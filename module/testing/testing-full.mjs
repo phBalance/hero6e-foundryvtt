@@ -1,4 +1,4 @@
-import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
+import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
@@ -14,8 +14,12 @@ export function registerFullTests(quench) {
         (context) => {
             const { after, afterEach, assert, before, beforeEach, describe, expect, it } = context;
 
-            describe("Characteristics 5e simple", function () {
-                const contents = `
+            describe("Full Character Tests", function () {
+                // The default timeout tends to be insufficient with multiple actors being created at the same time.
+                setQuenchTimeout(this);
+
+                describe("Characteristics 5e simple", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
@@ -95,195 +99,195 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
+                    let actor;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("str.max", async function () {
+                        assert.equal(actor.system.characteristics.str.max, 11);
+                    });
+                    it("str.realCost", async function () {
+                        assert.equal(actor.system.characteristics.str.realCost, 1);
+                    });
+
+                    it("dex.max", async function () {
+                        assert.equal(actor.system.characteristics.dex.max, 12);
+                    });
+                    it("dex.realCost", async function () {
+                        assert.equal(actor.system.characteristics.dex.realCost, 6);
+                    });
+
+                    it("con.max", async function () {
+                        assert.equal(actor.system.characteristics.con.max, 13);
+                    });
+                    it("con.realCost", async function () {
+                        assert.equal(actor.system.characteristics.con.realCost, 6);
+                    });
+
+                    it("body.max", async function () {
+                        assert.equal(actor.system.characteristics.body.max, 14);
+                    });
+                    it("body.realCost", async function () {
+                        assert.equal(actor.system.characteristics.body.realCost, 8);
+                    });
+
+                    it("int.max", async function () {
+                        assert.equal(actor.system.characteristics.int.max, 15);
+                    });
+                    it("int.realCost", async function () {
+                        assert.equal(actor.system.characteristics.int.realCost, 5);
+                    });
+
+                    it("ego.max", async function () {
+                        assert.equal(actor.system.characteristics.ego.max, 16);
+                    });
+                    it("ego.realCost", async function () {
+                        assert.equal(actor.system.characteristics.ego.realCost, 12);
+                    });
+
+                    it("pre.max", async function () {
+                        assert.equal(actor.system.characteristics.pre.max, 17);
+                    });
+                    it("pre.realCost", async function () {
+                        assert.equal(actor.system.characteristics.pre.realCost, 7);
+                    });
+
+                    it("com.max", async function () {
+                        assert.equal(actor.system.characteristics.com.max, 18);
+                    });
+                    it("com.realCost", async function () {
+                        assert.equal(actor.system.characteristics.com.realCost, 4);
+                    });
+
+                    it("pd.max", async function () {
+                        assert.equal(actor.system.characteristics.pd.max, 2);
+                    });
+                    it("pd.realCost", async function () {
+                        assert.equal(actor.system.characteristics.pd.realCost, 0);
+                    });
+
+                    it("ed.max", async function () {
+                        assert.equal(actor.system.characteristics.ed.max, 3);
+                    });
+                    it("ed.realCost", async function () {
+                        assert.equal(actor.system.characteristics.ed.realCost, 0);
+                    });
+
+                    it("spd.max", async function () {
+                        assert.equal(actor.system.characteristics.spd.max, 4);
+                    });
+                    it("spd.realCost", async function () {
+                        assert.equal(actor.system.characteristics.spd.realCost, 18);
+                    });
+
+                    it("rec.max", async function () {
+                        assert.equal(actor.system.characteristics.rec.max, 5);
+                    });
+                    it("rec.realCost", async function () {
+                        assert.equal(actor.system.characteristics.rec.realCost, 0);
+                    });
+
+                    it("end.max", async function () {
+                        assert.equal(actor.system.characteristics.end.max, 26);
+                    });
+                    it("end.realCost", async function () {
+                        assert.equal(actor.system.characteristics.end.realCost, 0);
+                    });
+
+                    it("stun.max", async function () {
+                        assert.equal(actor.system.characteristics.stun.max, 27);
+                    });
+                    it("stun.realCost", async function () {
+                        assert.equal(actor.system.characteristics.stun.realCost, 0);
+                    });
+
+                    it("ocv.max", async function () {
+                        assert.equal(actor.system.characteristics.ocv.max, 4);
+                    });
+                    it("ocv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.ocv.realCost, 0);
+                    });
+
+                    it("dcv.max", async function () {
+                        assert.equal(actor.system.characteristics.dcv.max, 4);
+                    });
+                    it("dcv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.dcv.realCost, 0);
+                    });
+
+                    it("omcv.max", async function () {
+                        assert.equal(actor.system.characteristics.omcv.max, 5);
+                    });
+                    it("omcv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.omcv.realCost, 0);
+                    });
+
+                    it("dmcv.max", async function () {
+                        assert.equal(actor.system.characteristics.dmcv.max, 5);
+                    });
+                    it("dmcv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.dmcv.realCost, 0);
+                    });
+
+                    it("running.max", async function () {
+                        assert.equal(actor.system.characteristics.running.max, 27);
+                    });
+                    it("running.realCost", async function () {
+                        assert.equal(actor.system.characteristics.running.realCost, 42);
+                    });
+
+                    it("swimming.max", async function () {
+                        assert.equal(actor.system.characteristics.swimming.max, 28);
+                    });
+                    it("swimming.realCost", async function () {
+                        assert.equal(actor.system.characteristics.swimming.realCost, 26);
+                    });
+
+                    it("leaping.max", async function () {
+                        assert.equal(actor.system.characteristics.leaping.max, 29);
+                    });
+                    it("leaping.realCost", async function () {
+                        assert.equal(actor.system.characteristics.leaping.realCost, 27);
+                    });
+
+                    it("tunneling.max", async function () {
+                        assert.equal(actor.system.characteristics.tunneling.max, 0);
+                    });
+                    it("tunneling.realCost", async function () {
+                        assert.equal(actor.system.characteristics.tunneling.realCost, 0);
+                    });
+
+                    it("flight.max", async function () {
+                        assert.equal(actor.system.characteristics.flight.max, 0);
+                    });
+                    it("flight.realCost", async function () {
+                        assert.equal(actor.system.characteristics.flight.realCost, 0);
+                    });
+
+                    it("gliding.max", async function () {
+                        assert.equal(actor.system.characteristics.gliding.max, 0);
+                    });
+                    it("gliding.realCost", async function () {
+                        assert.equal(actor.system.characteristics.gliding.realCost, 0);
+                    });
+
+                    it("realCost", async function () {
+                        assert.equal(actor.realCost, 162);
+                    });
+
+                    it("activePoints", async function () {
+                        assert.equal(actor.activePoints, 162);
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                it("str.max", async function () {
-                    assert.equal(actor.system.characteristics.str.max, 11);
-                });
-                it("str.realCost", async function () {
-                    assert.equal(actor.system.characteristics.str.realCost, 1);
-                });
-
-                it("dex.max", async function () {
-                    assert.equal(actor.system.characteristics.dex.max, 12);
-                });
-                it("dex.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dex.realCost, 6);
-                });
-
-                it("con.max", async function () {
-                    assert.equal(actor.system.characteristics.con.max, 13);
-                });
-                it("con.realCost", async function () {
-                    assert.equal(actor.system.characteristics.con.realCost, 6);
-                });
-
-                it("body.max", async function () {
-                    assert.equal(actor.system.characteristics.body.max, 14);
-                });
-                it("body.realCost", async function () {
-                    assert.equal(actor.system.characteristics.body.realCost, 8);
-                });
-
-                it("int.max", async function () {
-                    assert.equal(actor.system.characteristics.int.max, 15);
-                });
-                it("int.realCost", async function () {
-                    assert.equal(actor.system.characteristics.int.realCost, 5);
-                });
-
-                it("ego.max", async function () {
-                    assert.equal(actor.system.characteristics.ego.max, 16);
-                });
-                it("ego.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ego.realCost, 12);
-                });
-
-                it("pre.max", async function () {
-                    assert.equal(actor.system.characteristics.pre.max, 17);
-                });
-                it("pre.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pre.realCost, 7);
-                });
-
-                it("com.max", async function () {
-                    assert.equal(actor.system.characteristics.com.max, 18);
-                });
-                it("com.realCost", async function () {
-                    assert.equal(actor.system.characteristics.com.realCost, 4);
-                });
-
-                it("pd.max", async function () {
-                    assert.equal(actor.system.characteristics.pd.max, 2);
-                });
-                it("pd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pd.realCost, 0);
-                });
-
-                it("ed.max", async function () {
-                    assert.equal(actor.system.characteristics.ed.max, 3);
-                });
-                it("ed.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ed.realCost, 0);
-                });
-
-                it("spd.max", async function () {
-                    assert.equal(actor.system.characteristics.spd.max, 4);
-                });
-                it("spd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.spd.realCost, 18);
-                });
-
-                it("rec.max", async function () {
-                    assert.equal(actor.system.characteristics.rec.max, 5);
-                });
-                it("rec.realCost", async function () {
-                    assert.equal(actor.system.characteristics.rec.realCost, 0);
-                });
-
-                it("end.max", async function () {
-                    assert.equal(actor.system.characteristics.end.max, 26);
-                });
-                it("end.realCost", async function () {
-                    assert.equal(actor.system.characteristics.end.realCost, 0);
-                });
-
-                it("stun.max", async function () {
-                    assert.equal(actor.system.characteristics.stun.max, 27);
-                });
-                it("stun.realCost", async function () {
-                    assert.equal(actor.system.characteristics.stun.realCost, 0);
-                });
-
-                it("ocv.max", async function () {
-                    assert.equal(actor.system.characteristics.ocv.max, 4);
-                });
-                it("ocv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ocv.realCost, 0);
-                });
-
-                it("dcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dcv.max, 4);
-                });
-                it("dcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dcv.realCost, 0);
-                });
-
-                it("omcv.max", async function () {
-                    assert.equal(actor.system.characteristics.omcv.max, 5);
-                });
-                it("omcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.omcv.realCost, 0);
-                });
-
-                it("dmcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.max, 5);
-                });
-                it("dmcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.realCost, 0);
-                });
-
-                it("running.max", async function () {
-                    assert.equal(actor.system.characteristics.running.max, 27);
-                });
-                it("running.realCost", async function () {
-                    assert.equal(actor.system.characteristics.running.realCost, 42);
-                });
-
-                it("swimming.max", async function () {
-                    assert.equal(actor.system.characteristics.swimming.max, 28);
-                });
-                it("swimming.realCost", async function () {
-                    assert.equal(actor.system.characteristics.swimming.realCost, 26);
-                });
-
-                it("leaping.max", async function () {
-                    assert.equal(actor.system.characteristics.leaping.max, 29);
-                });
-                it("leaping.realCost", async function () {
-                    assert.equal(actor.system.characteristics.leaping.realCost, 27);
-                });
-
-                it("tunneling.max", async function () {
-                    assert.equal(actor.system.characteristics.tunneling.max, 0);
-                });
-                it("tunneling.realCost", async function () {
-                    assert.equal(actor.system.characteristics.tunneling.realCost, 0);
-                });
-
-                it("flight.max", async function () {
-                    assert.equal(actor.system.characteristics.flight.max, 0);
-                });
-                it("flight.realCost", async function () {
-                    assert.equal(actor.system.characteristics.flight.realCost, 0);
-                });
-
-                it("gliding.max", async function () {
-                    assert.equal(actor.system.characteristics.gliding.max, 0);
-                });
-                it("gliding.realCost", async function () {
-                    assert.equal(actor.system.characteristics.gliding.realCost, 0);
-                });
-
-                it("realCost", async function () {
-                    assert.equal(actor.realCost, 162);
-                });
-
-                it("activePoints", async function () {
-                    assert.equal(actor.activePoints, 162);
-                });
-            });
-
-            describe("Characteristics 5e buyback", function () {
-                const contents = `
+                describe("Characteristics 5e buyback", function () {
+                    const contents = `
                 <?xml version="1.0" encoding="UTF-16"?>
                 <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                   <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
@@ -363,178 +367,178 @@ export function registerFullTests(quench) {
                 </CHARACTER>
                 `;
 
-                let actor;
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    let actor;
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    // it("name", async function () {
+                    //     assert.equal(actor.name, "5e superhero");
+                    // });
+
+                    it("str.max", async function () {
+                        assert.equal(actor.system.characteristics.str.max, 5);
+                    });
+                    it("str.realCost", async function () {
+                        assert.equal(actor.system.characteristics.str.realCost, -5);
+                    });
+
+                    it("dex.max", async function () {
+                        assert.equal(actor.system.characteristics.dex.max, 5);
+                    });
+                    it("dex.realCost", async function () {
+                        assert.equal(actor.system.characteristics.dex.realCost, -15);
+                    });
+
+                    it("con.max", async function () {
+                        assert.equal(actor.system.characteristics.con.max, 5);
+                    });
+                    it("con.realCost", async function () {
+                        assert.equal(actor.system.characteristics.con.realCost, -10);
+                    });
+
+                    it("body.max", async function () {
+                        assert.equal(actor.system.characteristics.body.max, 5);
+                    });
+                    it("body.realCost", async function () {
+                        assert.equal(actor.system.characteristics.body.realCost, -10);
+                    });
+
+                    it("int.max", async function () {
+                        assert.equal(actor.system.characteristics.int.max, 5);
+                    });
+                    it("int.realCost", async function () {
+                        assert.equal(actor.system.characteristics.int.realCost, -5);
+                    });
+
+                    it("ego.max", async function () {
+                        assert.equal(actor.system.characteristics.ego.max, 5);
+                    });
+                    it("ego.realCost", async function () {
+                        assert.equal(actor.system.characteristics.ego.realCost, -10);
+                    });
+
+                    it("pre.max", async function () {
+                        assert.equal(actor.system.characteristics.pre.max, 5);
+                    });
+                    it("pre.realCost", async function () {
+                        assert.equal(actor.system.characteristics.pre.realCost, -5);
+                    });
+
+                    it("com.max", async function () {
+                        assert.equal(actor.system.characteristics.com.max, 5);
+                    });
+                    it("com.realCost", async function () {
+                        assert.equal(actor.system.characteristics.com.realCost, -2);
+                    });
+
+                    it("pd.max", async function () {
+                        assert.equal(actor.system.characteristics.pd.max, 1);
+                    });
+                    it("pd.realCost", async function () {
+                        assert.equal(actor.system.characteristics.pd.realCost, 0);
+                    });
+
+                    it("ed.max", async function () {
+                        assert.equal(actor.system.characteristics.ed.max, 0);
+                    });
+                    it("ed.realCost", async function () {
+                        assert.equal(actor.system.characteristics.ed.realCost, -1);
+                    });
+
+                    it("spd.max", async function () {
+                        assert.equal(actor.system.characteristics.spd.max, 1);
+                    });
+                    it("spd.realCost", async function () {
+                        assert.equal(actor.system.characteristics.spd.realCost, 0);
+                    });
+
+                    it("rec.max", async function () {
+                        assert.equal(actor.system.characteristics.rec.max, 2);
+                    });
+                    it("rec.realCost", async function () {
+                        assert.equal(actor.system.characteristics.rec.realCost, 0);
+                    });
+
+                    it("end.max", async function () {
+                        assert.equal(actor.system.characteristics.end.max, 10);
+                    });
+                    it("end.realCost", async function () {
+                        assert.equal(actor.system.characteristics.end.realCost, 0);
+                    });
+
+                    it("stun.max", async function () {
+                        assert.equal(actor.system.characteristics.stun.max, 11);
+                    });
+                    it("stun.realCost", async function () {
+                        assert.equal(actor.system.characteristics.stun.realCost, 0);
+                    });
+
+                    it("ocv.max", async function () {
+                        assert.equal(actor.system.characteristics.ocv.max, 2);
+                    });
+                    it("ocv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.ocv.realCost, 0);
+                    });
+
+                    it("dcv.max", async function () {
+                        assert.equal(actor.system.characteristics.dcv.max, 2);
+                    });
+                    it("dcv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.dcv.realCost, 0);
+                    });
+
+                    it("omcv.max", async function () {
+                        assert.equal(actor.system.characteristics.omcv.max, 2);
+                    });
+                    it("omcv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.omcv.realCost, 0);
+                    });
+
+                    it("dmcv.max", async function () {
+                        assert.equal(actor.system.characteristics.dmcv.max, 2);
+                    });
+                    it("dmcv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.dmcv.realCost, 0);
+                    });
+
+                    it("running.max", async function () {
+                        assert.equal(actor.system.characteristics.running.max, 6);
+                    });
+                    it("running.realCost", async function () {
+                        assert.equal(actor.system.characteristics.running.realCost, 0);
+                    });
+
+                    it("swimming.max", async function () {
+                        assert.equal(actor.system.characteristics.swimming.max, 2);
+                    });
+                    it("swimming.realCost", async function () {
+                        assert.equal(actor.system.characteristics.swimming.realCost, 0);
+                    });
+
+                    it("leaping.max", async function () {
+                        assert.equal(actor.system.characteristics.leaping.max, 1);
+                    });
+                    it("leaping.realCost", async function () {
+                        assert.equal(actor.system.characteristics.leaping.realCost, 0);
+                    });
+
+                    it("realCost", async function () {
+                        assert.equal(actor.realCost, -63);
+                    });
+
+                    it("activePoints", async function () {
+                        assert.equal(actor.activePoints, -63);
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                // it("name", async function () {
-                //     assert.equal(actor.name, "5e superhero");
-                // });
-
-                it("str.max", async function () {
-                    assert.equal(actor.system.characteristics.str.max, 5);
-                });
-                it("str.realCost", async function () {
-                    assert.equal(actor.system.characteristics.str.realCost, -5);
-                });
-
-                it("dex.max", async function () {
-                    assert.equal(actor.system.characteristics.dex.max, 5);
-                });
-                it("dex.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dex.realCost, -15);
-                });
-
-                it("con.max", async function () {
-                    assert.equal(actor.system.characteristics.con.max, 5);
-                });
-                it("con.realCost", async function () {
-                    assert.equal(actor.system.characteristics.con.realCost, -10);
-                });
-
-                it("body.max", async function () {
-                    assert.equal(actor.system.characteristics.body.max, 5);
-                });
-                it("body.realCost", async function () {
-                    assert.equal(actor.system.characteristics.body.realCost, -10);
-                });
-
-                it("int.max", async function () {
-                    assert.equal(actor.system.characteristics.int.max, 5);
-                });
-                it("int.realCost", async function () {
-                    assert.equal(actor.system.characteristics.int.realCost, -5);
-                });
-
-                it("ego.max", async function () {
-                    assert.equal(actor.system.characteristics.ego.max, 5);
-                });
-                it("ego.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ego.realCost, -10);
-                });
-
-                it("pre.max", async function () {
-                    assert.equal(actor.system.characteristics.pre.max, 5);
-                });
-                it("pre.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pre.realCost, -5);
-                });
-
-                it("com.max", async function () {
-                    assert.equal(actor.system.characteristics.com.max, 5);
-                });
-                it("com.realCost", async function () {
-                    assert.equal(actor.system.characteristics.com.realCost, -2);
-                });
-
-                it("pd.max", async function () {
-                    assert.equal(actor.system.characteristics.pd.max, 1);
-                });
-                it("pd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pd.realCost, 0);
-                });
-
-                it("ed.max", async function () {
-                    assert.equal(actor.system.characteristics.ed.max, 0);
-                });
-                it("ed.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ed.realCost, -1);
-                });
-
-                it("spd.max", async function () {
-                    assert.equal(actor.system.characteristics.spd.max, 1);
-                });
-                it("spd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.spd.realCost, 0);
-                });
-
-                it("rec.max", async function () {
-                    assert.equal(actor.system.characteristics.rec.max, 2);
-                });
-                it("rec.realCost", async function () {
-                    assert.equal(actor.system.characteristics.rec.realCost, 0);
-                });
-
-                it("end.max", async function () {
-                    assert.equal(actor.system.characteristics.end.max, 10);
-                });
-                it("end.realCost", async function () {
-                    assert.equal(actor.system.characteristics.end.realCost, 0);
-                });
-
-                it("stun.max", async function () {
-                    assert.equal(actor.system.characteristics.stun.max, 11);
-                });
-                it("stun.realCost", async function () {
-                    assert.equal(actor.system.characteristics.stun.realCost, 0);
-                });
-
-                it("ocv.max", async function () {
-                    assert.equal(actor.system.characteristics.ocv.max, 2);
-                });
-                it("ocv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ocv.realCost, 0);
-                });
-
-                it("dcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dcv.max, 2);
-                });
-                it("dcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dcv.realCost, 0);
-                });
-
-                it("omcv.max", async function () {
-                    assert.equal(actor.system.characteristics.omcv.max, 2);
-                });
-                it("omcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.omcv.realCost, 0);
-                });
-
-                it("dmcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.max, 2);
-                });
-                it("dmcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.realCost, 0);
-                });
-
-                it("running.max", async function () {
-                    assert.equal(actor.system.characteristics.running.max, 6);
-                });
-                it("running.realCost", async function () {
-                    assert.equal(actor.system.characteristics.running.realCost, 0);
-                });
-
-                it("swimming.max", async function () {
-                    assert.equal(actor.system.characteristics.swimming.max, 2);
-                });
-                it("swimming.realCost", async function () {
-                    assert.equal(actor.system.characteristics.swimming.realCost, 0);
-                });
-
-                it("leaping.max", async function () {
-                    assert.equal(actor.system.characteristics.leaping.max, 1);
-                });
-                it("leaping.realCost", async function () {
-                    assert.equal(actor.system.characteristics.leaping.realCost, 0);
-                });
-
-                it("realCost", async function () {
-                    assert.equal(actor.realCost, -63);
-                });
-
-                it("activePoints", async function () {
-                    assert.equal(actor.activePoints, -63);
-                });
-            });
-
-            describe("Characteristics 5e negative COM", function () {
-                describe("-10 COM", function () {
-                    const contents = `
+                describe("Characteristics 5e negative COM", function () {
+                    describe("-10 COM", function () {
+                        const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Normal.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="100" DISAD_POINTS="40" EXPERIENCE="0" RULES="Default" />
@@ -616,26 +620,26 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                    let actor;
+                        let actor;
 
-                    before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("com.max", async function () {
+                            assert.equal(actor.system.characteristics.com.max, -10);
+                        });
+                        it("com.realCost", async function () {
+                            assert.equal(actor.system.characteristics.com.realCost, 0);
+                        });
                     });
 
-                    after(async function () {
-                        await deleteQuenchActor({ quench: this, actor });
-                    });
-
-                    it("com.max", async function () {
-                        assert.equal(actor.system.characteristics.com.max, -10);
-                    });
-                    it("com.realCost", async function () {
-                        assert.equal(actor.system.characteristics.com.realCost, 0);
-                    });
-                });
-
-                describe("-30 COM", function () {
-                    const contents = `
+                    describe("-30 COM", function () {
+                        const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Normal.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="100" DISAD_POINTS="40" EXPERIENCE="0" RULES="Default" />
@@ -717,26 +721,26 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                    let actor;
+                        let actor;
 
-                    before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
-                    });
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                        });
 
-                    after(async function () {
-                        await deleteQuenchActor({ quench: this, actor });
-                    });
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
 
-                    it("com.max", async function () {
-                        assert.equal(actor.system.characteristics.com.max, -30);
-                    });
-                    it("com.realCost", async function () {
-                        assert.equal(actor.system.characteristics.com.realCost, 10);
+                        it("com.max", async function () {
+                            assert.equal(actor.system.characteristics.com.max, -30);
+                        });
+                        it("com.realCost", async function () {
+                            assert.equal(actor.system.characteristics.com.realCost, 10);
+                        });
                     });
                 });
-            });
-            describe("Enforcer", function () {
-                const contents = `
+                describe("Enforcer", function () {
+                    const contents = `
                 <?xml version="1.0" encoding="UTF-16"?>
                 <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                 <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="75" EXPERIENCE="382" RULES="Default" />
@@ -1034,170 +1038,170 @@ export function registerFullTests(quench) {
                 </CHARACTER>
                 `;
 
-                let actor;
+                    let actor;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("str.max", async function () {
+                        assert.equal(actor.system.characteristics.str.max, 55);
+                    });
+                    it("str.realCost", async function () {
+                        assert.equal(actor.system.characteristics.str.realCost, 45);
+                    });
+
+                    it("dex.max", async function () {
+                        assert.equal(actor.system.characteristics.dex.max, 20);
+                    });
+                    it("dex.realCost", async function () {
+                        assert.equal(actor.system.characteristics.dex.realCost, 30);
+                    });
+
+                    it("con.max", async function () {
+                        assert.equal(actor.system.characteristics.con.max, 35);
+                    });
+                    it("con.realCost", async function () {
+                        assert.equal(actor.system.characteristics.con.realCost, 50);
+                    });
+
+                    it("body.max", async function () {
+                        assert.equal(actor.system.characteristics.body.max, 25);
+                    });
+                    it("body.realCost", async function () {
+                        assert.equal(actor.system.characteristics.body.realCost, 30);
+                    });
+
+                    it("int.max", async function () {
+                        assert.equal(actor.system.characteristics.int.max, 15);
+                    });
+                    it("int.realCost", async function () {
+                        assert.equal(actor.system.characteristics.int.realCost, 5);
+                    });
+
+                    it("ego.max", async function () {
+                        assert.equal(actor.system.characteristics.ego.max, 14);
+                    });
+                    it("ego.realCost", async function () {
+                        assert.equal(actor.system.characteristics.ego.realCost, 8);
+                    });
+
+                    it("pre.max", async function () {
+                        assert.equal(actor.system.characteristics.pre.max, 22);
+                    });
+                    it("pre.realCost", async function () {
+                        assert.equal(actor.system.characteristics.pre.realCost, 12);
+                    });
+
+                    it("com.max", async function () {
+                        assert.equal(actor.system.characteristics.com.max, 10);
+                    });
+                    it("com.realCost", async function () {
+                        assert.equal(actor.system.characteristics.com.realCost, 0);
+                    });
+
+                    it("pd.max", async function () {
+                        assert.equal(actor.system.characteristics.pd.max, 25);
+                    });
+                    it("pd.realCost", async function () {
+                        assert.equal(actor.system.characteristics.pd.realCost, 14);
+                    });
+
+                    it("ed.max", async function () {
+                        assert.equal(actor.system.characteristics.ed.max, 20);
+                    });
+                    it("ed.realCost", async function () {
+                        assert.equal(actor.system.characteristics.ed.realCost, 13);
+                    });
+
+                    it("spd.max", async function () {
+                        assert.equal(actor.system.characteristics.spd.max, 5);
+                    });
+                    it("spd.realCost", async function () {
+                        assert.equal(actor.system.characteristics.spd.realCost, 20);
+                    });
+
+                    it("rec.max", async function () {
+                        assert.equal(actor.system.characteristics.rec.max, 21);
+                    });
+                    it("rec.realCost", async function () {
+                        assert.equal(actor.system.characteristics.rec.realCost, 6);
+                    });
+
+                    it("end.max", async function () {
+                        assert.equal(actor.system.characteristics.end.max, 85);
+                    });
+                    it("end.realCost", async function () {
+                        assert.equal(actor.system.characteristics.end.realCost, 8);
+                    });
+
+                    it("stun.max", async function () {
+                        assert.equal(actor.system.characteristics.stun.max, 125);
+                    });
+                    it("stun.realCost", async function () {
+                        assert.equal(actor.system.characteristics.stun.realCost, 54);
+                    });
+
+                    it("ocv.max", async function () {
+                        assert.equal(actor.system.characteristics.ocv.max, 7);
+                    });
+                    it("ocv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.ocv.realCost, 0);
+                    });
+
+                    it("dcv.max", async function () {
+                        assert.equal(actor.system.characteristics.dcv.max, 7);
+                    });
+                    it("dcv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.dcv.realCost, 0);
+                    });
+
+                    it("omcv.max", async function () {
+                        assert.equal(actor.system.characteristics.omcv.max, 5);
+                    });
+                    it("omcv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.omcv.realCost, 0);
+                    });
+
+                    it("dmcv.max", async function () {
+                        assert.equal(actor.system.characteristics.dmcv.max, 5);
+                    });
+                    it("dmcv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.dmcv.realCost, 0);
+                    });
+
+                    it("running.max", async function () {
+                        assert.equal(actor.system.characteristics.running.max, 13); //8 + 5 (Active Effect)
+                    });
+                    it("running.realCost", async function () {
+                        assert.equal(actor.system.characteristics.running.realCost, 4);
+                    });
+
+                    it("swimming.max", async function () {
+                        assert.equal(actor.system.characteristics.swimming.max, 2);
+                    });
+                    it("swimming.realCost", async function () {
+                        assert.equal(actor.system.characteristics.swimming.realCost, 0);
+                    });
+
+                    it("leaping.max", async function () {
+                        assert.equal(actor.system.characteristics.leaping.max, 11);
+                    });
+                    it("leaping.realCost", async function () {
+                        assert.equal(actor.system.characteristics.leaping.realCost, 0);
+                    });
+
+                    it("total points spent", async function () {
+                        assert.equal(actor.realCost, 657);
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                it("str.max", async function () {
-                    assert.equal(actor.system.characteristics.str.max, 55);
-                });
-                it("str.realCost", async function () {
-                    assert.equal(actor.system.characteristics.str.realCost, 45);
-                });
-
-                it("dex.max", async function () {
-                    assert.equal(actor.system.characteristics.dex.max, 20);
-                });
-                it("dex.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dex.realCost, 30);
-                });
-
-                it("con.max", async function () {
-                    assert.equal(actor.system.characteristics.con.max, 35);
-                });
-                it("con.realCost", async function () {
-                    assert.equal(actor.system.characteristics.con.realCost, 50);
-                });
-
-                it("body.max", async function () {
-                    assert.equal(actor.system.characteristics.body.max, 25);
-                });
-                it("body.realCost", async function () {
-                    assert.equal(actor.system.characteristics.body.realCost, 30);
-                });
-
-                it("int.max", async function () {
-                    assert.equal(actor.system.characteristics.int.max, 15);
-                });
-                it("int.realCost", async function () {
-                    assert.equal(actor.system.characteristics.int.realCost, 5);
-                });
-
-                it("ego.max", async function () {
-                    assert.equal(actor.system.characteristics.ego.max, 14);
-                });
-                it("ego.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ego.realCost, 8);
-                });
-
-                it("pre.max", async function () {
-                    assert.equal(actor.system.characteristics.pre.max, 22);
-                });
-                it("pre.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pre.realCost, 12);
-                });
-
-                it("com.max", async function () {
-                    assert.equal(actor.system.characteristics.com.max, 10);
-                });
-                it("com.realCost", async function () {
-                    assert.equal(actor.system.characteristics.com.realCost, 0);
-                });
-
-                it("pd.max", async function () {
-                    assert.equal(actor.system.characteristics.pd.max, 25);
-                });
-                it("pd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pd.realCost, 14);
-                });
-
-                it("ed.max", async function () {
-                    assert.equal(actor.system.characteristics.ed.max, 20);
-                });
-                it("ed.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ed.realCost, 13);
-                });
-
-                it("spd.max", async function () {
-                    assert.equal(actor.system.characteristics.spd.max, 5);
-                });
-                it("spd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.spd.realCost, 20);
-                });
-
-                it("rec.max", async function () {
-                    assert.equal(actor.system.characteristics.rec.max, 21);
-                });
-                it("rec.realCost", async function () {
-                    assert.equal(actor.system.characteristics.rec.realCost, 6);
-                });
-
-                it("end.max", async function () {
-                    assert.equal(actor.system.characteristics.end.max, 85);
-                });
-                it("end.realCost", async function () {
-                    assert.equal(actor.system.characteristics.end.realCost, 8);
-                });
-
-                it("stun.max", async function () {
-                    assert.equal(actor.system.characteristics.stun.max, 125);
-                });
-                it("stun.realCost", async function () {
-                    assert.equal(actor.system.characteristics.stun.realCost, 54);
-                });
-
-                it("ocv.max", async function () {
-                    assert.equal(actor.system.characteristics.ocv.max, 7);
-                });
-                it("ocv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ocv.realCost, 0);
-                });
-
-                it("dcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dcv.max, 7);
-                });
-                it("dcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dcv.realCost, 0);
-                });
-
-                it("omcv.max", async function () {
-                    assert.equal(actor.system.characteristics.omcv.max, 5);
-                });
-                it("omcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.omcv.realCost, 0);
-                });
-
-                it("dmcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.max, 5);
-                });
-                it("dmcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.realCost, 0);
-                });
-
-                it("running.max", async function () {
-                    assert.equal(actor.system.characteristics.running.max, 13); //8 + 5 (Active Effect)
-                });
-                it("running.realCost", async function () {
-                    assert.equal(actor.system.characteristics.running.realCost, 4);
-                });
-
-                it("swimming.max", async function () {
-                    assert.equal(actor.system.characteristics.swimming.max, 2);
-                });
-                it("swimming.realCost", async function () {
-                    assert.equal(actor.system.characteristics.swimming.realCost, 0);
-                });
-
-                it("leaping.max", async function () {
-                    assert.equal(actor.system.characteristics.leaping.max, 11);
-                });
-                it("leaping.realCost", async function () {
-                    assert.equal(actor.system.characteristics.leaping.realCost, 0);
-                });
-
-                it("total points spent", async function () {
-                    assert.equal(actor.realCost, 657);
-                });
-            });
-
-            describe("civilian6e", function () {
-                const contents = `
+                describe("civilian6e", function () {
+                    const contents = `
                 <?xml version="1.0" encoding="UTF-16"?>
                 <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
                 <BASIC_CONFIGURATION BASE_POINTS="175" DISAD_POINTS="50" EXPERIENCE="0" />
@@ -1287,166 +1291,166 @@ export function registerFullTests(quench) {
                 </CHARACTER>
                 `;
 
-                let actor;
+                    let actor;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: false });
-                });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false });
+                    });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
 
-                it("name", async function () {
-                    expect(actor.name).to.contain("civilian6e");
-                });
+                    it("name", async function () {
+                        expect(actor.name).to.contain("civilian6e");
+                    });
 
-                it("str.max", async function () {
-                    assert.equal(actor.system.characteristics.str.max, 10);
-                });
-                it("str.realCost", async function () {
-                    assert.equal(actor.system.characteristics.str.realCost, 0);
-                });
+                    it("str.max", async function () {
+                        assert.equal(actor.system.characteristics.str.max, 10);
+                    });
+                    it("str.realCost", async function () {
+                        assert.equal(actor.system.characteristics.str.realCost, 0);
+                    });
 
-                it("dex.max", async function () {
-                    assert.equal(actor.system.characteristics.dex.max, 10);
-                });
-                it("dex.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dex.realCost, 0);
-                });
+                    it("dex.max", async function () {
+                        assert.equal(actor.system.characteristics.dex.max, 10);
+                    });
+                    it("dex.realCost", async function () {
+                        assert.equal(actor.system.characteristics.dex.realCost, 0);
+                    });
 
-                it("con.max", async function () {
-                    assert.equal(actor.system.characteristics.con.max, 10);
-                });
-                it("con.realCost", async function () {
-                    assert.equal(actor.system.characteristics.con.realCost, 0);
-                });
+                    it("con.max", async function () {
+                        assert.equal(actor.system.characteristics.con.max, 10);
+                    });
+                    it("con.realCost", async function () {
+                        assert.equal(actor.system.characteristics.con.realCost, 0);
+                    });
 
-                it("body.max", async function () {
-                    assert.equal(actor.system.characteristics.body.max, 10);
-                });
-                it("body.realCost", async function () {
-                    assert.equal(actor.system.characteristics.body.realCost, 0);
-                });
+                    it("body.max", async function () {
+                        assert.equal(actor.system.characteristics.body.max, 10);
+                    });
+                    it("body.realCost", async function () {
+                        assert.equal(actor.system.characteristics.body.realCost, 0);
+                    });
 
-                it("int.max", async function () {
-                    assert.equal(actor.system.characteristics.int.max, 10);
-                });
-                it("int.realCost", async function () {
-                    assert.equal(actor.system.characteristics.int.realCost, 0);
-                });
+                    it("int.max", async function () {
+                        assert.equal(actor.system.characteristics.int.max, 10);
+                    });
+                    it("int.realCost", async function () {
+                        assert.equal(actor.system.characteristics.int.realCost, 0);
+                    });
 
-                it("ego.max", async function () {
-                    assert.equal(actor.system.characteristics.ego.max, 10);
-                });
-                it("ego.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ego.realCost, 0);
-                });
+                    it("ego.max", async function () {
+                        assert.equal(actor.system.characteristics.ego.max, 10);
+                    });
+                    it("ego.realCost", async function () {
+                        assert.equal(actor.system.characteristics.ego.realCost, 0);
+                    });
 
-                it("pre.max", async function () {
-                    assert.equal(actor.system.characteristics.pre.max, 10);
-                });
-                it("pre.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pre.realCost, 0);
-                });
+                    it("pre.max", async function () {
+                        assert.equal(actor.system.characteristics.pre.max, 10);
+                    });
+                    it("pre.realCost", async function () {
+                        assert.equal(actor.system.characteristics.pre.realCost, 0);
+                    });
 
-                it("pd.max", async function () {
-                    assert.equal(actor.system.characteristics.pd.max, 2);
-                });
-                it("pd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.pd.realCost, 0);
-                });
+                    it("pd.max", async function () {
+                        assert.equal(actor.system.characteristics.pd.max, 2);
+                    });
+                    it("pd.realCost", async function () {
+                        assert.equal(actor.system.characteristics.pd.realCost, 0);
+                    });
 
-                it("ed.max", async function () {
-                    assert.equal(actor.system.characteristics.ed.max, 2);
-                });
-                it("ed.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ed.realCost, 0);
-                });
+                    it("ed.max", async function () {
+                        assert.equal(actor.system.characteristics.ed.max, 2);
+                    });
+                    it("ed.realCost", async function () {
+                        assert.equal(actor.system.characteristics.ed.realCost, 0);
+                    });
 
-                it("spd.max", async function () {
-                    assert.equal(actor.system.characteristics.spd.max, 2);
-                });
-                it("spd.realCost", async function () {
-                    assert.equal(actor.system.characteristics.spd.realCost, 0);
-                });
+                    it("spd.max", async function () {
+                        assert.equal(actor.system.characteristics.spd.max, 2);
+                    });
+                    it("spd.realCost", async function () {
+                        assert.equal(actor.system.characteristics.spd.realCost, 0);
+                    });
 
-                it("rec.max", async function () {
-                    assert.equal(actor.system.characteristics.rec.max, 4);
-                });
-                it("rec.realCost", async function () {
-                    assert.equal(actor.system.characteristics.rec.realCost, 0);
-                });
+                    it("rec.max", async function () {
+                        assert.equal(actor.system.characteristics.rec.max, 4);
+                    });
+                    it("rec.realCost", async function () {
+                        assert.equal(actor.system.characteristics.rec.realCost, 0);
+                    });
 
-                it("end.max", async function () {
-                    assert.equal(actor.system.characteristics.end.max, 20);
-                });
-                it("end.realCost", async function () {
-                    assert.equal(actor.system.characteristics.end.realCost, 0);
-                });
+                    it("end.max", async function () {
+                        assert.equal(actor.system.characteristics.end.max, 20);
+                    });
+                    it("end.realCost", async function () {
+                        assert.equal(actor.system.characteristics.end.realCost, 0);
+                    });
 
-                it("stun.max", async function () {
-                    assert.equal(actor.system.characteristics.stun.max, 20);
-                });
-                it("stun.realCost", async function () {
-                    assert.equal(actor.system.characteristics.stun.realCost, 0);
-                });
+                    it("stun.max", async function () {
+                        assert.equal(actor.system.characteristics.stun.max, 20);
+                    });
+                    it("stun.realCost", async function () {
+                        assert.equal(actor.system.characteristics.stun.realCost, 0);
+                    });
 
-                it("ocv.max", async function () {
-                    assert.equal(actor.system.characteristics.ocv.max, 3);
-                });
-                it("ocv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.ocv.realCost, 0);
-                });
+                    it("ocv.max", async function () {
+                        assert.equal(actor.system.characteristics.ocv.max, 3);
+                    });
+                    it("ocv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.ocv.realCost, 0);
+                    });
 
-                it("dcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dcv.max, 3);
-                });
-                it("dcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dcv.realCost, 0);
-                });
+                    it("dcv.max", async function () {
+                        assert.equal(actor.system.characteristics.dcv.max, 3);
+                    });
+                    it("dcv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.dcv.realCost, 0);
+                    });
 
-                it("omcv.max", async function () {
-                    assert.equal(actor.system.characteristics.omcv.max, 3);
-                });
-                it("omcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.omcv.realCost, 0);
-                });
+                    it("omcv.max", async function () {
+                        assert.equal(actor.system.characteristics.omcv.max, 3);
+                    });
+                    it("omcv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.omcv.realCost, 0);
+                    });
 
-                it("dmcv.max", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.max, 3);
-                });
-                it("dmcv.realCost", async function () {
-                    assert.equal(actor.system.characteristics.dmcv.realCost, 0);
-                });
+                    it("dmcv.max", async function () {
+                        assert.equal(actor.system.characteristics.dmcv.max, 3);
+                    });
+                    it("dmcv.realCost", async function () {
+                        assert.equal(actor.system.characteristics.dmcv.realCost, 0);
+                    });
 
-                it("running.max", async function () {
-                    assert.equal(actor.system.characteristics.running.max, 12);
-                });
-                it("running.realCost", async function () {
-                    assert.equal(actor.system.characteristics.running.realCost, 0);
-                });
+                    it("running.max", async function () {
+                        assert.equal(actor.system.characteristics.running.max, 12);
+                    });
+                    it("running.realCost", async function () {
+                        assert.equal(actor.system.characteristics.running.realCost, 0);
+                    });
 
-                it("swimming.max", async function () {
-                    assert.equal(actor.system.characteristics.swimming.max, 4);
-                });
-                it("swimming.realCost", async function () {
-                    assert.equal(actor.system.characteristics.swimming.realCost, 0);
-                });
+                    it("swimming.max", async function () {
+                        assert.equal(actor.system.characteristics.swimming.max, 4);
+                    });
+                    it("swimming.realCost", async function () {
+                        assert.equal(actor.system.characteristics.swimming.realCost, 0);
+                    });
 
-                it("leaping.max", async function () {
-                    assert.equal(actor.system.characteristics.leaping.max, 4);
-                });
-                it("leaping.realCost", async function () {
-                    assert.equal(actor.system.characteristics.leaping.realCost, 0);
-                });
+                    it("leaping.max", async function () {
+                        assert.equal(actor.system.characteristics.leaping.max, 4);
+                    });
+                    it("leaping.realCost", async function () {
+                        assert.equal(actor.system.characteristics.leaping.realCost, 0);
+                    });
 
-                it("realCost", async function () {
-                    assert.equal(actor.realCost, 0);
+                    it("realCost", async function () {
+                        assert.equal(actor.realCost, 0);
+                    });
                 });
-            });
-            describe("Unnamed character", function () {
-                const contents = `
+                describe("Unnamed character", function () {
+                    const contents = `
                 <CHARACTER version="6.0" TEMPLATE="builtIn.Heroic6E.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="175" DISAD_POINTS="50" EXPERIENCE="0" RULES="Default"/>
                     <CHARACTER_INFO CHARACTER_NAME="" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.46224760379584" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
@@ -1549,28 +1553,28 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                const defaultActorName = "Quench Actor";
-                let actor;
+                    const defaultActorName = "Quench Actor";
+                    let actor;
 
-                before(async function () {
-                    actor = new HeroSystem6eActor(
-                        {
-                            name: defaultActorName,
-                            type: "pc",
-                        },
-                        {},
-                    );
+                    before(async function () {
+                        actor = new HeroSystem6eActor(
+                            {
+                                name: defaultActorName,
+                                type: "pc",
+                            },
+                            {},
+                        );
 
-                    await actor.uploadFromXml(contents, { quenchUpload: true });
+                        await actor.uploadFromXml(contents, { quenchUpload: true });
+                    });
+
+                    it("should default to the basic name when there is no name provided in the HDC", async function () {
+                        assert.equal(actor.name, defaultActorName);
+                    });
                 });
 
-                it("should default to the basic name when there is no name provided in the HDC", async function () {
-                    assert.equal(actor.name, defaultActorName);
-                });
-            });
-
-            describe("Martial DCs and Enhanced Perception", function () {
-                const contents = `
+                describe("Martial DCs and Enhanced Perception", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                 <CHARACTER version="6.0" TEMPLATE="builtIn.Heroic6E.hdt">
                 <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="12" RULES="Default" />
@@ -1706,89 +1710,98 @@ export function registerFullTests(quench) {
                 </CHARACTER>
                 `;
 
-                let actor;
-                let previousDoubleDamageLimitSetting;
-                before(async function () {
-                    previousDoubleDamageLimitSetting = await getAndSetGameSetting("DoubleDamageLimit", false);
+                    let actor;
+                    let previousDoubleDamageLimitSetting;
+                    before(async function () {
+                        previousDoubleDamageLimitSetting = await getAndSetGameSetting("DoubleDamageLimit", false);
 
-                    actor = await createQuenchActor({ quench: this, contents, is5e: false });
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false });
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+
+                        await getAndSetGameSetting("DoubleDamageLimit", previousDoubleDamageLimitSetting);
+                    });
+
+                    it("Killing Strike damage", async function () {
+                        // Killing Strike: 2DC killing, EXTRADC (+22 DC), 40 STR (+8 DC), 2 CSL (+1 DC) = 34 DC (killing) = 11d6+1
+                        assert.equal(
+                            actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.damage,
+                            "11d6+1K",
+                        );
+                    });
+
+                    it("Killing Strike OCV", async function () {
+                        assert.equal(
+                            actor.items
+                                .find((o) => o.system.ALIAS === "Killing Strike")
+                                .system.actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.ocvDetails
+                                .value,
+                            "1",
+                        );
+                    });
+
+                    it("Killing Strike DCV", async function () {
+                        assert.equal(
+                            actor.items
+                                .find((o) => o.system.ALIAS === "Killing Strike")
+                                .system.actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.dcvDetails
+                                .value,
+                            "3",
+                        );
+                    });
+
+                    it("Martial Strike damage", async function () {
+                        // Martial Strike: 2DC, EXTRADC (+22 DC),  40 STR (+8 DC), 2 CSL (+1 DC) = 34 DC (normal) = 34d6
+                        assert.equal(
+                            actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.damage,
+                            "34d6",
+                        );
+                    });
+
+                    it("Martial Strike OCV", async function () {
+                        assert.equal(
+                            actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.ocvDetails.value,
+                            "3",
+                        );
+                    });
+
+                    it("Martial Strike DCV", async function () {
+                        assert.equal(
+                            actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.dcvDetails.value,
+                            "5",
+                        );
+                    });
+
+                    it("HKA damage", async function () {
+                        // HKA 3d6+1, 50 STR
+                        assert.equal(actor.items.find((o) => o.system.XMLID === "HKA").system.damage, "6½d6K");
+                    });
+
+                    it("HKA CSL", async function () {
+                        assert.equal(
+                            combatSkillLevelsForAttack(actor.items.find((o) => o.system.XMLID === "HKA")).ocv,
+                            2,
+                        );
+                    });
+
+                    it("Enhanced Perception", async function () {
+                        assert.equal(actor.items.find((o) => o.system.XMLID === "PERCEPTION").system.roll, "17-");
+                    });
+
+                    it("realCost", async function () {
+                        assert.equal(actor.realCost, 165);
+                    });
+
+                    it("activePoints", async function () {
+                        assert.equal(actor.activePoints, 219);
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-
-                    await getAndSetGameSetting("DoubleDamageLimit", previousDoubleDamageLimitSetting);
-                });
-
-                it("Killing Strike damage", async function () {
-                    // Killing Strike: 2DC killing, EXTRADC (+22 DC), 40 STR (+8 DC), 2 CSL (+1 DC) = 34 DC (killing) = 11d6+1
-                    assert.equal(actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.damage, "11d6+1K");
-                });
-
-                it("Killing Strike OCV", async function () {
-                    assert.equal(
-                        actor.items
-                            .find((o) => o.system.ALIAS === "Killing Strike")
-                            .system.actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.ocvDetails
-                            .value,
-                        "1",
-                    );
-                });
-
-                it("Killing Strike DCV", async function () {
-                    assert.equal(
-                        actor.items
-                            .find((o) => o.system.ALIAS === "Killing Strike")
-                            .system.actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.dcvDetails
-                            .value,
-                        "3",
-                    );
-                });
-
-                it("Martial Strike damage", async function () {
-                    // Martial Strike: 2DC, EXTRADC (+22 DC),  40 STR (+8 DC), 2 CSL (+1 DC) = 34 DC (normal) = 34d6
-                    assert.equal(actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.damage, "34d6");
-                });
-
-                it("Martial Strike OCV", async function () {
-                    assert.equal(
-                        actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.ocvDetails.value,
-                        "3",
-                    );
-                });
-
-                it("Martial Strike DCV", async function () {
-                    assert.equal(
-                        actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.dcvDetails.value,
-                        "5",
-                    );
-                });
-
-                it("HKA damage", async function () {
-                    // HKA 3d6+1, 50 STR
-                    assert.equal(actor.items.find((o) => o.system.XMLID === "HKA").system.damage, "6½d6K");
-                });
-
-                it("HKA CSL", async function () {
-                    assert.equal(combatSkillLevelsForAttack(actor.items.find((o) => o.system.XMLID === "HKA")).ocv, 2);
-                });
-
-                it("Enhanced Perception", async function () {
-                    assert.equal(actor.items.find((o) => o.system.XMLID === "PERCEPTION").system.roll, "17-");
-                });
-
-                it("realCost", async function () {
-                    assert.equal(actor.realCost, 165);
-                });
-
-                it("activePoints", async function () {
-                    assert.equal(actor.activePoints, 219);
-                });
-            });
-
-            // From Misc Equipment Compendium
-            describe("Thieves’ Tools (High quality)", function () {
-                const contents = `<?xml version="1.0" encoding="UTF-16"?>
+                // From Misc Equipment Compendium
+                describe("Thieves’ Tools (High quality)", function () {
+                    const contents = `<?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Heroic6E.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="175" DISAD_POINTS="50" EXPERIENCE="0" />
                     <CHARACTER_INFO CHARACTER_NAME="" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.46224760379584" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
@@ -1896,57 +1909,57 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
-                let parentItem;
+                    let actor;
+                    let parentItem;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
 
-                    parentItem = actor.items.find((o) => o.system.XMLID === "COMPOUNDPOWER");
+                        parentItem = actor.items.find((o) => o.system.XMLID === "COMPOUNDPOWER");
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("Name Compound", async function () {
+                        assert.equal(parentItem.name, `Thieves’ Tools (High quality)`);
+                    });
+
+                    it("SkillName Lockpicking", async function () {
+                        assert.equal(parentItem.childItems[0].name, `Lockpicking`);
+                    });
+
+                    it("SkillDesc Lockpicking", async function () {
+                        assert.equal(
+                            parentItem.childItems[0].system.description,
+                            "Lockpicking 12- (PD&ED: 1, BODY: 1) (2 Active Points); OAF (-1)",
+                        );
+                    });
+
+                    it("SkillName Security Systems", async function () {
+                        assert.equal(parentItem.childItems[1].name, `Security Systems`);
+                    });
+                    it("SkillDesc Security Systems", async function () {
+                        assert.equal(
+                            parentItem.childItems[1].system.description,
+                            "Security Systems 12- (2 Active Points); OAF (-1)",
+                        );
+                    });
+
+                    it("Actor realCost", async function () {
+                        assert.equal(actor.realCost, 0);
+                    });
+
+                    it("Actor activePoints", async function () {
+                        assert.equal(actor.activePoints, 4);
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
+                describe("5e - base vs added DCs", function () {
+                    this.timeout(20000);
 
-                it("Name Compound", async function () {
-                    assert.equal(parentItem.name, `Thieves’ Tools (High quality)`);
-                });
-
-                it("SkillName Lockpicking", async function () {
-                    assert.equal(parentItem.childItems[0].name, `Lockpicking`);
-                });
-
-                it("SkillDesc Lockpicking", async function () {
-                    assert.equal(
-                        parentItem.childItems[0].system.description,
-                        "Lockpicking 12- (PD&ED: 1, BODY: 1) (2 Active Points); OAF (-1)",
-                    );
-                });
-
-                it("SkillName Security Systems", async function () {
-                    assert.equal(parentItem.childItems[1].name, `Security Systems`);
-                });
-                it("SkillDesc Security Systems", async function () {
-                    assert.equal(
-                        parentItem.childItems[1].system.description,
-                        "Security Systems 12- (2 Active Points); OAF (-1)",
-                    );
-                });
-
-                it("Actor realCost", async function () {
-                    assert.equal(actor.realCost, 0);
-                });
-
-                it("Actor activePoints", async function () {
-                    assert.equal(actor.activePoints, 4);
-                });
-            });
-
-            describe("5e - base vs added DCs", function () {
-                this.timeout(20000);
-
-                const contents = `
+                    const contents = `
                 <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
@@ -2076,289 +2089,295 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
-                let previousSetting;
-                let hka5DcItem;
-                let hka4DcItem;
+                    let actor;
+                    let previousSetting;
+                    let hka5DcItem;
+                    let hka4DcItem;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
-                    hka5DcItem = actor.items.find(
-                        (item) => item.system.XMLID === "HKA" && item.system.NAME === "2d6-1",
-                    );
+                        hka5DcItem = actor.items.find(
+                            (item) => item.system.XMLID === "HKA" && item.system.NAME === "2d6-1",
+                        );
 
-                    hka4DcItem = actor.items.find(
-                        (item) => item.system.XMLID === "HKA" && item.system.NAME === "1d6+1",
-                    );
-                });
-
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                beforeEach(async function () {
-                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
-                });
-
-                afterEach(async function () {
-                    await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
-                });
-
-                // Verify the cost of powers
-                it("should match the overall cost of HD", function () {
-                    assert.equal(actor.characterPointCost, 281);
-                });
-
-                it("should match the cost breakdown of HD", function () {
-                    assert.deepEqual(actor.pointsDetail, {
-                        characteristics: 60,
-                        martialart: 65,
-                        power: 38,
-                        skill: 88,
-                        talent: 30,
-                    });
-                });
-
-                describe("MANEUVERs with Velocity", function () {
-                    it("should add velocity damage for Move Through", function () {
-                        // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
-                        // Added DCs: velocity 30"/3 -> 10DC => +10DC
-                        // Base + Added = 4DC + 10DC (doubling rule does not apply) = 14 DC. Move Through is 5AP/die => 14d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
-                                { effectiveStr: 20, velocity: 30 },
-                            ),
-                            "14d6",
+                        hka4DcItem = actor.items.find(
+                            (item) => item.system.XMLID === "HKA" && item.system.NAME === "1d6+1",
                         );
                     });
 
-                    it("should add velocity damage for Move Through (not subject to doubling rule)", function () {
-                        // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
-                        // Added DCs: velocity 90"/3 -> 30DC => +30DC
-                        // Base + Added = 4DC + 30DC (doubling rule does not apply) = 34 DC. Move Through is 5AP/die => 34d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
-                                { effectiveStr: 20, velocity: 90 },
-                            ),
-                            "34d6",
-                        );
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
                     });
-
-                    it("should add velocity damage for Move By", function () {
-                        // Base DCs: Move By (STR 20 -> 4DC/2 -> 2DC)  => 2DC
-                        // Added DCs: velocity 10"/5 -> 3DC => +3DC
-                        // Base + Added = 2DC + 3DC (doubling rule does not apply) = 4 DC. Move By is 5AP/die => 4d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
-                                { effectiveStr: 20, velocity: 10 },
-                            ),
-                            "4d6",
-                        );
-                    });
-
-                    it("should add velocity damage for Move By (not subject to doubling rule)", function () {
-                        // Base DCs: Move By (STR 20 -> 4DC/2 -> 2DC) => 2DC
-                        // Added DCs: velocity 90"/5 -> 18DC => +18DC
-                        // Base + Added = 2DC + 18DC (doubling rule does not apply) = 20 DC. Move By is 5AP/die => 20d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
-                                { effectiveStr: 20, velocity: 90 },
-                            ),
-                            "20d6",
-                        );
-                    });
-
-                    it("should not add STR to damage twice for Move By (not subject to doubling rule)", function () {
-                        // Base DCs: 2d6-1K HKA Weapon (5DC) => 5DC Killing
-                        // Added DCs: STR added to HKA and NOT the MOVEBY (STR 20 -> +4DC) + velocity (10"/5 -> +2DC) => +6DC
-                        // Base + Added = 5DC + 6DC (doubling rule does not apply) = 11 DC. HKA is 15AP/die => 4d6-1K
-                        assert.equal(
-                            getFullyQualifiedEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
-                                { effectiveStr: 20, velocity: 10, maWeaponItem: hka5DcItem },
-                            ),
-                            "4d6-1K",
-                        );
-                    });
-
-                    it("should not add STR to damage twice for Move By (not subject to doubling rule)", function () {
-                        // Base DCs: 1d6+1K HKA Weapon (4DC) => 4DC Killing
-                        // Added DCs: STR added to HKA and NOT the MOVEBY (STR 20 with 5 STR minimum -> +3DC) + velocity (10"/5 -> +2DC) => +5DC
-                        // Base + Added = 4DC + 5DC (doubling rule does not apply) = 9 DC. HKA is 15AP/die => 3d6K
-                        assert.equal(
-                            getFullyQualifiedEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
-                                { effectiveStr: 20, velocity: 10, maWeaponItem: hka4DcItem },
-                            ),
-                            "3d6K",
-                        );
-                    });
-                });
-
-                describe("Martial Arts", function () {
-                    it("should have the correct damage for Nerve Strike", function () {
-                        // Base DCs: Nerve Strike 4DC (aka 2d6), EXTRADC +11DC => 15DC.
-                        // Added DCs: Does not use STR => +0 DC
-                        // Base + Added = 15DC. Nerve Strike is an NND (10AP/die) => 7½d6
-                        assert.equal(actor.items.find((o) => o.system.ALIAS === "Nerve Strike").system.damage, "7½d6");
-                    });
-
-                    it("should have the correct damage for Killing Strike", function () {
-                        // Added DCs: Killing Strike 4DC (killing halved in 5e becomes 2DC), EXTRADC +11DC (killing halved in 5e becomes 5DC) => 7 DC
-                        // Base: STR +14 DC (STR 70) => +14 DC  =>  14DC
-                        // Base + Added = 7C + 14DC (doubling rule clamps the strength added DC) = 14DC. Killing strike is 14AP/die => 4½d6
-                        // NOTE: HD gets 5d6K as it seems to be more than doubling the equivalent HKA. Math rounding problems in HD?
-                        assert.equal(
-                            actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.damage,
-                            "4½d6K",
-                        );
-                    });
-
-                    it("should have the correct damage for Martial Strike", function () {
-                        assert.equal(
-                            // Base DCs: STR +14 DC (STR 70),  EXTRADC +11DC => +25 DC
-                            // Added DCs: Martial Strike 2DC =>  +2 DC
-                            // Base + Added = 25DC + 2DC (doubling rule does not apply) = 27DC. Martial Strike is 5AP/die => 27d6
-                            actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.damage,
-                            "27d6",
-                        );
-                    });
-
-                    it("should have the correct damage for Martial Flash", function () {
-                        // Base DCs: Martial Flash 4DC (aka 2d6), EXTRADC +11DC => 15DC.
-                        // Added DCs: Does not use STR => +0 DC
-                        // Base + Added = 15DC. Martial Flash is a 5AP/die => 15d6
-                        assert.equal(actor.items.find((o) => o.system.ALIAS === "Martial Flash").system.damage, "15d6");
-                    });
-
-                    it("should have the correct damage for Sacrifice Strike", function () {
-                        // Base DCs:  STR +14 DC (STR 70),  EXTRADC +11DC =>  25DC
-                        // Added: Sacrifice Strike 4DC =>  4DC
-                        // Base + Added = 15DC + 4DC (doubling rule does not apply) = 29DC. Sacrifice Strike is 5AP/die => 29d6
-                        assert.equal(
-                            actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike").system.damage,
-                            "29d6",
-                        );
-                    });
-
-                    it.skip("should have the correct damage for Martial Strike with 0 STR", function () {});
-
-                    it.skip("should have the correct damage for Martial Strike with -10 STR", function () {});
-                });
-
-                describe("Maneuvers with CSLs", function () {
-                    let cslItem;
-                    let cslPreviousActiveState;
-                    let cslPreviousAllocation;
 
                     beforeEach(async function () {
-                        // Turn on the CSLs
-                        cslItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
-
-                        // Turn on the CSLs & Set the CSLs for DCs
-                        cslPreviousActiveState = cslItem.system.active;
-                        cslPreviousAllocation = cslItem.system.csl;
-                        await cslItem.update({
-                            "system.active": true,
-                            "system.csl": Array(parseInt(cslItem.system.LEVELS || 0)).fill("dc"),
-                        });
+                        previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
                     });
 
                     afterEach(async function () {
-                        // Turn off the CSLs & Set the CSLs to previous
-                        await cslItem.update({
-                            "system.active": cslPreviousActiveState,
-                            "system.csl": cslPreviousAllocation,
+                        await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
+                    });
+
+                    // Verify the cost of powers
+                    it("should match the overall cost of HD", function () {
+                        assert.equal(actor.characterPointCost, 281);
+                    });
+
+                    it("should match the cost breakdown of HD", function () {
+                        assert.deepEqual(actor.pointsDetail, {
+                            characteristics: 60,
+                            martialart: 65,
+                            power: 38,
+                            skill: 88,
+                            talent: 30,
                         });
                     });
 
-                    it("should have the correct damage for Nerve Strike", function () {
-                        // Base DCs: Nerve Strike 4DC (aka 2d6), EXTRADC +11DC => 15DC.
-                        // Added DCs: (11 CSL) 2:1 +5DC
-                        // Base + Added = 20DC. Nerve Strike is an NND (10AP/die) => 10d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((o) => o.system.ALIAS === "Nerve Strike"),
-                                {},
-                            ),
-                            "10d6",
-                        );
+                    describe("MANEUVERs with Velocity", function () {
+                        it("should add velocity damage for Move Through", function () {
+                            // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
+                            // Added DCs: velocity 30"/3 -> 10DC => +10DC
+                            // Base + Added = 4DC + 10DC (doubling rule does not apply) = 14 DC. Move Through is 5AP/die => 14d6
+                            assert.equal(
+                                getEffectFormulaFromItem(
+                                    actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
+                                    { effectiveStr: 20, velocity: 30 },
+                                ),
+                                "14d6",
+                            );
+                        });
+
+                        it("should add velocity damage for Move Through (not subject to doubling rule)", function () {
+                            // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
+                            // Added DCs: velocity 90"/3 -> 30DC => +30DC
+                            // Base + Added = 4DC + 30DC (doubling rule does not apply) = 34 DC. Move Through is 5AP/die => 34d6
+                            assert.equal(
+                                getEffectFormulaFromItem(
+                                    actor.items.find((item) => item.system.XMLID === "MOVETHROUGH"),
+                                    { effectiveStr: 20, velocity: 90 },
+                                ),
+                                "34d6",
+                            );
+                        });
+
+                        it("should add velocity damage for Move By", function () {
+                            // Base DCs: Move By (STR 20 -> 4DC/2 -> 2DC)  => 2DC
+                            // Added DCs: velocity 10"/5 -> 3DC => +3DC
+                            // Base + Added = 2DC + 3DC (doubling rule does not apply) = 4 DC. Move By is 5AP/die => 4d6
+                            assert.equal(
+                                getEffectFormulaFromItem(
+                                    actor.items.find((item) => item.system.XMLID === "MOVEBY"),
+                                    { effectiveStr: 20, velocity: 10 },
+                                ),
+                                "4d6",
+                            );
+                        });
+
+                        it("should add velocity damage for Move By (not subject to doubling rule)", function () {
+                            // Base DCs: Move By (STR 20 -> 4DC/2 -> 2DC) => 2DC
+                            // Added DCs: velocity 90"/5 -> 18DC => +18DC
+                            // Base + Added = 2DC + 18DC (doubling rule does not apply) = 20 DC. Move By is 5AP/die => 20d6
+                            assert.equal(
+                                getEffectFormulaFromItem(
+                                    actor.items.find((item) => item.system.XMLID === "MOVEBY"),
+                                    { effectiveStr: 20, velocity: 90 },
+                                ),
+                                "20d6",
+                            );
+                        });
+
+                        it("should not add STR to damage twice for Move By (not subject to doubling rule)", function () {
+                            // Base DCs: 2d6-1K HKA Weapon (5DC) => 5DC Killing
+                            // Added DCs: STR added to HKA and NOT the MOVEBY (STR 20 -> +4DC) + velocity (10"/5 -> +2DC) => +6DC
+                            // Base + Added = 5DC + 6DC (doubling rule does not apply) = 11 DC. HKA is 15AP/die => 4d6-1K
+                            assert.equal(
+                                getFullyQualifiedEffectFormulaFromItem(
+                                    actor.items.find((item) => item.system.XMLID === "MOVEBY"),
+                                    { effectiveStr: 20, velocity: 10, maWeaponItem: hka5DcItem },
+                                ),
+                                "4d6-1K",
+                            );
+                        });
+
+                        it("should not add STR to damage twice for Move By (not subject to doubling rule)", function () {
+                            // Base DCs: 1d6+1K HKA Weapon (4DC) => 4DC Killing
+                            // Added DCs: STR added to HKA and NOT the MOVEBY (STR 20 with 5 STR minimum -> +3DC) + velocity (10"/5 -> +2DC) => +5DC
+                            // Base + Added = 4DC + 5DC (doubling rule does not apply) = 9 DC. HKA is 15AP/die => 3d6K
+                            assert.equal(
+                                getFullyQualifiedEffectFormulaFromItem(
+                                    actor.items.find((item) => item.system.XMLID === "MOVEBY"),
+                                    { effectiveStr: 20, velocity: 10, maWeaponItem: hka4DcItem },
+                                ),
+                                "3d6K",
+                            );
+                        });
                     });
 
-                    it("should have the correct damage for Killing Strike", function () {
-                        // Base DCs: Killing Strike 4DC (killing halved in 5e becomes 2DC), EXTRADC +11DC (killing halved in 5e becomes 5DC) => 7 DC
-                        // Added DCs: (11 CSL) 2:1 +5DC, STR +0 DC (STR 0)  => +5DC
-                        // Base + Added = 7C + 5DC (doubling rule not applied) = 12DC. Killing strike is 15AP/die => 4d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((o) => o.system.ALIAS === "Killing Strike"),
-                                { effectiveStr: 0 },
-                            ),
-                            "4d6",
-                        );
+                    describe("Martial Arts", function () {
+                        it("should have the correct damage for Nerve Strike", function () {
+                            // Base DCs: Nerve Strike 4DC (aka 2d6), EXTRADC +11DC => 15DC.
+                            // Added DCs: Does not use STR => +0 DC
+                            // Base + Added = 15DC. Nerve Strike is an NND (10AP/die) => 7½d6
+                            assert.equal(
+                                actor.items.find((o) => o.system.ALIAS === "Nerve Strike").system.damage,
+                                "7½d6",
+                            );
+                        });
+
+                        it("should have the correct damage for Killing Strike", function () {
+                            // Added DCs: Killing Strike 4DC (killing halved in 5e becomes 2DC), EXTRADC +11DC (killing halved in 5e becomes 5DC) => 7 DC
+                            // Base: STR +14 DC (STR 70) => +14 DC  =>  14DC
+                            // Base + Added = 7C + 14DC (doubling rule clamps the strength added DC) = 14DC. Killing strike is 14AP/die => 4½d6
+                            // NOTE: HD gets 5d6K as it seems to be more than doubling the equivalent HKA. Math rounding problems in HD?
+                            assert.equal(
+                                actor.items.find((o) => o.system.ALIAS === "Killing Strike").system.damage,
+                                "4½d6K",
+                            );
+                        });
+
+                        it("should have the correct damage for Martial Strike", function () {
+                            assert.equal(
+                                // Base DCs: STR +14 DC (STR 70),  EXTRADC +11DC => +25 DC
+                                // Added DCs: Martial Strike 2DC =>  +2 DC
+                                // Base + Added = 25DC + 2DC (doubling rule does not apply) = 27DC. Martial Strike is 5AP/die => 27d6
+                                actor.items.find((o) => o.system.ALIAS === "Martial Strike").system.damage,
+                                "27d6",
+                            );
+                        });
+
+                        it("should have the correct damage for Martial Flash", function () {
+                            // Base DCs: Martial Flash 4DC (aka 2d6), EXTRADC +11DC => 15DC.
+                            // Added DCs: Does not use STR => +0 DC
+                            // Base + Added = 15DC. Martial Flash is a 5AP/die => 15d6
+                            assert.equal(
+                                actor.items.find((o) => o.system.ALIAS === "Martial Flash").system.damage,
+                                "15d6",
+                            );
+                        });
+
+                        it("should have the correct damage for Sacrifice Strike", function () {
+                            // Base DCs:  STR +14 DC (STR 70),  EXTRADC +11DC =>  25DC
+                            // Added: Sacrifice Strike 4DC =>  4DC
+                            // Base + Added = 15DC + 4DC (doubling rule does not apply) = 29DC. Sacrifice Strike is 5AP/die => 29d6
+                            assert.equal(
+                                actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike").system.damage,
+                                "29d6",
+                            );
+                        });
+
+                        it.skip("should have the correct damage for Martial Strike with 0 STR", function () {});
+
+                        it.skip("should have the correct damage for Martial Strike with -10 STR", function () {});
                     });
 
-                    it("should have the correct damage for Martial Strike", function () {
-                        assert.equal(
-                            // Base DCs: STR +14 DC (STR 70),  EXTRADC +11DC => +25 DC
-                            // Added DCs: Martial Strike 2DC, (11 CSL) 2:1 +5DC =>  +7 DC
-                            // Base + Added = 25DC + 7DC (doubling rule does not apply) = 32DC. Martial Strike is 5AP/die => 32d6
-                            getEffectFormulaFromItem(
-                                actor.items.find((o) => o.system.ALIAS === "Martial Strike"),
-                                {},
-                            ),
-                            "32d6",
-                        );
-                    });
+                    describe("Maneuvers with CSLs", function () {
+                        let cslItem;
+                        let cslPreviousActiveState;
+                        let cslPreviousAllocation;
 
-                    it("should have the correct damage for Martial Flash", function () {
-                        // Base DCs: Martial Flash 4DC (aka 2d6), EXTRADC +11DC => 15DC.
-                        // Added DCs: Does not use STR, (11 CSL) 2:1 +5DC => +5 DC
-                        // Base + Added = 20DC. Martial Flash is a 5AP/die => 20d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((o) => o.system.ALIAS === "Martial Flash"),
-                                {},
-                            ),
-                            "20d6",
-                        );
-                    });
+                        beforeEach(async function () {
+                            // Turn on the CSLs
+                            cslItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
 
-                    it("should have the correct damage for Sacrifice Strike", function () {
-                        // Base DCs:  STR +14 DC (STR 70),  EXTRADC +11DC =>  25DC
-                        // Added: Sacrifice Strike 4DC, (11 CSL) 2:1 +5DC =>  9DC
-                        // Base + Added = 15DC + 9DC (doubling rule does not apply) = 34DC. Sacrifice Strike is 5AP/die => 34d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike"),
-                                {},
-                            ),
-                            "34d6",
-                        );
-                    });
+                            // Turn on the CSLs & Set the CSLs for DCs
+                            cslPreviousActiveState = cslItem.system.active;
+                            cslPreviousAllocation = cslItem.system.csl;
+                            await cslItem.update({
+                                "system.active": true,
+                                "system.csl": Array(parseInt(cslItem.system.LEVELS || 0)).fill("dc"),
+                            });
+                        });
 
-                    it("should add velocity damage for Move By", function () {
-                        // Base DCs: Move By (STR 20 -> 4DC/2 -> 2DC)  => 2DC
-                        // Added DCs: velocity 10"/5 -> 2DC, (11 CSL) 2:1 +5DC => +7DC
-                        // Base + Added = 2DC + 7DC (doubling rule does apply but not to velocity) = 6 DC. Move By is 5AP/die => 6d6
-                        assert.equal(
-                            getEffectFormulaFromItem(
-                                actor.items.find((item) => item.system.XMLID === "MOVEBY"),
-                                { effectiveStr: 20, velocity: 10 },
-                            ),
-                            "6d6",
-                        );
+                        afterEach(async function () {
+                            // Turn off the CSLs & Set the CSLs to previous
+                            await cslItem.update({
+                                "system.active": cslPreviousActiveState,
+                                "system.csl": cslPreviousAllocation,
+                            });
+                        });
+
+                        it("should have the correct damage for Nerve Strike", function () {
+                            // Base DCs: Nerve Strike 4DC (aka 2d6), EXTRADC +11DC => 15DC.
+                            // Added DCs: (11 CSL) 2:1 +5DC
+                            // Base + Added = 20DC. Nerve Strike is an NND (10AP/die) => 10d6
+                            assert.equal(
+                                getEffectFormulaFromItem(
+                                    actor.items.find((o) => o.system.ALIAS === "Nerve Strike"),
+                                    {},
+                                ),
+                                "10d6",
+                            );
+                        });
+
+                        it("should have the correct damage for Killing Strike", function () {
+                            // Base DCs: Killing Strike 4DC (killing halved in 5e becomes 2DC), EXTRADC +11DC (killing halved in 5e becomes 5DC) => 7 DC
+                            // Added DCs: (11 CSL) 2:1 +5DC, STR +0 DC (STR 0)  => +5DC
+                            // Base + Added = 7C + 5DC (doubling rule not applied) = 12DC. Killing strike is 15AP/die => 4d6
+                            assert.equal(
+                                getEffectFormulaFromItem(
+                                    actor.items.find((o) => o.system.ALIAS === "Killing Strike"),
+                                    { effectiveStr: 0 },
+                                ),
+                                "4d6",
+                            );
+                        });
+
+                        it("should have the correct damage for Martial Strike", function () {
+                            assert.equal(
+                                // Base DCs: STR +14 DC (STR 70),  EXTRADC +11DC => +25 DC
+                                // Added DCs: Martial Strike 2DC, (11 CSL) 2:1 +5DC =>  +7 DC
+                                // Base + Added = 25DC + 7DC (doubling rule does not apply) = 32DC. Martial Strike is 5AP/die => 32d6
+                                getEffectFormulaFromItem(
+                                    actor.items.find((o) => o.system.ALIAS === "Martial Strike"),
+                                    {},
+                                ),
+                                "32d6",
+                            );
+                        });
+
+                        it("should have the correct damage for Martial Flash", function () {
+                            // Base DCs: Martial Flash 4DC (aka 2d6), EXTRADC +11DC => 15DC.
+                            // Added DCs: Does not use STR, (11 CSL) 2:1 +5DC => +5 DC
+                            // Base + Added = 20DC. Martial Flash is a 5AP/die => 20d6
+                            assert.equal(
+                                getEffectFormulaFromItem(
+                                    actor.items.find((o) => o.system.ALIAS === "Martial Flash"),
+                                    {},
+                                ),
+                                "20d6",
+                            );
+                        });
+
+                        it("should have the correct damage for Sacrifice Strike", function () {
+                            // Base DCs:  STR +14 DC (STR 70),  EXTRADC +11DC =>  25DC
+                            // Added: Sacrifice Strike 4DC, (11 CSL) 2:1 +5DC =>  9DC
+                            // Base + Added = 15DC + 9DC (doubling rule does not apply) = 34DC. Sacrifice Strike is 5AP/die => 34d6
+                            assert.equal(
+                                getEffectFormulaFromItem(
+                                    actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike"),
+                                    {},
+                                ),
+                                "34d6",
+                            );
+                        });
+
+                        it("should add velocity damage for Move By", function () {
+                            // Base DCs: Move By (STR 20 -> 4DC/2 -> 2DC)  => 2DC
+                            // Added DCs: velocity 10"/5 -> 2DC, (11 CSL) 2:1 +5DC => +7DC
+                            // Base + Added = 2DC + 7DC (doubling rule does apply but not to velocity) = 6 DC. Move By is 5AP/die => 6d6
+                            assert.equal(
+                                getEffectFormulaFromItem(
+                                    actor.items.find((item) => item.system.XMLID === "MOVEBY"),
+                                    { effectiveStr: 20, velocity: 10 },
+                                ),
+                                "6d6",
+                            );
+                        });
                     });
                 });
-            });
 
-            describe("5e - Maneuvers - base vs added DCs with HTH attacks", function () {
-                const contents = `
+                describe("5e - Maneuvers - base vs added DCs with HTH attacks", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
@@ -2505,470 +2524,477 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
-                let previousSetting;
-                let hthAttack14d6NoStrMinimum;
-                let hthAttack5d6StrMinimum;
-                let strikeItem;
-                let moveByItem;
-                let moveThroughItem;
-                let haymakerManeuver;
-                let nerveStrikeItem;
-                let killingStrikeItem;
-                let martialStrikeItem;
-                let martialFlashItem;
-                let sacrificeStrikeItem;
+                    let actor;
+                    let previousSetting;
+                    let hthAttack14d6NoStrMinimum;
+                    let hthAttack5d6StrMinimum;
+                    let strikeItem;
+                    let moveByItem;
+                    let moveThroughItem;
+                    let haymakerManeuver;
+                    let nerveStrikeItem;
+                    let killingStrikeItem;
+                    let martialStrikeItem;
+                    let martialFlashItem;
+                    let sacrificeStrikeItem;
 
-                before(async function () {
-                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
+                    before(async function () {
+                        previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
 
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
-                    hthAttack14d6NoStrMinimum = actor.items.find(
-                        (item) =>
-                            item.system.XMLID === "HANDTOHANDATTACK" && item.system.NAME === "14d6 no STR minimum",
-                    );
-                    hthAttack5d6StrMinimum = actor.items.find(
-                        (item) => item.system.XMLID === "HANDTOHANDATTACK" && item.system.NAME === "5d6 STR minimum",
-                    );
+                        hthAttack14d6NoStrMinimum = actor.items.find(
+                            (item) =>
+                                item.system.XMLID === "HANDTOHANDATTACK" && item.system.NAME === "14d6 no STR minimum",
+                        );
+                        hthAttack5d6StrMinimum = actor.items.find(
+                            (item) =>
+                                item.system.XMLID === "HANDTOHANDATTACK" && item.system.NAME === "5d6 STR minimum",
+                        );
 
-                    strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
-                    moveByItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
-                    moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
-                    haymakerManeuver = actor.items.find(
-                        (item) => item.isCombatManeuver && item.system.XMLID === "HAYMAKER",
-                    );
-                    nerveStrikeItem = actor.items.find((item) => item.system.ALIAS === "Nerve Strike");
-                    killingStrikeItem = actor.items.find((item) => item.system.ALIAS === "Killing Strike");
-                    martialStrikeItem = actor.items.find((o) => o.system.ALIAS === "Martial Strike");
-                    martialFlashItem = actor.items.find((item) => item.system.ALIAS === "Martial Flash");
-                    sacrificeStrikeItem = actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike");
-                });
-
-                after(async function () {
-                    await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
-
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                // Verify the cost of powers
-                it("should match the overall cost of HD", function () {
-                    assert.equal(actor.characterPointCost, 272);
-                });
-
-                it("should match the cost breakdown of HD", function () {
-                    assert.deepEqual(actor.pointsDetail, {
-                        characteristics: 0,
-                        martialart: 30,
-                        power: 154,
-                        skill: 88,
+                        strikeItem = actor.items.find((item) => item.system.XMLID === "STRIKE");
+                        moveByItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
+                        moveThroughItem = actor.items.find((item) => item.system.XMLID === "MOVETHROUGH");
+                        haymakerManeuver = actor.items.find(
+                            (item) => item.isCombatManeuver && item.system.XMLID === "HAYMAKER",
+                        );
+                        nerveStrikeItem = actor.items.find((item) => item.system.ALIAS === "Nerve Strike");
+                        killingStrikeItem = actor.items.find((item) => item.system.ALIAS === "Killing Strike");
+                        martialStrikeItem = actor.items.find((o) => o.system.ALIAS === "Martial Strike");
+                        martialFlashItem = actor.items.find((item) => item.system.ALIAS === "Martial Flash");
+                        sacrificeStrikeItem = actor.items.find((o) => o.system.ALIAS === "Sacrifice Strike");
                     });
-                });
 
-                describe("maneuver END usage", function () {
-                    // Non strength combat maneuvers use 1 END
-                    describe("BLOCK Combat Maneuver", function () {
-                        it("should use 1 END", function () {
-                            const blockCombatManeuver = actor.items.find((item) => item.system.XMLID === "BLOCK");
-                            assert.equal(blockCombatManeuver.end, 1);
+                    after(async function () {
+                        await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
+
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    // Verify the cost of powers
+                    it("should match the overall cost of HD", function () {
+                        assert.equal(actor.characterPointCost, 272);
+                    });
+
+                    it("should match the cost breakdown of HD", function () {
+                        assert.deepEqual(actor.pointsDetail, {
+                            characteristics: 0,
+                            martialart: 30,
+                            power: 154,
+                            skill: 88,
                         });
                     });
 
-                    // Non strength combat maneuvers use 1 END
-                    describe("DODGE Combat Maneuver", function () {
-                        it("should use 1 END", function () {
-                            const dodgeCombatManeuver = actor.items.find((item) => item.system.XMLID === "DODGE");
-                            assert.equal(dodgeCombatManeuver.end, 1);
+                    describe("maneuver END usage", function () {
+                        // Non strength combat maneuvers use 1 END
+                        describe("BLOCK Combat Maneuver", function () {
+                            it("should use 1 END", function () {
+                                const blockCombatManeuver = actor.items.find((item) => item.system.XMLID === "BLOCK");
+                                assert.equal(blockCombatManeuver.end, 1);
+                            });
+                        });
+
+                        // Non strength combat maneuvers use 1 END
+                        describe("DODGE Combat Maneuver", function () {
+                            it("should use 1 END", function () {
+                                const dodgeCombatManeuver = actor.items.find((item) => item.system.XMLID === "DODGE");
+                                assert.equal(dodgeCombatManeuver.end, 1);
+                            });
+                        });
+
+                        // Martial maneuvers use 0 END
+                        describe("FLYING DODGE Martial Art Maneuver", function () {
+                            it("should use 0 END", function () {
+                                const blockCombatManeuver = actor.items.find(
+                                    (item) => item.system.XMLID === "MANEUVER" && item.name === "Flying Dodge",
+                                );
+                                assert.equal(blockCombatManeuver.end, 0);
+                            });
                         });
                     });
 
-                    // Martial maneuvers use 0 END
-                    describe("FLYING DODGE Martial Art Maneuver", function () {
-                        it("should use 0 END", function () {
-                            const blockCombatManeuver = actor.items.find(
-                                (item) => item.system.XMLID === "MANEUVER" && item.name === "Flying Dodge",
-                            );
-                            assert.equal(blockCombatManeuver.end, 0);
+                    describe("basic maneuver with HTH attack", function () {
+                        afterEach(function () {
+                            // Remove the HTH attack
+                            delete strikeItem.system._active.linkedAssociated;
                         });
-                    });
-                });
 
-                describe("basic maneuver with HTH attack", function () {
-                    afterEach(function () {
-                        // Remove the HTH attack
-                        delete strikeItem.system._active.linkedAssociated;
-                    });
-
-                    it("should have the correct damage for a strike", function () {
-                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
-                        // Added DCs: Strike 0DC =>  +0 DC
-                        // Base + Added = 16DC + 0DC (doubling rule does not apply) = 16 DC. STR is 5AP/die => 16d6
-
-                        // Add the HTH attack
-                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-
-                        assert.equal(getEffectFormulaFromItem(strikeItem, {}), "16d6");
-                    });
-
-                    it("should have damage for a strike with HTH w/ STR minimum", function () {
-                        // Base DCs: STR (STR 10 => +2DC), HA Damage +5 DC (w/ STR 10 minimum => +3d6) => 5 DC
-                        // Added DCs: Strike 0DC =>  +0 DC
-                        // Base + Added = 5DC + 0DC (doubling rule does not apply) = 5 DC. STR is 5AP/die => 5d6
-
-                        // Add the HTH attack
-                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack5d6StrMinimum }];
-
-                        assert.equal(getEffectFormulaFromItem(strikeItem, {}), "5d6");
-                    });
-
-                    it.skip("should have damage for a strike with multiple HTH attacks", function () {
-                        assert.equal(true, false);
-                    });
-
-                    it.skip("should have damage for a strike with multiple HTH attacks that each have STR minima", function () {
-                        assert.equal(true, false);
-                    });
-
-                    it.skip("should have damage for a strike with an advantaged HTH attack with not too much STR", function () {
-                        assert.equal(true, false);
-                    });
-
-                    it.skip("should have damage for a strike with an advantaged HTH attack with too much STR", function () {
-                        assert.equal(true, false);
-                    });
-
-                    it.skip("should have damage for a strike with HTH when there is advantaged STR", function () {
-                        assert.equal(true, false);
-                    });
-
-                    it.skip("should have damage for a strike with an advantaged HTH when there is advantaged STR", function () {
-                        assert.equal(true, false);
-                    });
-
-                    it.skip("should have damage for a strike with an advantaged HTH when there is differently advantaged STR", function () {
-                        assert.equal(true, false);
-                    });
-                });
-
-                describe("basic maneuver without HTH attack", function () {
-                    it("should have the correct damage for a strike without HTH Attack", function () {
-                        // Base DCs: STR +2 DC (STR 10) => +2 DC
-                        // Added DCs: Strike 0DC =>  +0 DC
-                        // Base + Added = 2DC + 0DC (doubling rule does not apply) = 2 DC. Martial Strike is 5AP/die => 2d6
-                        assert.equal(getEffectFormulaFromItem(strikeItem, {}), "2d6");
-                    });
-                });
-
-                describe("Haymaker with HTH", function () {
-                    beforeEach(function () {
-                        // Add the HTH attack
-                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                    });
-
-                    afterEach(function () {
-                        delete strikeItem.system._active.linkedAssociated;
-                    });
-
-                    it("should increase the damage of a Strike", function () {
-                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
-                        // Added DCs: Strike 0DC, Haymaker +4DC =>  +4 DC
-                        // Base + Added = 16DC + 4DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 20d6
-                        assert.equal(
-                            getEffectFormulaFromItem(strikeItem, {
-                                haymakerManeuverActiveItem: haymakerManeuver,
-                            }),
-                            "20d6",
-                        );
-                    });
-                });
-
-                describe("Haymaker without HTH", function () {
-                    it("should not increase the damage of a move through", function () {
-                        // Base DCs: Move Through (STR 10 -> 2d6/2DC) => 2DC
-                        // Added DCs: Haymaker does not apply since we are executing a maneuver and this is not a Strike, velocity 20"/3 -> 6d6/6DC,
-                        // Base + Added = 2DC + 6DC (doubling rule does not apply) = 8 DC. Move Through is 5AP/die => 8d6
-                        assert.equal(
-                            getEffectFormulaFromItem(moveThroughItem, {
-                                haymakerManeuverActiveItem: haymakerManeuver,
-                                velocity: 20,
-                            }),
-                            "8d6",
-                        );
-                    });
-                });
-
-                describe("MANEUVER with Velocity without HTH", function () {
-                    it("should add velocity damage for Move Through", function () {
-                        // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
-                        // Added DCs: velocity 30"/3 -> 10DC => +10DC
-                        // Base + Added = 4DC + 10DC (doubling rule does not apply) = 14 DC. Move Through is 5AP/die => 14d6
-                        assert.equal(
-                            getEffectFormulaFromItem(moveThroughItem, { effectiveStr: 20, velocity: 30 }),
-                            "14d6",
-                        );
-                    });
-
-                    it("should add velocity damage for Move Through (not subject to doubling rule)", function () {
-                        // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
-                        // Added DCs: velocity 90"/3 -> 30DC => +30DC
-                        // Base + Added = 4DC + 30DC (doubling rule does not apply) = 34 DC. Move Through is 5AP/die => 34d6
-                        assert.equal(
-                            getEffectFormulaFromItem(moveThroughItem, { effectiveStr: 20, velocity: 90 }),
-                            "34d6",
-                        );
-                    });
-                });
-
-                describe("MANEUVER with Velocity with HTH", function () {
-                    beforeEach(function () {
-                        // Add the HTH attack
-                        moveByItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                    });
-
-                    afterEach(function () {
-                        delete moveByItem.system._active.linkedAssociated;
-                    });
-
-                    it("should add velocity damage for Move By", function () {
-                        // Base DCs: Move By (STR 20 -> 4 DC/2 -> 2DC), +14 DC HTH/2 -> +7DC => 9DC
-                        // Added DCs: velocity 10"/5 -> 2DC => +2DC
-                        // Base + Added = 9DC + 2DC (doubling rule does not apply) = 11 DC. Move By is 5AP/die => 11d6
-                        assert.equal(
-                            getEffectFormulaFromItem(moveByItem, {
-                                effectiveStr: 20,
-                                velocity: 10,
-                            }),
-                            "11d6",
-                        );
-                    });
-
-                    it("should add velocity damage for Move By (not subject to doubling rule)", function () {
-                        // Base DCs: Move By (STR 20 -> 4 DC/2 -> 2DC), +14 DC HTH/2 -> +7DC => 9DC
-                        // Added DCs: velocity 90"/5 -> 18DC => +18DC
-                        // Base + Added = 9DC + 18DC (doubling rule does not apply) = 27 DC. Move By is 5AP/die => 27d6
-                        assert.equal(getEffectFormulaFromItem(moveByItem, { effectiveStr: 20, velocity: 90 }), "27d6");
-                    });
-
-                    // TODO: move through with weapon
-                    // TODO: move by with weapon
-                });
-
-                describe("Martial Arts", function () {
-                    beforeEach(function () {
-                        // Add the HTH attack
-                        nerveStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                        killingStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                        martialStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                        martialFlashItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                        sacrificeStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                    });
-
-                    afterEach(function () {
-                        // Remove the HTH attack
-                        delete nerveStrikeItem.system._active.linkedAssociated;
-                        delete killingStrikeItem.system._active.linkedAssociated;
-                        delete martialStrikeItem.system._active.linkedAssociated;
-                        delete martialFlashItem.system._active.linkedAssociated;
-                        delete sacrificeStrikeItem.system._active.linkedAssociated;
-                    });
-
-                    it("should have the correct damage for Nerve Strike", function () {
-                        // Base DCs: Nerve Strike 4DC (aka 2d6) => 4DC.
-                        // Added DCs: Does not use STR, HTH doesn't activate as STR < 0 => +0 DC
-                        // Base + Added = 4DC. Nerve Strike is an NND (10AP/die) => 2d6
-                        assert.equal(
-                            getEffectFormulaFromItem(nerveStrikeItem, {
-                                effectiveStr: 0,
-                                velocity: 90,
-                            }),
-                            "2d6",
-                        );
-                    });
-
-                    it("should have the correct damage for Killing Strike", function () {
-                        // Base: Killing Strike 4DC (killing halved in 5e becomes 2DC) => 2 DC
-                        // Added DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
-                        // Base + Added = 2C + 16DC (doubling rule clamps the strength added DC) = 4DC. Killing strike is 15AP/die => 1d6+1
-                        assert.equal(
-                            getEffectFormulaFromItem(killingStrikeItem, {
-                                effectiveStr: 20,
-                                velocity: 90,
-                            }),
-                            "1d6+1",
-                        );
-                    });
-
-                    it("should have the correct damage for Martial Strike", function () {
-                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
-                        // Added DCs: Martial Strike 2DC =>  +2 DC
-                        // Base + Added = 16DC + 2DC (doubling rule does not apply) = 18 DC. Martial Strike is 5AP/die => 18d6
-                        assert.equal(getEffectFormulaFromItem(martialStrikeItem, {}), "18d6");
-                    });
-
-                    it("should have the correct damage for Martial Flash", function () {
-                        // Base DCs: Martial Flash 4DC => 4DC.
-                        // Added DCs: Does not use STR and no HTH Attack  => +0 DC
-                        // Base + Added = 4DC. Martial Flash is a 5AP/die => 4d6
-                        assert.equal(
-                            getEffectFormulaFromItem(martialFlashItem, { effectiveStr: 20, velocity: 90 }),
-                            "4d6",
-                        );
-                    });
-
-                    it("should have the correct damage for Sacrifice Strike", function () {
-                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
-                        // Added: Sacrifice Strike 4DC =>  4DC
-                        // Base + Added = 16DC + 4DC (doubling rule does not apply) = 20DC. Sacrifice Strike is 5AP/die => 20d6
-                        assert.equal(getEffectFormulaFromItem(sacrificeStrikeItem, {}), "20d6");
-                    });
-                });
-
-                describe("Martial Arts with CSLs", function () {
-                    let cslItem;
-                    let cslPreviousActiveState;
-                    let cslPreviousAllocation;
-
-                    beforeEach(function () {
-                        // Turn on the CSLs
-                        cslItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
-                        cslPreviousActiveState = cslItem.system.active;
-                        cslItem.system.active = true;
-
-                        // Set the CSLs for DCs
-                        cslPreviousAllocation = cslItem.system.csl;
-                        cslItem.system.csl = Array(parseInt(cslItem.system.LEVELS || 0)).fill("dc");
-                        // for (let idx = 0; idx < parseInt(cslItem.system.LEVELS || 0); idx++) {
-                        //     cslItem.system.csl[idx] = "dc";
-                        // }
-                    });
-
-                    afterEach(function () {
-                        // Turn off the CSLs
-                        cslItem.system.active = cslPreviousActiveState;
-
-                        // Set the CSLs to previous
-                        cslItem.system.csl = cslPreviousAllocation;
-                    });
-
-                    beforeEach(function () {
-                        // Add the HTH attack
-                        nerveStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                        killingStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                        martialStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                        martialFlashItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                        sacrificeStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                    });
-
-                    afterEach(function () {
-                        // Remove the HTH attack
-                        delete nerveStrikeItem.system._active.linkedAssociated;
-                        delete killingStrikeItem.system._active.linkedAssociated;
-                        delete martialStrikeItem.system._active.linkedAssociated;
-                        delete martialFlashItem.system._active.linkedAssociated;
-                        delete sacrificeStrikeItem.system._active.linkedAssociated;
-                    });
-
-                    it("should have the correct damage for Nerve Strike", function () {
-                        // Base DCs: Nerve Strike 4DC (aka 2d6) => 4DC.
-                        // Added DCs: (11 CSL) 2:1 +5DC
-                        // Base + Added = 4 DC + 5DC (Doubling rule kicks in) => 8DC. Nerve Strike is an NND (10AP/die) => 4d6
-                        assert.equal(getEffectFormulaFromItem(nerveStrikeItem, { effectiveStr: 0 }), "4d6");
-                    });
-
-                    it("should have the correct damage for Killing Strike", function () {
-                        // Base DCs: Killing Strike 4DC (killing halved in 5e becomes 2DC) => 2 DC
-                        // Added DCs: (11 CSL) 2:1 +5DC, STR +0 DC (STR 0)  => +5DC
-                        // Base + Added = 2DC + 5DC (doubling rule kicks in) = 4DC. Killing strike is 15AP/die => 1d6+1
-                        assert.equal(getEffectFormulaFromItem(killingStrikeItem, { effectiveStr: 0 }), "1d6+1");
-                    });
-
-                    it("should have the correct damage for Martial Strike", function () {
-                        assert.equal(
+                        it("should have the correct damage for a strike", function () {
                             // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
-                            // Added DCs: Martial Strike 2DC, (11 CSL) 2:1 +5DC =>  +7 DC
-                            // Base + Added = 16DC + 7DC (doubling rule does not apply) = 23DC. Martial Strike is 5AP/die => 23d6
-                            getEffectFormulaFromItem(martialStrikeItem, {}),
-                            "23d6",
-                        );
+                            // Added DCs: Strike 0DC =>  +0 DC
+                            // Base + Added = 16DC + 0DC (doubling rule does not apply) = 16 DC. STR is 5AP/die => 16d6
+
+                            // Add the HTH attack
+                            strikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+
+                            assert.equal(getEffectFormulaFromItem(strikeItem, {}), "16d6");
+                        });
+
+                        it("should have damage for a strike with HTH w/ STR minimum", function () {
+                            // Base DCs: STR (STR 10 => +2DC), HA Damage +5 DC (w/ STR 10 minimum => +3d6) => 5 DC
+                            // Added DCs: Strike 0DC =>  +0 DC
+                            // Base + Added = 5DC + 0DC (doubling rule does not apply) = 5 DC. STR is 5AP/die => 5d6
+
+                            // Add the HTH attack
+                            strikeItem.system._active.linkedAssociated = [{ item: hthAttack5d6StrMinimum }];
+
+                            assert.equal(getEffectFormulaFromItem(strikeItem, {}), "5d6");
+                        });
+
+                        it.skip("should have damage for a strike with multiple HTH attacks", function () {
+                            assert.equal(true, false);
+                        });
+
+                        it.skip("should have damage for a strike with multiple HTH attacks that each have STR minima", function () {
+                            assert.equal(true, false);
+                        });
+
+                        it.skip("should have damage for a strike with an advantaged HTH attack with not too much STR", function () {
+                            assert.equal(true, false);
+                        });
+
+                        it.skip("should have damage for a strike with an advantaged HTH attack with too much STR", function () {
+                            assert.equal(true, false);
+                        });
+
+                        it.skip("should have damage for a strike with HTH when there is advantaged STR", function () {
+                            assert.equal(true, false);
+                        });
+
+                        it.skip("should have damage for a strike with an advantaged HTH when there is advantaged STR", function () {
+                            assert.equal(true, false);
+                        });
+
+                        it.skip("should have damage for a strike with an advantaged HTH when there is differently advantaged STR", function () {
+                            assert.equal(true, false);
+                        });
                     });
 
-                    it("should have the correct damage for Martial Flash", function () {
-                        // Base DCs: Martial Flash 4DC (aka 2d6) => 4DC.
-                        // Added DCs: Does not use STR, (11 CSL) 2:1 +5DC => +5 DC
-                        // Base + Added = 4DC + 5DC (doubling rule kicks in) => 8DC. Martial Flash is a 5AP/die => 8d6
-                        assert.equal(getEffectFormulaFromItem(martialFlashItem, {}), "8d6");
+                    describe("basic maneuver without HTH attack", function () {
+                        it("should have the correct damage for a strike without HTH Attack", function () {
+                            // Base DCs: STR +2 DC (STR 10) => +2 DC
+                            // Added DCs: Strike 0DC =>  +0 DC
+                            // Base + Added = 2DC + 0DC (doubling rule does not apply) = 2 DC. Martial Strike is 5AP/die => 2d6
+                            assert.equal(getEffectFormulaFromItem(strikeItem, {}), "2d6");
+                        });
                     });
 
-                    it("should have the correct damage for Sacrifice Strike", function () {
-                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
-                        // Added: Sacrifice Strike 4DC, (11 CSL) 2:1 +5DC =>  9DC
-                        // Base + Added = 16DC + 9DC (doubling rule does not apply) = 25DC. Sacrifice Strike is 5AP/die => 25d6
-                        assert.equal(getEffectFormulaFromItem(sacrificeStrikeItem, {}), "25d6");
+                    describe("Haymaker with HTH", function () {
+                        beforeEach(function () {
+                            // Add the HTH attack
+                            strikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        });
+
+                        afterEach(function () {
+                            delete strikeItem.system._active.linkedAssociated;
+                        });
+
+                        it("should increase the damage of a Strike", function () {
+                            // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
+                            // Added DCs: Strike 0DC, Haymaker +4DC =>  +4 DC
+                            // Base + Added = 16DC + 4DC (doubling rule does not apply) = 16 DC. Martial Strike is 5AP/die => 20d6
+                            assert.equal(
+                                getEffectFormulaFromItem(strikeItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                }),
+                                "20d6",
+                            );
+                        });
+                    });
+
+                    describe("Haymaker without HTH", function () {
+                        it("should not increase the damage of a move through", function () {
+                            // Base DCs: Move Through (STR 10 -> 2d6/2DC) => 2DC
+                            // Added DCs: Haymaker does not apply since we are executing a maneuver and this is not a Strike, velocity 20"/3 -> 6d6/6DC,
+                            // Base + Added = 2DC + 6DC (doubling rule does not apply) = 8 DC. Move Through is 5AP/die => 8d6
+                            assert.equal(
+                                getEffectFormulaFromItem(moveThroughItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                    velocity: 20,
+                                }),
+                                "8d6",
+                            );
+                        });
+                    });
+
+                    describe("MANEUVER with Velocity without HTH", function () {
+                        it("should add velocity damage for Move Through", function () {
+                            // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
+                            // Added DCs: velocity 30"/3 -> 10DC => +10DC
+                            // Base + Added = 4DC + 10DC (doubling rule does not apply) = 14 DC. Move Through is 5AP/die => 14d6
+                            assert.equal(
+                                getEffectFormulaFromItem(moveThroughItem, { effectiveStr: 20, velocity: 30 }),
+                                "14d6",
+                            );
+                        });
+
+                        it("should add velocity damage for Move Through (not subject to doubling rule)", function () {
+                            // Base DCs: Move Through (STR 20 -> 4DC)  => 4DC
+                            // Added DCs: velocity 90"/3 -> 30DC => +30DC
+                            // Base + Added = 4DC + 30DC (doubling rule does not apply) = 34 DC. Move Through is 5AP/die => 34d6
+                            assert.equal(
+                                getEffectFormulaFromItem(moveThroughItem, { effectiveStr: 20, velocity: 90 }),
+                                "34d6",
+                            );
+                        });
+                    });
+
+                    describe("MANEUVER with Velocity with HTH", function () {
+                        beforeEach(function () {
+                            // Add the HTH attack
+                            moveByItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        });
+
+                        afterEach(function () {
+                            delete moveByItem.system._active.linkedAssociated;
+                        });
+
+                        it("should add velocity damage for Move By", function () {
+                            // Base DCs: Move By (STR 20 -> 4 DC/2 -> 2DC), +14 DC HTH/2 -> +7DC => 9DC
+                            // Added DCs: velocity 10"/5 -> 2DC => +2DC
+                            // Base + Added = 9DC + 2DC (doubling rule does not apply) = 11 DC. Move By is 5AP/die => 11d6
+                            assert.equal(
+                                getEffectFormulaFromItem(moveByItem, {
+                                    effectiveStr: 20,
+                                    velocity: 10,
+                                }),
+                                "11d6",
+                            );
+                        });
+
+                        it("should add velocity damage for Move By (not subject to doubling rule)", function () {
+                            // Base DCs: Move By (STR 20 -> 4 DC/2 -> 2DC), +14 DC HTH/2 -> +7DC => 9DC
+                            // Added DCs: velocity 90"/5 -> 18DC => +18DC
+                            // Base + Added = 9DC + 18DC (doubling rule does not apply) = 27 DC. Move By is 5AP/die => 27d6
+                            assert.equal(
+                                getEffectFormulaFromItem(moveByItem, { effectiveStr: 20, velocity: 90 }),
+                                "27d6",
+                            );
+                        });
+
+                        // TODO: move through with weapon
+                        // TODO: move by with weapon
+                    });
+
+                    describe("Martial Arts", function () {
+                        beforeEach(function () {
+                            // Add the HTH attack
+                            nerveStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                            killingStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                            martialStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                            martialFlashItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                            sacrificeStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        });
+
+                        afterEach(function () {
+                            // Remove the HTH attack
+                            delete nerveStrikeItem.system._active.linkedAssociated;
+                            delete killingStrikeItem.system._active.linkedAssociated;
+                            delete martialStrikeItem.system._active.linkedAssociated;
+                            delete martialFlashItem.system._active.linkedAssociated;
+                            delete sacrificeStrikeItem.system._active.linkedAssociated;
+                        });
+
+                        it("should have the correct damage for Nerve Strike", function () {
+                            // Base DCs: Nerve Strike 4DC (aka 2d6) => 4DC.
+                            // Added DCs: Does not use STR, HTH doesn't activate as STR < 0 => +0 DC
+                            // Base + Added = 4DC. Nerve Strike is an NND (10AP/die) => 2d6
+                            assert.equal(
+                                getEffectFormulaFromItem(nerveStrikeItem, {
+                                    effectiveStr: 0,
+                                    velocity: 90,
+                                }),
+                                "2d6",
+                            );
+                        });
+
+                        it("should have the correct damage for Killing Strike", function () {
+                            // Base: Killing Strike 4DC (killing halved in 5e becomes 2DC) => 2 DC
+                            // Added DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
+                            // Base + Added = 2C + 16DC (doubling rule clamps the strength added DC) = 4DC. Killing strike is 15AP/die => 1d6+1
+                            assert.equal(
+                                getEffectFormulaFromItem(killingStrikeItem, {
+                                    effectiveStr: 20,
+                                    velocity: 90,
+                                }),
+                                "1d6+1",
+                            );
+                        });
+
+                        it("should have the correct damage for Martial Strike", function () {
+                            // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
+                            // Added DCs: Martial Strike 2DC =>  +2 DC
+                            // Base + Added = 16DC + 2DC (doubling rule does not apply) = 18 DC. Martial Strike is 5AP/die => 18d6
+                            assert.equal(getEffectFormulaFromItem(martialStrikeItem, {}), "18d6");
+                        });
+
+                        it("should have the correct damage for Martial Flash", function () {
+                            // Base DCs: Martial Flash 4DC => 4DC.
+                            // Added DCs: Does not use STR and no HTH Attack  => +0 DC
+                            // Base + Added = 4DC. Martial Flash is a 5AP/die => 4d6
+                            assert.equal(
+                                getEffectFormulaFromItem(martialFlashItem, { effectiveStr: 20, velocity: 90 }),
+                                "4d6",
+                            );
+                        });
+
+                        it("should have the correct damage for Sacrifice Strike", function () {
+                            // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6)=> +16 DC
+                            // Added: Sacrifice Strike 4DC =>  4DC
+                            // Base + Added = 16DC + 4DC (doubling rule does not apply) = 20DC. Sacrifice Strike is 5AP/die => 20d6
+                            assert.equal(getEffectFormulaFromItem(sacrificeStrikeItem, {}), "20d6");
+                        });
+                    });
+
+                    describe("Martial Arts with CSLs", function () {
+                        let cslItem;
+                        let cslPreviousActiveState;
+                        let cslPreviousAllocation;
+
+                        beforeEach(function () {
+                            // Turn on the CSLs
+                            cslItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
+                            cslPreviousActiveState = cslItem.system.active;
+                            cslItem.system.active = true;
+
+                            // Set the CSLs for DCs
+                            cslPreviousAllocation = cslItem.system.csl;
+                            cslItem.system.csl = Array(parseInt(cslItem.system.LEVELS || 0)).fill("dc");
+                            // for (let idx = 0; idx < parseInt(cslItem.system.LEVELS || 0); idx++) {
+                            //     cslItem.system.csl[idx] = "dc";
+                            // }
+                        });
+
+                        afterEach(function () {
+                            // Turn off the CSLs
+                            cslItem.system.active = cslPreviousActiveState;
+
+                            // Set the CSLs to previous
+                            cslItem.system.csl = cslPreviousAllocation;
+                        });
+
+                        beforeEach(function () {
+                            // Add the HTH attack
+                            nerveStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                            killingStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                            martialStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                            martialFlashItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                            sacrificeStrikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        });
+
+                        afterEach(function () {
+                            // Remove the HTH attack
+                            delete nerveStrikeItem.system._active.linkedAssociated;
+                            delete killingStrikeItem.system._active.linkedAssociated;
+                            delete martialStrikeItem.system._active.linkedAssociated;
+                            delete martialFlashItem.system._active.linkedAssociated;
+                            delete sacrificeStrikeItem.system._active.linkedAssociated;
+                        });
+
+                        it("should have the correct damage for Nerve Strike", function () {
+                            // Base DCs: Nerve Strike 4DC (aka 2d6) => 4DC.
+                            // Added DCs: (11 CSL) 2:1 +5DC
+                            // Base + Added = 4 DC + 5DC (Doubling rule kicks in) => 8DC. Nerve Strike is an NND (10AP/die) => 4d6
+                            assert.equal(getEffectFormulaFromItem(nerveStrikeItem, { effectiveStr: 0 }), "4d6");
+                        });
+
+                        it("should have the correct damage for Killing Strike", function () {
+                            // Base DCs: Killing Strike 4DC (killing halved in 5e becomes 2DC) => 2 DC
+                            // Added DCs: (11 CSL) 2:1 +5DC, STR +0 DC (STR 0)  => +5DC
+                            // Base + Added = 2DC + 5DC (doubling rule kicks in) = 4DC. Killing strike is 15AP/die => 1d6+1
+                            assert.equal(getEffectFormulaFromItem(killingStrikeItem, { effectiveStr: 0 }), "1d6+1");
+                        });
+
+                        it("should have the correct damage for Martial Strike", function () {
+                            assert.equal(
+                                // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
+                                // Added DCs: Martial Strike 2DC, (11 CSL) 2:1 +5DC =>  +7 DC
+                                // Base + Added = 16DC + 7DC (doubling rule does not apply) = 23DC. Martial Strike is 5AP/die => 23d6
+                                getEffectFormulaFromItem(martialStrikeItem, {}),
+                                "23d6",
+                            );
+                        });
+
+                        it("should have the correct damage for Martial Flash", function () {
+                            // Base DCs: Martial Flash 4DC (aka 2d6) => 4DC.
+                            // Added DCs: Does not use STR, (11 CSL) 2:1 +5DC => +5 DC
+                            // Base + Added = 4DC + 5DC (doubling rule kicks in) => 8DC. Martial Flash is a 5AP/die => 8d6
+                            assert.equal(getEffectFormulaFromItem(martialFlashItem, {}), "8d6");
+                        });
+
+                        it("should have the correct damage for Sacrifice Strike", function () {
+                            // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
+                            // Added: Sacrifice Strike 4DC, (11 CSL) 2:1 +5DC =>  9DC
+                            // Base + Added = 16DC + 9DC (doubling rule does not apply) = 25DC. Sacrifice Strike is 5AP/die => 25d6
+                            assert.equal(getEffectFormulaFromItem(sacrificeStrikeItem, {}), "25d6");
+                        });
+                    });
+
+                    describe("Martial Arts with HTH", function () {
+                        afterEach(function () {
+                            // Remove the HTH attack
+                            delete strikeItem.system._active.linkedAssociated;
+                        });
+
+                        it.skip("should have the correct damage for a strike with HTH that has STR minimum and 0 effective STR", function () {
+                            // Base DCs: STR (STR 10 => +2DC), HA Damage +5 DC (w/ STR 10 minimum => +3d6) => 3 DC
+                            // Added DCs: Martial Strike 2DC (but there is 0 STR being applied so cannot double) =>  +0 DC
+                            // Base + Added = 3DC + 0DC (doubling rule not allowed) = 3 DC. STR is 5AP/die => 3d6
+
+                            // Add the HTH attack
+                            strikeItem.system._active.linkedAssociated = [{ item: hthAttack5d6StrMinimum }];
+
+                            assert.equal(getEffectFormulaFromItem(martialStrikeItem, {}), "3d6");
+                        });
+                    });
+
+                    describe("Underwater", function () {
+                        let previousStatuses;
+
+                        beforeEach(function () {
+                            // Pretend that we have the underwater status on
+                            previousStatuses = actor.statuses;
+                            actor.statuses = new Set(["underwater"]);
+
+                            // Add the HTH attack
+                            strikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
+                        });
+
+                        afterEach(function () {
+                            actor.statuses = previousStatuses;
+
+                            // Remove the HTH attack
+                            delete strikeItem.system._active.linkedAssociated;
+                        });
+
+                        it("should decrease the damage of a Strike", function () {
+                            // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
+                            // Added DCs: Strike 0DC, Underwater -2DC =>  -2 DC
+                            // Base + Added = 16DC - 2DC (doubling rule does not apply) = 14 DC. Martial Strike is 5AP/die => 14d6
+                            assert.equal(getEffectFormulaFromItem(strikeItem, {}), "14d6");
+                        });
+
+                        it("should decrease the damage of a move through", function () {
+                            // Base DCs: Move Through (STR 10 -> 2d6/2DC) => 2DC
+                            // Added DCs: Underwater -2DC, Velocity 20" -> 6DC =>  +4 DC
+                            // Base + Added = 2DC + 4DC (doubling rule does not apply) = 6 DC. Move Through is 5AP/die => 6d6
+                            assert.equal(getEffectFormulaFromItem(moveThroughItem, { velocity: 20 }), "6d6");
+                        });
+
+                        it("should not be possible to do negative damage", function () {
+                            // Base DCs: Move Through (STR 10 -> 2d6/2DC) => 2DC
+                            // Added DCs: Underwater -2DC, velocity 2" -> 0d6 =>  -2 DC
+                            // Base + Added = 1DC - 2DC (doubling rule does not apply) = 0 DC. Move Through is 5AP/die => 0d6
+                            assert.equal(
+                                getEffectFormulaFromItem(moveThroughItem, { effectiveStr: 5, velocity: 2 }),
+                                "0",
+                            );
+                        });
                     });
                 });
 
-                describe("Martial Arts with HTH", function () {
-                    afterEach(function () {
-                        // Remove the HTH attack
-                        delete strikeItem.system._active.linkedAssociated;
-                    });
-
-                    it.skip("should have the correct damage for a strike with HTH that has STR minimum and 0 effective STR", function () {
-                        // Base DCs: STR (STR 10 => +2DC), HA Damage +5 DC (w/ STR 10 minimum => +3d6) => 3 DC
-                        // Added DCs: Martial Strike 2DC (but there is 0 STR being applied so cannot double) =>  +0 DC
-                        // Base + Added = 3DC + 0DC (doubling rule not allowed) = 3 DC. STR is 5AP/die => 3d6
-
-                        // Add the HTH attack
-                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack5d6StrMinimum }];
-
-                        assert.equal(getEffectFormulaFromItem(martialStrikeItem, {}), "3d6");
-                    });
-                });
-
-                describe("Underwater", function () {
-                    let previousStatuses;
-
-                    beforeEach(function () {
-                        // Pretend that we have the underwater status on
-                        previousStatuses = actor.statuses;
-                        actor.statuses = new Set(["underwater"]);
-
-                        // Add the HTH attack
-                        strikeItem.system._active.linkedAssociated = [{ item: hthAttack14d6NoStrMinimum }];
-                    });
-
-                    afterEach(function () {
-                        actor.statuses = previousStatuses;
-
-                        // Remove the HTH attack
-                        delete strikeItem.system._active.linkedAssociated;
-                    });
-
-                    it("should decrease the damage of a Strike", function () {
-                        // Base DCs: STR +2 DC (STR 10), HA Damage +14 DC (+14d6) => +16 DC
-                        // Added DCs: Strike 0DC, Underwater -2DC =>  -2 DC
-                        // Base + Added = 16DC - 2DC (doubling rule does not apply) = 14 DC. Martial Strike is 5AP/die => 14d6
-                        assert.equal(getEffectFormulaFromItem(strikeItem, {}), "14d6");
-                    });
-
-                    it("should decrease the damage of a move through", function () {
-                        // Base DCs: Move Through (STR 10 -> 2d6/2DC) => 2DC
-                        // Added DCs: Underwater -2DC, Velocity 20" -> 6DC =>  +4 DC
-                        // Base + Added = 2DC + 4DC (doubling rule does not apply) = 6 DC. Move Through is 5AP/die => 6d6
-                        assert.equal(getEffectFormulaFromItem(moveThroughItem, { velocity: 20 }), "6d6");
-                    });
-
-                    it("should not be possible to do negative damage", function () {
-                        // Base DCs: Move Through (STR 10 -> 2d6/2DC) => 2DC
-                        // Added DCs: Underwater -2DC, velocity 2" -> 0d6 =>  -2 DC
-                        // Base + Added = 1DC - 2DC (doubling rule does not apply) = 0 DC. Move Through is 5AP/die => 0d6
-                        assert.equal(getEffectFormulaFromItem(moveThroughItem, { effectiveStr: 5, velocity: 2 }), "0");
-                    });
-                });
-            });
-
-            describe("5e - Powers - base vs added DCs with HTH attacks", function () {
-                const contents = `
+                describe("5e - Powers - base vs added DCs with HTH attacks", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
@@ -3116,203 +3142,203 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
-                let previousSetting;
-                let threeDcEnergyBlast;
-                let fourDcEnergyBlast;
-                let threeDcEgoAttack;
-                let fourDcEgoAttack;
-                let threeDcTransform;
-                let eightDcTransform;
+                    let actor;
+                    let previousSetting;
+                    let threeDcEnergyBlast;
+                    let fourDcEnergyBlast;
+                    let threeDcEgoAttack;
+                    let fourDcEgoAttack;
+                    let threeDcTransform;
+                    let eightDcTransform;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
-                    threeDcEnergyBlast = actor.items.find(
-                        (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "Little",
-                    );
-                    fourDcEnergyBlast = actor.items.find(
-                        (item) => item.system.XMLID === "ENERGYBLAST" && item.name !== "Little",
-                    );
-                    threeDcEgoAttack = actor.items.find(
-                        (item) => item.system.XMLID === "EGOATTACK" && item.name === "Little",
-                    );
-                    fourDcEgoAttack = actor.items.find(
-                        (item) => item.system.XMLID === "EGOATTACK" && item.name !== "Little",
-                    );
-                    threeDcTransform = actor.items.find(
-                        (item) => item.system.XMLID === "TRANSFORM" && item.name === "Little",
-                    );
-                    eightDcTransform = actor.items.find(
-                        (item) => item.system.XMLID === "TRANSFORM" && item.name !== "Little",
-                    );
-                });
+                        threeDcEnergyBlast = actor.items.find(
+                            (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "Little",
+                        );
+                        fourDcEnergyBlast = actor.items.find(
+                            (item) => item.system.XMLID === "ENERGYBLAST" && item.name !== "Little",
+                        );
+                        threeDcEgoAttack = actor.items.find(
+                            (item) => item.system.XMLID === "EGOATTACK" && item.name === "Little",
+                        );
+                        fourDcEgoAttack = actor.items.find(
+                            (item) => item.system.XMLID === "EGOATTACK" && item.name !== "Little",
+                        );
+                        threeDcTransform = actor.items.find(
+                            (item) => item.system.XMLID === "TRANSFORM" && item.name === "Little",
+                        );
+                        eightDcTransform = actor.items.find(
+                            (item) => item.system.XMLID === "TRANSFORM" && item.name !== "Little",
+                        );
+                    });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
 
-                beforeEach(async function () {
-                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
-                });
+                    beforeEach(async function () {
+                        previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
+                    });
 
-                afterEach(async function () {
-                    await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
-                });
+                    afterEach(async function () {
+                        await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
+                    });
 
-                // Verify the cost of powers
-                it("should match the overall cost of HD", function () {
-                    assert.equal(actor.characterPointCost, 125);
-                });
+                    // Verify the cost of powers
+                    it("should match the overall cost of HD", function () {
+                        assert.equal(actor.characterPointCost, 125);
+                    });
 
-                it("should match the cost breakdown of HD", function () {
-                    assert.deepEqual(actor.pointsDetail, {
-                        characteristics: 0,
-                        power: 125,
+                    it("should match the cost breakdown of HD", function () {
+                        assert.deepEqual(actor.pointsDetail, {
+                            characteristics: 0,
+                            power: 125,
+                        });
+                    });
+
+                    describe("Energy Blast", function () {
+                        it("should have the correct cost for the little EB", function () {
+                            assert.equal(threeDcEnergyBlast.activePoints, 15);
+                        });
+
+                        it("should have the correct END cost for the little EB", function () {
+                            assert.equal(threeDcEnergyBlast.end, 0);
+                        });
+
+                        it("should have the correct damage for the little EB", function () {
+                            assert.equal(getEffectFormulaFromItem(threeDcEnergyBlast, { boostableCharges: 0 }), "3d6");
+                        });
+
+                        it("should have the correct damage for a minimally boosted little EB", function () {
+                            assert.equal(getEffectFormulaFromItem(threeDcEnergyBlast, { boostableCharges: 1 }), "4d6");
+                        });
+
+                        it("should have the correct damage for a fully boosted little EB", function () {
+                            assert.equal(getEffectFormulaFromItem(threeDcEnergyBlast, { boostableCharges: 4 }), "6d6");
+                        });
+
+                        it("should have the correct cost for the big EB", function () {
+                            assert.equal(fourDcEnergyBlast.activePoints, 20);
+                        });
+
+                        it("should have the correct END cost for the big EB", function () {
+                            assert.equal(fourDcEnergyBlast.end, 0);
+                        });
+
+                        it("should have the correct damage for the big EB", function () {
+                            assert.equal(getEffectFormulaFromItem(fourDcEnergyBlast, { boostableCharges: 0 }), "4d6");
+                        });
+
+                        it("should have the correct damage for a minimally boosted little EB", function () {
+                            assert.equal(getEffectFormulaFromItem(fourDcEnergyBlast, { boostableCharges: 1 }), "5d6");
+                        });
+
+                        it("should have the correct damage for a fully boosted big EB", function () {
+                            assert.equal(getEffectFormulaFromItem(fourDcEnergyBlast, { boostableCharges: 4 }), "8d6");
+                        });
+
+                        it("should have the correct damage for an over boosted big EB", function () {
+                            assert.equal(getEffectFormulaFromItem(fourDcEnergyBlast, { boostableCharges: 5 }), "8d6");
+                        });
+                    });
+
+                    describe("Ego Attack", function () {
+                        it("should have the correct cost for the little Ego Attack", function () {
+                            assert.equal(threeDcEgoAttack.activePoints, 15);
+                        });
+
+                        it("should have the correct END cost for the little Ego Attack", function () {
+                            assert.equal(threeDcEgoAttack.end, 0);
+                        });
+
+                        it("should have the correct damage for the little Ego Attack", function () {
+                            assert.equal(getEffectFormulaFromItem(threeDcEgoAttack, { boostableCharges: 0 }), "1½d6");
+                        });
+
+                        it("should have the correct damage for a minimally boosted little Ego Attack", function () {
+                            assert.equal(getEffectFormulaFromItem(threeDcEgoAttack, { boostableCharges: 1 }), "2d6");
+                        });
+
+                        it("should have the correct damage for a fully boosted little Ego Attack", function () {
+                            assert.equal(getEffectFormulaFromItem(threeDcEgoAttack, { boostableCharges: 4 }), "3d6");
+                        });
+
+                        it("should have the correct cost for the big Ego Attack", function () {
+                            assert.equal(fourDcEgoAttack.activePoints, 20);
+                        });
+
+                        it("should have the correct END cost for the big Ego Attack", function () {
+                            assert.equal(fourDcEgoAttack.end, 0);
+                        });
+
+                        it("should have the correct damage for the big Ego Attack", function () {
+                            assert.equal(getEffectFormulaFromItem(fourDcEgoAttack, { boostableCharges: 0 }), "2d6");
+                        });
+
+                        it("should have the correct damage for a minimally boosted little Ego Attack", function () {
+                            assert.equal(getEffectFormulaFromItem(fourDcEgoAttack, { boostableCharges: 1 }), "2½d6");
+                        });
+
+                        it("should have the correct damage for a fully boosted big Ego Attack", function () {
+                            assert.equal(getEffectFormulaFromItem(fourDcEgoAttack, { boostableCharges: 4 }), "4d6");
+                        });
+
+                        it("should have the correct damage for an over boosted big Ego Attack", function () {
+                            assert.equal(getEffectFormulaFromItem(fourDcEgoAttack, { boostableCharges: 5 }), "4d6");
+                        });
+                    });
+
+                    describe("Major Transform", function () {
+                        it("should have the correct cost for the little Transform", function () {
+                            assert.equal(threeDcTransform.activePoints, 15);
+                        });
+
+                        it("should have the correct END cost for the little Transform", function () {
+                            assert.equal(threeDcTransform.end, 0);
+                        });
+
+                        it("should have the correct damage for the little Transform", function () {
+                            assert.equal(getEffectFormulaFromItem(threeDcTransform, { boostableCharges: 0 }), "1d6");
+                        });
+
+                        it("should have the correct damage for a minimally boosted little Transform", function () {
+                            assert.equal(getEffectFormulaFromItem(threeDcTransform, { boostableCharges: 1 }), "1d6+1");
+                        });
+
+                        it("should have the correct damage for a fully boosted little Transform", function () {
+                            assert.equal(getEffectFormulaFromItem(threeDcTransform, { boostableCharges: 4 }), "2d6");
+                        });
+
+                        it("should have the correct cost for the big Transform", function () {
+                            assert.equal(eightDcTransform.activePoints, 40);
+                        });
+
+                        it("should have the correct END cost for the big Transform", function () {
+                            assert.equal(eightDcTransform.end, 0);
+                        });
+
+                        it("should have the correct damage for the big Transform", function () {
+                            assert.equal(getEffectFormulaFromItem(eightDcTransform, { boostableCharges: 0 }), "2½d6");
+                        });
+
+                        it("should have the correct damage for a minimally boosted big Transform", function () {
+                            assert.equal(getEffectFormulaFromItem(eightDcTransform, { boostableCharges: 1 }), "3d6");
+                        });
+
+                        it("should have the correct damage for a fully boosted big Transform", function () {
+                            assert.equal(getEffectFormulaFromItem(eightDcTransform, { boostableCharges: 4 }), "4d6");
+                        });
+
+                        it("should have the correct damage for an over boosted big Transform", function () {
+                            assert.equal(getEffectFormulaFromItem(eightDcTransform, { boostableCharges: 5 }), "4d6");
+                        });
                     });
                 });
 
-                describe("Energy Blast", function () {
-                    it("should have the correct cost for the little EB", function () {
-                        assert.equal(threeDcEnergyBlast.activePoints, 15);
-                    });
-
-                    it("should have the correct END cost for the little EB", function () {
-                        assert.equal(threeDcEnergyBlast.end, 0);
-                    });
-
-                    it("should have the correct damage for the little EB", function () {
-                        assert.equal(getEffectFormulaFromItem(threeDcEnergyBlast, { boostableCharges: 0 }), "3d6");
-                    });
-
-                    it("should have the correct damage for a minimally boosted little EB", function () {
-                        assert.equal(getEffectFormulaFromItem(threeDcEnergyBlast, { boostableCharges: 1 }), "4d6");
-                    });
-
-                    it("should have the correct damage for a fully boosted little EB", function () {
-                        assert.equal(getEffectFormulaFromItem(threeDcEnergyBlast, { boostableCharges: 4 }), "6d6");
-                    });
-
-                    it("should have the correct cost for the big EB", function () {
-                        assert.equal(fourDcEnergyBlast.activePoints, 20);
-                    });
-
-                    it("should have the correct END cost for the big EB", function () {
-                        assert.equal(fourDcEnergyBlast.end, 0);
-                    });
-
-                    it("should have the correct damage for the big EB", function () {
-                        assert.equal(getEffectFormulaFromItem(fourDcEnergyBlast, { boostableCharges: 0 }), "4d6");
-                    });
-
-                    it("should have the correct damage for a minimally boosted little EB", function () {
-                        assert.equal(getEffectFormulaFromItem(fourDcEnergyBlast, { boostableCharges: 1 }), "5d6");
-                    });
-
-                    it("should have the correct damage for a fully boosted big EB", function () {
-                        assert.equal(getEffectFormulaFromItem(fourDcEnergyBlast, { boostableCharges: 4 }), "8d6");
-                    });
-
-                    it("should have the correct damage for an over boosted big EB", function () {
-                        assert.equal(getEffectFormulaFromItem(fourDcEnergyBlast, { boostableCharges: 5 }), "8d6");
-                    });
-                });
-
-                describe("Ego Attack", function () {
-                    it("should have the correct cost for the little Ego Attack", function () {
-                        assert.equal(threeDcEgoAttack.activePoints, 15);
-                    });
-
-                    it("should have the correct END cost for the little Ego Attack", function () {
-                        assert.equal(threeDcEgoAttack.end, 0);
-                    });
-
-                    it("should have the correct damage for the little Ego Attack", function () {
-                        assert.equal(getEffectFormulaFromItem(threeDcEgoAttack, { boostableCharges: 0 }), "1½d6");
-                    });
-
-                    it("should have the correct damage for a minimally boosted little Ego Attack", function () {
-                        assert.equal(getEffectFormulaFromItem(threeDcEgoAttack, { boostableCharges: 1 }), "2d6");
-                    });
-
-                    it("should have the correct damage for a fully boosted little Ego Attack", function () {
-                        assert.equal(getEffectFormulaFromItem(threeDcEgoAttack, { boostableCharges: 4 }), "3d6");
-                    });
-
-                    it("should have the correct cost for the big Ego Attack", function () {
-                        assert.equal(fourDcEgoAttack.activePoints, 20);
-                    });
-
-                    it("should have the correct END cost for the big Ego Attack", function () {
-                        assert.equal(fourDcEgoAttack.end, 0);
-                    });
-
-                    it("should have the correct damage for the big Ego Attack", function () {
-                        assert.equal(getEffectFormulaFromItem(fourDcEgoAttack, { boostableCharges: 0 }), "2d6");
-                    });
-
-                    it("should have the correct damage for a minimally boosted little Ego Attack", function () {
-                        assert.equal(getEffectFormulaFromItem(fourDcEgoAttack, { boostableCharges: 1 }), "2½d6");
-                    });
-
-                    it("should have the correct damage for a fully boosted big Ego Attack", function () {
-                        assert.equal(getEffectFormulaFromItem(fourDcEgoAttack, { boostableCharges: 4 }), "4d6");
-                    });
-
-                    it("should have the correct damage for an over boosted big Ego Attack", function () {
-                        assert.equal(getEffectFormulaFromItem(fourDcEgoAttack, { boostableCharges: 5 }), "4d6");
-                    });
-                });
-
-                describe("Major Transform", function () {
-                    it("should have the correct cost for the little Transform", function () {
-                        assert.equal(threeDcTransform.activePoints, 15);
-                    });
-
-                    it("should have the correct END cost for the little Transform", function () {
-                        assert.equal(threeDcTransform.end, 0);
-                    });
-
-                    it("should have the correct damage for the little Transform", function () {
-                        assert.equal(getEffectFormulaFromItem(threeDcTransform, { boostableCharges: 0 }), "1d6");
-                    });
-
-                    it("should have the correct damage for a minimally boosted little Transform", function () {
-                        assert.equal(getEffectFormulaFromItem(threeDcTransform, { boostableCharges: 1 }), "1d6+1");
-                    });
-
-                    it("should have the correct damage for a fully boosted little Transform", function () {
-                        assert.equal(getEffectFormulaFromItem(threeDcTransform, { boostableCharges: 4 }), "2d6");
-                    });
-
-                    it("should have the correct cost for the big Transform", function () {
-                        assert.equal(eightDcTransform.activePoints, 40);
-                    });
-
-                    it("should have the correct END cost for the big Transform", function () {
-                        assert.equal(eightDcTransform.end, 0);
-                    });
-
-                    it("should have the correct damage for the big Transform", function () {
-                        assert.equal(getEffectFormulaFromItem(eightDcTransform, { boostableCharges: 0 }), "2½d6");
-                    });
-
-                    it("should have the correct damage for a minimally boosted big Transform", function () {
-                        assert.equal(getEffectFormulaFromItem(eightDcTransform, { boostableCharges: 1 }), "3d6");
-                    });
-
-                    it("should have the correct damage for a fully boosted big Transform", function () {
-                        assert.equal(getEffectFormulaFromItem(eightDcTransform, { boostableCharges: 4 }), "4d6");
-                    });
-
-                    it("should have the correct damage for an over boosted big Transform", function () {
-                        assert.equal(getEffectFormulaFromItem(eightDcTransform, { boostableCharges: 5 }), "4d6");
-                    });
-                });
-            });
-
-            describe("5e - Real Weapons", function () {
-                const contents = `
+                describe("5e - Real Weapons", function () {
+                    const contents = `
                         <?xml version="1.0" encoding="UTF-16"?>
                         <CHARACTER version="6.0" TEMPLATE="builtIn.Heroic.hdt">
                         <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
@@ -3441,154 +3467,154 @@ export function registerFullTests(quench) {
                         <RULES name="Default" path="foo.hdr" BASEPOINTS="200" DISADPOINTS="150" APPEREND="10" STRAPPEREND="10" NCMSELECTED="No" NCMUSERCHANGEABLE="Yes" ATTACKAPMAXVALUE="90" ATTACKAPMAXRESPONSE="0" DEFENSEAPMAXVALUE="90" DEFENSEAPMAXRESPONSE="0" DISADCATEGORYMAXVALUE="75" DISADCATEGORYMAXRESPONSE="0" AVAILDISADPOINTSRESPONSE="0" AVAILTOTALPOINTSRESPONSE="0" CHARACTERISTICMAXVALUE="1000" CHARACTERISTICMAXRESPONSE="0" MANEUVERMAXVALUE="1000" MANEUVERMAXRESPONSE="0" SKILLMAXVALUE="1000" SKILLMAXRESPONSE="0" PERKMAXVALUE="1000" PERKMAXRESPONSE="0" TALENTMAXVALUE="1000" TALENTMAXRESPONSE="0" POWERMAXVALUE="1000" POWERMAXRESPONSE="0" EQUIPMENTCOSTVALUE="1000" EQUIPMENTCOSTRESPONSE="0" EQUIPMENTCOSTUNITS="$" EQUIPMENTCOSTCONVERSION="1.0" EQUIPMENTCOSTDECIMALPLACES="0" EQUIPMENTUNITSPREFIX="Yes" STANDARDEFFECTALLOWED="Yes" USEEXPANDEDGROWTHCHART="No" DEFAULTSTANDARDEFFECT="No" MULTIPLIERALLOWED="No" LANGUAGESIMILARITIESUSED="No" LITERACYFREE="No" NATIVELITERACYFREE="Yes" EQUIPMENTALLOWED="Yes" PENALIZENOLEVEL1="No" ONLYSELLONEFIGURED="Yes" USEINCREASEDDAMAGEDIFFERENTIATION="No" AUTOMATICALLYAPPLYNOFIGURED="Yes" LINKACROSSFRAMEWORK="2" SPECIALTYPEINFRAMEWORK="1" NONENDUSINGABILITYINEC="1" USESKILLMAXIMA="No" USESKILLMULTIPLIERS="No" LANGUAGESASINTSKILL="No" SKILLMAXIMALIMIT="13" SKILLROLLBASE="9" SKILLROLLDENOMINATOR="5.0" CHARROLLBASE="9" CHARROLLDENOMINATOR="5.0" USENOTES1="No" USENOTES2="No" USENOTES3="No" USENOTES4="No" USENOTES5="No" NOTES1LABEL="Notes 1" NOTES2LABEL="Notes 2" NOTES3LABEL="Notes 3" NOTES4LABEL="Notes 4" NOTES5LABEL="Notes 5" />
                         </CHARACTER>
                 `;
-                let actor;
+                    let actor;
 
-                let previousSetting;
+                    let previousSetting;
 
-                let rkaItem;
-                let hkaItem;
+                    let rkaItem;
+                    let hkaItem;
 
-                let moveByManeuverItem;
-                let martialStrikeManeuverItem;
-                let customMartialFourDcManeuverItem;
+                    let moveByManeuverItem;
+                    let martialStrikeManeuverItem;
+                    let customMartialFourDcManeuverItem;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
-                    rkaItem = actor.items.find((item) => item.system.XMLID === "RKA");
-                    hkaItem = actor.items.find((item) => item.system.XMLID === "HKA");
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                        rkaItem = actor.items.find((item) => item.system.XMLID === "RKA");
+                        hkaItem = actor.items.find((item) => item.system.XMLID === "HKA");
 
-                    moveByManeuverItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
+                        moveByManeuverItem = actor.items.find((item) => item.system.XMLID === "MOVEBY");
 
-                    martialStrikeManeuverItem = actor.items.find(
-                        (item) => item.system.XMLID === "MANEUVER" && item.name === "Martial Strike",
-                    );
+                        martialStrikeManeuverItem = actor.items.find(
+                            (item) => item.system.XMLID === "MANEUVER" && item.name === "Martial Strike",
+                        );
 
-                    customMartialFourDcManeuverItem = actor.items.find(
-                        (item) => item.system.XMLID === "MANEUVER" && item.name === "Custom 4DC attack",
-                    );
+                        customMartialFourDcManeuverItem = actor.items.find(
+                            (item) => item.system.XMLID === "MANEUVER" && item.name === "Custom 4DC attack",
+                        );
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    beforeEach(async function () {
+                        previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
+                    });
+
+                    afterEach(async function () {
+                        await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
+                    });
+
+                    describe("straight forward martial maneuvers with weapons", function () {
+                        it("should recognize RKA associated with martial arts", function () {
+                            // Base: RKA +1k (1 DC) => 1DC
+                            // Added: Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +1 DC
+                            // Base + Added 1DC + 1DC (Double rule does not apply) => 2DC at 15AP/die = 1/2d6
+                            assert.equal(
+                                getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
+                                    maWeaponItem: rkaItem,
+                                }),
+                                "½d6K",
+                            );
+                        });
+
+                        it("should recognize HKA associated with martial arts", function () {
+                            // Base: HKA 1d6k (3 DC) => 3DC
+                            // Added: STR 10 = +2 DC & STRMINIMUM 12 = -3DC to STR since diff is -2 STR, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +0 DC
+                            // Base + Added 3DC + 0DC (Double rule does not apply) => 3 DC at 15AP/die = 1d6
+                            assert.equal(
+                                getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
+                                    maWeaponItem: hkaItem,
+                                }),
+                                "1d6K",
+                            );
+                        });
+
+                        it("should recognize HKA associated with martial arts with more strength", function () {
+                            // Base: HKA 1d6k (3 DC) => 3DC
+                            // Added: STR 12 = +2 DC & STRMINIMUM 12 = -2DC to STR since diff is 0 STR, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +1 DC
+                            // Base + Added 3DC + 1DC (Double rule does not apply) => 3 DC at 15AP/die = 1d6+1
+                            assert.equal(
+                                getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
+                                    maWeaponItem: hkaItem,
+                                    effectiveStr: 12,
+                                }),
+                                "1d6+1K",
+                            );
+                        });
+
+                        it("should recognize HKA associated with martial arts with fractionally more strength", function () {
+                            // Base: HKA 1d6k (3 DC) => 3DC
+                            // Added: STR 15 = +3 DC & STRMINIMUM 12 = -3DC to STR since diff is 3 STR, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +1 DC
+                            // Base + Added 3DC + 1DC (Double rule does not apply) => 4 DC at 15AP/die = 1d6+1
+                            assert.equal(
+                                getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
+                                    maWeaponItem: hkaItem,
+                                    effectiveStr: 15,
+                                }),
+                                "1d6+1K",
+                            );
+                        });
+
+                        it("should recognize HKA associated with martial arts with much more strength", function () {
+                            // Base: HKA 1d6k (3 DC) => 3DC
+                            // Added: STR 18 = +3 DC & STRMINIMUM 12 = -2DC to STR since diff is 6 STR, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +2 DC
+                            // Base + Added 3DC + 2DC (Double rule does not apply) => 5 DC at 15AP/die = 1½d6
+                            assert.equal(
+                                getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
+                                    maWeaponItem: hkaItem,
+                                    effectiveStr: 18,
+                                }),
+                                "1½d6K",
+                            );
+                        });
+                    });
+
+                    describe("double damage limit with martial maneuvers", function () {
+                        it("should recognize double damage limit for martial maneuver with an RKA", function () {
+                            // Base: RKA +1k (1 DC) => 1DC
+                            // Added: Martial Strike (+4 DC halved because it's a killing attack = +2 DC) => +2 DC
+                            // Base + Added 1DC + 1DC (Double rule applies) => 2DC at 15AP/die = 1/2d6
+                            assert.equal(
+                                getFullyQualifiedEffectFormulaFromItem(customMartialFourDcManeuverItem, {
+                                    maWeaponItem: rkaItem,
+                                }),
+                                "½d6K",
+                            );
+                        });
+
+                        it("should recognize double damage limit for martial maneuver with an HKA", function () {
+                            // Base: HKA +1d6k (3 DC) => 3DC
+                            // Added: STR 45 = +9 DC & STRMINIMUM 12 = -3DC to STR since diff is 33 STR, Martial Strike (+4 DC halved because it's a killing attack = +2 DC) => +8 DC
+                            // Base + Added 3DC + 8DC (Double rule applies) => 6DC at 15AP/die = 2d6
+                            assert.equal(
+                                getFullyQualifiedEffectFormulaFromItem(customMartialFourDcManeuverItem, {
+                                    maWeaponItem: hkaItem,
+                                    effectiveStr: 45,
+                                }),
+                                "2d6K",
+                            );
+                        });
+
+                        it("should recognize velocity isn't in the double damage limit for move by maneuver with an HKA", function () {
+                            // Base: HKA 1d6k (3 DC) => 3DC
+                            // Added: STR 45 = +9 DC & STRMINIMUM 12 = -3DC to STR since diff is 33 STR, Move Through (+0 DC halved because it's a killing attack = +0 DC), velocity 30"/5 = 6DC => +12 DC
+                            // Base + Added 3DC + 12DC (Double rule partially applies) => 12 DC at 15AP/die = 4d6
+                            assert.equal(
+                                getFullyQualifiedEffectFormulaFromItem(moveByManeuverItem, {
+                                    velocity: 30,
+                                    maWeaponItem: hkaItem,
+                                    effectiveStr: 45,
+                                }),
+                                "4d6K",
+                            );
+                        });
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                beforeEach(async function () {
-                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
-                });
-
-                afterEach(async function () {
-                    await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
-                });
-
-                describe("straight forward martial maneuvers with weapons", function () {
-                    it("should recognize RKA associated with martial arts", function () {
-                        // Base: RKA +1k (1 DC) => 1DC
-                        // Added: Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +1 DC
-                        // Base + Added 1DC + 1DC (Double rule does not apply) => 2DC at 15AP/die = 1/2d6
-                        assert.equal(
-                            getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
-                                maWeaponItem: rkaItem,
-                            }),
-                            "½d6K",
-                        );
-                    });
-
-                    it("should recognize HKA associated with martial arts", function () {
-                        // Base: HKA 1d6k (3 DC) => 3DC
-                        // Added: STR 10 = +2 DC & STRMINIMUM 12 = -3DC to STR since diff is -2 STR, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +0 DC
-                        // Base + Added 3DC + 0DC (Double rule does not apply) => 3 DC at 15AP/die = 1d6
-                        assert.equal(
-                            getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
-                                maWeaponItem: hkaItem,
-                            }),
-                            "1d6K",
-                        );
-                    });
-
-                    it("should recognize HKA associated with martial arts with more strength", function () {
-                        // Base: HKA 1d6k (3 DC) => 3DC
-                        // Added: STR 12 = +2 DC & STRMINIMUM 12 = -2DC to STR since diff is 0 STR, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +1 DC
-                        // Base + Added 3DC + 1DC (Double rule does not apply) => 3 DC at 15AP/die = 1d6+1
-                        assert.equal(
-                            getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
-                                maWeaponItem: hkaItem,
-                                effectiveStr: 12,
-                            }),
-                            "1d6+1K",
-                        );
-                    });
-
-                    it("should recognize HKA associated with martial arts with fractionally more strength", function () {
-                        // Base: HKA 1d6k (3 DC) => 3DC
-                        // Added: STR 15 = +3 DC & STRMINIMUM 12 = -3DC to STR since diff is 3 STR, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +1 DC
-                        // Base + Added 3DC + 1DC (Double rule does not apply) => 4 DC at 15AP/die = 1d6+1
-                        assert.equal(
-                            getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
-                                maWeaponItem: hkaItem,
-                                effectiveStr: 15,
-                            }),
-                            "1d6+1K",
-                        );
-                    });
-
-                    it("should recognize HKA associated with martial arts with much more strength", function () {
-                        // Base: HKA 1d6k (3 DC) => 3DC
-                        // Added: STR 18 = +3 DC & STRMINIMUM 12 = -2DC to STR since diff is 6 STR, Martial Strike (+2 DC halved because it's a killing attack = +1 DC) => +2 DC
-                        // Base + Added 3DC + 2DC (Double rule does not apply) => 5 DC at 15AP/die = 1½d6
-                        assert.equal(
-                            getFullyQualifiedEffectFormulaFromItem(martialStrikeManeuverItem, {
-                                maWeaponItem: hkaItem,
-                                effectiveStr: 18,
-                            }),
-                            "1½d6K",
-                        );
-                    });
-                });
-
-                describe("double damage limit with martial maneuvers", function () {
-                    it("should recognize double damage limit for martial maneuver with an RKA", function () {
-                        // Base: RKA +1k (1 DC) => 1DC
-                        // Added: Martial Strike (+4 DC halved because it's a killing attack = +2 DC) => +2 DC
-                        // Base + Added 1DC + 1DC (Double rule applies) => 2DC at 15AP/die = 1/2d6
-                        assert.equal(
-                            getFullyQualifiedEffectFormulaFromItem(customMartialFourDcManeuverItem, {
-                                maWeaponItem: rkaItem,
-                            }),
-                            "½d6K",
-                        );
-                    });
-
-                    it("should recognize double damage limit for martial maneuver with an HKA", function () {
-                        // Base: HKA +1d6k (3 DC) => 3DC
-                        // Added: STR 45 = +9 DC & STRMINIMUM 12 = -3DC to STR since diff is 33 STR, Martial Strike (+4 DC halved because it's a killing attack = +2 DC) => +8 DC
-                        // Base + Added 3DC + 8DC (Double rule applies) => 6DC at 15AP/die = 2d6
-                        assert.equal(
-                            getFullyQualifiedEffectFormulaFromItem(customMartialFourDcManeuverItem, {
-                                maWeaponItem: hkaItem,
-                                effectiveStr: 45,
-                            }),
-                            "2d6K",
-                        );
-                    });
-
-                    it("should recognize velocity isn't in the double damage limit for move by maneuver with an HKA", function () {
-                        // Base: HKA 1d6k (3 DC) => 3DC
-                        // Added: STR 45 = +9 DC & STRMINIMUM 12 = -3DC to STR since diff is 33 STR, Move Through (+0 DC halved because it's a killing attack = +0 DC), velocity 30"/5 = 6DC => +12 DC
-                        // Base + Added 3DC + 12DC (Double rule partially applies) => 12 DC at 15AP/die = 4d6
-                        assert.equal(
-                            getFullyQualifiedEffectFormulaFromItem(moveByManeuverItem, {
-                                velocity: 30,
-                                maWeaponItem: hkaItem,
-                                effectiveStr: 45,
-                            }),
-                            "4d6K",
-                        );
-                    });
-                });
-            });
-
-            describe("5e - MA with ranged weapons", function () {
-                const contents = `<?xml version="1.0" encoding="UTF-16"?>
+                describe("5e - MA with ranged weapons", function () {
+                    const contents = `<?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Normal.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="40" DISAD_POINTS="25" EXPERIENCE="0" />
                     <CHARACTER_INFO CHARACTER_NAME="Ranged Martial Test Toon" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
@@ -3705,61 +3731,61 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                     `;
 
-                let actor;
-                let previousSetting;
-                let rkaItem;
-                let basicShotManeuverItem;
-                let snapShotManeuverItem;
+                    let actor;
+                    let previousSetting;
+                    let rkaItem;
+                    let basicShotManeuverItem;
+                    let snapShotManeuverItem;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
-                    rkaItem = actor.items.find((item) => item.system.XMLID === "RKA");
-                    basicShotManeuverItem = actor.items.find(
-                        (item) => item.system.XMLID === "MANEUVER" && item.system.ALIAS === "Basic Shot",
-                    );
-                    snapShotManeuverItem = actor.items.find((item) => item.system.XMLID === "SNAPSHOT");
+                        rkaItem = actor.items.find((item) => item.system.XMLID === "RKA");
+                        basicShotManeuverItem = actor.items.find(
+                            (item) => item.system.XMLID === "MANEUVER" && item.system.ALIAS === "Basic Shot",
+                        );
+                        snapShotManeuverItem = actor.items.find((item) => item.system.XMLID === "SNAPSHOT");
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    beforeEach(async function () {
+                        previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
+                    });
+
+                    afterEach(async function () {
+                        await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
+                    });
+
+                    it("should recognize MA - Basic Shot with RKA and RANGEDDC", function () {
+                        // Base: RKA 1d6k (3 DC) + RANGEDDC (5DC halved to 2DC because killing) => 5DC
+                        // Added: Basic Shot (+2 DC halved because it's a killing attack = +1 DC) => +1 DC
+                        // Base + Added 5DC + 1DC => 6DC at 15AP/die = 2d6K
+                        assert.equal(
+                            getFullyQualifiedEffectFormulaFromItem(basicShotManeuverItem, {
+                                maWeaponItem: rkaItem,
+                            }),
+                            "2d6K",
+                        );
+                    });
+
+                    it("should not apply RANGEDDC to a ranged combat maneuver", function () {
+                        // Base: RKA 1d6k (3 DC) => 3DC
+                        // Added: Basic Shot (+0 DC) => +0 DC
+                        // Base + Added 3DC + 0DC => 3DC at 15AP/die = 1d6K
+                        assert.equal(
+                            getFullyQualifiedEffectFormulaFromItem(snapShotManeuverItem, {
+                                maWeaponItem: rkaItem,
+                            }),
+                            "1d6K",
+                        );
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                beforeEach(async function () {
-                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
-                });
-
-                afterEach(async function () {
-                    await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
-                });
-
-                it("should recognize MA - Basic Shot with RKA and RANGEDDC", function () {
-                    // Base: RKA 1d6k (3 DC) + RANGEDDC (5DC halved to 2DC because killing) => 5DC
-                    // Added: Basic Shot (+2 DC halved because it's a killing attack = +1 DC) => +1 DC
-                    // Base + Added 5DC + 1DC => 6DC at 15AP/die = 2d6K
-                    assert.equal(
-                        getFullyQualifiedEffectFormulaFromItem(basicShotManeuverItem, {
-                            maWeaponItem: rkaItem,
-                        }),
-                        "2d6K",
-                    );
-                });
-
-                it("should not apply RANGEDDC to a ranged combat maneuver", function () {
-                    // Base: RKA 1d6k (3 DC) => 3DC
-                    // Added: Basic Shot (+0 DC) => +0 DC
-                    // Base + Added 3DC + 0DC => 3DC at 15AP/die = 1d6K
-                    assert.equal(
-                        getFullyQualifiedEffectFormulaFromItem(snapShotManeuverItem, {
-                            maWeaponItem: rkaItem,
-                        }),
-                        "1d6K",
-                    );
-                });
-            });
-
-            describe("5e - recognizing DC altering advantages", function () {
-                const contents = `
+                describe("5e - recognizing DC altering advantages", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
@@ -3940,69 +3966,69 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
-                let energyBlastItem;
-                let entangleItem;
-                let flightItem;
+                    let actor;
+                    let energyBlastItem;
+                    let entangleItem;
+                    let flightItem;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
-                    energyBlastItem = actor.items.find((o) => o.system.XMLID === "ENERGYBLAST");
-                    entangleItem = actor.items.find((o) => o.isEntangle);
-                    flightItem = actor.items.find((o) => o.system.XMLID === "FLIGHT");
+                        energyBlastItem = actor.items.find((o) => o.system.XMLID === "ENERGYBLAST");
+                        entangleItem = actor.items.find((o) => o.isEntangle);
+                        flightItem = actor.items.find((o) => o.system.XMLID === "FLIGHT");
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("Description", async function () {
+                        assert.equal(
+                            energyBlastItem.system.description,
+                            `Energy Blast 4d6 (ED), Trigger (Activating the Trigger requires a Zero Phase Action, Trigger requires a Turn or more to reset, Trigger can expire (it has a time limit), Character does not control activation of personal Trigger, Misfire, Two activation conditions apply simultaneously; +1/4), Area Of Effect (1" One Hex; +1/2), Armor Piercing (+1/2), Penetrating (+1/2), Does x1 1/2 Knockback (+1/2), Uncontrolled (+1/2), Variable Special Effects (Any SFX; +1/2), Attack Versus Limited Defense (+3/4), Continuous (+1), Does BODY (+1), Autofire (2 Shots; Non-Standard Attack Power; +1 1/4), Based On EGO Combat Value (Mental Defense applies; Range Modifiers Apply, Attacker Chooses Defense; +1 1/4), Variable Advantage (Limited Group of Advantages; +1 3/4)`,
+                        );
+                    });
+
+                    it("should recognize the cost of the energy blast", async function () {
+                        assert.equal(energyBlastItem.activePoints, 225);
+                    });
+
+                    it("should recognize all energy blast advantages", async function () {
+                        assert.equal(energyBlastItem.system._advantages, 10.25);
+                    });
+
+                    it("should recognize all energy blast advantages as DC affecting", async function () {
+                        assert.equal(energyBlastItem._advantagesAffectingDc, 10.25);
+                    });
+
+                    it("should recognize the cost of the entangle", async function () {
+                        assert.equal(entangleItem.activePoints, 37);
+                    });
+
+                    it("should recognize all entangle advantages", async function () {
+                        assert.equal(entangleItem.system._advantages, 2 + 3 / 4);
+                    });
+
+                    it("should recognize all entangle advantages as DC affecting", async function () {
+                        assert.equal(entangleItem._advantagesAffectingDc, 2 + 3 / 4);
+                    });
+
+                    it("should recognize the cost of the flight", async function () {
+                        assert.equal(flightItem.activePoints, 6);
+                    });
+
+                    it("should recognize all flight advantages ", async function () {
+                        assert.equal(flightItem.system._advantages, 2);
+                    });
+
+                    it("should recognize all flight advantages as DC affecting", async function () {
+                        assert.equal(flightItem._advantagesAffectingDc, 2);
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                it("Description", async function () {
-                    assert.equal(
-                        energyBlastItem.system.description,
-                        `Energy Blast 4d6 (ED), Trigger (Activating the Trigger requires a Zero Phase Action, Trigger requires a Turn or more to reset, Trigger can expire (it has a time limit), Character does not control activation of personal Trigger, Misfire, Two activation conditions apply simultaneously; +1/4), Area Of Effect (1" One Hex; +1/2), Armor Piercing (+1/2), Penetrating (+1/2), Does x1 1/2 Knockback (+1/2), Uncontrolled (+1/2), Variable Special Effects (Any SFX; +1/2), Attack Versus Limited Defense (+3/4), Continuous (+1), Does BODY (+1), Autofire (2 Shots; Non-Standard Attack Power; +1 1/4), Based On EGO Combat Value (Mental Defense applies; Range Modifiers Apply, Attacker Chooses Defense; +1 1/4), Variable Advantage (Limited Group of Advantages; +1 3/4)`,
-                    );
-                });
-
-                it("should recognize the cost of the energy blast", async function () {
-                    assert.equal(energyBlastItem.activePoints, 225);
-                });
-
-                it("should recognize all energy blast advantages", async function () {
-                    assert.equal(energyBlastItem.system._advantages, 10.25);
-                });
-
-                it("should recognize all energy blast advantages as DC affecting", async function () {
-                    assert.equal(energyBlastItem._advantagesAffectingDc, 10.25);
-                });
-
-                it("should recognize the cost of the entangle", async function () {
-                    assert.equal(entangleItem.activePoints, 37);
-                });
-
-                it("should recognize all entangle advantages", async function () {
-                    assert.equal(entangleItem.system._advantages, 2 + 3 / 4);
-                });
-
-                it("should recognize all entangle advantages as DC affecting", async function () {
-                    assert.equal(entangleItem._advantagesAffectingDc, 2 + 3 / 4);
-                });
-
-                it("should recognize the cost of the flight", async function () {
-                    assert.equal(flightItem.activePoints, 6);
-                });
-
-                it("should recognize all flight advantages ", async function () {
-                    assert.equal(flightItem.system._advantages, 2);
-                });
-
-                it("should recognize all flight advantages as DC affecting", async function () {
-                    assert.equal(flightItem._advantagesAffectingDc, 2);
-                });
-            });
-
-            describe("5e - DC altering advantages", function () {
-                const contents = `
+                describe("5e - DC altering advantages", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
@@ -4124,238 +4150,246 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
-                let ebPlusOneItem;
-                let ebPlusHalfItem;
-                let eaPlusOneItem;
-                let eaPlusHalfItem;
-                let hkaPlusHalfItem;
-                let rkaPlusHalfItem;
+                    let actor;
+                    let ebPlusOneItem;
+                    let ebPlusHalfItem;
+                    let eaPlusOneItem;
+                    let eaPlusHalfItem;
+                    let hkaPlusHalfItem;
+                    let rkaPlusHalfItem;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
-                    ebPlusOneItem = actor.items.find(
-                        (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1",
-                    );
-                    ebPlusHalfItem = actor.items.find(
-                        (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1/2",
-                    );
-                    eaPlusOneItem = actor.items.find(
-                        (item) => item.system.XMLID === "EGOATTACK" && item.name === "EA+1",
-                    );
-                    eaPlusHalfItem = actor.items.find(
-                        (item) => item.system.XMLID === "EGOATTACK" && item.name === "EA+1/2",
-                    );
-                    hkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "HKA");
-                    rkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "RKA");
+                        ebPlusOneItem = actor.items.find(
+                            (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1",
+                        );
+                        ebPlusHalfItem = actor.items.find(
+                            (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1/2",
+                        );
+                        eaPlusOneItem = actor.items.find(
+                            (item) => item.system.XMLID === "EGOATTACK" && item.name === "EA+1",
+                        );
+                        eaPlusHalfItem = actor.items.find(
+                            (item) => item.system.XMLID === "EGOATTACK" && item.name === "EA+1/2",
+                        );
+                        hkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "HKA");
+                        rkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "RKA");
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    describe("Energy Blast", function () {
+                        it("should have the correct cost for the +1/2 EB", function () {
+                            assert.equal(ebPlusHalfItem.activePoints, 30);
+                        });
+
+                        it("should have the correct END cost for the +1/2 EB", function () {
+                            assert.equal(ebPlusHalfItem.end, 3);
+                        });
+
+                        it("should have the correct damage for the +1/2 EB", function () {
+                            assert.equal(getEffectFormulaFromItem(ebPlusHalfItem, {}), "4d6");
+                        });
+
+                        it("should have the correct cost for the +1 EB", function () {
+                            assert.equal(ebPlusOneItem.activePoints, 40);
+                        });
+
+                        it("should have the correct END cost for the +1 EB", function () {
+                            assert.equal(ebPlusOneItem.end, 4);
+                        });
+
+                        it("should have the correct damage for the +1 EB", function () {
+                            assert.equal(getEffectFormulaFromItem(ebPlusOneItem, {}), "4d6");
+                        });
+                    });
+
+                    describe("Ego Attack", function () {
+                        it("should have the correct cost for the +1/2 EA", function () {
+                            assert.equal(eaPlusHalfItem.activePoints, 60);
+                        });
+
+                        it("should have the correct END cost for the +1/2 EA", function () {
+                            assert.equal(eaPlusHalfItem.end, 6);
+                        });
+
+                        it("should have the correct damage for the +1/2 EA", function () {
+                            assert.equal(getEffectFormulaFromItem(eaPlusHalfItem, {}), "4d6");
+                        });
+
+                        it("should have the correct cost for the +1 EA", function () {
+                            assert.equal(eaPlusOneItem.activePoints, 80);
+                        });
+
+                        it("should have the correct END cost for the +1 EA", function () {
+                            assert.equal(eaPlusOneItem.end, 8);
+                        });
+
+                        it("should have the correct damage for the +1 EA", function () {
+                            assert.equal(getEffectFormulaFromItem(eaPlusOneItem, {}), "4d6");
+                        });
+                    });
+
+                    describe("Killing Attack", function () {
+                        it("should have the correct cost for the +1/2 RKA", function () {
+                            assert.equal(rkaPlusHalfItem.activePoints, 67);
+                        });
+
+                        it("should have the correct END cost for the +1/2 RKA", function () {
+                            assert.equal(rkaPlusHalfItem.end, 7);
+                        });
+
+                        it("should have the correct damage for the +1/2 RKA", function () {
+                            assert.equal(getEffectFormulaFromItem(rkaPlusHalfItem, { effectiveStr: 15 }), "3d6");
+                        });
+
+                        it("should have the correct cost for the +1/2 HKA", function () {
+                            assert.equal(hkaPlusHalfItem.activePoints, 67);
+                        });
+
+                        it("should have the correct END cost for the +1/2 HKA", function () {
+                            assert.equal(hkaPlusHalfItem.end, 7);
+                        });
+
+                        it("should have the correct damage for the +1/2 HKA", function () {
+                            // 15 STR (3 DC) is 2 DC given the +1/2 advantage on the HKA. 3d6 + 2 DC = 3 1/2 d6
+                            assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectiveStr: 15 }), "3½d6");
+                        });
+                    });
+
+                    describe("CSLs and DCs", function () {
+                        let cslItem;
+                        let cslPreviousActiveState;
+                        let cslPreviousAllocation;
+
+                        beforeEach(function () {
+                            // Turn on the CSLs
+                            cslItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
+                            cslPreviousActiveState = cslItem.system.active;
+                            cslItem.system.active = true;
+
+                            // Set the CSLs for DCs
+                            cslPreviousAllocation = cslItem.system.csl;
+                            cslItem.system.csl = ["dc", "dc"];
+                        });
+
+                        afterEach(function () {
+                            // Turn off the CSLs
+                            cslItem.system.active = cslPreviousActiveState;
+
+                            // Set the CSLs to previous
+                            cslItem.system.csl = cslPreviousAllocation;
+                        });
+
+                        it("should have the correct damage for the +1/2 EB with 2 CSLs", function () {
+                            // 2 CSLs is 1DC (ignores advantage). 4d6 + 1 DC = 5d6
+                            assert.equal(getEffectFormulaFromItem(ebPlusHalfItem, {}), "5d6");
+                        });
+
+                        it("should have the correct damage for the +1 EB with 2 CSLs", function () {
+                            // 2 CSLs is 2DCs (ignores advantage). 3d6 + 2 DC = 3d6+1
+                            assert.equal(getEffectFormulaFromItem(ebPlusOneItem, {}), "5d6");
+                        });
+
+                        it("should have the correct damage for the +1/2 EA with 2 CSLs", function () {
+                            // 2 CSLs at +1/2 is 1DC (ignores advantages). + 1 DC = +½d6
+                            assert.equal(getEffectFormulaFromItem(eaPlusHalfItem, {}), "4½d6");
+                        });
+
+                        it("should have the correct damage for the +1 EA with 2 CSLs", function () {
+                            // 2 CSLs at +1/2 is 1DC  (ignores advantages). + 1 DC = +1
+                            assert.equal(getEffectFormulaFromItem(eaPlusOneItem, {}), "4½d6");
+                        });
+
+                        it("should have the correct damage for the +1/2 HKA with 1 CSL", function () {
+                            // Only use 1 CSL
+                            cslItem.system.csl = ["dc", "ocv"];
+
+                            // 1 CSLs is 0DC (ignores advantage). 3d6 + 0 DC = 3d6
+                            assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectiveStr: 0 }), "3d6");
+                        });
+
+                        it("should have the correct damage for the +1/2 HKA with 2 CSLs", function () {
+                            // 2 CSLs is 1DC (ignores advantage). 3d6 + 1 DC = 3d6+1
+                            assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectiveStr: 0 }), "3d6+1");
+                        });
+                    });
+
+                    // Confirm that we add straight dice in 5e for haymakers.
+                    describe("Haymaker", function () {
+                        let haymakerManeuver;
+
+                        before(function () {
+                            // Turn on the haymaker
+                            haymakerManeuver = actor.items.find(
+                                (item) => item.isCombatManeuver && item.system.XMLID === "HAYMAKER",
+                            );
+                        });
+
+                        it("should have the correct damage for the +1/2 EB", function () {
+                            assert.equal(
+                                getEffectFormulaFromItem(ebPlusHalfItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                }),
+                                "8d6",
+                            );
+                        });
+
+                        it("should have the correct damage for the +1 EB", function () {
+                            assert.equal(
+                                getEffectFormulaFromItem(ebPlusOneItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                }),
+                                "8d6",
+                            );
+                        });
+
+                        it("should have the correct damage for the +1/2 EA", function () {
+                            assert.equal(
+                                getEffectFormulaFromItem(eaPlusHalfItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                }),
+                                "6d6",
+                            );
+                        });
+
+                        it("should have the correct damage for the +1 EA", function () {
+                            assert.equal(
+                                getEffectFormulaFromItem(eaPlusOneItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                }),
+                                "6d6",
+                            );
+                        });
+
+                        it("should have the correct damage for the +1/2 RKA", function () {
+                            // +4 DC (ignoring advantages) at +1/2 is 4 DC and is then halved to +2DC => ½d6
+                            assert.equal(
+                                getEffectFormulaFromItem(rkaPlusHalfItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                }),
+                                "3½d6",
+                            );
+                        });
+
+                        it("should have the correct damage for the +1/2 HKA", function () {
+                            // +4 DC (ignoring advantages) at +1/2 is 4 DC and is then halved to +2DC => ½d6
+                            assert.equal(
+                                getEffectFormulaFromItem(hkaPlusHalfItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                    effectiveStr: 0,
+                                }),
+                                "3½d6",
+                            );
+                        });
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                describe("Energy Blast", function () {
-                    it("should have the correct cost for the +1/2 EB", function () {
-                        assert.equal(ebPlusHalfItem.activePoints, 30);
-                    });
-
-                    it("should have the correct END cost for the +1/2 EB", function () {
-                        assert.equal(ebPlusHalfItem.end, 3);
-                    });
-
-                    it("should have the correct damage for the +1/2 EB", function () {
-                        assert.equal(getEffectFormulaFromItem(ebPlusHalfItem, {}), "4d6");
-                    });
-
-                    it("should have the correct cost for the +1 EB", function () {
-                        assert.equal(ebPlusOneItem.activePoints, 40);
-                    });
-
-                    it("should have the correct END cost for the +1 EB", function () {
-                        assert.equal(ebPlusOneItem.end, 4);
-                    });
-
-                    it("should have the correct damage for the +1 EB", function () {
-                        assert.equal(getEffectFormulaFromItem(ebPlusOneItem, {}), "4d6");
-                    });
-                });
-
-                describe("Ego Attack", function () {
-                    it("should have the correct cost for the +1/2 EA", function () {
-                        assert.equal(eaPlusHalfItem.activePoints, 60);
-                    });
-
-                    it("should have the correct END cost for the +1/2 EA", function () {
-                        assert.equal(eaPlusHalfItem.end, 6);
-                    });
-
-                    it("should have the correct damage for the +1/2 EA", function () {
-                        assert.equal(getEffectFormulaFromItem(eaPlusHalfItem, {}), "4d6");
-                    });
-
-                    it("should have the correct cost for the +1 EA", function () {
-                        assert.equal(eaPlusOneItem.activePoints, 80);
-                    });
-
-                    it("should have the correct END cost for the +1 EA", function () {
-                        assert.equal(eaPlusOneItem.end, 8);
-                    });
-
-                    it("should have the correct damage for the +1 EA", function () {
-                        assert.equal(getEffectFormulaFromItem(eaPlusOneItem, {}), "4d6");
-                    });
-                });
-
-                describe("Killing Attack", function () {
-                    it("should have the correct cost for the +1/2 RKA", function () {
-                        assert.equal(rkaPlusHalfItem.activePoints, 67);
-                    });
-
-                    it("should have the correct END cost for the +1/2 RKA", function () {
-                        assert.equal(rkaPlusHalfItem.end, 7);
-                    });
-
-                    it("should have the correct damage for the +1/2 RKA", function () {
-                        assert.equal(getEffectFormulaFromItem(rkaPlusHalfItem, { effectiveStr: 15 }), "3d6");
-                    });
-
-                    it("should have the correct cost for the +1/2 HKA", function () {
-                        assert.equal(hkaPlusHalfItem.activePoints, 67);
-                    });
-
-                    it("should have the correct END cost for the +1/2 HKA", function () {
-                        assert.equal(hkaPlusHalfItem.end, 7);
-                    });
-
-                    it("should have the correct damage for the +1/2 HKA", function () {
-                        // 15 STR (3 DC) is 2 DC given the +1/2 advantage on the HKA. 3d6 + 2 DC = 3 1/2 d6
-                        assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectiveStr: 15 }), "3½d6");
-                    });
-                });
-
-                describe("CSLs and DCs", function () {
-                    let cslItem;
-                    let cslPreviousActiveState;
-                    let cslPreviousAllocation;
-
-                    beforeEach(function () {
-                        // Turn on the CSLs
-                        cslItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
-                        cslPreviousActiveState = cslItem.system.active;
-                        cslItem.system.active = true;
-
-                        // Set the CSLs for DCs
-                        cslPreviousAllocation = cslItem.system.csl;
-                        cslItem.system.csl = ["dc", "dc"];
-                    });
-
-                    afterEach(function () {
-                        // Turn off the CSLs
-                        cslItem.system.active = cslPreviousActiveState;
-
-                        // Set the CSLs to previous
-                        cslItem.system.csl = cslPreviousAllocation;
-                    });
-
-                    it("should have the correct damage for the +1/2 EB with 2 CSLs", function () {
-                        // 2 CSLs is 1DC (ignores advantage). 4d6 + 1 DC = 5d6
-                        assert.equal(getEffectFormulaFromItem(ebPlusHalfItem, {}), "5d6");
-                    });
-
-                    it("should have the correct damage for the +1 EB with 2 CSLs", function () {
-                        // 2 CSLs is 2DCs (ignores advantage). 3d6 + 2 DC = 3d6+1
-                        assert.equal(getEffectFormulaFromItem(ebPlusOneItem, {}), "5d6");
-                    });
-
-                    it("should have the correct damage for the +1/2 EA with 2 CSLs", function () {
-                        // 2 CSLs at +1/2 is 1DC (ignores advantages). + 1 DC = +½d6
-                        assert.equal(getEffectFormulaFromItem(eaPlusHalfItem, {}), "4½d6");
-                    });
-
-                    it("should have the correct damage for the +1 EA with 2 CSLs", function () {
-                        // 2 CSLs at +1/2 is 1DC  (ignores advantages). + 1 DC = +1
-                        assert.equal(getEffectFormulaFromItem(eaPlusOneItem, {}), "4½d6");
-                    });
-
-                    it("should have the correct damage for the +1/2 HKA with 1 CSL", function () {
-                        // Only use 1 CSL
-                        cslItem.system.csl = ["dc", "ocv"];
-
-                        // 1 CSLs is 0DC (ignores advantage). 3d6 + 0 DC = 3d6
-                        assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectiveStr: 0 }), "3d6");
-                    });
-
-                    it("should have the correct damage for the +1/2 HKA with 2 CSLs", function () {
-                        // 2 CSLs is 1DC (ignores advantage). 3d6 + 1 DC = 3d6+1
-                        assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectiveStr: 0 }), "3d6+1");
-                    });
-                });
-
-                // Confirm that we add straight dice in 5e for haymakers.
-                describe("Haymaker", function () {
-                    let haymakerManeuver;
-
-                    before(function () {
-                        // Turn on the haymaker
-                        haymakerManeuver = actor.items.find(
-                            (item) => item.isCombatManeuver && item.system.XMLID === "HAYMAKER",
-                        );
-                    });
-
-                    it("should have the correct damage for the +1/2 EB", function () {
-                        assert.equal(
-                            getEffectFormulaFromItem(ebPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
-                            "8d6",
-                        );
-                    });
-
-                    it("should have the correct damage for the +1 EB", function () {
-                        assert.equal(
-                            getEffectFormulaFromItem(ebPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
-                            "8d6",
-                        );
-                    });
-
-                    it("should have the correct damage for the +1/2 EA", function () {
-                        assert.equal(
-                            getEffectFormulaFromItem(eaPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
-                            "6d6",
-                        );
-                    });
-
-                    it("should have the correct damage for the +1 EA", function () {
-                        assert.equal(
-                            getEffectFormulaFromItem(eaPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
-                            "6d6",
-                        );
-                    });
-
-                    it("should have the correct damage for the +1/2 RKA", function () {
-                        // +4 DC (ignoring advantages) at +1/2 is 4 DC and is then halved to +2DC => ½d6
-                        assert.equal(
-                            getEffectFormulaFromItem(rkaPlusHalfItem, {
-                                haymakerManeuverActiveItem: haymakerManeuver,
-                            }),
-                            "3½d6",
-                        );
-                    });
-
-                    it("should have the correct damage for the +1/2 HKA", function () {
-                        // +4 DC (ignoring advantages) at +1/2 is 4 DC and is then halved to +2DC => ½d6
-                        assert.equal(
-                            getEffectFormulaFromItem(hkaPlusHalfItem, {
-                                haymakerManeuverActiveItem: haymakerManeuver,
-                                effectiveStr: 0,
-                            }),
-                            "3½d6",
-                        );
-                    });
-                });
-            });
-
-            describe("6e - DC altering advantages", function () {
-                const contents = `
+                describe("6e - DC altering advantages", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
@@ -4501,253 +4535,261 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
-                let ebPlusOneItem;
-                let ebPlusHalfItem;
-                let eaPlusOneItem;
-                let eaPlusHalfItem;
-                let hkaPlusHalfItem;
-                let rkaPlusHalfItem;
+                    let actor;
+                    let ebPlusOneItem;
+                    let ebPlusHalfItem;
+                    let eaPlusOneItem;
+                    let eaPlusHalfItem;
+                    let hkaPlusHalfItem;
+                    let rkaPlusHalfItem;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: false });
-                    ebPlusOneItem = actor.items.find(
-                        (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1",
-                    );
-                    ebPlusHalfItem = actor.items.find(
-                        (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1/2",
-                    );
-                    eaPlusOneItem = actor.items.find(
-                        (item) => item.system.XMLID === "EGOATTACK" && item.name === "EA+1",
-                    );
-                    eaPlusHalfItem = actor.items.find(
-                        (item) => item.system.XMLID === "EGOATTACK" && item.name === "EA+1/2",
-                    );
-                    hkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "HKA");
-                    rkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "RKA");
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false });
+                        ebPlusOneItem = actor.items.find(
+                            (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1",
+                        );
+                        ebPlusHalfItem = actor.items.find(
+                            (item) => item.system.XMLID === "ENERGYBLAST" && item.name === "EB+1/2",
+                        );
+                        eaPlusOneItem = actor.items.find(
+                            (item) => item.system.XMLID === "EGOATTACK" && item.name === "EA+1",
+                        );
+                        eaPlusHalfItem = actor.items.find(
+                            (item) => item.system.XMLID === "EGOATTACK" && item.name === "EA+1/2",
+                        );
+                        hkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "HKA");
+                        rkaPlusHalfItem = actor.items.find((item) => item.system.XMLID === "RKA");
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    describe("Energy Blast", function () {
+                        it("should have the correct cost for the +1/2 EB", function () {
+                            assert.equal(ebPlusHalfItem.activePoints, 30);
+                        });
+
+                        it("should have the correct END cost for the +1/2 EB", function () {
+                            assert.equal(ebPlusHalfItem.end, 3);
+                        });
+
+                        it("should have the correct damage for the +1/2 EB", function () {
+                            assert.equal(getEffectFormulaFromItem(ebPlusHalfItem, {}), "4d6");
+                        });
+
+                        it("should have the correct cost for the +1 EB", function () {
+                            assert.equal(ebPlusOneItem.activePoints, 40);
+                        });
+
+                        it("should have the correct END cost for the +1 EB", function () {
+                            assert.equal(ebPlusOneItem.end, 4);
+                        });
+
+                        it("should have the correct damage for the +1 EB", function () {
+                            assert.equal(getEffectFormulaFromItem(ebPlusOneItem, {}), "4d6");
+                        });
+                    });
+
+                    describe("Ego Attack", function () {
+                        it("should have the correct cost for the +1/2 EA", function () {
+                            assert.equal(eaPlusHalfItem.activePoints, 60);
+                        });
+
+                        it("should have the correct END cost for the +1/2 EA", function () {
+                            assert.equal(eaPlusHalfItem.end, 6);
+                        });
+
+                        it("should have the correct damage for the +1/2 EA", function () {
+                            assert.equal(getEffectFormulaFromItem(eaPlusHalfItem, {}), "4d6");
+                        });
+
+                        it("should have the correct cost for the +1 EA", function () {
+                            assert.equal(eaPlusOneItem.activePoints, 80);
+                        });
+
+                        it("should have the correct END cost for the +1 EA", function () {
+                            assert.equal(eaPlusOneItem.end, 8);
+                        });
+
+                        it("should have the correct damage for the +1 EA", function () {
+                            assert.equal(getEffectFormulaFromItem(eaPlusOneItem, {}), "4d6");
+                        });
+                    });
+
+                    describe("Killing Attack", function () {
+                        it("should have the correct cost for the +1/2 RKA", function () {
+                            assert.equal(rkaPlusHalfItem.activePoints, 67);
+                        });
+
+                        it("should have the correct END cost for the +1/2 RKA", function () {
+                            assert.equal(rkaPlusHalfItem.end, 7);
+                        });
+
+                        it("should have the correct damage for the +1/2 RKA", function () {
+                            assert.equal(getEffectFormulaFromItem(rkaPlusHalfItem, { effectiveStr: 15 }), "3d6");
+                        });
+
+                        it("should have the correct cost for the +1/2 HKA", function () {
+                            assert.equal(hkaPlusHalfItem.activePoints, 67);
+                        });
+
+                        it("should have the correct END cost for the +1/2 HKA", function () {
+                            assert.equal(hkaPlusHalfItem.end, 7);
+                        });
+
+                        it("should have the correct damage for the +1/2 HKA", function () {
+                            // 15 STR (3 DC) is 2 DC given the +1/2 advantage on the HKA. 3d6 + 2 DC = 3 1/2 d6
+                            assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectiveStr: 15 }), "3½d6");
+                        });
+                    });
+
+                    describe("CSLs and DCs", function () {
+                        let cslCombatItem;
+                        let cslCombatPreviousActiveState;
+                        let cslCombatPreviousAllocation;
+                        let cslMentalItem;
+                        let cslMentalPreviousActiveState;
+                        let cslMentalPreviousAllocation;
+
+                        beforeEach(function () {
+                            // Turn on the CSLs
+                            cslCombatItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
+                            cslCombatPreviousActiveState = cslCombatItem.system.active;
+                            cslCombatItem.system.active = true;
+
+                            cslMentalItem = actor.items.find((item) => item.system.XMLID === "MENTAL_COMBAT_LEVELS");
+                            cslMentalPreviousActiveState = cslMentalItem.system.active;
+                            cslMentalItem.system.active = true;
+
+                            // Set the CSLs for DCs
+                            cslCombatPreviousAllocation = cslCombatItem.system.csl;
+                            cslCombatItem.system.csl = ["dc", "dc"];
+
+                            cslMentalPreviousAllocation = cslMentalItem.system.csl;
+                            cslMentalItem.system.csl = ["dc", "dc"];
+                        });
+
+                        afterEach(function () {
+                            // Turn off the CSLs
+                            cslCombatItem.system.active = cslCombatPreviousActiveState;
+                            cslMentalItem.system.active = cslMentalPreviousActiveState;
+
+                            // Set the CSLs to previous
+                            cslCombatItem.system.csl = cslCombatPreviousAllocation;
+                            cslMentalItem.system.csl = cslMentalPreviousAllocation;
+                        });
+
+                        it("should have the correct damage for the +1/2 EB with 2 CSLs", function () {
+                            // 2 CSLs at +1/2 is 0.6666DC. 4d6 + 0.666 DC = +½d6
+                            assert.equal(getEffectFormulaFromItem(ebPlusHalfItem, {}), "4½d6");
+                        });
+
+                        it("should have the correct damage for the +1 EB with 2 CSLs", function () {
+                            // 2 CSLs at +1/2 is 0.5DC. 4d6 + 0.5 DC = +1
+                            assert.equal(getEffectFormulaFromItem(ebPlusOneItem, {}), "4d6+1");
+                        });
+
+                        it("should have the correct damage for the +1/2 EA with 2 CSLs", function () {
+                            // 2 CSLs at +1/2 is 0.6666DC. 4d6 + 0.666 DC = +1
+                            assert.equal(getEffectFormulaFromItem(eaPlusHalfItem, {}), "4d6+1");
+                        });
+
+                        it("should have the correct damage for the +1 EA with 2 CSLs", function () {
+                            // 2 CSLs at +1/2 is 0.5DC. 4d6 + 0.5 DC = +0
+                            assert.equal(getEffectFormulaFromItem(eaPlusOneItem, {}), "4d6");
+                        });
+
+                        it("should have the correct damage for the +1/2 HKA with 1 CSL", function () {
+                            // Only use 1 CSL
+                            cslCombatItem.system.csl = ["dc", "ocv"];
+
+                            // 1 CSLs is 0DC. 3d6 + 0 DC = 0d6
+                            assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectiveStr: 0 }), "3d6");
+                        });
+
+                        it("should have the correct damage for the +1/2 HKA with 2 CSLs", function () {
+                            // 2 CSLs at +1/2 is 0.6666DC. 4d6 + 0.666 DC = 0d6
+                            assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectiveStr: 0 }), "3d6");
+                        });
+                    });
+
+                    // Confirm that we add straight dice in 5e for haymakers.
+                    describe("Haymaker", function () {
+                        let haymakerManeuver;
+
+                        before(function () {
+                            // Turn on the haymaker
+                            haymakerManeuver = actor.items.find(
+                                (item) => item.isCombatManeuver && item.system.XMLID === "HAYMAKER",
+                            );
+                        });
+
+                        it("should have the correct damage for the +1/2 EB", function () {
+                            // +4 DC at +1/2 is 2.66 DC => 2½d6
+                            assert.equal(
+                                getEffectFormulaFromItem(ebPlusHalfItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                }),
+                                "6½d6",
+                            );
+                        });
+
+                        it("should have the correct damage for the +1 EB", function () {
+                            // +4 DC at +1 is 2 DC => 2d6
+                            assert.equal(
+                                getEffectFormulaFromItem(ebPlusOneItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                }),
+                                "6d6",
+                            );
+                        });
+
+                        it("should have the correct damage for the +1/2 EA", function () {
+                            // +4 DC at +1/2 is 2.66 DC => 1d6+1
+                            assert.equal(
+                                getEffectFormulaFromItem(eaPlusHalfItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                }),
+                                "5d6+1",
+                            );
+                        });
+
+                        it("should have the correct damage for the +1 EA", function () {
+                            // +4 DC at +1 is 2 DC => 1d6
+                            assert.equal(
+                                getEffectFormulaFromItem(eaPlusOneItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                }),
+                                "5d6",
+                            );
+                        });
+
+                        it("should have the correct damage for the +1/2 RKA", function () {
+                            // +4 DC at +1/2 is 2.66 DC => ½d6
+                            assert.equal(
+                                getEffectFormulaFromItem(rkaPlusHalfItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                }),
+                                "3½d6",
+                            );
+                        });
+
+                        it("should have the correct damage for the +1/2 HKA", function () {
+                            // +4 DC at +1 is 2 DC => 2d6
+                            assert.equal(
+                                getEffectFormulaFromItem(hkaPlusHalfItem, {
+                                    haymakerManeuverActiveItem: haymakerManeuver,
+                                    effectiveStr: 0,
+                                }),
+                                "3½d6",
+                            );
+                        });
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                describe("Energy Blast", function () {
-                    it("should have the correct cost for the +1/2 EB", function () {
-                        assert.equal(ebPlusHalfItem.activePoints, 30);
-                    });
-
-                    it("should have the correct END cost for the +1/2 EB", function () {
-                        assert.equal(ebPlusHalfItem.end, 3);
-                    });
-
-                    it("should have the correct damage for the +1/2 EB", function () {
-                        assert.equal(getEffectFormulaFromItem(ebPlusHalfItem, {}), "4d6");
-                    });
-
-                    it("should have the correct cost for the +1 EB", function () {
-                        assert.equal(ebPlusOneItem.activePoints, 40);
-                    });
-
-                    it("should have the correct END cost for the +1 EB", function () {
-                        assert.equal(ebPlusOneItem.end, 4);
-                    });
-
-                    it("should have the correct damage for the +1 EB", function () {
-                        assert.equal(getEffectFormulaFromItem(ebPlusOneItem, {}), "4d6");
-                    });
-                });
-
-                describe("Ego Attack", function () {
-                    it("should have the correct cost for the +1/2 EA", function () {
-                        assert.equal(eaPlusHalfItem.activePoints, 60);
-                    });
-
-                    it("should have the correct END cost for the +1/2 EA", function () {
-                        assert.equal(eaPlusHalfItem.end, 6);
-                    });
-
-                    it("should have the correct damage for the +1/2 EA", function () {
-                        assert.equal(getEffectFormulaFromItem(eaPlusHalfItem, {}), "4d6");
-                    });
-
-                    it("should have the correct cost for the +1 EA", function () {
-                        assert.equal(eaPlusOneItem.activePoints, 80);
-                    });
-
-                    it("should have the correct END cost for the +1 EA", function () {
-                        assert.equal(eaPlusOneItem.end, 8);
-                    });
-
-                    it("should have the correct damage for the +1 EA", function () {
-                        assert.equal(getEffectFormulaFromItem(eaPlusOneItem, {}), "4d6");
-                    });
-                });
-
-                describe("Killing Attack", function () {
-                    it("should have the correct cost for the +1/2 RKA", function () {
-                        assert.equal(rkaPlusHalfItem.activePoints, 67);
-                    });
-
-                    it("should have the correct END cost for the +1/2 RKA", function () {
-                        assert.equal(rkaPlusHalfItem.end, 7);
-                    });
-
-                    it("should have the correct damage for the +1/2 RKA", function () {
-                        assert.equal(getEffectFormulaFromItem(rkaPlusHalfItem, { effectiveStr: 15 }), "3d6");
-                    });
-
-                    it("should have the correct cost for the +1/2 HKA", function () {
-                        assert.equal(hkaPlusHalfItem.activePoints, 67);
-                    });
-
-                    it("should have the correct END cost for the +1/2 HKA", function () {
-                        assert.equal(hkaPlusHalfItem.end, 7);
-                    });
-
-                    it("should have the correct damage for the +1/2 HKA", function () {
-                        // 15 STR (3 DC) is 2 DC given the +1/2 advantage on the HKA. 3d6 + 2 DC = 3 1/2 d6
-                        assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectiveStr: 15 }), "3½d6");
-                    });
-                });
-
-                describe("CSLs and DCs", function () {
-                    let cslCombatItem;
-                    let cslCombatPreviousActiveState;
-                    let cslCombatPreviousAllocation;
-                    let cslMentalItem;
-                    let cslMentalPreviousActiveState;
-                    let cslMentalPreviousAllocation;
-
-                    beforeEach(function () {
-                        // Turn on the CSLs
-                        cslCombatItem = actor.items.find((item) => item.system.XMLID === "COMBAT_LEVELS");
-                        cslCombatPreviousActiveState = cslCombatItem.system.active;
-                        cslCombatItem.system.active = true;
-
-                        cslMentalItem = actor.items.find((item) => item.system.XMLID === "MENTAL_COMBAT_LEVELS");
-                        cslMentalPreviousActiveState = cslMentalItem.system.active;
-                        cslMentalItem.system.active = true;
-
-                        // Set the CSLs for DCs
-                        cslCombatPreviousAllocation = cslCombatItem.system.csl;
-                        cslCombatItem.system.csl = ["dc", "dc"];
-
-                        cslMentalPreviousAllocation = cslMentalItem.system.csl;
-                        cslMentalItem.system.csl = ["dc", "dc"];
-                    });
-
-                    afterEach(function () {
-                        // Turn off the CSLs
-                        cslCombatItem.system.active = cslCombatPreviousActiveState;
-                        cslMentalItem.system.active = cslMentalPreviousActiveState;
-
-                        // Set the CSLs to previous
-                        cslCombatItem.system.csl = cslCombatPreviousAllocation;
-                        cslMentalItem.system.csl = cslMentalPreviousAllocation;
-                    });
-
-                    it("should have the correct damage for the +1/2 EB with 2 CSLs", function () {
-                        // 2 CSLs at +1/2 is 0.6666DC. 4d6 + 0.666 DC = +½d6
-                        assert.equal(getEffectFormulaFromItem(ebPlusHalfItem, {}), "4½d6");
-                    });
-
-                    it("should have the correct damage for the +1 EB with 2 CSLs", function () {
-                        // 2 CSLs at +1/2 is 0.5DC. 4d6 + 0.5 DC = +1
-                        assert.equal(getEffectFormulaFromItem(ebPlusOneItem, {}), "4d6+1");
-                    });
-
-                    it("should have the correct damage for the +1/2 EA with 2 CSLs", function () {
-                        // 2 CSLs at +1/2 is 0.6666DC. 4d6 + 0.666 DC = +1
-                        assert.equal(getEffectFormulaFromItem(eaPlusHalfItem, {}), "4d6+1");
-                    });
-
-                    it("should have the correct damage for the +1 EA with 2 CSLs", function () {
-                        // 2 CSLs at +1/2 is 0.5DC. 4d6 + 0.5 DC = +0
-                        assert.equal(getEffectFormulaFromItem(eaPlusOneItem, {}), "4d6");
-                    });
-
-                    it("should have the correct damage for the +1/2 HKA with 1 CSL", function () {
-                        // Only use 1 CSL
-                        cslCombatItem.system.csl = ["dc", "ocv"];
-
-                        // 1 CSLs is 0DC. 3d6 + 0 DC = 0d6
-                        assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectiveStr: 0 }), "3d6");
-                    });
-
-                    it("should have the correct damage for the +1/2 HKA with 2 CSLs", function () {
-                        // 2 CSLs at +1/2 is 0.6666DC. 4d6 + 0.666 DC = 0d6
-                        assert.equal(getEffectFormulaFromItem(hkaPlusHalfItem, { effectiveStr: 0 }), "3d6");
-                    });
-                });
-
-                // Confirm that we add straight dice in 5e for haymakers.
-                describe("Haymaker", function () {
-                    let haymakerManeuver;
-
-                    before(function () {
-                        // Turn on the haymaker
-                        haymakerManeuver = actor.items.find(
-                            (item) => item.isCombatManeuver && item.system.XMLID === "HAYMAKER",
-                        );
-                    });
-
-                    it("should have the correct damage for the +1/2 EB", function () {
-                        // +4 DC at +1/2 is 2.66 DC => 2½d6
-                        assert.equal(
-                            getEffectFormulaFromItem(ebPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
-                            "6½d6",
-                        );
-                    });
-
-                    it("should have the correct damage for the +1 EB", function () {
-                        // +4 DC at +1 is 2 DC => 2d6
-                        assert.equal(
-                            getEffectFormulaFromItem(ebPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
-                            "6d6",
-                        );
-                    });
-
-                    it("should have the correct damage for the +1/2 EA", function () {
-                        // +4 DC at +1/2 is 2.66 DC => 1d6+1
-                        assert.equal(
-                            getEffectFormulaFromItem(eaPlusHalfItem, { haymakerManeuverActiveItem: haymakerManeuver }),
-                            "5d6+1",
-                        );
-                    });
-
-                    it("should have the correct damage for the +1 EA", function () {
-                        // +4 DC at +1 is 2 DC => 1d6
-                        assert.equal(
-                            getEffectFormulaFromItem(eaPlusOneItem, { haymakerManeuverActiveItem: haymakerManeuver }),
-                            "5d6",
-                        );
-                    });
-
-                    it("should have the correct damage for the +1/2 RKA", function () {
-                        // +4 DC at +1/2 is 2.66 DC => ½d6
-                        assert.equal(
-                            getEffectFormulaFromItem(rkaPlusHalfItem, {
-                                haymakerManeuverActiveItem: haymakerManeuver,
-                            }),
-                            "3½d6",
-                        );
-                    });
-
-                    it("should have the correct damage for the +1/2 HKA", function () {
-                        // +4 DC at +1 is 2 DC => 2d6
-                        assert.equal(
-                            getEffectFormulaFromItem(hkaPlusHalfItem, {
-                                haymakerManeuverActiveItem: haymakerManeuver,
-                                effectiveStr: 0,
-                            }),
-                            "3½d6",
-                        );
-                    });
-                });
-            });
-
-            describe("6e - weapon master and deadly blow", function () {
-                const contents = `
+                describe("6e - weapon master and deadly blow", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
@@ -4863,87 +4905,89 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
+                    let actor;
 
-                let bigSwordItem;
-                let littleSwordItem;
-                let previousSetting;
-
-                before(async function () {
-                    previousSetting = await getAndSetGameSetting("DoubleDamageLimit", false);
-                    actor = await createQuenchActor({ quench: this, contents, is5e: false });
-                    bigSwordItem = actor.items.find((item) => item.system.XMLID === "HKA" && item.name === "Big Sword");
-                    littleSwordItem = actor.items.find(
-                        (item) => item.system.XMLID === "HKA" && item.name === "Little Sword",
-                    );
-                });
-
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                    await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
-                });
-
-                describe("Big Sword Killing Attack", function () {
-                    it("should have the correct base damage for the Big Sword HKA", function () {
-                        // Base: Big Sword 2d6K (6 DC) => 6 DC
-                        // Added: 15 STR (3 DC), Weapon Master x3 for Big Sword (9 DC) => 12 DC
-                        // Combined: 6 DC + 12 DC (no damage doubling rule) => 18 DC
-                        assert.equal(getEffectFormulaFromItem(bigSwordItem, {}), "6d6");
-                    });
-
-                    it("should add strength for the Big Sword HKA", function () {
-                        // Base: Big Sword 2d6K (6 DC) => 6 DC
-                        // Added: 25 STR (5 DC), Weapon Master x3 for Big Sword (9 DC) => 14 DC
-                        // Combined: 6 DC + 14 DC (no damage doubling rule) => 20 DC
-                        assert.equal(getEffectFormulaFromItem(bigSwordItem, { effectiveStr: 25 }), "6½d6");
-                    });
-                });
-
-                describe("Little Sword Killing Attack", function () {
-                    it("should have the correct base damage for the Little Sword HKA", function () {
-                        // Base: Little Sword 1d6+1K (4 DC) => 4 DC
-                        // Added: 15 STR (3 DC)) => 3 DC
-                        // Combined: 4 DC + 3 DC (no damage doubling rule) => 7 DC
-                        assert.equal(getEffectFormulaFromItem(littleSwordItem, {}), "2d6+1");
-                    });
-
-                    it("should add strength for the Little Sword HKA", function () {
-                        // Base: Little Sword 1d6+1K (4 DC) => 4 DC
-                        // Added: 25 STR (5 DC)) => 5 DC
-                        // Combined: 4 DC + 5 DC (no damage doubling rule) => 9 DC
-                        assert.equal(getEffectFormulaFromItem(littleSwordItem, { effectiveStr: 25 }), "3d6");
-                    });
-                });
-
-                describe("Big and Little Sword Killing Attacks with damage doubling rules", function () {
+                    let bigSwordItem;
+                    let littleSwordItem;
                     let previousSetting;
 
                     before(async function () {
-                        previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
+                        previousSetting = await getAndSetGameSetting("DoubleDamageLimit", false);
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false });
+                        bigSwordItem = actor.items.find(
+                            (item) => item.system.XMLID === "HKA" && item.name === "Big Sword",
+                        );
+                        littleSwordItem = actor.items.find(
+                            (item) => item.system.XMLID === "HKA" && item.name === "Little Sword",
+                        );
                     });
 
                     after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
                         await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
                     });
 
-                    it("should limit total damage for the Big Sword HKA", function () {
-                        // Base: Big Sword 2d6K (6 DC) => 6 DC
-                        // Added: 15 STR (3 DC), Weapon Master x3 for Big Sword (9 DC) => 12 DC
-                        // Combined: 6 DC + 12 DC (damage doubling rule) => 12 DC
-                        assert.equal(getEffectFormulaFromItem(bigSwordItem, {}), "4d6");
+                    describe("Big Sword Killing Attack", function () {
+                        it("should have the correct base damage for the Big Sword HKA", function () {
+                            // Base: Big Sword 2d6K (6 DC) => 6 DC
+                            // Added: 15 STR (3 DC), Weapon Master x3 for Big Sword (9 DC) => 12 DC
+                            // Combined: 6 DC + 12 DC (no damage doubling rule) => 18 DC
+                            assert.equal(getEffectFormulaFromItem(bigSwordItem, {}), "6d6");
+                        });
+
+                        it("should add strength for the Big Sword HKA", function () {
+                            // Base: Big Sword 2d6K (6 DC) => 6 DC
+                            // Added: 25 STR (5 DC), Weapon Master x3 for Big Sword (9 DC) => 14 DC
+                            // Combined: 6 DC + 14 DC (no damage doubling rule) => 20 DC
+                            assert.equal(getEffectFormulaFromItem(bigSwordItem, { effectiveStr: 25 }), "6½d6");
+                        });
                     });
 
-                    it("should add strength for the Little Sword HKA", function () {
-                        // Base: Little Sword 1d6+1K (4 DC) => 4 DC
-                        // Added: 25 STR (5 DC)) => 5 DC
-                        // Combined: 4 DC + 5 DC (damage doubling rule) => 8 DC
-                        assert.equal(getEffectFormulaFromItem(littleSwordItem, { effectiveStr: 25 }), "2½d6");
+                    describe("Little Sword Killing Attack", function () {
+                        it("should have the correct base damage for the Little Sword HKA", function () {
+                            // Base: Little Sword 1d6+1K (4 DC) => 4 DC
+                            // Added: 15 STR (3 DC)) => 3 DC
+                            // Combined: 4 DC + 3 DC (no damage doubling rule) => 7 DC
+                            assert.equal(getEffectFormulaFromItem(littleSwordItem, {}), "2d6+1");
+                        });
+
+                        it("should add strength for the Little Sword HKA", function () {
+                            // Base: Little Sword 1d6+1K (4 DC) => 4 DC
+                            // Added: 25 STR (5 DC)) => 5 DC
+                            // Combined: 4 DC + 5 DC (no damage doubling rule) => 9 DC
+                            assert.equal(getEffectFormulaFromItem(littleSwordItem, { effectiveStr: 25 }), "3d6");
+                        });
+                    });
+
+                    describe("Big and Little Sword Killing Attacks with damage doubling rules", function () {
+                        let previousSetting;
+
+                        before(async function () {
+                            previousSetting = await getAndSetGameSetting("DoubleDamageLimit", true);
+                        });
+
+                        after(async function () {
+                            await getAndSetGameSetting("DoubleDamageLimit", previousSetting);
+                        });
+
+                        it("should limit total damage for the Big Sword HKA", function () {
+                            // Base: Big Sword 2d6K (6 DC) => 6 DC
+                            // Added: 15 STR (3 DC), Weapon Master x3 for Big Sword (9 DC) => 12 DC
+                            // Combined: 6 DC + 12 DC (damage doubling rule) => 12 DC
+                            assert.equal(getEffectFormulaFromItem(bigSwordItem, {}), "4d6");
+                        });
+
+                        it("should add strength for the Little Sword HKA", function () {
+                            // Base: Little Sword 1d6+1K (4 DC) => 4 DC
+                            // Added: 25 STR (5 DC)) => 5 DC
+                            // Combined: 4 DC + 5 DC (damage doubling rule) => 8 DC
+                            assert.equal(getEffectFormulaFromItem(littleSwordItem, { effectiveStr: 25 }), "2½d6");
+                        });
                     });
                 });
-            });
 
-            describe("Amadeus - compound powers", function () {
-                const contents = `
+                describe("Amadeus - compound powers", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="334" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
@@ -5216,44 +5260,44 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
+                    let actor;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: false });
-                });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false });
+                    });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
 
-                it("should match the cost breakdown of HD", function () {
-                    assert.deepEqual(actor.pointsDetail, {
-                        characteristics: 160,
-                        skill: 40,
-                        talent: 6,
-                        power: 128,
-                        disadvantage: 60,
-                        MatchingDisads: 60,
+                    it("should match the cost breakdown of HD", function () {
+                        assert.deepEqual(actor.pointsDetail, {
+                            characteristics: 160,
+                            skill: 40,
+                            talent: 6,
+                            power: 128,
+                            disadvantage: 60,
+                            MatchingDisads: 60,
+                        });
+                    });
+
+                    it("name", async function () {
+                        console.log("name");
+                        assert.equal(actor.name.includes("Amadeus"), true);
+                    });
+
+                    it("realCost", async function () {
+                        assert.equal(actor.realCost, 334);
+                    });
+
+                    it("activePoints", async function () {
+                        assert.equal(actor.activePoints, 680);
                     });
                 });
 
-                it("name", async function () {
-                    console.log("name");
-                    assert.equal(actor.name.includes("Amadeus"), true);
-                });
-
-                it("realCost", async function () {
-                    assert.equal(actor.realCost, 334);
-                });
-
-                it("activePoints", async function () {
-                    assert.equal(actor.activePoints, 680);
-                });
-            });
-
-            // PH: FIXME: Flesh this out
-            describe("single power naked advantage to strength", function () {
-                const contents = `
+                // PH: FIXME: Flesh this out
+                describe("single power naked advantage to strength", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
@@ -5341,62 +5385,62 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
+                    let actor;
 
-                let strikeManeuver;
-                let nakedStrAoE;
-                // let nakedStrAp;
+                    let strikeManeuver;
+                    let nakedStrAoE;
+                    // let nakedStrAp;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
-                    strikeManeuver = actor.items.find((item) => item.system.XMLID === "STRIKE");
+                        strikeManeuver = actor.items.find((item) => item.system.XMLID === "STRIKE");
 
-                    nakedStrAoE = actor.items.find(
-                        (item) => item.system.XMLID === "NAKEDMODIFIER" && item.name === "AoE STR",
-                    );
-                    // nakedStrAp = actor.items.find(
-                    //     (item) => item.system.XMLID === "NAKEDMODIFIER" && item.name === "AP STR",
-                    // );
-                });
-
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                // PH: FIXME: TODO:
-                describe("Costs are correct for character", function () {
-                    it.skip("should have the correct total cost", function () {});
-                });
-
-                describe("Costs are correct for AoE Naked Advantage", function () {
-                    it.skip("should have the correct total cost", function () {});
-                });
-
-                describe("Costs are correct for AP Naked Advantage", function () {
-                    it.skip("should have the correct total cost", function () {});
-                });
-
-                describe("Maneuvers with AoE Naked Advantage", function () {
-                    it("should have the correct base damage for Strike with AoE NA", function () {
-                        // Base: 60 STR -> 12 DC, Naked Advantage for 60 STR -> +12 DC => 24 DC
-                        // Added: Strike 0DC => 0DC
-                        // Combined: 24 DC + 0 DC (no damage doubling rule) => 24 DC -> 12d6 + AoE
-                        assert.equal(
-                            getEffectFormulaFromItem(strikeManeuver, {
-                                nakedAdvantage: nakedStrAoE,
-                                effectiveStr: 60,
-                            }),
-                            "12d6",
+                        nakedStrAoE = actor.items.find(
+                            (item) => item.system.XMLID === "NAKEDMODIFIER" && item.name === "AoE STR",
                         );
+                        // nakedStrAp = actor.items.find(
+                        //     (item) => item.system.XMLID === "NAKEDMODIFIER" && item.name === "AP STR",
+                        // );
                     });
 
-                    // PH: FIXME: NA can't be applied to anything of more active points than was bought.
-                });
-            });
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
 
-            describe("HD Cost with fractional points", function () {
-                const contents = `
+                    // PH: FIXME: TODO:
+                    describe("Costs are correct for character", function () {
+                        it.skip("should have the correct total cost", function () {});
+                    });
+
+                    describe("Costs are correct for AoE Naked Advantage", function () {
+                        it.skip("should have the correct total cost", function () {});
+                    });
+
+                    describe("Costs are correct for AP Naked Advantage", function () {
+                        it.skip("should have the correct total cost", function () {});
+                    });
+
+                    describe("Maneuvers with AoE Naked Advantage", function () {
+                        it("should have the correct base damage for Strike with AoE NA", function () {
+                            // Base: 60 STR -> 12 DC, Naked Advantage for 60 STR -> +12 DC => 24 DC
+                            // Added: Strike 0DC => 0DC
+                            // Combined: 24 DC + 0 DC (no damage doubling rule) => 24 DC -> 12d6 + AoE
+                            assert.equal(
+                                getEffectFormulaFromItem(strikeManeuver, {
+                                    nakedAdvantage: nakedStrAoE,
+                                    effectiveStr: 60,
+                                }),
+                                "12d6",
+                            );
+                        });
+
+                        // PH: FIXME: NA can't be applied to anything of more active points than was bought.
+                    });
+                });
+
+                describe("HD Cost with fractional points", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Normal.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
@@ -5490,79 +5534,79 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
-                let hearingFlash;
-                let mysticFlash;
+                    let actor;
+                    let hearingFlash;
+                    let mysticFlash;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
-                    hearingFlash = actor.items.find(
-                        (item) => item.system.XMLID === "FLASH" && item.system.OPTIONID === "HEARINGGROUP",
-                    );
+                        hearingFlash = actor.items.find(
+                            (item) => item.system.XMLID === "FLASH" && item.system.OPTIONID === "HEARINGGROUP",
+                        );
 
-                    mysticFlash = actor.items.find(
-                        (item) => item.system.XMLID === "FLASH" && item.system.OPTIONID === "MENTALGROUP",
-                    );
-                });
-
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                describe("total costs", function () {
-                    it("should match the overall cost of HD", function () {
-                        assert.equal(actor.characterPointCost, 9);
+                        mysticFlash = actor.items.find(
+                            (item) => item.system.XMLID === "FLASH" && item.system.OPTIONID === "MENTALGROUP",
+                        );
                     });
 
-                    it("should match the cost breakdown of HD", function () {
-                        assert.deepEqual(actor.pointsDetail, {
-                            characteristics: 0,
-                            power: 9,
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    describe("total costs", function () {
+                        it("should match the overall cost of HD", function () {
+                            assert.equal(actor.characterPointCost, 9);
+                        });
+
+                        it("should match the cost breakdown of HD", function () {
+                            assert.deepEqual(actor.pointsDetail, {
+                                characteristics: 0,
+                                power: 9,
+                            });
+                        });
+                    });
+
+                    describe("hearing flash", function () {
+                        it("description", function () {
+                            assert.equal(hearingFlash.system.description, "Hearing Group Flash 1½d6");
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(hearingFlash.realCost, 4.5);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(hearingFlash.activePoints, 4.5);
+                        });
+
+                        it("end", function () {
+                            assert.equal(hearingFlash.end, 1);
+                        });
+                    });
+
+                    describe("mystic flash", function () {
+                        it("description", function () {
+                            assert.equal(mysticFlash.system.description, "Mental Group Flash 1½d6");
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(mysticFlash.realCost, 4.5);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(mysticFlash.activePoints, 4.5);
+                        });
+
+                        it("end", function () {
+                            assert.equal(mysticFlash.end, 1);
                         });
                     });
                 });
 
-                describe("hearing flash", function () {
-                    it("description", function () {
-                        assert.equal(hearingFlash.system.description, "Hearing Group Flash 1½d6");
-                    });
-
-                    it("realCost", function () {
-                        assert.equal(hearingFlash.realCost, 4.5);
-                    });
-
-                    it("activePoints", function () {
-                        assert.equal(hearingFlash.activePoints, 4.5);
-                    });
-
-                    it("end", function () {
-                        assert.equal(hearingFlash.end, 1);
-                    });
-                });
-
-                describe("mystic flash", function () {
-                    it("description", function () {
-                        assert.equal(mysticFlash.system.description, "Mental Group Flash 1½d6");
-                    });
-
-                    it("realCost", function () {
-                        assert.equal(mysticFlash.realCost, 4.5);
-                    });
-
-                    it("activePoints", function () {
-                        assert.equal(mysticFlash.activePoints, 4.5);
-                    });
-
-                    it("end", function () {
-                        assert.equal(mysticFlash.end, 1);
-                    });
-                });
-            });
-
-            describe("older HDC formats", function () {
-                describe("can load older HDC format - GitHub issue #2228", function () {
-                    const contents = `
+                describe("older HDC formats", function () {
+                    describe("can load older HDC format - GitHub issue #2228", function () {
+                        const contents = `
                         <?xml version="1.0" encoding="ISO-8859-1"?>
                         <CHARACTER>
                             <BASIC_CONFIGURATION BASE_POINTS="50" DISAD_POINTS="250" EXPERIENCE="0" MAX_POINTS_FROM_DISAD="50" TEMPLATE="builtIn.CompetentNormal.hdt" />
@@ -5768,28 +5812,28 @@ export function registerFullTests(quench) {
                             <EQUIPMENT />
                         </CHARACTER>`;
 
-                    let actor;
+                        let actor;
 
-                    before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        // FIXME: Broken
+                        it.skip("should be the correct number of points", function () {
+                            assert.equal(actor.characterPointCost, 299);
+                        });
+
+                        it("should have the correct template type", function () {
+                            assert.equal(actor._templateType, "Normal");
+                        });
                     });
 
-                    after(async function () {
-                        await deleteQuenchActor({ quench: this, actor });
-                    });
-
-                    // FIXME: Broken
-                    it.skip("should be the correct number of points", function () {
-                        assert.equal(actor.characterPointCost, 299);
-                    });
-
-                    it("should have the correct template type", function () {
-                        assert.equal(actor._templateType, "Normal");
-                    });
-                });
-
-                describe("can load older HDC format - GitHub issue #2229", function () {
-                    const contents = `
+                    describe("can load older HDC format - GitHub issue #2229", function () {
+                        const contents = `
                         <?xml version="1.0" encoding="UTF-8"?>
                         <CHARACTER version="2.0">
                         <BASIC_CONFIGURATION BASE_POINTS="300" DISAD_POINTS="100" EXPERIENCE="0" RULES="Default" TEMPLATE="builtIn.Superheroic.hdt" EXPORT_TEMPLATE="foo.hde" />
@@ -6243,33 +6287,33 @@ export function registerFullTests(quench) {
                         <EQUIPMENT />
                         </CHARACTER>`;
 
-                    let actor;
+                        let actor;
 
-                    before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
-                    });
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                        });
 
-                    after(async function () {
-                        await deleteQuenchActor({ quench: this, actor });
-                    });
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
 
-                    // This is broken because of #2115
-                    it.skip("should be the correct number of points", function () {
-                        assert.equal(actor.characterPointCost, 401);
-                    });
+                        // This is broken because of #2115
+                        it.skip("should be the correct number of points", function () {
+                            assert.equal(actor.characterPointCost, 401);
+                        });
 
-                    it("should have the correct template type", function () {
-                        assert.equal(actor._templateType, "Superheroic");
-                    });
+                        it("should have the correct template type", function () {
+                            assert.equal(actor._templateType, "Superheroic");
+                        });
 
-                    it("should have the correct template", function () {
-                        assert.equal(actor.system.CHARACTER.TEMPLATE.name, "builtIn.Superheroic.hdt");
+                        it("should have the correct template", function () {
+                            assert.equal(actor.system.CHARACTER.TEMPLATE.name, "builtIn.Superheroic.hdt");
+                        });
                     });
                 });
-            });
 
-            describe("Low powered multipowers that have naive real cost less than 1", function () {
-                const contents = `
+                describe("Low powered multipowers that have naive real cost less than 1", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" />
@@ -6445,36 +6489,36 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                     `;
 
-                let actor;
-                let lifeSupportItem;
-                let infraredPerceptionItem;
+                    let actor;
+                    let lifeSupportItem;
+                    let infraredPerceptionItem;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
-                    lifeSupportItem = actor.items.find((item) => item.system.XMLID === "LIFESUPPORT");
-                    infraredPerceptionItem = actor.items.find((item) => item.system.XMLID === "INFRAREDPERCEPTION");
+                        lifeSupportItem = actor.items.find((item) => item.system.XMLID === "LIFESUPPORT");
+                        infraredPerceptionItem = actor.items.find((item) => item.system.XMLID === "INFRAREDPERCEPTION");
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    // This is 10 active points with 1.25 of limitations so 4 real points and .4 character points.
+                    // Make sure we're clamping costs at 1.
+                    it("LIFESUPPORT points", function () {
+                        assert.equal(lifeSupportItem.characterPointCost, 1);
+                    });
+
+                    // This is 6 active points with 0.5 limitation so 4 real points and .4 character points.
+                    // Make sure we're clamping costs at 1.
+                    it("INFRAREDPERCEPTION points", function () {
+                        assert.equal(infraredPerceptionItem.characterPointCost, 1);
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                // This is 10 active points with 1.25 of limitations so 4 real points and .4 character points.
-                // Make sure we're clamping costs at 1.
-                it("LIFESUPPORT points", function () {
-                    assert.equal(lifeSupportItem.characterPointCost, 1);
-                });
-
-                // This is 6 active points with 0.5 limitation so 4 real points and .4 character points.
-                // Make sure we're clamping costs at 1.
-                it("INFRAREDPERCEPTION points", function () {
-                    assert.equal(infraredPerceptionItem.characterPointCost, 1);
-                });
-            });
-
-            describe("5e Character with Elemental Control", function () {
-                const contents = `
+                describe("5e Character with Elemental Control", function () {
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                     <BASIC_CONFIGURATION BASE_POINTS="500" DISAD_POINTS="100" EXPERIENCE="68" RULES="Default" />
@@ -6999,50 +7043,50 @@ export function registerFullTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
+                    let actor;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    describe("tab costs", async function () {
+                        it("should have the correct total cost", function () {
+                            assert.equal(actor.realCost, 662);
+                        });
+
+                        it("should have the correct characteristics cost", function () {
+                            assert.equal(actor.pointsDetail.characteristics, 248);
+                        });
+
+                        it("should have the correct skills cost", function () {
+                            assert.equal(actor.pointsDetail.skill, 45);
+                        });
+
+                        it("should have the correct talents cost", function () {
+                            assert.equal(actor.pointsDetail.talent, 63);
+                        });
+
+                        it("should have the correct perk cost", function () {
+                            assert.equal(actor.pointsDetail.perk, 5);
+                        });
+
+                        it("should have the correct martial arts cost", function () {
+                            assert.equal(actor.pointsDetail.martialart, 78);
+                        });
+
+                        it("should have the correct power cost", function () {
+                            assert.equal(actor.pointsDetail.power, 223);
+                        });
+                    });
                 });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
-
-                describe("tab costs", async function () {
-                    it("should have the correct total cost", function () {
-                        assert.equal(actor.realCost, 662);
-                    });
-
-                    it("should have the correct characteristics cost", function () {
-                        assert.equal(actor.pointsDetail.characteristics, 248);
-                    });
-
-                    it("should have the correct skills cost", function () {
-                        assert.equal(actor.pointsDetail.skill, 45);
-                    });
-
-                    it("should have the correct talents cost", function () {
-                        assert.equal(actor.pointsDetail.talent, 63);
-                    });
-
-                    it("should have the correct perk cost", function () {
-                        assert.equal(actor.pointsDetail.perk, 5);
-                    });
-
-                    it("should have the correct martial arts cost", function () {
-                        assert.equal(actor.pointsDetail.martialart, 78);
-                    });
-
-                    it("should have the correct power cost", function () {
-                        assert.equal(actor.pointsDetail.power, 223);
-                    });
-                });
-            });
-
-            describe("duration modifiers - see #3560", function () {
-                describe("5e", function () {
-                    const contents = `
+                describe("duration modifiers - see #3560", function () {
+                    describe("5e", function () {
+                        const contents = `
                         <?xml version="1.0" encoding="UTF-16"?>
                         <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                         <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
@@ -7191,127 +7235,129 @@ export function registerFullTests(quench) {
                         <EQUIPMENT />
                         </CHARACTER>
                     `;
-                    let actor;
+                        let actor;
 
-                    let instantItem;
-                    let instantToConstantItemViaContinuous;
-                    let constantItem;
-                    let constantToPersistentItemViaPersistent;
-                    let constantToPersistentToInherentItemViaPersistentAndInherent;
-                    let persistentItem;
-                    let persistentToInherentItemViaInherent;
-                    let persistentToConstantItemViaActivationRoll;
-                    let persistentToConstantItemViaCostsEndurance;
-                    let persistentToConstantItemViaNonpersistent;
-                    let persistentToConstantToInstantItemViaNonpersistentAndInstant;
-                    let constantToInstantItem;
+                        let instantItem;
+                        let instantToConstantItemViaContinuous;
+                        let constantItem;
+                        let constantToPersistentItemViaPersistent;
+                        let constantToPersistentToInherentItemViaPersistentAndInherent;
+                        let persistentItem;
+                        let persistentToInherentItemViaInherent;
+                        let persistentToConstantItemViaActivationRoll;
+                        let persistentToConstantItemViaCostsEndurance;
+                        let persistentToConstantItemViaNonpersistent;
+                        let persistentToConstantToInstantItemViaNonpersistentAndInstant;
+                        let constantToInstantItem;
 
-                    before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
-                        instantItem = actor.items.find((item) => item.name === "Instant");
-                        instantToConstantItemViaContinuous = actor.items.find(
-                            (item) => item.name === "Instant -> Constant via Continuous",
-                        );
-                        constantItem = actor.items.find((item) => item.name === "Constant");
-                        constantToPersistentItemViaPersistent = actor.items.find(
-                            (item) => item.name === "Constant -> Persistent via Persistent",
-                        );
-                        constantToPersistentToInherentItemViaPersistentAndInherent = actor.items.find(
-                            (item) => item.name === "Constant -> Persistent -> Inherent via Persistent and Inherent",
-                        );
-                        persistentItem = actor.items.find((item) => item.name === "Persistent");
-                        persistentToInherentItemViaInherent = actor.items.find(
-                            (item) => item.name === "Persistent -> Inherent via Inherent",
-                        );
-                        persistentToConstantItemViaActivationRoll = actor.items.find(
-                            (item) => item.name === "Persistent -> Constant via Activation Roll",
-                        );
-                        persistentToConstantItemViaCostsEndurance = actor.items.find(
-                            (item) => item.name === "Persistent -> Constant via Costs Endurance",
-                        );
-                        persistentToConstantItemViaNonpersistent = actor.items.find(
-                            (item) => item.name === "Persistent -> Constant via Nonpersistent",
-                        );
-                        persistentToConstantToInstantItemViaNonpersistentAndInstant = actor.items.find(
-                            (item) => item.name === "Persistent -> Constant -> Instant via Nonpersistent and Instant",
-                        );
-                        constantToInstantItem = actor.items.find(
-                            (item) => item.name === "Constant -> Instant via Instant",
-                        );
+                            instantItem = actor.items.find((item) => item.name === "Instant");
+                            instantToConstantItemViaContinuous = actor.items.find(
+                                (item) => item.name === "Instant -> Constant via Continuous",
+                            );
+                            constantItem = actor.items.find((item) => item.name === "Constant");
+                            constantToPersistentItemViaPersistent = actor.items.find(
+                                (item) => item.name === "Constant -> Persistent via Persistent",
+                            );
+                            constantToPersistentToInherentItemViaPersistentAndInherent = actor.items.find(
+                                (item) =>
+                                    item.name === "Constant -> Persistent -> Inherent via Persistent and Inherent",
+                            );
+                            persistentItem = actor.items.find((item) => item.name === "Persistent");
+                            persistentToInherentItemViaInherent = actor.items.find(
+                                (item) => item.name === "Persistent -> Inherent via Inherent",
+                            );
+                            persistentToConstantItemViaActivationRoll = actor.items.find(
+                                (item) => item.name === "Persistent -> Constant via Activation Roll",
+                            );
+                            persistentToConstantItemViaCostsEndurance = actor.items.find(
+                                (item) => item.name === "Persistent -> Constant via Costs Endurance",
+                            );
+                            persistentToConstantItemViaNonpersistent = actor.items.find(
+                                (item) => item.name === "Persistent -> Constant via Nonpersistent",
+                            );
+                            persistentToConstantToInstantItemViaNonpersistentAndInstant = actor.items.find(
+                                (item) =>
+                                    item.name === "Persistent -> Constant -> Instant via Nonpersistent and Instant",
+                            );
+                            constantToInstantItem = actor.items.find(
+                                (item) => item.name === "Constant -> Instant via Instant",
+                            );
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("should have duration instant", function () {
+                            expect(instantItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.INSTANT);
+                        });
+
+                        it("should have duration instant -> constant (via continuous)", function () {
+                            expect(instantToConstantItemViaContinuous.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.CONSTANT,
+                            );
+                        });
+
+                        it("should have duration constant", function () {
+                            expect(constantItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.CONSTANT);
+                        });
+
+                        it("should have duration constant -> persistent via persistent", function () {
+                            expect(constantToPersistentItemViaPersistent.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.PERSISTENT,
+                            );
+                        });
+
+                        it("should have duration constant -> persistent -> inherent", function () {
+                            expect(constantToPersistentToInherentItemViaPersistentAndInherent.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.INHERENT,
+                            );
+                        });
+
+                        it("should have duration persistent", function () {
+                            expect(persistentItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.PERSISTENT);
+                        });
+
+                        it("should have duration persistent -> inherent", function () {
+                            expect(persistentToInherentItemViaInherent.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.INHERENT,
+                            );
+                        });
+
+                        it("should have duration persistent -> constant via activation roll", function () {
+                            expect(persistentToConstantItemViaActivationRoll.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.CONSTANT,
+                            );
+                        });
+
+                        it("should have duration persistent -> constant via costs endurance", function () {
+                            expect(persistentToConstantItemViaCostsEndurance.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.CONSTANT,
+                            );
+                        });
+
+                        it("should have duration persistent -> constant via non persistent", function () {
+                            expect(persistentToConstantItemViaNonpersistent.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.CONSTANT,
+                            );
+                        });
+
+                        it("should have duration persistent -> constant -> instant via non persistent and instant", function () {
+                            expect(
+                                persistentToConstantToInstantItemViaNonpersistentAndInstant.system.duration,
+                            ).to.equal(CONFIG.HERO.DURATION_TYPES.INSTANT);
+                        });
+
+                        it("should have duration constant -> instant via instant", function () {
+                            expect(constantToInstantItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.INSTANT);
+                        });
                     });
 
-                    after(async function () {
-                        await deleteQuenchActor({ quench: this, actor });
-                    });
-
-                    it("should have duration instant", function () {
-                        expect(instantItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.INSTANT);
-                    });
-
-                    it("should have duration instant -> constant (via continuous)", function () {
-                        expect(instantToConstantItemViaContinuous.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.CONSTANT,
-                        );
-                    });
-
-                    it("should have duration constant", function () {
-                        expect(constantItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.CONSTANT);
-                    });
-
-                    it("should have duration constant -> persistent via persistent", function () {
-                        expect(constantToPersistentItemViaPersistent.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.PERSISTENT,
-                        );
-                    });
-
-                    it("should have duration constant -> persistent -> inherent", function () {
-                        expect(constantToPersistentToInherentItemViaPersistentAndInherent.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.INHERENT,
-                        );
-                    });
-
-                    it("should have duration persistent", function () {
-                        expect(persistentItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.PERSISTENT);
-                    });
-
-                    it("should have duration persistent -> inherent", function () {
-                        expect(persistentToInherentItemViaInherent.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.INHERENT,
-                        );
-                    });
-
-                    it("should have duration persistent -> constant via activation roll", function () {
-                        expect(persistentToConstantItemViaActivationRoll.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.CONSTANT,
-                        );
-                    });
-
-                    it("should have duration persistent -> constant via costs endurance", function () {
-                        expect(persistentToConstantItemViaCostsEndurance.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.CONSTANT,
-                        );
-                    });
-
-                    it("should have duration persistent -> constant via non persistent", function () {
-                        expect(persistentToConstantItemViaNonpersistent.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.CONSTANT,
-                        );
-                    });
-
-                    it("should have duration persistent -> constant -> instant via non persistent and instant", function () {
-                        expect(persistentToConstantToInstantItemViaNonpersistentAndInstant.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.INSTANT,
-                        );
-                    });
-
-                    it("should have duration constant -> instant via instant", function () {
-                        expect(constantToInstantItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.INSTANT);
-                    });
-                });
-
-                describe("6e", function () {
-                    const contents = `
+                    describe("6e", function () {
+                        const contents = `
                         <?xml version="1.0" encoding="UTF-16"?>
                         <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
                         <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
@@ -7523,122 +7569,125 @@ export function registerFullTests(quench) {
                         <EQUIPMENT />
                         </CHARACTER>
                     `;
-                    let actor;
+                        let actor;
 
-                    let instantItem;
-                    let instantToConstantItemViaContinuous;
-                    let constantItem;
-                    let constantToPersistentItemViaPersistent;
-                    let constantToPersistentToInherentItemViaPersistentAndInherent;
-                    let persistentItem;
-                    let persistentToInherentItemViaInherent;
-                    let persistentToConstantItemViaRequiresARoll;
-                    let persistentToConstantItemViaCostsEndurance;
-                    let persistentToConstantItemViaNonpersistent;
-                    let persistentToConstantToInstantItemViaNonpersistentAndInstant;
-                    let constantToInstantItem;
+                        let instantItem;
+                        let instantToConstantItemViaContinuous;
+                        let constantItem;
+                        let constantToPersistentItemViaPersistent;
+                        let constantToPersistentToInherentItemViaPersistentAndInherent;
+                        let persistentItem;
+                        let persistentToInherentItemViaInherent;
+                        let persistentToConstantItemViaRequiresARoll;
+                        let persistentToConstantItemViaCostsEndurance;
+                        let persistentToConstantItemViaNonpersistent;
+                        let persistentToConstantToInstantItemViaNonpersistentAndInstant;
+                        let constantToInstantItem;
 
-                    before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: false });
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, contents, is5e: false });
 
-                        instantItem = actor.items.find((item) => item.name === "Instant");
-                        instantToConstantItemViaContinuous = actor.items.find(
-                            (item) => item.name === "Instant -> Constant via Constant",
-                        );
-                        constantItem = actor.items.find((item) => item.name === "Constant");
-                        constantToPersistentItemViaPersistent = actor.items.find(
-                            (item) => item.name === "Constant -> Persistent via Persistent",
-                        );
-                        constantToPersistentToInherentItemViaPersistentAndInherent = actor.items.find(
-                            (item) => item.name === "Constant -> Persistent -> Inherent via Persistent and Inherent",
-                        );
-                        persistentItem = actor.items.find((item) => item.name === "Persistent");
-                        persistentToInherentItemViaInherent = actor.items.find(
-                            (item) => item.name === "Persistent -> Inherent via Inherent",
-                        );
-                        persistentToConstantItemViaRequiresARoll = actor.items.find(
-                            (item) => item.name === "Persistent -> Constant via Requires A Roll",
-                        );
-                        persistentToConstantItemViaCostsEndurance = actor.items.find(
-                            (item) => item.name === "Persistent -> Constant via Costs Endurance",
-                        );
-                        persistentToConstantItemViaNonpersistent = actor.items.find(
-                            (item) => item.name === "Persistent -> Constant via Nonpersistent",
-                        );
-                        persistentToConstantToInstantItemViaNonpersistentAndInstant = actor.items.find(
-                            (item) => item.name === "Persistent -> Constant -> Instant via Nonpersistent and Instant",
-                        );
-                        constantToInstantItem = actor.items.find(
-                            (item) => item.name === "Constant -> Instant via Instant",
-                        );
-                    });
+                            instantItem = actor.items.find((item) => item.name === "Instant");
+                            instantToConstantItemViaContinuous = actor.items.find(
+                                (item) => item.name === "Instant -> Constant via Constant",
+                            );
+                            constantItem = actor.items.find((item) => item.name === "Constant");
+                            constantToPersistentItemViaPersistent = actor.items.find(
+                                (item) => item.name === "Constant -> Persistent via Persistent",
+                            );
+                            constantToPersistentToInherentItemViaPersistentAndInherent = actor.items.find(
+                                (item) =>
+                                    item.name === "Constant -> Persistent -> Inherent via Persistent and Inherent",
+                            );
+                            persistentItem = actor.items.find((item) => item.name === "Persistent");
+                            persistentToInherentItemViaInherent = actor.items.find(
+                                (item) => item.name === "Persistent -> Inherent via Inherent",
+                            );
+                            persistentToConstantItemViaRequiresARoll = actor.items.find(
+                                (item) => item.name === "Persistent -> Constant via Requires A Roll",
+                            );
+                            persistentToConstantItemViaCostsEndurance = actor.items.find(
+                                (item) => item.name === "Persistent -> Constant via Costs Endurance",
+                            );
+                            persistentToConstantItemViaNonpersistent = actor.items.find(
+                                (item) => item.name === "Persistent -> Constant via Nonpersistent",
+                            );
+                            persistentToConstantToInstantItemViaNonpersistentAndInstant = actor.items.find(
+                                (item) =>
+                                    item.name === "Persistent -> Constant -> Instant via Nonpersistent and Instant",
+                            );
+                            constantToInstantItem = actor.items.find(
+                                (item) => item.name === "Constant -> Instant via Instant",
+                            );
+                        });
 
-                    after(async function () {
-                        await deleteQuenchActor({ quench: this, actor });
-                    });
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
 
-                    it("should have duration instant", function () {
-                        expect(instantItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.INSTANT);
-                    });
+                        it("should have duration instant", function () {
+                            expect(instantItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.INSTANT);
+                        });
 
-                    it("should have duration instant -> constant (via continuous)", function () {
-                        expect(instantToConstantItemViaContinuous.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.CONSTANT,
-                        );
-                    });
+                        it("should have duration instant -> constant (via continuous)", function () {
+                            expect(instantToConstantItemViaContinuous.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.CONSTANT,
+                            );
+                        });
 
-                    it("should have duration constant", function () {
-                        expect(constantItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.CONSTANT);
-                    });
+                        it("should have duration constant", function () {
+                            expect(constantItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.CONSTANT);
+                        });
 
-                    it("should have duration constant -> persistent via persistent", function () {
-                        expect(constantToPersistentItemViaPersistent.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.PERSISTENT,
-                        );
-                    });
+                        it("should have duration constant -> persistent via persistent", function () {
+                            expect(constantToPersistentItemViaPersistent.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.PERSISTENT,
+                            );
+                        });
 
-                    it("should have duration constant -> persistent -> inherent", function () {
-                        expect(constantToPersistentToInherentItemViaPersistentAndInherent.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.INHERENT,
-                        );
-                    });
+                        it("should have duration constant -> persistent -> inherent", function () {
+                            expect(constantToPersistentToInherentItemViaPersistentAndInherent.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.INHERENT,
+                            );
+                        });
 
-                    it("should have duration persistent", function () {
-                        expect(persistentItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.PERSISTENT);
-                    });
+                        it("should have duration persistent", function () {
+                            expect(persistentItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.PERSISTENT);
+                        });
 
-                    it("should have duration persistent -> inherent", function () {
-                        expect(persistentToInherentItemViaInherent.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.INHERENT,
-                        );
-                    });
+                        it("should have duration persistent -> inherent", function () {
+                            expect(persistentToInherentItemViaInherent.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.INHERENT,
+                            );
+                        });
 
-                    it("should have duration persistent -> constant via activation roll", function () {
-                        expect(persistentToConstantItemViaRequiresARoll.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.CONSTANT,
-                        );
-                    });
+                        it("should have duration persistent -> constant via activation roll", function () {
+                            expect(persistentToConstantItemViaRequiresARoll.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.CONSTANT,
+                            );
+                        });
 
-                    it("should have duration persistent -> constant via costs endurance", function () {
-                        expect(persistentToConstantItemViaCostsEndurance.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.CONSTANT,
-                        );
-                    });
+                        it("should have duration persistent -> constant via costs endurance", function () {
+                            expect(persistentToConstantItemViaCostsEndurance.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.CONSTANT,
+                            );
+                        });
 
-                    it("should have duration persistent -> constant via non persistent", function () {
-                        expect(persistentToConstantItemViaNonpersistent.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.CONSTANT,
-                        );
-                    });
+                        it("should have duration persistent -> constant via non persistent", function () {
+                            expect(persistentToConstantItemViaNonpersistent.system.duration).to.equal(
+                                CONFIG.HERO.DURATION_TYPES.CONSTANT,
+                            );
+                        });
 
-                    it("should have duration persistent -> constant -> instant via non persistent and instant", function () {
-                        expect(persistentToConstantToInstantItemViaNonpersistentAndInstant.system.duration).to.equal(
-                            CONFIG.HERO.DURATION_TYPES.INSTANT,
-                        );
-                    });
+                        it("should have duration persistent -> constant -> instant via non persistent and instant", function () {
+                            expect(
+                                persistentToConstantToInstantItemViaNonpersistentAndInstant.system.duration,
+                            ).to.equal(CONFIG.HERO.DURATION_TYPES.INSTANT);
+                        });
 
-                    it("should have duration constant -> instant via instant", function () {
-                        expect(constantToInstantItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.INSTANT);
+                        it("should have duration constant -> instant via instant", function () {
+                            expect(constantToInstantItem.system.duration).to.equal(CONFIG.HERO.DURATION_TYPES.INSTANT);
+                        });
                     });
                 });
             });

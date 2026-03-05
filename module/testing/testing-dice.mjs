@@ -1,3 +1,5 @@
+import { setQuenchTimeout } from "./quench-helper.mjs";
+
 import { HeroRoller } from "../utility/dice.mjs";
 
 const Die = foundry.dice.terms.Die;
@@ -145,7 +147,10 @@ export function registerDiceTests(quench) {
         "hero6efoundryvttv2.utils.dice",
         (context) => {
             const { describe, expect, it } = context;
-            describe("HeroRoller", function () {
+            describe("HeroRoller Tests", function () {
+                // The default timeout tends to be insufficient with multiple actors being created at the same time.
+                setQuenchTimeout(this);
+
                 describe("chaining", function () {
                     it("should be conditional for make functions with negative and default", function () {
                         const roller = new HeroRoller().makeSuccessRoll();

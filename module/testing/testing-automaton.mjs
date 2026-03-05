@@ -1,4 +1,4 @@
-import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
+import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 
 export function registerAutomatonTests(quench) {
     quench.registerBatch(
@@ -8,7 +8,7 @@ export function registerAutomatonTests(quench) {
 
             describe("Automaton Characteristics", function () {
                 // The default timeout tends to be insufficient with multiple actors being created at the same time.
-                this.timeout(20000);
+                setQuenchTimeout(this);
 
                 describe("5e - Cannot Be Stunned", async function () {
                     const contents = `

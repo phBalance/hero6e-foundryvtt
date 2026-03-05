@@ -117,3 +117,11 @@ export function registerGlobalTeardown(quench) {
         },
     );
 }
+
+/**
+ * The default timeout tends to be insufficient with multiple actors being created at the same time.
+ * @param {*} quench
+ */
+export function setQuenchTimeout(quench) {
+    quench.timeout(20000);
+}
