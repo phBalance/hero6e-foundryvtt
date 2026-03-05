@@ -1,4 +1,4 @@
-import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
+import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 
 export function registerCslTests(quench) {
     quench.registerBatch(
@@ -6,11 +6,13 @@ export function registerCslTests(quench) {
         (context) => {
             const { after, before, describe, expect, it } = context;
 
-            describe("Combat Skill Levels (CSL & SL)", function () {
-                this.timeout(20000);
+            describe("CSL, PSL, and SL Tests", function () {
+                // The default timeout tends to be insufficient with multiple actors being created at the same time.
+                setQuenchTimeout(this);
 
-                describe("5e", async function () {
-                    const contents = `
+                describe("Combat Skill Levels (CSL & SL)", function () {
+                    describe("5e", async function () {
+                        const contents = `
                             <?xml version="1.0" encoding="UTF-16"?>
                             <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                                 <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
@@ -317,730 +319,746 @@ export function registerCslTests(quench) {
                                 <EQUIPMENT />
                             </CHARACTER>
                         `;
-                    let actor;
+                        let actor;
 
-                    let singleTargetMentalBlast;
-                    let aoeMentalBlast;
-                    let singleTargetDrainStun;
-                    let singleTargetDrainBody;
-                    let aoeDrainStun;
-                    let strike;
-                    let basicStrike;
-                    let martialStrike;
-                    let flyingDodge;
-                    let basicShot;
-                    let defensiveShot;
-                    let offensiveRangedDisarm;
+                        let singleTargetMentalBlast;
+                        let aoeMentalBlast;
+                        let singleTargetDrainStun;
+                        let singleTargetDrainBody;
+                        let aoeDrainStun;
+                        let strike;
+                        let basicStrike;
+                        let martialStrike;
+                        let flyingDodge;
+                        let basicShot;
+                        let defensiveShot;
+                        let offensiveRangedDisarm;
 
-                    let notImplementedCorrectlyCsl;
-                    let singleNonMentalCsl;
-                    let singleMentalCsl;
-                    let singleStrikeCsl;
-                    let anyStrikeCsl;
-                    let multipowerTightGroupOfAttacksCsl;
-                    let listHthMartialArtsStyleCsl;
-                    let martialManeuversCsl;
-                    let magicSubsetCsl;
-                    let multipowerBroadGroupOfAttacksCsl;
+                        let notImplementedCorrectlyCsl;
+                        let singleNonMentalCsl;
+                        let singleMentalCsl;
+                        let singleStrikeCsl;
+                        let anyStrikeCsl;
+                        let multipowerTightGroupOfAttacksCsl;
+                        let listHthMartialArtsStyleCsl;
+                        let martialManeuversCsl;
+                        let magicSubsetCsl;
+                        let multipowerBroadGroupOfAttacksCsl;
 
-                    let hthDcvCsl;
-                    let rangedDcvCsl;
-                    let hthCsl;
-                    let rangedCsl;
-                    let mentalCsl;
-                    let hthAndRangedDcvCsl;
-                    let hthAndRangedOcvCsl;
-                    let hthAndMentalDcvCsl;
-                    let hthAndMentalOcvCsl;
-                    let rangedAndMentalDcvCsl;
-                    let rangedAndMentalOcvCsl;
-                    let dcvCsl;
-                    let decvCsl;
-                    let allCsl;
+                        let hthDcvCsl;
+                        let rangedDcvCsl;
+                        let hthCsl;
+                        let rangedCsl;
+                        let mentalCsl;
+                        let hthAndRangedDcvCsl;
+                        let hthAndRangedOcvCsl;
+                        let hthAndMentalDcvCsl;
+                        let hthAndMentalOcvCsl;
+                        let rangedAndMentalDcvCsl;
+                        let rangedAndMentalOcvCsl;
+                        let dcvCsl;
+                        let decvCsl;
+                        let allCsl;
 
-                    let overallSl;
-                    let nonOverallSl;
+                        let overallSl;
+                        let nonOverallSl;
 
-                    let invalidTwoDcvCsl;
-                    let invalidTwoOcvCsl;
+                        let invalidTwoDcvCsl;
+                        let invalidTwoOcvCsl;
 
-                    before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
-                        singleTargetMentalBlast = actor.items.find((item) => item.name === "Single Target Ego Attack");
-                        aoeMentalBlast = actor.items.find((item) => item.name === "AoE Ego Attack");
-                        singleTargetDrainStun = actor.items.find((item) => item.name === "Single Target Drain STUN");
-                        singleTargetDrainBody = actor.items.find((item) => item.name === "Single Target Drain BODY");
-                        aoeDrainStun = actor.items.find((item) => item.name === "AoE Drain STUN");
-                        strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
-                        basicStrike = actor.items.find((item) => item.name === "Basic Strike");
-                        martialStrike = actor.items.find((item) => item.name === "Martial Strike");
-                        flyingDodge = actor.items.find((item) => item.name === "Flying Dodge");
-                        basicShot = actor.items.find((item) => item.name === "Basic Shot");
-                        defensiveShot = actor.items.find((item) => item.name === "Defensive Shot");
-                        offensiveRangedDisarm = actor.items.find((item) => item.name === "Offensive Ranged Disarm");
+                            singleTargetMentalBlast = actor.items.find(
+                                (item) => item.name === "Single Target Ego Attack",
+                            );
+                            aoeMentalBlast = actor.items.find((item) => item.name === "AoE Ego Attack");
+                            singleTargetDrainStun = actor.items.find(
+                                (item) => item.name === "Single Target Drain STUN",
+                            );
+                            singleTargetDrainBody = actor.items.find(
+                                (item) => item.name === "Single Target Drain BODY",
+                            );
+                            aoeDrainStun = actor.items.find((item) => item.name === "AoE Drain STUN");
+                            strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
+                            basicStrike = actor.items.find((item) => item.name === "Basic Strike");
+                            martialStrike = actor.items.find((item) => item.name === "Martial Strike");
+                            flyingDodge = actor.items.find((item) => item.name === "Flying Dodge");
+                            basicShot = actor.items.find((item) => item.name === "Basic Shot");
+                            defensiveShot = actor.items.find((item) => item.name === "Defensive Shot");
+                            offensiveRangedDisarm = actor.items.find((item) => item.name === "Offensive Ranged Disarm");
 
-                        notImplementedCorrectlyCsl = actor.items.find(
-                            (item) => item.name === "Not Implemented Correctly",
-                        );
-                        singleNonMentalCsl = actor.items.find((item) => item.name === "Single Attack Non Mental CSL");
-                        singleMentalCsl = actor.items.find((item) => item.name === "Single Attack Mental CSL");
-                        singleStrikeCsl = actor.items.find((item) => item.name === "Single Strike CSL");
-                        anyStrikeCsl = actor.items.find((item) => item.name === "Any Strike CSL");
-                        multipowerTightGroupOfAttacksCsl = actor.items.find(
-                            (item) => item.name === "Multipower Tight Group of Attacks CSL",
-                        );
-                        listHthMartialArtsStyleCsl = actor.items.find(
-                            (item) => item.name === "HTH Martial Arts Style List CSL",
-                        );
-                        martialManeuversCsl = actor.items.find((item) => item.name === "Martial Maneuvers CSL");
-                        magicSubsetCsl = actor.items.find((item) => item.name === "Magic Subset CSL");
-                        multipowerBroadGroupOfAttacksCsl = actor.items.find(
-                            (item) => item.name === "Multipower Broad CSL",
-                        );
+                            notImplementedCorrectlyCsl = actor.items.find(
+                                (item) => item.name === "Not Implemented Correctly",
+                            );
+                            singleNonMentalCsl = actor.items.find(
+                                (item) => item.name === "Single Attack Non Mental CSL",
+                            );
+                            singleMentalCsl = actor.items.find((item) => item.name === "Single Attack Mental CSL");
+                            singleStrikeCsl = actor.items.find((item) => item.name === "Single Strike CSL");
+                            anyStrikeCsl = actor.items.find((item) => item.name === "Any Strike CSL");
+                            multipowerTightGroupOfAttacksCsl = actor.items.find(
+                                (item) => item.name === "Multipower Tight Group of Attacks CSL",
+                            );
+                            listHthMartialArtsStyleCsl = actor.items.find(
+                                (item) => item.name === "HTH Martial Arts Style List CSL",
+                            );
+                            martialManeuversCsl = actor.items.find((item) => item.name === "Martial Maneuvers CSL");
+                            magicSubsetCsl = actor.items.find((item) => item.name === "Magic Subset CSL");
+                            multipowerBroadGroupOfAttacksCsl = actor.items.find(
+                                (item) => item.name === "Multipower Broad CSL",
+                            );
 
-                        hthCsl = actor.items.find((item) => item.name === "HTH CSL");
-                        rangedCsl = actor.items.find((item) => item.name === "Ranged CSL");
-                        mentalCsl = actor.items.find((item) => item.name === "Mental CSL");
+                            hthCsl = actor.items.find((item) => item.name === "HTH CSL");
+                            rangedCsl = actor.items.find((item) => item.name === "Ranged CSL");
+                            mentalCsl = actor.items.find((item) => item.name === "Mental CSL");
 
-                        hthDcvCsl = actor.items.find((item) => item.name === "HTH DCV CSL");
-                        rangedDcvCsl = actor.items.find((item) => item.name === "Ranged DCV CSL");
+                            hthDcvCsl = actor.items.find((item) => item.name === "HTH DCV CSL");
+                            rangedDcvCsl = actor.items.find((item) => item.name === "Ranged DCV CSL");
 
-                        dcvCsl = actor.items.find((item) => item.name === "DCV CSL");
-                        decvCsl = actor.items.find((item) => item.name === "DECV CSL");
+                            dcvCsl = actor.items.find((item) => item.name === "DCV CSL");
+                            decvCsl = actor.items.find((item) => item.name === "DECV CSL");
 
-                        hthAndRangedDcvCsl = actor.items.find((item) => item.name === "HTH and Ranged DCV CSL");
-                        hthAndRangedOcvCsl = actor.items.find((item) => item.name === "HTH and Ranged OCV CSL");
-                        hthAndMentalDcvCsl = actor.items.find((item) => item.name === "HTH and Mental DCV CSL");
-                        hthAndMentalOcvCsl = actor.items.find((item) => item.name === "HTH and Mental OCV CSL");
-                        rangedAndMentalDcvCsl = actor.items.find((item) => item.name === "Ranged and Mental DCV CSL");
-                        rangedAndMentalOcvCsl = actor.items.find((item) => item.name === "Mental and Ranged OCV CSL");
+                            hthAndRangedDcvCsl = actor.items.find((item) => item.name === "HTH and Ranged DCV CSL");
+                            hthAndRangedOcvCsl = actor.items.find((item) => item.name === "HTH and Ranged OCV CSL");
+                            hthAndMentalDcvCsl = actor.items.find((item) => item.name === "HTH and Mental DCV CSL");
+                            hthAndMentalOcvCsl = actor.items.find((item) => item.name === "HTH and Mental OCV CSL");
+                            rangedAndMentalDcvCsl = actor.items.find(
+                                (item) => item.name === "Ranged and Mental DCV CSL",
+                            );
+                            rangedAndMentalOcvCsl = actor.items.find(
+                                (item) => item.name === "Mental and Ranged OCV CSL",
+                            );
 
-                        allCsl = actor.items.find((item) => item.name === "All CSL");
+                            allCsl = actor.items.find((item) => item.name === "All CSL");
 
-                        overallSl = actor.items.find((item) => item.name === "Overall SL");
-                        nonOverallSl = actor.items.find((item) => item.name === "Non Overall SL");
+                            overallSl = actor.items.find((item) => item.name === "Overall SL");
+                            nonOverallSl = actor.items.find((item) => item.name === "Non Overall SL");
 
-                        invalidTwoDcvCsl = actor.items.find(
-                            (item) => item.name === "Didn't mention DCV with Mental, HTH, or Ranged",
-                        );
-                        invalidTwoOcvCsl = actor.items.find(
-                            (item) => item.name === "Didn't mention OCV with Mental, HTH, or Ranged",
-                        );
+                            invalidTwoDcvCsl = actor.items.find(
+                                (item) => item.name === "Didn't mention DCV with Mental, HTH, or Ranged",
+                            );
+                            invalidTwoOcvCsl = actor.items.find(
+                                (item) => item.name === "Didn't mention OCV with Mental, HTH, or Ranged",
+                            );
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        describe("Applicability To Attack - cslAppliesTo", function () {
+                            describe("cslAppliesTo correctness", function () {
+                                it("should return false when not called on a CSL/MCSL/SL", function () {
+                                    expect(strike.cslAppliesTo(strike)).to.be.false;
+                                });
+                            });
+
+                            describe("CSLs", function () {
+                                // The 1 point CSL should only apply to a particular maneuver with a particular weapon that is listed
+                                // but we don't have a way to do that.
+                                it.skip("should not apply CSL to unlisted power - notImplementedCorrectlyCsl", function () {
+                                    expect(notImplementedCorrectlyCsl.cslAppliesTo(strike)).to.be.false;
+                                });
+
+                                it("should not apply CSL because it's not listed - singleNonMentalCsl", function () {
+                                    expect(singleNonMentalCsl.cslAppliesTo(basicStrike)).to.be.false;
+                                });
+
+                                it("should apply CSL because it is listed - singleNonMentalCsl", function () {
+                                    expect(singleNonMentalCsl.cslAppliesTo(strike)).to.be.true;
+                                });
+
+                                it("should not apply CSL to power because it's not listed - singleMentalCsl", function () {
+                                    expect(singleMentalCsl.cslAppliesTo(aoeDrainStun)).to.be.false;
+                                    expect(singleMentalCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                                });
+
+                                it("should apply CSL to non mental power that is listed - singleMentalCsl", function () {
+                                    expect(singleMentalCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                });
+
+                                it("should not apply CSL to power because it's not listed - singleStrikeCsl", function () {
+                                    expect(singleStrikeCsl.cslAppliesTo(strike)).to.be.false;
+                                });
+
+                                it("should apply CSL to non mental power that is listed - singleStrikeCsl", function () {
+                                    expect(singleStrikeCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                });
+
+                                it("should apply CSL to power because it's listed - anyStrikeCsl", function () {
+                                    expect(anyStrikeCsl.cslAppliesTo(strike)).to.be.true;
+                                    expect(anyStrikeCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                });
+
+                                it("should not apply CSL to power that is not listed - anyStrikeCsl", function () {
+                                    expect(anyStrikeCsl.cslAppliesTo(flyingDodge)).to.be.false;
+                                    expect(anyStrikeCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                                    expect(anyStrikeCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                });
+
+                                it("should not apply CSL to power because it's not listed - multipowerTightGroupOfAttacksCsl", function () {
+                                    expect(multipowerTightGroupOfAttacksCsl.cslAppliesTo(singleTargetMentalBlast)).to.be
+                                        .false;
+                                });
+
+                                it("should apply CSL to non mental power that is listed - multipowerTightGroupOfAttacksCsl", function () {
+                                    expect(multipowerTightGroupOfAttacksCsl.cslAppliesTo(singleTargetDrainStun)).to.be
+                                        .true;
+                                    expect(multipowerTightGroupOfAttacksCsl.cslAppliesTo(singleTargetDrainBody)).to.be
+                                        .true;
+                                    expect(multipowerTightGroupOfAttacksCsl.cslAppliesTo(aoeDrainStun)).to.be.true;
+                                });
+
+                                it("should not apply CSL to power because it's not listed - listHthMartialArtsStyleCsl", function () {
+                                    expect(listHthMartialArtsStyleCsl.cslAppliesTo(basicShot)).to.be.false;
+                                });
+
+                                it("should apply CSL to non mental power that is listed - listHthMartialArtsStyleCsl", function () {
+                                    expect(listHthMartialArtsStyleCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                    expect(listHthMartialArtsStyleCsl.cslAppliesTo(martialStrike)).to.be.true;
+                                    expect(listHthMartialArtsStyleCsl.cslAppliesTo(flyingDodge)).to.be.true;
+                                });
+
+                                it("should not apply CSL to power because it's not listed - martialManeuversCsl", function () {
+                                    expect(martialManeuversCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                });
+
+                                it("should apply CSL to non mental power that is listed - martialManeuversCsl", function () {
+                                    expect(martialManeuversCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                    expect(martialManeuversCsl.cslAppliesTo(martialStrike)).to.be.true;
+                                    expect(martialManeuversCsl.cslAppliesTo(flyingDodge)).to.be.true;
+                                    expect(martialManeuversCsl.cslAppliesTo(basicShot)).to.be.true;
+                                    expect(martialManeuversCsl.cslAppliesTo(defensiveShot)).to.be.true;
+                                    expect(martialManeuversCsl.cslAppliesTo(offensiveRangedDisarm)).to.be.true;
+                                });
+
+                                it("should not apply CSL to power because it's not listed - magicSubsetCsl", function () {
+                                    expect(magicSubsetCsl.cslAppliesTo(basicShot)).to.be.false;
+                                });
+
+                                it("should apply CSL to non mental power that is listed - magicSubsetCsl", function () {
+                                    expect(magicSubsetCsl.cslAppliesTo(singleTargetDrainStun)).to.be.true;
+                                    expect(magicSubsetCsl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
+                                    expect(magicSubsetCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                });
+
+                                it("should not apply CSL to power because it's not listed - multipowerBroadGroupOfAttacksCsl", function () {
+                                    expect(multipowerBroadGroupOfAttacksCsl.cslAppliesTo(singleTargetDrainStun)).to.be
+                                        .false;
+                                });
+
+                                it("should apply CSL to non mental power that is listed - multipowerBroadGroupOfAttacksCsl", function () {
+                                    expect(multipowerBroadGroupOfAttacksCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                                    expect(multipowerBroadGroupOfAttacksCsl.cslAppliesTo(singleTargetMentalBlast)).to.be
+                                        .true;
+                                });
+
+                                it("should apply DCV with HTH combat - hthDcvCsl", function () {
+                                    expect(hthDcvCsl.cslAppliesTo(strike)).to.be.true;
+                                    expect(hthDcvCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                });
+
+                                it("should not apply DCV with HTH combat - hthDcvCsl", function () {
+                                    expect(hthDcvCsl.cslAppliesTo(flyingDodge)).to.be.false;
+                                    expect(hthDcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                                    expect(hthDcvCsl.cslAppliesTo(basicShot)).to.be.false;
+                                    expect(hthDcvCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                                });
+
+                                it("should apply DCV with Ranged combat - rangedDcvCsl", function () {
+                                    expect(rangedDcvCsl.cslAppliesTo(basicShot)).to.be.true;
+                                    expect(rangedDcvCsl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
+                                });
+
+                                it("should not apply DCV with Ranged combat - rangedDcvCsl", function () {
+                                    expect(rangedDcvCsl.cslAppliesTo(strike)).to.be.false;
+                                    expect(rangedDcvCsl.cslAppliesTo(basicStrike)).to.be.false;
+                                    expect(rangedDcvCsl.cslAppliesTo(flyingDodge)).to.be.false;
+                                    expect(rangedDcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                                });
+
+                                it("should apply CSL for HTH combat - hthCsl", function () {
+                                    expect(hthCsl.cslAppliesTo(strike)).to.be.true;
+                                    expect(hthCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                });
+
+                                it("should not apply CSL for HTH combat - hthCsl", function () {
+                                    expect(hthCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                    expect(hthCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                                    expect(hthCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                                    expect(hthCsl.cslAppliesTo(singleTargetDrainStun)).to.be.false;
+                                    expect(hthCsl.cslAppliesTo(aoeDrainStun)).to.be.false;
+                                    expect(hthCsl.cslAppliesTo(flyingDodge)).to.be.false;
+                                });
+
+                                it("should apply CSL for Ranged combat - rangedCsl", function () {
+                                    expect(rangedCsl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
+                                    expect(rangedCsl.cslAppliesTo(singleTargetDrainStun)).to.be.true;
+                                    expect(rangedCsl.cslAppliesTo(aoeDrainStun)).to.be.true;
+                                });
+
+                                it("should not apply CSL for Ranged combat - rangedCsl", function () {
+                                    expect(rangedCsl.cslAppliesTo(strike)).to.be.false;
+                                    expect(rangedCsl.cslAppliesTo(basicStrike)).to.be.false;
+                                    expect(rangedCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                    expect(rangedCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                                    expect(hthCsl.cslAppliesTo(flyingDodge)).to.be.false;
+                                });
+
+                                it("should apply CSL for Mental combat - mentalCsl", function () {
+                                    expect(mentalCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                    expect(mentalCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                                });
+
+                                it("should not apply CSL for Mental combat - mentalCsl", function () {
+                                    expect(mentalCsl.cslAppliesTo(strike)).to.be.false;
+                                    expect(mentalCsl.cslAppliesTo(basicStrike)).to.be.false;
+                                    expect(mentalCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                                    expect(mentalCsl.cslAppliesTo(singleTargetDrainStun)).to.be.false;
+                                    expect(mentalCsl.cslAppliesTo(aoeDrainStun)).to.be.false;
+                                    expect(hthCsl.cslAppliesTo(flyingDodge)).to.be.false;
+                                });
+
+                                it("should apply CSL to DCV HTH and Ranged combat - hthAndRangedDcvCsl", function () {
+                                    expect(hthAndRangedDcvCsl.cslAppliesTo(basicShot)).to.be.true;
+                                    expect(hthAndRangedDcvCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                    expect(hthAndRangedDcvCsl.cslAppliesTo(aoeDrainStun)).to.be.true;
+                                });
+
+                                it("should not apply CSL to DCV HTH and Ranged combat - hthAndRangedDcvCsl", function () {
+                                    expect(hthAndRangedDcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                    expect(hthAndRangedDcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                                });
+
+                                it("should apply CSL to DCV HTH and Mental combat - hthAndMentalDcvCsl", function () {
+                                    expect(hthAndMentalDcvCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                    expect(hthAndMentalDcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                                    expect(hthAndMentalDcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                });
+
+                                it("should not apply CSL to DCV HTH and Mental combat - hthAndMentalDcvCsl", function () {
+                                    expect(hthAndMentalDcvCsl.cslAppliesTo(basicShot)).to.be.false;
+                                    expect(hthAndMentalDcvCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                                });
+
+                                it("should apply CSL to DCV Ranged and Mental combat - rangedAndMentalDcvCsl", function () {
+                                    expect(rangedAndMentalDcvCsl.cslAppliesTo(basicShot)).to.be.true;
+                                    expect(rangedAndMentalDcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                });
+
+                                it("should not apply CSL to DCV Ranged and Mental combat - rangedAndMentalDcvCsl", function () {
+                                    expect(rangedAndMentalDcvCsl.cslAppliesTo(strike)).to.be.false;
+                                    expect(rangedAndMentalDcvCsl.cslAppliesTo(basicStrike)).to.be.false;
+                                });
+
+                                it("should apply CSL to OCV HTH and Ranged combat - hthAndRangedOcvCsl", function () {
+                                    expect(hthAndRangedOcvCsl.cslAppliesTo(basicShot)).to.be.true;
+                                    expect(hthAndRangedOcvCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                    expect(hthAndRangedOcvCsl.cslAppliesTo(aoeDrainStun)).to.be.true;
+                                });
+
+                                it("should not apply CSL to OCV HTH and Ranged combat - hthAndRangedOcvCsl", function () {
+                                    expect(hthAndRangedOcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                    expect(hthAndRangedOcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                                });
+
+                                it("should apply CSL to OCV HTH and Mental combat - hthAndMentalOcvCsl", function () {
+                                    expect(hthAndMentalOcvCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                    expect(hthAndMentalOcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                                    expect(hthAndMentalOcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                });
+
+                                it("should not apply CSL to OCV HTH and Mental combat - hthAndMentalOcvCsl", function () {
+                                    expect(hthAndMentalOcvCsl.cslAppliesTo(basicShot)).to.be.false;
+                                    expect(hthAndMentalOcvCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                                });
+
+                                it("should apply CSL to OCV Ranged and Mental combat - rangedAndMentalOcvCsl", function () {
+                                    expect(rangedAndMentalOcvCsl.cslAppliesTo(basicShot)).to.be.true;
+                                    expect(rangedAndMentalOcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                });
+
+                                it("should not apply CSL to OCV Ranged and Mental combat - rangedAndMentalOcvCsl", function () {
+                                    expect(rangedAndMentalOcvCsl.cslAppliesTo(strike)).to.be.false;
+                                    expect(rangedAndMentalOcvCsl.cslAppliesTo(basicStrike)).to.be.false;
+                                });
+
+                                it("should apply CSL to all combat types - allCsl", function () {
+                                    expect(allCsl.cslAppliesTo(strike)).to.be.true;
+                                    expect(allCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                    expect(allCsl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
+                                    expect(allCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                    expect(allCsl.cslAppliesTo(basicShot)).to.be.true;
+                                });
+                            });
+
+                            describe("SLs", function () {
+                                it("should apply overall SLs to mental and non mental attacks", function () {
+                                    expect(overallSl.cslAppliesTo(singleTargetDrainStun)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(aoeDrainStun)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(strike)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(basicStrike)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(martialStrike)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(flyingDodge)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(basicShot)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(defensiveShot)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(offensiveRangedDisarm)).to.be.true;
+                                });
+
+                                it("should not apply non overall SLs to mental or non mental attacks", function () {
+                                    expect(nonOverallSl.cslAppliesTo(singleTargetDrainStun)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(aoeDrainStun)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(strike)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(basicStrike)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(martialStrike)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(flyingDodge)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(basicShot)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(defensiveShot)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(offensiveRangedDisarm)).to.be.false;
+                                });
+                            });
+
+                            describe("Invalid TWODCV/TWOOCV CSLs", function () {
+                                it("should recognize correctly specified TWODCV", function () {
+                                    expect(hthAndRangedDcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                    expect(hthAndRangedDcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
+
+                                    expect(hthAndMentalDcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                    expect(hthAndMentalDcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
+
+                                    expect(rangedAndMentalDcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                    expect(rangedAndMentalDcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
+                                });
+
+                                it("should recognize incorrectly specified TWODCV", function () {
+                                    expect(invalidTwoDcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                    expect(invalidTwoDcvCsl.csl5eCslDcvOcvTypes).to.have.length(0);
+                                });
+
+                                it("should recognize correctly specified TWOOCV", function () {
+                                    expect(hthAndRangedOcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                    expect(hthAndRangedOcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
+
+                                    expect(hthAndMentalOcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                    expect(hthAndMentalOcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
+
+                                    expect(rangedAndMentalOcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                    expect(rangedAndMentalOcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
+                                });
+
+                                it("should recognize incorrectly specified TWOOCV", function () {
+                                    expect(invalidTwoOcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
+                                    expect(invalidTwoOcvCsl.csl5eCslDcvOcvTypes).to.have.length(0);
+                                });
+                            });
+                        });
+
+                        describe("cslChoices function", async function () {
+                            describe("CSLs (Physical and Mental)", function () {
+                                it("should return correct choices for SINGLESINGLE CSL", function () {
+                                    // SINGLESINGLE should only have OCV, no DCV or DC
+                                    const choices = notImplementedCorrectlyCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(2);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.not.have.property("dcv");
+                                    expect(choices).to.not.have.property("dmcv");
+                                    expect(choices).to.not.have.property("dc");
+                                });
+
+                                it("should return correct choices for SINGLE CSL", function () {
+                                    // SINGLE should only have OCV, no DCV or DC
+                                    const choices = singleNonMentalCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(2);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.not.have.property("dcvRanged");
+                                    expect(choices).to.not.have.property("dcvHth");
+                                    expect(choices).to.not.have.property("dmcv");
+                                    expect(choices).to.not.have.property("dc");
+                                });
+
+                                it("should return correct choices for SINGLESTRIKE CSL", function () {
+                                    // SINGLESTRIKE should only have OCV, no DCV or DC
+                                    const choices = singleStrikeCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(2);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.not.have.property("dcvRanged");
+                                    expect(choices).to.not.have.property("dcvHth");
+                                    expect(choices).to.not.have.property("dmcv");
+                                    expect(choices).to.not.have.property("dc");
+                                });
+
+                                it("should return correct choices for STRIKE CSL", function () {
+                                    // STRIKE CSL should have OCV (non mental and mental), DCV (hth, ranged, and mental), and DC
+                                    const choices = anyStrikeCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(6);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
+                                });
+
+                                it("should return correct choices for TIGHT CSL", function () {
+                                    // TIGHT should have OCV (non mental and mental), DCV (hth, ranged, and mental), and DC
+                                    const choices = multipowerTightGroupOfAttacksCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(6);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
+                                });
+
+                                it("should return correct choices for MARTIAL CSL", function () {
+                                    // MARTIAL should have OCV, DCV (both), and DC. Assume GM allows mental too.
+                                    const choices = martialManeuversCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(6);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
+                                });
+
+                                it("should return correct choices for MAGIC CSL", function () {
+                                    // MAGIC should have OCV (non mental and mental), DCV (hth, ranged, and mental), and DC
+                                    const choices = magicSubsetCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(6);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
+                                });
+
+                                it("should return correct choices for BROAD CSL", function () {
+                                    // BROAD should have OCV (non mental and mental), DCV (hth, ranged, and mental), and DC
+                                    const choices = multipowerBroadGroupOfAttacksCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(6);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
+                                });
+
+                                it("should return correct choices for HTHDCV CSL - HTH option", function () {
+                                    // HTHDCV should not ever have OCV, DCV (ranged), and DC displayed
+                                    const choices = hthDcvCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(1);
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.not.have.property("dcvRanged");
+                                    expect(choices).to.not.have.property("ocv");
+                                    expect(choices).to.not.have.property("dc");
+                                });
+
+                                it("should return correct choices for HTHDCV CSL - Ranged option", function () {
+                                    // HTHDCV should not ever have OCV, DCV (HTH), and DC displayed
+                                    const choices = rangedDcvCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(1);
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.not.have.property("dcvHth");
+                                    expect(choices).to.not.have.property("ocv");
+                                    expect(choices).to.not.have.property("dc");
+                                });
+
+                                it("should return correct choices for DECV CSL", function () {
+                                    // DECV should not ever have OMCV, DMCV, and DC displayed as it's an Active Effect
+                                    const choices = decvCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(1);
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.not.have.property("omcv");
+                                    expect(choices).to.not.have.property("dcvRanged");
+                                    expect(choices).to.not.have.property("dcvHth");
+                                    expect(choices).to.not.have.property("dc");
+                                });
+
+                                it("should return correct choices for HTH CSL", function () {
+                                    // HTH should have OCV, DCV (HTH only), and DC
+                                    const choices = hthCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(3);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dc");
+                                    expect(choices).to.not.have.property("dcvRanged");
+                                });
+
+                                it("should return correct choices for RANGED CSL", function () {
+                                    // RANGED should have OCV, DCV (ranged only), and DC
+                                    const choices = rangedCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(3);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dc");
+                                    expect(choices).to.not.have.property("dcvHth");
+                                });
+
+                                it("should return correct choices for MENTAL CSL", function () {
+                                    // MENTAL should have OMCV, DMCV, and DC
+                                    const choices = mentalCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(3);
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
+                                });
+
+                                it("should return correct choices for DCV CSL", function () {
+                                    // DCV should not ever have OCV and DC displayed as it's an Active Effect
+                                    const choices = dcvCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(2);
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.not.have.property("ocv");
+                                    expect(choices).to.not.have.property("omcv");
+                                    expect(choices).to.not.have.property("dc");
+                                });
+
+                                it("should return correct choices for TWOOCV CSL - HTH and Ranged", function () {
+                                    // TWOOCV should have OCV, DCV (both), and DC
+                                    const choices = hthAndRangedOcvCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(4);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dc");
+                                });
+
+                                it("should return correct choices for TWOOCV CSL - HTH and Mental", function () {
+                                    // TWOOCV should have OCV, OMCV, DCV (HTH), DMCV, and DC
+                                    const choices = hthAndMentalOcvCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(5);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
+                                    expect(choices).to.not.have.property("dcvRanged");
+                                });
+
+                                it("should return correct choices for TWOOCV CSL - Ranged and Mental", function () {
+                                    // TWOOCV should have OCV, OMCV, DCV (ranged), DMCV, and DC
+                                    const choices = rangedAndMentalOcvCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(5);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
+                                    expect(choices).to.not.have.property("dcvHth");
+                                });
+
+                                it("should return correct choices for TWODCV CSL - HTH and Ranged", function () {
+                                    // TWODCV should not have OCV, OMCV, and DC
+                                    const choices = hthAndRangedDcvCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(2);
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.not.have.property("ocv");
+                                    expect(choices).to.not.have.property("omcv");
+                                    expect(choices).to.not.have.property("dc");
+                                });
+
+                                it("should return correct choices for TWODCV CSL - HTH and Mental", function () {
+                                    // TWODCV not should have OCV, OMCV, DCV (ranged), and DC displayed
+                                    const choices = hthAndMentalDcvCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(2);
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.not.have.property("ocv");
+                                    expect(choices).to.not.have.property("omcv");
+                                    expect(choices).to.not.have.property("dc");
+                                    expect(choices).to.not.have.property("dcvRanged");
+                                });
+
+                                it("should return correct choices for TWODCV CSL - Ranged and Mental", function () {
+                                    // TWODCV should not ever have OCV, OMCV, DCV (hth), and DC displayed
+                                    const choices = rangedAndMentalDcvCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(2);
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.not.have.property("ocv");
+                                    expect(choices).to.not.have.property("omcv");
+                                    expect(choices).to.not.have.property("dc");
+                                    expect(choices).to.not.have.property("dcvHth");
+                                });
+
+                                it("should return correct choices for ALL CSL", function () {
+                                    const allCsl = actor.items.find(
+                                        (item) =>
+                                            item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "ALL",
+                                    );
+                                    expect(!!allCsl).to.be.true;
+
+                                    // ALL CSL should have OCV, OMCV, DCV (both), and DC
+                                    const choices = allCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(6);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
+                                });
+                            });
+
+                            describe("SLs", function () {
+                                it("should return correct choices for OVERALL Skill Levels", function () {
+                                    const overallSl = actor.items.find(
+                                        (item) =>
+                                            item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "OVERALL",
+                                    );
+                                    expect(!!overallSl).to.be.true;
+
+                                    const choices = overallSl.cslChoices;
+                                    // OVERALL Skill Levels should have all combat values
+                                    expect(Object.keys(choices)).to.have.length(6);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
+                                });
+
+                                it("should return correct choices for NONCOMBAT Skill Levels", function () {
+                                    const NonCombatSl = actor.items.find(
+                                        (item) =>
+                                            item.system.XMLID === "SKILL_LEVELS" &&
+                                            item.system.OPTIONID === "NONCOMBAT",
+                                    );
+                                    expect(!!NonCombatSl).to.be.true;
+
+                                    // Only OVERALL Skill Levels should have all combat values
+                                    const choices = NonCombatSl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(0);
+                                    expect(choices).to.not.have.property("ocv");
+                                    expect(choices).to.not.have.property("omcv");
+                                    expect(choices).to.not.have.property("dcvRanged");
+                                    expect(choices).to.not.have.property("dcvHth");
+                                    expect(choices).to.not.have.property("dmcv");
+                                    expect(choices).to.not.have.property("dc");
+                                });
+                            });
+                        });
                     });
 
-                    after(async function () {
-                        await deleteQuenchActor({ quench: this, actor });
-                    });
-
-                    describe("Applicability To Attack - cslAppliesTo", function () {
-                        describe("cslAppliesTo correctness", function () {
-                            it("should return false when not called on a CSL/MCSL/SL", function () {
-                                expect(strike.cslAppliesTo(strike)).to.be.false;
-                            });
-                        });
-
-                        describe("CSLs", function () {
-                            // The 1 point CSL should only apply to a particular maneuver with a particular weapon that is listed
-                            // but we don't have a way to do that.
-                            it.skip("should not apply CSL to unlisted power - notImplementedCorrectlyCsl", function () {
-                                expect(notImplementedCorrectlyCsl.cslAppliesTo(strike)).to.be.false;
-                            });
-
-                            it("should not apply CSL because it's not listed - singleNonMentalCsl", function () {
-                                expect(singleNonMentalCsl.cslAppliesTo(basicStrike)).to.be.false;
-                            });
-
-                            it("should apply CSL because it is listed - singleNonMentalCsl", function () {
-                                expect(singleNonMentalCsl.cslAppliesTo(strike)).to.be.true;
-                            });
-
-                            it("should not apply CSL to power because it's not listed - singleMentalCsl", function () {
-                                expect(singleMentalCsl.cslAppliesTo(aoeDrainStun)).to.be.false;
-                                expect(singleMentalCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
-                            });
-
-                            it("should apply CSL to non mental power that is listed - singleMentalCsl", function () {
-                                expect(singleMentalCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                            });
-
-                            it("should not apply CSL to power because it's not listed - singleStrikeCsl", function () {
-                                expect(singleStrikeCsl.cslAppliesTo(strike)).to.be.false;
-                            });
-
-                            it("should apply CSL to non mental power that is listed - singleStrikeCsl", function () {
-                                expect(singleStrikeCsl.cslAppliesTo(basicStrike)).to.be.true;
-                            });
-
-                            it("should apply CSL to power because it's listed - anyStrikeCsl", function () {
-                                expect(anyStrikeCsl.cslAppliesTo(strike)).to.be.true;
-                                expect(anyStrikeCsl.cslAppliesTo(basicStrike)).to.be.true;
-                            });
-
-                            it("should not apply CSL to power that is not listed - anyStrikeCsl", function () {
-                                expect(anyStrikeCsl.cslAppliesTo(flyingDodge)).to.be.false;
-                                expect(anyStrikeCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
-                                expect(anyStrikeCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
-                            });
-
-                            it("should not apply CSL to power because it's not listed - multipowerTightGroupOfAttacksCsl", function () {
-                                expect(multipowerTightGroupOfAttacksCsl.cslAppliesTo(singleTargetMentalBlast)).to.be
-                                    .false;
-                            });
-
-                            it("should apply CSL to non mental power that is listed - multipowerTightGroupOfAttacksCsl", function () {
-                                expect(multipowerTightGroupOfAttacksCsl.cslAppliesTo(singleTargetDrainStun)).to.be.true;
-                                expect(multipowerTightGroupOfAttacksCsl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
-                                expect(multipowerTightGroupOfAttacksCsl.cslAppliesTo(aoeDrainStun)).to.be.true;
-                            });
-
-                            it("should not apply CSL to power because it's not listed - listHthMartialArtsStyleCsl", function () {
-                                expect(listHthMartialArtsStyleCsl.cslAppliesTo(basicShot)).to.be.false;
-                            });
-
-                            it("should apply CSL to non mental power that is listed - listHthMartialArtsStyleCsl", function () {
-                                expect(listHthMartialArtsStyleCsl.cslAppliesTo(basicStrike)).to.be.true;
-                                expect(listHthMartialArtsStyleCsl.cslAppliesTo(martialStrike)).to.be.true;
-                                expect(listHthMartialArtsStyleCsl.cslAppliesTo(flyingDodge)).to.be.true;
-                            });
-
-                            it("should not apply CSL to power because it's not listed - martialManeuversCsl", function () {
-                                expect(martialManeuversCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
-                            });
-
-                            it("should apply CSL to non mental power that is listed - martialManeuversCsl", function () {
-                                expect(martialManeuversCsl.cslAppliesTo(basicStrike)).to.be.true;
-                                expect(martialManeuversCsl.cslAppliesTo(martialStrike)).to.be.true;
-                                expect(martialManeuversCsl.cslAppliesTo(flyingDodge)).to.be.true;
-                                expect(martialManeuversCsl.cslAppliesTo(basicShot)).to.be.true;
-                                expect(martialManeuversCsl.cslAppliesTo(defensiveShot)).to.be.true;
-                                expect(martialManeuversCsl.cslAppliesTo(offensiveRangedDisarm)).to.be.true;
-                            });
-
-                            it("should not apply CSL to power because it's not listed - magicSubsetCsl", function () {
-                                expect(magicSubsetCsl.cslAppliesTo(basicShot)).to.be.false;
-                            });
-
-                            it("should apply CSL to non mental power that is listed - magicSubsetCsl", function () {
-                                expect(magicSubsetCsl.cslAppliesTo(singleTargetDrainStun)).to.be.true;
-                                expect(magicSubsetCsl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
-                                expect(magicSubsetCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                            });
-
-                            it("should not apply CSL to power because it's not listed - multipowerBroadGroupOfAttacksCsl", function () {
-                                expect(multipowerBroadGroupOfAttacksCsl.cslAppliesTo(singleTargetDrainStun)).to.be
-                                    .false;
-                            });
-
-                            it("should apply CSL to non mental power that is listed - multipowerBroadGroupOfAttacksCsl", function () {
-                                expect(multipowerBroadGroupOfAttacksCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
-                                expect(multipowerBroadGroupOfAttacksCsl.cslAppliesTo(singleTargetMentalBlast)).to.be
-                                    .true;
-                            });
-
-                            it("should apply DCV with HTH combat - hthDcvCsl", function () {
-                                expect(hthDcvCsl.cslAppliesTo(strike)).to.be.true;
-                                expect(hthDcvCsl.cslAppliesTo(basicStrike)).to.be.true;
-                            });
-
-                            it("should not apply DCV with HTH combat - hthDcvCsl", function () {
-                                expect(hthDcvCsl.cslAppliesTo(flyingDodge)).to.be.false;
-                                expect(hthDcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
-                                expect(hthDcvCsl.cslAppliesTo(basicShot)).to.be.false;
-                                expect(hthDcvCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
-                            });
-
-                            it("should apply DCV with Ranged combat - rangedDcvCsl", function () {
-                                expect(rangedDcvCsl.cslAppliesTo(basicShot)).to.be.true;
-                                expect(rangedDcvCsl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
-                            });
-
-                            it("should not apply DCV with Ranged combat - rangedDcvCsl", function () {
-                                expect(rangedDcvCsl.cslAppliesTo(strike)).to.be.false;
-                                expect(rangedDcvCsl.cslAppliesTo(basicStrike)).to.be.false;
-                                expect(rangedDcvCsl.cslAppliesTo(flyingDodge)).to.be.false;
-                                expect(rangedDcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
-                            });
-
-                            it("should apply CSL for HTH combat - hthCsl", function () {
-                                expect(hthCsl.cslAppliesTo(strike)).to.be.true;
-                                expect(hthCsl.cslAppliesTo(basicStrike)).to.be.true;
-                            });
-
-                            it("should not apply CSL for HTH combat - hthCsl", function () {
-                                expect(hthCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
-                                expect(hthCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
-                                expect(hthCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
-                                expect(hthCsl.cslAppliesTo(singleTargetDrainStun)).to.be.false;
-                                expect(hthCsl.cslAppliesTo(aoeDrainStun)).to.be.false;
-                                expect(hthCsl.cslAppliesTo(flyingDodge)).to.be.false;
-                            });
-
-                            it("should apply CSL for Ranged combat - rangedCsl", function () {
-                                expect(rangedCsl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
-                                expect(rangedCsl.cslAppliesTo(singleTargetDrainStun)).to.be.true;
-                                expect(rangedCsl.cslAppliesTo(aoeDrainStun)).to.be.true;
-                            });
-
-                            it("should not apply CSL for Ranged combat - rangedCsl", function () {
-                                expect(rangedCsl.cslAppliesTo(strike)).to.be.false;
-                                expect(rangedCsl.cslAppliesTo(basicStrike)).to.be.false;
-                                expect(rangedCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
-                                expect(rangedCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
-                                expect(hthCsl.cslAppliesTo(flyingDodge)).to.be.false;
-                            });
-
-                            it("should apply CSL for Mental combat - mentalCsl", function () {
-                                expect(mentalCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                                expect(mentalCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
-                            });
-
-                            it("should not apply CSL for Mental combat - mentalCsl", function () {
-                                expect(mentalCsl.cslAppliesTo(strike)).to.be.false;
-                                expect(mentalCsl.cslAppliesTo(basicStrike)).to.be.false;
-                                expect(mentalCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
-                                expect(mentalCsl.cslAppliesTo(singleTargetDrainStun)).to.be.false;
-                                expect(mentalCsl.cslAppliesTo(aoeDrainStun)).to.be.false;
-                                expect(hthCsl.cslAppliesTo(flyingDodge)).to.be.false;
-                            });
-
-                            it("should apply CSL to DCV HTH and Ranged combat - hthAndRangedDcvCsl", function () {
-                                expect(hthAndRangedDcvCsl.cslAppliesTo(basicShot)).to.be.true;
-                                expect(hthAndRangedDcvCsl.cslAppliesTo(basicStrike)).to.be.true;
-                                expect(hthAndRangedDcvCsl.cslAppliesTo(aoeDrainStun)).to.be.true;
-                            });
-
-                            it("should not apply CSL to DCV HTH and Ranged combat - hthAndRangedDcvCsl", function () {
-                                expect(hthAndRangedDcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
-                                expect(hthAndRangedDcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
-                            });
-
-                            it("should apply CSL to DCV HTH and Mental combat - hthAndMentalDcvCsl", function () {
-                                expect(hthAndMentalDcvCsl.cslAppliesTo(basicStrike)).to.be.true;
-                                expect(hthAndMentalDcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
-                                expect(hthAndMentalDcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                            });
-
-                            it("should not apply CSL to DCV HTH and Mental combat - hthAndMentalDcvCsl", function () {
-                                expect(hthAndMentalDcvCsl.cslAppliesTo(basicShot)).to.be.false;
-                                expect(hthAndMentalDcvCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
-                            });
-
-                            it("should apply CSL to DCV Ranged and Mental combat - rangedAndMentalDcvCsl", function () {
-                                expect(rangedAndMentalDcvCsl.cslAppliesTo(basicShot)).to.be.true;
-                                expect(rangedAndMentalDcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                            });
-
-                            it("should not apply CSL to DCV Ranged and Mental combat - rangedAndMentalDcvCsl", function () {
-                                expect(rangedAndMentalDcvCsl.cslAppliesTo(strike)).to.be.false;
-                                expect(rangedAndMentalDcvCsl.cslAppliesTo(basicStrike)).to.be.false;
-                            });
-
-                            it("should apply CSL to OCV HTH and Ranged combat - hthAndRangedOcvCsl", function () {
-                                expect(hthAndRangedOcvCsl.cslAppliesTo(basicShot)).to.be.true;
-                                expect(hthAndRangedOcvCsl.cslAppliesTo(basicStrike)).to.be.true;
-                                expect(hthAndRangedOcvCsl.cslAppliesTo(aoeDrainStun)).to.be.true;
-                            });
-
-                            it("should not apply CSL to OCV HTH and Ranged combat - hthAndRangedOcvCsl", function () {
-                                expect(hthAndRangedOcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
-                                expect(hthAndRangedOcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
-                            });
-
-                            it("should apply CSL to OCV HTH and Mental combat - hthAndMentalOcvCsl", function () {
-                                expect(hthAndMentalOcvCsl.cslAppliesTo(basicStrike)).to.be.true;
-                                expect(hthAndMentalOcvCsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
-                                expect(hthAndMentalOcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                            });
-
-                            it("should not apply CSL to OCV HTH and Mental combat - hthAndMentalOcvCsl", function () {
-                                expect(hthAndMentalOcvCsl.cslAppliesTo(basicShot)).to.be.false;
-                                expect(hthAndMentalOcvCsl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
-                            });
-
-                            it("should apply CSL to OCV Ranged and Mental combat - rangedAndMentalOcvCsl", function () {
-                                expect(rangedAndMentalOcvCsl.cslAppliesTo(basicShot)).to.be.true;
-                                expect(rangedAndMentalOcvCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                            });
-
-                            it("should not apply CSL to OCV Ranged and Mental combat - rangedAndMentalOcvCsl", function () {
-                                expect(rangedAndMentalOcvCsl.cslAppliesTo(strike)).to.be.false;
-                                expect(rangedAndMentalOcvCsl.cslAppliesTo(basicStrike)).to.be.false;
-                            });
-
-                            it("should apply CSL to all combat types - allCsl", function () {
-                                expect(allCsl.cslAppliesTo(strike)).to.be.true;
-                                expect(allCsl.cslAppliesTo(basicStrike)).to.be.true;
-                                expect(allCsl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
-                                expect(allCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                                expect(allCsl.cslAppliesTo(basicShot)).to.be.true;
-                            });
-                        });
-
-                        describe("SLs", function () {
-                            it("should apply overall SLs to mental and non mental attacks", function () {
-                                expect(overallSl.cslAppliesTo(singleTargetDrainStun)).to.be.true;
-                                expect(overallSl.cslAppliesTo(singleTargetDrainBody)).to.be.true;
-                                expect(overallSl.cslAppliesTo(aoeDrainStun)).to.be.true;
-                                expect(overallSl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                                expect(overallSl.cslAppliesTo(aoeMentalBlast)).to.be.true;
-                                expect(overallSl.cslAppliesTo(strike)).to.be.true;
-                                expect(overallSl.cslAppliesTo(basicStrike)).to.be.true;
-                                expect(overallSl.cslAppliesTo(martialStrike)).to.be.true;
-                                expect(overallSl.cslAppliesTo(flyingDodge)).to.be.true;
-                                expect(overallSl.cslAppliesTo(basicShot)).to.be.true;
-                                expect(overallSl.cslAppliesTo(defensiveShot)).to.be.true;
-                                expect(overallSl.cslAppliesTo(offensiveRangedDisarm)).to.be.true;
-                            });
-
-                            it("should not apply non overall SLs to mental or non mental attacks", function () {
-                                expect(nonOverallSl.cslAppliesTo(singleTargetDrainStun)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(singleTargetDrainBody)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(aoeDrainStun)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(aoeMentalBlast)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(strike)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(basicStrike)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(martialStrike)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(flyingDodge)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(basicShot)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(defensiveShot)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(offensiveRangedDisarm)).to.be.false;
-                            });
-                        });
-
-                        describe("Invalid TWODCV/TWOOCV CSLs", function () {
-                            it("should recognize correctly specified TWODCV", function () {
-                                expect(hthAndRangedDcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
-                                expect(hthAndRangedDcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
-
-                                expect(hthAndMentalDcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
-                                expect(hthAndMentalDcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
-
-                                expect(rangedAndMentalDcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
-                                expect(rangedAndMentalDcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
-                            });
-
-                            it("should recognize incorrectly specified TWODCV", function () {
-                                expect(invalidTwoDcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
-                                expect(invalidTwoDcvCsl.csl5eCslDcvOcvTypes).to.have.length(0);
-                            });
-
-                            it("should recognize correctly specified TWOOCV", function () {
-                                expect(hthAndRangedOcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
-                                expect(hthAndRangedOcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
-
-                                expect(hthAndMentalOcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
-                                expect(hthAndMentalOcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
-
-                                expect(rangedAndMentalOcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
-                                expect(rangedAndMentalOcvCsl.csl5eCslDcvOcvTypes).to.have.length(2);
-                            });
-
-                            it("should recognize incorrectly specified TWOOCV", function () {
-                                expect(invalidTwoOcvCsl.csl5eCslDcvOcvTypes).to.be.an("array");
-                                expect(invalidTwoOcvCsl.csl5eCslDcvOcvTypes).to.have.length(0);
-                            });
-                        });
-                    });
-
-                    describe("cslChoices function", async function () {
-                        describe("CSLs (Physical and Mental)", function () {
-                            it("should return correct choices for SINGLESINGLE CSL", function () {
-                                // SINGLESINGLE should only have OCV, no DCV or DC
-                                const choices = notImplementedCorrectlyCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(2);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.not.have.property("dcv");
-                                expect(choices).to.not.have.property("dmcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for SINGLE CSL", function () {
-                                // SINGLE should only have OCV, no DCV or DC
-                                const choices = singleNonMentalCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(2);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.not.have.property("dcvRanged");
-                                expect(choices).to.not.have.property("dcvHth");
-                                expect(choices).to.not.have.property("dmcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for SINGLESTRIKE CSL", function () {
-                                // SINGLESTRIKE should only have OCV, no DCV or DC
-                                const choices = singleStrikeCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(2);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.not.have.property("dcvRanged");
-                                expect(choices).to.not.have.property("dcvHth");
-                                expect(choices).to.not.have.property("dmcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for STRIKE CSL", function () {
-                                // STRIKE CSL should have OCV (non mental and mental), DCV (hth, ranged, and mental), and DC
-                                const choices = anyStrikeCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(6);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for TIGHT CSL", function () {
-                                // TIGHT should have OCV (non mental and mental), DCV (hth, ranged, and mental), and DC
-                                const choices = multipowerTightGroupOfAttacksCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(6);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for MARTIAL CSL", function () {
-                                // MARTIAL should have OCV, DCV (both), and DC. Assume GM allows mental too.
-                                const choices = martialManeuversCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(6);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for MAGIC CSL", function () {
-                                // MAGIC should have OCV (non mental and mental), DCV (hth, ranged, and mental), and DC
-                                const choices = magicSubsetCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(6);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for BROAD CSL", function () {
-                                // BROAD should have OCV (non mental and mental), DCV (hth, ranged, and mental), and DC
-                                const choices = multipowerBroadGroupOfAttacksCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(6);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for HTHDCV CSL - HTH option", function () {
-                                // HTHDCV should not ever have OCV, DCV (ranged), and DC displayed
-                                const choices = hthDcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.not.have.property("dcvRanged");
-                                expect(choices).to.not.have.property("ocv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for HTHDCV CSL - Ranged option", function () {
-                                // HTHDCV should not ever have OCV, DCV (HTH), and DC displayed
-                                const choices = rangedDcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.not.have.property("dcvHth");
-                                expect(choices).to.not.have.property("ocv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for DECV CSL", function () {
-                                // DECV should not ever have OMCV, DMCV, and DC displayed as it's an Active Effect
-                                const choices = decvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.not.have.property("omcv");
-                                expect(choices).to.not.have.property("dcvRanged");
-                                expect(choices).to.not.have.property("dcvHth");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for HTH CSL", function () {
-                                // HTH should have OCV, DCV (HTH only), and DC
-                                const choices = hthCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dc");
-                                expect(choices).to.not.have.property("dcvRanged");
-                            });
-
-                            it("should return correct choices for RANGED CSL", function () {
-                                // RANGED should have OCV, DCV (ranged only), and DC
-                                const choices = rangedCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dc");
-                                expect(choices).to.not.have.property("dcvHth");
-                            });
-
-                            it("should return correct choices for MENTAL CSL", function () {
-                                // MENTAL should have OMCV, DMCV, and DC
-                                const choices = mentalCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for DCV CSL", function () {
-                                // DCV should not ever have OCV and DC displayed as it's an Active Effect
-                                const choices = dcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(2);
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.not.have.property("ocv");
-                                expect(choices).to.not.have.property("omcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for TWOOCV CSL - HTH and Ranged", function () {
-                                // TWOOCV should have OCV, DCV (both), and DC
-                                const choices = hthAndRangedOcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(4);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for TWOOCV CSL - HTH and Mental", function () {
-                                // TWOOCV should have OCV, OMCV, DCV (HTH), DMCV, and DC
-                                const choices = hthAndMentalOcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(5);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                                expect(choices).to.not.have.property("dcvRanged");
-                            });
-
-                            it("should return correct choices for TWOOCV CSL - Ranged and Mental", function () {
-                                // TWOOCV should have OCV, OMCV, DCV (ranged), DMCV, and DC
-                                const choices = rangedAndMentalOcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(5);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                                expect(choices).to.not.have.property("dcvHth");
-                            });
-
-                            it("should return correct choices for TWODCV CSL - HTH and Ranged", function () {
-                                // TWODCV should not have OCV, OMCV, and DC
-                                const choices = hthAndRangedDcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(2);
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.not.have.property("ocv");
-                                expect(choices).to.not.have.property("omcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for TWODCV CSL - HTH and Mental", function () {
-                                // TWODCV not should have OCV, OMCV, DCV (ranged), and DC displayed
-                                const choices = hthAndMentalDcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(2);
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.not.have.property("ocv");
-                                expect(choices).to.not.have.property("omcv");
-                                expect(choices).to.not.have.property("dc");
-                                expect(choices).to.not.have.property("dcvRanged");
-                            });
-
-                            it("should return correct choices for TWODCV CSL - Ranged and Mental", function () {
-                                // TWODCV should not ever have OCV, OMCV, DCV (hth), and DC displayed
-                                const choices = rangedAndMentalDcvCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(2);
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.not.have.property("ocv");
-                                expect(choices).to.not.have.property("omcv");
-                                expect(choices).to.not.have.property("dc");
-                                expect(choices).to.not.have.property("dcvHth");
-                            });
-
-                            it("should return correct choices for ALL CSL", function () {
-                                const allCsl = actor.items.find(
-                                    (item) => item.system.XMLID === "COMBAT_LEVELS" && item.system.OPTIONID === "ALL",
-                                );
-                                expect(!!allCsl).to.be.true;
-
-                                // ALL CSL should have OCV, OMCV, DCV (both), and DC
-                                const choices = allCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(6);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-                        });
-
-                        describe("SLs", function () {
-                            it("should return correct choices for OVERALL Skill Levels", function () {
-                                const overallSl = actor.items.find(
-                                    (item) =>
-                                        item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "OVERALL",
-                                );
-                                expect(!!overallSl).to.be.true;
-
-                                const choices = overallSl.cslChoices;
-                                // OVERALL Skill Levels should have all combat values
-                                expect(Object.keys(choices)).to.have.length(6);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for NONCOMBAT Skill Levels", function () {
-                                const NonCombatSl = actor.items.find(
-                                    (item) =>
-                                        item.system.XMLID === "SKILL_LEVELS" && item.system.OPTIONID === "NONCOMBAT",
-                                );
-                                expect(!!NonCombatSl).to.be.true;
-
-                                // Only OVERALL Skill Levels should have all combat values
-                                const choices = NonCombatSl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(0);
-                                expect(choices).to.not.have.property("ocv");
-                                expect(choices).to.not.have.property("omcv");
-                                expect(choices).to.not.have.property("dcvRanged");
-                                expect(choices).to.not.have.property("dcvHth");
-                                expect(choices).to.not.have.property("dmcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-                        });
-                    });
-                });
-
-                describe("6e", function () {
-                    const contents = `
+                    describe("6e", function () {
+                        const contents = `
                             <?xml version="1.0" encoding="UTF-16"?>
                             <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
                                 <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
@@ -1399,521 +1417,532 @@ export function registerCslTests(quench) {
                                 <EQUIPMENT />
                             </CHARACTER>
                         `;
-                    let actor;
+                        let actor;
 
-                    let singleTargetMentalBlast;
-                    let aoeMentalBlast;
-                    let singleTargetDrain;
-                    let aoeDrain;
-                    let strike;
-                    let basicStrike;
-                    let counterstrike;
-                    let basicShot;
-                    let singleTargetHka;
-                    let singleTargetMentalHka;
-                    let singleTargetRka;
-                    let singleTargetMentalRka;
-                    let singleTargetHa;
-                    let singleTargetEb;
+                        let singleTargetMentalBlast;
+                        let aoeMentalBlast;
+                        let singleTargetDrain;
+                        let aoeDrain;
+                        let strike;
+                        let basicStrike;
+                        let counterstrike;
+                        let basicShot;
+                        let singleTargetHka;
+                        let singleTargetMentalHka;
+                        let singleTargetRka;
+                        let singleTargetMentalRka;
+                        let singleTargetHa;
+                        let singleTargetEb;
 
-                    let singleAttackCslShouldNotWork;
-                    let singleStrikeTargetCsl;
-                    let smallGroupCsl;
-                    let largeGroupCsl;
-                    let hthCsl;
-                    let rangedCsl;
-                    let allAttacksCsl;
+                        let singleAttackCslShouldNotWork;
+                        let singleStrikeTargetCsl;
+                        let smallGroupCsl;
+                        let largeGroupCsl;
+                        let hthCsl;
+                        let rangedCsl;
+                        let allAttacksCsl;
 
-                    let singleMentalAttackShouldNotWork;
-                    let singleMentalAttackMcsl;
-                    let groupIndividualMentalMcsl;
-                    let groupMentalMcsl;
-                    let allMentalMcsl;
+                        let singleMentalAttackShouldNotWork;
+                        let singleMentalAttackMcsl;
+                        let groupIndividualMentalMcsl;
+                        let groupMentalMcsl;
+                        let allMentalMcsl;
 
-                    let overallSl;
-                    let nonOverallSl;
+                        let overallSl;
+                        let nonOverallSl;
 
-                    let veryLimitedWm;
-                    let limitedWm;
-                    let allHthKillingWm;
-                    let allRangedKillingWm;
-                    let allHthNormalWm;
-                    let allRangedNormalWm;
-                    let allHthExplicitWm;
-                    let allRangedExplicitWm;
+                        let veryLimitedWm;
+                        let limitedWm;
+                        let allHthKillingWm;
+                        let allRangedKillingWm;
+                        let allHthNormalWm;
+                        let allRangedNormalWm;
+                        let allHthExplicitWm;
+                        let allRangedExplicitWm;
 
-                    before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
 
-                        singleTargetMentalBlast = actor.items.find(
-                            (item) => item.name === "Single Target Mental Blast",
-                        );
-                        aoeMentalBlast = actor.items.find((item) => item.name === "AoE Mental Blast");
-                        singleTargetDrain = actor.items.find((item) => item.name === "Single Target Drain");
-                        aoeDrain = actor.items.find((item) => item.name === "AoE Drain");
-                        strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
-                        basicStrike = actor.items.find((item) => item.name === "Basic Strike");
-                        counterstrike = actor.items.find((item) => item.name === "Counterstrike");
-                        basicShot = actor.items.find((item) => item.name === "Basic Shot");
-                        singleTargetHka = actor.items.find((item) => item.name === "Single Target HTH Killing Attack");
-                        singleTargetMentalHka = actor.items.find(
-                            (item) => item.name === "Single Target HTH Mental Killing Attack",
-                        );
-                        singleTargetRka = actor.items.find(
-                            (item) => item.name === "Single Target Ranged Killing Attack",
-                        );
-                        singleTargetMentalRka = actor.items.find(
-                            (item) => item.name === "Single Target Ranged Mental Killing Attack",
-                        );
-                        singleTargetHa = actor.items.find((item) => item.name === "Single Target Hand-To-Hand Attack");
-                        singleTargetEb = actor.items.find((item) => item.name === "Single Target Energy Blast");
+                            singleTargetMentalBlast = actor.items.find(
+                                (item) => item.name === "Single Target Mental Blast",
+                            );
+                            aoeMentalBlast = actor.items.find((item) => item.name === "AoE Mental Blast");
+                            singleTargetDrain = actor.items.find((item) => item.name === "Single Target Drain");
+                            aoeDrain = actor.items.find((item) => item.name === "AoE Drain");
+                            strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
+                            basicStrike = actor.items.find((item) => item.name === "Basic Strike");
+                            counterstrike = actor.items.find((item) => item.name === "Counterstrike");
+                            basicShot = actor.items.find((item) => item.name === "Basic Shot");
+                            singleTargetHka = actor.items.find(
+                                (item) => item.name === "Single Target HTH Killing Attack",
+                            );
+                            singleTargetMentalHka = actor.items.find(
+                                (item) => item.name === "Single Target HTH Mental Killing Attack",
+                            );
+                            singleTargetRka = actor.items.find(
+                                (item) => item.name === "Single Target Ranged Killing Attack",
+                            );
+                            singleTargetMentalRka = actor.items.find(
+                                (item) => item.name === "Single Target Ranged Mental Killing Attack",
+                            );
+                            singleTargetHa = actor.items.find(
+                                (item) => item.name === "Single Target Hand-To-Hand Attack",
+                            );
+                            singleTargetEb = actor.items.find((item) => item.name === "Single Target Energy Blast");
 
-                        singleAttackCslShouldNotWork = actor.items.find(
-                            (item) => item.name === "Single Attack CSL Should Not Work",
-                        );
-                        singleStrikeTargetCsl = actor.items.find((item) => item.name === "Strike Single Target CSL");
-                        smallGroupCsl = actor.items.find((item) => item.name === "Small Group CSL");
-                        largeGroupCsl = actor.items.find((item) => item.name === "Large Group CSL");
-                        hthCsl = actor.items.find((item) => item.name === "HTH CSL");
-                        rangedCsl = actor.items.find((item) => item.name === "Ranged CSL");
-                        allAttacksCsl = actor.items.find((item) => item.name === "All Attacks CSL");
+                            singleAttackCslShouldNotWork = actor.items.find(
+                                (item) => item.name === "Single Attack CSL Should Not Work",
+                            );
+                            singleStrikeTargetCsl = actor.items.find(
+                                (item) => item.name === "Strike Single Target CSL",
+                            );
+                            smallGroupCsl = actor.items.find((item) => item.name === "Small Group CSL");
+                            largeGroupCsl = actor.items.find((item) => item.name === "Large Group CSL");
+                            hthCsl = actor.items.find((item) => item.name === "HTH CSL");
+                            rangedCsl = actor.items.find((item) => item.name === "Ranged CSL");
+                            allAttacksCsl = actor.items.find((item) => item.name === "All Attacks CSL");
 
-                        singleMentalAttackShouldNotWork = actor.items.find(
-                            (item) => item.name === "Single Mental Attack MCSL Should Not Work",
-                        );
-                        singleMentalAttackMcsl = actor.items.find((item) => item.name === "Single Mental Attack MCSL");
-                        groupIndividualMentalMcsl = actor.items.find((item) => item.name === "Group MCSL (Individual)");
-                        groupMentalMcsl = actor.items.find((item) => item.name === "Group MCSL");
-                        allMentalMcsl = actor.items.find((item) => item.name === "All Mental MCSL");
+                            singleMentalAttackShouldNotWork = actor.items.find(
+                                (item) => item.name === "Single Mental Attack MCSL Should Not Work",
+                            );
+                            singleMentalAttackMcsl = actor.items.find(
+                                (item) => item.name === "Single Mental Attack MCSL",
+                            );
+                            groupIndividualMentalMcsl = actor.items.find(
+                                (item) => item.name === "Group MCSL (Individual)",
+                            );
+                            groupMentalMcsl = actor.items.find((item) => item.name === "Group MCSL");
+                            allMentalMcsl = actor.items.find((item) => item.name === "All Mental MCSL");
 
-                        overallSl = actor.items.find((item) => item.name === "Overall SL");
-                        nonOverallSl = actor.items.find((item) => item.name === "Non Overall SL");
+                            overallSl = actor.items.find((item) => item.name === "Overall SL");
+                            nonOverallSl = actor.items.find((item) => item.name === "Non Overall SL");
 
-                        veryLimitedWm = actor.items.find((item) => item.name === "WM Very Limited Group");
-                        limitedWm = actor.items.find((item) => item.name === "WM Limited Group");
-                        allHthKillingWm = actor.items.find((item) => item.name === "WM All HTH KA Weapons");
-                        allRangedKillingWm = actor.items.find((item) => item.name === "WM All Ranged KA Weapons");
-                        allHthNormalWm = actor.items.find((item) => item.name === "WM All HTH Normal Weapons");
-                        allRangedNormalWm = actor.items.find((item) => item.name === "WM All Ranged Normal Weapons");
-                        allHthExplicitWm = actor.items.find((item) => item.name === "WM All HTH Explicit Weapons");
-                        allRangedExplicitWm = actor.items.find(
-                            (item) => item.name === "WM All Ranged Explicit Weapons",
-                        );
-                    });
+                            veryLimitedWm = actor.items.find((item) => item.name === "WM Very Limited Group");
+                            limitedWm = actor.items.find((item) => item.name === "WM Limited Group");
+                            allHthKillingWm = actor.items.find((item) => item.name === "WM All HTH KA Weapons");
+                            allRangedKillingWm = actor.items.find((item) => item.name === "WM All Ranged KA Weapons");
+                            allHthNormalWm = actor.items.find((item) => item.name === "WM All HTH Normal Weapons");
+                            allRangedNormalWm = actor.items.find(
+                                (item) => item.name === "WM All Ranged Normal Weapons",
+                            );
+                            allHthExplicitWm = actor.items.find((item) => item.name === "WM All HTH Explicit Weapons");
+                            allRangedExplicitWm = actor.items.find(
+                                (item) => item.name === "WM All Ranged Explicit Weapons",
+                            );
+                        });
 
-                    after(async function () {
-                        await deleteQuenchActor({ quench: this, actor });
-                    });
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
 
-                    describe("Applicability To Attack - cslAppliesTo", function () {
-                        describe("cslAppliesTo correctness", function () {
-                            it("should return false when not called on a CSL/MCSL/SL", function () {
-                                expect(strike.cslAppliesTo(strike)).to.be.false;
+                        describe("Applicability To Attack - cslAppliesTo", function () {
+                            describe("cslAppliesTo correctness", function () {
+                                it("should return false when not called on a CSL/MCSL/SL", function () {
+                                    expect(strike.cslAppliesTo(strike)).to.be.false;
+                                });
+                            });
+
+                            describe("levels to csl array entries", function () {
+                                it("should have the correct number of csl array entries (= LEVELS) - CSL", function () {
+                                    expect(hthCsl.system.LEVELS).to.equal(hthCsl.system.csl.length);
+                                });
+
+                                it("should have the correct number of csl array entries (= LEVELS) - MCSL", function () {
+                                    expect(allMentalMcsl.system.LEVELS).to.equal(allMentalMcsl.system.csl.length);
+                                });
+
+                                it("should have the correct number of csl array entries (= LEVELS) - Overall SL", function () {
+                                    expect(overallSl.system.LEVELS).to.equal(overallSl.system.csl.length);
+                                });
+
+                                it("should have the correct number of csl array entries (6 x LEVELS) - Weapon Master", function () {
+                                    expect(6 * allRangedKillingWm.system.LEVELS).to.equal(
+                                        allRangedKillingWm.system.csl.length,
+                                    );
+                                });
+                            });
+
+                            describe("CSLs", function () {
+                                it("should not apply CSL to mental power", function () {
+                                    expect(singleAttackCslShouldNotWork.cslAppliesTo(singleTargetMentalBlast)).to.be
+                                        .false;
+                                });
+
+                                it("should not apply CSL to non mental power because it's not listed", function () {
+                                    expect(singleAttackCslShouldNotWork.cslAppliesTo(singleTargetDrain)).to.be.false;
+                                });
+
+                                it("should apply CSL to non mental power that is listed", function () {
+                                    expect(singleStrikeTargetCsl.cslAppliesTo(strike)).to.be.true;
+                                });
+
+                                it("should apply CSL to non mental powers that are listed", function () {
+                                    expect(smallGroupCsl.cslAppliesTo(singleTargetDrain)).to.be.true;
+                                    expect(smallGroupCsl.cslAppliesTo(aoeDrain)).to.be.true;
+                                });
+
+                                it("should apply CSL to non mental powers that are not listed", function () {
+                                    expect(smallGroupCsl.cslAppliesTo(strike)).to.be.false;
+                                });
+
+                                it("should apply CSL to non mental powers that are in the multipower", function () {
+                                    expect(largeGroupCsl.cslAppliesTo(singleTargetDrain)).to.be.true;
+                                    expect(largeGroupCsl.cslAppliesTo(aoeDrain)).to.be.true;
+                                });
+
+                                it("should apply CSL to HTH that are not listed", function () {
+                                    expect(hthCsl.cslAppliesTo(strike)).to.be.true;
+                                    expect(hthCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                });
+
+                                it("should apply CSL to HTH that are listed", function () {
+                                    expect(hthCsl.cslAppliesTo(counterstrike)).to.be.true;
+                                });
+
+                                it("should not apply CSL to ranged for HTH CSL", function () {
+                                    expect(hthCsl.cslAppliesTo(singleTargetDrain)).to.be.false;
+                                });
+
+                                it("should apply CSL to Ranged that are not listed", function () {
+                                    expect(rangedCsl.cslAppliesTo(singleTargetDrain)).to.be.true;
+                                    expect(rangedCsl.cslAppliesTo(basicShot)).to.be.true;
+                                });
+
+                                it("should apply CSL to Ranged that are listed", function () {
+                                    expect(rangedCsl.cslAppliesTo(aoeDrain)).to.be.true;
+                                });
+
+                                it("should not apply CSL to HTH for ranged CSL", function () {
+                                    expect(rangedCsl.cslAppliesTo(strike)).to.be.false;
+                                    expect(rangedCsl.cslAppliesTo(counterstrike)).to.be.false;
+                                });
+
+                                it("should apply CSL to all non mental attacks", function () {
+                                    expect(allAttacksCsl.cslAppliesTo(strike)).to.be.true;
+                                    expect(allAttacksCsl.cslAppliesTo(basicStrike)).to.be.true;
+                                    expect(allAttacksCsl.cslAppliesTo(basicShot)).to.be.true;
+                                    expect(allAttacksCsl.cslAppliesTo(aoeDrain)).to.be.true;
+                                });
+
+                                it("should not apply CSL to all mental attacks", function () {
+                                    expect(allAttacksCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                });
+                            });
+
+                            describe("MCSLs", function () {
+                                it("should not apply MCSL to mental power", function () {
+                                    expect(singleMentalAttackShouldNotWork.cslAppliesTo(strike)).to.be.false;
+                                });
+
+                                it("should not apply MCSL to non mental power because it's not listed", function () {
+                                    expect(singleMentalAttackShouldNotWork.cslAppliesTo(singleTargetMentalBlast)).to.be
+                                        .false;
+                                });
+
+                                it("should apply MCSL to mental power", function () {
+                                    expect(singleMentalAttackMcsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                });
+
+                                it("should not apply MCSL to mental power that is not listed", function () {
+                                    expect(singleMentalAttackMcsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
+                                });
+
+                                it("should apply group MCSL to several mental powers that are listed", function () {
+                                    expect(groupIndividualMentalMcsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                    expect(groupIndividualMentalMcsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                                });
+
+                                it("should apply group MCSL to several mental powers in a framework", function () {
+                                    expect(groupMentalMcsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                    expect(groupMentalMcsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                                });
+
+                                it("should apply MCSL to any mental power", function () {
+                                    expect(allMentalMcsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                    expect(allMentalMcsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
+                                });
+
+                                it("should not apply MCSL to any non mental power", function () {
+                                    expect(allMentalMcsl.cslAppliesTo(singleTargetDrain)).to.be.false;
+                                    expect(allMentalMcsl.cslAppliesTo(strike)).to.be.false;
+                                });
+                            });
+
+                            describe("SLs", function () {
+                                it("should apply overall SLs to mental and non mental attacks", function () {
+                                    expect(overallSl.cslAppliesTo(singleTargetDrain)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(strike)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(counterstrike)).to.be.true;
+                                    expect(overallSl.cslAppliesTo(basicShot)).to.be.true;
+                                });
+
+                                it("should not apply non overall SLs to mental or non mental attacks", function () {
+                                    expect(nonOverallSl.cslAppliesTo(singleTargetDrain)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(strike)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(counterstrike)).to.be.false;
+                                    expect(nonOverallSl.cslAppliesTo(basicShot)).to.be.false;
+                                });
+                            });
+
+                            describe("Weapon Master", function () {
+                                it("should apply to selected weapon - Very Limited Group", function () {
+                                    expect(veryLimitedWm.cslAppliesTo(strike)).to.be.true;
+                                });
+
+                                it("should not apply to a not selected weapon - Very Limited Group", function () {
+                                    expect(veryLimitedWm.cslAppliesTo(basicShot)).to.be.false;
+                                });
+
+                                it("should apply to selected weapon - Limited Group", function () {
+                                    expect(limitedWm.cslAppliesTo(singleTargetDrain)).to.be.true;
+                                });
+
+                                it("should not apply to a not selected weapon - Limited Group", function () {
+                                    expect(limitedWm.cslAppliesTo(strike)).to.be.false;
+                                });
+
+                                describe("killing group", function () {
+                                    it("should apply to HTH killing weapon - All HTH Killing Group", function () {
+                                        expect(allHthKillingWm.cslAppliesTo(singleTargetHka)).to.be.true;
+                                    });
+
+                                    it("should not apply to HTH normal weapon - All HTH Killing Group", function () {
+                                        expect(allHthKillingWm.cslAppliesTo(singleTargetHa)).to.be.false;
+                                    });
+
+                                    it("should not apply to Ranged killing weapon - All HTH Killing Group", function () {
+                                        expect(allHthKillingWm.cslAppliesTo(singleTargetRka)).to.be.false;
+                                    });
+
+                                    it("should not apply to HTH mental killing weapon - All HTH Killing Group", function () {
+                                        expect(allHthKillingWm.cslAppliesTo(singleTargetMentalHka)).to.be.false;
+                                    });
+
+                                    it("should apply to Ranged killing weapon - All Ranged Killing Group", function () {
+                                        expect(allRangedKillingWm.cslAppliesTo(singleTargetRka)).to.be.true;
+                                    });
+
+                                    it("should not apply to HTH normal weapon - All Ranged Killing Group", function () {
+                                        expect(allRangedKillingWm.cslAppliesTo(singleTargetHa)).to.be.false;
+                                    });
+
+                                    it("should not apply to Ranged normal weapon - All Ranged Killing Group", function () {
+                                        expect(allRangedKillingWm.cslAppliesTo(singleTargetEb)).to.be.false;
+                                    });
+
+                                    it("should not apply to ranged adjustment weapon - All Ranged Killing Group", function () {
+                                        expect(allRangedKillingWm.cslAppliesTo(singleTargetDrain)).to.be.false;
+                                    });
+
+                                    it("should not apply to Ranged mental killing weapon - All Ranged Killing Group", function () {
+                                        expect(allRangedKillingWm.cslAppliesTo(singleTargetMentalRka)).to.be.false;
+                                    });
+                                });
+
+                                describe("normal group", function () {
+                                    it("should apply to HTH normal weapon - All HTH Normal Group", function () {
+                                        expect(allHthNormalWm.cslAppliesTo(singleTargetHa)).to.be.true;
+                                    });
+
+                                    it("should apply to HTH killing weapon - All HTH Normal Group", function () {
+                                        expect(allHthNormalWm.cslAppliesTo(singleTargetHka)).to.be.false;
+                                    });
+
+                                    it("should not apply to Ranged killing weapon - All HTH Normal Group", function () {
+                                        expect(allHthNormalWm.cslAppliesTo(singleTargetRka)).to.be.false;
+                                    });
+
+                                    it("should not apply to HTH mental killing weapon - All HTH Normal Group", function () {
+                                        expect(allHthNormalWm.cslAppliesTo(singleTargetMentalHka)).to.be.false;
+                                    });
+
+                                    it("should not apply to HTH mental killing weapon - All HTH Normal Group", function () {
+                                        expect(allHthNormalWm.cslAppliesTo(singleTargetMentalHka)).to.be.false;
+                                    });
+
+                                    it("should apply to Ranged killing weapon - All Ranged Normal Group", function () {
+                                        expect(allRangedNormalWm.cslAppliesTo(singleTargetEb)).to.be.true;
+                                    });
+
+                                    it("should not apply to HTH normal weapon - All Ranged Normal Group", function () {
+                                        expect(allRangedNormalWm.cslAppliesTo(singleTargetHa)).to.be.false;
+                                    });
+
+                                    it("should not apply to Ranged killing weapon - All Ranged Normal Group", function () {
+                                        expect(allRangedNormalWm.cslAppliesTo(singleTargetRka)).to.be.false;
+                                    });
+
+                                    it("should not apply to ranged adjustment weapon - All Ranged Normal Group", function () {
+                                        expect(allRangedNormalWm.cslAppliesTo(singleTargetDrain)).to.be.false;
+                                    });
+                                });
+
+                                describe("explicit group", function () {
+                                    it("should apply to explicit listed weapon - All HTH Explicit Group", function () {
+                                        expect(allHthExplicitWm.cslAppliesTo(singleTargetHa)).to.be.true;
+                                    });
+
+                                    it("should not apply to unlisted Ranged mental killing weapon - All HTH Explicit Group", function () {
+                                        expect(allHthExplicitWm.cslAppliesTo(singleTargetMentalRka)).to.be.false;
+                                    });
+
+                                    it("should apply to listed Ranged killing weapon - All Ranged Explicit Group", function () {
+                                        expect(allRangedExplicitWm.cslAppliesTo(singleTargetEb)).to.be.true;
+                                    });
+
+                                    it("should not apply to unlisted HTH normal weapon - All Ranged Explicit Group", function () {
+                                        expect(allRangedExplicitWm.cslAppliesTo(singleTargetHa)).to.be.false;
+                                    });
+                                });
                             });
                         });
 
-                        describe("levels to csl array entries", function () {
-                            it("should have the correct number of csl array entries (= LEVELS) - CSL", function () {
-                                expect(hthCsl.system.LEVELS).to.equal(hthCsl.system.csl.length);
-                            });
-
-                            it("should have the correct number of csl array entries (= LEVELS) - MCSL", function () {
-                                expect(allMentalMcsl.system.LEVELS).to.equal(allMentalMcsl.system.csl.length);
-                            });
-
-                            it("should have the correct number of csl array entries (= LEVELS) - Overall SL", function () {
-                                expect(overallSl.system.LEVELS).to.equal(overallSl.system.csl.length);
-                            });
-
-                            it("should have the correct number of csl array entries (6 x LEVELS) - Weapon Master", function () {
-                                expect(6 * allRangedKillingWm.system.LEVELS).to.equal(
-                                    allRangedKillingWm.system.csl.length,
-                                );
-                            });
-                        });
-
-                        describe("CSLs", function () {
-                            it("should not apply CSL to mental power", function () {
-                                expect(singleAttackCslShouldNotWork.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
-                            });
-
-                            it("should not apply CSL to non mental power because it's not listed", function () {
-                                expect(singleAttackCslShouldNotWork.cslAppliesTo(singleTargetDrain)).to.be.false;
-                            });
-
-                            it("should apply CSL to non mental power that is listed", function () {
-                                expect(singleStrikeTargetCsl.cslAppliesTo(strike)).to.be.true;
-                            });
-
-                            it("should apply CSL to non mental powers that are listed", function () {
-                                expect(smallGroupCsl.cslAppliesTo(singleTargetDrain)).to.be.true;
-                                expect(smallGroupCsl.cslAppliesTo(aoeDrain)).to.be.true;
-                            });
-
-                            it("should apply CSL to non mental powers that are not listed", function () {
-                                expect(smallGroupCsl.cslAppliesTo(strike)).to.be.false;
-                            });
-
-                            it("should apply CSL to non mental powers that are in the multipower", function () {
-                                expect(largeGroupCsl.cslAppliesTo(singleTargetDrain)).to.be.true;
-                                expect(largeGroupCsl.cslAppliesTo(aoeDrain)).to.be.true;
-                            });
-
-                            it("should apply CSL to HTH that are not listed", function () {
-                                expect(hthCsl.cslAppliesTo(strike)).to.be.true;
-                                expect(hthCsl.cslAppliesTo(basicStrike)).to.be.true;
-                            });
-
-                            it("should apply CSL to HTH that are listed", function () {
-                                expect(hthCsl.cslAppliesTo(counterstrike)).to.be.true;
-                            });
-
-                            it("should not apply CSL to ranged for HTH CSL", function () {
-                                expect(hthCsl.cslAppliesTo(singleTargetDrain)).to.be.false;
-                            });
-
-                            it("should apply CSL to Ranged that are not listed", function () {
-                                expect(rangedCsl.cslAppliesTo(singleTargetDrain)).to.be.true;
-                                expect(rangedCsl.cslAppliesTo(basicShot)).to.be.true;
-                            });
-
-                            it("should apply CSL to Ranged that are listed", function () {
-                                expect(rangedCsl.cslAppliesTo(aoeDrain)).to.be.true;
-                            });
-
-                            it("should not apply CSL to HTH for ranged CSL", function () {
-                                expect(rangedCsl.cslAppliesTo(strike)).to.be.false;
-                                expect(rangedCsl.cslAppliesTo(counterstrike)).to.be.false;
-                            });
-
-                            it("should apply CSL to all non mental attacks", function () {
-                                expect(allAttacksCsl.cslAppliesTo(strike)).to.be.true;
-                                expect(allAttacksCsl.cslAppliesTo(basicStrike)).to.be.true;
-                                expect(allAttacksCsl.cslAppliesTo(basicShot)).to.be.true;
-                                expect(allAttacksCsl.cslAppliesTo(aoeDrain)).to.be.true;
-                            });
-
-                            it("should not apply CSL to all mental attacks", function () {
-                                expect(allAttacksCsl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
-                            });
-                        });
-
-                        describe("MCSLs", function () {
-                            it("should not apply MCSL to mental power", function () {
-                                expect(singleMentalAttackShouldNotWork.cslAppliesTo(strike)).to.be.false;
-                            });
-
-                            it("should not apply MCSL to non mental power because it's not listed", function () {
-                                expect(singleMentalAttackShouldNotWork.cslAppliesTo(singleTargetMentalBlast)).to.be
-                                    .false;
-                            });
-
-                            it("should apply MCSL to mental power", function () {
-                                expect(singleMentalAttackMcsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                            });
-
-                            it("should not apply MCSL to mental power that is not listed", function () {
-                                expect(singleMentalAttackMcsl.cslAppliesTo(aoeMentalBlast)).to.be.false;
-                            });
-
-                            it("should apply group MCSL to several mental powers that are listed", function () {
-                                expect(groupIndividualMentalMcsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                                expect(groupIndividualMentalMcsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
-                            });
-
-                            it("should apply group MCSL to several mental powers in a framework", function () {
-                                expect(groupMentalMcsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                                expect(groupMentalMcsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
-                            });
-
-                            it("should apply MCSL to any mental power", function () {
-                                expect(allMentalMcsl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                                expect(allMentalMcsl.cslAppliesTo(aoeMentalBlast)).to.be.true;
-                            });
-
-                            it("should not apply MCSL to any non mental power", function () {
-                                expect(allMentalMcsl.cslAppliesTo(singleTargetDrain)).to.be.false;
-                                expect(allMentalMcsl.cslAppliesTo(strike)).to.be.false;
-                            });
-                        });
-
-                        describe("SLs", function () {
-                            it("should apply overall SLs to mental and non mental attacks", function () {
-                                expect(overallSl.cslAppliesTo(singleTargetDrain)).to.be.true;
-                                expect(overallSl.cslAppliesTo(singleTargetMentalBlast)).to.be.true;
-                                expect(overallSl.cslAppliesTo(strike)).to.be.true;
-                                expect(overallSl.cslAppliesTo(counterstrike)).to.be.true;
-                                expect(overallSl.cslAppliesTo(basicShot)).to.be.true;
-                            });
-
-                            it("should not apply non overall SLs to mental or non mental attacks", function () {
-                                expect(nonOverallSl.cslAppliesTo(singleTargetDrain)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(singleTargetMentalBlast)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(strike)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(counterstrike)).to.be.false;
-                                expect(nonOverallSl.cslAppliesTo(basicShot)).to.be.false;
-                            });
-                        });
-
-                        describe("Weapon Master", function () {
-                            it("should apply to selected weapon - Very Limited Group", function () {
-                                expect(veryLimitedWm.cslAppliesTo(strike)).to.be.true;
-                            });
-
-                            it("should not apply to a not selected weapon - Very Limited Group", function () {
-                                expect(veryLimitedWm.cslAppliesTo(basicShot)).to.be.false;
-                            });
-
-                            it("should apply to selected weapon - Limited Group", function () {
-                                expect(limitedWm.cslAppliesTo(singleTargetDrain)).to.be.true;
-                            });
-
-                            it("should not apply to a not selected weapon - Limited Group", function () {
-                                expect(limitedWm.cslAppliesTo(strike)).to.be.false;
-                            });
-
-                            describe("killing group", function () {
-                                it("should apply to HTH killing weapon - All HTH Killing Group", function () {
-                                    expect(allHthKillingWm.cslAppliesTo(singleTargetHka)).to.be.true;
+                        describe("Applicability to Attack - cslChoices", function () {
+                            describe("Physical CSL", function () {
+                                it("should return correct choices for Physical SINGLE CSL", function () {
+                                    // Physical SINGLE should only have OCV, no DCV or DC
+                                    const choices = singleStrikeTargetCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(1);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.not.have.property("dcvRanged");
+                                    expect(choices).to.not.have.property("dcvHth");
+                                    expect(choices).to.not.have.property("dc");
                                 });
 
-                                it("should not apply to HTH normal weapon - All HTH Killing Group", function () {
-                                    expect(allHthKillingWm.cslAppliesTo(singleTargetHa)).to.be.false;
+                                it("should return correct choices for Physical TIGHT CSL", function () {
+                                    // Physical TIGHT should have OCV, DCV (both), and DC
+                                    const choices = smallGroupCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(4);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dc");
                                 });
 
-                                it("should not apply to Ranged killing weapon - All HTH Killing Group", function () {
-                                    expect(allHthKillingWm.cslAppliesTo(singleTargetRka)).to.be.false;
+                                it("should return correct choices for Physical BROAD CSL", function () {
+                                    // Physical BROAD should have OCV, DCV (both), and DC
+                                    const choices = largeGroupCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(4);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dc");
                                 });
 
-                                it("should not apply to HTH mental killing weapon - All HTH Killing Group", function () {
-                                    expect(allHthKillingWm.cslAppliesTo(singleTargetMentalHka)).to.be.false;
+                                it("should return correct choices for Physical HTH CSL", function () {
+                                    // Physical HTH should have OCV, DCV (HTH), and DC
+                                    const choices = hthCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(3);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dc");
+                                    expect(choices).to.not.have.property("dcvRanged");
                                 });
 
-                                it("should apply to Ranged killing weapon - All Ranged Killing Group", function () {
-                                    expect(allRangedKillingWm.cslAppliesTo(singleTargetRka)).to.be.true;
+                                it("should return correct choices for Physical RANGED CSL", function () {
+                                    // Physical RANGED should have OCV, DCV (ranged), and DC
+                                    const choices = rangedCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(3);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dc");
+                                    expect(choices).to.not.have.property("dcvHth");
                                 });
 
-                                it("should not apply to HTH normal weapon - All Ranged Killing Group", function () {
-                                    expect(allRangedKillingWm.cslAppliesTo(singleTargetHa)).to.be.false;
-                                });
-
-                                it("should not apply to Ranged normal weapon - All Ranged Killing Group", function () {
-                                    expect(allRangedKillingWm.cslAppliesTo(singleTargetEb)).to.be.false;
-                                });
-
-                                it("should not apply to ranged adjustment weapon - All Ranged Killing Group", function () {
-                                    expect(allRangedKillingWm.cslAppliesTo(singleTargetDrain)).to.be.false;
-                                });
-
-                                it("should not apply to Ranged mental killing weapon - All Ranged Killing Group", function () {
-                                    expect(allRangedKillingWm.cslAppliesTo(singleTargetMentalRka)).to.be.false;
+                                it("should return correct choices for Physical ALL CSL", function () {
+                                    // Physical ALL should have OCV, DCV (both), and DC
+                                    const choices = allAttacksCsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(4);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dc");
                                 });
                             });
 
-                            describe("normal group", function () {
-                                it("should apply to HTH normal weapon - All HTH Normal Group", function () {
-                                    expect(allHthNormalWm.cslAppliesTo(singleTargetHa)).to.be.true;
+                            describe("Mental CSL", function () {
+                                it("should return correct choices for Mental SINGLE CSL", function () {
+                                    // Mental SINGLE should only have OMCV, no DMCV or DC
+                                    const choices = singleMentalAttackMcsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(1);
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.not.have.property("dmcv");
+                                    expect(choices).to.not.have.property("dc");
                                 });
 
-                                it("should apply to HTH killing weapon - All HTH Normal Group", function () {
-                                    expect(allHthNormalWm.cslAppliesTo(singleTargetHka)).to.be.false;
+                                it("should return correct choices for Mental TIGHT CSL", function () {
+                                    // Mental TIGHT should have OMCV, DMCV, and DC
+                                    const choices = groupMentalMcsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(3);
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
                                 });
 
-                                it("should not apply to Ranged killing weapon - All HTH Normal Group", function () {
-                                    expect(allHthNormalWm.cslAppliesTo(singleTargetRka)).to.be.false;
-                                });
-
-                                it("should not apply to HTH mental killing weapon - All HTH Normal Group", function () {
-                                    expect(allHthNormalWm.cslAppliesTo(singleTargetMentalHka)).to.be.false;
-                                });
-
-                                it("should not apply to HTH mental killing weapon - All HTH Normal Group", function () {
-                                    expect(allHthNormalWm.cslAppliesTo(singleTargetMentalHka)).to.be.false;
-                                });
-
-                                it("should apply to Ranged killing weapon - All Ranged Normal Group", function () {
-                                    expect(allRangedNormalWm.cslAppliesTo(singleTargetEb)).to.be.true;
-                                });
-
-                                it("should not apply to HTH normal weapon - All Ranged Normal Group", function () {
-                                    expect(allRangedNormalWm.cslAppliesTo(singleTargetHa)).to.be.false;
-                                });
-
-                                it("should not apply to Ranged killing weapon - All Ranged Normal Group", function () {
-                                    expect(allRangedNormalWm.cslAppliesTo(singleTargetRka)).to.be.false;
-                                });
-
-                                it("should not apply to ranged adjustment weapon - All Ranged Normal Group", function () {
-                                    expect(allRangedNormalWm.cslAppliesTo(singleTargetDrain)).to.be.false;
+                                it("should return correct choices for Mental BROAD CSL", function () {
+                                    // Mental BROAD should have OMCV, DMCV, and DC
+                                    const choices = allMentalMcsl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(3);
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
                                 });
                             });
 
-                            describe("explicit group", function () {
-                                it("should apply to explicit listed weapon - All HTH Explicit Group", function () {
-                                    expect(allHthExplicitWm.cslAppliesTo(singleTargetHa)).to.be.true;
+                            describe("Skill Levels", function () {
+                                it("should return correct choices for OVERALL Skill Levels", function () {
+                                    // OVERALL Skill Levels should have all combat values
+                                    const choices = overallSl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(6);
+                                    expect(choices).to.have.property("ocv");
+                                    expect(choices).to.have.property("omcv");
+                                    expect(choices).to.have.property("dcvRanged");
+                                    expect(choices).to.have.property("dcvHth");
+                                    expect(choices).to.have.property("dmcv");
+                                    expect(choices).to.have.property("dc");
                                 });
 
-                                it("should not apply to unlisted Ranged mental killing weapon - All HTH Explicit Group", function () {
-                                    expect(allHthExplicitWm.cslAppliesTo(singleTargetMentalRka)).to.be.false;
-                                });
-
-                                it("should apply to listed Ranged killing weapon - All Ranged Explicit Group", function () {
-                                    expect(allRangedExplicitWm.cslAppliesTo(singleTargetEb)).to.be.true;
-                                });
-
-                                it("should not apply to unlisted HTH normal weapon - All Ranged Explicit Group", function () {
-                                    expect(allRangedExplicitWm.cslAppliesTo(singleTargetHa)).to.be.false;
+                                it("should return empty choices for non-OVERALL Skill Levels", function () {
+                                    // Non-OVERALL Skill Levels should return empty object
+                                    const choices = nonOverallSl.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(0);
                                 });
                             });
-                        });
-                    });
 
-                    describe("Applicability to Attack - cslChoices", function () {
-                        describe("Physical CSL", function () {
-                            it("should return correct choices for Physical SINGLE CSL", function () {
-                                // Physical SINGLE should only have OCV, no DCV or DC
-                                const choices = singleStrikeTargetCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.not.have.property("dcvRanged");
-                                expect(choices).to.not.have.property("dcvHth");
-                                expect(choices).to.not.have.property("dc");
-                            });
+                            describe("Weapon Master", function () {
+                                it("should return correct choices for WM with Very Limited Group", function () {
+                                    const choices = veryLimitedWm.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(1);
+                                    expect(choices).to.have.property("dc");
+                                });
 
-                            it("should return correct choices for Physical TIGHT CSL", function () {
-                                // Physical TIGHT should have OCV, DCV (both), and DC
-                                const choices = smallGroupCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(4);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dc");
-                            });
+                                it("should return correct choices for WM with Limited Group", function () {
+                                    const choices = limitedWm.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(1);
+                                    expect(choices).to.have.property("dc");
+                                });
 
-                            it("should return correct choices for Physical BROAD CSL", function () {
-                                // Physical BROAD should have OCV, DCV (both), and DC
-                                const choices = largeGroupCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(4);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dc");
-                            });
+                                it("should return correct choices for WM with All HTH", function () {
+                                    const choices = allHthKillingWm.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(1);
+                                    expect(choices).to.have.property("dc");
+                                });
 
-                            it("should return correct choices for Physical HTH CSL", function () {
-                                // Physical HTH should have OCV, DCV (HTH), and DC
-                                const choices = hthCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dc");
-                                expect(choices).to.not.have.property("dcvRanged");
-                            });
-
-                            it("should return correct choices for Physical RANGED CSL", function () {
-                                // Physical RANGED should have OCV, DCV (ranged), and DC
-                                const choices = rangedCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dc");
-                                expect(choices).to.not.have.property("dcvHth");
-                            });
-
-                            it("should return correct choices for Physical ALL CSL", function () {
-                                // Physical ALL should have OCV, DCV (both), and DC
-                                const choices = allAttacksCsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(4);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dc");
-                            });
-                        });
-
-                        describe("Mental CSL", function () {
-                            it("should return correct choices for Mental SINGLE CSL", function () {
-                                // Mental SINGLE should only have OMCV, no DMCV or DC
-                                const choices = singleMentalAttackMcsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.not.have.property("dmcv");
-                                expect(choices).to.not.have.property("dc");
-                            });
-
-                            it("should return correct choices for Mental TIGHT CSL", function () {
-                                // Mental TIGHT should have OMCV, DMCV, and DC
-                                const choices = groupMentalMcsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for Mental BROAD CSL", function () {
-                                // Mental BROAD should have OMCV, DMCV, and DC
-                                const choices = allMentalMcsl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(3);
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-                        });
-
-                        describe("Skill Levels", function () {
-                            it("should return correct choices for OVERALL Skill Levels", function () {
-                                // OVERALL Skill Levels should have all combat values
-                                const choices = overallSl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(6);
-                                expect(choices).to.have.property("ocv");
-                                expect(choices).to.have.property("omcv");
-                                expect(choices).to.have.property("dcvRanged");
-                                expect(choices).to.have.property("dcvHth");
-                                expect(choices).to.have.property("dmcv");
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return empty choices for non-OVERALL Skill Levels", function () {
-                                // Non-OVERALL Skill Levels should return empty object
-                                const choices = nonOverallSl.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(0);
-                            });
-                        });
-
-                        describe("Weapon Master", function () {
-                            it("should return correct choices for WM with Very Limited Group", function () {
-                                const choices = veryLimitedWm.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for WM with Limited Group", function () {
-                                const choices = limitedWm.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for WM with All HTH", function () {
-                                const choices = allHthKillingWm.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("dc");
-                            });
-
-                            it("should return correct choices for WM with All Ranged", function () {
-                                const choices = allRangedKillingWm.cslChoices;
-                                expect(Object.keys(choices)).to.have.length(1);
-                                expect(choices).to.have.property("dc");
+                                it("should return correct choices for WM with All Ranged", function () {
+                                    const choices = allRangedKillingWm.cslChoices;
+                                    expect(Object.keys(choices)).to.have.length(1);
+                                    expect(choices).to.have.property("dc");
+                                });
                             });
                         });
                     });
                 });
-            });
 
-            describe("Penalty Skill Levels", function () {
-                this.timeout(20000);
-
-                describe("5e", async function () {
-                    const contents = `
+                describe("Penalty Skill Levels", function () {
+                    describe("5e", async function () {
+                        const contents = `
                         <?xml version="1.0" encoding="UTF-16"?>
                         <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
                         <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
@@ -2283,187 +2312,193 @@ export function registerCslTests(quench) {
                         <EQUIPMENT />
                         </CHARACTER>
                         `;
-                    let actor;
+                        let actor;
 
-                    let pslHitLocationSingle;
-                    let pslRangeSingle;
-                    let pslThrowingSingle;
-                    let pslArmorPenaltiesSingle;
+                        let pslHitLocationSingle;
+                        let pslRangeSingle;
+                        let pslThrowingSingle;
+                        let pslArmorPenaltiesSingle;
 
-                    let pslHitLocationTight;
-                    let pslRangeTight;
-                    let pslThrowingTight;
-                    let pslArmorPenaltiesTight;
+                        let pslHitLocationTight;
+                        let pslRangeTight;
+                        let pslThrowingTight;
+                        let pslArmorPenaltiesTight;
 
-                    let pslHitLocationAll;
-                    let pslRangeAll;
-                    let pslThrowingAll;
-                    let pslArmorPenaltiesAll;
+                        let pslHitLocationAll;
+                        let pslRangeAll;
+                        let pslThrowingAll;
+                        let pslArmorPenaltiesAll;
 
-                    let singleTargetDrainBody;
-                    let strike;
-                    let basicStrike;
-                    let basicShot;
-                    let defensiveShot;
-                    let offensiveRangedDisarm;
+                        let singleTargetDrainBody;
+                        let strike;
+                        let basicStrike;
+                        let basicShot;
+                        let defensiveShot;
+                        let offensiveRangedDisarm;
 
-                    before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "pc" });
 
-                        pslHitLocationSingle = actor.items.find((item) => item.name === "PSL Hit Location w/ Single");
-                        pslRangeSingle = actor.items.find((item) => item.name === "PSL Range w/ Single");
-                        pslThrowingSingle = actor.items.find((item) => item.name === "PSL Throwing w/ Single");
-                        pslArmorPenaltiesSingle = actor.items.find(
-                            (item) => item.name === "PSL Armor Penalties w/ Single",
-                        );
+                            pslHitLocationSingle = actor.items.find(
+                                (item) => item.name === "PSL Hit Location w/ Single",
+                            );
+                            pslRangeSingle = actor.items.find((item) => item.name === "PSL Range w/ Single");
+                            pslThrowingSingle = actor.items.find((item) => item.name === "PSL Throwing w/ Single");
+                            pslArmorPenaltiesSingle = actor.items.find(
+                                (item) => item.name === "PSL Armor Penalties w/ Single",
+                            );
 
-                        pslHitLocationTight = actor.items.find(
-                            (item) => item.name === "PSL Hit Location w/ Tight Group",
-                        );
-                        pslRangeTight = actor.items.find((item) => item.name === "PSL Range w/ Tight Group");
-                        pslThrowingTight = actor.items.find((item) => item.name === "PSL Throwing w/ Tight Group");
-                        pslArmorPenaltiesTight = actor.items.find(
-                            (item) => item.name === "PSL Armor Penalties w/ Tight Group",
-                        );
+                            pslHitLocationTight = actor.items.find(
+                                (item) => item.name === "PSL Hit Location w/ Tight Group",
+                            );
+                            pslRangeTight = actor.items.find((item) => item.name === "PSL Range w/ Tight Group");
+                            pslThrowingTight = actor.items.find((item) => item.name === "PSL Throwing w/ Tight Group");
+                            pslArmorPenaltiesTight = actor.items.find(
+                                (item) => item.name === "PSL Armor Penalties w/ Tight Group",
+                            );
 
-                        pslHitLocationAll = actor.items.find((item) => item.name === "PSL Hit Location w/ All");
-                        pslRangeAll = actor.items.find((item) => item.name === "PSL Range w/ All");
-                        pslThrowingAll = actor.items.find((item) => item.name === "PSL Throwing w/ All");
-                        pslArmorPenaltiesAll = actor.items.find((item) => item.name === "PSL Armor Penalties w/ All");
+                            pslHitLocationAll = actor.items.find((item) => item.name === "PSL Hit Location w/ All");
+                            pslRangeAll = actor.items.find((item) => item.name === "PSL Range w/ All");
+                            pslThrowingAll = actor.items.find((item) => item.name === "PSL Throwing w/ All");
+                            pslArmorPenaltiesAll = actor.items.find(
+                                (item) => item.name === "PSL Armor Penalties w/ All",
+                            );
 
-                        singleTargetDrainBody = actor.items.find((item) => item.name === "Single Target Drain BODY");
-                        strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
-                        basicStrike = actor.items.find((item) => item.name === "Basic Strike");
-                        basicShot = actor.items.find((item) => item.name === "Basic Shot");
-                        defensiveShot = actor.items.find((item) => item.name === "Defensive Shot");
-                        offensiveRangedDisarm = actor.items.find((item) => item.name === "Offensive Ranged Disarm");
+                            singleTargetDrainBody = actor.items.find(
+                                (item) => item.name === "Single Target Drain BODY",
+                            );
+                            strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
+                            basicStrike = actor.items.find((item) => item.name === "Basic Strike");
+                            basicShot = actor.items.find((item) => item.name === "Basic Shot");
+                            defensiveShot = actor.items.find((item) => item.name === "Defensive Shot");
+                            offensiveRangedDisarm = actor.items.find((item) => item.name === "Offensive Ranged Disarm");
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        describe("descriptions", function () {
+                            it("should have a correct description - hit location single", function () {
+                                expect(pslHitLocationSingle.system.description).to.equal(
+                                    "Penalty Skill Levels: +1 vs Hit Location modifiers with a single attack (Strike)",
+                                );
+                            });
+
+                            it("should have a correct description - range single", function () {
+                                expect(pslRangeSingle.system.description).to.equal(
+                                    "Penalty Skill Levels: +1 vs Range Modifier with a single attack (Single Target Drain BODY)",
+                                );
+                            });
+
+                            it("should have a correct description - throwing single", function () {
+                                expect(pslThrowingSingle.system.description).to.equal(
+                                    "Penalty Skill Levels: +1 vs Throwing modifiers with a single attack (Basic Shot)",
+                                );
+                            });
+
+                            it("should have a correct description - armor penalties single", function () {
+                                expect(pslArmorPenaltiesSingle.system.description).to.equal(
+                                    "Penalty Skill Levels: +4 vs armor penalties to DCV with a single attack (Strike)",
+                                );
+                            });
+
+                            it("should have a correct description - hit location tight group", function () {
+                                expect(pslHitLocationTight.system.description).to.equal(
+                                    "Penalty Skill Levels: +1 vs Hit Location modifiers with a tight group of attacks (Ranged Martial Maneuvers Style)",
+                                );
+                            });
+
+                            it("should have a correct description - range tight group", function () {
+                                expect(pslRangeTight.system.description).to.equal(
+                                    "Penalty Skill Levels: +1 vs Range Modifier with a tight group of attacks (Drain Multipower)",
+                                );
+                            });
+
+                            it("should have a correct description - throwing tight group", function () {
+                                expect(pslThrowingTight.system.description).to.equal(
+                                    "Penalty Skill Levels: +1 vs Throwing modifiers with a tight group of attacks (Grab; Martial Grab; Passing Throw)",
+                                );
+                            });
+
+                            it("should have a correct description - armor penalties tight group", function () {
+                                expect(pslArmorPenaltiesTight.system.description).to.equal(
+                                    "Penalty Skill Levels: +1 vs armor penalties to DCV with a tight group of attacks (Hand-to-Hand Martial Maneuver Style)",
+                                );
+                            });
+
+                            it("should have a correct description - hit location all attacks", function () {
+                                expect(pslHitLocationAll.system.description).to.equal(
+                                    "Penalty Skill Levels: +1 vs Hit Location modifiers with All Attacks",
+                                );
+                            });
+
+                            it("should have a correct description - range all attacks", function () {
+                                expect(pslRangeAll.system.description).to.equal(
+                                    "Penalty Skill Levels: +1 vs Range Modifier with All Attacks",
+                                );
+                            });
+
+                            it("should have a correct description - throwing all attacks", function () {
+                                expect(pslThrowingAll.system.description).to.equal(
+                                    "Penalty Skill Levels: +1 vs Throwing modifiers with All Attacks",
+                                );
+                            });
+
+                            it("should have a correct description - armor penalties all attacks", function () {
+                                expect(pslArmorPenaltiesAll.system.description).to.equal(
+                                    "Penalty Skill Levels: +1 vs armor penalties to DCV with All Attacks",
+                                );
+                            });
+                        });
+
+                        describe("costs", function () {
+                            it("should have the right cost for single target PSL", function () {
+                                expect(pslRangeSingle.characterPointCost).to.equal(1.5);
+                            });
+
+                            it("should have the right cost for single target PSL - for character sheet display", function () {
+                                expect(pslRangeSingle.characterPointCostForDisplay).to.equal(2);
+                            });
+
+                            it("should have the right cost for tight group PSL", function () {
+                                expect(pslRangeTight.characterPointCost).to.equal(2);
+                            });
+
+                            it("should have the right cost for All target PSL", function () {
+                                expect(pslRangeAll.characterPointCost).to.equal(3);
+                            });
+                        });
+
+                        describe("Applicability To Attack - pslAppliesTo", function () {
+                            it("should apply single PSL to power because it's listed - pslHitLocationSingle", function () {
+                                expect(pslHitLocationSingle.pslAppliesTo(strike)).to.be.true;
+                            });
+
+                            it("should not apply single PSL to power because it's not listed - pslHitLocationSingle", function () {
+                                expect(pslHitLocationSingle.pslAppliesTo(basicStrike)).to.be.false;
+                            });
+
+                            it("should apply tight group PSL to power because it's contained - pslHitLocationTight", function () {
+                                expect(pslHitLocationTight.pslAppliesTo(basicShot)).to.be.true;
+                                expect(pslHitLocationTight.pslAppliesTo(defensiveShot)).to.be.true;
+                                expect(pslHitLocationTight.pslAppliesTo(offensiveRangedDisarm)).to.be.true;
+                            });
+
+                            it("should not apply tight group PSL to power because it's not contained - pslHitLocationTight", function () {
+                                expect(pslHitLocationTight.pslAppliesTo(basicStrike)).to.be.false;
+                            });
+
+                            it("should apply all attack PSL to power because it's listed - pslThrowingAll", function () {
+                                expect(pslThrowingAll.pslAppliesTo(strike)).to.be.true;
+                                expect(pslThrowingAll.pslAppliesTo(basicStrike)).to.be.true;
+                                expect(pslThrowingAll.pslAppliesTo(singleTargetDrainBody)).to.be.true;
+                            });
+                        });
                     });
 
-                    after(async function () {
-                        await deleteQuenchActor({ quench: this, actor });
-                    });
-
-                    describe("descriptions", function () {
-                        it("should have a correct description - hit location single", function () {
-                            expect(pslHitLocationSingle.system.description).to.equal(
-                                "Penalty Skill Levels: +1 vs Hit Location modifiers with a single attack (Strike)",
-                            );
-                        });
-
-                        it("should have a correct description - range single", function () {
-                            expect(pslRangeSingle.system.description).to.equal(
-                                "Penalty Skill Levels: +1 vs Range Modifier with a single attack (Single Target Drain BODY)",
-                            );
-                        });
-
-                        it("should have a correct description - throwing single", function () {
-                            expect(pslThrowingSingle.system.description).to.equal(
-                                "Penalty Skill Levels: +1 vs Throwing modifiers with a single attack (Basic Shot)",
-                            );
-                        });
-
-                        it("should have a correct description - armor penalties single", function () {
-                            expect(pslArmorPenaltiesSingle.system.description).to.equal(
-                                "Penalty Skill Levels: +4 vs armor penalties to DCV with a single attack (Strike)",
-                            );
-                        });
-
-                        it("should have a correct description - hit location tight group", function () {
-                            expect(pslHitLocationTight.system.description).to.equal(
-                                "Penalty Skill Levels: +1 vs Hit Location modifiers with a tight group of attacks (Ranged Martial Maneuvers Style)",
-                            );
-                        });
-
-                        it("should have a correct description - range tight group", function () {
-                            expect(pslRangeTight.system.description).to.equal(
-                                "Penalty Skill Levels: +1 vs Range Modifier with a tight group of attacks (Drain Multipower)",
-                            );
-                        });
-
-                        it("should have a correct description - throwing tight group", function () {
-                            expect(pslThrowingTight.system.description).to.equal(
-                                "Penalty Skill Levels: +1 vs Throwing modifiers with a tight group of attacks (Grab; Martial Grab; Passing Throw)",
-                            );
-                        });
-
-                        it("should have a correct description - armor penalties tight group", function () {
-                            expect(pslArmorPenaltiesTight.system.description).to.equal(
-                                "Penalty Skill Levels: +1 vs armor penalties to DCV with a tight group of attacks (Hand-to-Hand Martial Maneuver Style)",
-                            );
-                        });
-
-                        it("should have a correct description - hit location all attacks", function () {
-                            expect(pslHitLocationAll.system.description).to.equal(
-                                "Penalty Skill Levels: +1 vs Hit Location modifiers with All Attacks",
-                            );
-                        });
-
-                        it("should have a correct description - range all attacks", function () {
-                            expect(pslRangeAll.system.description).to.equal(
-                                "Penalty Skill Levels: +1 vs Range Modifier with All Attacks",
-                            );
-                        });
-
-                        it("should have a correct description - throwing all attacks", function () {
-                            expect(pslThrowingAll.system.description).to.equal(
-                                "Penalty Skill Levels: +1 vs Throwing modifiers with All Attacks",
-                            );
-                        });
-
-                        it("should have a correct description - armor penalties all attacks", function () {
-                            expect(pslArmorPenaltiesAll.system.description).to.equal(
-                                "Penalty Skill Levels: +1 vs armor penalties to DCV with All Attacks",
-                            );
-                        });
-                    });
-
-                    describe("costs", function () {
-                        it("should have the right cost for single target PSL", function () {
-                            expect(pslRangeSingle.characterPointCost).to.equal(1.5);
-                        });
-
-                        it("should have the right cost for single target PSL - for character sheet display", function () {
-                            expect(pslRangeSingle.characterPointCostForDisplay).to.equal(2);
-                        });
-
-                        it("should have the right cost for tight group PSL", function () {
-                            expect(pslRangeTight.characterPointCost).to.equal(2);
-                        });
-
-                        it("should have the right cost for All target PSL", function () {
-                            expect(pslRangeAll.characterPointCost).to.equal(3);
-                        });
-                    });
-
-                    describe("Applicability To Attack - pslAppliesTo", function () {
-                        it("should apply single PSL to power because it's listed - pslHitLocationSingle", function () {
-                            expect(pslHitLocationSingle.pslAppliesTo(strike)).to.be.true;
-                        });
-
-                        it("should not apply single PSL to power because it's not listed - pslHitLocationSingle", function () {
-                            expect(pslHitLocationSingle.pslAppliesTo(basicStrike)).to.be.false;
-                        });
-
-                        it("should apply tight group PSL to power because it's contained - pslHitLocationTight", function () {
-                            expect(pslHitLocationTight.pslAppliesTo(basicShot)).to.be.true;
-                            expect(pslHitLocationTight.pslAppliesTo(defensiveShot)).to.be.true;
-                            expect(pslHitLocationTight.pslAppliesTo(offensiveRangedDisarm)).to.be.true;
-                        });
-
-                        it("should not apply tight group PSL to power because it's not contained - pslHitLocationTight", function () {
-                            expect(pslHitLocationTight.pslAppliesTo(basicStrike)).to.be.false;
-                        });
-
-                        it("should apply all attack PSL to power because it's listed - pslThrowingAll", function () {
-                            expect(pslThrowingAll.pslAppliesTo(strike)).to.be.true;
-                            expect(pslThrowingAll.pslAppliesTo(basicStrike)).to.be.true;
-                            expect(pslThrowingAll.pslAppliesTo(singleTargetDrainBody)).to.be.true;
-                        });
-                    });
-                });
-
-                describe("6e", async function () {
-                    const contents = `
+                    describe("6e", async function () {
+                        const contents = `
                         <?xml version="1.0" encoding="UTF-16"?>
                         <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
                         <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
@@ -2948,200 +2983,205 @@ export function registerCslTests(quench) {
                         <EQUIPMENT />
                         </CHARACTER>
                         `;
-                    let actor;
+                        let actor;
 
-                    let pslRangeSingle;
-                    let pslRangeTight;
-                    let pslRangeAll;
-                    let pslHitLocationSingle;
-                    let pslHitLocationTight;
-                    let pslHitLocationAll;
-                    let pslThrowingSingle;
-                    let pslThrowingTight;
-                    let pslThrowingAll;
-                    let dpslSingle;
-                    let dpslGroup;
+                        let pslRangeSingle;
+                        let pslRangeTight;
+                        let pslRangeAll;
+                        let pslHitLocationSingle;
+                        let pslHitLocationTight;
+                        let pslHitLocationAll;
+                        let pslThrowingSingle;
+                        let pslThrowingTight;
+                        let pslThrowingAll;
+                        let dpslSingle;
+                        let dpslGroup;
 
-                    let singleTargetDrain;
-                    let strike;
-                    let basicStrike;
-                    let basicShot;
-                    let defensiveShot;
-                    let offensiveShot;
+                        let singleTargetDrain;
+                        let strike;
+                        let basicStrike;
+                        let basicShot;
+                        let defensiveShot;
+                        let offensiveShot;
 
-                    before(async function () {
-                        actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "pc" });
 
-                        pslRangeSingle = actor.items.find((item) => item.name === "PSL Range OCV Modifier w/ single");
-                        pslRangeTight = actor.items.find(
-                            (item) => item.name === "PSL Range OCV Modifier w/ 3 maneuvers or tight group",
-                        );
-                        pslRangeAll = actor.items.find((item) => item.name === "PSL Range OCV Modifier w/ All");
-
-                        pslHitLocationSingle = actor.items.find(
-                            (item) => item.name === "PSL HitLocation OCV Modifier w/ single",
-                        );
-                        pslHitLocationTight = actor.items.find(
-                            (item) => item.name === "PSL HitLocation OCV Modifier w/ 3 maneuvers or tight group",
-                        );
-                        pslHitLocationAll = actor.items.find(
-                            (item) => item.name === "PSL HitLocation OCV Modifier w/ All",
-                        );
-
-                        pslThrowingSingle = actor.items.find(
-                            (item) => item.name === "PSL Throwing OCV Modifier w/ single",
-                        );
-                        pslThrowingTight = actor.items.find(
-                            (item) => item.name === "PSL Throwing OCV Modifier w/ 3 maneuvers or tight group",
-                        );
-                        pslThrowingAll = actor.items.find((item) => item.name === "PSL Throwing OCV Modifier w/ All");
-
-                        dpslSingle = actor.items.find((item) => item.name === "PSL Groundfighting DCV Modifier");
-                        dpslGroup = actor.items.find(
-                            (item) => item.name === "PSL Groundfighting, Encumbrance, and Underwater DCV Modifier",
-                        );
-
-                        singleTargetDrain = actor.items.find((item) => item.name === "Single Target Drain");
-                        strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
-                        basicStrike = actor.items.find((item) => item.name === "Basic Strike");
-                        basicShot = actor.items.find((item) => item.name === "Basic Shot");
-                        defensiveShot = actor.items.find((item) => item.name === "Defensive Shot");
-                        offensiveShot = actor.items.find((item) => item.name === "Offensive Shot");
-                    });
-
-                    after(async function () {
-                        await deleteQuenchActor({ quench: this, actor });
-                    });
-
-                    describe("descriptions", function () {
-                        it("should have a correct description - range single", function () {
-                            expect(pslRangeSingle.system.description).to.equal(
-                                "+1 to offset negative Range OCV modifiers with any single attack (Single Target Drain)",
+                            pslRangeSingle = actor.items.find(
+                                (item) => item.name === "PSL Range OCV Modifier w/ single",
                             );
-                        });
-
-                        it("should have a correct description - range tight", function () {
-                            expect(pslRangeTight.system.description).to.equal(
-                                "+1 to offset negative Range OCV modifiers with any three maneuvers or tight group (Basic Shot; Defensive Shot; Offensive Shot)",
+                            pslRangeTight = actor.items.find(
+                                (item) => item.name === "PSL Range OCV Modifier w/ 3 maneuvers or tight group",
                             );
-                        });
+                            pslRangeAll = actor.items.find((item) => item.name === "PSL Range OCV Modifier w/ All");
 
-                        it("should have a correct description - range all", function () {
-                            expect(pslRangeAll.system.description).to.equal(
-                                "+1 to offset negative Range OCV modifiers with all attacks",
+                            pslHitLocationSingle = actor.items.find(
+                                (item) => item.name === "PSL HitLocation OCV Modifier w/ single",
                             );
-                        });
-
-                        it("should have a correct description - hit location single", function () {
-                            expect(pslHitLocationSingle.system.description).to.equal(
-                                "+1 to offset negative hitLocation OCV modifiers with any single attack (Strike)",
+                            pslHitLocationTight = actor.items.find(
+                                (item) => item.name === "PSL HitLocation OCV Modifier w/ 3 maneuvers or tight group",
                             );
-                        });
-
-                        it("should have a correct description - hit location tight", function () {
-                            expect(pslHitLocationTight.system.description).to.equal(
-                                "+1 to offset negative hitLocation OCV modifier with any three maneuvers or tight group (Ranged Martial Maneuvers Style)",
+                            pslHitLocationAll = actor.items.find(
+                                (item) => item.name === "PSL HitLocation OCV Modifier w/ All",
                             );
-                        });
 
-                        it("should have a correct description - hit location all", function () {
-                            expect(pslHitLocationAll.system.description).to.equal(
-                                "+1 to offset negative hitLocation OCV modifier with all attacks",
+                            pslThrowingSingle = actor.items.find(
+                                (item) => item.name === "PSL Throwing OCV Modifier w/ single",
                             );
-                        });
-
-                        it("should have a correct description - throwing single", function () {
-                            expect(pslThrowingSingle.system.description).to.equal(
-                                "+1 to offset negative Throwing OCV modifier with any single attack (Grab)",
+                            pslThrowingTight = actor.items.find(
+                                (item) => item.name === "PSL Throwing OCV Modifier w/ 3 maneuvers or tight group",
                             );
-                        });
-
-                        it("should have a correct description - throwing tight", function () {
-                            expect(pslThrowingTight.system.description).to.equal(
-                                "+1 to offset negative Throwing OCV modifier with any three maneuvers or tight group (Grab; Martial Grab; Passing Throw)",
+                            pslThrowingAll = actor.items.find(
+                                (item) => item.name === "PSL Throwing OCV Modifier w/ All",
                             );
-                        });
 
-                        it("should have a correct description - throwing all", function () {
-                            expect(pslThrowingAll.system.description).to.equal(
-                                "+1 to offset negative Throwing OCV modifier with all attacks",
+                            dpslSingle = actor.items.find((item) => item.name === "PSL Groundfighting DCV Modifier");
+                            dpslGroup = actor.items.find(
+                                (item) => item.name === "PSL Groundfighting, Encumbrance, and Underwater DCV Modifier",
                             );
+
+                            singleTargetDrain = actor.items.find((item) => item.name === "Single Target Drain");
+                            strike = actor.items.find((item) => item.system.XMLID === "STRIKE");
+                            basicStrike = actor.items.find((item) => item.name === "Basic Strike");
+                            basicShot = actor.items.find((item) => item.name === "Basic Shot");
+                            defensiveShot = actor.items.find((item) => item.name === "Defensive Shot");
+                            offensiveShot = actor.items.find((item) => item.name === "Offensive Shot");
                         });
 
-                        it("should have a correct description - groundfighting", function () {
-                            expect(dpslSingle.system.description).to.equal(
-                                "+1 to offset a specific negative DCV modifier imposed by groundfighting",
-                            );
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
                         });
 
-                        it("should have a correct description - groundfighting, encumbrance, underwater", function () {
-                            expect(dpslGroup.system.description).to.equal(
-                                "+1 to offset a specific negative DCV modifier imposed by groundfighting, encumbrance, underwater",
-                            );
-                        });
-                    });
+                        describe("descriptions", function () {
+                            it("should have a correct description - range single", function () {
+                                expect(pslRangeSingle.system.description).to.equal(
+                                    "+1 to offset negative Range OCV modifiers with any single attack (Single Target Drain)",
+                                );
+                            });
 
-                    describe("costs", function () {
-                        it("should have the right cost for single target PSL", function () {
-                            expect(pslRangeSingle.characterPointCost).to.equal(1);
+                            it("should have a correct description - range tight", function () {
+                                expect(pslRangeTight.system.description).to.equal(
+                                    "+1 to offset negative Range OCV modifiers with any three maneuvers or tight group (Basic Shot; Defensive Shot; Offensive Shot)",
+                                );
+                            });
+
+                            it("should have a correct description - range all", function () {
+                                expect(pslRangeAll.system.description).to.equal(
+                                    "+1 to offset negative Range OCV modifiers with all attacks",
+                                );
+                            });
+
+                            it("should have a correct description - hit location single", function () {
+                                expect(pslHitLocationSingle.system.description).to.equal(
+                                    "+1 to offset negative hitLocation OCV modifiers with any single attack (Strike)",
+                                );
+                            });
+
+                            it("should have a correct description - hit location tight", function () {
+                                expect(pslHitLocationTight.system.description).to.equal(
+                                    "+1 to offset negative hitLocation OCV modifier with any three maneuvers or tight group (Ranged Martial Maneuvers Style)",
+                                );
+                            });
+
+                            it("should have a correct description - hit location all", function () {
+                                expect(pslHitLocationAll.system.description).to.equal(
+                                    "+1 to offset negative hitLocation OCV modifier with all attacks",
+                                );
+                            });
+
+                            it("should have a correct description - throwing single", function () {
+                                expect(pslThrowingSingle.system.description).to.equal(
+                                    "+1 to offset negative Throwing OCV modifier with any single attack (Grab)",
+                                );
+                            });
+
+                            it("should have a correct description - throwing tight", function () {
+                                expect(pslThrowingTight.system.description).to.equal(
+                                    "+1 to offset negative Throwing OCV modifier with any three maneuvers or tight group (Grab; Martial Grab; Passing Throw)",
+                                );
+                            });
+
+                            it("should have a correct description - throwing all", function () {
+                                expect(pslThrowingAll.system.description).to.equal(
+                                    "+1 to offset negative Throwing OCV modifier with all attacks",
+                                );
+                            });
+
+                            it("should have a correct description - groundfighting", function () {
+                                expect(dpslSingle.system.description).to.equal(
+                                    "+1 to offset a specific negative DCV modifier imposed by groundfighting",
+                                );
+                            });
+
+                            it("should have a correct description - groundfighting, encumbrance, underwater", function () {
+                                expect(dpslGroup.system.description).to.equal(
+                                    "+1 to offset a specific negative DCV modifier imposed by groundfighting, encumbrance, underwater",
+                                );
+                            });
                         });
 
-                        it("should have the right cost for single target PSL - character sheet display", function () {
-                            expect(pslRangeSingle.characterPointCostForDisplay).to.equal(1);
+                        describe("costs", function () {
+                            it("should have the right cost for single target PSL", function () {
+                                expect(pslRangeSingle.characterPointCost).to.equal(1);
+                            });
+
+                            it("should have the right cost for single target PSL - character sheet display", function () {
+                                expect(pslRangeSingle.characterPointCostForDisplay).to.equal(1);
+                            });
+
+                            it("should have the right cost for tight group PSL", function () {
+                                expect(pslRangeTight.characterPointCost).to.equal(2);
+                            });
+
+                            it("should have the right cost for All target PSL", function () {
+                                expect(pslRangeAll.characterPointCost).to.equal(3);
+                            });
+
+                            it("should have the right cost for single DPSL", function () {
+                                expect(dpslSingle.characterPointCost).to.equal(2);
+                            });
+
+                            it("should have the right cost for group DPSL", function () {
+                                expect(dpslGroup.characterPointCost).to.equal(3);
+                            });
                         });
 
-                        it("should have the right cost for tight group PSL", function () {
-                            expect(pslRangeTight.characterPointCost).to.equal(2);
-                        });
+                        describe("Applicability To Attack - pslAppliesTo", function () {
+                            it("should apply single PSL to power because it's listed - pslRangeSingle", function () {
+                                expect(pslRangeSingle.pslAppliesTo(singleTargetDrain)).to.be.true;
+                            });
 
-                        it("should have the right cost for All target PSL", function () {
-                            expect(pslRangeAll.characterPointCost).to.equal(3);
-                        });
+                            it("should not apply single PSL to power because it's not listed - pslRangeSingle", function () {
+                                expect(pslRangeSingle.pslAppliesTo(basicStrike)).to.be.false;
+                            });
 
-                        it("should have the right cost for single DPSL", function () {
-                            expect(dpslSingle.characterPointCost).to.equal(2);
-                        });
+                            it("should apply tight group PSL to power because it's contained - pslRangeTight", function () {
+                                expect(pslRangeTight.pslAppliesTo(basicShot)).to.be.true;
+                                expect(pslRangeTight.pslAppliesTo(defensiveShot)).to.be.true;
+                                expect(pslRangeTight.pslAppliesTo(offensiveShot)).to.be.true;
+                            });
 
-                        it("should have the right cost for group DPSL", function () {
-                            expect(dpslGroup.characterPointCost).to.equal(3);
-                        });
-                    });
+                            it("should not apply tight group PSL to power because it's not contained - pslRangeTight", function () {
+                                expect(pslRangeTight.pslAppliesTo(basicStrike)).to.be.false;
+                            });
 
-                    describe("Applicability To Attack - pslAppliesTo", function () {
-                        it("should apply single PSL to power because it's listed - pslRangeSingle", function () {
-                            expect(pslRangeSingle.pslAppliesTo(singleTargetDrain)).to.be.true;
-                        });
+                            it("should apply all attack PSL to power because it's listed - pslRangeAll", function () {
+                                expect(pslRangeAll.pslAppliesTo(strike)).to.be.true;
+                                expect(pslRangeAll.pslAppliesTo(basicStrike)).to.be.true;
+                                expect(pslRangeAll.pslAppliesTo(singleTargetDrain)).to.be.true;
+                            });
 
-                        it("should not apply single PSL to power because it's not listed - pslRangeSingle", function () {
-                            expect(pslRangeSingle.pslAppliesTo(basicStrike)).to.be.false;
-                        });
+                            it("should not apply any DPSL to attack - dpslSingle", function () {
+                                expect(dpslSingle.pslAppliesTo(strike)).to.be.false;
+                                expect(dpslSingle.pslAppliesTo(basicStrike)).to.be.false;
+                                expect(dpslSingle.pslAppliesTo(singleTargetDrain)).to.be.false;
+                            });
 
-                        it("should apply tight group PSL to power because it's contained - pslRangeTight", function () {
-                            expect(pslRangeTight.pslAppliesTo(basicShot)).to.be.true;
-                            expect(pslRangeTight.pslAppliesTo(defensiveShot)).to.be.true;
-                            expect(pslRangeTight.pslAppliesTo(offensiveShot)).to.be.true;
-                        });
-
-                        it("should not apply tight group PSL to power because it's not contained - pslRangeTight", function () {
-                            expect(pslRangeTight.pslAppliesTo(basicStrike)).to.be.false;
-                        });
-
-                        it("should apply all attack PSL to power because it's listed - pslRangeAll", function () {
-                            expect(pslRangeAll.pslAppliesTo(strike)).to.be.true;
-                            expect(pslRangeAll.pslAppliesTo(basicStrike)).to.be.true;
-                            expect(pslRangeAll.pslAppliesTo(singleTargetDrain)).to.be.true;
-                        });
-
-                        it("should not apply any DPSL to attack - dpslSingle", function () {
-                            expect(dpslSingle.pslAppliesTo(strike)).to.be.false;
-                            expect(dpslSingle.pslAppliesTo(basicStrike)).to.be.false;
-                            expect(dpslSingle.pslAppliesTo(singleTargetDrain)).to.be.false;
-                        });
-
-                        it("should not apply any DPSL to attack - dpslGroup", function () {
-                            expect(dpslGroup.pslAppliesTo(strike)).to.be.false;
-                            expect(dpslGroup.pslAppliesTo(basicStrike)).to.be.false;
-                            expect(dpslGroup.pslAppliesTo(singleTargetDrain)).to.be.false;
+                            it("should not apply any DPSL to attack - dpslGroup", function () {
+                                expect(dpslGroup.pslAppliesTo(strike)).to.be.false;
+                                expect(dpslGroup.pslAppliesTo(basicStrike)).to.be.false;
+                                expect(dpslGroup.pslAppliesTo(singleTargetDrain)).to.be.false;
+                            });
                         });
                     });
                 });

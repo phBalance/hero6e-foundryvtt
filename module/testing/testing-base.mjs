@@ -1,4 +1,4 @@
-import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
+import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 
 import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 
@@ -9,6 +9,9 @@ export function registerBaseTests(quench) {
             const { after, before, describe, expect, it } = context;
 
             describe("Base Tests", function () {
+                // The default timeout tends to be insufficient with multiple actors being created at the same time.
+                setQuenchTimeout(this);
+
                 describe("5e Characteristics", async function () {
                     const contents = `
                         <?xml version="1.0" encoding="UTF-16"?>
