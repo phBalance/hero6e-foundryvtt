@@ -4243,6 +4243,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         this.migrateData_4_0_26(source);
         this.migrateData_4_1_13(source);
 
+        this.migrateData_XmlidCharacteristics(source);
+
         return super.migrateData(source);
     }
 
@@ -4266,6 +4268,41 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (_removePlaceholderWeaponItem) {
             source.items = source.items.filter((item) => item.name !== "__InternalManeuverPlaceholderWeapon");
             tagObjectForPersistence(source);
+        }
+    }
+
+    static migrateData_XmlidCharacteristics(source) {
+        // Some super old actors are missing XMLID for STUN characteristic,
+        // which we will try to fix as it is critical for many calculations.
+        // REF: https://github.com/dmdorman/hero6e-foundryvtt/issues/3825
+        // Newly created actors don't have this issue as we create characteristics with XMLIDs.
+        for (const charKey of [
+            "STR",
+            "DEX",
+            "CON",
+            "INT",
+            "EGO",
+            "PRE",
+            "COM",
+            "OCV",
+            "DCV",
+            "OMCV",
+            "DMCV",
+            "SPD",
+            "PD",
+            "ED",
+            "REC",
+            "BODY",
+            "STUN",
+            "LEAPING",
+            "RUNNING",
+            "SWIMMING",
+        ]) {
+            const characteristic = source.system[charKey];
+            if (characteristic && !characteristic.XMLID && characteristic.ALIAS === charKey) {
+                characteristic.XMLID = charKey;
+                tagObjectForPersistence(source);
+            }
         }
     }
 }
