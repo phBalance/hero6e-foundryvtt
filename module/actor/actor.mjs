@@ -1735,10 +1735,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     async ResetActor() {
-        if (this.token) {
-            return this.ResetActorToMatchPrototype();
-        }
-
         const xml = this.system._hdcXml;
         if (!xml) {
             throw new Error("Cannot reset actor without _hdcXml in system");
