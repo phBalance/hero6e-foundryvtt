@@ -1261,7 +1261,7 @@ export function registerDamageFunctionTests(quench) {
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await actor.FullHealth();
+                        await actor.fullHealth();
                     });
 
                     after(async function () {
@@ -1303,7 +1303,7 @@ export function registerDamageFunctionTests(quench) {
                         });
                         item.type = "maneuver";
                         actor.items.set(item.system.XMLID, item);
-                        await actor.FullHealth();
+                        await actor.fullHealth();
                     });
 
                     after(async function () {
@@ -1340,7 +1340,7 @@ export function registerDamageFunctionTests(quench) {
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await actor.FullHealth();
+                        await actor.fullHealth();
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -1385,7 +1385,7 @@ export function registerDamageFunctionTests(quench) {
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -1429,7 +1429,7 @@ export function registerDamageFunctionTests(quench) {
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -1476,7 +1476,7 @@ export function registerDamageFunctionTests(quench) {
                             item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                             actor.items.set(item.system.XMLID, item);
                         });
 
@@ -1524,7 +1524,7 @@ export function registerDamageFunctionTests(quench) {
                                 parent: actor,
                             },
                         );
-                        await actor.FullHealth();
+                        await actor.fullHealth();
                         actor.items.set(item.system.XMLID, item);
                     });
 
@@ -1565,7 +1565,7 @@ export function registerDamageFunctionTests(quench) {
                                 parent: actor,
                             },
                         );
-                        await actor.FullHealth();
+                        await actor.fullHealth();
                         actor.items.set(item.system.XMLID, item);
                     });
 

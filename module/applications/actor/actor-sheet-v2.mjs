@@ -194,13 +194,13 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
         switch (action) {
             case "fullHealth":
-                return this.actor.FullHealth();
+                return this.actor.fullHealth();
             case "restore":
-                return this.actor.RestoreUnlinkedActorToMatchPrototype();
+                return this.actor.restoreUnlinkedActorToMatchPrototype();
             case "reset":
-                return this.actor.ResetActor();
+                return this.actor.resetActor();
             case "rebuild":
-                return this.actor.RebuildActor();
+                return this.actor.rebuildActor();
         }
     }
 
