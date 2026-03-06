@@ -223,8 +223,8 @@ export function determineCostPerActivePoint(targetCharacteristic, targetPower, t
     return targetPower
         ? parseFloat(targetPower?.baseInfo.activePoints / targetPower?.baseInfo.system.LEVELS)
         : parseFloat(
-              characteristic?.baseInfo.cost(characteristic) ||
-                  characteristic?.baseInfo.costPerLevel(characteristic) ||
+              characteristic?.baseInfo.cost?.(characteristic) ||
+                  characteristic?.baseInfo.costPerLevel?.(characteristic) ||
                   0,
           );
 }
