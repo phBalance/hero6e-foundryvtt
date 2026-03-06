@@ -4298,7 +4298,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             "RUNNING",
             "SWIMMING",
         ]) {
-            const characteristic = source.system[charKey];
+            const characteristic = source?.system?.[charKey];
             if (characteristic && !characteristic.XMLID && characteristic.ALIAS === charKey) {
                 characteristic.XMLID = charKey;
                 tagObjectForPersistence(source);

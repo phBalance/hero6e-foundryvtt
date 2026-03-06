@@ -205,22 +205,28 @@ export function determineCostPerActivePoint(targetCharacteristic, targetPower, t
         console.error(`Missing targetCharacteristic & targetPower`, targetActor);
     }
     // TODO: Not sure we need to use the characteristic here...
-    const powerInfo =
-        targetPower?.baseInfo ||
-        getPowerInfo({
-            xmlid: targetCharacteristic.toUpperCase(),
-            actor: targetActor,
-            xmlTag: targetPower?.system.xmlTag || targetCharacteristic.toUpperCase(),
-        });
+    // const powerInfo =
+    //     targetPower?.baseInfo ||
+    //     getPowerInfo({
+    //         xmlid: targetCharacteristic.toUpperCase(),
+    //         actor: targetActor,
+    //         xmlTag: targetPower?.system.xmlTag || targetCharacteristic.toUpperCase(),
+    //     });
+
+    const characteristic = targetActor.system?.[targetCharacteristic.toUpperCase()];
 
     // Simplified Healing
-    if (powerInfo.XMLID === "HEALING" && targetPower.system.INPUT.match(/simplified/i)) {
+    if (targetPower?.XMLID === "HEALING" && targetPower?.system.INPUT.match(/simplified/i)) {
         return 1;
     }
 
     return targetPower
-        ? parseFloat(targetPower.activePoints / targetPower.system.LEVELS)
-        : parseFloat(powerInfo?.cost || powerInfo?.costPerLevel(targetActor) || 0);
+        ? parseFloat(targetPower?.baseInfo.activePoints / targetPower?.baseInfo.system.LEVELS)
+        : parseFloat(
+              characteristic?.baseInfo.cost(characteristic) ||
+                  characteristic?.baseInfo.costPerLevel(characteristic) ||
+                  0,
+          );
 }
 
 function _findExistingMatchingEffect(item, potentialCharacteristic, targetSystem, activePoints) {
