@@ -34,7 +34,6 @@ import {
     maneuverHasVelocityTrait,
 } from "./item/maneuver.mjs";
 import { squelch, hdcTextNumberToNumeric } from "./utility/util.mjs";
-import { HeroActorCharacteristic } from "./item/HeroSystem6eTypeDataModels.mjs";
 import * as heroEncounter from "./utility/encounter/encounter.mjs";
 
 /**
