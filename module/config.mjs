@@ -1263,10 +1263,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(10),
             cost: function (spdCharacteristicOrItem) {
                 if (
-                    !(spdCharacteristicOrItem instanceof HeroActorCharacteristic) &&
-                    !(spdCharacteristicOrItem instanceof HeroSystem6eItem)
+                    !["HeroItemCharacteristic", "HeroActorCharacteristic"].includes(
+                        spdCharacteristicOrItem.constructor.name,
+                    )
                 ) {
-                    console.error(`unexpected datatype`, spdCharacteristicOrItem);
+                    console.error(`unexpected datatype`, spdCharacteristicOrItem.constructor.name);
                     return 0;
                 }
 
