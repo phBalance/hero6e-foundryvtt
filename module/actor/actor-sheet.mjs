@@ -1282,7 +1282,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Content"),
         });
         if (!confirmed) return;
-        return this.actor.FullHealth();
+        return this.actor.fullHealth();
     }
 
     async _onActorDescription() {

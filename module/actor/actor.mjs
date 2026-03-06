@@ -1636,13 +1636,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
     }
 
-    async FullHealth() {
+    async fullHealth() {
         const tDelta = 500;
         let start = Date.now();
         await this.statuses.clear();
         let end = Date.now();
         if (end - start > tDelta) {
-            console.warn("FullHealth performance concern: this.statuses.clear", end - start);
+            console.warn("fullHealth performance concern: this.statuses.clear", end - start);
         }
 
         // Reset all items
@@ -1651,7 +1651,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             await item.resetToOriginal();
             end = Date.now();
             if (end - start > tDelta) {
-                console.warn(`FullHealth performance concern: ${item.name} resetToOriginal`, end - start);
+                console.warn(`fullHealth performance concern: ${item.name} resetToOriginal`, end - start);
             }
         }
 
@@ -1668,7 +1668,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
         end = Date.now();
         if (end - start > tDelta) {
-            console.warn("FullHealth performance concern: Remove temporary effects", end - start);
+            console.warn("fullHealth performance concern: Remove temporary effects", end - start);
         }
 
         // Remove Maneuver/Martial effects
@@ -1680,7 +1680,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
         end = Date.now();
         if (end - start > tDelta) {
-            console.warn("FullHealth performance concern: Remove Maneuver/Martial effects", end - start);
+            console.warn("fullHealth performance concern: Remove Maneuver/Martial effects", end - start);
         }
 
         // Set Characteristics MAX to CORE (or 5e calculated value)
@@ -1702,7 +1702,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
         end = Date.now();
         if (end - start > tDelta) {
-            console.warn("FullHealth performance concern: Set Characteristics MAX to CORE", end - start);
+            console.warn("fullHealth performance concern: Set Characteristics MAX to CORE", end - start);
         }
 
         // start = Date.now();
@@ -1730,7 +1730,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
         end = Date.now();
         if (end - start > tDelta) {
-            console.warn("FullHealth performance concern: Set Characteristics VALUE to MAX", end - start);
+            console.warn("fullHealth performance concern: Set Characteristics VALUE to MAX", end - start);
         }
     }
 
@@ -1738,27 +1738,25 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const xml = this.system._hdcXml;
         if (!xml) {
             throw new Error("Cannot reset actor without _hdcXml in system");
-        }
-        if (this.token) {
+        } else if (this.token) {
             throw new Error("Cannot reset unlinked actor");
         }
 
         await this.uploadFromXml(xml, { keepExistingImage: true });
     }
 
-    async RebuildActor() {
+    async rebuildActor() {
         const xml = this.system._hdcXml;
         if (!xml) {
             throw new Error("Cannot rebuild actor without _hdcXml in system");
-        }
-        if (this.token) {
+        } else if (this.token) {
             throw new Error("Cannot rebuild unlinked actor");
         }
 
         await this.uploadFromXml(xml, { keepExistingImage: true, rebuild: true });
     }
 
-    async RestoreUnlinkedActorToMatchPrototype() {
+    async restoreUnlinkedActorToMatchPrototype() {
         if (!this.token) {
             throw new Error("Cannot reset actor to match prototype without token");
         }
@@ -2316,7 +2314,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 (heroJson.CHARACTER.TALENTS?.length || 0) +
                 (this.type === "pc" || this.type === "npc" || this.type === "automaton" ? freeStuffCount : 0) + // Free stuff
                 1 + // Validating adjustment and powers
-                1 + // FullHealth
+                1 + // fullHealth
                 1 + // VPP
                 1 + // Images
                 1 + // Final save
@@ -2817,8 +2815,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             // Make sure any powers with characteristic properties
             // reflect in current VALUE
-            uploadProgressBar.advance(`${this.name}: FullHealth`, 0);
-            await this.FullHealth();
+            uploadProgressBar.advance(`${this.name}: Full Health`, 0);
+            await this.fullHealth();
             // Kluge to ensure characteristic values match max
             try {
                 if (this.id) {
@@ -2831,7 +2829,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             } catch (e) {
                 console.error(e);
             }
-            uploadProgressBar.advance(`${this.name}: FullHealth complete`, 1);
+            uploadProgressBar.advance(`${this.name}: Full Health complete`, 1);
 
             // retainValuesOnUpload Charges
             uploadProgressBar.advance(`${this.name}: retainValuesOnUpload charges and ablative`, 0);

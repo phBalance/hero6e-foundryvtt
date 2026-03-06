@@ -5,7 +5,7 @@
   "author": "lMjTkal2ggc2JaCP",
   "img": "icons/svg/heal.svg",
   "scope": "global",
-  "command": "for(let token of game.scenes.current.tokens.filter(o=>o.isOwner)) {\n  token.actor.FullHealth()\n}",
+  "command": "for(let token of game.scenes.current.tokens.filter(o=>o.isOwner)) {\n  token.actor.fullHealth()\n}",
   "folder": null,
   "sort": 0,
   "ownership": {

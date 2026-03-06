@@ -1,4 +1,4 @@
-import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
+import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 
 export function registerVehicleTests(quench) {
     quench.registerBatch(
@@ -8,7 +8,7 @@ export function registerVehicleTests(quench) {
 
             describe("Vehicle Characteristics", function () {
                 // The default timeout tends to be insufficient with multiple actors being created at the same time.
-                this.timeout(20000);
+                setQuenchTimeout(this);
 
                 describe("6e ARC-170 Starfighter", async function () {
                     const contents = `
