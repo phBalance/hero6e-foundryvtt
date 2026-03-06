@@ -11,6 +11,8 @@ import {
 import { maneuverHasBlockTrait, maneuverHasFlashEffectTrait } from "./maneuver.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 
+const { StringField, ObjectField, BooleanField, ArrayField, EmbeddedDataField, SchemaField } = foundry.data.fields;
+
 // XML parsing is expensive when done frequently during actions like loading characters.
 // Use this for storing the parsed value and then clear it out after 10 seconds.
 // NOTE: This is a kludge. The 10 seconds is based on the fact we don't really want to keep
@@ -69,7 +71,12 @@ export function getChargeOptionIdToLevel(optionId) {
     return level;
 }
 
-const { StringField, ObjectField, BooleanField, ArrayField, EmbeddedDataField, SchemaField } = foundry.data.fields;
+// Schema elements which are present when inside a MULTIPOWER framework
+function multipowerFrameworkSchema() {
+    return {
+        ULTRA_SLOT: new StringField(),
+    };
+}
 
 class HeroNumberField extends foundry.data.fields.NumberField {
     _applyChangeMultiply(value, delta) {
@@ -1189,6 +1196,7 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
         // Note that the return is just a simple object
         return {
             ...super.defineSchema(),
+            ...multipowerFrameworkSchema(), // Items can be in a multipower
             AFFECTS_PRIMARY: new BooleanField({ initial: null, nullable: true }),
             AFFECTS_TOTAL: new BooleanField({ initial: null, nullable: true }),
             ACTIVE: new StringField(), // XMLID=DETECT
@@ -1225,7 +1233,6 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             TARGET: new StringField(),
             USECUSTOMENDCOLUMN: new StringField(),
             USESTANDARDEFFECT: new BooleanField({ initial: null, nullable: true }),
-            ULTRA_SLOT: new StringField(),
             VISIBLE: new StringField(),
             WIDTHLEVELS: new StringField(),
 
@@ -1269,6 +1276,7 @@ export class HeroSystem6eItemSkill extends HeroSystem6eItemTypeDataModelProps {
         // Note that the return is just a simple object
         return {
             ...super.defineSchema(),
+            ...multipowerFrameworkSchema(), // Skills can be in a multipower framework
             CHARACTERISTIC: new StringField(),
             EVERYMAN: new BooleanField({ initial: null, nullable: true }),
             FAMILIARITY: new BooleanField({ initial: null, nullable: true }),
@@ -1452,8 +1460,6 @@ export class HeroSystem6eItemTalent extends HeroSystem6eItemTypeDataModelProps {
     /// https://foundryvtt.wiki/en/development/api/DataModel
 
     static defineSchema() {
-        //const { ObjectField, StringField, ArrayField, EmbeddedDataField } = foundry.data.fields;
-        // Note that the return is just a simple object
         return {
             ...super.defineSchema(),
 
