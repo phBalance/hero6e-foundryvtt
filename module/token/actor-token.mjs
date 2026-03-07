@@ -231,7 +231,11 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
 
     #movementPossibilities(action) {
         const movementActiveEffects = this.actor.appliedEffects.filter((ae) =>
-            ae.changes.find((c) => c.key === `system.characteristics.${action.toLowerCase()}.max`),
+            ae.changes.find(
+                (c) =>
+                    c.key === `system.characteristics.${action.toLowerCase()}.max` &&
+                    c.mode === CONST.ACTIVE_EFFECT_MODES.ADD, // FIXME: We can have AEs like STR0 that are not appropriate to consider
+            ),
         );
         const possibleMovements = [];
         for (const ae of movementActiveEffects) {
