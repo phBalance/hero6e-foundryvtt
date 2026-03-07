@@ -9,6 +9,9 @@
 - Copy/Paste tokens with "Append Incrementing Number" property now ensure unique numbers [#3759](https://github.com/dmdorman/hero6e-foundryvtt/issues/3759)
 - Fix brace maneuver [#3791](https://github.com/dmdorman/hero6e-foundryvtt/issues/3791)
 - Fix set maneuver's bonus [#3795](https://github.com/dmdorman/hero6e-foundryvtt/issues/3795)
+- ActorSheetV2 are more compact
+- Skill roll results are colorized to make success/failure more obvious. [#3831
+  ](https://github.com/dmdorman/hero6e-foundryvtt/issues/3831)
 
 ### Version 4.2.17 20260221
 
