@@ -32,7 +32,7 @@
         font-size: 15px;
 
         .dice-succeeded {
-            color: var(--color-level-success);
+            color: #006400; // TODO: Investigating setting var(--color-level-success);
         }
 
         .dice-failed {
