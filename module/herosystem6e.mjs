@@ -48,13 +48,12 @@ import {
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
 import { HeroSystemItemSheetV2 } from "./applications/item/item-sheet-v2.mjs";
 
-//import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
-
 import SettingsHelpers from "./settings/settings-helpers.mjs";
 
 import { HeroSystemTokenHud } from "./token/heroSystemTokenHud.mjs";
 
 import { expireEffects } from "./utility/util.mjs";
+import { HeroRoll } from "./utility/dice.mjs";
 import "./utility/adjustment.mjs";
 import "./utility/chat-dice.mjs";
 
@@ -386,6 +385,8 @@ Hooks.once("init", async function () {
 Hooks.once("i18nInit", () => {
     // Override the default statusEffects
     CONFIG.statusEffects = HeroSystem6eActorActiveEffects.initialize(HEROSYS.module);
+
+    HeroRoll.initialize();
 });
 
 Hooks.on("canvasReady", () => {

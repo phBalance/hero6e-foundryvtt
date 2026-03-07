@@ -27,4 +27,16 @@
             background-image: url("../icons/circle.svg");
         }
     }
+
+    .dice-flavor {
+        font-size: 15px;
+
+        .dice-succeeded {
+            color: var(--color-level-success);
+        }
+
+        .dice-failed {
+            color: var(--color-level-error);
+        }
+    }
 }

@@ -2072,9 +2072,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const useAutoSuccess = autoSuccess !== undefined;
         const success = useAutoSuccess ? autoSuccess : margin >= 0;
 
-        const flavor = `${label.toUpperCase()} (${charRoll}-) characteristic roll ${
-            success ? "succeeded" : "failed"
-        } ${useAutoSuccess ? `due to automatic ${autoSuccess ? "success" : "failure"}` : `by ${Math.abs(margin)}`}`;
+        const flavor = `${label.toUpperCase()} (${charRoll}-) characteristic roll 
+        <b class="dice-${success ? "succeeded" : "failed"}">
+            ${
+                success ? "succeeded" : "failed"
+            } ${useAutoSuccess ? `due to automatic ${autoSuccess ? "success" : "failure"}` : `by ${Math.abs(margin)}`}
+        </b>`;
 
         const cardHtml = await heroRoller.render(flavor);
 
