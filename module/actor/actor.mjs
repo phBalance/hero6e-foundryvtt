@@ -1334,7 +1334,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             ) || {};
         if (_sizeDetails.body) {
             sizeActiveEffect.name = `size${size}`;
-            sizeActiveEffect.img ??= "icons/svg/teleport.svg";
+            sizeActiveEffect.img ??= "icons/svg/aura.svg";
             sizeActiveEffect.flags ??= {
                 [game.system.id]: {
                     size: true,
