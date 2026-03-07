@@ -811,7 +811,7 @@ export async function performAdjustment(
         updateEffectName(activeEffect);
         const createdEffects = await targetActor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
 
-        if (!createdEffects[0].duration.startTime) {
+        if (createdEffects[0].duration.startTime == null) {
             console.warn(
                 `${targetSystem?.name}: ${createdEffects[0].name} has no duration.startTime and will likely never expire.`,
                 createdEffects[0],
