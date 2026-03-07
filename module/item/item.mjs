@@ -7004,7 +7004,7 @@ export function getItem(id) {
     return null;
 }
 
-export async function RequiresACharacteristicRollCheck(actor, characteristic, reasonText) {
+export async function requiresACharacteristicRollCheck(actor, characteristic, reasonText) {
     console.log(characteristic, this);
     const successValue = parseInt(actor?.system.characteristics[characteristic.toLowerCase()].roll) || 8;
     const activationRoller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
@@ -7014,9 +7014,12 @@ export async function RequiresACharacteristicRollCheck(actor, characteristic, re
     const total = activationRoller.getSuccessTotal();
     const margin = successValue - total;
 
-    const flavor = `${reasonText ? `${reasonText}. ` : ``}${characteristic.toUpperCase()} roll ${successValue}- ${
-        succeeded ? "succeeded" : "failed"
-    } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
+    const flavor = `${reasonText ? `${reasonText}. ` : ``}${characteristic.toUpperCase()} roll ${successValue}-
+        <b class="dice-${succeeded ? "succeeded" : "failed"}">
+            ${
+                succeeded ? "succeeded" : "failed"
+            } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}
+        </b>`;
     let cardHtml = await activationRoller.render(flavor);
 
     // FORCE success
