@@ -89,6 +89,18 @@ Hooks.once("diceSoNiceReady", (diceSoNice) => {
 });
 
 /**
+ * We override aspects of the FoundryVTT Roll class.
+ */
+export class HeroRoll extends Roll {
+    static initialize() {
+        // Override the default chat template so that we can have HTML in our flavour text.
+        HeroRoll.CHAT_TEMPLATE = `systems/${game.system.id}/templates/chat/roll.hbs`;
+
+        CONFIG.Dice.rolls.push(this);
+    }
+}
+
+/**
  * @typedef {Object} TermMetadataEntry
  * @param {string} term
  * @param {number} originalTermIndex
@@ -192,8 +204,9 @@ export class HeroRoller {
      */
     _termsCluster;
 
-    constructor(options, rollClass = Roll) {
+    constructor(options, rollClass = HeroRoll) {
         this._buildRollClass = rollClass;
+
         this._options = options;
         this._rollObj = undefined;
 
@@ -667,18 +680,20 @@ export class HeroRoller {
     // TODO: May wish to consider our own custom chat template for this.
     // TODO: May wish to consider no flavour, but rather have it be the type of roll?
     // TODO: borderColor: margin >= 0 ? 0x00ff00 : 0xff0000, based on success/failure?
-    async render(flavor) {
-        //const template = this._buildRollClass.CHAT_TEMPLATE;
-        const customTemplate = `systems/${game.system.id}/templates/chat/roll.hbs`;
-        const chatData = {
-            formula: this.#buildFormula(),
-            flavor: flavor,
-            user: game.user.id,
-            tooltip: this.#buildTooltip(),
-            total: this.getTotalSummary(),
-        };
+    async render(flavor, isPrivate = false) {
+        // PH: FIXME: isPrivate should be provided everywhere explicitly
+        const template = this._buildRollClass.CHAT_TEMPLATE;
+        const chatData = isPrivate
+            ? { formula: "???", flavor: "???", user: game.user.id, tooltip: "", total: "???" }
+            : {
+                  formula: this.#buildFormula(),
+                  flavor: flavor,
+                  user: game.user.id,
+                  tooltip: this.#buildTooltip(),
+                  total: this.getTotalSummary(),
+              };
 
-        return foundryVttRenderTemplate(customTemplate, chatData);
+        return foundryVttRenderTemplate(template, chatData);
     }
 
     tags() {
@@ -1067,9 +1082,9 @@ export class HeroRoller {
 
     static fromData(dataObj) {
         // TODO: Finish this.
-        // TODO: I suspect that will only be able to support Roll class.
-        const heroRoller = new HeroRoller(dataObj.options, Roll);
-        heroRoller._rollObj = dataObj._rollObj ? Roll.fromData(dataObj._rollObj) : undefined;
+        // TODO: I suspect that will only be able to support HeroRoll class.
+        const heroRoller = new HeroRoller(dataObj.options, HeroRoll);
+        heroRoller._rollObj = dataObj._rollObj ? HeroRoll.fromData(dataObj._rollObj) : undefined;
 
         heroRoller._formulaTerms = dataObj._formulaTerms.map((_term, index) =>
             RollTermClass.fromData(dataObj._formulaTerms[index]),
