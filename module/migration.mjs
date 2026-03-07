@@ -11,14 +11,48 @@ export function tagObjectForPersistence(source) {
     foundry.utils.setProperty(source, needToCommitMigrationToDbField, true);
 }
 
+/**
+ * Returns all unlinked tokens in the game
+ *
+ * @returns {HeroSystem6eTokenDocument[]}
+ */
+function getUnlinkedTokensInGame() {
+    return game.scenes.contents
+        .map((scene) => [...scene.tokens.filter((token) => token.actor && !token.actorLink).map((t) => t.actor)])
+        .flat();
+}
+
+/**
+ * Get all actors listed in the Actor tab
+ *
+ * @returns {HeroSystem6eActor[]}
+ */
+function getSideBarActorsInGame() {
+    return game.actors.contents;
+}
+
+/**
+ * Find all unique actors associated with unlinked tokens. Some tokens may not have an actor
+ *
+ * @returns {HeroSystem6eActor[]}
+ */
+function getActorsFromUnlinkedTokensInGame() {
+    return (
+        // Get unique actors (sort by id and exclude if the same as the previous index)
+        getUnlinkedTokensInGame()
+            .sort((a, b) => a.id.localeCompare(b.id))
+            .filter((actor, index, array) => {
+                if (index > 0) {
+                    return actor.id !== array[index - 1].id;
+                } else {
+                    return true;
+                }
+            })
+    );
+}
+
 function getAllActorsInGame() {
-    return [
-        ...game.actors.contents,
-        ...game.scenes.contents
-            .map((scene) => [...scene.tokens.map((t) => t.actor)])
-            .flat()
-            .filter((a) => a),
-    ];
+    return [...getSideBarActorsInGame(), ...getActorsFromUnlinkedTokensInGame()];
 }
 
 async function willNotMigrate(lastMigration) {
@@ -99,7 +133,9 @@ export async function migrateWorld() {
         return;
     }
 
-    if (await willNotMigrate(lastMigration)) return;
+    if (await willNotMigrate(lastMigration)) {
+        return;
+    }
 
     // Delete invalidItems from unlinked tokens without actors.
     // Mostly to avoid future errors, not sure why we keep any "delta" from unlinked tokens without actors.
@@ -265,15 +301,22 @@ export async function migrateWorld() {
         "4.2.18",
         lastMigration,
         getAllActorsInGame(),
-        "Delete Invalid Item Types and Migrate Maneuvers",
-        async (actor) => await migrateTo4_2_18(actor),
+        "Delete Invalid Item Types",
+        async (actor) => await deleteInvalidItems4_2_18(actor),
     );
     await migrateToVersion(
         "4.2.18",
         lastMigration,
         Array.from(game.items.invalidDocumentIds).map((id) => game.items.getInvalid(id)),
-        "Invalid Item Types",
+        "Delete Invalid Item Types (side bar items)",
         async (item) => await deleteItemsWithInvalidTypesFromSideBar4_2_18(item),
+    );
+    await migrateToVersion(
+        "4.2.18",
+        lastMigration,
+        getAllActorsInGame(),
+        "Maneuvers",
+        async (actor) => await migrateActorManeuvers4_2_18(actor),
     );
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.18`, "background: #1111FF; color: #FFFFFF");
 
@@ -364,10 +407,9 @@ async function commitItemsCollectionMigrateDataChanges(item) {
     }
 }
 
-async function migrateTo4_2_18(actor) {
+async function deleteInvalidItems4_2_18(actor) {
     try {
         await deleteItemsWithInvalidTypesFromActor4_2_18(actor);
-        await migrateSeveralManeuver4_2_18(actor);
     } catch (e) {
         console.error(e);
     }
@@ -401,56 +443,81 @@ async function deleteItemsWithInvalidTypesFromActor4_2_18(actor) {
     return Promise.all(deletingItemPromises);
 }
 
-async function addHeroSystemManeuver(actor, maneuverName) {
-    const powerList = actor.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
-    const maneuver = powerList.find((baseInfo) => baseInfo.key === maneuverName && baseInfo.type?.includes("maneuver"));
-
-    // NOTE: It's bad form to use the functions outside the migration, but going to do it anyways.
-    return maneuver ? actor.addManeuver(maneuver) : undefined;
-}
-
 /**
  * There were some issues with the descriptions of BRACE, MULTIPLEATTACK, RAPIDFIRE, SET, and SETANDBRACE
  * @param {*} actor
  */
-async function migrateSeveralManeuver4_2_18(actor) {
-    const createPromises = [];
-
+async function migrateActorManeuvers4_2_18(actor) {
     try {
-        const braceItem = actor.items.find((item) => item.system.XMLID === "BRACE");
-        if (braceItem) {
-            await braceItem.delete();
-            createPromises.push(addHeroSystemManeuver(actor, "BRACE"));
-        }
-
-        const multipleAttackItem = actor.items.find((item) => item.system.XMLID === "MULTIPLEATTACK");
-        if (multipleAttackItem) {
-            await multipleAttackItem.delete();
-            createPromises.push(addHeroSystemManeuver(actor, "MULTIPLEATTACK"));
-        }
-
-        const rapidFireItem = actor.items.find((item) => item.system.XMLID === "RAPIDFIRE");
-        if (rapidFireItem) {
-            await rapidFireItem.delete();
-            createPromises.push(addHeroSystemManeuver(actor, "RAPIDFIRE"));
-        }
-
-        const setItem = actor.items.find((item) => item.system.XMLID === "SET");
-        if (setItem) {
-            await setItem.delete();
-            createPromises.push(addHeroSystemManeuver(actor, "SET"));
-        }
-
-        // Remove the set and brace as it's not in the combat maneuvers table (it's just in the action table)
-        const setAndBraceItem = actor.items.find((item) => item.system.XMLID === "SETANDBRACE");
-        if (setAndBraceItem) {
-            await setAndBraceItem.delete();
-        }
+        await readdHeroSystemManeuvers_4_2_18(actor);
     } catch (e) {
         console.error(e);
     }
+}
 
-    return Promise.all(createPromises);
+async function readdHeroSystemManeuvers_4_2_18(actor) {
+    // Delete all existing maneuvers
+    const existingManeuverIds = actor.items.filter((power) => power.type?.includes("maneuver")).map((item) => item.id);
+    await actor.deleteEmbeddedDocuments("Item", existingManeuverIds);
+
+    // Add all maneuvers for this version
+    const powerList = actor.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+    const maneuverList = powerList.filter((power) => power.type?.includes("maneuver"));
+    const maneuverItemsData = maneuverList.map((maneuverBaseInfo) =>
+        buildManeuverItemData_4_2_18(actor, maneuverBaseInfo),
+    );
+    return actor.createEmbeddedDocuments("Item", maneuverItemsData);
+}
+
+function buildManeuverItemData_4_2_18(actor, maneuver) {
+    const name = maneuver.name;
+    const XMLID = maneuver.key;
+
+    const maneuverDetails = maneuver.maneuverDesc;
+    const ADDSTR = maneuverDetails.addStr;
+    const DC = maneuverDetails.dc;
+    const DCV = maneuverDetails.dcv;
+    const EFFECT = maneuverDetails.effects;
+    const OCV = maneuverDetails.ocv;
+    const PHASE = maneuverDetails.phase;
+    const RANGE = maneuverDetails.range || "0";
+    const USEWEAPON = maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
+    const WEAPONEFFECT = maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
+
+    const itemData = {
+        name,
+        type: "maneuver",
+        system: {
+            active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
+            description: EFFECT,
+            is5e: actor.is5e,
+            ADDSTR,
+            DC,
+            DCV,
+            DISPLAY: name, // Not sure we should allow editing of basic maneuvers
+            EFFECT,
+            OCV,
+            PHASE,
+            RANGE,
+            USEWEAPON,
+            WEAPONEFFECT,
+            XMLID,
+            // MARTIALARTS consists of a list of MANEUVERS, the MARTIALARTS MANEUVERS have more props than our basic ones.
+            // Adding in some of those props as we may enhance/rework the basic maneuvers in the future.
+            //  <MANEUVER XMLID="MANEUVER" ID="1705867725258" BASECOST="4.0" LEVELS="0" ALIAS="Block" POSITION="1"
+            //  MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes"
+            //  INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Block" OCV="+2"
+            //  DCV="+2" DC="0" PHASE="1/2" EFFECT="Block, Abort" ADDSTR="No" ACTIVECOST="20" DAMAGETYPE="0"
+            //  MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Block, Abort">
+        },
+    };
+
+    if (!itemData.name) {
+        console.error("Missing name", itemData);
+        return;
+    }
+
+    return itemData;
 }
 
 async function deleteItemsWithInvalidTypesFromSideBar4_2_18(item) {
