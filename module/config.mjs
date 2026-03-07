@@ -1262,7 +1262,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(10),
             cost: function (spdCharacteristicOrItem) {
                 if (
-                    !["HeroItemCharacteristic", "HeroActorCharacteristic"].includes(
+                    !["HeroItemCharacteristic", "HeroActorCharacteristic", "HeroSystem6eItem"].includes(
                         spdCharacteristicOrItem.constructor.name,
                     )
                 ) {
