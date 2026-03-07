@@ -33,6 +33,8 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("toLowerCase", toLowerCase);
     Handlebars.registerHelper("toUpperCase", toUpperCase);
     Handlebars.registerHelper("objectNumKeys", objectNumKeys);
+    Handlebars.registerHelper("defenseAbbreviation", defenseAbbreviation);
+    Handlebars.registerHelper("endOrChargeDisplay", endOrChargeDisplay);
 }
 
 function indexOf(str, searchTerm) {
@@ -142,6 +144,17 @@ function objectNumKeys(obj) {
         console.error(e);
         return 0;
     }
+}
+
+function defenseAbbreviation(defense) {
+    return CONFIG.HERO.DEFENSE_ABBREVIATIONS[defense] || defense;
+}
+
+function endOrChargeDisplay(item) {
+    const chargeText = item.system.chargesMax > 0 ? `[${item.system.numCharges}]` : "";
+
+    // You can have charges and end, so show both if that's the case.
+    return `${item.system.endEstimate ? item.system.endEstimate : ""} ${chargeText}`.trim();
 }
 
 /**

@@ -12,6 +12,8 @@
 - ActorSheetV2 are more compact
 - Skill roll results are colorized to make success/failure more obvious. [#3831
   ](https://github.com/dmdorman/hero6e-foundryvtt/issues/3831)
+- Fixed issue where actor sheet attacks were not showing charges.[#3853
+  ](https://github.com/dmdorman/hero6e-foundryvtt/issues/3853)
 
 ### Version 4.2.17 20260221
 
