@@ -2372,7 +2372,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreForActor: staticIgnoreForActorFunction(["base2", "computer", "ai"]),
             maneuverDesc: {
                 phase: "1",
-                ocv: "var",
+                ocv: "-2/x", // Just to make consistent with 5e attacks - also seems better than "var"
                 dcv: "x1/2",
                 effects: "Attack one or more targets multiple times",
                 dc: "0",
