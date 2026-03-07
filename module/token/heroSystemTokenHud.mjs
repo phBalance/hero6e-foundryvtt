@@ -43,7 +43,7 @@ function generateMovementMaxNonCombatDistanceMeters(characteristic) {
                 token.actor?.appliedEffects.filter(
                     (ae) =>
                         ae.changes.find((c) => c.key === `system.characteristics.${characteristic}.max`) &&
-                        ae.parent.findModsByXmlid("IMPROVEDNONCOMBAT"),
+                        ae.parent.findModsByXmlid?.("IMPROVEDNONCOMBAT"), // NOTE: ae.parent can be an Actor or Item. We only care about items.
                 ) ?? [];
             for (const ae of movementEffectsWithImprovedNonCombat) {
                 const change = ae.changes.find((c) => c.key === `system.characteristics.${characteristic}.max`);
