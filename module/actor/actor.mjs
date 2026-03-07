@@ -642,7 +642,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             for (const charKEY of Object.keys(data.system)) {
                 if (data.system[charKEY]?.LEVELS != null) {
                     const charKey = charKEY.toLowerCase();
-                    if (this.system.characteristics[charKey] && this.hasCharacteristic(charKey.toUpperCase())) {
+                    if (this.hasCharacteristic(charKey.toUpperCase())) {
                         const basePlusLevels = this.system.characteristics[charKey].basePlusLevels;
                         await this.update({
                             [`system.characteristics.${charKey}.max`]: basePlusLevels,
@@ -653,8 +653,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
                         // Check for any figuredCharacteristic dependencies.
                         await this.updateFiguredCharacteristicDependencies(charKey);
-                    } else {
-                        //console.log(`${this.name} does not have characteristic key ${charKey}`);
                     }
                 }
             }
@@ -1734,7 +1732,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
     }
 
-    async ResetActor() {
+    async resetActor() {
         const xml = this.system._hdcXml;
         if (!xml) {
             throw new Error("Cannot reset actor without _hdcXml in system");
