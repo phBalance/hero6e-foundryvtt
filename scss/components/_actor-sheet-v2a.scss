@@ -55,7 +55,7 @@
 .herosystem6e.actor-sheet-v2a section.window-content {
     display: grid;
     grid-template:
-        "sidebar header" 75px
+        "sidebar header" max-content
         "sidebar nav" max-content
         "sidebar content" 1fr / 100px 1fr;
     overflow: hidden;
@@ -169,6 +169,10 @@ input.over-max {
         margin: 5px;
         text-align: center;
     }
+
+    h1.charname {
+        margin: 0;
+    }
 }
 
 /************************************************************************
@@ -187,13 +191,13 @@ input.over-max {
     }
 
     a {
-        margin: 0.25em;
-        padding: 0.25em;
+        margin: 0;
+        padding: 0;
         text-align: center;
         border: thin solid var(--color-tabs-border);
         border-radius: 0.5em;
         line-height: inherit;
-        width: 100px; // Characteristics is the longest tab
+        width: 95px; // `racteristics is the longest tab
     }
 
     a.active {
@@ -206,7 +210,8 @@ input.over-max {
 * Override nav.tabs
 ************************************************************************/
 .herosystem6e.actor-sheet-v2a .window-content nav.sheet-tabs.tabs {
-    gap: 0;
+    gap: 2px;
+    padding: 2px 0;
 }
 
 /************************************************************************
