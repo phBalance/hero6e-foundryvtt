@@ -21,7 +21,7 @@ import {
 } from "../utility/units.mjs";
 import {
     HeroSystem6eItem,
-    RequiresACharacteristicRollCheck,
+    requiresACharacteristicRollCheck,
     rollRequiresASkillRollCheck,
     rollAblativeActivationCheck,
 } from "../item/item.mjs";
@@ -851,7 +851,7 @@ async function doSingleTargetActionToHit(action, options) {
     if (actor && actor.hasCharacteristic("STR") && (item.system.usesStrength || item.findModsByXmlid("GESTURES"))) {
         if (parseInt(actor.system.characteristics.str.value) <= 0) {
             if (
-                !(await RequiresACharacteristicRollCheck(
+                !(await requiresACharacteristicRollCheck(
                     actor,
                     "str",
                     `Actions that use STR or GESTURES require STR roll when at 0 STR`,
@@ -872,7 +872,7 @@ async function doSingleTargetActionToHit(action, options) {
     // Not all token types (base) will have PRE
     if (actor && actor.hasCharacteristic("PRE") && parseInt(actor.system.characteristics.pre.value) <= 0) {
         if (
-            !(await RequiresACharacteristicRollCheck(
+            !(await requiresACharacteristicRollCheck(
                 actor,
                 "pre",
                 `Offensive actions when at PRE 0 requires PRE roll, failure typically results in actor avoiding threats`,
