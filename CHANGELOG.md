@@ -1,6 +1,6 @@
 # Releases
 
-### Version 4.2.18 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.2.18 20260307 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Actors that were upload prior to version 3.0.75 may have items/powers/skill/etc that we no longer support. These items are now deleted as they are unusable. This includes invalid items from the sidebar that may have been manually created. Compendiums remain untouched.
 - You can no longer "Create Items" from the sidebar. You can drag pre-configured items from the HeroItems compendium.
@@ -10,10 +10,8 @@
 - Fix brace maneuver [#3791](https://github.com/dmdorman/hero6e-foundryvtt/issues/3791)
 - Fix set maneuver's bonus [#3795](https://github.com/dmdorman/hero6e-foundryvtt/issues/3795)
 - ActorSheetV2 are more compact
-- Skill roll results are colorized to make success/failure more obvious. [#3831
-  ](https://github.com/dmdorman/hero6e-foundryvtt/issues/3831)
-- Fixed issue where actor sheet attacks were not showing charges.[#3853
-  ](https://github.com/dmdorman/hero6e-foundryvtt/issues/3853)
+- Skill roll results are colorized to make success/failure more obvious. [#3831](https://github.com/dmdorman/hero6e-foundryvtt/issues/3831)
+- Fixed issue where actor sheet attacks were not showing charges.[#3853](https://github.com/dmdorman/hero6e-foundryvtt/issues/3853)
 
 ### Version 4.2.17 20260221
 
