@@ -642,7 +642,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             for (const charKEY of Object.keys(data.system)) {
                 if (data.system[charKEY]?.LEVELS != null) {
                     const charKey = charKEY.toLowerCase();
-                    if (this.system.characteristics[charKey] && this.hasCharacteristic(charKey.toUpperCase())) {
+                    if (this.hasCharacteristic(charKey.toUpperCase())) {
                         const basePlusLevels = this.system.characteristics[charKey].basePlusLevels;
                         await this.update({
                             [`system.characteristics.${charKey}.max`]: basePlusLevels,
@@ -653,8 +653,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
                         // Check for any figuredCharacteristic dependencies.
                         await this.updateFiguredCharacteristicDependencies(charKey);
-                    } else {
-                        //console.log(`${this.name} does not have characteristic key ${charKey}`);
                     }
                 }
             }
