@@ -16,10 +16,11 @@ export function tagObjectForPersistence(source) {
  *
  * @returns {HeroSystem6eTokenDocument[]}
  */
-function getUnlinkedTokensInGame() {
+function getActorsFromUnlinkedTokensInGame() {
     return game.scenes.contents
         .map((scene) => [...scene.tokens.filter((token) => token.actor && !token.actorLink).map((t) => t.actor)])
-        .flat();
+        .flat()
+        .filter(Boolean);
 }
 
 /**
@@ -29,26 +30,6 @@ function getUnlinkedTokensInGame() {
  */
 function getSideBarActorsInGame() {
     return game.actors.contents;
-}
-
-/**
- * Find all unique actors associated with unlinked tokens. Some tokens may not have an actor
- *
- * @returns {HeroSystem6eActor[]}
- */
-function getActorsFromUnlinkedTokensInGame() {
-    return (
-        // Get unique actors (sort by id and exclude if the same as the previous index)
-        getUnlinkedTokensInGame()
-            .sort((a, b) => a.id.localeCompare(b.id))
-            .filter((actor, index, array) => {
-                if (index > 0) {
-                    return actor.id !== array[index - 1].id;
-                } else {
-                    return true;
-                }
-            })
-    );
 }
 
 function getAllActorsInGame() {
@@ -456,17 +437,29 @@ async function migrateActorManeuvers4_2_18(actor) {
 }
 
 async function readdHeroSystemManeuvers_4_2_18(actor) {
-    // Delete all existing maneuvers
-    const existingManeuverIds = actor.items.filter((power) => power.type?.includes("maneuver")).map((item) => item.id);
-    await actor.deleteEmbeddedDocuments("Item", existingManeuverIds);
+    // Consider linked and unlinked actors differently.
+    if (actor.token) {
+        // Don't migrate unlinked token items - we will instead delete them to make them equal to the prototype token's values.
+        const maneuversToDelete = actor.token.delta._source.items
+            .filter((item) => item.type === "maneuver")
+            .filter((i) => !actor.token.baseActor.items.map((i) => i.id).includes(i._id) && !i._tombstone);
+        const idsToDelete = maneuversToDelete.map((i) => i._id);
+        return actor.deleteEmbeddedDocuments("Item", idsToDelete);
+    } else {
+        // Delete all existing maneuvers from our linked actors
+        const existingManeuverIds = actor.items
+            .filter((power) => power.type?.includes("maneuver"))
+            .map((item) => item.id);
+        await actor.deleteEmbeddedDocuments("Item", existingManeuverIds);
 
-    // Add all maneuvers for this version
-    const powerList = actor.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
-    const maneuverList = powerList.filter((power) => power.type?.includes("maneuver"));
-    const maneuverItemsData = maneuverList.map((maneuverBaseInfo) =>
-        buildManeuverItemData_4_2_18(actor, maneuverBaseInfo),
-    );
-    return actor.createEmbeddedDocuments("Item", maneuverItemsData);
+        // Add all maneuvers for this version
+        const powerList = actor.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+        const maneuverList = powerList.filter((power) => power.type?.includes("maneuver"));
+        const maneuverItemsData = maneuverList.map((maneuverBaseInfo) =>
+            buildManeuverItemData_4_2_18(actor, maneuverBaseInfo),
+        );
+        return actor.createEmbeddedDocuments("Item", maneuverItemsData);
+    }
 }
 
 function buildManeuverItemData_4_2_18(actor, maneuver) {
