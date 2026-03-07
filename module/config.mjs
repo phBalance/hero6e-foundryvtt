@@ -63,6 +63,11 @@ HERO.folderColors = {
     "Powers.Talents": "#ff6666",
 };
 
+HERO.DEFENSE_ABBREVIATIONS = {
+    FLASHDEFENSE: "FlashD",
+    POWERDEFENSE: "PowD",
+};
+
 HERO.attacksWith = {
     ocv: "OCV",
     omcv: "OMCV",

@@ -61,11 +61,11 @@
                         <div class="item-column item-dmg">
                             <span>{{item.system.damage}}</span>
                         </div>
-                        <div class="item-column item-res">
-                            {{item.attackDefenseVs}}
+                        <div class="item-column item-res" {{#if (ne item.attackDefenseVs (  defenseAbbreviation item.attackDefenseVs))}} data-tooltip="{{item.attackDefenseVs}}" {{/if}}>
+                            {{defenseAbbreviation item.attackDefenseVs}}
                         </div>
                         <div class="item-column item-end">
-                            {{item.system.endEstimate}}
+                            {{endOrChargeDisplay item}}
                         </div>
                         <div class="item-column item-aoe">
                             {{#if item.aoeAttackParameters}}
