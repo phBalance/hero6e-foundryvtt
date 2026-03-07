@@ -55,7 +55,7 @@ async function CreateHeroMacros() {
   yes: () => {
       for(const token of game.scenes.current.tokens.filter(o=>o.isOwner)) {
         console.log(token);
-      token.actor?.FullHealth();
+      token.actor?.fullHealth();
       }
     }
 });

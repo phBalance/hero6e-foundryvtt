@@ -1321,7 +1321,7 @@ export function registerUploadTests(quench) {
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await actor.FullHealth();
+                        await actor.fullHealth();
                     });
 
                     after(async function () {
@@ -1376,7 +1376,7 @@ export function registerUploadTests(quench) {
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await actor.FullHealth();
+                        await actor.fullHealth();
                     });
 
                     after(async function () {
@@ -1675,7 +1675,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -2290,7 +2290,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -2655,7 +2655,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -2695,7 +2695,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
                         after(async function () {
                             await deleteQuenchActor({ quench: this, actor });
@@ -4105,7 +4105,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -4674,7 +4674,7 @@ export function registerUploadTests(quench) {
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await actor.FullHealth();
+                        await actor.fullHealth();
                     });
 
                     after(async function () {
@@ -4899,7 +4899,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -4953,7 +4953,7 @@ export function registerUploadTests(quench) {
                                     parent: actor,
                                 },
                             );
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -5004,7 +5004,7 @@ export function registerUploadTests(quench) {
                                     parent: actor,
                                 },
                             );
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -5089,7 +5089,7 @@ export function registerUploadTests(quench) {
                             await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(ridingContents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -5132,7 +5132,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -5272,7 +5272,7 @@ export function registerUploadTests(quench) {
                         item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await actor.FullHealth();
+                        await actor.fullHealth();
                     });
 
                     after(async function () {
@@ -5558,7 +5558,7 @@ export function registerUploadTests(quench) {
                         skillItem = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,
                         });
-                        await actor.FullHealth();
+                        await actor.fullHealth();
                     });
 
                     after(async function () {
@@ -6274,7 +6274,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -6484,7 +6484,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -6839,7 +6839,7 @@ export function registerUploadTests(quench) {
 
                             actor.items.set(item.system.XMLID, item);
 
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -6941,7 +6941,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -7051,7 +7051,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -7582,7 +7582,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -8024,7 +8024,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -8206,7 +8206,7 @@ export function registerUploadTests(quench) {
                             });
 
                             actor.items.set(item.system.XMLID, item);
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         it("description", function () {
@@ -8651,7 +8651,7 @@ export function registerUploadTests(quench) {
                                 );
 
                                 await item.setActiveEffects();
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                                 if (!item.isActive) {
                                     await item.toggle();
                                 }
@@ -8733,7 +8733,7 @@ export function registerUploadTests(quench) {
                                 );
 
                                 await item.setActiveEffects();
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                                 if (!item.isActive) {
                                     await item.toggle();
                                 }
@@ -8795,7 +8795,7 @@ export function registerUploadTests(quench) {
                                 );
 
                                 await item.setActiveEffects();
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                                 if (!item.isActive) {
                                     await item.toggle();
                                 }
@@ -8865,7 +8865,7 @@ export function registerUploadTests(quench) {
                                 );
 
                                 await item.setActiveEffects();
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                                 if (!item.isActive) {
                                     await item.toggle();
                                 }
@@ -8935,7 +8935,7 @@ export function registerUploadTests(quench) {
                                 );
 
                                 await item.setActiveEffects();
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                                 if (!item.isActive) {
                                     await item.toggle();
                                 }
@@ -9001,7 +9001,7 @@ export function registerUploadTests(quench) {
                                 );
 
                                 await item.setActiveEffects();
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                                 if (!item.isActive) {
                                     await item.toggle();
                                 }
@@ -9083,7 +9083,7 @@ export function registerUploadTests(quench) {
                                 );
 
                                 await item.setActiveEffects();
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                                 if (!item.isActive) {
                                     await item.toggle();
                                 }
@@ -9145,7 +9145,7 @@ export function registerUploadTests(quench) {
                                 );
 
                                 await item.setActiveEffects();
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                                 if (!item.isActive) {
                                     await item.toggle();
                                 }
@@ -9215,7 +9215,7 @@ export function registerUploadTests(quench) {
                                 );
 
                                 await item.setActiveEffects();
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                                 if (!item.isActive) {
                                     await item.toggle();
                                 }
@@ -9285,7 +9285,7 @@ export function registerUploadTests(quench) {
                                 );
 
                                 await item.setActiveEffects();
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                                 if (!item.isActive) {
                                     await item.toggle();
                                 }
@@ -9385,7 +9385,7 @@ export function registerUploadTests(quench) {
                     let actor;
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true });
-                        await actor.FullHealth();
+                        await actor.fullHealth();
 
                         compoundPowerItem = actor.items.find((item) => item.system.XMLID === "COMPOUNDPOWER");
                     });
@@ -9525,7 +9525,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -9568,7 +9568,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -9610,7 +9610,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -9787,7 +9787,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -9828,7 +9828,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -9917,7 +9917,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -9957,7 +9957,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -10013,7 +10013,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10072,7 +10072,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10131,7 +10131,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10190,7 +10190,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10249,7 +10249,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10310,7 +10310,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10371,7 +10371,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10432,7 +10432,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10495,7 +10495,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10556,7 +10556,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10619,7 +10619,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10677,7 +10677,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10742,7 +10742,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10804,7 +10804,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10864,7 +10864,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10922,7 +10922,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -10980,7 +10980,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -11040,7 +11040,7 @@ export function registerUploadTests(quench) {
                                         parent: actor,
                                     },
                                 );
-                                await actor.FullHealth();
+                                await actor.fullHealth();
                             });
 
                             after(async function () {
@@ -11100,7 +11100,7 @@ export function registerUploadTests(quench) {
                             item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                                 parent: actor,
                             });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -11142,7 +11142,7 @@ export function registerUploadTests(quench) {
                         let actor;
                         before(async function () {
                             actor = await createQuenchActor({ quench: this, is5e: true });
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {
@@ -11193,7 +11193,7 @@ export function registerUploadTests(quench) {
                             );
                             await dexItem.turnOn();
                             await egoItem.turnOn();
-                            await actor.FullHealth();
+                            await actor.fullHealth();
                         });
 
                         after(async function () {

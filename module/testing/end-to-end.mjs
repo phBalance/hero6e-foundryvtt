@@ -81,36 +81,36 @@ export class HeroSystem6eEndToEndTest {
         // return;
 
         // AID 6 multiple characteristics + stacking
-        // await this.token5.actor.FullHealth();
-        // await this.token6.actor.FullHealth();
+        // await this.token5.actor.fullHealth();
+        // await this.token6.actor.fullHealth();
         // if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "STR, DEX"))) return;
         // if (!(await this.testAdjustmentStacking(this.token6, this.token5, "AID", "END, POWERDEFENSE"))) return;
 
         // AID 6
         // for (const char of getCharacteristicInfoArrayForActor(this.token6.actor)) {
-        //     await this.token5.actor.FullHealth();
-        //     await this.token6.actor.FullHealth();
+        //     await this.token5.actor.fullHealth();
+        //     await this.token6.actor.fullHealth();
         //     if (!(await this.testAdjustmentStacking(this.token6, this.token6, "AID", char.XMLID))) return;
         // }
 
         // AID 5
         for (const char of getCharacteristicInfoArrayForActor(this.token5.actor)) {
-            await this.token5.actor.FullHealth();
-            await this.token6.actor.FullHealth();
+            await this.token5.actor.fullHealth();
+            await this.token6.actor.fullHealth();
             if (!(await this.testAdjustmentStacking(this.token5, this.token5, "AID", char.XMLID))) return;
         }
 
         // DRAIN 6
         // for (const char of getCharacteristicInfoArrayForActor(this.token6.actor)) {
-        //     await this.token5.actor.FullHealth();
-        //     await this.token6.actor.FullHealth();
+        //     await this.token5.actor.fullHealth();
+        //     await this.token6.actor.fullHealth();
         //     if (!(await this.testAdjustmentStacking(this.token6, this.token6, "DRAIN", char.XMLID))) return;
         // }
 
         // DRAIN 5
         for (const char of getCharacteristicInfoArrayForActor(this.token5.actor)) {
-            await this.token5.actor.FullHealth();
-            await this.token6.actor.FullHealth();
+            await this.token5.actor.fullHealth();
+            await this.token6.actor.fullHealth();
             if (!(await this.testAdjustmentStacking(this.token5, this.token5, "DRAIN", char.XMLID))) return;
         }
 
@@ -177,7 +177,7 @@ export class HeroSystem6eEndToEndTest {
             },
         });
         await this.actor5.update({ "system.is5e": true });
-        await this.actor5.FullHealth();
+        await this.actor5.fullHealth();
 
         await TokenDocument.create(
             {
@@ -207,7 +207,7 @@ export class HeroSystem6eEndToEndTest {
                 "characteristics.stun.core": 50,
             },
         });
-        await this.actor6.FullHealth();
+        await this.actor6.fullHealth();
         await TokenDocument.create(
             {
                 name: this.actor6.name.replace("_", ""),

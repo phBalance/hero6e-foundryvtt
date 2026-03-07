@@ -1,4 +1,4 @@
-import { createQuenchActor, deleteQuenchActor } from "./quench-helper.mjs";
+import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 
 export function registerManeuverTests(quench) {
     quench.registerBatch(
@@ -7,6 +7,9 @@ export function registerManeuverTests(quench) {
             const { after, before, describe, expect, it } = context;
 
             describe("Maneuver Behaviors", function () {
+                // The default timeout tends to be insufficient with multiple actors being created at the same time.
+                setQuenchTimeout(this);
+
                 describe("5e Test Character Maneuvers", async function () {
                     // Using the Test-5e.hdc file content
                     const contents = `
