@@ -89,6 +89,12 @@ export function dehydrateAttackItem(item) {
     const dehydratedObj = {};
     dehydratedObj.item = item.toObject(false);
 
+    // If there is a base attack item, dehydrate it
+    if (item.system._active.__baseAttackItem) {
+        dehydratedObj.__baseAttackItem = item.system._active.__baseAttackItem.toObject(false);
+        dehydratedObj.item.system._active.__baseAttackItem = null;
+    }
+
     // If there is a strength item, dehydrate it
     if (item.system._active.effectiveStrItem) {
         dehydratedObj.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
@@ -159,6 +165,13 @@ export function rehydrateAttackItem(itemJsonStr, actor) {
     const item = HeroSystem6eItem.fromSource(obj.item, {
         parent: actor,
     });
+
+    // If there is a base attack item, then we need to rehydrate it.
+    if (obj.__baseAttackItem) {
+        item.system._active.__baseAttackItem = HeroSystem6eItem.fromSource(obj.__baseAttackItem, {
+            parent: actor,
+        });
+    }
 
     // If there is a strength item, then we need to rehydrate it.
     if (obj.effectiveStrItem) {

@@ -5632,12 +5632,15 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     /**
-     * Return the effect attack item for this item.
-     * If the item is using a martial arts weapon, then that's the effective attack item.
-     * Anything else?
+     * Return the effect attack item for this item which is not necessarily the item that the player attacked with/clicked the dice icon for.
+     *
+     * If the item is a martial maneuver using a martial arts weapon (including a HTH), then that's the effective attack item.
+     * If the item is a maneuver using a HTH then the effective attack item is the HTH.
+     * If the item is a maneuver using STR then the effective attack item is the STR.
+     * If the item is not a maneuver of some kind then it's the effective attack item.
      */
     get effectiveAttackItem() {
-        return this.system._active.maWeaponItem || this;
+        return this.system._active.maWeaponItem || this.system._active.__baseAttackItem || this;
     }
 
     /**
@@ -7573,13 +7576,13 @@ export function buildItemAsClub(effectivePower, actor, name) {
  *
  * Caller can do further changes, such as linking items
  *
- * @param {HeroSystem6eItem} originalItem
+ * @param {HeroSystem6eItem} originalItem - attack item that is in the database
  * @param {Object} effectiveRealCost
  * @param {Object} pushedRealPoints
  * @param {Object} effectiveStr
  * @param {Object} effectiveStrPushedRealPoints
  *
- * @returns {HeroSystem6eItem} - the effective attack item
+ * @returns {HeroSystem6eItem} - the effective attack item that is not in the database
  */
 export function cloneToEffectiveAttackItem({
     originalItem,
@@ -7651,7 +7654,7 @@ export function cloneToEffectiveAttackItem({
  * @param {Number} effectiveObjectParameters.autofire.shots
  * @param {Number} effectiveObjectParameters.autofire.maxShots
  *
- * @returns
+ * @returns {HeroSystem6eItem} - In memory effective attack item
  */
 export function buildEffectiveObject(effectiveObjectParameters) {
     const { effectiveItem, strengthItem } = cloneToEffectiveAttackItem({
@@ -7681,10 +7684,11 @@ export function buildEffectiveObject(effectiveObjectParameters) {
     }
 
     // Active points for the base item. For maneuvers this could be STR or a weapon.
-    const effectiveItemActivePointsBeforeHthAndNaAdvantages = effectiveItem.baseInfo.baseEffectDicePartsBundle(
+    const baseAttackItemBeforeHthAndNa = effectiveItem.baseInfo.baseEffectDicePartsBundle(
         effectiveItem,
         {},
-    ).baseAttackItem._activePoints;
+    ).baseAttackItem;
+    const effectiveItemActivePointsBeforeHthAndNaAdvantages = baseAttackItemBeforeHthAndNa._activePoints;
 
     // Add any checked & appropriate Hand-to-Hand Attack advantages into the base item
     let hthAttackDisabledDueToStrength = false;
@@ -7716,7 +7720,7 @@ export function buildEffectiveObject(effectiveObjectParameters) {
         .map(([uuid]) => fromUuidSync(uuid))
         .forEach((hthAttack) => {
             // 5e only: Can add advantages from HA to STR if HA's unmodified active points don't exceed the STR used.
-            // 6e only: PH: FIXME: the HA becomes the base attack item.
+            // 6e only: The HA becomes the base attack item.
             // PH: FIXME: Need to consider STRMINIMUM
             const haBaseCost = hthAttack._basePoints;
             if (hthAttack.is5e && haBaseCost >= effectiveItemActivePointsBeforeHthAndNaAdvantages) {
@@ -7731,10 +7735,6 @@ export function buildEffectiveObject(effectiveObjectParameters) {
             } else if (hthAttack.is5e) {
                 ui.notifications.warn(
                     `${hthAttack.detailedName()} has fewer unmodified active points (${haBaseCost}) than STR (${effectiveItemActivePointsBeforeHthAndNaAdvantages}). Advantages do not apply.`,
-                );
-            } else if (!hthAttack.is5e && hthAttack.advantages.length > 0) {
-                ui.notifications.warn(
-                    `6e Advantaged Hand-to-Hand Attacks not supported. Advantages for ${hthAttack.detailedName()} are not applied.`,
                 );
             }
 
@@ -7804,6 +7804,16 @@ export function buildEffectiveObject(effectiveObjectParameters) {
             `Naked Advantages must be able to apply at least as many active points as the base attack${effectiveItem.is5e ? "" : " and other naked advantages"}`,
         );
     }
+
+    const baseAttackItemAfterHthAndNa = effectiveItem.baseInfo.baseEffectDicePartsBundle(
+        effectiveItem,
+        {},
+    ).baseAttackItem;
+    const __baseAttackItem =
+        baseAttackItemAfterHthAndNa.uuid === effectiveObjectParameters.originalItem.uuid
+            ? null
+            : baseAttackItemAfterHthAndNa;
+    effectiveItem.system._active.__baseAttackItem = __baseAttackItem;
 
     return effectiveItem;
 }
