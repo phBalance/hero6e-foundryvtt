@@ -20,17 +20,14 @@ import {
 /**
  * 5e HEX type and NORMAL are converted to RADIUS
  */
-const heroAoeTypeToFoundryAoeTypeConversions = {
+const heroAoeTypeToFoundryAoeTypeConversions = Object.freeze({
     any: "rect",
     cone: "cone",
     line: "ray",
     radius: "circle",
     surface: "rect",
-};
+});
 
-/* *
- * uses ../templates/attack/item-attack-application.hbs
- * */
 export class ItemAttackFormApplication extends FormApplication {
     constructor(data) {
         super();
