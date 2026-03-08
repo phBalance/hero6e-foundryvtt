@@ -4670,10 +4670,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // CONFIG overrides for specific XMLIDs
         if (baseAttackItem.baseInfo?.attackDefenseVs) {
-            if (typeof baseAttackItem.baseInfo.attackDefenseVs === "function") {
-                return baseAttackItem.baseInfo.attackDefenseVs();
-            }
-            return baseAttackItem.baseInfo.attackDefenseVs;
+            return baseAttackItem.baseInfo.attackDefenseVs(baseAttackItem);
         }
 
         // Adjustment
@@ -4727,14 +4724,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         if (baseAttackItem.system.XMLID === "KNOCKBACK") {
             return "KB";
-        }
-
-        if (baseAttackItem.system.XMLID === "HANDTOHANDATTACK") {
-            ui.notifications.error(
-                `${this.detailedName()} has baseItem ${baseAttackItem.detailedName()}. Please report.`,
-            );
-
-            return "PD";
         }
 
         if (this.system.usesStrength) {

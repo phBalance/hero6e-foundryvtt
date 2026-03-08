@@ -7643,7 +7643,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: HERO.DURATION_TYPES.INSTANT,
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true,
-            usesStrength: false,
+            usesStrength: false, // NOTE: Not an attack of its own
+            attackDefenseVs: function (/* item */) {
+                return "PD";
+            },
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
@@ -8373,7 +8376,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             costEnd: true,
             usesStrength: false,
-            attackDefenseVs: "POWERDEFENSE",
+            attackDefenseVs: function (/* item */) {
+                return "POWERDEFENSE";
+            },
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="TRANSFORM" ID="1709334039303" BASECOST="0.0" LEVELS="1" ALIAS="Transform" POSITION="84" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="COSMETIC" OPTIONID="COSMETIC" OPTION_ALIAS="Cosmetic" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
@@ -8395,6 +8400,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(5),
             costEnd: true,
             usesStrength: false, // Doesn't stack with itself.
+            attackDefenseVs: function (/* item */) {
+                return "PD";
+            },
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
             doesKillingDamage: fixedValueFunction(false),
             xml: `<POWER XMLID="__STRENGTHDAMAGE" ID="1709333792635" BASECOST="0.0" LEVELS="1" ALIAS="__InternalStrengthPlaceholder" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
