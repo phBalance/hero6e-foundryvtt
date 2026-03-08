@@ -2453,10 +2453,14 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
     /**
      * Returns the base cost of an item. It's possible that it costs more beyond there (e.g. STR added etc)
+     *
      * @returns number
      */
     getBaseEndCost() {
-        const isStrOrStrDamage = this.system.XMLID === "__STRENGTHDAMAGE" || this.system.XMLID === "STR";
+        const isStrOrStrDamage =
+            this.system.XMLID === "__STRENGTHDAMAGE" ||
+            this.system.XMLID === "STR" ||
+            this.system.XMLID === "HANDTOHANDATTACK";
 
         // STR (or any other characteristic only cost end when the native STR is used), PERKS, TALENTS, COMPLICATIONS, and martial maneuvers do not use endurance.
         if (
@@ -2471,7 +2475,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return 1;
         }
 
-        // Everything else is based on 1 END per 10 active points except for strength which is 1 per 5 when using optional heroic rules.
+        // Everything else is based on 1 END per 10 active points except for strength & HANDTOHANDATTACK which is 1 per 5 when using optional heroic rules.
         const endUnitSize = isStrOrStrDamage && game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10;
 
         const activePoints = this.system._active?.originalActivePoints ?? this._activePoints;
