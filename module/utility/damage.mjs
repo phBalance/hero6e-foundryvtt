@@ -1065,21 +1065,22 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
 
     // PH: FIXME: Need to figure in all the crazy rules around STR and STR with advantage.
     const baseEffectiveStrength = effectiveStrength(item, options);
+    let str = baseEffectiveStrength;
+
     let actorStrengthItem = item.system._active.effectiveStrItem;
     if (!actorStrengthItem) {
         actorStrengthItem = buildStrengthItem(baseEffectiveStrength, item.actor, `STR used with ${item.name}`);
     }
 
-    let str = baseEffectiveStrength;
     const baseEffectiveStrDc =
         characteristicValueToDiceParts(baseEffectiveStrength).dc *
-        (strengthAddsToDamage ? 1 : 1 + actorStrengthItem._advantagesAffectingDc);
+        (strengthAddsToDamage ? 1 : 1 + actorStrengthItem._advantagesAffectingDc); // PH: FIXME: Can we get rid of this? Is it right for the true case - perhaps we had a naked advantage on STR?
 
-    const strDiceParts = calculateDicePartsFromDcForItem(item, baseEffectiveStrDc);
-    const formula = dicePartsToFullyQualifiedEffectFormula(item, strDiceParts);
+    dicePartsBundle.baseAttackItem ??= actorStrengthItem;
+    const strDiceParts = calculateDicePartsFromDcForItem(dicePartsBundle.baseAttackItem, baseEffectiveStrDc);
+    const formula = dicePartsToFullyQualifiedEffectFormula(dicePartsBundle.baseAttackItem, strDiceParts);
 
-    dicePartsBundle.baseAttackItem = actorStrengthItem;
-    dicePartsBundle.diceParts = addDiceParts(actorStrengthItem, dicePartsBundle.diceParts, strDiceParts);
+    dicePartsBundle.diceParts = addDiceParts(dicePartsBundle.baseAttackItem, dicePartsBundle.diceParts, strDiceParts);
     dicePartsBundle.tags.push({
         value: `${strengthAddsToDamage ? "+" : ""}${formula}`,
         name: "STR",
@@ -1187,9 +1188,12 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
                     ?.map((info) => info.item)
                     .filter((power) => power.system.XMLID === "HANDTOHANDATTACK") || [];
 
+            // If there is an HTH attack, make that the base attack
             // PH: FIXME: If we have multiple Hand-to-Hand attack items being combined, how should we be combining them? We should
             //            probably be checking that they all can be combined somehow. For the time being, the first one in this list
             //            will be the base attack item
+            const hthBaseAttackItem = hthAttackItems[0];
+            baseDicePartsBundle.baseAttackItem = hthBaseAttackItem;
 
             hthAttackItems.forEach((hthAttack) => {
                 const { diceParts: hthAttackDiceParts, tags } = hthAttack.baseInfo.baseEffectDicePartsBundle(
@@ -1197,7 +1201,11 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
                     options,
                 );
 
-                baseDicePartsBundle.diceParts = addDiceParts(item, baseDicePartsBundle.diceParts, hthAttackDiceParts);
+                baseDicePartsBundle.diceParts = addDiceParts(
+                    baseDicePartsBundle.baseAttackItem,
+                    baseDicePartsBundle.diceParts,
+                    hthAttackDiceParts,
+                );
                 baseDicePartsBundle.tags.push(...tags);
 
                 // Any STRDC modifiers such as MOVEBY for this maneuver? If yes, then make sure the effect of the HTH Attack
@@ -1212,7 +1220,7 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
                     const formula = dicePartsToFullyQualifiedEffectFormula(hthAttack, hthDiceParts);
 
                     baseDicePartsBundle.diceParts = subtractDiceParts(
-                        item,
+                        baseDicePartsBundle.baseAttackItem,
                         baseDicePartsBundle.diceParts,
                         hthDiceParts,
                     );
@@ -1225,7 +1233,7 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
             });
 
             // STR is the base attack in the case of there being no Hand-to-Hand attacks
-            addStrengthToBundle(item, options, baseDicePartsBundle, false);
+            addStrengthToBundle(item, options, baseDicePartsBundle, !!hthBaseAttackItem);
         } else {
             const rawItemBaseDc = parseInt(item.system.DC);
             let itemBaseDc = rawItemBaseDc;

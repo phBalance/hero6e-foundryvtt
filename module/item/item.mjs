@@ -7580,8 +7580,13 @@ export function buildItemAsClub(effectivePower, actor, name) {
  *
  * Caller can do further changes, such as linking items
  *
- * @param {Object} param0
- * @returns
+ * @param {HeroSystem6eItem} originalItem
+ * @param {Object} effectiveRealCost
+ * @param {Object} pushedRealPoints
+ * @param {Object} effectiveStr
+ * @param {Object} effectiveStrPushedRealPoints
+ *
+ * @returns {HeroSystem6eItem} - the effective attack item
  */
 export function cloneToEffectiveAttackItem({
     originalItem,
