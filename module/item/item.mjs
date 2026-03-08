@@ -7035,7 +7035,7 @@ export async function requiresACharacteristicRollCheck(actor, characteristic, re
     speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
         rolls: activationRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
@@ -7091,22 +7091,28 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
     if (!rar) {
         return true;
     }
+
+    // FIXME: This doesn't support 2 RAR. See https://github.com/dmdorman/hero6e-foundryvtt/issues/3873
+
     // todo why OPTION and not OPTIONID to look for background skills (OPTIONID can't be altered by user)
+    // PH: FIXME: This doesn't look right as it can and should be modified in the HDC. Also variable name indicates boolean and it's not
     const rarOptionIsBackground = rar.OPTION.substring(0, 2).toUpperCase();
 
-    const filterSkillRollItems = (o) => {
-        if (!o.isRollable()) {
+    const filterSkillRollItems = (item) => {
+        if (!item.isRollable()) {
             return false;
         }
+
         return (
-            o.baseInfo?.type?.includes("skill") && // is a skill
-            !o.baseInfo?.type?.includes("enhancer") && // is not an enhancer (scholar, scientist, etc.)
-            o.system.XMLID !== "SKILL_LEVELS" && // is not a bonus to skills
-            o.system.XMLID !== "COMBAT_LEVELS" // is not a bonus to combat
+            item.baseInfo?.type?.includes("skill") && // is a skill
+            !item.baseInfo?.type?.includes("enhancer") && // is not an enhancer (scholar, scientist, etc.)
+            item.system.XMLID !== "SKILL_LEVELS" && // is not a bonus to skills
+            item.system.XMLID !== "COMBAT_LEVELS" // is not a bonus to combat
         );
     };
 
     // NaN if there is no number at the start of the OPTION (14 11 8 etc) for standard activation rolls
+    // PH: FIXME: rar is a terrible parameter value. Should we been looking at OPTION?
     const findRollValue = (rar) => {
         const value = parseInt(rar.OPTION, 10);
         return value;
@@ -7124,6 +7130,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
         const rar_Comments = rarComments.replaceAll(" ", "_");
         const rar_RollAlias = rarRollAlias.replaceAll(" ", "_");
 
+        // PH: FIXME: o is a terrible parameter value.
         const matchRequiredSkillRoll = (o) => {
             // TODO
             // it might be worthwhile to also try with underscores in the XMLID '_' replaced with spaces ' ' to match better
@@ -7137,6 +7144,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
             if (xmlIdMatch) {
                 return true;
             }
+
             const nameUpper = o.name?.toUpperCase() ?? "";
             const nameMatch =
                 nameUpper &&
@@ -7148,6 +7156,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
             if (nameMatch) {
                 return true;
             }
+
             const aliasUpper = o.system.ALIAS?.toUpperCase() ?? "";
             const aliasMatch =
                 aliasUpper &&
@@ -7159,6 +7168,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
             if (aliasMatch) {
                 return true;
             }
+
             // Some skills have an underscore in them; the user might not have the name matched exactly
             // so if there is an underscore (as in SLEIGHT_OF_HAND), we check for that here
             const xml_Id_Match =
@@ -7183,10 +7193,12 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
             PS: "PROFESSIONAL_SKILL",
         };
 
+        // PH: FIXME: Do we really want a closure over rar here?
         const isBackgroundSkillType = () => {
             return rar.OPTIONID === "BASICRSR" || Object.keys(backgroundSkillKeys).includes(rarOptionIsBackground);
         };
 
+        // PH: FIXME: Do we really want a closure over rar here?
         const matchBackgroundSkillType = (o) => {
             return rar.OPTIONID === "BASICRSR" || backgroundSkillKeys[rarOptionIsBackground] === o.system.XMLID;
         };
@@ -7222,24 +7234,24 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
         // item.activePoints is a number
         if (rar.OPTIONID.includes("1PER5")) {
             return 5;
-        }
-        if (rar.OPTIONID.includes("1PER20")) {
+        } else if (rar.OPTIONID.includes("1PER20")) {
             return 20;
         }
+
         const divisorOption = rar.ADDER.find((o) => {
             return o.XMLID === "MINUS1PER20" || o.XMLID === "MINUS1PER5";
         });
 
         if (divisorOption?.XMLID === "MINUS1PER20") {
             return 20;
-        }
-        if (divisorOption?.XMLID === "MINUS1PER5") {
+        } else if (divisorOption?.XMLID === "MINUS1PER5") {
             return 5;
         }
         // activation rolls have no minuses due to active points
-        if (!isNaN(parseInt(rar.OPTION, 10))) {
+        else if (!isNaN(parseInt(rar.OPTION, 10))) {
             return NaN;
         }
+
         return 10;
     };
 
@@ -7251,6 +7263,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
         return Math.floor(parseInt(item.activePoints) / divisor);
     };
 
+    // PH: FIXME: k is a terrible parameter name
     const characteristicKeys = Object.keys(item.actor.system.characteristics).filter(
         (k) => item.actor.system.characteristics[k].roll != null,
     );
@@ -7272,6 +7285,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
             // finds pre, not presence
             return rarCommentMaybeHasCharKey;
         }
+
         // comment would be Strength, Intelligence, Presence etc.
         const matchedKeyInComment = characteristicKeys.find((key) =>
             characteristicKeyRegex[key].test(rarCommentMaybeHasCharKey),
@@ -7279,18 +7293,21 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
         if (matchedKeyInComment) {
             return matchedKeyInComment;
         }
+
         const matchedKeyInName = characteristicKeys.find((key) =>
             characteristicKeyRegex[key].test(rarDisplayMaybeHasCharKey),
         );
         if (matchedKeyInName) {
             return matchedKeyInName;
         }
+
         const matchedKeyInRollAlias = characteristicKeys.find((key) =>
             characteristicKeyRegex[key].test(rarRollAliasMaybeHasCharKey),
         );
         if (matchedKeyInRollAlias) {
             return matchedKeyInRollAlias;
         }
+
         const matchedKeyInOption = characteristicKeys.find((key) =>
             characteristicKeyRegex[key].test(rarOptionMaybeHasCharKey),
         );
