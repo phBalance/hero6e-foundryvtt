@@ -7603,10 +7603,6 @@ export function cloneToEffectiveAttackItem({
     effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
     effectiveItem.system._active = { __originalUuid: originalItem.uuid };
 
-    // updateSource seems to overrite _active
-    // so may need to make everything an updateSource?
-    //effectiveItem.updateSource({ "system.originalItemUuid": originalItem.uuid });
-
     // PH: FIXME: Doesn't include TK
     // PH: FIXME: Doesn't include items with STR minima
     // Does this item allow strength to be added and has the character decided to use strength to augment the damage?
