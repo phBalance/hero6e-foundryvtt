@@ -486,7 +486,7 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
     if (baseAttackItem.system.usesStrength) {
         // PH: FIXME: We want to consider the original item as it could be a maneuver.
 
-        addStrengthToBundle(baseAttackItem, options, addedDamageBundle, true);
+        addStrengthToBundle(baseAttackItem, options, addedDamageBundle, true, false);
     }
 
     // Boostable Charges
@@ -1058,7 +1058,7 @@ export function dicePartsToFullyQualifiedEffectFormula(item, diceParts) {
     return `${dicePartsToEffectFormula(diceParts)}${item.doesKillingDamage ? "K" : ""}`;
 }
 
-function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamage) {
+function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamage, is5eHthAttack) {
     if (!item.system._active) {
         console.error(`Missing _active`, item, options, dicePartsBundle, strengthAddsToDamage, this);
     }
@@ -1072,9 +1072,11 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
         actorStrengthItem = buildStrengthItem(baseEffectiveStrength, item.actor, `STR used with ${item.name}`);
     }
 
+    // When we add in strength there are a number of cases to consider:
+    // - Are we adding STR to an existing baseAttackItem? If so, it adds DCs unless adding to 5e HTH in which case it adds straight dice as STR automatically gains the advantages of the HTH.
+    // - Are we setting up STR as the baseAttackItem? If so, we need make sure DCs reflect the advantages of the STR item
     const baseEffectiveStrDc =
-        characteristicValueToDiceParts(baseEffectiveStrength).dc *
-        (strengthAddsToDamage ? 1 : 1 + actorStrengthItem._advantagesAffectingDc); // PH: FIXME: Can we get rid of this? Is it right for the true case - perhaps we had a naked advantage on STR?
+        actorStrengthItem.dcRaw * (is5eHthAttack ? 1 + dicePartsBundle.baseAttackItem._advantageCost : 1);
 
     dicePartsBundle.baseAttackItem ??= actorStrengthItem;
     const strDiceParts = calculateDicePartsFromDcForItem(dicePartsBundle.baseAttackItem, baseEffectiveStrDc);
@@ -1233,7 +1235,13 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
             });
 
             // STR is the base attack in the case of there being no Hand-to-Hand attacks
-            addStrengthToBundle(item, options, baseDicePartsBundle, !!hthBaseAttackItem);
+            addStrengthToBundle(
+                item,
+                options,
+                baseDicePartsBundle,
+                !!hthBaseAttackItem,
+                hthBaseAttackItem && hthBaseAttackItem.is5e,
+            );
         } else {
             const rawItemBaseDc = parseInt(item.system.DC);
             let itemBaseDc = rawItemBaseDc;
