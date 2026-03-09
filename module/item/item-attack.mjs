@@ -1474,6 +1474,11 @@ function getAttackTags(item) {
                 });
                 break;
 
+            case "EXPLOSION":
+            case "AOE":
+                // Intentionally show nothing for these two cases as we are getting it above with the AoE section
+                break;
+
             default: {
                 const _name = `${mod.ALIAS || mod.XMLID} ${parseInt(mod.LEVELS || 0) ? mod.LEVELS : ""}`.trim();
                 if (!attackTags.find((tag) => tag.name?.toLowerCase() === _name.toLowerCase())) {

@@ -293,10 +293,8 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                         return attacksObj;
                     }
 
-                    // Default to useable for any attack.
-                    const use = hthAttack.system._canUseForAttack ?? true;
                     attacksObj[hthAttack.uuid] = {
-                        _canUseForAttack: use,
+                        _canUseForAttack: false,
                         reasonForCantUse: "",
                         description: hthAttack.system.description,
                         name: hthAttack.name,
