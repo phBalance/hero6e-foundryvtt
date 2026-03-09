@@ -1415,6 +1415,28 @@ function getAttackTags(item) {
         }
     }
 
+    // AoE
+    const aoeParameters = effectiveAttackItem.aoeAttackParameters;
+    if (aoeParameters) {
+        // 6e explosion is a modifier to AOE. In 5e EXPLOSION is a mod to itself so
+        // for 5e (i.e. here), show 2 tags.
+        const systemDisplayUnits = getSystemDisplayUnits(effectiveAttackItem.is5e);
+
+        if (aoeParameters.isExplosion) {
+            // 5e has ability to change falloff. 6e is purely based on the size of the AoE.
+            const dcFalloff = aoeParameters.dcFalloff;
+            attackTags.push({
+                name: "Explosion",
+                title: dcFalloff ? `Explosion falloff -1 DC/${dcFalloff}${systemDisplayUnits}` : "Explosion",
+            });
+        }
+
+        attackTags.push({
+            name: `${aoeParameters.type} (${aoeParameters.value}${systemDisplayUnits})`,
+            title: `${aoeParameters.XMLID}`,
+        });
+    }
+
     // item modifiers
     for (const mod of effectiveAttackItem.system.MODIFIER || []) {
         switch (mod.XMLID) {
@@ -1434,23 +1456,6 @@ function getAttackTags(item) {
                         title: `${mod.OPTION_ALIAS || ""}`,
                     });
                 }
-                break;
-
-            case "EXPLOSION":
-                // 6e explosion is a modifier to AOE. In 5e EXPLOSION is a mod to itself so
-                // for 5e (i.e. here), show 2 tags.
-                attackTags.push({
-                    name: `${mod.ALIAS}`,
-                    title: `${mod.XMLID}`,
-                });
-
-            // Intentionally Fall Through to AOE to show the size of the attack
-            case "AOE":
-                // TODO: This needs to be corrected as the names are not consistent.
-                attackTags.push({
-                    name: `${mod.OPTION_ALIAS}(${mod.LEVELS})`,
-                    title: `${mod.XMLID}`,
-                });
                 break;
 
             case "STRMINIMUM": {
