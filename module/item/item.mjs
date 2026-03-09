@@ -7715,30 +7715,23 @@ export function buildEffectiveObject(effectiveObjectParameters) {
         })
         .map(([uuid]) => fromUuidSync(uuid))
         .forEach((hthAttack) => {
-            // 5e only: Can add advantages from HA to STR if HA's unmodified active points don't exceed the STR used.
+            // 5e only: Can use the HA with STR if HA's unmodified active points don't exceed the STR used. Get the advantages for free on STR if can use the HA.
             // 6e only: The HA becomes the base attack item.
             // PH: FIXME: Need to consider STRMINIMUM
             const haBaseCost = hthAttack._basePoints;
-            if (hthAttack.is5e && haBaseCost >= effectiveItemActivePointsBeforeHthAndNaAdvantages) {
-                // Endurance advantages and limitations don't apply to strength
-                // Invisible Power Effects does not transfer to STR if on the HTH Attack
-                const ignoreAdvantagesForHthAttack = ["INCREASEDEND", "REDUCEDEND", "INVISIBLE"];
-
-                // PH: FIXME: AoE gets an increased radius based on STR used (so effectively double the radius)
-                // PH: FIXME: AoE gets the radius built from the HA not based on the effective item
-                effectiveItem.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
-                strengthItem?.copyItemAdvantages(hthAttack, ignoreAdvantagesForHthAttack);
-            } else if (hthAttack.is5e) {
+            // If 5e and can't use, generate a warning. Otherwise link it in.
+            if (hthAttack.is5e && haBaseCost < effectiveItemActivePointsBeforeHthAndNaAdvantages) {
+                // Fire and forget
                 ui.notifications.warn(
                     `${hthAttack.detailedName()} has fewer unmodified active points (${haBaseCost}) than STR (${effectiveItemActivePointsBeforeHthAndNaAdvantages}). Advantages do not apply.`,
                 );
+            } else {
+                effectiveItem.system._active.linkedAssociated ??= [];
+                effectiveItem.system._active.linkedAssociated.push({
+                    item: hthAttack,
+                    uuid: hthAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
+                });
             }
-
-            effectiveItem.system._active.linkedAssociated ??= [];
-            effectiveItem.system._active.linkedAssociated.push({
-                item: hthAttack,
-                uuid: hthAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
-            });
         });
     if (hthAttackDisabledDueToStrength) {
         ui.notifications.warn(`Must use at least 3 (½d6) STR to add a hand-to-hand attack`);
@@ -7801,6 +7794,7 @@ export function buildEffectiveObject(effectiveObjectParameters) {
         );
     }
 
+    // Figure out what baseAttack we have now that everything is setup.
     const baseAttackItemAfterHthAndNa = effectiveItem.baseInfo.baseEffectDicePartsBundle(
         effectiveItem,
         {},

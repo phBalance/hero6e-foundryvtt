@@ -282,10 +282,8 @@ export class ItemAttackFormApplication extends FormApplication {
                         return attacksObj;
                     }
 
-                    // Default to useable for any attack.
-                    const use = hthAttack.system._canUseForAttack ?? true;
                     attacksObj[hthAttack.uuid] = {
-                        _canUseForAttack: use,
+                        _canUseForAttack: false,
                         reasonForCantUse: "",
                         description: hthAttack.system.description,
                         name: hthAttack.name,
@@ -350,7 +348,7 @@ export class ItemAttackFormApplication extends FormApplication {
 
                 naObj[naItem.uuid] = {
                     _canUseForAttack: false,
-                    easonForCantUse: "",
+                    reasonForCantUse: "",
                     description: naItem.system.description,
                     name: naItem.name,
                     item: naItem,
