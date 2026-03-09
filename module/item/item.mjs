@@ -2453,10 +2453,14 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
     /**
      * Returns the base cost of an item. It's possible that it costs more beyond there (e.g. STR added etc)
+     *
      * @returns number
      */
     getBaseEndCost() {
-        const isStrOrStrDamage = this.system.XMLID === "__STRENGTHDAMAGE" || this.system.XMLID === "STR";
+        const isStrOrStrDamage =
+            this.system.XMLID === "__STRENGTHDAMAGE" ||
+            this.system.XMLID === "STR" ||
+            this.system.XMLID === "HANDTOHANDATTACK";
 
         // STR (or any other characteristic only cost end when the native STR is used), PERKS, TALENTS, COMPLICATIONS, and martial maneuvers do not use endurance.
         if (
@@ -2471,7 +2475,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return 1;
         }
 
-        // Everything else is based on 1 END per 10 active points except for strength which is 1 per 5 when using optional heroic rules.
+        // Everything else is based on 1 END per 10 active points except for strength & HANDTOHANDATTACK which is 1 per 5 when using optional heroic rules.
         const endUnitSize = isStrOrStrDamage && game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10;
 
         const activePoints = this.system._active?.originalActivePoints ?? this._activePoints;
@@ -4666,10 +4670,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // CONFIG overrides for specific XMLIDs
         if (baseAttackItem.baseInfo?.attackDefenseVs) {
-            if (typeof baseAttackItem.baseInfo.attackDefenseVs === "function") {
-                return baseAttackItem.baseInfo.attackDefenseVs();
-            }
-            return baseAttackItem.baseInfo.attackDefenseVs;
+            return baseAttackItem.baseInfo.attackDefenseVs(baseAttackItem);
         }
 
         // Adjustment
@@ -4723,14 +4724,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         if (baseAttackItem.system.XMLID === "KNOCKBACK") {
             return "KB";
-        }
-
-        if (baseAttackItem.system.XMLID === "HANDTOHANDATTACK") {
-            ui.notifications.error(
-                `${this.detailedName()} has baseItem ${baseAttackItem.detailedName()}. Please report.`,
-            );
-
-            return "PD";
         }
 
         if (this.system.usesStrength) {
@@ -5639,12 +5632,15 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     /**
-     * Return the effect attack item for this item.
-     * If the item is using a martial arts weapon, then that's the effective attack item.
-     * Anything else?
+     * Return the effect attack item for this item which is not necessarily the item that the player attacked with/clicked the dice icon for.
+     *
+     * If the item is a martial maneuver using a martial arts weapon (including a HTH), then that's the effective attack item.
+     * If the item is a maneuver using a HTH then the effective attack item is the HTH.
+     * If the item is a maneuver using STR then the effective attack item is the STR.
+     * If the item is not a maneuver of some kind then it's the effective attack item.
      */
     get effectiveAttackItem() {
-        return this.system._active.maWeaponItem || this;
+        return this.system._active.maWeaponItem || this.system._active.__baseAttackItem || this;
     }
 
     /**
@@ -7580,8 +7576,13 @@ export function buildItemAsClub(effectivePower, actor, name) {
  *
  * Caller can do further changes, such as linking items
  *
- * @param {Object} param0
- * @returns
+ * @param {HeroSystem6eItem} originalItem - attack item that is in the database
+ * @param {Object} effectiveRealCost
+ * @param {Object} pushedRealPoints
+ * @param {Object} effectiveStr
+ * @param {Object} effectiveStrPushedRealPoints
+ *
+ * @returns {HeroSystem6eItem} - the effective attack item that is not in the database
  */
 export function cloneToEffectiveAttackItem({
     originalItem,
@@ -7601,10 +7602,6 @@ export function cloneToEffectiveAttackItem({
     effectiveItemData._id = null;
     effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
     effectiveItem.system._active = { __originalUuid: originalItem.uuid };
-
-    // updateSource seems to overrite _active
-    // so may need to make everything an updateSource?
-    //effectiveItem.updateSource({ "system.originalItemUuid": originalItem.uuid });
 
     // PH: FIXME: Doesn't include TK
     // PH: FIXME: Doesn't include items with STR minima
@@ -7653,7 +7650,7 @@ export function cloneToEffectiveAttackItem({
  * @param {Number} effectiveObjectParameters.autofire.shots
  * @param {Number} effectiveObjectParameters.autofire.maxShots
  *
- * @returns
+ * @returns {HeroSystem6eItem} - In memory effective attack item
  */
 export function buildEffectiveObject(effectiveObjectParameters) {
     const { effectiveItem, strengthItem } = cloneToEffectiveAttackItem({
@@ -7683,10 +7680,11 @@ export function buildEffectiveObject(effectiveObjectParameters) {
     }
 
     // Active points for the base item. For maneuvers this could be STR or a weapon.
-    const effectiveItemActivePointsBeforeHthAndNaAdvantages = effectiveItem.baseInfo.baseEffectDicePartsBundle(
+    const baseAttackItemBeforeHthAndNa = effectiveItem.baseInfo.baseEffectDicePartsBundle(
         effectiveItem,
         {},
-    ).baseAttackItem._activePoints;
+    ).baseAttackItem;
+    const effectiveItemActivePointsBeforeHthAndNaAdvantages = baseAttackItemBeforeHthAndNa._activePoints;
 
     // Add any checked & appropriate Hand-to-Hand Attack advantages into the base item
     let hthAttackDisabledDueToStrength = false;
@@ -7718,7 +7716,7 @@ export function buildEffectiveObject(effectiveObjectParameters) {
         .map(([uuid]) => fromUuidSync(uuid))
         .forEach((hthAttack) => {
             // 5e only: Can add advantages from HA to STR if HA's unmodified active points don't exceed the STR used.
-            // 6e only: PH: FIXME: the HA becomes the base attack item.
+            // 6e only: The HA becomes the base attack item.
             // PH: FIXME: Need to consider STRMINIMUM
             const haBaseCost = hthAttack._basePoints;
             if (hthAttack.is5e && haBaseCost >= effectiveItemActivePointsBeforeHthAndNaAdvantages) {
@@ -7733,10 +7731,6 @@ export function buildEffectiveObject(effectiveObjectParameters) {
             } else if (hthAttack.is5e) {
                 ui.notifications.warn(
                     `${hthAttack.detailedName()} has fewer unmodified active points (${haBaseCost}) than STR (${effectiveItemActivePointsBeforeHthAndNaAdvantages}). Advantages do not apply.`,
-                );
-            } else if (!hthAttack.is5e && hthAttack.advantages.length > 0) {
-                ui.notifications.warn(
-                    `6e Advantaged Hand-to-Hand Attacks not supported. Advantages for ${hthAttack.detailedName()} are not applied.`,
                 );
             }
 
@@ -7806,6 +7800,16 @@ export function buildEffectiveObject(effectiveObjectParameters) {
             `Naked Advantages must be able to apply at least as many active points as the base attack${effectiveItem.is5e ? "" : " and other naked advantages"}`,
         );
     }
+
+    const baseAttackItemAfterHthAndNa = effectiveItem.baseInfo.baseEffectDicePartsBundle(
+        effectiveItem,
+        {},
+    ).baseAttackItem;
+    const __baseAttackItem =
+        baseAttackItemAfterHthAndNa.uuid === effectiveObjectParameters.originalItem.uuid
+            ? null
+            : baseAttackItemAfterHthAndNa;
+    effectiveItem.system._active.__baseAttackItem = __baseAttackItem;
 
     return effectiveItem;
 }

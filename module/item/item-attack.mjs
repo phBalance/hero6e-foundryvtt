@@ -89,6 +89,12 @@ export function dehydrateAttackItem(item) {
     const dehydratedObj = {};
     dehydratedObj.item = item.toObject(false);
 
+    // If there is a base attack item, dehydrate it
+    if (item.system._active.__baseAttackItem) {
+        dehydratedObj.__baseAttackItem = item.system._active.__baseAttackItem.toObject(false);
+        dehydratedObj.item.system._active.__baseAttackItem = null;
+    }
+
     // If there is a strength item, dehydrate it
     if (item.system._active.effectiveStrItem) {
         dehydratedObj.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
@@ -159,6 +165,13 @@ export function rehydrateAttackItem(itemJsonStr, actor) {
     const item = HeroSystem6eItem.fromSource(obj.item, {
         parent: actor,
     });
+
+    // If there is a base attack item, then we need to rehydrate it.
+    if (obj.__baseAttackItem) {
+        item.system._active.__baseAttackItem = HeroSystem6eItem.fromSource(obj.__baseAttackItem, {
+            parent: actor,
+        });
+    }
 
     // If there is a strength item, then we need to rehydrate it.
     if (obj.effectiveStrItem) {
@@ -1297,7 +1310,7 @@ async function doSingleTargetActionToHit(action, options) {
 
 function getAttackTags(item) {
     // Attack Tags
-    let attackTags = [];
+    const attackTags = [];
 
     if (!item) return attackTags;
 
@@ -1308,41 +1321,36 @@ function getAttackTags(item) {
         attackTags.push(originalItemTag);
     }
 
-    // INPUT (typically PD or ED)
-    if (item.system.INPUT) {
-        if (["PD", "ED"].includes(item.system.INPUT)) {
-            attackTags.push({
-                name: item.system.INPUT,
-            });
-        }
-    }
-
     // Use the effective item to figure out what this attack really is.
-    // PH: FIXME: simplify this to effectAttackItem ... probably also used elsewhere
-    const baseAttackItem = item.baseInfo.baseEffectDicePartsBundle(item, {}).baseAttackItem;
+    const effectiveAttackItem = item.effectiveAttackItem;
 
     // Provide the name of the actual attack item in the tag if it is different from the original item. However,
     // make sure we ignore internal placeholders.
     if (
-        (baseAttackItem.system.ALIAS || baseAttackItem.system.XMLID) &&
-        baseAttackItem.system.XMLID !== "__STRENGTHDAMAGE"
+        (effectiveAttackItem.system.ALIAS || effectiveAttackItem.system.XMLID) &&
+        effectiveAttackItem.system.XMLID !== "__STRENGTHDAMAGE"
     ) {
         const baseAttackItemTag = {
-            name: `${baseAttackItem.system.ALIAS || baseAttackItem.system.XMLID}`,
-            title: `${baseAttackItem.system.XMLID}`,
+            name: `${effectiveAttackItem.system.ALIAS || effectiveAttackItem.system.XMLID}`,
+            title: `${effectiveAttackItem.system.XMLID}`,
         };
         if (baseAttackItemTag.name !== originalItemTag?.name && baseAttackItemTag.title !== originalItemTag?.title) {
             attackTags.push(baseAttackItemTag);
         }
     }
 
-    if (baseAttackItem.doesKillingDamage) {
+    // What are we attacking against?
+    attackTags.push({
+        name: effectiveAttackItem.attackDefenseVs,
+    });
+
+    if (effectiveAttackItem.doesKillingDamage) {
         attackTags.push({ name: `killing` });
     }
 
     // Item adders
-    if (baseAttackItem.adders) {
-        for (const adder of baseAttackItem.adders) {
+    if (effectiveAttackItem.adders) {
+        for (const adder of effectiveAttackItem.adders) {
             switch (adder.XMLID) {
                 case "MINUSONEPIP":
                 case "PLUSONEHALFDIE":
@@ -1366,7 +1374,7 @@ function getAttackTags(item) {
     }
 
     // USESTANDARDEFFECT
-    if (baseAttackItem.system.USESTANDARDEFFECT) {
+    if (effectiveAttackItem.system.USESTANDARDEFFECT) {
         attackTags.push({
             name: `Standard Effect`,
             title: `USESTANDARDEFFECT`,
@@ -1375,28 +1383,28 @@ function getAttackTags(item) {
 
     // STUN/BODY/EFFECT Only
     if (
-        baseAttackItem.system.stunBodyDamage &&
-        baseAttackItem.system.stunBodyDamage !== CONFIG.HERO.stunBodyDamages.stunbody
+        effectiveAttackItem.system.stunBodyDamage &&
+        effectiveAttackItem.system.stunBodyDamage !== CONFIG.HERO.stunBodyDamages.stunbody
     ) {
         attackTags.push({
-            name: baseAttackItem.system.stunBodyDamage,
-            title: baseAttackItem.system.stunBodyDamage,
+            name: effectiveAttackItem.system.stunBodyDamage,
+            title: effectiveAttackItem.system.stunBodyDamage,
         });
     }
 
     // FLASH
-    if (baseAttackItem.system.XMLID === "FLASH") {
-        attackTags.push({ name: baseAttackItem.system.OPTION_ALIAS, title: baseAttackItem.system.OPTIONID });
-        for (const adder of baseAttackItem.adders) {
+    if (effectiveAttackItem.system.XMLID === "FLASH") {
+        attackTags.push({ name: effectiveAttackItem.system.OPTION_ALIAS, title: effectiveAttackItem.system.OPTIONID });
+        for (const adder of effectiveAttackItem.adders) {
             attackTags.push({ name: adder.ALIAS, title: adder.XMLID });
         }
     }
 
     // ADJUSTMENT should include what we are adjusting
-    if (baseAttackItem.isAdjustment) {
-        const { valid, reducesArray, enhancesArray } = baseAttackItem.splitAdjustmentSourceAndTarget();
+    if (effectiveAttackItem.isAdjustment) {
+        const { valid, reducesArray, enhancesArray } = effectiveAttackItem.splitAdjustmentSourceAndTarget();
         if (!valid) {
-            attackTags.push({ name: baseAttackItem.system.INPUT });
+            attackTags.push({ name: effectiveAttackItem.system.INPUT });
         } else {
             for (const adjustTarget of reducesArray) {
                 attackTags.push({ name: `-${adjustTarget}` });
@@ -1407,8 +1415,30 @@ function getAttackTags(item) {
         }
     }
 
+    // AoE
+    const aoeParameters = effectiveAttackItem.aoeAttackParameters;
+    if (aoeParameters) {
+        // 6e explosion is a modifier to AOE. In 5e EXPLOSION is a mod to itself so
+        // for 5e (i.e. here), show 2 tags.
+        const systemDisplayUnits = getSystemDisplayUnits(effectiveAttackItem.is5e);
+
+        if (aoeParameters.isExplosion) {
+            // 5e has ability to change falloff. 6e is purely based on the size of the AoE.
+            const dcFalloff = aoeParameters.dcFalloff;
+            attackTags.push({
+                name: "Explosion",
+                title: dcFalloff ? `Explosion falloff -1 DC/${dcFalloff}${systemDisplayUnits}` : "Explosion",
+            });
+        }
+
+        attackTags.push({
+            name: `${aoeParameters.type} (${aoeParameters.value}${systemDisplayUnits})`,
+            title: `${aoeParameters.XMLID}`,
+        });
+    }
+
     // item modifiers
-    for (const mod of baseAttackItem.system.MODIFIER || []) {
+    for (const mod of effectiveAttackItem.system.MODIFIER || []) {
         switch (mod.XMLID) {
             case "AVAD":
             case "AVLD":
@@ -1426,23 +1456,6 @@ function getAttackTags(item) {
                         title: `${mod.OPTION_ALIAS || ""}`,
                     });
                 }
-                break;
-
-            case "EXPLOSION":
-                // 6e explosion is a modifier to AOE. In 5e EXPLOSION is a mod to itself so
-                // for 5e (i.e. here), show 2 tags.
-                attackTags.push({
-                    name: `${mod.ALIAS}`,
-                    title: `${mod.XMLID}`,
-                });
-
-            // Intentionally Fall Through to AOE to show the size of the attack
-            case "AOE":
-                // TODO: This needs to be corrected as the names are not consistent.
-                attackTags.push({
-                    name: `${mod.OPTION_ALIAS}(${mod.LEVELS})`,
-                    title: `${mod.XMLID}`,
-                });
                 break;
 
             case "STRMINIMUM": {
@@ -1493,7 +1506,7 @@ function getAttackTags(item) {
 
     // MartialArts NND
     // PH: FIXME: need to consider WEAPONEFFECT too.
-    if (baseAttackItem.system.EFFECT?.includes("NNDDC")) {
+    if (effectiveAttackItem.system.EFFECT?.includes("NNDDC")) {
         attackTags.push({
             name: `NND`,
             title: `No Normal Defense`,
@@ -1502,23 +1515,23 @@ function getAttackTags(item) {
 
     // Martial FLASH
     // PH: FIXME: need to consider WEAPONEFFECT too.
-    if (baseAttackItem.system.EFFECT?.includes("FLASHDC")) {
+    if (effectiveAttackItem.system.EFFECT?.includes("FLASHDC")) {
         attackTags.push({
             name: `Flash`,
-            title: baseAttackItem.name,
+            title: effectiveAttackItem.name,
         });
         attackTags.push({
-            name: baseAttackItem.system.INPUT,
-            title: baseAttackItem.name,
+            name: effectiveAttackItem.system.INPUT,
+            title: effectiveAttackItem.name,
         });
     }
 
-    // Remove any duplicates.  Like with FLASH #2629
-    attackTags = Array.from(
+    // Remove any duplicates. Like with FLASH #2629
+    const deDupedAttackTags = Array.from(
         new Set(attackTags.map((o) => o.name)).map((name) => attackTags.find((p) => p.name === name)),
     );
 
-    return attackTags;
+    return deDupedAttackTags;
 }
 
 export async function _onRollAoeDamage(event) {

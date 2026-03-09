@@ -1,6 +1,11 @@
 # Releases
 
-### Version 4.2.18 20260307 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.2.19 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- 6e HTH attacks should now be correctly advantaged. [#2839](https://github.com/dmdorman/hero6e-foundryvtt/issues/2839)
+- Fix attack tags for defense type and AoE advantage. [#3432](https://github.com/dmdorman/hero6e-foundryvtt/issues/3432) [#3055](https://github.com/dmdorman/hero6e-foundryvtt/issues/3055)
+
+### Version 4.2.18 20260307
 
 - Actors that were upload prior to version 3.0.75 may have items/powers/skill/etc that we no longer support. These items are now deleted as they are unusable. This includes invalid items from the sidebar that may have been manually created. Compendiums remain untouched.
 - You can no longer "Create Items" from the sidebar. You can drag pre-configured items from the HeroItems compendium.
