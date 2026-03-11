@@ -2211,17 +2211,18 @@ export async function _onRollDamage(event) {
     // Build list of who to target
     const targetTokens = [];
     for (const id of toHitData.targetIds.split(",")) {
-        const token = canvas.scene.tokens.get(id);
-        if (token) {
-            const entangleAE = token.actor?.temporaryEffects?.find(
+        const tokenDocument = canvas.scene.tokens.get(id);
+        if (tokenDocument) {
+            const entangleAE = tokenDocument.actor?.temporaryEffects?.find(
                 (o) => o.flags[game.system.id]?.XMLID === "ENTANGLE",
             );
             const targetToken = {
                 tokenId: id,
-                name: token.name,
+                tokenUuid: tokenDocument.uuid,
+                name: tokenDocument.name,
                 subTarget:
                     toHitData.targetEntangle && entangleAE
-                        ? `${token.name} [${entangleAE.flags[game.system.id]?.XMLID}]`
+                        ? `${tokenDocument.name} [${entangleAE.flags[game.system.id]?.XMLID}]`
                         : null,
                 targetEntangle: !!toHitData.targetEntangle,
             };

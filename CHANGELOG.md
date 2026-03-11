@@ -4,6 +4,8 @@
 
 - 6e HTH attacks should now be correctly advantaged. [#2839](https://github.com/dmdorman/hero6e-foundryvtt/issues/2839)
 - Fix attack tags for defense type and AoE advantage. [#3432](https://github.com/dmdorman/hero6e-foundryvtt/issues/3432) [#3055](https://github.com/dmdorman/hero6e-foundryvtt/issues/3055)
+- Tokens referenced in Chat Messages now support hover in/out to highlight the token in the scene. [#3862
+  ](https://github.com/dmdorman/hero6e-foundryvtt/issues/3862)
 
 ### Version 4.2.18 20260307
 

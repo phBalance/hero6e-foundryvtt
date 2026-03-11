@@ -92,6 +92,7 @@ export class HeroSystem6eChatMessage extends ChatMessage {
                     header.classList.add("with-image");
                     const portrait = document.createElement("div");
                     portrait.classList.add("portrait");
+                    portrait.dataset.highlightToken = token.uuid ?? token.id;
                     portrait.append(image);
 
                     header.prepend(portrait);
