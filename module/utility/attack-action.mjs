@@ -1,4 +1,29 @@
+import { getAttackTags } from "../item/item-attack.mjs";
+
 export class AttackAction {
+    stages = {
+        TEMPLATE_PLACEMENT_ROLL: {
+            complete: false,
+        },
+        TEMPLATE_SELECTIVE_TOHIT: {
+            complete: false,
+        },
+        ROLL_DAMAGE_OR_EFFECT: {
+            complete: false,
+        },
+        APPLY_DAMAGE_OR_EFFECT: {
+            complete: false,
+        },
+        ROLL_KNOCKBACK: {
+            complete: false,
+        },
+        APPLY_KNOCKBACK: {
+            complete: false,
+        },
+        // AUTOFIRE?
+        // MULTIFIRE?
+    };
+
     constructor(data) {
         // Don't need "setData", move all that code here
         this.setData(data);
@@ -99,6 +124,10 @@ export class AttackAction {
         return this.effectiveItem?.actor ?? this.attackerToken?.actor;
     }
 
+    get placedAoeTemplate() {
+        return canvas.scene?.templates.find((t) => t.flags[game.system.id]?.messageId === this.messageId);
+    }
+
     setData(data) {
         if (!data) {
             return;
@@ -150,5 +179,17 @@ export class AttackAction {
         const el = parsedMessageContent.querySelector(`[data-attack-action]`);
         el.dataset.attackAction = JSON.stringify(this);
         await message.update({ content: parsedMessageContent.innerHTML });
+    }
+
+    get attackTags() {
+        return getAttackTags(this.effectiveItem);
+    }
+
+    get toHitTags() {
+        if (this.stages["TEMPLATE_PLACEMENT_ROLL"].heroRoller) {
+            return this.stages["TEMPLATE_PLACEMENT_ROLL"].heroRoller.tags();
+        }
+
+        throw new Error("HeroRoller is required to get toHitTags");
     }
 }

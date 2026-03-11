@@ -9,12 +9,24 @@
             <h3 class="item-name">{{{itemName attackAction.effectiveItem}}}</h3>
         </header>
 
+        {{!-- Attack Tags --}}
         <div class="tags">
             {{#each attackAction.attackTags as |tag id|}}
-            <span class="tag" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
+                <span class="tag" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
             {{/each}}
         </div>
         <hr>
+
+        {{!-- ToHit Tags --}}
+        <div class="tags">
+            {{#each attackAction.toHitTags as |tag id|}}
+                <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}"{{/if}}{{#if ../maxMinds}} data-visibility="gm"{{/if}}>{{tag.name}}
+                    {{tag.value}}
+                </span>
+            {{/each}}
+        </div>
+        <hr>
+
     </span>
 
     <section class="owner-buttons">

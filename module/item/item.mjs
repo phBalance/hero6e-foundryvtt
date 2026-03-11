@@ -2259,11 +2259,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return itemData;
     }
 
-    // get actor() {
-    //     // Additional support to get the actor of an effectiveItem
-    //     // NOT WORKING FOR MANEUVERS (which may not have an id)
-    //     return this.id ? super.actor : fromUuidSync(this.system.originalItemUuid)?.actor;
-    // }
+    get actor() {
+        // Additional support to get the actor of an effectiveItem with V2 code
+        return super.actor ?? fromUuidSync(this.system.originalItemUuid)?.actor;
+    }
 
     /**
      * Retrieves the parent item of the current item based on the `PARENTID` property.
@@ -7601,6 +7600,12 @@ export function cloneToEffectiveAttackItem({
     const effectiveItemData = originalItem.toObject(false);
     effectiveItemData._id = null;
     effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
+
+    // Item-attack-V2 uses originalItemUuid.
+    // Be careful as updateSource wipe anything not set with updateSource so do all
+    // the updateSources first.
+    // By using updateSource we should be able to avoid hydrate/rehydrate.
+    effectiveItem.updateSource({ "system.originalItemUuid": originalItem.uuid });
     effectiveItem.system._active = { __originalUuid: originalItem.uuid };
 
     // PH: FIXME: Doesn't include TK
