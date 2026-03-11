@@ -1,7 +1,12 @@
 <aside>
     <div class="sidebar">
-        <img class="profile-img" src="{{actor.img}}" data-edit="img" title="{{actor.name}}" height="100"
-            width="100" />
+        <img class="profile-img" 
+            src="{{actor.img}}" 
+            data-edit="img" 
+            data-action="{{#if actor.isOwner}}editImage{{/if}}"
+            title="{{actor.name}}" height="100"
+            width="100" 
+        />
 
         <section class="flexrow">
             <div class="attributes flexcol">
