@@ -1340,9 +1340,11 @@ function getAttackTags(item) {
     }
 
     // What are we attacking against?
-    attackTags.push({
-        name: effectiveAttackItem.attackDefenseVs,
-    });
+    if (effectiveAttackItem.attackDefenseVs.length > 1) {
+        attackTags.push({
+            name: effectiveAttackItem.attackDefenseVs,
+        });
+    }
 
     if (effectiveAttackItem.doesKillingDamage) {
         attackTags.push({ name: `killing` });
@@ -1493,6 +1495,13 @@ function getAttackTags(item) {
         // item modifier adders
         for (const adder of mod.ADDER || []) {
             switch (adder.XMLID) {
+                case "CONTINUING":
+                    attackTags.push({
+                        name: `${adder.ALIAS || adder.XMLID} ${adder.OPTION_ALIAS || ""}`.trim(),
+                        title: `${adder.ALIAS || ""} ${adder.OPTIONID || ""}`.trim(),
+                    });
+                    break;
+
                 case "CONTINUOUSCONCENTRATION":
                     attackTags.push({
                         name: `Continuous`,
