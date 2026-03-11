@@ -1493,6 +1493,13 @@ function getAttackTags(item) {
         // item modifier adders
         for (const adder of mod.ADDER || []) {
             switch (adder.XMLID) {
+                case "CONTINUING":
+                    attackTags.push({
+                        name: `${adder.ALIAS || adder.XMLID} ${adder.OPTION_ALIAS || ""}`.trim(),
+                        title: `${adder.ALIAS || ""} ${adder.OPTIONID || ""}`.trim(),
+                    });
+                    break;
+
                 case "CONTINUOUSCONCENTRATION":
                     attackTags.push({
                         name: `Continuous`,
