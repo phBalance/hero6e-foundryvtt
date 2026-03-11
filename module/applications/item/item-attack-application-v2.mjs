@@ -1,7 +1,8 @@
 // REF: https://foundryvtt.wiki/en/development/api/applicationv2
 import { HEROSYS } from "../../herosystem6e.mjs";
 import { filterIgnoreCompoundAndFrameworkItems } from "../../config.mjs";
-import { calculateRequiredResourcesToUse, processActionToHitV2 } from "../../item/item-attack.mjs";
+import { calculateRequiredResourcesToUse } from "../../item/item-attack.mjs";
+import { ItemAttackV2 } from "../../item/item-attack-v2.mjs";
 import { buildEffectiveObject } from "../../item/item.mjs";
 import { Attack } from "../../utility/attack.mjs";
 import { AttackAction } from "../../utility/attack-action.mjs";
@@ -478,7 +479,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
     static async #onSubmit(event, form, formData) {
         // Do things with the returned FormData
         //this.data.effectiveItem, formData, { token: this.data.token, allInOne: true }
-        return processActionToHitV2(
+        return ItemAttackV2.processActionToHitV2(
             new AttackAction({
                 ...formData.object,
                 effectiveItem: this.data.effectiveItem,

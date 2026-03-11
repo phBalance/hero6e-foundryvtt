@@ -1,4 +1,5 @@
 import * as Attack from "../item/item-attack.mjs";
+import { ItemAttackV2 } from "../item/item-attack-v2.mjs";
 
 export class HeroSystem6eCardHelpers {
     static onMessageRendered(html) {
@@ -7,6 +8,7 @@ export class HeroSystem6eCardHelpers {
 
     static chatListeners(html) {
         Attack.chatListeners(html);
+        ItemAttackV2.chatListeners(html);
 
         // May need passive: true
         html.on("pointerover", "[data-highlight-token]", HeroSystem6eCardHelpers._onChatMessageTokenHoverIn.bind(this));
