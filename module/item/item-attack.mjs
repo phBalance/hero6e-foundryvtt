@@ -1340,9 +1340,11 @@ function getAttackTags(item) {
     }
 
     // What are we attacking against?
-    attackTags.push({
-        name: effectiveAttackItem.attackDefenseVs,
-    });
+    if (effectiveAttackItem.attackDefenseVs.length > 1) {
+        attackTags.push({
+            name: effectiveAttackItem.attackDefenseVs,
+        });
+    }
 
     if (effectiveAttackItem.doesKillingDamage) {
         attackTags.push({ name: `killing` });
