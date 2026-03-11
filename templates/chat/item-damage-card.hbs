@@ -56,14 +56,16 @@
             </button>
 
             {{#each targetTokens as |target id|}}
+            {{log target}}
 
                 <button class="apply-damage"
                     title="Apply damage to {{target.name}}"
-                    data-item-json-str="{{../itemJsonStr}}"
                     data-actor-uuid="{{../actor.uuid}}"
-                    data-action-data="{{../actionDataJSON}}"
-                    data-roller="{{../rollerJSON}}"
                     data-target-tokens="{{toJsonArray target}}"
+                    data-highlight-token="{{target.tokenUuid}}"
+                    data-roller="{{../rollerJSON}}"
+                    data-item-json-str="{{../itemJsonStr}}"
+                    data-action-data="{{../actionDataJSON}}"
                 >
                     {{#if (or ../nonDmgEffect ../isSenseAffecting)}}
                         Apply {{../item.system.XMLID}} to <b>{{target.name}}</b>
@@ -82,9 +84,9 @@
                     title="Apply damage to ALL tokens that were hit"
                     data-item-json-str="{{itemJsonStr}}"
                     data-actor-uuid="{{actor.uuid}}"
-                    data-action-data="{{actionDataJSON}}"
                     data-roller="{{rollerJSON}}"
                     data-target-tokens="{{toJSON targetTokens}}"
+                    data-action-data="{{actionDataJSON}}"
                 >
                     {{#if (or nonDmgEffect isSenseAffecting)}}
                         Apply {{item.system.XMLID}} to <b>ALL</b>
