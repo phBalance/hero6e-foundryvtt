@@ -36,17 +36,13 @@ body.theme-light .herosystem6e,
 
 // ref: https://venngage.com/tools/accessible-color-palette-generator
 .herosystem6e.theme-hc {
-    --herosystem-table-header-bg-color: black;
+    --herosystem-table-header-bg-color: var(--color-dark-1);
     --table-header-text-color: white;
-    --background: #f6f5f7;
-
-    // button {
-    //     --button-background-color: inherit;
-    // }
-
-    // input {
-    //     --input-background-color: inherit;
-    // }
+    --background: var(--color-light-1);
+    --color-text-primary: var(--color-dark-1);
+    --color-text-secondary: var(--color-dark-2);
+    --input-text-color: var(--color-dark-2);
+    --input-background-color: var(--color-light-2);
 
     img.item-image {
         filter: brightness(0.1);

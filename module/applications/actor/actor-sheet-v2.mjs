@@ -752,6 +752,13 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         // We will add additional DragDrop support for dragging items between different tabs (which represent different item.type).
         this.#dragDrop.forEach((d) => d.bind(this.element));
 
+        // Edit profile image on click
+        // if (this.actor.isOwner) {
+        //     this.element
+        //         .querySelector("img[data-edit].profile-img")
+        //         ?.addEventListener("click", this._onEditImage.bind(this));
+        // }
+
         // item-description-expand chevron expand collapse
         this.element.querySelectorAll('[data-action="toggleDocumentDescription"]').forEach((el) => {
             el.addEventListener("click", (ev) => {
@@ -1617,4 +1624,28 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     // get dragDrop() {
     //     return this.#dragDrop;
     // }
+
+    /**
+     * Handle changing a Document's image.
+     * @param {MouseEvent} event  The click event.
+     * @returns {Promise<FilePicker>}
+     * @protected
+     */
+    _onEditImage(event) {
+        const attr = event.currentTarget.dataset.edit;
+        const current = foundry.utils.getProperty(this.object, attr);
+        const { img } = this.document.constructor.getDefaultArtwork?.(this.document.toObject()) ?? {};
+        const fp = new FilePicker.implementation({
+            current,
+            type: "image",
+            redirectToRoot: img ? [img] : [],
+            callback: (path) => {
+                event.currentTarget.src = path;
+                if (this.options.submitOnChange) return this._onSubmit(event);
+            },
+            top: this.position.top + 40,
+            left: this.position.left + 10,
+        });
+        return fp.browse();
+    }
 }
