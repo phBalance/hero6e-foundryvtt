@@ -15,6 +15,7 @@ export class ItemAttackClubWeaponApplicationV2 extends HandlebarsApplicationMixi
 
     constructor(data = {}) {
         super(data);
+
         // the caller may pass in an actor or token as part of the data
         this.data = data;
     }
@@ -30,18 +31,21 @@ export class ItemAttackClubWeaponApplicationV2 extends HandlebarsApplicationMixi
      * Option defaults for this V2 form.
      */
     static DEFAULT_OPTIONS = {
-        tag: "form",
         classes: ["herosystem6e", "club-weapon-application"],
         id: "item-attack-club-weapon-v2",
         position: {
-            width: "320",
+            width: 400,
         },
+        tag: "form",
         form: {
             handler: ItemAttackClubWeaponApplicationV2.#onSubmit,
             closeOnSubmit: true,
         },
         window: {
             icon: "fas fa-screwdriver-wrench",
+        },
+        actions: {
+            cancel: ItemAttackClubWeaponApplicationV2.#onCancel,
         },
     };
 
@@ -65,23 +69,60 @@ export class ItemAttackClubWeaponApplicationV2 extends HandlebarsApplicationMixi
      */
     async _prepareContext(/* options */) {
         const actor = this.data.actor ?? this.data.token?.actor;
-        const hkaItems = actor
-            ? actor.items.filter((i) => i.system.XMLID === "HKA" && i.baseInfo.type.includes("attack"))
-            : [];
-        return foundry.utils.mergeObject(this.data, { hkaItems });
+
+        this.data.clubWeaponId ??= null;
+
+        this.data.possibleHkaItems ??= actor
+            ? actor.items
+                  .filter((item) => item.system.XMLID === "HKA" && item.isActive)
+                  .map((hka) => {
+                      return {
+                          id: hka.id,
+                          label: hka.name,
+                          description: hka.system.description,
+                          item: hka,
+                      };
+                  })
+            : [
+                  {
+                      id: null,
+                      label: "No hand-to-hand killing attacks found",
+                      description: "No hand-to-hand killing attacks found",
+                      item: null,
+                  },
+              ];
+
+        return this.data;
     }
 
     /**
      * Get the selected HKA and pass to the build attack dialog handler
      */
-    static async #onSubmit /* html */() {
-        // const form = html[0];
-        // const formData = new FormData(form);
-        // const selected = formData.get("hkaItem");
-        // if (selected && this.data.actor) {
-        //     await this.data.actor.setFlag(HEROSYS.module, "clubWeaponTarget", selected);
-        // }
+    static async #onSubmit(event, form, formData) {
+        const clubWeaponId = formData.get("clubWeaponId");
+        if (clubWeaponId) {
+            // We can cheat because Club Weapon has a +0 OCV and +0 DCV. Just replace CLUBWEAPON with the
+            // the selected HKA with no adverse calculation problems.
+            const clubWeaponItem = this.data.possibleHkaItems.find((hka) => hka.id === clubWeaponId).item;
+            this.data.originalItem = clubWeaponItem;
 
-        return true;
+            // Link up so that it can return back to this application
+            if (this.data.nextApplication) {
+                this.data.previousApplication ??= [];
+                this.data.previousApplication.push(ItemAttackClubWeaponApplicationV2);
+                this.data.nextApplication = null;
+
+                return new this.data.nextApplication(this.data).render(true);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Cancel selection and exit dialog.
+     */
+    static async #onCancel() {
+        return this.close();
     }
 }

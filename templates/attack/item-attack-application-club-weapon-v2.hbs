@@ -1,18 +1,19 @@
-<form class="hero club-weapon-form">
-  <h4>Club Weapon Selection</h4>
-  {{#if hkaItems.length}}
+<div class="hero club-weapon-form">
+    <h4>Club Weapon Selection</h4>
+
     <div class="form-group">
-      <label>Choose a hand-to-hand killing attack to use as a club:</label>
-      {{#each hkaItems as |item index|}}
-        <div class="radio-option">
-          <input type="radio" name="hkaItem" id="{{item.id}}" value="{{item.id}}" {{#if (eq index 0)}}checked{{/if}} />
-          <label for="{{item.id}}">{{item.name}}</label>
-        </div>
-      {{/each}}
+        <label>HKA to club with</label>
+        <select name="clubWeaponId" id="clubWeaponId">
+            {{selectOptions possibleHkaItems selected=clubWeaponId valueAttr="id" labelAttr="label" disabled="disabled"}}
+        </select>
     </div>
-  {{else}}
-    <div class="form-group">
-      <p><em>No hand-to-hand killing attacks are available on this actor.</em></p>
-    </div>
-  {{/if}}
-</form>
+
+    <button type="submit" name="submit" data-action="submit" {{#unless possibleHkaItems.length}}disabled="true"{{/unless}}>
+        <i class="fas fa-check button-success"></i>
+        Use As Club
+    </button>
+    <button type="button" name="cancel" data-action="cancel">
+        <i class="fas fa-times button-cancel"></i>
+        Cancel Club Weapon Attack
+    </button>
+</div>

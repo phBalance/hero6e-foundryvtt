@@ -274,9 +274,17 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
 
     //await
     if (options.allInOne) {
-        await new ItemAttackFormApplicationV2(data).render(true);
+        if (item.system.XMLID === "CLUBWEAPON") {
+            ata.previousApplication = [];
+            data.nextApplication = ItemAttackFormApplication;
+            await new ItemAttackClubWeaponApplicationV2(data).render(true);
+        } else {
+            await new ItemAttackFormApplicationV2(data).render(true);
+        }
     } else {
         if (item.system.XMLID === "CLUBWEAPON") {
+            data.previousApplication = [];
+            data.nextApplication = ItemAttackFormApplication;
             await new ItemAttackClubWeaponApplicationV2(data).render(true);
         } else {
             await new ItemAttackFormApplication(data).render(true);
