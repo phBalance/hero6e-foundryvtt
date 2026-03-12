@@ -1,11 +1,25 @@
-import { HEROSYS } from "../herosystem6e.mjs";
+import { activateManeuver, doManeuverEffects, maneuverHasBlockTrait } from "./maneuver.mjs";
 
-import { getPowerInfo, tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
-import { getActorDefensesVsAttack, getConditionalDefenses, getItemDefenseVsAttack } from "../utility/defense.mjs";
+import { HEROSYS } from "../herosystem6e.mjs";
+import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { getOffHandDefenseDcv } from "../actor/actor-utils.mjs";
+
+import { ItemAttackFormApplication, getAoeTemplateForBaseItem } from "../item/item-attack-application.mjs";
+import { ItemAttackFormApplicationV2 } from "../applications/item/item-attack-application-v2.mjs";
+import { ItemAttackClubWeaponApplicationV2 } from "../applications/item/item-attack-application-club-weapon.mjs";
+
+import {
+    HeroSystem6eItem,
+    requiresACharacteristicRollCheck,
+    rollRequiresASkillRollCheck,
+    rollAblativeActivationCheck,
+} from "../item/item.mjs";
+
+import { overrideCanAct } from "../settings/settings-helpers.mjs";
+
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import {
     calculateDicePartsForItem,
@@ -19,21 +33,12 @@ import {
     getRoundedDownDistanceInSystemUnits,
     getSystemDisplayUnits,
 } from "../utility/units.mjs";
-import {
-    HeroSystem6eItem,
-    requiresACharacteristicRollCheck,
-    rollRequiresASkillRollCheck,
-    rollAblativeActivationCheck,
-} from "../item/item.mjs";
-import { ItemAttackFormApplication, getAoeTemplateForBaseItem } from "../item/item-attack-application.mjs";
-import { ItemAttackFormApplicationV2 } from "../applications/item/item-attack-application-v2.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
 import { clamp } from "../utility/compatibility.mjs";
-import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import { Attack, actionFromJSON, actionToJSON } from "../utility/attack.mjs";
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
-import { overrideCanAct } from "../settings/settings-helpers.mjs";
-import { activateManeuver, doManeuverEffects, maneuverHasBlockTrait } from "./maneuver.mjs";
+import { getPowerInfo, tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
+import { getActorDefensesVsAttack, getConditionalDefenses, getItemDefenseVsAttack } from "../utility/defense.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -271,7 +276,11 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
     if (options.allInOne) {
         await new ItemAttackFormApplicationV2(data).render(true);
     } else {
-        await new ItemAttackFormApplication(data).render(true);
+        if (item.system.XMLID === "CLUBWEAPON") {
+            await new ItemAttackClubWeaponApplicationV2(data).render(true);
+        } else {
+            await new ItemAttackFormApplication(data).render(true);
+        }
     }
 }
 
@@ -333,7 +342,7 @@ export async function processActionToHit(item, formData, options = {}) {
     );
     if (haymakerManeuverActive) {
         if (item.isMartialManeuver || (item.isCombatManeuver && item.system.XMLID !== "STRIKE")) {
-            return ui.notifications.warn("Haymaker cannot be combined with another maneuver except Strike.", {
+            return ui.notifications.error("Haymaker cannot be combined with another maneuver except Strike.", {
                 localize: true,
             });
         }
