@@ -7805,10 +7805,10 @@ export function buildEffectiveObject(effectiveObjectParameters) {
         effectiveItem,
         {},
     ).baseAttackItem;
-    const __baseAttackItem =
-        baseAttackItemAfterHthAndNa.uuid === effectiveObjectParameters.originalItem.uuid
-            ? null
-            : baseAttackItemAfterHthAndNa;
+    const __baseAttackItem = null;
+    // baseAttackItemAfterHthAndNa.uuid === effectiveObjectParameters.originalItem.uuid
+    //     ? null
+    //     : baseAttackItemAfterHthAndNa;
     effectiveItem.system._active.__baseAttackItem = __baseAttackItem;
 
     return effectiveItem;
