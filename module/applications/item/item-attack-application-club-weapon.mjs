@@ -101,18 +101,18 @@ export class ItemAttackClubWeaponApplicationV2 extends HandlebarsApplicationMixi
     static async #onSubmit(event, form, formData) {
         const clubWeaponId = formData.get("clubWeaponId");
         if (clubWeaponId) {
-            // We can cheat because Club Weapon has a +0 OCV and +0 DCV. Just replace CLUBWEAPON with the
-            // the selected HKA with no adverse calculation problems.
             const clubWeaponItem = this.data.possibleHkaItems.find((hka) => hka.id === clubWeaponId).item;
-            this.data.originalItem = clubWeaponItem;
+            this.data.clubWeaponItem = clubWeaponItem;
 
             // Link up so that it can return back to this application
             if (this.data.nextApplication) {
                 this.data.previousApplication ??= [];
                 this.data.previousApplication.push(ItemAttackClubWeaponApplicationV2);
+
+                const nextApplication = this.data.nextApplication;
                 this.data.nextApplication = null;
 
-                return new this.data.nextApplication(this.data).render(true);
+                return new nextApplication(this.data).render(true);
             }
         }
 

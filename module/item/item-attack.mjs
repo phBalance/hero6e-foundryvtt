@@ -275,7 +275,7 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
     //await
     if (options.allInOne) {
         if (item.system.XMLID === "CLUBWEAPON") {
-            ata.previousApplication = [];
+            data.previousApplication = [];
             data.nextApplication = ItemAttackFormApplication;
             await new ItemAttackClubWeaponApplicationV2(data).render(true);
         } else {
