@@ -2,7 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { AttackAction } from "../utility/attack-action.mjs";
 import { calculateDistanceBetween } from "../utility/range.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
-import { addRangeIntoToHitRoll, addAttackCslsIntoToHitRoll } from "./item-attack.mjs";
+import { addRangeIntoToHitRoll } from "./item-attack.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -135,8 +135,8 @@ export class ItemAttackV2 {
         // Range modifiers
         addRangeIntoToHitRoll(distance, attackAction.effectiveItem, attackAction.actor, attackHeroRoller);
 
-        // Combat Skill Levels
-        await addAttackCslsIntoToHitRoll(null, attackHeroRoller, attackAction.effectiveItem);
+        // Combat Skill Levels (need new version to use attackAction)
+        //await addAttackCslsIntoToHitRoll({}, attackHeroRoller, attackAction.effectiveItem);
 
         // This is the actual roll to hit. In order to provide for a die roll
         // that indicates the upper bound of DCV hit, we have added the base (11) and the OCV, and subtracted the mods
@@ -144,6 +144,8 @@ export class ItemAttackV2 {
         // (so we can be sneaky and not tell the target's DCV out loud).
         attackHeroRoller.addDice(-3);
         await attackHeroRoller.roll();
+        ui.notifications.info(`Template placement roll: ${attackHeroRoller.getBaseTotal()}`, {});
+        throw new Error("Template placement unimplemented");
     }
 
     static newHeroRollerForAttackAction(attackAction) {
