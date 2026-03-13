@@ -7605,7 +7605,8 @@ export function cloneToEffectiveAttackItem({
     // Be careful as updateSource wipe anything not set with updateSource so do all
     // the updateSources first.
     // By using updateSource we should be able to avoid hydrate/rehydrate.
-    effectiveItem.updateSource({ "system.originalItemUuid": originalItem.uuid });
+    //effectiveItem.updateSource({ "system.originalItemUuid": originalItem.uuid });
+    effectiveItem.system.originalItemUuid = originalItem.uuid;
     effectiveItem.system._active = { __originalUuid: originalItem.uuid };
 
     // PH: FIXME: Doesn't include TK
