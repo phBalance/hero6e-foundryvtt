@@ -15,6 +15,7 @@ import {
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
 import { HeroObjectCacheMixin } from "../utility/cache.mjs";
+import { foundryVttParseUuid } from "../utility/compatibility.mjs";
 import {
     foundryVttDeleteProperty,
     getPowerInfo,
@@ -5979,7 +5980,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
      * @returns boolean
      */
     isAttackItemInCustomLinkAddersAllowList(attackItem) {
-        const lookingForId = attackItem.id ?? foundry.utils.parseUuid(attackItem.system._active?.__originalUuid)?.id;
+        const lookingForId = attackItem.id ?? foundryVttParseUuid(attackItem.system._active?.__originalUuid)?.id;
         const attackMatchesCustomAdder = !!this.customLinkAddersToExpandedItems.find(
             (item) => item.id === lookingForId,
         );
