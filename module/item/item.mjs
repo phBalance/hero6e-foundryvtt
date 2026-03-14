@@ -20,6 +20,7 @@ import {
     foundryVttDeleteProperty,
     getPowerInfo,
     hdcTimeOptionIdToSeconds,
+    squelch,
     tokenEducatedGuess,
     whisperUserTargetsForActor,
 } from "../utility/util.mjs";
@@ -4747,7 +4748,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return "-";
         }
 
-        console.warn(`Unable to determine defense for ${this.detailedName()}`);
+        if (!squelch(`${this.id}attackDefenseVs`)) {
+            console.warn(`Unable to determine defense for ${this.detailedName()}`);
+        }
         return "-"; // Default
     }
 
@@ -5206,7 +5209,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             this.adders.length === 0
         ) {
             if (_basePoints === 0) {
-                console.warn(`Min cost is 1 pt for ${this.name}`, this);
+                if (!squelch(`${this.id}minCost1`)) {
+                    console.warn(`Min cost is 1 pt for ${this.name}`, this);
+                }
             }
             _basePoints = Math.max(1, _basePoints);
         }
