@@ -853,17 +853,18 @@ export class ItemAttackFormApplication extends FormApplication {
                 y: templateData.y,
             });
         } else {
-            canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [templateData]);
+            //canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [templateData]);
         }
+        await canvas.templates.createPreview(templateData);
 
-        canvas.templates.activate({ tool: templateType });
-        canvas.templates.selectObjects({
-            x: templateData.x,
-            y: templateData.y,
-            releaseOthers: true,
-            control: true,
-            toggle: false,
-        });
+        // canvas.templates.activate({ tool: templateType });
+        // canvas.templates.selectObjects({
+        //     x: templateData.x,
+        //     y: templateData.y,
+        //     releaseOthers: true,
+        //     control: true,
+        //     toggle: false,
+        // });
     }
 
     /**
