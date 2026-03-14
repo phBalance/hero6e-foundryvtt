@@ -261,10 +261,8 @@ async function skillRoll(item, actor, target) {
 
     await skillRoller.makeSuccessRoll(true, successValue).roll();
 
-    // Rolling under the negative reputation amount should be considered a failure.
-    const negativeReputation = item.system.XMLID === "REPUTATION" && item.type === "disadvantage";
-    const succeeded = negativeReputation ? !skillRoller.getSuccess() : skillRoller.getSuccess();
-    const autoSuccess = negativeReputation ? !skillRoller.getAutoSuccess() : skillRoller.getAutoSuccess();
+    const succeeded = skillRoller.getSuccess();
+    const autoSuccess = skillRoller.getAutoSuccess();
     const total = skillRoller.getSuccessTotal();
     const margin = successValue - total;
 
@@ -281,10 +279,14 @@ async function skillRoll(item, actor, target) {
             break;
 
         case "REPUTATION":
-            if (negativeReputation) {
-                disadFlavor = "Failure on this roll indicates that people are aware of your negative reputation.";
-            } else {
-                disadFlavor = "Success on this roll indicates that people are aware of your positive reputation.";
+            {
+                const negativeReputation = item.system.XMLID === "REPUTATION" && item.type === "disadvantage";
+
+                if (negativeReputation) {
+                    disadFlavor = "Success on this roll indicates that people are aware of your negative reputation.";
+                } else {
+                    disadFlavor = "Success on this roll indicates that people are aware of your positive reputation.";
+                }
             }
             break;
 
