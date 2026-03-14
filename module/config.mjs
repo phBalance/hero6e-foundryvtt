@@ -5479,7 +5479,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "REPUTATION",
-            type: ["perk", "disadvantage"],
+            type: ["perk"],
             behaviors: ["success"],
             duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             name: "Positive Reputation",
