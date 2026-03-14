@@ -889,9 +889,9 @@ export class ItemAttackFormApplication extends FormApplication {
  * @param {*} item
  * @returns
  */
-function getEffectiveItemOriginalItemId(effectiveAttackItem) {
+function getEffectiveItemOriginalItemId(item) {
     //const effectiveAttackItem = item.effectiveAttackItem;
-    const effectiveAttackItemUuid = effectiveAttackItem.system._active.__originalUuid;
+    const effectiveAttackItemUuid = item.system._active.__originalUuid;
 
     // Is the effective attack item an temporary effective item?
     if (effectiveAttackItemUuid) {
@@ -899,12 +899,12 @@ function getEffectiveItemOriginalItemId(effectiveAttackItem) {
     }
 
     // Is the effective attack item an actual original item?
-    if (effectiveAttackItem.id) {
-        return effectiveAttackItem.id;
+    if (item.id) {
+        return item.id;
     }
 
     console.error(
-        `${item.detailedName()} | ${effectiveAttackItem?.detailedName()} doesn't have an originating UUID stored and the effective item doesn't have an id`,
+        `${item.detailedName()} | ${item?.detailedName()} doesn't have an originating UUID stored and the effective item doesn't have an id`,
     );
 
     return null;
