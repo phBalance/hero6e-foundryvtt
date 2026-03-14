@@ -945,13 +945,32 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
         // Is this a valid target tab
         if (!validItemTypeChanges?.includes(targetType)) {
-            console.warn(`${targetTab} is not a valid drop target`);
-            return;
+            return ui.notifications.error(
+                `"${item.name}" is a ${item.baseInfo?.xmlTag} and cannot be added to ${targetTab.toUpperCase()} items tab.`,
+            );
         }
 
         if (!validItemTypeChanges.includes(item.type)) {
             console.error(`${item.name} has unsupported type= ${item.type}`);
             return;
+        }
+
+        const sameActor = item.actor?.id === this.actor.id;
+        if (!sameActor) {
+            // Does the XMLID exist in the receiving actor's game edition (e.g. the SUPPRESS XMLID exists only in 5e)?
+            const baseInfoCheck = getPowerInfo({
+                xmlid: item.system.XMLID,
+                is5e: this.actor.is5e,
+                xmlTag: item.xmlTag,
+            });
+            if (!baseInfoCheck) {
+                ui.notifications.error(
+                    `${item.system.XMLID} is a ${item.is5e ? "5e" : "6e"} only item and cannot be dropped onto a ${this.actor.is5e ? "5e" : "6e"} actor.`,
+                );
+                return;
+            }
+
+            return this.DropItemFramework(item, { type: targetType });
         }
 
         if (!item.actor) {
@@ -1029,7 +1048,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     ui.notifications.info(
                         `<b>${item.name}</b> was removed from parent <b>${item.parentItem.name}</b>.`,
                     );
-                    await item.update({ "system.-=PARENTID": null, type: item.parentItem.type });
+                    await item.update({ "system.-=PARENTID": null });
                 } else if (!item.isContainer && parentItem?.isContainer) {
                     ui.notifications.info(`<b>${item.name}</b> was moved into to parent <b>${parentItem.name}</b>`);
                     await item.update({ "system.PARENTID": parentItem.system.ID });
@@ -1039,37 +1058,61 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             return super._onDropItem(event, item);
         }
 
-        if (item.isCombatManeuver) {
-            ui.notifications.error(`You cannot drop a MANEUVER onto an actor.`);
-            return;
-        }
+        ui.notifications.error(`You must drop items onto an appropriate item tab, such as "Equipment" or "Powers"`);
 
-        // Does the XMLID exist in the receiving actor's game edition (e.g. the SUPPRESS XMLID exists only in 5e)?
-        const baseInfoCheck = getPowerInfo({
-            xmlid: item.system.XMLID,
-            is5e: this.actor.is5e,
-            xmlTag: item.xmlTag,
-        });
-        if (!baseInfoCheck) {
-            ui.notifications.error(
-                `${item.system.XMLID} is a ${item.is5e ? "5e" : "6e"} only item and cannot be dropped onto a ${this.actor.is5e ? "5e" : "6e"} actor.`,
-            );
-            return;
-        }
+        // if (item.isCombatManeuver) {
+        //     ui.notifications.error(`You cannot drop a MANEUVER onto an actor.`);
+        //     return;
+        // }
 
-        await this.DropItemFramework(item);
+        // // Does the XMLID exist in the receiving actor's game edition (e.g. the SUPPRESS XMLID exists only in 5e)?
+        // const baseInfoCheck = getPowerInfo({
+        //     xmlid: item.system.XMLID,
+        //     is5e: this.actor.is5e,
+        //     xmlTag: item.xmlTag,
+        // });
+        // if (!baseInfoCheck) {
+        //     ui.notifications.error(
+        //         `${item.system.XMLID} is a ${item.is5e ? "5e" : "6e"} only item and cannot be dropped onto a ${this.actor.is5e ? "5e" : "6e"} actor.`,
+        //     );
+        //     return;
+        // }
+
+        // await this.DropItemFramework(item);
     }
 
-    async DropItemFramework(item, parentId) {
+    async DropItemFramework(item, options = {}) {
         const itemData = item.toObject();
 
         // Create new system.ID
         itemData.system.ID = new Date().getTime();
 
+        const baseInfoCheck = getPowerInfo({
+            xmlid: itemData.system.XMLID,
+            is5e: this.actor.is5e,
+            xmlTag: itemData.xmlTag,
+        });
+
+        // Override type
+        if (options.type) {
+            // Need to validate new type
+
+            if (["power", "equipment"].includes(options.type) || baseInfoCheck?.xmlTag.toLowerCase() === options.type) {
+                itemData.type = options.type;
+            } else {
+                return ui.notifications.error(
+                    `"${item.name}" is a ${baseInfoCheck?.xmlTag} and cannot be added to ${options.type.toUpperCase()} items tab.`,
+                );
+            }
+        }
+
+        // Make sure we have xmlTag in itemData (some older items may be missing this)
+        itemData.system.xmlTag ??= baseInfoCheck?.xmlTag;
+
         // Remove system.PARENTID
         delete itemData.system.PARENTID;
-        if (parentId) {
-            itemData.system.PARENTID = parentId;
+        if (options.PARENTID) {
+            itemData.system.PARENTID = options.PARENTID;
         }
         delete itemData.system.childIdx; // Not really used as of 3.0.100, but good to clean up any older items
 
@@ -1113,7 +1156,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
         // Is this a parent item with children?
         for (const child of item.childItems) {
-            await this.DropItemFramework(child, itemData.system.ID);
+            await this.DropItemFramework(child, { PARENTID: itemData.system.ID });
         }
     }
 
