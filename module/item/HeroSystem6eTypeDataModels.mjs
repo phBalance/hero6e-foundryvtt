@@ -1071,7 +1071,6 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
 
             //attackActions: new SetField( new ObjectField()),  // Maybe not
             //templates: new SetField( new ObjectField()), // Reference for continus END cost
-            originalItemUuid: new StringField(), // So effective items can reference the original item
         };
     }
 
