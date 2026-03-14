@@ -1993,7 +1993,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CLUBWEAPON",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver", "activatable"],
+            behaviors: ["non-hd", "optional-maneuver", "to-hit"], // to-hit should be different as it should create dialog
             name: "Club Weapon",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -9709,7 +9709,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REPUTATION",
             type: ["disadvantage"],
-            behaviors: [],
+            behaviors: ["success"],
             name: "Negative Reputation",
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
