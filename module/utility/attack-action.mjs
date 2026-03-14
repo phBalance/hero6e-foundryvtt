@@ -148,6 +148,27 @@ export class AttackAction {
         return this._data;
     }
 
+    toJSON() {
+        if (!this.effectiveItem) {
+            throw new Error("missing effectiveItem");
+        }
+        if (this.effectiveItem._id) {
+            throw new Error("effectiveItem must not be a real item");
+        }
+
+        // Store raw data to _source so we can use native serialization routines.
+        // Trying to avoid hydrate/rehydrate functions, prefer something more generic.
+        // Also getting rid of _active to avoid circular references, and I'm trying to depreciate it anyway.
+        // TODO: Can we tweak the HeroSystem6eItem.toJSON toObjet or other serialization functions so we don't need this?
+        //       Perhaps using _id to determine if we need to do anything special?
+        //       Or perhaps rework all effectiveItem changes to use updateSource?
+        const clonedEffectiveItem = foundry.utils.deepClone(this._effectiveItem);
+        clonedEffectiveItem.system._active = undefined;
+        clonedEffectiveItem.updateSource({ system: { ...clonedEffectiveItem.system } }, { diff: false });
+
+        return { ...this, _effectiveItem: clonedEffectiveItem._source };
+    }
+
     static fromJSON(jsonData) {
         if (jsonData.constructor.name === "String") {
             jsonData = JSON.parse(jsonData);
