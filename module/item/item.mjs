@@ -5671,11 +5671,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // advantages (which was clearly an "it's too complicated to calculate" simplification in the rules that we'll keep)
         const effectiveBaseRawDc = this.dcRaw * (effectiveRealCost / baseRealCost);
 
-        return this.changePowerLevelByDc(effectiveBaseRawDc);
-    }
-
-    changePowerLevelByDc(newDc) {
-        const diceParts = calculateDicePartsFromDcForItem(this, newDc);
+        const diceParts = calculateDicePartsFromDcForItem(this, effectiveBaseRawDc);
 
         this.damageLevelTweaking(diceParts);
     }
@@ -7575,34 +7571,6 @@ export function buildItemAsClub(effectivePower, actor, name) {
 }
 
 /**
- * Create an in-memory hand-to-hand attack from a matching hand-to-hand killing attack
- *
- * @param {HeroSystem6eItem} hkaItem - HKA to convert
- *
- * @returns {HeroSystem6eItem} - an HA equivalent in DC/advantages/etc to the HKA
- */
-function buildHthAttackFromKa(hkaItem) {
-    // Build a slightly modified HA. HA doesn't normally have the INPUT field but give it here to reflect an HKA that is energy based being used as a club.
-    const haItem = new HeroSystem6eItem(
-        HeroSystem6eItem.itemDataFromXml(
-            `<POWER XMLID="HANDTOHANDATTACK" ID="1709333792639" BASECOST="0.0" LEVELS="1" ALIAS="${hkaItem.name} as Club" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="${hkaItem.system.INPUT}" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
-            hkaItem.actor,
-        ),
-        {
-            parent: hkaItem.actor,
-        },
-    );
-
-    // Make sure we have all the same advantages
-    haItem.copyItemAdvantages(hkaItem, []);
-
-    // Make sure we have the same DC
-    haItem.changePowerLevelByDc(hkaItem.dcRaw);
-
-    return haItem;
-}
-
-/**
  * Create an uninitialized in-memory item.
  *
  * Caller can do further changes, such as linking items
@@ -7622,18 +7590,16 @@ export function cloneToEffectiveAttackItem({
     effectiveStr,
     effectiveStrPushedRealPoints,
 }) {
+    // PH: FIXME: Add a way to create a new power type. Change the name of the function. Check CLUBWEAPON and
+    //            probably want to give a warning if CLUBWEAPON is on and the attack is not a killing attack.
+    // const clubWeaponActive = originalItem.actor?.items.find(
+    //     (anItem) => anItem.isCombatManeuver && anItem.system.XMLID === "CLUBWEAPON" && anItem.isActive,
+    // );`
+
     let effectiveItem;
     const effectiveItemData = originalItem.toObject(false);
     effectiveItemData._id = null;
     effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
-
-    // Item-attack-V2 uses originalItemUuid.
-    // Be careful as updateSource wipe anything not set with updateSource so do all
-    // the updateSources first.
-    // By using updateSource we should be able to avoid hydrate/rehydrate.
-    //effectiveItem.updateSource({ "system.originalItemUuid": originalItem.uuid });
-    effectiveItem.system.originalItemUuid = originalItem.uuid;
-    effectiveItem.system._active = { __originalUuid: originalItem.uuid };
 
     // PH: FIXME: Doesn't include TK
     // PH: FIXME: Doesn't include items with STR minima
@@ -7675,10 +7641,9 @@ export function cloneToEffectiveAttackItem({
  * @param {Number} effectiveObjectParameters.pushedRealPoints
  * @param {Number} effectiveObjectParameters.effectiveStr
  * @param {Number} effectiveObjectParameters.effectiveStrPushedRealPoints
- * @param {String | undefined} effectiveObjectParameters.maWeaponId
+ * @param {String} effectiveObjectParameters.maWeaponId
  * @param {HeroSystem6eItem[]} effectiveObjectParameters.hthAttackItems
  * @param {HeroSystem6eItem[]} effectiveObjectParameters.nakedAdvantagesItems
- * @param {HeroSystem6eItem | undefined} effectiveObjectParameters.clubWeaponItem
  * @param {Object} effectiveObjectParameters.autofire
  * @param {Number} effectiveObjectParameters.autofire.shots
  * @param {Number} effectiveObjectParameters.autofire.maxShots
@@ -7696,19 +7661,6 @@ export function buildEffectiveObject(effectiveObjectParameters) {
 
     // How many shots for this attack (aka autofire)
     effectiveItem.system._active.autofire = effectiveObjectParameters.autofire;
-
-    // Was this a club weapon attack
-    if (effectiveObjectParameters.clubWeaponItem) {
-        const hkaAsClubbedWeapon = buildHthAttackFromKa(effectiveObjectParameters.clubWeaponItem);
-
-        effectiveItem.system._active.maWeaponItem = hkaAsClubbedWeapon;
-
-        effectiveItem.system._active.linkedAssociated ??= [];
-        effectiveItem.system._active.linkedAssociated.push({
-            item: effectiveItem.system._active.maWeaponItem,
-            uuid: effectiveItem.system._active.maWeaponItem.uuid,
-        });
-    }
 
     // Martial Arts weapon being used?
     if (effectiveObjectParameters.maWeaponId) {

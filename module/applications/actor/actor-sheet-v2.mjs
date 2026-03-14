@@ -1270,15 +1270,15 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 },
             },
 
-            {
-                name: "Roll (all in one; alpha test)",
-                icon: '<i class="fa-solid fa-fw fa-dice"></i>',
-                condition: () => this.actor.isOwner,
-                callback: async (target) => {
-                    const document = this._getEmbeddedDocument(target);
-                    await document.roll({ event: this.event, token: this.token, allInOne: true });
-                },
-            },
+            // {
+            //     name: "Roll (all in one; alpha test)",
+            //     icon: '<i class="fa-solid fa-fw fa-dice"></i>',
+            //     condition: () => this.actor.isOwner,
+            //     callback: async (target) => {
+            //         const document = this._getEmbeddedDocument(target);
+            //         await document.roll({ event: this.event, token: this.token, allInOne: true });
+            //     },
+            // },
         ];
     }
 

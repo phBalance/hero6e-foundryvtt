@@ -1299,7 +1299,7 @@ export function getAttackTags(item) {
     }
 
     // What are we attacking against?
-    if (effectiveAttackItem.attackDefenseVs.length > 1) {
+    if (effectiveAttackItem.attackDefenseVs?.length > 1) {
         attackTags.push({
             name: effectiveAttackItem.attackDefenseVs,
         });
