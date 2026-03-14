@@ -1,8 +1,12 @@
 # Releases
 
-### Version 4.2.20 20260314 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.01 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- We have made our last change to explictly support v12. Please upgrade to v13 if you wish to receive enhancements and bug fixes.
+-
+
+### Version 4.2.20 20260314
+
+- We have made our last change to explicitly support v12. Please upgrade to v13 if you wish to receive enhancements and bug fixes.
 
 ### Version 4.2.19 20260314
 
