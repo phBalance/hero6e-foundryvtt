@@ -1282,6 +1282,11 @@ export function maneuverBaseEffectDicePartsBundle(item, options) {
             baseAttackItem: weaponItem,
         };
 
+        // If we're using a Hand-to-Hand attack as a weapon then add STR into it.
+        if (weaponItem.system.XMLID === "HANDTOHANDATTACK") {
+            addStrengthToBundle(item, options, weaponDicePartBundle, true, weaponItem.is5e);
+        }
+
         // NOTE: 5e martial arts EXTRADCs and RANGEDDCs are not baseDCs if they are armed. Do the same for 6e in case they use the optional damage doubling rules too.
 
         // PH: FIXME: STR minima apply to base weapon damage
