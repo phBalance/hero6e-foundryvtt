@@ -35,17 +35,10 @@ import {
     isManeuverThatDoesReplaceableDamageType,
     isRangedMartialManeuver,
 } from "../utility/damage.mjs";
-import {
-    getRoundedUpDistanceInSystemUnits,
-    getSystemDisplayUnits,
-    convertSystemUnitsToMetres,
-    gridUnitsToMeters,
-    currentSceneUsesHexGrid,
-} from "../utility/units.mjs";
+import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
-import { AttackAction } from "../utility/attack-action.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
