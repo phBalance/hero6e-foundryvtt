@@ -1993,7 +1993,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "CLUBWEAPON",
             type: ["maneuver"],
-            behaviors: ["non-hd", "optional-maneuver", "activatable"],
+            behaviors: ["non-hd", "optional-maneuver", "to-hit"], // to-hit should be different as it should create dialog
             name: "Club Weapon",
             costPerLevel: fixedValueFunction(0),
             perceivability: "obvious",
@@ -5479,7 +5479,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "REPUTATION",
-            type: ["perk", "disadvantage"],
+            type: ["perk"],
             behaviors: ["success"],
             duration: HERO.DURATION_TYPES.INHERENT, // There isn't strictly a duration but this can't be adjusted
             name: "Positive Reputation",
@@ -9709,7 +9709,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REPUTATION",
             type: ["disadvantage"],
-            behaviors: [],
+            behaviors: ["success"],
             name: "Negative Reputation",
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",

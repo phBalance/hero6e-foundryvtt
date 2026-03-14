@@ -513,6 +513,7 @@ export class ItemAttackFormApplication extends FormApplication {
             maWeaponId: this.data.maSelectedWeaponId,
             hthAttackItems: this.data.hthAttackItems,
             nakedAdvantagesItems: this.data.nakedAdvantagesItems,
+            clubWeaponItem: this.data.clubWeaponItem,
 
             autofire: {
                 shots: this.data.autofireShotsToUse,

@@ -1,0 +1,19 @@
+<div class="hero club-weapon-form">
+    <h4>Club Weapon Selection</h4>
+
+    <div class="form-group">
+        <label>HKA to club with</label>
+        <select name="clubWeaponId" id="clubWeaponId">
+            {{selectOptions possibleHkaItems selected=clubWeaponId valueAttr="id" labelAttr="label" disabled="disabled"}}
+        </select>
+    </div>
+
+    <button type="submit" name="submit" data-action="submit" {{#unless possibleHkaItems.length}}disabled="true"{{/unless}}>
+        <i class="fas fa-check button-success"></i>
+        Use As Club
+    </button>
+    <button type="button" name="cancel" data-action="cancel">
+        <i class="fas fa-times button-cancel"></i>
+        Cancel Club Weapon Attack
+    </button>
+</div>
