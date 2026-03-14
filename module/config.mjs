@@ -9709,7 +9709,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "REPUTATION",
             type: ["disadvantage"],
-            behaviors: [],
+            behaviors: ["success"],
             name: "Negative Reputation",
             costPerLevel: fixedValueFunction(0), // TODO: needs function
             target: "self only",
