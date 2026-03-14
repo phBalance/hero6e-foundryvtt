@@ -260,8 +260,11 @@ async function skillRoll(item, actor, target) {
     }
 
     await skillRoller.makeSuccessRoll(true, successValue).roll();
-    const succeeded = skillRoller.getSuccess();
-    const autoSuccess = skillRoller.getAutoSuccess();
+
+    // Rolling under the negative reputation amount should be considered a failure.
+    const negativeReputation = item.system.XMLID === "REPUTATION" && item.type === "disadvantage";
+    const succeeded = negativeReputation ? !skillRoller.getSuccess() : skillRoller.getSuccess();
+    const autoSuccess = negativeReputation ? !skillRoller.getAutoSuccess() : skillRoller.getAutoSuccess();
     const total = skillRoller.getSuccessTotal();
     const margin = successValue - total;
 
@@ -271,9 +274,22 @@ async function skillRoll(item, actor, target) {
             disadFlavor =
                 "Success on this roll typically means that the character must follow the psychological complication for at least one phase, after which the character is free to act against this psychological complication. Failure on this roll means that the character must continue to follow this psychological complication.";
             break;
+
         case "SOCIALLIMITATION":
             disadFlavor =
                 "Success on this roll typically means the character is required to react to (or is affected by) the social complication.";
+            break;
+
+        case "REPUTATION":
+            if (negativeReputation) {
+                disadFlavor = "Failure on this roll indicates that people are aware of your negative reputation.";
+            } else {
+                disadFlavor = "Success on this roll indicates that people are aware of your positive reputation.";
+            }
+            break;
+
+        default:
+            // Intentionally empty
             break;
     }
 
