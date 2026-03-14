@@ -6574,7 +6574,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Remove cost of 1 LEVEL of the least expensive adder
                 if (sortedAdderValuation.length === 0) {
-                    console.warn(`CHANGEENVIRONMENT ${item.detailedName()} couldn't find any combat effects.`);
+                    if (!squelch(`${item.id}addersCost`)) {
+                        console.warn(`CHANGEENVIRONMENT ${item.detailedName()} couldn't find any combat effects.`);
+                    }
                     return 0;
                 }
 
