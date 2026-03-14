@@ -27,3 +27,15 @@ export function clamp(num, min, max) {
 
     return Math.min(Math.max(num, min), max);
 }
+
+/**
+ * V12 foundry.utils.parseUuid does not allow string to be falsy. V13 does.
+ * Provide V13 functionality for V12
+ */
+export function foundryVttParseUuid(uuid) {
+    if (!uuid) {
+        return null;
+    }
+
+    return foundry.utils.parseUuid(uuid);
+}
