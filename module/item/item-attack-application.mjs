@@ -853,18 +853,17 @@ export class ItemAttackFormApplication extends FormApplication {
                 y: templateData.y,
             });
         } else {
-            //canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [templateData]);
+            canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [templateData]);
         }
-        await canvas.templates.createPreview(templateData);
 
-        // canvas.templates.activate({ tool: templateType });
-        // canvas.templates.selectObjects({
-        //     x: templateData.x,
-        //     y: templateData.y,
-        //     releaseOthers: true,
-        //     control: true,
-        //     toggle: false,
-        // });
+        canvas.templates.activate({ tool: templateType });
+        canvas.templates.selectObjects({
+            x: templateData.x,
+            y: templateData.y,
+            releaseOthers: true,
+            control: true,
+            toggle: false,
+        });
     }
 
     /**
@@ -905,7 +904,7 @@ function getEffectiveItemOriginalItemId(item) {
     }
 
     console.error(
-        `${item.detailedName()} | ${item?.detailedName()} doesn't have an originating UUID stored and the effective item doesn't have an id`,
+        `${item.detailedName()} doesn't have an originating UUID stored and the effective item doesn't have an id`,
     );
 
     return null;
