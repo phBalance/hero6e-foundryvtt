@@ -969,7 +969,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         if (["power", "equipment"].includes(targetType) || item.baseInfo.type.includes(targetType)) {
             const preType = item.type;
             if (item.system.PARENTID) {
-                item.system.PARENTID = null;
+                item.updateSource({ "system.PARENTID": null });
             }
             await item.update({
                 type: targetType,
