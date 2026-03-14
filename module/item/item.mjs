@@ -6821,62 +6821,62 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
     }
 
-    async placeTemplate(message) {
-        if (!this.getAoeModifier()) throw Error("Attempted to create template with non-aoe item");
-        return this.placeItemTemplate(message);
-    }
+    // async placeTemplate(message) {
+    //     if (!this.getAoeModifier()) throw Error("Attempted to create template with non-aoe item");
+    //     return this.placeItemTemplate(message);
+    // }
 
-    async placeItemTemplate(message) {
-        if (!canvas.ready) throw Error("No canvas");
+    // async placeItemTemplate(message) {
+    //     if (!canvas.ready) throw Error("No canvas");
 
-        const parsedMessageContent = document.createElement("div");
-        parsedMessageContent.innerHTML = message.content;
+    //     const parsedMessageContent = document.createElement("div");
+    //     parsedMessageContent.innerHTML = message.content;
 
-        const attackActionJson = parsedMessageContent.querySelector("[data-attack-action]")?.dataset?.attackAction;
-        if (!attackActionJson) {
-            throw new Error("missing attackAction");
-        }
-        const attackAction = AttackAction.fromJSON(attackActionJson);
+    //     const attackActionJson = parsedMessageContent.querySelector("[data-attack-action]")?.dataset?.attackAction;
+    //     if (!attackActionJson) {
+    //         throw new Error("missing attackAction");
+    //     }
+    //     const attackAction = AttackAction.fromJSON(attackActionJson);
 
-        const areaOfEffect = this.aoeAttackParameters;
-        if (!areaOfEffect) throw Error("No aoeAttackParameters");
+    //     const areaOfEffect = this.aoeAttackParameters;
+    //     if (!areaOfEffect) throw Error("No aoeAttackParameters");
 
-        const aoeType = areaOfEffect.type;
-        const aoeValue = areaOfEffect.value;
-        const heroAoeTypeToFoundryAoeTypeConversions = {
-            any: "rect",
-            cone: "cone",
-            line: "ray",
-            radius: "circle",
-            surface: "rect",
-        };
-        const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
-        const sizeConversionToMeters = convertSystemUnitsToMetres(1, this.actor?.is5e);
-        const hexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
-        const hexGrid = currentSceneUsesHexGrid();
+    //     const aoeType = areaOfEffect.type;
+    //     const aoeValue = areaOfEffect.value;
+    //     const heroAoeTypeToFoundryAoeTypeConversions = {
+    //         any: "rect",
+    //         cone: "cone",
+    //         line: "ray",
+    //         radius: "circle",
+    //         surface: "rect",
+    //     };
+    //     const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
+    //     const sizeConversionToMeters = convertSystemUnitsToMetres(1, this.actor?.is5e);
+    //     const hexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
+    //     const hexGrid = currentSceneUsesHexGrid();
 
-        // NOTE: If we're using hex templates (i.e. 5e), the target hex is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
-        //       for distance we need to subtract 0.5"/1m from the radius.
-        // NOTE: MeasuredTemplates assume that the distance is in grid units.
-        const distanceInMeters = aoeValue * sizeConversionToMeters - (hexTemplates && hexGrid ? 1 : 0);
-        const distanceInGridUnits = distanceInMeters / gridUnitsToMeters();
+    //     // NOTE: If we're using hex templates (i.e. 5e), the target hex is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
+    //     //       for distance we need to subtract 0.5"/1m from the radius.
+    //     // NOTE: MeasuredTemplates assume that the distance is in grid units.
+    //     const distanceInMeters = aoeValue * sizeConversionToMeters - (hexTemplates && hexGrid ? 1 : 0);
+    //     const distanceInGridUnits = distanceInMeters / gridUnitsToMeters();
 
-        const templateData = {
-            t: templateType,
-            author: game.user.id,
-            distance: distanceInGridUnits,
-            fillColor: game.user.color,
-            flags: {
-                [game.system.id]: {
-                    messageId: message?.id,
-                    purpose: "AoE",
-                    effectiveItem: JSON.stringify(attackAction.effectiveItem),
-                },
-            },
-        };
+    //     const templateData = {
+    //         t: templateType,
+    //         author: game.user.id,
+    //         distance: distanceInGridUnits,
+    //         fillColor: game.user.color,
+    //         flags: {
+    //             [game.system.id]: {
+    //                 messageId: message?.id,
+    //                 purpose: "AoE",
+    //                 effectiveItem: JSON.stringify(attackAction.effectiveItem),
+    //             },
+    //         },
+    //     };
 
-        return canvas.templates.createPreview(templateData);
-    }
+    //     return canvas.templates.createPreview(templateData);
+    // }
 }
 
 // Prepare the modifier object. This is not really an item, but a MODIFER or ADDER
