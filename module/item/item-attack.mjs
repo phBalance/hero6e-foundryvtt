@@ -3510,8 +3510,11 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
     const attackType = damageItem.attackDefenseVs; // TODO: avad?
 
     // Match attack against absorption type. If we match we can do some absorption.
-    for (const absorptionItem of absorptionItems) {
-        if (absorptionItem.system.OPTION === attackType.toUpperCase() && absorptionItem.isActive) {
+    for (const absorptionItem of absorptionItems.filter((item) => item.isActive)) {
+        if (
+            (absorptionItem.system.OPTIONID === "PHYSICAL" && attackType === "PD") ||
+            (absorptionItem.system.OPTIONID === "ENERGY" && attackType === "ED")
+        ) {
             const actor = absorptionItem.actor;
             let maxAbsorption;
             if (actor.system.is5e) {

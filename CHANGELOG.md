@@ -4,6 +4,7 @@
 
 - This (and future) releases no longer support FoundryVTT V12. This release only works with FoundryVTT V13.
 - Added button to roll BREAKFALL skill after applying KNOCKBACK to remain on your feet. [#3557](https://github.com/dmdorman/hero6e-foundryvtt/issues/3557)
+- Fixed ABSORPTION. [#2720](https://github.com/dmdorman/hero6e-foundryvtt/issues/2720)
 
 ### Version 4.2.20 20260314
 
