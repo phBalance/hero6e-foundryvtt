@@ -10,7 +10,7 @@ const backgroundSkillKeys = Object.freeze({
     PS: "PROFESSIONAL_SKILL",
 });
 
-const filterSkillRollItems = (item) => {
+function filterSkillRollItems(item) {
     if (!item.isRollable()) {
         return false;
     }
@@ -21,14 +21,14 @@ const filterSkillRollItems = (item) => {
         item.system.XMLID !== "SKILL_LEVELS" && // is not a bonus to skills
         item.system.XMLID !== "COMBAT_LEVELS" // is not a bonus to combat
     );
-};
+}
 
-const findRollValue = (rar) => {
+function findRollValue(rar) {
     const value = parseInt(rar.OPTION, 10);
     return value;
-};
+}
 
-const matchRequiredSkillRoll = (o, rar, rarOptionIsBackground) => {
+function matchRequiredSkillRoll(o, rar, rarOptionIsBackground) {
     const rarAliasDisplay = rar.ALIAS?.toUpperCase() || ""; // From the "Display" field. ex: "Requires A Magic Roll"
     // OPTION_ALIAS is different in 5e: it is entered in the Type field
     const rarOptionsAlias = rar.OPTION_ALIAS?.toUpperCase() || ""; // From the "Options" field. ex: "Magic Roll, -1 per 5 Active Points modifier"
@@ -92,17 +92,17 @@ const matchRequiredSkillRoll = (o, rar, rarOptionIsBackground) => {
     // TODO check 'Text'?
     // TODO check 'Type'?
     return false;
-};
+}
 
-const isBackgroundSkillType = (rar, rarOptionIsBackground) => {
+function isBackgroundSkillType(rar, rarOptionIsBackground) {
     return rar.OPTIONID === "BASICRSR" || Object.keys(backgroundSkillKeys).includes(rarOptionIsBackground);
-};
+}
 
-const matchBackgroundSkillType = (o, rar, rarOptionIsBackground) => {
+function matchBackgroundSkillType(o, rar, rarOptionIsBackground) {
     return rar.OPTIONID === "BASICRSR" || backgroundSkillKeys[rarOptionIsBackground] === o.system.XMLID;
-};
+}
 
-const matchBackgroundSkillRoll = (o, rar, item, rarOptionIsBackground) => {
+function matchBackgroundSkillRoll(o, rar, item, rarOptionIsBackground) {
     if (!matchBackgroundSkillType(o, rar, rarOptionIsBackground)) {
         return false;
     }
@@ -122,9 +122,9 @@ const matchBackgroundSkillRoll = (o, rar, item, rarOptionIsBackground) => {
     }
 
     return matchRequiredSkillRoll(o, rar, rarOptionIsBackground);
-};
+}
 
-const findSkillRoll = (rar, item, rarOptionIsBackground) => {
+function findSkillRoll(rar, item, rarOptionIsBackground) {
     if (rar.OPTIONID === "PER" || rar.ROLLALIAS === "PER") {
         return item.actor.items.find((o) => o.system.XMLID === "PERCEPTION");
     } else if (rar.OPTIONID.includes("LUCK")) {
@@ -138,9 +138,9 @@ const findSkillRoll = (rar, item, rarOptionIsBackground) => {
     return item.actor.items.find(
         (o) => filterSkillRollItems(o) && matchRequiredSkillRoll(o, rar, rarOptionIsBackground),
     );
-};
+}
 
-const findRollDivisor = (rar) => {
+function findRollDivisor(rar) {
     // item.activePoints is a number
     if (rar.OPTIONID.includes("1PER5")) {
         return 5;
@@ -163,18 +163,18 @@ const findRollDivisor = (rar) => {
     }
 
     return 10;
-};
+}
 
-const findRollMinus = (rar, item) => {
+function findRollMinus(rar, item) {
     const divisor = findRollDivisor(rar);
     if (isNaN(divisor)) {
         return 0;
     }
 
     return Math.floor(parseInt(item.activePoints) / divisor);
-};
+}
 
-const getRequiredCharacteristicKey = (rar, item) => {
+function getRequiredCharacteristicKey(rar, item) {
     // PH: FIXME: k is a terrible parameter name
     const characteristicKeys = Object.keys(item.actor.system.characteristics).filter(
         (k) => item.actor.system.characteristics[k].roll != null,
@@ -223,7 +223,7 @@ const getRequiredCharacteristicKey = (rar, item) => {
         characteristicKeyRegex[key].test(rarOptionMaybeHasCharKey),
     );
     return matchedKeyInOption ?? "";
-};
+}
 
 /**
  *
@@ -435,5 +435,6 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
     if (!succeeded && options.showUi) {
         ui.notifications.warn(cardHtml);
     }
+
     return succeeded;
 }
