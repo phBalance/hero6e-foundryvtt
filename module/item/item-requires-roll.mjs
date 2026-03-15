@@ -1,0 +1,433 @@
+import { HEROSYS } from "../herosystem6e.mjs";
+import { HeroRoller } from "../utility/dice.mjs";
+import { calculateDicePartsForItem } from "../utility/damage.mjs";
+import { overrideCanAct } from "../settings/settings-helpers.mjs";
+
+/**
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {Object} options
+ * @returns {Boolean} - success
+ *
+ * The RaR is the Requires A Roll including Activation roll from 5e.
+ * If the Activation roll is a simple throw then it is quite easily done.
+ * If it is connected to a Skill or Characteristic then the correct roll must be discovered.
+ * There are several places a player might put information to tie the RaR to an existing skill/characteristic.
+ *
+ * 1) ALIAS/Display: RaR has a Display in HD which is ALIAS here: an editable field which users are likely to change to indicate their selected roll, as it shows naturally on the sheet.
+ * 2) OPTION/Options: the Options field in RaR that can also be edited.
+ * 2--a ) OPTIONID/Options: the same drop-down gives and uneditable flag that indicates things like
+ *    - Activation roll
+ *    - Skill roll
+ *    - Characteristic roll
+ *    - PER roll
+ *    - KS, PS, SS roll (Background skills)
+ *    - and the difficulty -1/10 (default), -1/5 (hard), -1/20 (easy)
+ * 3) COMMENTS/Comments: is an editable field that users might use to indicate the roll required.
+ * 4) ROLLALIAS: is a 5e only editable field that users might use to indicate the roll required.
+ *
+ * the Skills to be matched will be generally be referenced as 'o' as they are considered in anonymous find functions.
+ * ex: filterSkillRollItems which filters out skill items from skill enhancers and skill level bonuses.
+ * Skills that are to be matched will be 'rollable' skills.
+ * Most skills are only taken once, the user is warned if they purchase multiple copies of the same skill.
+ * One exception is the POWERSKILL which is expected to be customized per power and purchased multiple times.
+ * Likewise with the Background skills (KS, PS, SS) are a special case as they can be purchased multiple times with different INPUTs.
+ * The Background skills are only matched when the RaR is looking for one of those specifically.
+ * The RaR will have an OPTIONID of KS, PS, or SS which must match the skill's XMLID.
+ *
+ * 1) o.name/Name
+ * 2) o.system.ALIAS/Display
+ * 3) o.system.XMLID/XMLID
+ * 4) o.system.INPUT/(Science/Knowledge/ (Background skills only)
+ *
+ *
+ */
+// PH: FIXME: The name of the function is not what it is doing. It is not checking if it requires a roll...
+export async function rollRequiresASkillRollCheck(item, options = {}) {
+    const rar = item.modifiers.find((o) => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL");
+    if (!rar) {
+        return true;
+    }
+
+    // FIXME: This doesn't support 2 RAR. See https://github.com/dmdorman/hero6e-foundryvtt/issues/3873
+
+    // todo why OPTION and not OPTIONID to look for background skills (OPTIONID can't be altered by user)
+    // PH: FIXME: This doesn't look right as it can and should be modified in the HDC. Also variable name indicates boolean and it's not
+    const rarOptionIsBackground = rar.OPTION.substring(0, 2).toUpperCase();
+
+    const filterSkillRollItems = (item) => {
+        if (!item.isRollable()) {
+            return false;
+        }
+
+        return (
+            item.baseInfo?.type?.includes("skill") && // is a skill
+            !item.baseInfo?.type?.includes("enhancer") && // is not an enhancer (scholar, scientist, etc.)
+            item.system.XMLID !== "SKILL_LEVELS" && // is not a bonus to skills
+            item.system.XMLID !== "COMBAT_LEVELS" // is not a bonus to combat
+        );
+    };
+
+    // NaN if there is no number at the start of the OPTION (14 11 8 etc) for standard activation rolls
+    // PH: FIXME: rar is a terrible parameter value. Should we been looking at OPTION?
+    const findRollValue = (rar) => {
+        const value = parseInt(rar.OPTION, 10);
+        return value;
+    };
+
+    const findSkillRoll = (rar) => {
+        const rarAliasDisplay = rar.ALIAS?.toUpperCase() || ""; // From the "Display" field. ex: "Requires A Magic Roll"
+        // OPTION_ALIAS is different in 5e: it is entered in the Type field
+        const rarOptionsAlias = rar.OPTION_ALIAS?.toUpperCase() || ""; // From the "Options" field. ex: "Magic Roll, -1 per 5 Active Points modifier"
+        const rarComments = rar.COMMENTS?.toUpperCase() || ""; // From Comments, begins blank, common use would be to enter just the skill name
+        const rarRollAlias = rar.ROLLALIAS?.toUpperCase() || ""; // From the 5e "Roll" field. ex: "STR", "Acrobatics"
+
+        const rar_AliasDisplay = rarAliasDisplay.replaceAll(" ", "_");
+        const rar_OptionsAlias = rarOptionsAlias.replaceAll(" ", "_");
+        const rar_Comments = rarComments.replaceAll(" ", "_");
+        const rar_RollAlias = rarRollAlias.replaceAll(" ", "_");
+
+        // PH: FIXME: o is a terrible parameter value.
+        const matchRequiredSkillRoll = (o) => {
+            // TODO
+            // it might be worthwhile to also try with underscores in the XMLID '_' replaced with spaces ' ' to match better
+            // or vice versa, put underscores in the stable RaR strings and search with underscores present
+            // this is IN ADDITION to what's here now; dont replace this
+            const xmlIdMatch =
+                rarAliasDisplay.includes(o.system.XMLID) ||
+                rarOptionsAlias.includes(o.system.XMLID) ||
+                rarRollAlias.includes(o.system.XMLID) ||
+                rarComments.includes(o.system.XMLID);
+            if (xmlIdMatch) {
+                return true;
+            }
+
+            const nameUpper = o.name?.toUpperCase() ?? "";
+            const nameMatch =
+                nameUpper &&
+                rarOptionIsBackground !== nameUpper &&
+                (rarAliasDisplay.includes(nameUpper) ||
+                    rarOptionsAlias.includes(nameUpper) ||
+                    rarRollAlias.includes(nameUpper) ||
+                    rarComments.includes(nameUpper));
+            if (nameMatch) {
+                return true;
+            }
+
+            const aliasUpper = o.system.ALIAS?.toUpperCase() ?? "";
+            const aliasMatch =
+                aliasUpper &&
+                rarOptionIsBackground !== aliasUpper &&
+                (rarAliasDisplay.includes(aliasUpper) ||
+                    rarOptionsAlias.includes(aliasUpper) ||
+                    rarRollAlias.includes(aliasUpper) ||
+                    rarComments.includes(aliasUpper));
+            if (aliasMatch) {
+                return true;
+            }
+
+            // Some skills have an underscore in them; the user might not have the name matched exactly
+            // so if there is an underscore (as in SLEIGHT_OF_HAND), we check for that here
+            const xml_Id_Match =
+                /_/.test(o.system.XMLID) &&
+                (rar_AliasDisplay.includes(o.system.XMLID) ||
+                    rar_OptionsAlias.includes(o.system.XMLID) ||
+                    rar_RollAlias.includes(o.system.XMLID) ||
+                    rar_Comments.includes(o.system.XMLID));
+            if (xml_Id_Match) {
+                return true;
+            }
+
+            // TODO check 'Text'?
+            // TODO check 'Type'?
+            return false;
+        };
+
+        const backgroundSkillKeys = {
+            // matches RaR OPTION to XMLID
+            KS: "KNOWLEDGE_SKILL",
+            SS: "SCIENCE_SKILL",
+            PS: "PROFESSIONAL_SKILL",
+        };
+
+        // PH: FIXME: Do we really want a closure over rar here?
+        const isBackgroundSkillType = () => {
+            return rar.OPTIONID === "BASICRSR" || Object.keys(backgroundSkillKeys).includes(rarOptionIsBackground);
+        };
+
+        // PH: FIXME: Do we really want a closure over rar here?
+        const matchBackgroundSkillType = (o) => {
+            return rar.OPTIONID === "BASICRSR" || backgroundSkillKeys[rarOptionIsBackground] === o.system.XMLID;
+        };
+
+        const matchBackgroundSkillRoll = (o) => {
+            if (!matchBackgroundSkillType(o)) {
+                return false;
+            }
+            const inputUpper = o.system.INPUT?.toUpperCase() ?? "";
+            const inputMatch =
+                inputUpper &&
+                rarOptionIsBackground !== inputUpper &&
+                (rarAliasDisplay.includes(inputUpper) ||
+                    rarOptionsAlias.includes(inputUpper) ||
+                    rarComments.includes(inputUpper));
+            if (inputMatch) {
+                return true;
+            }
+            return matchRequiredSkillRoll(o);
+        };
+
+        if (rar.OPTIONID === "PER" || rar.ROLLALIAS === "PER") {
+            return item.actor.items.find((o) => o.system.XMLID === "PERCEPTION");
+        } else if (rar.OPTIONID.includes("LUCK")) {
+            return item.actor.items.find((o) => o.system.XMLID === "LUCK");
+        } else if (isBackgroundSkillType()) {
+            return item.actor.items.find((o) => filterSkillRollItems(o) && matchBackgroundSkillRoll(o));
+        }
+        return item.actor.items.find((o) => filterSkillRollItems(o) && matchRequiredSkillRoll(o));
+    };
+
+    const findRollDivisor = (rar) => {
+        // item.activePoints is a number
+        if (rar.OPTIONID.includes("1PER5")) {
+            return 5;
+        } else if (rar.OPTIONID.includes("1PER20")) {
+            return 20;
+        }
+
+        const divisorOption = rar.ADDER.find((o) => {
+            return o.XMLID === "MINUS1PER20" || o.XMLID === "MINUS1PER5";
+        });
+
+        if (divisorOption?.XMLID === "MINUS1PER20") {
+            return 20;
+        } else if (divisorOption?.XMLID === "MINUS1PER5") {
+            return 5;
+        }
+        // activation rolls have no minuses due to active points
+        else if (!isNaN(parseInt(rar.OPTION, 10))) {
+            return NaN;
+        }
+
+        return 10;
+    };
+
+    const findRollMinus = (rar) => {
+        const divisor = findRollDivisor(rar);
+        if (isNaN(divisor)) {
+            return 0;
+        }
+        return Math.floor(parseInt(item.activePoints) / divisor);
+    };
+
+    // PH: FIXME: k is a terrible parameter name
+    const characteristicKeys = Object.keys(item.actor.system.characteristics).filter(
+        (k) => item.actor.system.characteristics[k].roll != null,
+    );
+    const rarDisplayMaybeHasCharKey = rar.ALIAS?.toLowerCase() || "";
+    const rarOptionMaybeHasCharKey = rar.OPTION_ALIAS?.toLowerCase() || "";
+    const rarCommentMaybeHasCharKey = rar.COMMENTS?.toLowerCase() || ""; // pre or presence, STR or Strength
+    const rarRollAliasMaybeHasCharKey = rar.ROLLALIAS?.toLowerCase() || "";
+    // The \b ensures the match is at the start of a word
+    const characteristicKeyRegex = characteristicKeys.reduce((accumulator, currentKey) => {
+        // For each key, create the RegExp object
+        const regex = new RegExp(`\\b${currentKey}`, "i");
+        accumulator[currentKey] = regex;
+        return accumulator;
+    }, {});
+
+    const getRequiredCharacteristicKey = () => {
+        // exact match in comments
+        if (characteristicKeys.includes(rarCommentMaybeHasCharKey)) {
+            // finds pre, not presence
+            return rarCommentMaybeHasCharKey;
+        }
+
+        // comment would be Strength, Intelligence, Presence etc.
+        const matchedKeyInComment = characteristicKeys.find((key) =>
+            characteristicKeyRegex[key].test(rarCommentMaybeHasCharKey),
+        );
+        if (matchedKeyInComment) {
+            return matchedKeyInComment;
+        }
+
+        const matchedKeyInName = characteristicKeys.find((key) =>
+            characteristicKeyRegex[key].test(rarDisplayMaybeHasCharKey),
+        );
+        if (matchedKeyInName) {
+            return matchedKeyInName;
+        }
+
+        const matchedKeyInRollAlias = characteristicKeys.find((key) =>
+            characteristicKeyRegex[key].test(rarRollAliasMaybeHasCharKey),
+        );
+        if (matchedKeyInRollAlias) {
+            return matchedKeyInRollAlias;
+        }
+
+        const matchedKeyInOption = characteristicKeys.find((key) =>
+            characteristicKeyRegex[key].test(rarOptionMaybeHasCharKey),
+        );
+        return matchedKeyInOption ?? "";
+    };
+
+    const charKey = getRequiredCharacteristicKey();
+
+    // if the RaR is an Activation roll, then we have the value we need
+    let value = findRollValue(rar);
+    let skill = undefined;
+    let char = undefined;
+    if (isNaN(value)) {
+        if (rar.OPTIONID !== "CHAR") {
+            skill = findSkillRoll(rar);
+        }
+        if (!skill) {
+            char = item.actor.system.characteristics[charKey];
+            if (char) {
+                // if we weren't supposed to look for a char but we had to find one the rar is not constructed right
+                // 5e BASICRSR is Skills and Characteristics
+                if (rar.OPTIONID !== "CHAR" && rar.OPTIONID !== "BASICRSR") {
+                    ui.notifications.warn(
+                        `${item.actor.name} has a power ${item.name}, which is incorrectly built.  Skill Roll for ${charKey.toUpperCase()} should be a Characteristic Roll.`,
+                    );
+                }
+            } else {
+                // could not find a skill or characteristic to match
+                const typeOfRollRequired = rar.OPTIONID !== "CHAR" ? "known skill" : "characteristic";
+                ui.notifications.warn(
+                    `${item.actor.name} has a power ${item.name}. Expecting '${rar.OPTION} roll', where ${rar.OPTION} is the name of a ${typeOfRollRequired} that can be rolled.
+                    <br>Put the name of the ${typeOfRollRequired} into the Options or Comments of the Requires A Roll modifier for the best results.`,
+                );
+                if (!overrideCanAct) {
+                    const actor = item.actor;
+                    const token = actor.token;
+                    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+                    speaker.alias = actor.name;
+                    const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+
+                    const chatData = {
+                        style: CONST.CHAT_MESSAGE_STYLES.IC,
+                        author: game.user._id,
+                        content:
+                            `<div class="dice-roll"><div class="dice-flavor">${item.name} (${item.system.OPTION_ALIAS || item.system.COMMENTS}) activation failed because the appropriate skill is not owned.</div></div>` +
+                            `\nPress <b>${overrideKeyText}</b> to override.`,
+                        speaker: speaker,
+                    };
+
+                    await ChatMessage.create(chatData);
+
+                    return false;
+                }
+            }
+        }
+    }
+    // TODO: for refactor the above should return: skill, char, value, rollModifier so that the output can be constructed.
+
+    let succeeded = false;
+    let flavor = "";
+    let cardHtml = "";
+    let roller = null;
+    const usefulAlias = rarOptionIsBackground !== skill?.system.ALIAS ? skill?.system.ALIAS : "";
+    const skillName = skill?.system.INPUT || usefulAlias || skill?.name;
+    const charName = charKey?.toUpperCase();
+    const activationFrom = skill ? `${skillName}:` : char ? `${charName}:` : "";
+    if (skill?.system.XMLID === "LUCK") {
+        const { diceParts } = calculateDicePartsForItem(skill, {});
+
+        roller = new HeroRoller()
+            .modifyTo5e(skill.actor.system.is5e)
+            .makeEffectRoll()
+            .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0)
+            .addHalfDice(diceParts.halfDieCount >= 1 ? diceParts.halfDieCount : 0)
+            .addDiceMinus1(diceParts.d6Less1DieCount >= 1 ? diceParts.d6Less1DieCount : 0)
+            .addNumber(diceParts.constant);
+
+        await roller.roll();
+
+        const lucky = roller.getEffectTerms();
+        // Each "6" rolled counts as 1 point of Luck.
+        const luck = lucky.reduce((accumulator, dieRoll) => {
+            if (dieRoll === 6) {
+                accumulator += 1;
+            }
+            return accumulator;
+        }, 0);
+        if (rar.OPTIONID === "ONELUCK") {
+            succeeded = luck >= 1;
+        } else if (rar.OPTIONID === "TWOLUCK") {
+            succeeded = luck >= 2;
+        } else if (rar.OPTIONID === "THREELUCK") {
+            succeeded = luck >= 3;
+        }
+        flavor = `${item.name} (${activationFrom} rolled ${lucky} for ${luck} points) activation ${succeeded ? "succeeded" : "failed"} `;
+    } else {
+        if (skill) {
+            // skill.system.roll is a string
+            value = parseInt(skill.system.roll);
+            if (isNaN(value)) {
+                // sumthing wrong with the skill?
+                value = 11;
+            }
+        } else if (char) {
+            // a char.roll is an int
+            value = char.roll;
+        } else if (!value) {
+            ui.notifications.warn(`${item.actor.name} has a power ${item.name}. ${rar.OPTION_ALIAS} is not supported.`);
+            // Try to continue
+            value = 11;
+        }
+        const minus = findRollMinus(rar);
+        value -= minus;
+        const successValue = parseInt(value);
+
+        //TODO what about additional skill levels used to influence the activation roll?
+        roller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
+        await roller.roll();
+        succeeded = roller.getSuccess();
+        const autoSuccess = roller.getAutoSuccess();
+        const total = roller.getSuccessTotal();
+        const margin = successValue - total;
+
+        const targetRoll = skill ? skill.system.roll : char ? char.roll : `${rar.OPTION_ALIAS}:${value}-`;
+        const divisor = findRollDivisor(rar);
+        const penalty = isNaN(divisor) ? "" : `, -1 per ${divisor} active points`;
+
+        const penaltyString = penalty ? `${penalty}: -${minus}` : "";
+
+        flavor = `${item.name} (${activationFrom}${targetRoll}${penaltyString}) activation ${
+            succeeded ? "succeeded" : "failed"
+        } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
+    }
+    cardHtml = await roller.render(flavor);
+
+    // FORCE success
+    if (!succeeded && overrideCanAct) {
+        const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+        ui.notifications.info(`${item.actor.name} succeeded roll because override key.`);
+        succeeded = true;
+        cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
+    }
+
+    const actor = item.actor;
+    const token = actor.token;
+    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+
+    if (!succeeded && options.resourcesUsedDescription) {
+        cardHtml += `Spent ${options.resourcesUsedDescription}.`;
+    }
+
+    const chatData = {
+        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        rolls: roller.rawRolls(),
+        author: game.user._id,
+        content: cardHtml,
+        speaker: speaker,
+    };
+
+    await ChatMessage.create(chatData);
+
+    if (!succeeded && options.showUi) {
+        ui.notifications.warn(cardHtml);
+    }
+    return succeeded;
+}

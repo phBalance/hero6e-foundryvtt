@@ -11,12 +11,8 @@ import { ItemAttackFormApplication, getAoeTemplateForBaseItem } from "../item/it
 import { ItemAttackFormApplicationV2 } from "../applications/item/item-attack-application-v2.mjs";
 import { ItemAttackClubWeaponApplicationV2 } from "../applications/item/item-attack-application-club-weapon.mjs";
 
-import {
-    HeroSystem6eItem,
-    requiresACharacteristicRollCheck,
-    rollRequiresASkillRollCheck,
-    rollAblativeActivationCheck,
-} from "../item/item.mjs";
+import { HeroSystem6eItem, requiresACharacteristicRollCheck, rollAblativeActivationCheck } from "../item/item.mjs";
+import { rollRequiresASkillRollCheck } from "./item-requires-roll.mjs";
 
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
