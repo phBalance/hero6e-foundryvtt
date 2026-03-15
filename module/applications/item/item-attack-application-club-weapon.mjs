@@ -1,3 +1,5 @@
+import { HeroSystem6eActorActiveEffects } from "../../actor/actor-active-effects.mjs";
+
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 /**
@@ -69,6 +71,8 @@ export class ItemAttackClubWeaponApplicationV2 extends HandlebarsApplicationMixi
      */
     async _prepareContext(/* options */) {
         const actor = this.data.actor ?? this.data.token?.actor;
+
+        this.data.clubIcon = HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.img;
 
         this.data.clubWeaponId ??= null;
 
