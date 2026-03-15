@@ -5646,7 +5646,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     /**
-     * Add advantages from itemFrom to this item but postUpload is not run
+     * Add advantages from itemFrom to this item
      * FIXME: this does not handle the merging of any advantages (e.g. AP being added when already have AP)
      * NOTE: This assumes that all changes have been made and that copying item advantage is the last thing that's
      *       done for an effective item.
@@ -5656,14 +5656,33 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     copyItemAdvantages(itemFrom, advantagesToIgnore) {
         this.system._active.originalActivePoints = this.system._active.originalActivePoints ?? this._activePoints;
 
-        const advantagesCopy = itemFrom.advantages
+        const advantagesToCopy = itemFrom.advantages
             .filter((advantage) => !advantagesToIgnore.includes(advantage.XMLID))
             .map((advantage) => advantage.clone());
 
-        this.system.MODIFIER = this.system.MODIFIER.concat(advantagesCopy);
+        this.system.MODIFIER = this.system.MODIFIER.concat(advantagesToCopy);
 
         // Stash a copy of what we've added in after the fact
-        this.system._active.MODIFIER = (this.system._active.MODIFIER || []).concat(advantagesCopy);
+        this.system._active.MODIFIER = (this.system._active.MODIFIER || []).concat(advantagesToCopy);
+    }
+
+    /**
+     * Add modifiers (advantages and limitations) from itemFrom to this item
+     * FIXME: this does not handle the merging of any modifiers that may already exist (e.g. AP being added when already have AP)
+     * NOTE: This assumes that all changes have been made and that copying item modifiers is the last thing that's
+     *       done for an effective item.
+     *
+     * @param {HeroSystem6eItem} itemTo
+     */
+    copyItemModifiers(itemFrom, modifiersToIgnore) {
+        const modifiersToCopy = itemFrom.modifiers
+            .filter((modifier) => !modifiersToIgnore.includes(modifier.XMLID))
+            .map((modifier) => modifier.clone());
+
+        this.system.MODIFIER = this.system.MODIFIER.concat(modifiersToCopy);
+
+        // Stash a copy of what we've added in after the fact
+        this.system._active.MODIFIER = (this.system._active.MODIFIER || []).concat(modifiersToCopy);
     }
 
     // Change the actual levels
@@ -7578,8 +7597,10 @@ function buildHthAttackFromKa(hkaItem) {
         },
     );
 
-    // Make sure we have all the same advantages
-    haItem.copyItemAdvantages(hkaItem, []);
+    // Make sure we have all the same advantages and limitations. There may be a case, but nothing spotted in the rules,
+    // that it doesn't make sense for a number of advantages and/or limitations to not be brought over. In that case the
+    // GM will have to get the player to use something like the generic dice roller.
+    haItem.copyItemModifiers(hkaItem, []);
 
     // Make sure we have the same DC
     haItem.changePowerLevelByDc(hkaItem.dcRaw);
