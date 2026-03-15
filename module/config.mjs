@@ -10089,6 +10089,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // MINDLINK related
+            key: "ANYDIMENSION",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ANYDIMENSION" ID="1773553086147" BASECOST="10.0" LEVELS="0" ALIAS="Any dimension" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // MINDLINK related
+            key: "ANYDISTANCE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="ANYDISTANCE" ID="1773553099980" BASECOST="5.0" LEVELS="0" ALIAS="Any distance" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // LINKED related
             key: "ANYPHASE",
             behaviors: ["adder"],
@@ -13774,6 +13796,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="NOFRINGE" ID="1762134791402" BASECOST="10.0" LEVELS="0" ALIAS="No Fringe" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // MINDLINK related
+            key: "NOLOSNEEDED",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="NOLOSNEEDED" ID="1773553079669" BASECOST="10.0" LEVELS="0" ALIAS="No LOS Needed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
