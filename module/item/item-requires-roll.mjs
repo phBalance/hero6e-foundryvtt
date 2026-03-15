@@ -3,6 +3,228 @@ import { HeroRoller } from "../utility/dice.mjs";
 import { calculateDicePartsForItem } from "../utility/damage.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
+const backgroundSkillKeys = Object.freeze({
+    // matches RaR OPTION to XMLID
+    KS: "KNOWLEDGE_SKILL",
+    SS: "SCIENCE_SKILL",
+    PS: "PROFESSIONAL_SKILL",
+});
+
+const filterSkillRollItems = (item) => {
+    if (!item.isRollable()) {
+        return false;
+    }
+
+    return (
+        item.baseInfo?.type?.includes("skill") && // is a skill
+        !item.baseInfo?.type?.includes("enhancer") && // is not an enhancer (scholar, scientist, etc.)
+        item.system.XMLID !== "SKILL_LEVELS" && // is not a bonus to skills
+        item.system.XMLID !== "COMBAT_LEVELS" // is not a bonus to combat
+    );
+};
+
+const findRollValue = (rar) => {
+    const value = parseInt(rar.OPTION, 10);
+    return value;
+};
+
+const matchRequiredSkillRoll = (o, rar, rarOptionIsBackground) => {
+    const rarAliasDisplay = rar.ALIAS?.toUpperCase() || ""; // From the "Display" field. ex: "Requires A Magic Roll"
+    // OPTION_ALIAS is different in 5e: it is entered in the Type field
+    const rarOptionsAlias = rar.OPTION_ALIAS?.toUpperCase() || ""; // From the "Options" field. ex: "Magic Roll, -1 per 5 Active Points modifier"
+    const rarComments = rar.COMMENTS?.toUpperCase() || ""; // From Comments, begins blank, common use would be to enter just the skill name
+    const rarRollAlias = rar.ROLLALIAS?.toUpperCase() || ""; // From the 5e "Roll" field. ex: "STR", "Acrobatics"
+
+    const rar_AliasDisplay = rarAliasDisplay.replaceAll(" ", "_");
+    const rar_OptionsAlias = rarOptionsAlias.replaceAll(" ", "_");
+    const rar_Comments = rarComments.replaceAll(" ", "_");
+    const rar_RollAlias = rarRollAlias.replaceAll(" ", "_");
+
+    // TODO
+    // it might be worthwhile to also try with underscores in the XMLID '_' replaced with spaces ' ' to match better
+    // or vice versa, put underscores in the stable RaR strings and search with underscores present
+    // this is IN ADDITION to what's here now; dont replace this
+    const xmlIdMatch =
+        rarAliasDisplay.includes(o.system.XMLID) ||
+        rarOptionsAlias.includes(o.system.XMLID) ||
+        rarRollAlias.includes(o.system.XMLID) ||
+        rarComments.includes(o.system.XMLID);
+    if (xmlIdMatch) {
+        return true;
+    }
+
+    const nameUpper = o.name?.toUpperCase() ?? "";
+    const nameMatch =
+        nameUpper &&
+        rarOptionIsBackground !== nameUpper &&
+        (rarAliasDisplay.includes(nameUpper) ||
+            rarOptionsAlias.includes(nameUpper) ||
+            rarRollAlias.includes(nameUpper) ||
+            rarComments.includes(nameUpper));
+    if (nameMatch) {
+        return true;
+    }
+
+    const aliasUpper = o.system.ALIAS?.toUpperCase() ?? "";
+    const aliasMatch =
+        aliasUpper &&
+        rarOptionIsBackground !== aliasUpper &&
+        (rarAliasDisplay.includes(aliasUpper) ||
+            rarOptionsAlias.includes(aliasUpper) ||
+            rarRollAlias.includes(aliasUpper) ||
+            rarComments.includes(aliasUpper));
+    if (aliasMatch) {
+        return true;
+    }
+
+    // Some skills have an underscore in them; the user might not have the name matched exactly
+    // so if there is an underscore (as in SLEIGHT_OF_HAND), we check for that here
+    const xml_Id_Match =
+        /_/.test(o.system.XMLID) &&
+        (rar_AliasDisplay.includes(o.system.XMLID) ||
+            rar_OptionsAlias.includes(o.system.XMLID) ||
+            rar_RollAlias.includes(o.system.XMLID) ||
+            rar_Comments.includes(o.system.XMLID));
+    if (xml_Id_Match) {
+        return true;
+    }
+
+    // TODO check 'Text'?
+    // TODO check 'Type'?
+    return false;
+};
+
+const isBackgroundSkillType = (rar, rarOptionIsBackground) => {
+    return rar.OPTIONID === "BASICRSR" || Object.keys(backgroundSkillKeys).includes(rarOptionIsBackground);
+};
+
+const matchBackgroundSkillType = (o, rar, rarOptionIsBackground) => {
+    return rar.OPTIONID === "BASICRSR" || backgroundSkillKeys[rarOptionIsBackground] === o.system.XMLID;
+};
+
+const matchBackgroundSkillRoll = (o, rar, item, rarOptionIsBackground) => {
+    if (!matchBackgroundSkillType(o, rar, rarOptionIsBackground)) {
+        return false;
+    }
+
+    const rarAliasDisplay = rar.ALIAS?.toUpperCase() || "";
+    const rarOptionsAlias = rar.OPTION_ALIAS?.toUpperCase() || "";
+    const rarComments = rar.COMMENTS?.toUpperCase() || "";
+    const inputUpper = o.system.INPUT?.toUpperCase() ?? "";
+    const inputMatch =
+        inputUpper &&
+        rarOptionIsBackground !== inputUpper &&
+        (rarAliasDisplay.includes(inputUpper) ||
+            rarOptionsAlias.includes(inputUpper) ||
+            rarComments.includes(inputUpper));
+    if (inputMatch) {
+        return true;
+    }
+
+    return matchRequiredSkillRoll(o, rar, rarOptionIsBackground);
+};
+
+const findSkillRoll = (rar, item, rarOptionIsBackground) => {
+    if (rar.OPTIONID === "PER" || rar.ROLLALIAS === "PER") {
+        return item.actor.items.find((o) => o.system.XMLID === "PERCEPTION");
+    } else if (rar.OPTIONID.includes("LUCK")) {
+        return item.actor.items.find((o) => o.system.XMLID === "LUCK");
+    } else if (isBackgroundSkillType(rar, rarOptionIsBackground)) {
+        return item.actor.items.find(
+            (o) => filterSkillRollItems(o) && matchBackgroundSkillRoll(o, rar, item, rarOptionIsBackground),
+        );
+    }
+
+    return item.actor.items.find(
+        (o) => filterSkillRollItems(o) && matchRequiredSkillRoll(o, rar, rarOptionIsBackground),
+    );
+};
+
+const findRollDivisor = (rar) => {
+    // item.activePoints is a number
+    if (rar.OPTIONID.includes("1PER5")) {
+        return 5;
+    } else if (rar.OPTIONID.includes("1PER20")) {
+        return 20;
+    }
+
+    const divisorOption = rar.ADDER.find((o) => {
+        return o.XMLID === "MINUS1PER20" || o.XMLID === "MINUS1PER5";
+    });
+
+    if (divisorOption?.XMLID === "MINUS1PER20") {
+        return 20;
+    } else if (divisorOption?.XMLID === "MINUS1PER5") {
+        return 5;
+    }
+    // activation rolls have no minuses due to active points
+    else if (!isNaN(parseInt(rar.OPTION, 10))) {
+        return NaN;
+    }
+
+    return 10;
+};
+
+const findRollMinus = (rar, item) => {
+    const divisor = findRollDivisor(rar);
+    if (isNaN(divisor)) {
+        return 0;
+    }
+
+    return Math.floor(parseInt(item.activePoints) / divisor);
+};
+
+const getRequiredCharacteristicKey = (rar, item) => {
+    // PH: FIXME: k is a terrible parameter name
+    const characteristicKeys = Object.keys(item.actor.system.characteristics).filter(
+        (k) => item.actor.system.characteristics[k].roll != null,
+    );
+    const rarDisplayMaybeHasCharKey = rar.ALIAS?.toLowerCase() || "";
+    const rarOptionMaybeHasCharKey = rar.OPTION_ALIAS?.toLowerCase() || "";
+    const rarCommentMaybeHasCharKey = rar.COMMENTS?.toLowerCase() || ""; // pre or presence, STR or Strength
+    const rarRollAliasMaybeHasCharKey = rar.ROLLALIAS?.toLowerCase() || "";
+    // The \b ensures the match is at the start of a word
+    const characteristicKeyRegex = characteristicKeys.reduce((accumulator, currentKey) => {
+        // For each key, create the RegExp object
+        const regex = new RegExp(`\\b${currentKey}`, "i");
+        accumulator[currentKey] = regex;
+        return accumulator;
+    }, {});
+
+    // exact match in comments
+    if (characteristicKeys.includes(rarCommentMaybeHasCharKey)) {
+        // finds pre, not presence
+        return rarCommentMaybeHasCharKey;
+    }
+
+    // comment would be Strength, Intelligence, Presence etc.
+    const matchedKeyInComment = characteristicKeys.find((key) =>
+        characteristicKeyRegex[key].test(rarCommentMaybeHasCharKey),
+    );
+    if (matchedKeyInComment) {
+        return matchedKeyInComment;
+    }
+
+    const matchedKeyInName = characteristicKeys.find((key) =>
+        characteristicKeyRegex[key].test(rarDisplayMaybeHasCharKey),
+    );
+    if (matchedKeyInName) {
+        return matchedKeyInName;
+    }
+
+    const matchedKeyInRollAlias = characteristicKeys.find((key) =>
+        characteristicKeyRegex[key].test(rarRollAliasMaybeHasCharKey),
+    );
+    if (matchedKeyInRollAlias) {
+        return matchedKeyInRollAlias;
+    }
+
+    const matchedKeyInOption = characteristicKeys.find((key) =>
+        characteristicKeyRegex[key].test(rarOptionMaybeHasCharKey),
+    );
+    return matchedKeyInOption ?? "";
+};
+
 /**
  *
  * @param {HeroSystem6eItem} item
@@ -55,223 +277,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
     // PH: FIXME: This doesn't look right as it can and should be modified in the HDC. Also variable name indicates boolean and it's not
     const rarOptionIsBackground = rar.OPTION.substring(0, 2).toUpperCase();
 
-    const filterSkillRollItems = (item) => {
-        if (!item.isRollable()) {
-            return false;
-        }
-
-        return (
-            item.baseInfo?.type?.includes("skill") && // is a skill
-            !item.baseInfo?.type?.includes("enhancer") && // is not an enhancer (scholar, scientist, etc.)
-            item.system.XMLID !== "SKILL_LEVELS" && // is not a bonus to skills
-            item.system.XMLID !== "COMBAT_LEVELS" // is not a bonus to combat
-        );
-    };
-
-    // NaN if there is no number at the start of the OPTION (14 11 8 etc) for standard activation rolls
-    // PH: FIXME: rar is a terrible parameter value. Should we been looking at OPTION?
-    const findRollValue = (rar) => {
-        const value = parseInt(rar.OPTION, 10);
-        return value;
-    };
-
-    const findSkillRoll = (rar) => {
-        const rarAliasDisplay = rar.ALIAS?.toUpperCase() || ""; // From the "Display" field. ex: "Requires A Magic Roll"
-        // OPTION_ALIAS is different in 5e: it is entered in the Type field
-        const rarOptionsAlias = rar.OPTION_ALIAS?.toUpperCase() || ""; // From the "Options" field. ex: "Magic Roll, -1 per 5 Active Points modifier"
-        const rarComments = rar.COMMENTS?.toUpperCase() || ""; // From Comments, begins blank, common use would be to enter just the skill name
-        const rarRollAlias = rar.ROLLALIAS?.toUpperCase() || ""; // From the 5e "Roll" field. ex: "STR", "Acrobatics"
-
-        const rar_AliasDisplay = rarAliasDisplay.replaceAll(" ", "_");
-        const rar_OptionsAlias = rarOptionsAlias.replaceAll(" ", "_");
-        const rar_Comments = rarComments.replaceAll(" ", "_");
-        const rar_RollAlias = rarRollAlias.replaceAll(" ", "_");
-
-        // PH: FIXME: o is a terrible parameter value.
-        const matchRequiredSkillRoll = (o) => {
-            // TODO
-            // it might be worthwhile to also try with underscores in the XMLID '_' replaced with spaces ' ' to match better
-            // or vice versa, put underscores in the stable RaR strings and search with underscores present
-            // this is IN ADDITION to what's here now; dont replace this
-            const xmlIdMatch =
-                rarAliasDisplay.includes(o.system.XMLID) ||
-                rarOptionsAlias.includes(o.system.XMLID) ||
-                rarRollAlias.includes(o.system.XMLID) ||
-                rarComments.includes(o.system.XMLID);
-            if (xmlIdMatch) {
-                return true;
-            }
-
-            const nameUpper = o.name?.toUpperCase() ?? "";
-            const nameMatch =
-                nameUpper &&
-                rarOptionIsBackground !== nameUpper &&
-                (rarAliasDisplay.includes(nameUpper) ||
-                    rarOptionsAlias.includes(nameUpper) ||
-                    rarRollAlias.includes(nameUpper) ||
-                    rarComments.includes(nameUpper));
-            if (nameMatch) {
-                return true;
-            }
-
-            const aliasUpper = o.system.ALIAS?.toUpperCase() ?? "";
-            const aliasMatch =
-                aliasUpper &&
-                rarOptionIsBackground !== aliasUpper &&
-                (rarAliasDisplay.includes(aliasUpper) ||
-                    rarOptionsAlias.includes(aliasUpper) ||
-                    rarRollAlias.includes(aliasUpper) ||
-                    rarComments.includes(aliasUpper));
-            if (aliasMatch) {
-                return true;
-            }
-
-            // Some skills have an underscore in them; the user might not have the name matched exactly
-            // so if there is an underscore (as in SLEIGHT_OF_HAND), we check for that here
-            const xml_Id_Match =
-                /_/.test(o.system.XMLID) &&
-                (rar_AliasDisplay.includes(o.system.XMLID) ||
-                    rar_OptionsAlias.includes(o.system.XMLID) ||
-                    rar_RollAlias.includes(o.system.XMLID) ||
-                    rar_Comments.includes(o.system.XMLID));
-            if (xml_Id_Match) {
-                return true;
-            }
-
-            // TODO check 'Text'?
-            // TODO check 'Type'?
-            return false;
-        };
-
-        const backgroundSkillKeys = {
-            // matches RaR OPTION to XMLID
-            KS: "KNOWLEDGE_SKILL",
-            SS: "SCIENCE_SKILL",
-            PS: "PROFESSIONAL_SKILL",
-        };
-
-        // PH: FIXME: Do we really want a closure over rar here?
-        const isBackgroundSkillType = () => {
-            return rar.OPTIONID === "BASICRSR" || Object.keys(backgroundSkillKeys).includes(rarOptionIsBackground);
-        };
-
-        // PH: FIXME: Do we really want a closure over rar here?
-        const matchBackgroundSkillType = (o) => {
-            return rar.OPTIONID === "BASICRSR" || backgroundSkillKeys[rarOptionIsBackground] === o.system.XMLID;
-        };
-
-        const matchBackgroundSkillRoll = (o) => {
-            if (!matchBackgroundSkillType(o)) {
-                return false;
-            }
-            const inputUpper = o.system.INPUT?.toUpperCase() ?? "";
-            const inputMatch =
-                inputUpper &&
-                rarOptionIsBackground !== inputUpper &&
-                (rarAliasDisplay.includes(inputUpper) ||
-                    rarOptionsAlias.includes(inputUpper) ||
-                    rarComments.includes(inputUpper));
-            if (inputMatch) {
-                return true;
-            }
-            return matchRequiredSkillRoll(o);
-        };
-
-        if (rar.OPTIONID === "PER" || rar.ROLLALIAS === "PER") {
-            return item.actor.items.find((o) => o.system.XMLID === "PERCEPTION");
-        } else if (rar.OPTIONID.includes("LUCK")) {
-            return item.actor.items.find((o) => o.system.XMLID === "LUCK");
-        } else if (isBackgroundSkillType()) {
-            return item.actor.items.find((o) => filterSkillRollItems(o) && matchBackgroundSkillRoll(o));
-        }
-        return item.actor.items.find((o) => filterSkillRollItems(o) && matchRequiredSkillRoll(o));
-    };
-
-    const findRollDivisor = (rar) => {
-        // item.activePoints is a number
-        if (rar.OPTIONID.includes("1PER5")) {
-            return 5;
-        } else if (rar.OPTIONID.includes("1PER20")) {
-            return 20;
-        }
-
-        const divisorOption = rar.ADDER.find((o) => {
-            return o.XMLID === "MINUS1PER20" || o.XMLID === "MINUS1PER5";
-        });
-
-        if (divisorOption?.XMLID === "MINUS1PER20") {
-            return 20;
-        } else if (divisorOption?.XMLID === "MINUS1PER5") {
-            return 5;
-        }
-        // activation rolls have no minuses due to active points
-        else if (!isNaN(parseInt(rar.OPTION, 10))) {
-            return NaN;
-        }
-
-        return 10;
-    };
-
-    const findRollMinus = (rar) => {
-        const divisor = findRollDivisor(rar);
-        if (isNaN(divisor)) {
-            return 0;
-        }
-        return Math.floor(parseInt(item.activePoints) / divisor);
-    };
-
-    // PH: FIXME: k is a terrible parameter name
-    const characteristicKeys = Object.keys(item.actor.system.characteristics).filter(
-        (k) => item.actor.system.characteristics[k].roll != null,
-    );
-    const rarDisplayMaybeHasCharKey = rar.ALIAS?.toLowerCase() || "";
-    const rarOptionMaybeHasCharKey = rar.OPTION_ALIAS?.toLowerCase() || "";
-    const rarCommentMaybeHasCharKey = rar.COMMENTS?.toLowerCase() || ""; // pre or presence, STR or Strength
-    const rarRollAliasMaybeHasCharKey = rar.ROLLALIAS?.toLowerCase() || "";
-    // The \b ensures the match is at the start of a word
-    const characteristicKeyRegex = characteristicKeys.reduce((accumulator, currentKey) => {
-        // For each key, create the RegExp object
-        const regex = new RegExp(`\\b${currentKey}`, "i");
-        accumulator[currentKey] = regex;
-        return accumulator;
-    }, {});
-
-    const getRequiredCharacteristicKey = () => {
-        // exact match in comments
-        if (characteristicKeys.includes(rarCommentMaybeHasCharKey)) {
-            // finds pre, not presence
-            return rarCommentMaybeHasCharKey;
-        }
-
-        // comment would be Strength, Intelligence, Presence etc.
-        const matchedKeyInComment = characteristicKeys.find((key) =>
-            characteristicKeyRegex[key].test(rarCommentMaybeHasCharKey),
-        );
-        if (matchedKeyInComment) {
-            return matchedKeyInComment;
-        }
-
-        const matchedKeyInName = characteristicKeys.find((key) =>
-            characteristicKeyRegex[key].test(rarDisplayMaybeHasCharKey),
-        );
-        if (matchedKeyInName) {
-            return matchedKeyInName;
-        }
-
-        const matchedKeyInRollAlias = characteristicKeys.find((key) =>
-            characteristicKeyRegex[key].test(rarRollAliasMaybeHasCharKey),
-        );
-        if (matchedKeyInRollAlias) {
-            return matchedKeyInRollAlias;
-        }
-
-        const matchedKeyInOption = characteristicKeys.find((key) =>
-            characteristicKeyRegex[key].test(rarOptionMaybeHasCharKey),
-        );
-        return matchedKeyInOption ?? "";
-    };
-
-    const charKey = getRequiredCharacteristicKey();
+    const charKey = getRequiredCharacteristicKey(rar, item);
 
     // if the RaR is an Activation roll, then we have the value we need
     let value = findRollValue(rar);
@@ -279,7 +285,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
     let char = undefined;
     if (isNaN(value)) {
         if (rar.OPTIONID !== "CHAR") {
-            skill = findSkillRoll(rar);
+            skill = findSkillRoll(rar, item, rarOptionIsBackground);
         }
         if (!skill) {
             char = item.actor.system.characteristics[charKey];
@@ -376,7 +382,7 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
             // Try to continue
             value = 11;
         }
-        const minus = findRollMinus(rar);
+        const minus = findRollMinus(rar, item);
         value -= minus;
         const successValue = parseInt(value);
 
