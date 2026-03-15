@@ -376,6 +376,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     async _preparePartContext(partId, context) {
         globalThis.sheet = this;
+        //globalThis.token = this.token;
         context = await super._preparePartContext(partId, context);
         context.tab = context.tabs[partId];
         context.actor ??= this.actor;

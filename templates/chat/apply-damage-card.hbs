@@ -86,6 +86,17 @@
             {{ knockbackMessage }}
           </button>
         </div>
+
+        {{!-- BreakFall--}}
+        {{#if canBreakFall}}
+          <button class="roll-breakfall" 
+            data-actor-uuid="{{actor.uuid}}" 
+            data-target-token-id="{{targetTokenDocument.id}}"
+            data-knockback-Result-Total="{{knockbackResultTotal}}"
+            title="You can use BREAKFALL to land on feet after Knockback and avoid being prone.">
+            Roll Breakfall
+          </button>
+        {{/if}}
       {{else}}
         <div class="description-tiny">{{ knockbackMessage }}</div>
       {{/if}}
