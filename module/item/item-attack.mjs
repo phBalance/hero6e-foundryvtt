@@ -51,6 +51,7 @@ export async function chatListeners(_html) {
     html.on("click", "button.generic-roller-apply-damage", this._onGenericRollerApplyDamage.bind(this));
     html.on("click", "button.rollAoe-damage", this._onRollAoeDamage.bind(this));
     html.on("click", "button.roll-knockback", this._onRollKnockback.bind(this));
+    html.on("click", "button.roll-breakfall", this._onRollBreakfall.bind(this));
     html.on("click", "button.roll-mindscan", this._onRollMindScan.bind(this));
     html.on("click", "button.roll-mindscan-ego", this._onRollMindScanEffectRoll.bind(this));
     html.on("click", "div.adjustment-summary", this._onAdjustmentToolipExpandCollapse.bind(this));
@@ -2181,6 +2182,129 @@ export async function _onRollDamage(event) {
     return;
 }
 
+export async function _onRollBreakfall(event) {
+    const button = event.currentTarget;
+    button.blur(); // The button remains highlighted for some reason; kludge to fix.
+
+    const token = tokenEducatedGuess({
+        tokenId: button.dataset.targetTokenId,
+        actor: fromUuidSync(button.dataset.actorUuid),
+    });
+
+    const actor = token.actor ?? fromUuidSync(button.dataset.actorUuid);
+    if (!actor) {
+        throw new Error("Actor details are no longer available.");
+    }
+
+    const knockbackResultTotal = button.dataset.knockbackResultTotal;
+    if (!knockbackResultTotal) {
+        throw new Error("Knockback details are not available.");
+    }
+
+    const breakFallItem = actor?.items.find((o) => o.system.XMLID === "BREAKFALL" && o.isActive);
+    if (!breakFallItem) {
+        throw new Error("Breakfall item not found.");
+    }
+
+    // Indicate button has already been used
+    const messageId = event.target.closest(`li[data-message-id]`).dataset.messageId;
+    const message = ChatMessage.get(messageId);
+    if (message) {
+        const parsedMessageContent = document.createElement("div");
+        parsedMessageContent.innerHTML = message.content;
+        const button = parsedMessageContent.querySelector(`button.roll-breakfall`);
+        if (button) {
+            button.style.color = "darkgray";
+            await message.update({ content: parsedMessageContent.innerHTML });
+        }
+    }
+
+    const speaker = ChatMessage.getSpeaker({ actor, token: tokenEducatedGuess({ actor }) });
+
+    // Make sure there are enough resources and consume them
+    const {
+        error: resourceError,
+        warning: resourceWarning,
+        resourcesUsedDescription,
+        resourcesUsedDescriptionRenderedRoll,
+    } = await userInteractiveVerifyOptionallyPromptThenSpendResources(breakFallItem, {
+        noResourceUse: overrideCanAct,
+    });
+    if (resourceError || resourceWarning) {
+        const chatData = {
+            author: game.user._id,
+            content: `${breakFallItem.name} ${resourceError || resourceWarning}`,
+            speaker,
+        };
+
+        ChatMessage.create(chatData);
+    } else {
+        // We have confirmed we have enough reources and spent them, now we need to roll the breakfall
+        const skillRoller = new HeroRoller().addDice(3);
+        let successValue = 0;
+        const tags = foundry.utils.deepClone(breakFallItem.system.tags);
+        for (const tag of tags) {
+            successValue = successValue + tag.value;
+        }
+        const kbPenalty = -Math.floor(knockbackResultTotal / 2);
+        tags.push({
+            value: kbPenalty,
+            name: "KB Penalty",
+            title: `KB Penalty -1 per ${actor.is5e ? `2"` : `4m`} of KB`,
+        });
+        successValue += kbPenalty;
+        await skillRoller.makeSuccessRoll(true, successValue).roll();
+
+        const succeeded = skillRoller.getSuccess();
+        const autoSuccess = skillRoller.getAutoSuccess();
+        const total = skillRoller.getSuccessTotal();
+        const margin = successValue - total;
+
+        const flavor = `${breakFallItem.name.toUpperCase()}
+                        ${breakFallItem.system.INPUT && !breakFallItem.name.match(new RegExp(breakFallItem.system.INPUT, "i")) ? `: ${breakFallItem.system.INPUT}` : ``}
+                        (${successValue}-) roll
+                        <b class="dice-${succeeded ? "succeeded" : "failed"}">
+                        ${succeeded ? "succeeded" : "failed"} by ${
+                            autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`
+                        }</b>. ${succeeded ? "Landed on feet after Knockback (not possible if Knocked Back into something). No longer prone." : "Failed to land on feet, remain prone."}`;
+        const rollHtml = await skillRoller.render(flavor);
+
+        // render card
+        const cardData = {
+            tags: tags.map((tag) => {
+                return { ...tag, value: tag.value.signedStringHero() };
+            }),
+            rolls: skillRoller.rawRolls(),
+            renderedRoll: rollHtml,
+            resourcesUsedDescription: resourcesUsedDescription
+                ? `Spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`
+                : "",
+            user: game.user._id,
+            speaker: speaker,
+        };
+        const template = `systems/${HEROSYS.module}/templates/chat/skill-success-roll-card.hbs`;
+        const cardHtml = await foundryVttRenderTemplate(template, cardData);
+
+        const chatData = {
+            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            rolls: skillRoller.rawRolls(),
+            author: game.user._id,
+            content: cardHtml,
+            speaker: speaker,
+        };
+
+        ChatMessage.create(chatData);
+
+        // Need to be bit careful to only remove prone.
+        // Don't apply prone on BREAKFALL failure as the prone status may have manually been changed.
+        if (succeeded) {
+            await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
+                active: false,
+            });
+        }
+    }
+}
+
 export async function _onRollMindScan(event) {
     console.log(event);
     const button = event.currentTarget;
@@ -2972,6 +3096,11 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         knockbackTags: damageDetail.knockbackTags,
         knockbackResultTotal: damageDetail.knockbackResultTotal,
         knockbackResultTotalWithShrinking: damageDetail.knockbackResultTotal + damageDetail.shrinkingKB,
+        canBreakFall:
+            !damageDetail.preKnockBackProneStatus &&
+            (targetToken?.document ?? targetToken).actor.items.find(
+                (o) => o.system.XMLID === "BREAKFALL" && o.isActive,
+            ),
 
         // misc
         tags: defenseTags.filter((o) => !o.options?.knockback),
@@ -3903,6 +4032,7 @@ async function _calcDamage(damageRoller, item, options) {
         knockbackRoller,
         knockbackResultTotal,
         shrinkingKB,
+        preKnockBackProneStatus,
     } = await _calcKnockback(bodyForKbCalculations, item, options, itemData.knockbackMultiplier);
 
     // -------------------------------------------------
@@ -4006,6 +4136,7 @@ async function _calcDamage(damageRoller, item, options) {
     damageDetail.knockbackRoller = knockbackRoller;
     damageDetail.knockbackResultTotal = knockbackResultTotal;
     damageDetail.shrinkingKB = shrinkingKB;
+    damageDetail.preKnockBackProneStatus = preKnockBackProneStatus;
 
     return damageDetail;
 }
@@ -4022,6 +4153,7 @@ async function _calcKnockback(bodyForKbCalculations, item, options, knockbackMul
 
     // Get poossible actor
     const actor = options?.targetToken?.actor;
+    const preKnockBackProneStatus = actor.statuses.has("prone");
 
     // BASEs do not experience KB
     const isBase = actor?.type === "base2";
@@ -4158,7 +4290,6 @@ async function _calcKnockback(bodyForKbCalculations, item, options, knockbackMul
         // SHRINKING
         if (actor) {
             for (const shrinkItem of actor.items.filter((i) => i.system.XMLID === "SHRINKING" && i.isActive)) {
-                console.log(shrinkItem, shrinkItem.baseInfo);
                 shrinkingKB += (parseInt(shrinkItem.system.LEVELS) || 0) * 3;
             }
         }
@@ -4167,14 +4298,14 @@ async function _calcKnockback(bodyForKbCalculations, item, options, knockbackMul
             knockbackMessage = "No Knockback";
         } else if (knockbackResultTotal + shrinkingKB == 0) {
             knockbackMessage = "Inflicts Knockdown";
-            await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
-                active: true,
-            });
         } else {
             // If the result is positive, the target is Knocked Back 1" or 2m times the result
             knockbackMessage = `Knocked Back ${
-                (knockbackResultTotal + shrinkingKB) * (item.actor?.system.is5e || item.system.is5e ? 1 : 2)
-            }${getSystemDisplayUnits(item.actor?.is5e || item.system.is5e)}`;
+                (knockbackResultTotal + shrinkingKB) * (actor?.is5e ? 1 : 2)
+            }${getSystemDisplayUnits(actor?.is5e)}`;
+        }
+
+        if (knockbackResultTotal + shrinkingKB >= 0) {
             await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
                 active: true,
             });
@@ -4189,6 +4320,7 @@ async function _calcKnockback(bodyForKbCalculations, item, options, knockbackMul
         knockbackRoller,
         knockbackResultTotal,
         shrinkingKB,
+        preKnockBackProneStatus,
     };
 }
 

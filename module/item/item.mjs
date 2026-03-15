@@ -4748,6 +4748,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return "-";
         }
 
+        if (this.system.XMLID === "ENTANGLE") {
+            return "-";
+        }
+
         if (!squelch(`${this.id}attackDefenseVs`)) {
             console.warn(`Unable to determine defense for ${this.detailedName()}`);
         }
