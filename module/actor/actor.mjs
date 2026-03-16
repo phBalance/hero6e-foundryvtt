@@ -2447,16 +2447,23 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 }
 
                 const targetType = this._templateType
-                    ?.match(/(ai|automaton|base|computer|heroic|normal|superheroic|vehicle|standardsuper)/i)?.[1]
+                    .replace("builtIn.", "")
+                    .replace("6E", "")
+                    .replace(".hdt", "")
                     .toLowerCase()
                     .replace("base", "base2")
                     .replace("normal", "pc")
                     .replace("superheroic", "pc")
                     .replace("heroic", "pc")
-                    .replace("standardsuper", "pc"); // super old HDC
+                    .replace("standardsuper", "pc") // super old HDC
+                    .replace("main", "pc"); // custom template
 
                 if (targetType && this.type.replace("npc", "pc") !== targetType) {
-                    await this.update({ type: targetType, [`==system`]: this.system });
+                    if (Object.keys(game.system.template.Actor).includes(targetType)) {
+                        await this.update({ type: targetType, [`==system`]: this.system });
+                    } else {
+                        ui.notifications.error(`${targetType} is not a valid actor type`);
+                    }
                 }
 
                 // Delete maneuvers (or any other item) when changing is5e
@@ -3472,103 +3479,98 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 }
             }
 
-            // Some custom templates will cause unhandled crashes.
-            // Seems to only be an issue with HDC files exported from https://app.d6games.io/ (Zora Amari.HDC)
-            if (jsonChild.ISLIMITATION || jsonChild.SHOWOPTIONONLY || jsonChild.xmlTag === "OPTION") {
-                ui.notifications.error(`${jsonChild.XMLID} appears to be from an unsupported template.`);
-                continue;
-            }
-
             if (child.children.length > 0) {
                 this._xmlToJsonNode(jsonChild, child.children);
             }
 
-            // Some super old items use RANGED, but is now called RANGE
-            if (jsonChild.XMLID === "RANGED" && jsonChild.xmlTag === "ADDER") {
-                jsonChild.XMLID = "RANGE";
-                jsonChild.errors ??= [];
-                jsonChild.errors.push("RANGE renamed to RANGED");
+            let isPartOfTemplate = false;
+            let ptr = child;
+            while (ptr) {
+                if (ptr.tagName === "TEMPLATE") {
+                    isPartOfTemplate = true;
+                    break;
+                }
+                ptr = ptr.parentNode;
             }
 
-            // Items should have an XMLID
-            // Some super old items are missing XMLID, which we will try to fix
-            // A bit more generic
-            if (
-                !jsonChild.XMLID &&
-                ["CHARACTERISTICS", ...HeroSystem6eItem.ItemXmlTags].includes(child.parentNode.tagName)
-            ) {
-                const powerInfo = getPowerInfo({
-                    xmlid: jsonChild.xmlTag,
-                    xmlTag: jsonChild.xmlTag,
-                    is5e: true,
-                });
-                if (powerInfo) {
-                    if (powerInfo.key != jsonChild.xmlTag) {
-                        console.error(`powerInfo.key != xmlTag`, jsonChild);
+            if (!isPartOfTemplate) {
+                // Some super old items use RANGED, but is now called RANGE
+                if (jsonChild.XMLID === "RANGED" && jsonChild.xmlTag === "ADDER") {
+                    jsonChild.XMLID = "RANGE";
+                    jsonChild.errors ??= [];
+                    jsonChild.errors.push("RANGE renamed to RANGED");
+                }
+
+                // Items should have an XMLID
+                // Some super old items are missing XMLID, which we will try to fix
+                // A bit more generic
+                if (
+                    !jsonChild.XMLID &&
+                    ["CHARACTERISTICS", ...HeroSystem6eItem.ItemXmlTags].includes(child.parentNode.tagName)
+                ) {
+                    const powerInfo = getPowerInfo({
+                        xmlid: jsonChild.xmlTag,
+                        xmlTag: jsonChild.xmlTag,
+                        is5e: true,
+                    });
+                    if (powerInfo) {
+                        if (powerInfo.key != jsonChild.xmlTag) {
+                            console.error(`powerInfo.key != xmlTag`, jsonChild);
+                        }
+                        jsonChild.XMLID = powerInfo.key;
+                        jsonChild.errors ??= [];
+                        jsonChild.errors.push("Missing XMLID, using xmlTag reference");
                     }
-                    jsonChild.XMLID = powerInfo.key;
-                    jsonChild.errors ??= [];
-                    jsonChild.errors.push("Missing XMLID, using xmlTag reference");
-                }
-            }
-
-            // Super old HDC missing XMLID for power frameworks & lists (newer has XMLID=GENERIC_OBJECT)
-            if (!jsonChild.XMLID && ["LIST", "VPP", "MULTIPOWER"].includes(jsonChild.xmlTag)) {
-                jsonChild.XMLID = jsonChild.xmlTag;
-            }
-
-            // Some super old items are missing OPTIONID, which we will try to fix
-            if (jsonChild.OPTION && !jsonChild.OPTIONID) {
-                const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag, is5e: true });
-                jsonChild.OPTIONID = powerInfo?.optionIDFix?.(jsonChild) || jsonChild.OPTION.toUpperCase();
-                jsonChild.errors ??= [];
-                jsonChild.errors.push("Missing OPTIONID, using OPTION reference");
-            }
-
-            // Some super old items are missing and ID (like SCIENTIST skill enhancer)
-            if (jsonChild.XMLID && !jsonChild.ID) {
-                const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag, is5e: true });
-                const PARENTID = child.nextElementSibling?.attributes?.PARENTID?.value;
-                if (PARENTID) {
-                    jsonChild.ID = PARENTID;
-                    jsonChild.errors ??= [];
-                    jsonChild.errors.push("Missing ID, using PARENTID from nextElementSibling");
                 }
 
-                if (!jsonChild.BASECOST) {
-                    // We are going to rebase this item as we have no BASECOST or likely any other properties
-                    if (!powerInfo?.xml) {
-                        ui.notifications.error(
-                            `Unable to rebase ${jsonChild?.XMLID} because powerInfo is not available.`,
-                        );
-                        continue;
-                    } else {
-                        try {
-                            jsonChild.errors ??= [];
-                            const parser = new DOMParser();
-                            const rebase = parser.parseFromString(powerInfo.xml.trim(), "text/xml");
-                            for (const attribute of rebase.children[0].attributes) {
-                                if (!jsonChild[attribute.name]) {
-                                    jsonChild[attribute.name] ??= attribute.value;
-                                    jsonChild.errors.push(`${attribute.name} from config.mjs:xml`);
+                // Super old HDC missing XMLID for power frameworks & lists (newer has XMLID=GENERIC_OBJECT)
+                if (!jsonChild.XMLID && ["LIST", "VPP", "MULTIPOWER"].includes(jsonChild.xmlTag)) {
+                    jsonChild.XMLID = jsonChild.xmlTag;
+                }
+
+                // Some super old items are missing OPTIONID, which we will try to fix
+                if (jsonChild.OPTION && !jsonChild.OPTIONID) {
+                    const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag, is5e: true });
+                    jsonChild.OPTIONID = powerInfo?.optionIDFix?.(jsonChild) || jsonChild.OPTION.toUpperCase();
+                    jsonChild.errors ??= [];
+                    jsonChild.errors.push("Missing OPTIONID, using OPTION reference");
+                }
+
+                // Some super old items are missing and ID (like SCIENTIST skill enhancer)
+                if (jsonChild.XMLID && !jsonChild.ID) {
+                    const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag, is5e: true });
+                    const PARENTID = child.nextElementSibling?.attributes?.PARENTID?.value;
+                    if (PARENTID) {
+                        jsonChild.ID = PARENTID;
+                        jsonChild.errors ??= [];
+                        jsonChild.errors.push("Missing ID, using PARENTID from nextElementSibling");
+                    }
+
+                    if (!jsonChild.BASECOST) {
+                        // We are going to rebase this item as we have no BASECOST or likely any other properties
+                        if (!powerInfo?.xml) {
+                            ui.notifications.error(
+                                `Unable to rebase ${jsonChild?.XMLID} because powerInfo is not available.`,
+                            );
+                            continue;
+                        } else {
+                            try {
+                                jsonChild.errors ??= [];
+                                const parser = new DOMParser();
+                                const rebase = parser.parseFromString(powerInfo.xml.trim(), "text/xml");
+                                for (const attribute of rebase.children[0].attributes) {
+                                    if (!jsonChild[attribute.name]) {
+                                        jsonChild[attribute.name] ??= attribute.value;
+                                        jsonChild.errors.push(`${attribute.name} from config.mjs:xml`);
+                                    }
                                 }
+                            } catch (e) {
+                                console.error(e);
                             }
-                        } catch (e) {
-                            console.error(e);
                         }
                     }
                 }
             }
-
-            // An attempt to track hierarchy of ADDERS/MODS (not needed with new DataModel)
-            // if (
-            //     !jsonChild.PARENTID &&
-            //     jsonChild.ID &&
-            //     child.parentNode?.getAttribute &&
-            //     child.parentNode?.getAttribute("ID")
-            // ) {
-            //     jsonChild.PARENTID = child.parentNode.getAttribute("ID");
-            // }
 
             if (
                 HeroSystem6eItem.ItemXmlChildTagsUpload.includes(child.tagName) &&
@@ -3849,82 +3851,25 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      * Try to determine the template type
      */
     get _templateType() {
-        let templateType = "";
         // isHeroic
         // Need to be a careful as there are custom templates ('Nekhbet Vulture Child Goddess')
         // that we are unlikely able to decode heroic status.
         // NOTE: Older HD used "Main" as the template type - not sure what it means
         // Stringify the TEMPLATE for our best chance.
-        try {
-            const template = this.system.CHARACTER?.TEMPLATE.name;
-            if (!template) return templateType;
-
-            const stringifiedTemplate = JSON.stringify(template);
-
-            if (stringifiedTemplate?.match(/\.Heroic/i)) {
-                // Have seen "Heroic" and "Heroic6E"
-                templateType = "Heroic";
-            } else if (stringifiedTemplate?.match(/\.Superheroic/i)) {
-                // Have seen "Superheroic" and "Superheroic6E"
-                templateType = "Superheroic";
-            } else if (stringifiedTemplate?.match(/\.Vehicle/i)) {
-                // Have seen "Vehicle" and "Vehicle6E"
-                templateType = "Vehicle";
-            } else if (stringifiedTemplate?.match(/\.Base/i)) {
-                // Have seen "Base" and "Base6E"
-                templateType = "Base";
-            } else if (stringifiedTemplate?.match(/\.Automaton/i)) {
-                // Have seen "Automaton" and "Automaton6E"
-                templateType = "Automaton";
-            } else if (stringifiedTemplate?.match(/\.AI/i)) {
-                // Have seen "AI" and "AI6E"
-                templateType = "AI";
-            } else if (stringifiedTemplate?.match(/\.Computer/i)) {
-                // Have seen "Computer" and "Computer6E"
-                templateType = "Computer";
-            } else if (stringifiedTemplate?.match(/Normal/i)) {
-                // Have seen "Normal" and "CompetentNormal" - no 6e template
-                templateType = "Normal";
-            } else if (stringifiedTemplate?.match(/Super/i)) {
-                // 'builtIn.StandardSuper.hdt'
-                templateType = "Superheroic";
-            } else if (this.system.CHARACTER?.TEMPLATE.name) {
-                templateType = this.system.CHARACTER.TEMPLATE.name;
-            }
-
-            if (templateType === "" && this.type !== "base2") {
-                // && this.flags[game.system.id]?.uploading !== true
-                // Custom Templates
-                // Automations
-                // Barrier
-                if (this.id && this.system.CHARACTER && !window[game.system.id]?.squelch?.templateType) {
-                    console.warn(
-                        `Unknown template type for ${this.name}.`,
-                        this.system.CHARACTER?.TEMPLATE?.name,
-                        this.system.BASIC_CONFIGURATION?.TEMPLATE,
-                    );
-                    window[game.system.id] ??= {
-                        squelch: [],
-                    };
-                    window[game.system.id].squelch.templateType = true;
-                }
-            }
-        } catch (e) {
-            console.error(e);
-        }
-
-        return templateType;
+        return this.system.CHARACTER?.TEMPLATE.name;
     }
 
     get _templateTypeAbreviation() {
+        // Heroic or SuperHeroic
         const templateType = this._templateType;
 
         // There are 2 types that start with A (AI, and Automaton) so distinguish between them
-        if (templateType === "AI") {
-            return "ai";
+        if (templateType.includes("Superheroic")) {
+            return "s";
+        } else if (templateType.includes("heroic")) {
+            return "h";
         }
-
-        return templateType?.charAt(0).toLowerCase() || "?";
+        return "";
     }
 
     get encumbrance() {
