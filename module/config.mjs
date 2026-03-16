@@ -9366,7 +9366,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             duration: HERO.DURATION_TYPES.PERSISTENT, // Enhanced Senses are typically persistent
             costPerLevel: function (item) {
                 // Cost depends on the sense. If it's a sense group then it's 3 cp per 2 levels. For a single sense it's 1 cp per 2 levels.
-                if (item.system.OPTIONID.includes("GROUP")) {
+                if (item.system.OPTIONID?.includes("GROUP")) {
                     return 3 / 2;
                 }
 
