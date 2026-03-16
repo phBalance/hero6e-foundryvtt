@@ -3472,6 +3472,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 }
             }
 
+            // Some custom templates will cause unhandled crashes.
+            // Seems to only be an issue with HDC files exported from https://app.d6games.io/ (Zora Amari.HDC)
+            if (jsonChild.ISLIMITATION || jsonChild.SHOWOPTIONONLY || jsonChild.xmlTag === "OPTION") {
+                ui.notifications.error(`${jsonChild.XMLID} appears to be from an unsupported template.`);
+                continue;
+            }
+
             if (child.children.length > 0) {
                 this._xmlToJsonNode(jsonChild, child.children);
             }
@@ -3521,7 +3528,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             // Some super old items are missing and ID (like SCIENTIST skill enhancer)
             if (jsonChild.XMLID && !jsonChild.ID) {
                 const powerInfo = getPowerInfo({ xmlid: jsonChild.XMLID, xmlTag: jsonChild.xmlTag, is5e: true });
-
                 const PARENTID = child.nextElementSibling?.attributes?.PARENTID?.value;
                 if (PARENTID) {
                     jsonChild.ID = PARENTID;
@@ -3531,8 +3537,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
                 if (!jsonChild.BASECOST) {
                     // We are going to rebase this item as we have no BASECOST or likely any other properties
-                    if (!powerInfo.xml) {
-                        console.warn(`Unable to rebase ${jsonChild.XMLID} because powerInfo.xml is not available.`);
+                    if (!powerInfo?.xml) {
+                        ui.notifications.error(
+                            `Unable to rebase ${jsonChild?.XMLID} because powerInfo is not available.`,
+                        );
+                        continue;
                     } else {
                         try {
                             jsonChild.errors ??= [];
