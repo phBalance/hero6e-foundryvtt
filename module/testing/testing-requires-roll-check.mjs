@@ -1,11 +1,10 @@
 import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
-import { rollRequiresASkillRollCheck } from "../item/item-requires-roll.mjs";
 
 export function registerRequiresRollCheckTests(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.item.requiresCheck",
         (context) => {
-            const { after, assert, before, describe, expect, it } = context;
+            const { after, before, describe, expect, it } = context;
 
             describe("requires roll check", function () {
                 // The default timeout tends to be insufficient with multiple actors being created at the same time.
@@ -145,11 +144,11 @@ export function registerRequiresRollCheckTests(quench) {
 
                     describe("sectional security armor - old item migration", async function () {
                         it("should have a created OPTION property", function () {
-                            assert.equal(sectionalActivationRollModifier.OPTION, "14");
+                            expect(sectionalActivationRollModifier.OPTION).to.equal("14");
                         });
 
                         it("should have a created OPTIONID property", function () {
-                            assert.equal(sectionalActivationRollModifier.OPTIONID, "14");
+                            expect(sectionalActivationRollModifier.OPTIONID).to.equal("14");
                         });
                     });
                 });
