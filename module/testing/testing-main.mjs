@@ -8,6 +8,7 @@ import { registerEverythingLadLass } from "./testing-everything-lad-lass.mjs";
 import { registerFullTests } from "./testing-full.mjs";
 import { registerHeroMathTests } from "./testing-hero-math.mjs";
 import { registerManeuverTests } from "./testing-maneuvers.mjs";
+import { registerRequiresRollCheckTests } from "./testing-requires-roll-check.mjs";
 import { registerUploadTests } from "./testing-upload.mjs";
 import { registerVehicleTests } from "./testing-vehicles.mjs";
 import { registerGlobalSetup, registerGlobalTeardown } from "./quench-helper.mjs";
@@ -40,6 +41,7 @@ Hooks.on("quenchReady", async (quench) => {
     registerHeroMathTests(quench);
     registerMainTests(quench);
     registerManeuverTests(quench);
+    registerRequiresRollCheckTests(quench);
     registerUploadTests(quench);
     registerVehicleTests(quench);
 

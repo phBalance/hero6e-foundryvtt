@@ -1,19 +1,28 @@
-<div class="hero club-weapon-form">
-    <h4>Club Weapon Selection</h4>
+<div class="hero chat-card club-weapon-form">
+    <header class="card-header flexrow">
+        <img src="{{clubIcon}}" title="{{action.system.currentItem.name}}" width="36" height="36" />
+        <h3>Club Weapon Selection</h3>
+    </header>
 
-    <div class="form-group">
-        <label>HKA to club with</label>
-        <select name="clubWeaponId" id="clubWeaponId">
-            {{selectOptions possibleHkaItems selected=clubWeaponId valueAttr="id" labelAttr="label" disabled="disabled"}}
-        </select>
+    <div class="standard-attack-section flexrow">
+        <div class="form-group">
+            <label>Hand-to-Hand Attack to club with</label>
+            <select name="clubWeaponId" id="clubWeaponId">
+                {{selectOptions possibleHkaItems selected=clubWeaponId valueAttr="id" labelAttr="label" disabled="disabled"}}
+            </select>
+        </div>
     </div>
 
-    <button type="submit" name="submit" data-action="submit" {{#unless possibleHkaItems.length}}disabled="true"{{/unless}}>
-        <i class="fas fa-check button-success"></i>
-        Use As Club
-    </button>
-    <button type="button" name="cancel" data-action="cancel">
-        <i class="fas fa-times button-cancel"></i>
-        Cancel Club Weapon Attack
-    </button>
+    <hr/>
+
+    <footer class="sheet-footer flexcol">
+        <button type="submit" name="submit" data-action="submit" {{#unless possibleHkaItems.length}}disabled="true"{{/unless}}>
+            <i class="fas fa-check button-success"></i>
+            Use As Club
+        </button>
+        <button type="button" name="cancel" data-action="cancel">
+            <i class="fas fa-times button-cancel"></i>
+            Cancel Club Weapon Attack
+        </button>
+    </footer>
 </div>
