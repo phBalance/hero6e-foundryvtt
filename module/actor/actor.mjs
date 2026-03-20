@@ -3864,9 +3864,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const templateType = this._templateType;
 
         // There are 2 types that start with A (AI, and Automaton) so distinguish between them
-        if (templateType.includes("Superheroic")) {
+        if (templateType?.includes("Superheroic")) {
             return "s";
-        } else if (templateType.includes("heroic")) {
+        } else if (templateType?.includes("heroic")) {
             return "h";
         }
         return "";
