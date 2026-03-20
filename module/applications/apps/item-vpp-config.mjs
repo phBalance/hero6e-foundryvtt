@@ -39,7 +39,7 @@ export class ItemVppConfig extends HeroApplication {
         super._configureRenderOptions(options);
 
         // Window title
-        options = foundry.utils.mergeObject(options, {
+        foundry.utils.mergeObject(options, {
             window: {
                 title: `VPP SLOT SELECT: ${this.item.name}`,
             },

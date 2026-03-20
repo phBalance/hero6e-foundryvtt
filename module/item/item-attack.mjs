@@ -1014,10 +1014,10 @@ async function doSingleTargetActionToHit(action, options) {
         // Mind scan typically has just 1 target, but could have more. Use same roll for all targets.
         const targetHeroRoller = aoeAlwaysHit || options.mindScanMinds ? attackHeroRoller : attackHeroRoller.clone();
         let toHitRollTotal = 0;
-        let by = 0;
         let autoSuccess = false;
-
         let hit = "Miss";
+        let by;
+
         if (aoeAlwaysHit) {
             hit = "Hit";
             by = "AOE auto";

@@ -120,7 +120,7 @@ export class Attack {
     static parseCvModifiers(OCV, DCV, DC) {
         let ocv = 0;
         let dcv = 0;
-        let dc = 0;
+        let dc;
         let dcvMultiplier = 1;
         let ocvMultiplier = 1;
         const ocvMod = Attack._parseCvModifier(OCV);

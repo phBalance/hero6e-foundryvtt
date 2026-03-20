@@ -1338,7 +1338,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                                     actor.system.characteristics[target].max + ae.flags[game.system.id]?.affectedPoints;
                                 const presentValue = actor.system.characteristics[target].value;
 
-                                let newValue = 0;
+                                let newValue;
                                 if (ae.flags[game.system.id]?.affectedPoints < 0) {
                                     // This is a positive adjustment. When it goes away
                                     // the points are lost but anything already lost doesn't go away.
