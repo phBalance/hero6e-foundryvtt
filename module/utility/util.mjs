@@ -394,7 +394,7 @@ export async function expireEffects(actor, expiresOn) {
  * @returns {number} Should be >= 0 unless there is an error.
  */
 export function hdcTimeOptionIdToSeconds(durationOptionId) {
-    let seconds = 12;
+    let seconds;
 
     switch (durationOptionId) {
         case "EXTRAPHASE":

@@ -666,7 +666,7 @@ export class HeroSystem6eCombat extends Combat {
 
         const heroHistoryKey = `r${String(this.round).padStart(2, "0")}s${String(_segmentNumber).padStart(2, "0")}`;
 
-        let heroHistoryThisCombatant = combatant.flags[game.system.id].heroHistory[heroHistoryKey];
+        // let heroHistoryThisCombatant = combatant.flags[game.system.id].heroHistory[heroHistoryKey];
         //console.warn(heroHistoryKey, heroHistoryThisCombatant);
 
         // V13 clear movement history and END used for movement
@@ -690,10 +690,10 @@ export class HeroSystem6eCombat extends Combat {
         try {
             masterCombatant.flags[game.system.id].heroHistory ??= {};
             masterCombatant.flags[game.system.id].heroHistory[heroHistoryKey] ??= {};
-            heroHistoryThisCombatant = masterCombatant.flags[game.system.id].heroHistory[heroHistoryKey];
-            heroHistoryThisCombatant.end = masterCombatant.actor.system.characteristics.end?.value;
-            heroHistoryThisCombatant.stun = masterCombatant.actor.system.characteristics.stun?.value;
-            heroHistoryThisCombatant.body = masterCombatant.actor.system.characteristics.body?.value;
+            // heroHistoryThisCombatant = masterCombatant.flags[game.system.id].heroHistory[heroHistoryKey];
+            // heroHistoryThisCombatant.end = masterCombatant.actor.system.characteristics.end?.value;
+            // heroHistoryThisCombatant.stun = masterCombatant.actor.system.characteristics.stun?.value;
+            // heroHistoryThisCombatant.body = masterCombatant.actor.system.characteristics.body?.value;
             await masterCombatant.setFlag(
                 game.system.id,
                 "heroHistory",

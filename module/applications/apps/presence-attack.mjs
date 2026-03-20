@@ -142,7 +142,7 @@ export class PresenceAttackApplication extends HeroApplication {
         for (const preAttackInput of preAttackModInputs) {
             const preAttackModItem = this.actor.items.get(preAttackInput.id);
 
-            let numDice = 0;
+            let numDice;
             if (preAttackModItem.system.XMLID === "STRIKING_APPEARANCE") {
                 numDice = parseInt(preAttackModItem.system.LEVELS || 0);
             } else if (preAttackModItem.system.XMLID === "REPUTATION") {

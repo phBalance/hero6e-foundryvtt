@@ -16480,7 +16480,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             cost: function (modifier) {
                 const levels = parseInt(modifier.LEVELS) || 0;
-                let _cost = 0;
+                let _cost;
                 switch (modifier.OPTIONID) {
                     case "RADIUS":
                         _cost = Math.max(1, Math.ceil(Math.log2(levels / 2))) * 0.25;

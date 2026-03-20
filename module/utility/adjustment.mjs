@@ -646,7 +646,7 @@ export async function performAdjustment(
         }
 
         // Clamp fade (always 5) to not exceed adjustmentActivePoints
-        let maximumActivePointsFade = 5;
+        let maximumActivePointsFade;
         if (existingEffect.flags[game.system.id]?.adjustmentActivePoints >= 0) {
             // AID fade
             maximumActivePointsFade = Math.max(

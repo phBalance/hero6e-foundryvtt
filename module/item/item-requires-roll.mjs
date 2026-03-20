@@ -330,9 +330,8 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
     // TODO: for refactor the above should return: skill, char, value, rollModifier so that the output can be constructed.
 
     let succeeded = false;
-    let flavor = "";
-    let cardHtml = "";
-    let roller = null;
+    let flavor;
+    let roller;
     const usefulAlias = rarOptionIsBackground !== skill?.system.ALIAS ? skill?.system.ALIAS : "";
     const skillName = skill?.system.INPUT || usefulAlias || skill?.name;
     const charName = charKey?.toUpperCase();
@@ -404,7 +403,8 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
             succeeded ? "succeeded" : "failed"
         } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
     }
-    cardHtml = await roller.render(flavor);
+
+    let cardHtml = await roller.render(flavor);
 
     // FORCE success
     if (!succeeded && overrideCanAct) {

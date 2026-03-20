@@ -3853,7 +3853,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             // If baseinfo is missing the baseinfo.type causes errors. Known to occur with old manually built attacks with no XMLID.
             // Plan is to delete these invalid attacks.  For now they show in invalid actor sheet tab for reference only.
             console.error(`${this.name} has unhandled error in cslItems`);
-            throw new Error(e);
+            throw new Error("sortedAttackItemsForCslPsl failure", { cause: e });
         }
     }
 

@@ -118,7 +118,7 @@ function hasProperty(actorOrItem, attributeName) {
     try {
         return foundry.utils.hasProperty(actorOrItem, attributeName);
     } catch (e) {
-        throw new Error(e);
+        throw new Error("foundry.utils.hasProperty failure", { cause: e });
     }
 }
 

@@ -589,7 +589,7 @@ export class HeroSystem6eEndToEndTest {
 
             adjustmentActivePoints = foundry.utils.deepClone(newAdjustmentActivePoints);
             adjustmentValue = foundry.utils.deepClone(adjustmentNewValue);
-            actorCharacteristicValue = foundry.utils.deepClone(actorNewCharacteristicValue);
+            foundry.utils.deepClone(actorNewCharacteristicValue);
         }
 
         this.log("Abandon fade loop");

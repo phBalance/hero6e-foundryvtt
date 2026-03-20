@@ -318,7 +318,8 @@ export class HeroAdderModel extends HeroAdderModelCommon {
 
 class HeroModifierModelCommon extends HeroItemModCommonModel {
     get cost() {
-        let _cost = 0;
+        let _cost;
+
         // Custom costs calculations
         if (this.baseInfo?.cost) {
             _cost = this.baseInfo.cost(this, this.item);
