@@ -150,6 +150,15 @@ export function getRoundedUpDistanceInSystemUnits(distanceInMetres, is5e) {
     return roundedDistanceInMetres;
 }
 
+export const daysPerGregorianYear = 365.2425;
+export const secondsPerGregorianYear = 31556952;
+export const turnsPerGregorianYear = 31556952 / 12;
+
+export const astronomicalUnitsInMetres = 1.496e11;
+export const lightYearInMetres = 9.461e15;
+export const parsecInLightYears = 3.26156;
+export const parsecInMetres = parsecInLightYears * lightYearInMetres;
+
 /**
  *  Get a multiplier that tries to translates from grid units, which are freeform text, to meters
  */
@@ -160,6 +169,7 @@ export function gridUnitsToMeters() {
     if (units === "m") {
         distanceMultiplier = 1;
     } else if (units === '"') {
+        // Hero system hexes (5e)
         distanceMultiplier = 2;
     } else if (units === "km") {
         distanceMultiplier = 1000;
@@ -167,11 +177,19 @@ export function gridUnitsToMeters() {
         distanceMultiplier = 0.3048;
     } else if (units === "miles") {
         distanceMultiplier = 1609.34;
+    } else if (units === "au") {
+        distanceMultiplier = astronomicalUnitsInMetres;
+    } else if (units === "ly") {
+        // Light years
+        distanceMultiplier = lightYearInMetres;
+    } else if (units === "pc") {
+        // Parsecs
+        distanceMultiplier = parsecInMetres;
     } else {
         // Not sure what the units might be. Guess meters.
         if (!squelch(game.scenes?.current?.name || "scene")) {
             ui.notifications.error(
-                `Scene "${game.scenes?.current?.name}" has unknown grid units (${units}). Fix your scene grid to be m, ", km, ft, or miles.`,
+                `Scene "${game.scenes?.current?.name}" has unknown grid units (${units}). Fix your scene grid to be m, ", ft, km, miles, au (astronomical units), ly (light years), or pc (parsecs).`,
             );
         }
         distanceMultiplier = 1;

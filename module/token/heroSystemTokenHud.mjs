@@ -1,4 +1,4 @@
-import { convertSystemUnitsToMetres } from "../utility/units.mjs";
+import { convertSystemUnitsToMetres, lightYearInMetres, turnsPerGregorianYear } from "../utility/units.mjs";
 import { ftlLevelsToLightYearsPerYear } from "../item/item.mjs";
 
 // PH: FIXME: Need to get extra dimensional appearing. We have icon now.
@@ -86,7 +86,7 @@ function ftlMaxNonCombatDistanceMeters(token) {
 
     // FTL is given movement per year - not per phase. Convert to per phase based on speed.
     const lightYearsPerYear = ftlLevelsToLightYearsPerYear(ftlLevels);
-    const metresPerTurnPerLightYearPerYear = 2.998e8 * lightYearsPerYear;
+    const metresPerTurnPerLightYearPerYear = (lightYearInMetres * lightYearsPerYear) / turnsPerGregorianYear;
     const speed = parseInt(token.actor?.system.characteristics.spd?.value || 0);
 
     return metresPerTurnPerLightYearPerYear / speed;
