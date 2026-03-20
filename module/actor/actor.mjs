@@ -2765,6 +2765,16 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 }
             }
 
+            // If it was a childItem and now isn't
+            // need to remove PARENTID as HDC doesn't
+            // specifically include it.
+            for (const item of itemsToUpdate.filter((item) => !item.system.PARENTID)) {
+                const itemExisting = this.items.find((o) => o.id === item._id);
+                if (itemExisting.system.PARENTID) {
+                    item.system.PARENTID = null;
+                }
+            }
+
             // update existing document, overwriting any MODIFIERS, etc
             await this.updateEmbeddedDocuments("Item", itemsToUpdate);
 
