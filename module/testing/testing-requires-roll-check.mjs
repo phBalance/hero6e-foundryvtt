@@ -133,6 +133,37 @@ export function registerRequiresRollCheckTests(quench) {
                     });
                 });
 
+                describe("5e - activation roll", function () {
+                    // Quench test suite scaffolding for Activation Roll Limitation (5e, FRed)
+                    // Based on Hero System 5e rules as described in FRed (.github/RuleBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf)
+
+                    describe.skip("Activation Roll Limitation (5e, FRed)", function () {
+                        // Standard Success/Failure Scenarios
+                        it.skip("Succeeds when roll is equal to or less than activation number", function () {
+                            // Implementation goes here
+                        });
+                        it.skip("Fails when roll is greater than activation number", function () {
+                            // Implementation goes here
+                        });
+
+                        // Automatic Success/Failure
+                        it.skip("Always succeeds on a roll of 3", function () {
+                            // Implementation goes here
+                        });
+                        it.skip("Always fails on a roll of 18", function () {
+                            // Implementation goes here
+                        });
+
+                        // Modifiers
+                        it.skip("Succeeds with positive modifier applied to activation number", function () {
+                            // Implementation goes here
+                        });
+                        it.skip("Fails with negative modifier applied to activation number", function () {
+                            // Implementation goes here
+                        });
+                    });
+                });
+
                 describe("rollRequiresASkillRollCheck", function () {
                     describe("6e", function () {
                         const contents = `
