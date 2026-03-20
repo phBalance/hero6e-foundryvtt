@@ -13,7 +13,7 @@ jobs:
       release: ${{ steps.extract_release.outputs.RELEASE }}
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Install jq
       run: sudo apt-get install jq
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: build css
       run: npm ci && npm run compile
@@ -64,7 +64,7 @@ jobs:
         zip -r hero6efoundryvttv2.zip . -x .git/\* -x .github/\* -x node_modules/\* -x scss/\* -x .gitattributes -x .gitignore  -x .git-blame-ignore-revs -x .eslintrc.json -x .npmignore -x .prettierignore -x .prettierrc.json -x gulpfile.mjs -x package.json -x package-lock.json
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: hero6efoundryvttv2.zip
         path: hero6efoundryvttv2.zip
