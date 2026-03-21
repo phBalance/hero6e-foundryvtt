@@ -424,7 +424,7 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
             attackHeroRoller.addNumber(
                 pslOffsets,
                 "Penalty Skill Levels",
-                `${pslItem.name} ${pslItem.system.LEVELS.signedStringHero()} offset`,
+                `${pslItem.name} ${pslItem.system.LEVELS.signedString()} offset`,
             );
         }
 
@@ -435,7 +435,7 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
         attackHeroRoller.addNumber(
             maneuverRangeOffsets,
             "Maneuver bonus",
-            `${attackItem.name} RANGE ${maneuverRangeOffset.signedStringHero()}`,
+            `${attackItem.name} RANGE ${maneuverRangeOffset.signedString()}`,
         );
 
         // Brace (+2 OCV only to offset the Range Modifier)
@@ -449,7 +449,7 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
             attackHeroRoller.addNumber(
                 braceOffsets,
                 "Brace modifier",
-                `Brace maneuver ${braceRangeOffset.signedStringHero()} offset`,
+                `Brace maneuver ${braceRangeOffset.signedString()} offset`,
             );
         }
 
@@ -767,9 +767,9 @@ function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingAc
             if (levelsForThisCsl) {
                 defensiveCslLevels += levelsForThisCsl;
                 defensiveTags.push({
-                    name: `${csl.name} ${levelsForThisCsl.signedStringHero()} ${defendsWith.toUpperCase()}`,
+                    name: `${csl.name} ${levelsForThisCsl.signedString()} ${defendsWith.toUpperCase()}`,
                     value: levelsForThisCsl,
-                    title: `${csl.name} ${levelsForThisCsl.signedStringHero()} ${defendsWith.toUpperCase()}`,
+                    title: `${csl.name} ${levelsForThisCsl.signedString()} ${defendsWith.toUpperCase()}`,
                 });
             }
         }
@@ -781,7 +781,7 @@ function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingAc
         const offHandDcvBonus = getOffHandDefenseDcv(defendingActor);
         if (offHandDcvBonus > 0) {
             const offHandDefenseName = `${defendingActor.is5e ? "WF: Off Hand" : "Off Hand Defense"}`;
-            const tagString = `${offHandDefenseName} ${offHandDcvBonus.signedStringHero()} HTH DCV`;
+            const tagString = `${offHandDefenseName} ${offHandDcvBonus.signedString()} HTH DCV`;
             defensiveTags.push({
                 name: tagString,
                 value: offHandDcvBonus,
@@ -2278,7 +2278,7 @@ export async function _onRollBreakfall(event) {
         // render card
         const cardData = {
             tags: tags.map((tag) => {
-                return { ...tag, value: tag.value.signedStringHero() };
+                return { ...tag, value: tag.value.signedString() };
             }),
             rolls: skillRoller.rawRolls(),
             renderedRoll: rollHtml,

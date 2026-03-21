@@ -264,7 +264,7 @@ function notEqual(value1, value2) {
 
 function signedString(value) {
     try {
-        return Number(value).signedStringHero() || value;
+        return Number(value).signedString() || value;
     } catch (e) {
         console.error(e);
     }

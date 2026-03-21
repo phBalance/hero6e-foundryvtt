@@ -52,7 +52,7 @@ export class Attack {
             if (dcv < 0) {
                 icon = "icons/svg/downgrade.svg";
             }
-            name += `${comma ? "," : ""} ${dcv.signedStringHero()} DCV`;
+            name += `${comma ? "," : ""} ${dcv.signedString()} DCV`;
             comma = true;
             changes.push({
                 key: `system.characteristics.dcv.max`,
@@ -67,7 +67,7 @@ export class Attack {
             if (dmcv < 0) {
                 icon = "icons/svg/downgrade.svg";
             }
-            name += `${comma ? "," : ""} ${dmcv.signedStringHero()} DMCV`;
+            name += `${comma ? "," : ""} ${dmcv.signedString()} DMCV`;
             comma = true;
             changes.push({
                 key: `system.characteristics.dmcv.max`,

@@ -65,21 +65,6 @@ import { HeroSocketHandler } from "./heroSocketHandler.mjs";
 import { HeroSystem6eChatMessage } from "./heroChatMessage.mjs";
 import { HeroSystem6eTemplateLayer } from "./canvas-layer.mjs";
 
-// V13 SignedString does not add a plus before a zero, also uses a non-standard minus sign.
-// V12 SignedString works great, unclear why V13 change it.
-// So we will create our own signedString.
-function signedStringHero() {
-    const n = this.toLocaleString(game.i18n.lang);
-    //if (this === 0) return n;
-    if (this < 0)
-        //return n.replace("-", "−"); // Minus sign character
-        return n;
-    else return `+${n}`;
-}
-Object.defineProperties(Number.prototype, {
-    signedStringHero: { value: signedStringHero },
-});
-
 // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttActors = foundry.documents?.collections?.Actors || Actors;
 const FoundryVttItems = foundry.documents?.collections?.Items || Items;

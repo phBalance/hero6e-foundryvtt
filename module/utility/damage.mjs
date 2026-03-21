@@ -314,17 +314,6 @@ export function getManueverEffectWithPlaceholdersReplaced(item) {
                         .replace("[WEAPONNNDDC]", diceFormula);
                 }
             }
-
-            //const maneuverDcs = parseInt(item.DC || 0) + getExtraMartialDcsOrZero(this);
-            // dcsString =
-            //     isManeuverThatDoesReplaceableDamageType(this) && maneuverDcs
-            //         ? `, ${maneuverDcs.signedStringHero()} DC`
-            //         : "";
-
-            // if (isRangedMartialManeuver(this)) {
-            //     const range = parseInt(item.system.RANGE || 0);
-            //     rangeString = `, Range ${range.signedStringHero()}`;
-            // }
         }
 
         return effectString;
@@ -425,7 +414,7 @@ function addExtraMartialDcsToBundle(item, dicePartsBundle) {
         dicePartsBundle.tags.push({
             value: `${formula}`,
             name: "Extra DCs",
-            title: `${numExtraDcs.signedStringHero()}DC${numExtraDcs !== extraDcLevels ? " (halved due to 5e killing attack)" : ""} -> ${formula}`,
+            title: `${numExtraDcs.signedString()}DC${numExtraDcs !== extraDcLevels ? " (halved due to 5e killing attack)" : ""} -> ${formula}`,
         });
     }
 }
@@ -478,7 +467,7 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
         addedDamageBundle.tags.push({
             value: formula === "0" ? "" : `${formula}`, // Hide the formula if it's 0 as it looks ugly
             name: item.name,
-            title: `${rawManeuverDc.signedStringHero()}DC${maneuverDC !== rawManeuverDc ? " (halved due to 5e killing attack)" : ""} -> ${formula}`,
+            title: `${rawManeuverDc.signedString()}DC${maneuverDC !== rawManeuverDc ? " (halved due to 5e killing attack)" : ""} -> ${formula}`,
         });
     }
 
@@ -527,7 +516,7 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
                 addedDamageBundle.tags.push({
                     value: `+${formula}`,
                     name: cslDetail.item.name,
-                    title: `${actualDcEffect.signedStringHero()}DC -> ${formula}`,
+                    title: `${actualDcEffect.signedString()}DC -> ${formula}`,
                 });
             } else {
                 addedDamageBundle.tags.push({

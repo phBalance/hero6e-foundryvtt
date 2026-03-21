@@ -2918,12 +2918,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     const maneuverDcs = parseInt(system.DC || 0) + getExtraMartialDcsOrZero(this);
                     description +=
                         isManeuverThatDoesReplaceableDamageType(this) && maneuverDcs
-                            ? `, ${maneuverDcs.signedStringHero()} DC`
+                            ? `, ${maneuverDcs.signedString()} DC`
                             : "";
 
                     if (isRangedMartialManeuver(this)) {
                         const range = system.RANGE;
-                        description += `, Range ${range.signedStringHero()}`;
+                        description += `, Range ${range.signedString()}`;
                     }
                 }
                 break;
@@ -3004,7 +3004,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
             case "SKILL_LEVELS":
                 //<i>Martial Practice:</i>  +10 with single Skill or Characteristic Roll
-                description = `${parseInt(system.LEVELS).signedStringHero()} ${system.OPTION_ALIAS}`;
+                description = `${parseInt(system.LEVELS).signedString()} ${system.OPTION_ALIAS}`;
                 break;
 
             case "VPP":
@@ -3456,7 +3456,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     // can be for anything, we don't provide its cost if the cost is 0.
                     if (adder.ALIAS.trim()) {
                         _adderArray.push(
-                            `${adder.ALIAS}${parseInt(adder.BASECOST) !== 0 ? ` ${parseInt(adder.BASECOST)?.signedStringHero()} Points` : ""}`,
+                            `${adder.ALIAS}${parseInt(adder.BASECOST) !== 0 ? ` ${parseInt(adder.BASECOST)?.signedString()} Points` : ""}`,
                         );
                     }
                     break;
