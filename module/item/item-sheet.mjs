@@ -629,14 +629,50 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
     async _onConvertToPower(event) {
         event.preventDefault();
 
+        if (this.item.parentItem) {
+            return ui.notifications.error(
+                `<b>${this.item.name}</b> is a child of <b>${this.item.parentItem.name}</b>.  Converting a child item type is not supported.`,
+            );
+        }
+
+        const confirmed = await Dialog.confirm({
+            title: `Confirm ${this.item.name} type change`,
+            content: `Convert ${this.item.name} from a ${this.item.type} to a POWER`,
+        });
+
+        if (!confirmed) {
+            return;
+        }
+
         // Also need to use force replace ==items for this to work in v13
         await this.item.update({ [`type`]: "power", [`==system`]: this.item.system }, { recursive: false });
+        for (const childItem of this.item.childItems) {
+            await childItem.update({ [`type`]: "power", [`==system`]: childItem.system }, { recursive: false });
+        }
     }
 
     async _onConvertToEquipment(event) {
         event.preventDefault();
 
+        if (this.item.parentItem) {
+            return ui.notifications.error(
+                `<b>${this.item.name}</b> is a child of <b>${this.item.parentItem.name}</b>.  Converting a child item type is not supported.`,
+            );
+        }
+
+        const confirmed = await Dialog.confirm({
+            title: `Confirm ${this.item.name} type change`,
+            content: `Convert ${this.item.name} from a ${this.item.type} to EQUIPMENT`,
+        });
+
+        if (!confirmed) {
+            return;
+        }
+
         // Also need to use force replace ==items for this to work in v13
         await this.item.update({ [`type`]: "equipment", [`==system`]: this.item.system }, { recursive: false });
+        for (const childItem of this.item.childItems) {
+            await childItem.update({ [`type`]: "equipment", [`==system`]: childItem.system }, { recursive: false });
+        }
     }
 }
