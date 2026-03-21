@@ -980,11 +980,6 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             return;
         }
 
-        // if (targetType === item.type) {
-        //     console.error(`${item.name} has identical type= ${item.type}, no action taken.`);
-        //     return;
-        // }
-
         // Most things can become a power or equipment.
         // Or change from power/equipment to native type.
         if (["power", "equipment"].includes(targetType) || item.baseInfo.type.includes(targetType)) {
@@ -1060,27 +1055,27 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             return super._onDropItem(event, item);
         }
 
-        ui.notifications.error(`You must drop items onto an appropriate item tab, such as "Equipment" or "Powers"`);
+        // Handle dropping an item anywhere on the actor sheet.  We will retain item.type
 
-        // if (item.isCombatManeuver) {
-        //     ui.notifications.error(`You cannot drop a MANEUVER onto an actor.`);
-        //     return;
-        // }
+        if (item.isCombatManeuver) {
+            ui.notifications.error(`You cannot drop a MANEUVER onto an actor.`);
+            return;
+        }
 
-        // // Does the XMLID exist in the receiving actor's game edition (e.g. the SUPPRESS XMLID exists only in 5e)?
-        // const baseInfoCheck = getPowerInfo({
-        //     xmlid: item.system.XMLID,
-        //     is5e: this.actor.is5e,
-        //     xmlTag: item.xmlTag,
-        // });
-        // if (!baseInfoCheck) {
-        //     ui.notifications.error(
-        //         `${item.system.XMLID} is a ${item.is5e ? "5e" : "6e"} only item and cannot be dropped onto a ${this.actor.is5e ? "5e" : "6e"} actor.`,
-        //     );
-        //     return;
-        // }
+        // Does the XMLID exist in the receiving actor's game edition (e.g. the SUPPRESS XMLID exists only in 5e)?
+        const baseInfoCheck = getPowerInfo({
+            xmlid: item.system.XMLID,
+            is5e: this.actor.is5e,
+            xmlTag: item.xmlTag,
+        });
+        if (!baseInfoCheck) {
+            ui.notifications.error(
+                `${item.system.XMLID} is a ${item.is5e ? "5e" : "6e"} only item and cannot be dropped onto a ${this.actor.is5e ? "5e" : "6e"} actor.`,
+            );
+            return;
+        }
 
-        // await this.DropItemFramework(item);
+        await this.DropItemFramework(item);
     }
 
     async DropItemFramework(item, options = {}) {
