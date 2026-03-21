@@ -3152,7 +3152,9 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     const damageChatMessage = ChatMessage.create(chatData);
 
     // Absorption happens after damage is taken unless the GM allows it. This system doesn't allow GM choice.
-    const absorptionItems = targetToken.actor.items.filter((item) => item.system.XMLID === "ABSORPTION");
+    const absorptionItems = targetToken.actor.items.filter(
+        (item) => item.system.XMLID === "ABSORPTION" && item.isActive,
+    );
     if (absorptionItems) {
         await _performAbsorptionForToken(targetToken, absorptionItems, damageDetail, item);
     }
@@ -3521,10 +3523,11 @@ async function _performAbsorptionForToken(token, absorptionItems, damageDetail, 
     // Also the attack must do BODY damage.
 
     // Match attack against absorption type. If we match we can do some absorption.
-    for (const absorptionItem of absorptionItems.filter((item) => item.isActive)) {
+    for (const absorptionItem of absorptionItems) {
         if (
-            (absorptionItem.system.OPTIONID === "PHYSICAL" && attackType === "PD") ||
-            (absorptionItem.system.OPTIONID === "ENERGY" && attackType === "ED")
+            ((absorptionItem.system.OPTIONID === "PHYSICAL" && attackType === "PD") ||
+                (absorptionItem.system.OPTIONID === "ENERGY" && attackType === "ED")) &&
+            damageItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.stunbody
         ) {
             const actor = absorptionItem.actor;
             let maxAbsorption;

@@ -4006,7 +4006,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         const stunOnly = this.findModsByXmlid("STUNONLY");
-        const noStun = this.modifiers.find((m) => m.XMLID === "LIMITEDPOWER" && m.OPTIONID === "NOSTUN");
         const nnd = this.findModsByXmlid("NND");
         const avld = this.findModsByXmlid("AVLD");
         if (stunOnly || nnd || avld) {
@@ -4020,6 +4019,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             results.knockbackMultiplier = 1;
         }
 
+        const noStun = this.modifiers.find((m) => m.XMLID === "LIMITEDPOWER" && m.OPTIONID === "NOSTUN");
         if (noStun) {
             switch (results.stunBodyDamage) {
                 case CONFIG.HERO.stunBodyDamages.stunbody:
@@ -4028,12 +4028,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 default:
                     console.error(`Unhandled NOSTUN for ${results.stunBodyDamage}`);
             }
-        }
-
-        // AVAD
-        const avad = this.findModsByXmlid("AVAD");
-        if (avad) {
-            results.class = "avad";
         }
 
         // Armor Piercing
