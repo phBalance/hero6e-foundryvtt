@@ -6806,7 +6806,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     /**
-     * Very old HDCs' XML for REQUIRESASKILLROLL don't include OPTION and OPTIONID. Modify them to do so.
+     * Very old HDCs' XML for ACTIVATIONROLL (5e only) don't include OPTION and OPTIONID. Modify them to do so.
      *
      * @param {Object} source - object matching the shape of Item's source
      */
@@ -6818,64 +6818,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return;
         }
 
-        // PH: FIXME: Need to figure out if this is 6e or 5e. This is for 6e.
         if (
-            activationModifier.XMLID === "REQUIRESASKILLROLL" &&
-            activationModifier.OPTION == null &&
-            activationModifier.OPTIONID == null &&
-            activationModifier.BASECOST != null
-        ) {
-            let option;
-            let optionId;
-            const rollBaseCost = parseFloat(activationModifier.BASECOST);
-            switch (rollBaseCost) {
-                case 0.25:
-                    option = optionId = "14";
-                    break;
-
-                case 0:
-                    option = optionId = "13";
-                    break;
-
-                case -0.25:
-                    option = optionId = "12";
-                    break;
-
-                case -0.5:
-                    option = optionId = "11";
-                    break;
-
-                case -0.75:
-                    option = optionId = "10";
-                    break;
-
-                case -1:
-                    option = optionId = "9";
-                    break;
-
-                case -1.25:
-                    option = optionId = "8";
-                    break;
-
-                case -1.5:
-                    option = optionId = "7";
-                    break;
-
-                default:
-                    console.error(`Unexpected REQUIRESASKILLROLL rollBaseCost`, source);
-                    break;
-            }
-
-            activationModifier.OPTION = option;
-            activationModifier.OPTIONID = optionId;
-
-            // Signal to migration code that this object has changed and needs to be persisted to the DB
-            // PH: FIXME: Not ready for persisting - test etc first tagObjectForPersistence(source);
-        }
-
-        // The same thing exists for ACTIVATIONROLL
-        // PH: FIXME: Need to fix for 5e vs 6e
-        else if (
             activationModifier.XMLID === "ACTIVATIONROLL" &&
             activationModifier.OPTION == null &&
             activationModifier.OPTIONID == null &&
@@ -6915,7 +6858,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             activationModifier.OPTIONID = optionId;
 
             // Signal to migration code that this object has changed and needs to be persisted to the DB
-            // PH: FIXME: Not ready for persisting - test etc first tagObjectForPersistence(source);
+            tagObjectForPersistence(source);
         }
     }
 
