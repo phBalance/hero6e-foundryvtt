@@ -5846,7 +5846,7 @@ export function registerFullTests(quench) {
                         });
 
                         it("should have the correct template type", function () {
-                            assert.equal(actor._templateType, "Normal");
+                            assert.equal(actor._templateType, "builtIn.CompetentNormal.hdt");
                         });
                     });
 
@@ -6321,7 +6321,7 @@ export function registerFullTests(quench) {
                         });
 
                         it("should have the correct template type", function () {
-                            assert.equal(actor._templateType, "Superheroic");
+                            assert.equal(actor._templateType, "builtIn.Superheroic.hdt");
                         });
 
                         it("should have the correct template", function () {
