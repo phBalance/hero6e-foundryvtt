@@ -2456,7 +2456,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     .replace("superheroic", "pc")
                     .replace("heroic", "pc")
                     .replace("standardsuper", "pc") // super old HDC
-                    .replace("main", "pc"); // custom template
+                    .replace("main", "pc") // custom template
+                    .replace("competentpc", "pc"); // super old HDC
 
                 if (targetType && this.type.replace("npc", "pc") !== targetType) {
                     if (Object.keys(game.system.template.Actor).includes(targetType)) {
@@ -3865,20 +3866,63 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // Need to be a careful as there are custom templates ('Nekhbet Vulture Child Goddess')
         // that we are unlikely able to decode heroic status.
         // NOTE: Older HD used "Main" as the template type - not sure what it means
-        // Stringify the TEMPLATE for our best chance.
+
+        // CAREFUL: the template type is only loosly tied to actor.type
+        // TODO: See if we can tighly couple the tempalte to actor.type
+
+        // Templates can extend other templates.
+        // Some HDC files include custom tempalte info that we currently ignore.
+
         return this.system.CHARACTER?.TEMPLATE.name;
     }
 
     get _templateTypeAbreviation() {
         // Heroic or SuperHeroic
-        const templateType = this._templateType;
+        // CAREFUL: the template type is only loosly tied to actor.type
+        // TODO: See if we can tighly couple the tempalte to actor.type
 
         // There are 2 types that start with A (AI, and Automaton) so distinguish between them
-        if (templateType?.includes("Superheroic")) {
-            return "s";
-        } else if (templateType?.includes("heroic")) {
-            return "h";
+        switch (this._templateType) {
+            case "builtIn.AI.hdt":
+            case "builtIn.AI6E.hdt":
+                return "ai";
+
+            case "builtIn.Automaton.hdt":
+            case "builtIn.Automaton6E.hdt":
+                return "a";
+
+            case "builtIn.Base.hdt":
+            case "builtIn.Base6E.hdt":
+                return "b";
+
+            case "builtIn.CompetentNormal.hdt":
+                console.warn(`Unhandled template=${this._templateType}`);
+                return "";
+
+            case "builtIn.Computer.hdt":
+            case "builtIn.Computer6E.hdt":
+                return "c";
+
+            case "builtIn.Heroic.hdt":
+            case "builtIn.Heroic6E.hdt":
+                return "h";
+
+            case "builtIn.Main.hdt":
+            case "builtIn.Main6E.hdt":
+                // Custom Template based on Main such as ZoriaAmari.HDC
+                console.warn(`Unhandled template=${this._templateType}`);
+                return "";
+
+            case "builtIn.Superheroic.hdt":
+            case "builtIn.Superheroic6E.hdt":
+                return "s";
+
+            case "builtIn.Vehicle.hdt":
+            case "builtIn.Vehicle6E.hdt":
+                return "v";
         }
+
+        console.warn(`Unhandled template=${this._templateType}`);
         return "";
     }
 
