@@ -2203,16 +2203,21 @@ export async function _onRollBreakfall(event) {
     }
 
     // Indicate button has already been used
-    const messageId = event.target.closest(`li[data-message-id]`).dataset.messageId;
-    const message = ChatMessage.get(messageId);
-    if (message) {
-        const parsedMessageContent = document.createElement("div");
-        parsedMessageContent.innerHTML = message.content;
-        const button = parsedMessageContent.querySelector(`button.roll-breakfall`);
-        if (button) {
-            button.style.color = "darkgray";
-            await message.update({ content: parsedMessageContent.innerHTML });
+    try {
+        const messageId = event.target.closest(`li[data-message-id]`).dataset.messageId;
+        const message = ChatMessage.get(messageId);
+        if (message) {
+            const parsedMessageContent = document.createElement("div");
+            parsedMessageContent.innerHTML = message.content;
+            const button = parsedMessageContent.querySelector(`button.roll-breakfall`);
+            if (button) {
+                button.style.color = "darkgray";
+                await message.update({ content: parsedMessageContent.innerHTML });
+            }
         }
+    } catch (e) {
+        // Likely permissions issue, need to sockets it
+        console.error(e);
     }
 
     const speaker = ChatMessage.getSpeaker({ actor, token: tokenEducatedGuess({ actor }) });
