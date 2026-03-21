@@ -1031,24 +1031,38 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             return this._onDropItemOnTab(event, data, item, targetTab);
         }
 
+        // We use data-item-id for the built in super._onDropItem._onSortItem
+        // and data-document-uuid for this routine.
+        // We probably don't need both, but Aaron likes the UUID, so keeping both for now.
         const dropTarget = event.target.closest("[data-document-uuid]");
 
         const sameActor = item.actor?.id === this.actor.id;
         if (sameActor) {
             // we are dragging in or out of a parent item
             if (!item.isContainer || item.system.XMLID === "COMPOUNDPOWER") {
-                const parentItem = await fromUuid(dropTarget?.dataset.documentUuid);
-                if (!item.system.PARENTID && parentItem?.isContainer) {
-                    ui.notifications.info(`<b>${item.name}</b> was moved into to parent <b>${parentItem.name}</b>`);
-                    await item.update({ "system.PARENTID": parentItem.system.ID });
-                } else if (item.system.PARENTID && !parentItem?.system.PARENTID) {
+                const dropTargetItem = await fromUuid(dropTarget?.dataset.documentUuid);
+                if (!item.system.PARENTID && dropTargetItem?.isContainer) {
+                    ui.notifications.info(`<b>${item.name}</b> was moved into to parent <b>${dropTargetItem.name}</b>`);
+                    await item.update({ "system.PARENTID": dropTargetItem.system.ID });
+                } else if (item.system.PARENTID && !dropTargetItem?.system.PARENTID) {
                     ui.notifications.info(
                         `<b>${item.name}</b> was removed from parent <b>${item.parentItem.name}</b>.`,
                     );
                     await item.update({ "system.-=PARENTID": null });
-                } else if (!item.isContainer && parentItem?.isContainer) {
-                    ui.notifications.info(`<b>${item.name}</b> was moved into to parent <b>${parentItem.name}</b>`);
-                    await item.update({ "system.PARENTID": parentItem.system.ID });
+                } else if (!item.isContainer && dropTargetItem?.isContainer) {
+                    ui.notifications.info(`<b>${item.name}</b> was moved into to parent <b>${dropTargetItem.name}</b>`);
+                    await item.update({ "system.PARENTID": dropTargetItem.system.ID });
+                } else if (
+                    dropTargetItem.parentItem &&
+                    !item.parentItem &&
+                    item.childItems?.length === 0 &&
+                    dropTargetItem.childItems?.length === 0
+                ) {
+                    // Dropping inside of a container, mid list not parent head
+                    ui.notifications.info(
+                        `<b>${item.name}</b> was moved into to parent <b>${dropTargetItem.parentItem.name}</b>`,
+                    );
+                    await item.update({ "system.PARENTID": dropTargetItem.parentItem.system.ID });
                 }
             }
 
