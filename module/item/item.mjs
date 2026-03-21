@@ -2918,12 +2918,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     const maneuverDcs = parseInt(system.DC || 0) + getExtraMartialDcsOrZero(this);
                     description +=
                         isManeuverThatDoesReplaceableDamageType(this) && maneuverDcs
-                            ? `, ${maneuverDcs.signedStringHero()} DC`
+                            ? `, ${maneuverDcs.signedString()} DC`
                             : "";
 
                     if (isRangedMartialManeuver(this)) {
                         const range = system.RANGE;
-                        description += `, Range ${range.signedStringHero()}`;
+                        description += `, Range ${range.signedString()}`;
                     }
                 }
                 break;
@@ -3004,7 +3004,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
             case "SKILL_LEVELS":
                 //<i>Martial Practice:</i>  +10 with single Skill or Characteristic Roll
-                description = `${parseInt(system.LEVELS).signedStringHero()} ${system.OPTION_ALIAS}`;
+                description = `${parseInt(system.LEVELS).signedString()} ${system.OPTION_ALIAS}`;
                 break;
 
             case "VPP":
@@ -3456,7 +3456,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     // can be for anything, we don't provide its cost if the cost is 0.
                     if (adder.ALIAS.trim()) {
                         _adderArray.push(
-                            `${adder.ALIAS}${parseInt(adder.BASECOST) !== 0 ? ` ${parseInt(adder.BASECOST)?.signedStringHero()} Points` : ""}`,
+                            `${adder.ALIAS}${parseInt(adder.BASECOST) !== 0 ? ` ${parseInt(adder.BASECOST)?.signedString()} Points` : ""}`,
                         );
                     }
                     break;
@@ -4006,7 +4006,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         const stunOnly = this.findModsByXmlid("STUNONLY");
-        const noStun = this.modifiers.find((m) => m.XMLID === "LIMITEDPOWER" && m.OPTIONID === "NOSTUN");
         const nnd = this.findModsByXmlid("NND");
         const avld = this.findModsByXmlid("AVLD");
         if (stunOnly || nnd || avld) {
@@ -4020,6 +4019,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             results.knockbackMultiplier = 1;
         }
 
+        const noStun = this.modifiers.find((m) => m.XMLID === "LIMITEDPOWER" && m.OPTIONID === "NOSTUN");
         if (noStun) {
             switch (results.stunBodyDamage) {
                 case CONFIG.HERO.stunBodyDamages.stunbody:
@@ -4028,12 +4028,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 default:
                     console.error(`Unhandled NOSTUN for ${results.stunBodyDamage}`);
             }
-        }
-
-        // AVAD
-        const avad = this.findModsByXmlid("AVAD");
-        if (avad) {
-            results.class = "avad";
         }
 
         // Armor Piercing
@@ -6812,7 +6806,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     /**
-     * Very old HDCs' XML for REQUIRESASKILLROLL don't include OPTION and OPTIONID. Modify them to do so.
+     * Very old HDCs' XML for ACTIVATIONROLL (5e only) don't include OPTION and OPTIONID. Modify them to do so.
      *
      * @param {Object} source - object matching the shape of Item's source
      */
@@ -6824,64 +6818,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return;
         }
 
-        // PH: FIXME: Need to figure out if this is 6e or 5e. This is for 6e.
         if (
-            activationModifier.XMLID === "REQUIRESASKILLROLL" &&
-            activationModifier.OPTION == null &&
-            activationModifier.OPTIONID == null &&
-            activationModifier.BASECOST != null
-        ) {
-            let option;
-            let optionId;
-            const rollBaseCost = parseFloat(activationModifier.BASECOST);
-            switch (rollBaseCost) {
-                case 0.25:
-                    option = optionId = "14";
-                    break;
-
-                case 0:
-                    option = optionId = "13";
-                    break;
-
-                case -0.25:
-                    option = optionId = "12";
-                    break;
-
-                case -0.5:
-                    option = optionId = "11";
-                    break;
-
-                case -0.75:
-                    option = optionId = "10";
-                    break;
-
-                case -1:
-                    option = optionId = "9";
-                    break;
-
-                case -1.25:
-                    option = optionId = "8";
-                    break;
-
-                case -1.5:
-                    option = optionId = "7";
-                    break;
-
-                default:
-                    console.error(`Unexpected REQUIRESASKILLROLL rollBaseCost`, source);
-                    break;
-            }
-
-            activationModifier.OPTION = option;
-            activationModifier.OPTIONID = optionId;
-
-            // Signal to migration code that this object has changed and needs to be persisted to the DB
-            // PH: FIXME: Not ready for persisting - test etc first tagObjectForPersistence(source);
-        }
-
-        // The same thing exists for ACTIVATIONROLL
-        // PH: FIXME: Need to fix for 5e vs 6e
-        else if (
             activationModifier.XMLID === "ACTIVATIONROLL" &&
             activationModifier.OPTION == null &&
             activationModifier.OPTIONID == null &&
@@ -6921,7 +6858,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             activationModifier.OPTIONID = optionId;
 
             // Signal to migration code that this object has changed and needs to be persisted to the DB
-            // PH: FIXME: Not ready for persisting - test etc first tagObjectForPersistence(source);
+            tagObjectForPersistence(source);
         }
     }
 

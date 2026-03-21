@@ -1040,7 +1040,7 @@ function updateEffectName(activeEffect) {
             });
             break;
         }
-        let _value = (parseInt(c.value) || 0).signedStringHero();
+        let _value = (parseInt(c.value) || 0).signedString();
         if (_value === "+0" && activeEffect.flags[game.system.id]?.adjustmentActivePoints < 0) {
             _value = "-0";
         }

@@ -499,9 +499,9 @@ export function toHHMMSS(secs) {
  *
  * @param {Object} options
  * @param {action} options.action
- * @param {HeroSystem6eActor} options.actor
- * @param {Token | TokenDocument} options.token
- * @param {string} options.tokenId we should really get rid of this.
+ * @param {HeroSystem6eActor | undefined} options.actor
+ * @param {Token | TokenDocument | undefined} options.token
+ * @param {string | undefined} options.tokenId we should really get rid of this.
  *
  * @returns {Token | TokenDocument}
  */

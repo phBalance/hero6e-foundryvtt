@@ -856,7 +856,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
         }
 
         _details.value = _details.tags.reduce((accum, currItem) => accum + currItem.value, 0);
-        _details.tooltip = _details.tags.map((m) => `${m.value.signedStringHero()} ${m.name}`).join("<br>");
+        _details.tooltip = _details.tags.map((m) => `${m.value.signedString()} ${m.name}`).join("<br>");
 
         return _details;
     };

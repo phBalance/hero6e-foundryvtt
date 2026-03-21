@@ -1,9 +1,9 @@
 # Releases
 
-### Version 4.3.01 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.1 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - This (and future) releases no longer support FoundryVTT V12. This release only works with FoundryVTT V13.
-- Added button to roll BREAKFALL skill after applying KNOCKBACK to remain on your feet. [#3557](https://github.com/dmdorman/hero6e-foundryvtt/issues/3557)
+- Added button to roll BREAKFALL skill after applying KNOCKBACK to regain control and not be prone. [#3557](https://github.com/dmdorman/hero6e-foundryvtt/issues/3557)
 - Fixed ABSORPTION. [#2720](https://github.com/dmdorman/hero6e-foundryvtt/issues/2720)
 - Added astronomical units (au), light years (ly) and parsecs (pc) to supported grid scales. [#3916](https://github.com/dmdorman/hero6e-foundryvtt/issues/3916)
 - Support for ED Hand-To-Hand Attacks. [#3921](https://github.com/dmdorman/hero6e-foundryvtt/issues/3921)

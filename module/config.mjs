@@ -1157,7 +1157,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 if (dcvHthLevels || dcvRangedLevels || dcvLevels) {
                     notes.push(
-                        `Extra CSL defenses: HTH DCV ${dcvHthLevels.signedStringHero()}, Ranged DCV ${dcvRangedLevels.signedStringHero()}, DCV ${dcvLevels.signedStringHero()}`,
+                        `Extra CSL defenses: HTH DCV ${dcvHthLevels.signedString()}, Ranged DCV ${dcvRangedLevels.signedString()}, DCV ${dcvLevels.signedString()}`,
                     );
                 }
 
@@ -1165,7 +1165,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const offHandDefense = getOffHandDefenseDcv(actor);
                 if (offHandDefense > 0) {
                     notes.push(
-                        `${actor.is5e ? "WF: Off Hand" : "Off Hand Defense"} vs HTH DCV ${offHandDefense.signedStringHero()}`,
+                        `${actor.is5e ? "WF: Off Hand" : "Off Hand Defense"} vs HTH DCV ${offHandDefense.signedString()}`,
                     );
                 }
 
@@ -1243,7 +1243,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 }
 
                 if (dmcvLevels) {
-                    notes.push(`Extra CSL defenses: DMCV ${dmcvLevels.signedStringHero()}`);
+                    notes.push(`Extra CSL defenses: DMCV ${dmcvLevels.signedString()}`);
                 }
 
                 return notes.join(", ");
