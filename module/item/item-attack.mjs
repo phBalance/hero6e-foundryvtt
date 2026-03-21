@@ -2182,14 +2182,13 @@ export async function _onRollBreakfall(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
 
-    const token = tokenEducatedGuess({
+    const targetToken = tokenEducatedGuess({
         tokenId: button.dataset.targetTokenId,
-        actor: fromUuidSync(button.dataset.actorUuid),
     });
 
-    const actor = token.actor ?? fromUuidSync(button.dataset.actorUuid);
-    if (!actor) {
-        throw new Error("Actor details are no longer available.");
+    const targetActor = targetToken.actor;
+    if (!targetActor) {
+        throw new Error("Target actor details are no longer available.");
     }
 
     const knockbackResultTotal = button.dataset.knockbackResultTotal;
@@ -2197,7 +2196,7 @@ export async function _onRollBreakfall(event) {
         throw new Error("Knockback details are not available.");
     }
 
-    const breakFallItem = actor?.items.find((o) => o.system.XMLID === "BREAKFALL" && o.isActive);
+    const breakFallItem = targetActor.items.find((o) => o.system.XMLID === "BREAKFALL" && o.isActive);
     if (!breakFallItem) {
         throw new Error("Breakfall item not found.");
     }
@@ -2220,7 +2219,7 @@ export async function _onRollBreakfall(event) {
         console.error(e);
     }
 
-    const speaker = ChatMessage.getSpeaker({ actor, token: tokenEducatedGuess({ actor }) });
+    const speaker = ChatMessage.getSpeaker({ actor: targetActor, token: targetToken });
 
     // Make sure there are enough resources and consume them
     const {
@@ -2247,13 +2246,19 @@ export async function _onRollBreakfall(event) {
         for (const tag of tags) {
             successValue = successValue + tag.value;
         }
-        const kbPenalty = -Math.floor(knockbackResultTotal / 2);
+
+        // 5e has -1 for each 2" (ignoring fractions)
+        // 6e has -1 for each 4m or fraction thereof
+        const kbPenalty = targetActor.is5e
+            ? -Math.floor(knockbackResultTotal / 2)
+            : -Math.ceil(knockbackResultTotal / 2);
         tags.push({
             value: kbPenalty,
             name: "KB Penalty",
-            title: `KB Penalty -1 per ${actor.is5e ? `2"` : `4m`} of KB`,
+            title: `KB Penalty -1 per ${targetActor.is5e ? `2"` : `4m or fraction thereof`} of KB`,
         });
         successValue += kbPenalty;
+
         await skillRoller.makeSuccessRoll(true, successValue).roll();
 
         const succeeded = skillRoller.getSuccess();
@@ -2267,7 +2272,7 @@ export async function _onRollBreakfall(event) {
                         <b class="dice-${succeeded ? "succeeded" : "failed"}">
                         ${succeeded ? "succeeded" : "failed"} by ${
                             autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`
-                        }</b>. ${succeeded ? "Landed on feet after Knockback (not possible if Knocked Back into something). No longer prone." : "Failed to land on feet, remain prone."}`;
+                        }</b>. ${succeeded ? "Regained control after Knockback (not possible if Knocked Back into something). No longer prone." : "Failed to regain control. Remains prone."}`;
         const rollHtml = await skillRoller.render(flavor);
 
         // render card
@@ -2287,19 +2292,18 @@ export async function _onRollBreakfall(event) {
         const cardHtml = await foundryVttRenderTemplate(template, cardData);
 
         const chatData = {
-            style: CONST.CHAT_MESSAGE_STYLES.IC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            style: CONST.CHAT_MESSAGE_STYLES.IC,
             rolls: skillRoller.rawRolls(),
             author: game.user._id,
             content: cardHtml,
             speaker: speaker,
         };
-
         ChatMessage.create(chatData);
 
         // Need to be bit careful to only remove prone.
-        // Don't apply prone on BREAKFALL failure as the prone status may have manually been changed.
+        // Intentionally don't apply prone on BREAKFALL failure as the prone status may have manually been changed.
         if (succeeded) {
-            await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
+            await targetActor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
                 active: false,
             });
         }
