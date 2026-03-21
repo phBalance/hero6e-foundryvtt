@@ -6,6 +6,7 @@
 - Added button to roll BREAKFALL skill after applying KNOCKBACK to remain on your feet. [#3557](https://github.com/dmdorman/hero6e-foundryvtt/issues/3557)
 - Fixed ABSORPTION. [#2720](https://github.com/dmdorman/hero6e-foundryvtt/issues/2720)
 - Added astronomical units (au), light years (ly) and parsecs (pc) to supported grid scales. [#3916](https://github.com/dmdorman/hero6e-foundryvtt/issues/3916)
+- Support for ED Hand-To-Hand Attacks. [#3921](https://github.com/dmdorman/hero6e-foundryvtt/issues/3921)
 
 ### Version 4.2.20 20260314
 

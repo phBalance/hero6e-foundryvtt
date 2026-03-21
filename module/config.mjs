@@ -7646,8 +7646,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costEnd: true,
             usesStrength: false, // NOTE: Not an attack of its own
-            attackDefenseVs: function (/* item */) {
-                return "PD";
+            attackDefenseVs: function (item) {
+                // Custom support of ED HTH attacks
+                const isED = item.adders.find(
+                    (adder) =>
+                        adder.XMLID === "ADDER" && adder.ALIAS.toLowerCase() === "attack vs ed" && adder.BASECOST === 0,
+                );
+                return isED ? "ED" : "PD";
             },
             costPerLevel: fixedValueFunction(5),
             baseEffectDicePartsBundle: standardBaseEffectDiceParts,
