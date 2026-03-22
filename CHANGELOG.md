@@ -8,6 +8,7 @@
 - Added astronomical units (au), light years (ly) and parsecs (pc) to supported grid scales. [#3916](https://github.com/dmdorman/hero6e-foundryvtt/issues/3916)
 - Support for ED Hand-To-Hand Attacks (add a custom adder named "Attack vs ED"). [#3921](https://github.com/dmdorman/hero6e-foundryvtt/issues/3921)
 - Tighter controls over converting POWERS to EQUIPMENT and vice versa. [#3944](https://github.com/dmdorman/hero6e-foundryvtt/issues/3944)
+- Fix 5e HTH attacks without advantages. [#3956](https://github.com/dmdorman/hero6e-foundryvtt/issues/3956)
 
 ### Version 4.2.20 20260314
 
