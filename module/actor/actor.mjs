@@ -2542,7 +2542,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                             // Precheck to make sure we have a supported XMLID
                             const baseInfo = getPowerInfo({
                                 xmlid: system.XMLID,
-                                is5e: this.is5e,
+                                xmlTag: system.xmlTag,
+                                actor: this,
                             });
                             if (!baseInfo) {
                                 ui.notifications.error(
@@ -2619,8 +2620,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                                             if (system2.XMLID) {
                                                 const power = getPowerInfo({
                                                     xmlid: system2.XMLID,
-                                                    actor: this,
                                                     xmlTag: key,
+                                                    actor: this,
                                                 });
                                                 if (!power) {
                                                     ui.notifications.error(
