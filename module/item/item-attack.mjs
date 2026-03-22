@@ -12,7 +12,7 @@ import { ItemAttackFormApplicationV2 } from "../applications/item/item-attack-ap
 import { ItemAttackClubWeaponApplicationV2 } from "../applications/item/item-attack-application-club-weapon.mjs";
 
 import { HeroSystem6eItem, requiresACharacteristicRollCheck, rollAblativeActivationCheck } from "../item/item.mjs";
-import { rollRequiresASkillRollCheck } from "./item-requires-roll.mjs";
+import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
@@ -415,7 +415,7 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
             // Requires A Roll? Only include if successful.
             // PH: FIXME: This should store the active state until the next phase? DCV and DC should,
             //            presumably, also not be active for the next phase.
-            // if (!(await rollRequiresASkillRollCheck(pslItem))) {
+            // if (!(await isActivatedForThisUse(pslItem))) {
             //     continue;
             // }
 
@@ -488,7 +488,7 @@ export async function addAttackCslsIntoToHitRoll(action, attackHeroRoller, _item
         // Requires A Roll? Only include if successful.
         // PH: FIXME: This should store the active state until the next phase? DCV and DC should,
         //            presumably, also not be active for the next phase.
-        if (!(await rollRequiresASkillRollCheck(csl.item))) {
+        if (!(await isActivatedForThisUse(csl.item))) {
             continue;
         }
 
@@ -554,7 +554,7 @@ async function addAttackHitLocationsIntoToHitRoll(item, attackHeroRoller, option
             // Requires A Roll? Only include if successful.
             // PH: FIXME: This should store the active state until the next phase? DCV and DC should,
             //            presumably, also not be active for the next phase.
-            if (!(await rollRequiresASkillRollCheck(psl))) {
+            if (!(await isActivatedForThisUse(psl))) {
                 continue;
             }
 
@@ -871,7 +871,7 @@ async function doSingleTargetActionToHit(action, options) {
     }
 
     // Does base item Requires A Rolls
-    const attackItemRSR = await rollRequiresASkillRollCheck(item, {
+    const attackItemRSR = await isActivatedForThisUse(item, {
         showUI: true,
         resourcesRequired,
         resourcesUsedDescription,
@@ -885,7 +885,7 @@ async function doSingleTargetActionToHit(action, options) {
         item.system._active?.__originalUuid === item.effectiveAttackItem.system._active?.__originalUuid;
     const effectiveAttackItemRSR =
         !attackItemAndEffectiveItemAreSame &&
-        (await rollRequiresASkillRollCheck(item.effectiveAttackItem, {
+        (await isActivatedForThisUse(item.effectiveAttackItem, {
             showUI: true,
             resourcesRequired,
             resourcesUsedDescription,
@@ -2844,7 +2844,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         const rar = defense.findModsByXmlid("EVERYPHASE") || defense.findModsByXmlid("ACTIVATIONROLL");
         let rarSuccess = true;
         if (rar) {
-            rarSuccess = await rollRequiresASkillRollCheck(defense);
+            rarSuccess = await isActivatedForThisUse(defense);
         }
 
         const ablative = defense.findModsByXmlid("ABLATIVE");

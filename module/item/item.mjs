@@ -45,7 +45,7 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
 import { tagObjectForPersistence } from "../migration.mjs";
-import { rollRequiresASkillRollCheck } from "./item-requires-roll.mjs";
+import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -1117,7 +1117,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             const isSkill = powerInfo?.type.includes("skill");
 
             if (hasSuccessRoll && isSkill) {
-                if (!(await rollRequiresASkillRollCheck(this))) {
+                if (!(await isActivatedForThisUse(this))) {
                     return;
                 }
 
@@ -1410,7 +1410,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             token: options.token,
         });
 
-        const success = await rollRequiresASkillRollCheck(this, options.event);
+        const success = await isActivatedForThisUse(this, options.event);
         if (!success) {
             const chatData = {
                 author: game.user._id,

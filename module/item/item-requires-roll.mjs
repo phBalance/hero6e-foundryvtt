@@ -265,7 +265,11 @@ function getRequiredCharacteristicKey(rar, item) {
  *
  */
 // PH: FIXME: The name of the function is not what it is doing. It is not checking if it requires a roll...
-export async function rollRequiresASkillRollCheck(item, options = {}) {
+export async function isActivatedForThisUse(item, options = {}) {
+    // if(!item.isActive) {
+    //     return false;
+    // }
+
     const rar = item.modifiers.find((o) => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL");
     if (!rar) {
         return true;
