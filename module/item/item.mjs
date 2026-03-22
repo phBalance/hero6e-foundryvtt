@@ -1295,15 +1295,21 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return;
         }
 
+        // If this item is "used" EVERYPHASE or via ACTIVATIONROLL (like armors) then we
+        // do not need to spend resources at this time.
+        const activationRoll = this.findModsByXmlid("EVERYPHASE") || this.findModsByXmlid("ACTIVATIONROLL");
+
         // Make sure there are enough resources and consume them
         const {
             error: resourceError,
             warning: resourceWarning,
             resourcesUsedDescription,
             resourcesUsedDescriptionRenderedRoll,
-        } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
-            noResourceUse: overrideCanAct,
-        });
+        } = activationRoll
+            ? {}
+            : await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
+                  noResourceUse: overrideCanAct,
+              });
         if (resourceError) {
             return ui.notifications.error(`${item.name} ${resourceError}`);
         } else if (resourceWarning) {
@@ -1410,7 +1416,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             token: options.token,
         });
 
-        const success = await isActivatedForThisUse(this, options.event);
+        const success = activationRoll || (await isActivatedForThisUse(this, options.event));
         if (!success) {
             const chatData = {
                 author: game.user._id,
@@ -1431,7 +1437,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: `${
                 resourcesUsedDescription ? `Spent ${resourcesUsedDescription} to activate` : "Activated "
-            } ${item.name}${resourcesUsedDescriptionRenderedRoll}`,
+            } ${item.name}${resourcesUsedDescriptionRenderedRoll ?? ""}`,
             whisper: whisperUserTargetsForActor(item.actor),
             speaker,
         };
