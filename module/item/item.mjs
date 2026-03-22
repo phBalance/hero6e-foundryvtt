@@ -7394,8 +7394,17 @@ export function buildEffectiveObject(effectiveObjectParameters) {
             // 6e only: The HA becomes the base attack item.
             // PH: FIXME: Need to consider STRMINIMUM
             const haBaseCost = hthAttack._basePoints;
+
+            // 5e requires that advantaged HAs need to have matching STR advantages or more unmodified active points to be able to use them.
+            // PH: FIXME: We have no way to determine STR's advantages yet but we could theoretically have them via Naked Advantages etc.
+            const haHasExtraAdvantages = hthAttack.advantages.length > 0;
+
             // If 5e and can't use, generate a warning. Otherwise link it in.
-            if (hthAttack.is5e && haBaseCost < effectiveItemActivePointsBeforeHthAndNaAdvantages) {
+            if (
+                hthAttack.is5e &&
+                haHasExtraAdvantages &&
+                haBaseCost < effectiveItemActivePointsBeforeHthAndNaAdvantages
+            ) {
                 // Fire and forget
                 ui.notifications.warn(
                     `${hthAttack.detailedName()} has fewer unmodified active points (${haBaseCost}) than STR (${effectiveItemActivePointsBeforeHthAndNaAdvantages}). Advantages do not apply.`,

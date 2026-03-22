@@ -2542,7 +2542,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                             // Precheck to make sure we have a supported XMLID
                             const baseInfo = getPowerInfo({
                                 xmlid: system.XMLID,
-                                is5e: this.is5e,
+                                xmlTag: system.xmlTag,
+                                actor: this,
                             });
                             if (!baseInfo) {
                                 ui.notifications.error(
@@ -2619,8 +2620,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                                             if (system2.XMLID) {
                                                 const power = getPowerInfo({
                                                     xmlid: system2.XMLID,
-                                                    actor: this,
                                                     xmlTag: key,
+                                                    actor: this,
                                                 });
                                                 if (!power) {
                                                     ui.notifications.error(
@@ -3879,11 +3880,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // that we are unlikely able to decode heroic status.
         // NOTE: Older HD used "Main" as the template type - not sure what it means
 
-        // CAREFUL: the template type is only loosly tied to actor.type
-        // TODO: See if we can tighly couple the tempalte to actor.type
+        // CAREFUL: the template type is only loosely tied to actor.type
+        // TODO: See if we can tighly couple the template to actor.type
 
         // Templates can extend other templates.
-        // Some HDC files include custom tempalte info that we currently ignore.
+        // Some HDC files include custom template info that we currently ignore.
 
         return this.system.CHARACTER?.TEMPLATE.name;
     }
@@ -3891,7 +3892,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     get _templateTypeAbreviation() {
         // Heroic or SuperHeroic
         // CAREFUL: the template type is only loosly tied to actor.type
-        // TODO: See if we can tighly couple the tempalte to actor.type
+        // TODO: See if we can tighly couple the template to actor.type
 
         // There are 2 types that start with A (AI, and Automaton) so distinguish between them
         switch (this._templateType) {
@@ -3924,6 +3925,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 // Custom Template based on Main such as ZoriaAmari.HDC
                 console.warn(`Unhandled template=${this._templateType}`);
                 return "";
+
+            case "builtIn.Normal.hdt":
+                return "n";
 
             case "builtIn.Superheroic.hdt":
             case "builtIn.Superheroic6E.hdt":
