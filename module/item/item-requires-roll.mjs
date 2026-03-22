@@ -2,6 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { calculateDicePartsForItem } from "../utility/damage.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
+import { tokenEducatedGuess } from "../utility/util.mjs";
 
 const backgroundSkillKeys = Object.freeze({
     // matches RaR OPTION to XMLID
@@ -275,6 +276,37 @@ export async function isActivatedForThisUse(item, options = {}) {
         return true;
     }
 
+    const actor = item.actor;
+    const token = options.token ?? tokenEducatedGuess({ actor });
+    const speaker = ChatMessage.getSpeaker({ actor, token });
+
+    // Sectional Defense will bypass the roll
+    if (options.hitLocationTotal) {
+        const activationRoll = item.modifiers.find((o) => o.XMLID === "EVERYPHASE" || o.XMLID === "ACTIVATIONROLL");
+        if (activationRoll) {
+            // The comment should contain hit location details.  For example "locations 1-18".
+            const hitLocationMatch = activationRoll.COMMENTS?.match(/locations (\d+)-(\d+)/i);
+            if (hitLocationMatch) {
+                // We have confirmed we have valid Sectional Defense
+                const success =
+                    options.hitLocationTotal >= hitLocationMatch[1] && options.hitLocationTotal <= hitLocationMatch[2];
+
+                const chatData = {
+                    style: CONST.CHAT_MESSAGE_STYLES.IC,
+                    author: game.user._id,
+                    content: `The sectional defense from ${item.name} ${success ? "successfully applied" : "failed to apply"}`,
+                    speaker: speaker,
+                };
+                await ChatMessage.create(chatData);
+                return success;
+            } else {
+                console.warn(
+                    `Check for Sectional Defense failed, expected "locations 1-18" in the COMMENTS of ${activationRoll.NAME ?? activationRoll.ALIAS ?? activationRoll.XMLID}.`,
+                );
+            }
+        }
+    }
+
     // FIXME: This doesn't support 2 RAR. See https://github.com/dmdorman/hero6e-foundryvtt/issues/3873
 
     // todo why OPTION and not OPTIONID to look for background skills (OPTIONID can't be altered by user)
@@ -309,10 +341,6 @@ export async function isActivatedForThisUse(item, options = {}) {
                     <br>Put the name of the ${typeOfRollRequired} into the Options or Comments of the Requires A Roll modifier for the best results.`,
                 );
                 if (!overrideCanAct) {
-                    const actor = item.actor;
-                    const token = actor.token;
-                    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-                    speaker.alias = actor.name;
                     const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
 
                     const chatData = {
@@ -408,10 +436,6 @@ export async function isActivatedForThisUse(item, options = {}) {
         succeeded = true;
         cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
     }
-
-    const actor = item.actor;
-    const token = actor.token;
-    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
 
     if (!succeeded && options.resourcesUsedDescription) {
         cardHtml += `Spent ${options.resourcesUsedDescription}.`;
