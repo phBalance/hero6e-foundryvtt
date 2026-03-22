@@ -2539,6 +2539,19 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 if (heroJson.CHARACTER[itemTag]) {
                     for (const system of heroJson.CHARACTER[itemTag]) {
                         try {
+                            // Precheck to make sure we have a supported XMLID
+                            const baseInfo = getPowerInfo({
+                                xmlid: system.XMLID,
+                                is5e: this.is5e,
+                            });
+                            if (!baseInfo) {
+                                ui.notifications.error(
+                                    `${system.NAME || system.ALIAS} [${system.XMLID}] is an unsupported ${this.is5e ? "5e" : "6e"} power and was excluded from the upload. Please report.`,
+                                    { permanent: true },
+                                );
+                                continue;
+                            }
+
                             system.is5e = this.is5e;
                             if (system.XMLID === "COMPOUNDPOWER") {
                                 for (const _modifier of system.MODIFIER || []) {
@@ -2610,10 +2623,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                                                     xmlTag: key,
                                                 });
                                                 if (!power) {
-                                                    await ui.notifications.error(
-                                                        `${this.name}/${itemData.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+                                                    ui.notifications.error(
+                                                        `${system.NAME}/${system2.NAME}/${system2.XMLID} is an unsupported ${this.is5e ? "5e" : "6e"} power and was excluded from the upload. Please report.`,
                                                         {
-                                                            console: true,
                                                             permanent: true,
                                                         },
                                                     );

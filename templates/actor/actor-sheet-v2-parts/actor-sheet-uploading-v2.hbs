@@ -1,0 +1,16 @@
+{{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}
+    <div class="uploading">
+        <div>
+            {{#if (getScopedFlagValue actor @root/gameSystemId "uploadingError")}}
+                <span style="color:red;font-size:48px">Upload failed, please Report</span>
+                <span style="color:red;">
+                    <pre>{{{getScopedFlagValue actor @root/gameSystemId "uploadingError"}}}</pre>
+                </span>
+            {{else}}
+                <span style="padding:20px;font-size:48px">Upload in progress</span>
+            {{/if}}
+        </div>
+    </div>
+{{else}}
+    <div></div>
+{{/if}}
