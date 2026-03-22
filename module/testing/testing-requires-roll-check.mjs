@@ -133,6 +133,573 @@ export function registerRequiresRollCheckTests(quench) {
                     });
                 });
 
+                describe("5e - activation roll", function () {
+                    const contents = `
+                        <?xml version="1.0" encoding="UTF-16"?>
+                        <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
+                        <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
+                        <CHARACTER_INFO CHARACTER_NAME="Test 5e Activation Roll" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.46224760379584" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                            <BACKGROUND />
+                            <PERSONALITY />
+                            <QUOTE />
+                            <TACTICS />
+                            <CAMPAIGN_USE />
+                            <APPEARANCE />
+                            <NOTES1 />
+                            <NOTES2 />
+                            <NOTES3 />
+                            <NOTES4 />
+                            <NOTES5 />
+                        </CHARACTER_INFO>
+                        <CHARACTERISTICS>
+                            <STR XMLID="STR" ID="1774142627887" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </STR>
+                            <DEX XMLID="DEX" ID="1774142627915" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </DEX>
+                            <CON XMLID="CON" ID="1774142627900" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </CON>
+                            <BODY XMLID="BODY" ID="1774142628378" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </BODY>
+                            <INT XMLID="INT" ID="1774142628524" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </INT>
+                            <EGO XMLID="EGO" ID="1774142628258" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </EGO>
+                            <PRE XMLID="PRE" ID="1774142628046" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </PRE>
+                            <COM XMLID="COM" ID="1774142628559" BASECOST="0.0" LEVELS="0" ALIAS="COM" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </COM>
+                            <PD XMLID="PD" ID="1774142628390" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </PD>
+                            <ED XMLID="ED" ID="1774142628238" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </ED>
+                            <SPD XMLID="SPD" ID="1774142628459" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </SPD>
+                            <REC XMLID="REC" ID="1774142627846" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </REC>
+                            <END XMLID="END" ID="1774142628189" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </END>
+                            <STUN XMLID="STUN" ID="1774142627957" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </STUN>
+                            <RUNNING XMLID="RUNNING" ID="1774142628084" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </RUNNING>
+                            <SWIMMING XMLID="SWIMMING" ID="1774142627962" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </SWIMMING>
+                            <LEAPING XMLID="LEAPING" ID="1774142628064" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </LEAPING>
+                        </CHARACTERISTICS>
+                        <SKILLS>
+                            <SKILL XMLID="ACROBATICS" ID="1774142644678" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 8-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144246591" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774144750794" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 8- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144800582" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774144800569" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774146160475" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 8- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146299672" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774146302202" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="BURNOUT" ID="1774146303922" BASECOST="0.5" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774143298339" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 9-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144255902" BASECOST="-1.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774144777528" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 9- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144833320" BASECOST="-1.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774144833307" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774146165573" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 9- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146286632" BASECOST="-1.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774146291491" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="BURNOUT" ID="1774146292690" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774143301295" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 10-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144260607" BASECOST="-1.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="10" OPTIONID="10" OPTION_ALIAS="10-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774144781077" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 10- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144854707" BASECOST="-1.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="10" OPTIONID="10" OPTION_ALIAS="10-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774144863126" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774146171326" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 10- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146274809" BASECOST="-1.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="10" OPTIONID="10" OPTION_ALIAS="10-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774146277740" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="BURNOUT" ID="1774146279691" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774143303272" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 11-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144268402" BASECOST="-1.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774144783547" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 11- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144874298" BASECOST="-1.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774144874285" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774146176105" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 11- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146263211" BASECOST="-1.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774146266046" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="BURNOUT" ID="1774146267964" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774143304943" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 12-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144274027" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774144786628" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 12- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144890805" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774144890792" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774146181084" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 12- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146251051" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774146255358" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="BURNOUT" ID="1774146256989" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774143306539" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 13-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144280054" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="13" OPTIONID="13" OPTION_ALIAS="13-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774144788939" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 13- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144908728" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="13" OPTIONID="13" OPTION_ALIAS="13-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774144908715" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774146184997" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 13- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146238059" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="13" OPTIONID="13" OPTION_ALIAS="13-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774146241447" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="BURNOUT" ID="1774146243214" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774143314132" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 14-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144285000" BASECOST="-0.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774144791152" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 14- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144921017" BASECOST="-0.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774144921004" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774146189432" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 14- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146222357" BASECOST="-0.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774146225976" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="BURNOUT" ID="1774146227583" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774143316149" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="21" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 15-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144290342" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774144793614" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="22" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 15- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144932019" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774144932006" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                            <SKILL XMLID="ACROBATICS" ID="1774146194130" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 15- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146196278" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="JAMMED" ID="1774146203457" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                                <ADDER XMLID="BURNOUT" ID="1774146204904" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </SKILL>
+                        </SKILLS>
+                        <PERKS />
+                        <TALENTS />
+                        <MARTIALARTS />
+                        <POWERS />
+                        <DISADVANTAGES />
+                        <EQUIPMENT />
+                        </CHARACTER>
+                        `;
+                    let actor;
+                    let acrobaticsActivation8Less;
+                    let acrobaticsActivation9Less;
+                    let acrobaticsActivation10Less;
+                    let acrobaticsActivation11Less;
+                    let acrobaticsActivation12Less;
+                    let acrobaticsActivation13Less;
+                    let acrobaticsActivation14Less;
+                    let acrobaticsActivation15Less;
+
+                    let acrobaticsActivation8LessJamming;
+                    let acrobaticsActivation9LessJamming;
+                    let acrobaticsActivation10LessJamming;
+                    let acrobaticsActivation11LessJamming;
+                    let acrobaticsActivation12LessJamming;
+                    let acrobaticsActivation13LessJamming;
+                    let acrobaticsActivation14LessJamming;
+                    let acrobaticsActivation15LessJamming;
+
+                    let acrobaticsActivation8LessJammingBurnout;
+                    let acrobaticsActivation9LessJammingBurnout;
+                    let acrobaticsActivation10LessJammingBurnout;
+                    let acrobaticsActivation11LessJammingBurnout;
+                    let acrobaticsActivation12LessJammingBurnout;
+                    let acrobaticsActivation13LessJammingBurnout;
+                    let acrobaticsActivation14LessJammingBurnout;
+                    let acrobaticsActivation15LessJammingBurnout;
+
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+
+                        acrobaticsActivation8Less = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 8-",
+                        );
+                        acrobaticsActivation9Less = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 9-",
+                        );
+                        acrobaticsActivation10Less = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 10-",
+                        );
+                        acrobaticsActivation11Less = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 11-",
+                        );
+                        acrobaticsActivation12Less = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 12-",
+                        );
+                        acrobaticsActivation13Less = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 13-",
+                        );
+                        acrobaticsActivation14Less = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 14-",
+                        );
+                        acrobaticsActivation15Less = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 15-",
+                        );
+
+                        acrobaticsActivation8LessJamming = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 8- Jamming",
+                        );
+                        acrobaticsActivation9LessJamming = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 9- Jamming",
+                        );
+                        acrobaticsActivation10LessJamming = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 10- Jamming",
+                        );
+                        acrobaticsActivation11LessJamming = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 11- Jamming",
+                        );
+                        acrobaticsActivation12LessJamming = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 12- Jamming",
+                        );
+                        acrobaticsActivation13LessJamming = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 13- Jamming",
+                        );
+                        acrobaticsActivation14LessJamming = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 14- Jamming",
+                        );
+                        acrobaticsActivation15LessJamming = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 15- Jamming",
+                        );
+
+                        acrobaticsActivation8LessJammingBurnout = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 8- Jamming Burnout",
+                        );
+                        acrobaticsActivation9LessJammingBurnout = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 9- Jamming Burnout",
+                        );
+                        acrobaticsActivation10LessJammingBurnout = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 10- Jamming Burnout",
+                        );
+                        acrobaticsActivation11LessJammingBurnout = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 11- Jamming Burnout",
+                        );
+                        acrobaticsActivation12LessJammingBurnout = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 12- Jamming Burnout",
+                        );
+                        acrobaticsActivation13LessJammingBurnout = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 13- Jamming Burnout",
+                        );
+                        acrobaticsActivation14LessJammingBurnout = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 14- Jamming Burnout",
+                        );
+                        acrobaticsActivation15LessJammingBurnout = actor.items.find(
+                            (item) => item.name === "Acrobatics Activation 15- Jamming Burnout",
+                        );
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    describe.only("cost", function () {
+                        describe("acrobatics with activation roll", function () {
+                            it("should have correct cost activation 8-", function () {
+                                expect(acrobaticsActivation8Less.realCost).to.equal(14);
+                            });
+
+                            it("should have correct cost activation 9-", function () {
+                                expect(acrobaticsActivation9Less.realCost).to.equal(17);
+                            });
+
+                            it("should have correct cost activation 10-", function () {
+                                expect(acrobaticsActivation10Less.realCost).to.equal(19);
+                            });
+
+                            it("should have correct cost activation 11-", function () {
+                                expect(acrobaticsActivation11Less.realCost).to.equal(21);
+                            });
+
+                            it("should have correct cost activation 12-", function () {
+                                expect(acrobaticsActivation12Less.realCost).to.equal(24);
+                            });
+
+                            it("should have correct cost activation 13-", function () {
+                                expect(acrobaticsActivation13Less.realCost).to.equal(24);
+                            });
+
+                            it("should have correct cost activation 14-", function () {
+                                expect(acrobaticsActivation14Less.realCost).to.equal(29);
+                            });
+
+                            it("should have correct cost activation 15-", function () {
+                                expect(acrobaticsActivation15Less.realCost).to.equal(34);
+                            });
+                        });
+
+                        describe("acrobatics with activation roll jamming", function () {
+                            it("should have correct cost activation 8- Jamming", function () {
+                                expect(acrobaticsActivation8LessJamming.realCost).to.equal(12);
+                            });
+
+                            it("should have correct cost activation 9- Jamming", function () {
+                                expect(acrobaticsActivation9LessJamming.realCost).to.equal(14);
+                            });
+
+                            it("should have correct cost activation 10- Jamming", function () {
+                                expect(acrobaticsActivation10LessJamming.realCost).to.equal(16);
+                            });
+
+                            it("should have correct cost activation 11- Jamming", function () {
+                                expect(acrobaticsActivation11LessJamming.realCost).to.equal(17);
+                            });
+
+                            it("should have correct cost activation 12- Jamming", function () {
+                                expect(acrobaticsActivation12LessJamming.realCost).to.equal(19);
+                            });
+
+                            it("should have correct cost activation 13- Jamming", function () {
+                                expect(acrobaticsActivation13LessJamming.realCost).to.equal(19);
+                            });
+
+                            it("should have correct cost activation 14- Jamming", function () {
+                                expect(acrobaticsActivation14LessJamming.realCost).to.equal(21);
+                            });
+
+                            it("should have correct cost activation 15- Jamming", function () {
+                                expect(acrobaticsActivation15LessJamming.realCost).to.equal(24);
+                            });
+                        });
+
+                        describe("acrobatics with activation roll jamming burnout", function () {
+                            it("should have correct cost activation 8- Jamming Burnout", function () {
+                                expect(acrobaticsActivation8LessJammingBurnout.realCost).to.equal(14);
+                            });
+
+                            it("should have correct cost activation 9- Jamming Burnout", function () {
+                                expect(acrobaticsActivation9LessJammingBurnout.realCost).to.equal(16);
+                            });
+
+                            it("should have correct cost activation 10- Jamming Burnout", function () {
+                                expect(acrobaticsActivation10LessJammingBurnout.realCost).to.equal(17);
+                            });
+
+                            it("should have correct cost activation 11- Jamming Burnout", function () {
+                                expect(acrobaticsActivation11LessJammingBurnout.realCost).to.equal(19);
+                            });
+
+                            it("should have correct cost activation 12- Jamming Burnout", function () {
+                                expect(acrobaticsActivation12LessJammingBurnout.realCost).to.equal(21);
+                            });
+
+                            it("should have correct cost activation 13- Jamming Burnout", function () {
+                                expect(acrobaticsActivation13LessJammingBurnout.realCost).to.equal(21);
+                            });
+
+                            it("should have correct cost activation 14- Jamming Burnout", function () {
+                                expect(acrobaticsActivation14LessJammingBurnout.realCost).to.equal(24);
+                            });
+
+                            it("should have correct cost activation 15- Jamming Burnout", function () {
+                                expect(acrobaticsActivation15LessJammingBurnout.realCost).to.equal(29);
+                            });
+                        });
+                    });
+
+                    // Quench test suite scaffolding for Activation Roll Limitation (5e, FRed)
+                    // Based on Hero System 5e rules as described in FRed (.github/RuleBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf)
+
+                    describe.skip("Activation Roll Limitation (5e, FRed)", function () {
+                        // Activation Roll Cost Possibilities (8- to 15-)
+                        for (let n = 8; n <= 15; n++) {
+                            it.skip(`Succeeds on ${n}- activation roll`, function () {
+                                // Preconditions: Activation roll set to `${n}-`, roll <= n
+                                // Expected: Success, power activates
+                                // Rule: Activation Roll, private/RulesBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf
+                            });
+                            it.skip(`Fails on ${n}- activation roll`, function () {
+                                // Preconditions: Activation roll set to `${n}-`, roll > n
+                                // Expected: Failure, power does not activate
+                                // Rule: Activation Roll, private/RulesBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf
+                            });
+                        }
+
+                        // Special Results: Burnout and Jammed
+                        it.skip("Handles burnout on failed activation roll", function () {
+                            // Preconditions: Activation roll with Burnout Limitation, failed roll
+                            // Expected: Power is lost or disabled per Burnout rules
+                            // Rule: Burnout, private/RulesBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf
+                        });
+                        it.skip("Handles jammed on failed activation roll", function () {
+                            // Preconditions: Activation roll with Jammed Limitation, failed roll
+                            // Expected: Power is jammed and cannot be used until cleared
+                            // Rule: Jammed, private/RulesBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf
+                        });
+                        // Standard Success/Failure Scenarios
+                        it.skip("Succeeds when roll is equal to or less than activation number", function () {
+                            // Implementation goes here
+                        });
+                        it.skip("Fails when roll is greater than activation number", function () {
+                            // Implementation goes here
+                        });
+
+                        // Automatic Success/Failure
+                        it.skip("Always succeeds on a roll of 3", function () {
+                            // Implementation goes here
+                        });
+                        it.skip("Always fails on a roll of 18", function () {
+                            // Implementation goes here
+                        });
+
+                        // Modifiers
+                        it.skip("Succeeds with positive modifier applied to activation number", function () {
+                            // Implementation goes here
+                        });
+                        it.skip("Fails with negative modifier applied to activation number", function () {
+                            // Implementation goes here
+                        });
+                    });
+                });
+
                 describe("rollRequiresASkillRollCheck", function () {
                     describe("6e", function () {
                         const contents = `

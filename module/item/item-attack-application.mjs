@@ -525,7 +525,6 @@ export class ItemAttackFormApplication extends FormApplication {
         return buildEffectiveObject(effectiveObjectParameters);
     }
 
-    // PH: FIXME: Effective item is not STR for maneuvers with empty fist or the weapon for weapon maneuvers
     /**
      * Can only push and reduce so much. Make sure we're not exceeding basic boundaries for strength or the item.
      *  PH: FIXME: Should not be able to push if the power is bought to 0 END, doesn't cost END, or use charges.

@@ -2320,8 +2320,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 1 + // Images
                 1 + // Final save
                 1 + // Restore retained damage
-                1 + // CSL assignment
-                1 + // PSL assignment
+                1 + // Custom adders link/assignment
                 1 + // debugModelProps
                 1; // Not really sure why we need an extra +1
 
@@ -3088,37 +3087,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             }
             uploadProgressBar.advance(`${this.name}: Restored retained damage`, 0);
 
-            uploadProgressBar.advance(`${this.name}: Linking Combat Skill Levels`, 0);
-            const cslInitializationUpdates = [];
-            for (const csl of this.allCslSkills) {
-                const cslChangesToLink = csl.linkBasedOnCustomAdders(csl.system._source.ADDER, this.cslItems);
-                if (csl._id != null) {
-                    cslChangesToLink._id = csl._id;
-                    cslInitializationUpdates.push(cslChangesToLink);
-                } else {
-                    foundry.utils.mergeObject(csl, cslChangesToLink);
-                }
-            }
-            if (cslInitializationUpdates.length > 0) {
-                await Item.implementation.updateDocuments(cslInitializationUpdates, { parent: this });
-            }
-            uploadProgressBar.advance(`${this.name}: Linked Combat Skill Levels`, 1);
-
-            uploadProgressBar.advance(`${this.name}: Linking Penalty Skill Levels`, 0);
-            const pslInitializationUpdates = [];
-            for (const psl of this.allPslSkills) {
-                const pslChangesToLink = psl.linkBasedOnCustomAdders(psl.system._source.ADDER, this.pslItems);
-                if (psl._id != null) {
-                    pslChangesToLink._id = psl._id;
-                    pslInitializationUpdates.push(pslChangesToLink);
-                } else {
-                    foundry.utils.mergeObject(psl, pslChangesToLink);
-                }
-            }
-            if (pslInitializationUpdates.length > 0) {
-                await Item.implementation.updateDocuments(pslInitializationUpdates, { parent: this });
-            }
-            uploadProgressBar.advance(`${this.name}: Linked Penalty Skill Levels`, 1);
+            uploadProgressBar.advance(`${this.name}: Linking Custom Adders`, 0);
+            await this.linkCustomAddersForUpload();
+            uploadProgressBar.advance(`${this.name}: Linked Custom Adders`, 1);
 
             if (this.id) {
                 await this.setFlag(game.system.id, "uploading", false);
@@ -3243,6 +3214,38 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 // Needed for when the delete extra items has an error.
                 await this.setFlag(game.system.id, "uploading", true);
             }
+        }
+    }
+
+    async linkCustomAddersForUpload() {
+        // CSLs
+        const cslInitializationUpdates = [];
+        for (const csl of this.allCslSkills) {
+            const cslChangesToLink = csl.linkBasedOnCustomAdders(csl.system._source.ADDER, this.cslItems);
+            if (csl._id != null) {
+                cslChangesToLink._id = csl._id;
+                cslInitializationUpdates.push(cslChangesToLink);
+            } else {
+                foundry.utils.mergeObject(csl, cslChangesToLink);
+            }
+        }
+        if (cslInitializationUpdates.length > 0) {
+            await Item.implementation.updateDocuments(cslInitializationUpdates, { parent: this });
+        }
+
+        // PSLs
+        const pslInitializationUpdates = [];
+        for (const psl of this.allPslSkills) {
+            const pslChangesToLink = psl.linkBasedOnCustomAdders(psl.system._source.ADDER, this.pslItems);
+            if (psl._id != null) {
+                pslChangesToLink._id = psl._id;
+                pslInitializationUpdates.push(pslChangesToLink);
+            } else {
+                foundry.utils.mergeObject(psl, pslChangesToLink);
+            }
+        }
+        if (pslInitializationUpdates.length > 0) {
+            await Item.implementation.updateDocuments(pslInitializationUpdates, { parent: this });
         }
     }
 

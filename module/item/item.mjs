@@ -45,7 +45,7 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
 import { tagObjectForPersistence } from "../migration.mjs";
-import { rollRequiresASkillRollCheck } from "./item-requires-roll.mjs";
+import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -882,7 +882,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // PSLs have multiple fields which are linked. Do that linking.
-        if (this.isPsl) {
+        else if (this.isPsl) {
             // Update PSLs if their ADDER array has changed (in any way)
             if (changes.system?.ADDER != null) {
                 const relinkChanges = this.linkBasedOnCustomAdders(changes.system.ADDER, this.actor?.pslItems || []);
@@ -1117,7 +1117,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             const isSkill = powerInfo?.type.includes("skill");
 
             if (hasSuccessRoll && isSkill) {
-                if (!(await rollRequiresASkillRollCheck(this))) {
+                if (!(await isActivatedForThisUse(this))) {
                     return;
                 }
 
@@ -1410,7 +1410,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             token: options.token,
         });
 
-        const success = await rollRequiresASkillRollCheck(this, options.event);
+        const success = await isActivatedForThisUse(this, options.event);
         if (!success) {
             const chatData = {
                 author: game.user._id,
@@ -5891,7 +5891,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     /**
-     * Link the item's custom adders to other items
+     * Link the item's custom adders to other items. This should only be invoked for
+     * items which support linked custom adders (eg. CSL, PSL)
      *
      * @param {HeroAdderModel[]} adders - All system.ADDER which will not be mutated
      *
@@ -7406,16 +7407,16 @@ export function buildEffectiveObject(effectiveObjectParameters) {
                 haBaseCost < effectiveItemActivePointsBeforeHthAndNaAdvantages
             ) {
                 // Fire and forget
-                ui.notifications.warn(
+                return ui.notifications.warn(
                     `${hthAttack.detailedName()} has fewer unmodified active points (${haBaseCost}) than STR (${effectiveItemActivePointsBeforeHthAndNaAdvantages}). Advantages do not apply.`,
                 );
-            } else {
-                effectiveItem.system._active.linkedAssociated ??= [];
-                effectiveItem.system._active.linkedAssociated.push({
-                    item: hthAttack,
-                    uuid: hthAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
-                });
             }
+
+            effectiveItem.system._active.linkedAssociated ??= [];
+            effectiveItem.system._active.linkedAssociated.push({
+                item: hthAttack,
+                uuid: hthAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
+            });
         });
     if (hthAttackDisabledDueToStrength) {
         ui.notifications.warn(`Must use at least 3 (½d6) STR to add a hand-to-hand attack`);

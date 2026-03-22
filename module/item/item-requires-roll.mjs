@@ -265,7 +265,11 @@ function getRequiredCharacteristicKey(rar, item) {
  *
  */
 // PH: FIXME: The name of the function is not what it is doing. It is not checking if it requires a roll...
-export async function rollRequiresASkillRollCheck(item, options = {}) {
+export async function isActivatedForThisUse(item, options = {}) {
+    // if(!item.isActive) {
+    //     return false;
+    // }
+
     const rar = item.modifiers.find((o) => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL");
     if (!rar) {
         return true;
@@ -341,30 +345,21 @@ export async function rollRequiresASkillRollCheck(item, options = {}) {
 
         roller = new HeroRoller()
             .modifyTo5e(skill.actor.system.is5e)
-            .makeEffectRoll()
-            .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0)
-            .addHalfDice(diceParts.halfDieCount >= 1 ? diceParts.halfDieCount : 0)
-            .addDiceMinus1(diceParts.d6Less1DieCount >= 1 ? diceParts.d6Less1DieCount : 0)
-            .addNumber(diceParts.constant);
+            .makeLuckRoll()
+            .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0);
 
         await roller.roll();
 
-        const lucky = roller.getEffectTerms();
-        // Each "6" rolled counts as 1 point of Luck.
-        const luck = lucky.reduce((accumulator, dieRoll) => {
-            if (dieRoll === 6) {
-                accumulator += 1;
-            }
-            return accumulator;
-        }, 0);
+        const luckTotal = roller.getLuckTotal();
         if (rar.OPTIONID === "ONELUCK") {
-            succeeded = luck >= 1;
+            succeeded = luckTotal >= 1;
         } else if (rar.OPTIONID === "TWOLUCK") {
-            succeeded = luck >= 2;
+            succeeded = luckTotal >= 2;
         } else if (rar.OPTIONID === "THREELUCK") {
-            succeeded = luck >= 3;
+            succeeded = luckTotal >= 3;
         }
-        flavor = `${item.name} (${activationFrom} rolled ${lucky} for ${luck} points) activation ${succeeded ? "succeeded" : "failed"} `;
+
+        flavor = `${item.name} (${activationFrom} rolled ${luckTotal} points) activation ${succeeded ? "succeeded" : "failed"} `;
     } else {
         if (skill) {
             // skill.system.roll is a string
