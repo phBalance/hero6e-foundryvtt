@@ -1,6 +1,6 @@
 # Releases
 
-### Version 4.3.1 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.0 20260322 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - This (and future) releases no longer support FoundryVTT V12. This release only works with FoundryVTT V13.
 - Added button to roll BREAKFALL skill after applying KNOCKBACK to regain control and not be prone. [#3557](https://github.com/dmdorman/hero6e-foundryvtt/issues/3557)
