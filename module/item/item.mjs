@@ -7407,16 +7407,16 @@ export function buildEffectiveObject(effectiveObjectParameters) {
                 haBaseCost < effectiveItemActivePointsBeforeHthAndNaAdvantages
             ) {
                 // Fire and forget
-                ui.notifications.warn(
+                return ui.notifications.warn(
                     `${hthAttack.detailedName()} has fewer unmodified active points (${haBaseCost}) than STR (${effectiveItemActivePointsBeforeHthAndNaAdvantages}). Advantages do not apply.`,
                 );
-            } else {
-                effectiveItem.system._active.linkedAssociated ??= [];
-                effectiveItem.system._active.linkedAssociated.push({
-                    item: hthAttack,
-                    uuid: hthAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
-                });
             }
+
+            effectiveItem.system._active.linkedAssociated ??= [];
+            effectiveItem.system._active.linkedAssociated.push({
+                item: hthAttack,
+                uuid: hthAttack.uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
+            });
         });
     if (hthAttackDisabledDueToStrength) {
         ui.notifications.warn(`Must use at least 3 (½d6) STR to add a hand-to-hand attack`);
