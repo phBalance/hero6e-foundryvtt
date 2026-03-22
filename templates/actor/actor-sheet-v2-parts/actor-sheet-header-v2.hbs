@@ -1,7 +1,8 @@
 {{log 'actor-sheet-header-v2' this}}
-<header class="char-header sheet-header ">
-    <div class="header-fields flexrow" style="width: 100%">
-        <div class="charname flex4" 
+<header class="char-header sheet-header">
+<div class="header-fields flexrow" 
+        style="width: 100%">
+        <div class="charname flex4 {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" 
             title='{{getScopedFlagValue actor @root/gameSystemId "file" "name"}} 
             was uploaded by {{getScopedFlagValue actor @root/gameSystemId "file" "uploadedBy"}} 
             whose file was last modified on {{getUploadLastModifiedDate actor}}'>
@@ -9,17 +10,17 @@
         </div>
 
         {{#if actor.is5e}}
-            <div class="edition fifth-ed flex0" title="5th edition {{actor._templateType}} {{actor.type}}">5{{actor._templateTypeAbreviation}}</div>
+            <div class="edition fifth-ed flex0 {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" title="5th edition {{actor._templateType}} {{actor.type}}">5{{actor._templateTypeAbreviation}}</div>
         {{else}}
-            <div class="edition sixth-ed flex0" title="6th edition {{actor._templateType}} {{actor.type}}">6{{actor._templateTypeAbreviation}}</div>
+            <div class="edition sixth-ed flex0 {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" title="6th edition {{actor._templateType}} {{actor.type}}">6{{actor._templateTypeAbreviation}}</div>
         {{/if}}
 
         {{#if actor.characterPointCost}}
-            <div class="points flex0" title="{{pointsTitle}}">{{actor._characterPointsForDisplay}}CP</div>
+            <div class="points flex0 {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" title="{{pointsTitle}}">{{actor._characterPointsForDisplay}}CP</div>
         {{/if}}
 
         {{#if actor.activePoints}}
-            <div class="points flex0" title="{{activePointsTitle}}">{{actor._activePointsForDisplay}}AP</div>
+            <div class="points flex0 {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" title="{{activePointsTitle}}">{{actor._activePointsForDisplay}}AP</div>
         {{/if}}
 
         <label class="upload-button flex0 {{#if (and isOwner (not actor.token))}}is-owner{{/if}}" 

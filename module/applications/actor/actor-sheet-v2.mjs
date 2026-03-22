@@ -336,6 +336,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-invalid-v2.hbs`,
                 scrollable: [""],
             },
+
+            uploading: {
+                template: `systems/${systemId}/templates/actor/actor-sheet-v2-parts/actor-sheet-uploading-v2.hbs`,
+                scrollable: [""],
+            },
         };
     }
 
@@ -395,6 +400,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 case "tabs":
                     for (const tabName of HeroSystemActorSheetV2.TABS.primary.tabs.map((m) => m.id)) {
                         context.tabs[tabName].cssClass = context.tabs[tabName].cssClass?.split(" ") ?? [];
+                        if (this.actor.flags[game.system.id].uploading) {
+                            context.tabs[tabName].cssClass.push("uploading-blur");
+                        }
 
                         if (!this._items[tabName] || this._items[tabName].length === 0) {
                             context.tabs[tabName].cssClass.push("empty");
@@ -457,6 +465,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     break;
                 case "analysis":
                     context.analysis = await this._prepareAnalysis();
+                    break;
+                case "uploading":
                     break;
                 default:
                     console.warn(`unhandled part=${partId}`);
@@ -750,6 +760,17 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         // The ActorSheetV2 super handles DragDrop with the .draggable class of items.
         // This includes dragging items to actor sheet and dragging withing item-list.
         super._onRender(context, options);
+
+        // Uploading class for section.window-content
+        // this.element.querySelector("section.window-content").childNodes.forEach((el) => {
+        //     if (el.className !== "uploading") {
+        //         if (this.actor.flags[game.system.id].uploading) {
+        //             el.classList.add("uploading-blur");
+        //         }
+        //     } else {
+        //         console.error(el);
+        //     }
+        // });
 
         // We will add additional DragDrop support for dragging items between different tabs (which represent different item.type).
         this.#dragDrop.forEach((d) => d.bind(this.element));

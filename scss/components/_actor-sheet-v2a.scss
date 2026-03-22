@@ -3,6 +3,28 @@
     min-width: 500px;
 }
 
+.herosystem6e.actor-sheet-v2a .uploading-blur {
+    filter: blur(2px) grayscale(1);
+}
+
+.herosystem6e.actor-sheet-v2a [data-application-part="uploading"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    pointer-events: none;
+
+    div {
+        pointer-events: all;
+        background: rgb(255 255 255 / 70%);
+        padding: 5px;
+    }
+}
+
 .herosystem6e.actor-sheet-v2a.minimizing,
 .herosystem6e.actor-sheet-v2a.maximizing,
 .herosystem6e.actor-sheet-v2a.minimized {
