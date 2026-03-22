@@ -882,7 +882,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // PSLs have multiple fields which are linked. Do that linking.
-        if (this.isPsl) {
+        else if (this.isPsl) {
             // Update PSLs if their ADDER array has changed (in any way)
             if (changes.system?.ADDER != null) {
                 const relinkChanges = this.linkBasedOnCustomAdders(changes.system.ADDER, this.actor?.pslItems || []);
@@ -5891,7 +5891,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     /**
-     * Link the item's custom adders to other items
+     * Link the item's custom adders to other items. This should only be invoked for
+     * items which support linked custom adders (eg. CSL, PSL)
      *
      * @param {HeroAdderModel[]} adders - All system.ADDER which will not be mutated
      *
