@@ -2,7 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroRoller } from "../utility/dice.mjs";
 import { calculateDicePartsForItem } from "../utility/damage.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
-import { tokenEducatedGuess } from "../utility/util.mjs";
+import { tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 
 const backgroundSkillKeys = Object.freeze({
     // matches RaR OPTION to XMLID
@@ -280,31 +280,60 @@ export async function isActivatedForThisUse(item, options = {}) {
     const token = options.token ?? tokenEducatedGuess({ actor });
     const speaker = ChatMessage.getSpeaker({ actor, token });
 
-    // Sectional Defense will bypass the roll
-    if (options.hitLocationTotal) {
-        const activationRoll = item.modifiers.find((o) => o.XMLID === "EVERYPHASE" || o.XMLID === "ACTIVATIONROLL");
-        if (activationRoll) {
-            // The comment should contain hit location details.  For example "locations 1-18".
-            const hitLocationMatch = activationRoll.COMMENTS?.match(/locations (\d+)-(\d+)/i);
-            if (hitLocationMatch) {
-                // We have confirmed we have valid Sectional Defense
-                const success =
-                    options.hitLocationTotal >= hitLocationMatch[1] && options.hitLocationTotal <= hitLocationMatch[2];
+    // Sectional Defense is new, so putting a safety TRY/CATCH around the new code
+    try {
+        function determineSectionalDefenses(comment, hitLocationNum) {
+            // We should always have a hitLocationNum, being paranoid
+            if (!hitLocationNum) {
+                console.error(`hitLocationNum was not found`);
+                return null;
+            }
 
-                const chatData = {
-                    style: CONST.CHAT_MESSAGE_STYLES.IC,
-                    author: game.user._id,
-                    content: `The sectional defense from ${item.name} ${success ? "successfully applied" : "failed to apply"}`,
-                    speaker: speaker,
+            // Expecting comment to contain hit location details.  For example "locations 1-18".
+            // TODO: Support "locations 3-5, 9-14, 16-18"
+            // TODO: Move this to be an item getter so we can use it in HeroValidation to determine if the RAR 8- 14-, etc are correct.
+            const hitLocationMatch = comment?.match(/locations (\d+)-(\d+)/i);
+            if (hitLocationMatch) {
+                return {
+                    // lower: hitLocationMatch[1], // lower/upper are not used and should be array of ranges if we want to keep
+                    // upper: hitLocationMatch[2],
+                    success: hitLocationNum >= hitLocationMatch[1] && hitLocationNum <= hitLocationMatch[2],
                 };
-                await ChatMessage.create(chatData);
-                return success;
-            } else {
-                console.warn(
-                    `Check for Sectional Defense failed, expected "locations 1-18" in the COMMENTS of ${activationRoll.NAME ?? activationRoll.ALIAS ?? activationRoll.XMLID}.`,
+            }
+            console.warn(`Sectional Defense location matching failed`);
+            return null;
+        }
+
+        // Sectional Defense will bypass the roll
+        if (options.damageRoller) {
+            const activationRoll =
+                item.modifiers.find((o) => o.XMLID === "ACTIVATIONROLL") ?? item.findModsByXmlid("EVERYPHASE")?.parent;
+            if (activationRoll) {
+                const sectionalDefenses = determineSectionalDefenses(
+                    activationRoll.COMMENTS,
+                    options.damageRoller.getHitLocation().num,
                 );
+
+                if (sectionalDefenses) {
+                    // ChatMessage
+                    const chatData = {
+                        style: CONST.CHAT_MESSAGE_STYLES.IC,
+                        author: game.user._id,
+                        content: `The sectional defense from <b>${item.name}</b> ${sectionalDefenses.success ? "successfully applied" : "failed to apply"}`,
+                        speaker: speaker,
+                        whisper: whisperUserTargetsForActor(actor),
+                    };
+                    await ChatMessage.create(chatData);
+                    return sectionalDefenses.success;
+                } else {
+                    console.warn(
+                        `Check for Sectional Defense failed, expected "locations x-y" in the COMMENTS. Will use standard activation roll instead.`,
+                    );
+                }
             }
         }
+    } catch (e) {
+        console.error(`Unexpected sectional defense error`, e);
     }
 
     // FIXME: This doesn't support 2 RAR. See https://github.com/dmdorman/hero6e-foundryvtt/issues/3873

@@ -231,6 +231,7 @@ export class HeroRoller {
 
         this._hitLocation = {
             name: "body",
+            num: 0, // Body isn't really a valid HitLocation but we need a placeholder
             side: "",
             fullName: "body",
             stunMultiplier: 1,
@@ -1184,6 +1185,7 @@ export class HeroRoller {
             (this._type === HeroRoller.ROLL_TYPE.NORMAL || this._type === HeroRoller.ROLL_TYPE.KILLING)
         ) {
             let locationName;
+            let locationRollTotal = 0;
 
             if (this._alreadyHitLocation === "none") {
                 // Not a placed shot or special hit location
@@ -1192,8 +1194,7 @@ export class HeroRoller {
                     .makeBasicRoll()
                     .addDice(3);
                 await this._hitLocationRoller.roll();
-                const locationRollTotal = this._hitLocationRoller.getBasicTotal();
-
+                locationRollTotal = this._hitLocationRoller.getBasicTotal();
                 locationName = CONFIG.HERO.hitLocationsToHit[locationRollTotal];
             } else if (CONFIG.HERO.isSpecialHitLocation(this._alreadyHitLocation)) {
                 // Special hit location
@@ -1203,12 +1204,14 @@ export class HeroRoller {
                     .addDice(CONFIG.HERO.hitLocations[this._alreadyHitLocation].dice)
                     .addNumber(CONFIG.HERO.hitLocations[this._alreadyHitLocation].constant);
                 await this._hitLocationRoller.roll();
-                const locationRollTotal = this._hitLocationRoller.getBasicTotal();
-
+                locationRollTotal = this._hitLocationRoller.getBasicTotal();
                 locationName = CONFIG.HERO.hitLocationsToHit[locationRollTotal];
             } else {
                 // Placed shot
                 locationName = this._alreadyHitLocation;
+                locationRollTotal = parseInt(
+                    Object.entries(CONFIG.HERO.hitLocationsToHit).find((o) => o[1] === locationName)?.[0],
+                );
             }
 
             let locationSide;
@@ -1232,6 +1235,7 @@ export class HeroRoller {
 
             this._hitLocation = {
                 name: locationName,
+                num: locationRollTotal,
                 side: locationSide,
                 fullName:
                     CONFIG.HERO.sidedLocations.has(locationName) && this._useHitLocationSide

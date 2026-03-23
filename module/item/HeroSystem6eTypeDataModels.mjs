@@ -1780,7 +1780,7 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
     get baseInfo() {
         // cache getPowerInfo
         const key = this.schema.name?.toUpperCase();
-        this.#baseInfo ??= getPowerInfo({ XMLID: key, is5e: this.actor?.is5e, xmlTag: key });
+        this.#baseInfo ??= getPowerInfo({ XMLID: key, actor: this.actor, xmlTag: key });
         return this.#baseInfo;
     }
 

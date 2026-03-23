@@ -1297,7 +1297,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // If this item is "used" EVERYPHASE or via ACTIVATIONROLL (like armors) then we
         // do not need to spend resources at this time.
-        const activationRoll = this.findModsByXmlid("EVERYPHASE") || this.findModsByXmlid("ACTIVATIONROLL");
+        const activationRoll =
+            this.modifiers.find((o) => o.XMLID === "ACTIVATIONROLL") ?? this.findModsByXmlid("EVERYPHASE");
 
         // Make sure there are enough resources and consume them
         const {
