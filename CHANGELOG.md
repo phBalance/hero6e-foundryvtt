@@ -1,6 +1,11 @@
 # Releases
 
-### Version 4.3.0 20260322 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.1 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Turning on (or carrying) items with ACTIVATIONROLL or that are used EVERYPHASE no longer consume resources during item toggle. This is meant to resolve issues with ARMORs that should not consume resources to put on, but do consume resources when the defense is used as part of an attack. [#1751](https://github.com/dmdorman/hero6e-foundryvtt/issues/1751)
+- Initial support for sectional defenses. Put "locations x-y" in the comments for ACTIVATIONROLL or REQUIRESAROLL. More complicated locations are not yet supported. REQUIRESAROLL also requires the "Must be made each Phase/use" adder. [#3876](https://github.com/dmdorman/hero6e-foundryvtt/issues/3876) [#1652](https://github.com/dmdorman/hero6e-foundryvtt/issues/1652)
+
+### Version 4.3.0 20260322
 
 - This (and future) releases no longer support FoundryVTT V12. This release only works with FoundryVTT V13.
 - Added button to roll BREAKFALL skill after applying KNOCKBACK to regain control and not be prone. [#3557](https://github.com/dmdorman/hero6e-foundryvtt/issues/3557)

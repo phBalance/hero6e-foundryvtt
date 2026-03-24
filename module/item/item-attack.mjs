@@ -2844,7 +2844,10 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         const rar = defense.findModsByXmlid("EVERYPHASE") || defense.findModsByXmlid("ACTIVATIONROLL");
         let rarSuccess = true;
         if (rar) {
-            rarSuccess = await isActivatedForThisUse(defense);
+            // Passing damageRoller for SectionalDefense check
+            rarSuccess = await isActivatedForThisUse(defense, {
+                damageRoller,
+            });
         }
 
         const ablative = defense.findModsByXmlid("ABLATIVE");
