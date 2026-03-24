@@ -1185,7 +1185,7 @@ export class HeroRoller {
             (this._type === HeroRoller.ROLL_TYPE.NORMAL || this._type === HeroRoller.ROLL_TYPE.KILLING)
         ) {
             let locationName;
-            let locationRollTotal = 0;
+            let locationRollTotal;
 
             if (this._alreadyHitLocation === "none") {
                 // Not a placed shot or special hit location
