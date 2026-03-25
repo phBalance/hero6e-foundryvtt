@@ -3,7 +3,7 @@
         <img class="profile-img {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" 
             src="{{actor.img}}" 
             data-edit="img" 
-            data-action="{{#if actor.isOwner}}editImage{{/if}}"
+            data-action="{{#if actor.isOwner}}updateActorImage{{/if}}"
             title="{{actor.name}}" height="100"
             width="100" 
         />

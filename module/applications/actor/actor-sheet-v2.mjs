@@ -55,6 +55,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             toggleEffect: HeroSystemActorSheetV2.#onToggleEffect,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
             toggleStatus: HeroSystemActorSheetV2.#onToggleStatus,
+            updateActorImage: HeroSystemActorSheetV2.#onUpdateActorImage,
             vpp: HeroSystemActorSheetV2.#onVpp,
         },
         //tag: "form", // The default is "div"
@@ -1556,6 +1557,30 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         await this.actor.toggleStatusEffect(status);
     }
 
+    /**
+     * Handle changing a Document's image.
+     * @param {MouseEvent} event  The click event.
+     * @returns {Promise<FilePicker>}
+     * @protected
+     */
+    static async #onUpdateActorImage(event, target) {
+        const attr = target.dataset.edit;
+        const current = foundry.utils.getProperty(this.object, attr);
+        const { img } = this.document.constructor.getDefaultArtwork?.(this.document.toObject()) ?? {};
+        const fp = new FilePicker.implementation({
+            current,
+            type: "image",
+            redirectToRoot: img ? [img] : [],
+            callback: async (path) => {
+                // Potential improvement: If we want to manage token here or separately (see DND5e sheet for potential inspiration on UI), path is 'tokenPrototype.texture.src'
+                await this.document.update({ img: path });
+            },
+            top: this.position.top + 40,
+            left: this.position.left + 10,
+        });
+        return fp.browse();
+    }
+
     #heroValidationCssForTab(items) {
         if (!items || items.length === 0) {
             return "";
@@ -1730,28 +1755,4 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     // get dragDrop() {
     //     return this.#dragDrop;
     // }
-
-    /**
-     * Handle changing a Document's image.
-     * @param {MouseEvent} event  The click event.
-     * @returns {Promise<FilePicker>}
-     * @protected
-     */
-    _onEditImage(event) {
-        const attr = event.currentTarget.dataset.edit;
-        const current = foundry.utils.getProperty(this.object, attr);
-        const { img } = this.document.constructor.getDefaultArtwork?.(this.document.toObject()) ?? {};
-        const fp = new FilePicker.implementation({
-            current,
-            type: "image",
-            redirectToRoot: img ? [img] : [],
-            callback: (path) => {
-                event.currentTarget.src = path;
-                if (this.options.submitOnChange) return this._onSubmit(event);
-            },
-            top: this.position.top + 40,
-            left: this.position.left + 10,
-        });
-        return fp.browse();
-    }
 }
