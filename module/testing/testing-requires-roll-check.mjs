@@ -645,24 +645,7 @@ export function registerRequiresRollCheckTests(quench) {
                         });
                     });
 
-                    // Quench test suite scaffolding for Activation Roll Limitation (5e, FRed)
-                    // Based on Hero System 5e rules as described in FRed (.github/RuleBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf)
-
                     describe.skip("Activation Roll Limitation (5e, FRed)", function () {
-                        // Activation Roll Cost Possibilities (8- to 15-)
-                        for (let n = 8; n <= 15; n++) {
-                            it.skip(`Succeeds on ${n}- activation roll`, function () {
-                                // Preconditions: Activation roll set to `${n}-`, roll <= n
-                                // Expected: Success, power activates
-                                // Rule: Activation Roll, private/RulesBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf
-                            });
-                            it.skip(`Fails on ${n}- activation roll`, function () {
-                                // Preconditions: Activation roll set to `${n}-`, roll > n
-                                // Expected: Failure, power does not activate
-                                // Rule: Activation Roll, private/RulesBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf
-                            });
-                        }
-
                         // Special Results: Burnout and Jammed
                         it.skip("Handles burnout on failed activation roll", function () {
                             // Preconditions: Activation roll with Burnout Limitation, failed roll
