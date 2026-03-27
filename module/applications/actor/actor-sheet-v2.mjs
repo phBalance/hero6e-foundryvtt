@@ -54,8 +54,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             toggleChevron: HeroSystemActorSheetV2.#onToggleChevron,
             toggleEffect: HeroSystemActorSheetV2.#onToggleEffect,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
+            togglePortrait: HeroSystemActorSheetV2.#onTogglePortrait,
             toggleStatus: HeroSystemActorSheetV2.#onToggleStatus,
             updateActorImage: HeroSystemActorSheetV2.#onUpdateActorImage,
+            updateTokenImage: HeroSystemActorSheetV2.#onUpdateTokenImage,
             vpp: HeroSystemActorSheetV2.#onVpp,
         },
         //tag: "form", // The default is "div"
@@ -1572,13 +1574,40 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             type: "image",
             redirectToRoot: img ? [img] : [],
             callback: async (path) => {
-                // Potential improvement: If we want to manage token here or separately (see DND5e sheet for potential inspiration on UI), path is 'tokenPrototype.texture.src'
                 await this.document.update({ img: path });
             },
             top: this.position.top + 40,
             left: this.position.left + 10,
         });
         return fp.browse();
+    }
+
+    static async #onUpdateTokenImage(event, target) {
+        const attr = target.dataset.edit;
+        const current = foundry.utils.getProperty(this.object, attr);
+        const { img } = this.document.constructor.getDefaultArtwork?.(this.document.toObject()) ?? {};
+        const fp = new FilePicker.implementation({
+            current,
+            type: "image",
+            redirectToRoot: img ? [img] : [],
+            callback: async (path) => {
+                await this.document.update({ ["prototypeToken.texture.src"]: path });
+            },
+            top: this.position.top + 40,
+            left: this.position.left + 10,
+        });
+        return fp.browse();
+    }
+
+    static async #onTogglePortrait(event, target) {
+        // The double parent node traversal here isn't great but there's not a clean way around it without a bit of a rework of the template
+        target.parentNode.parentNode.querySelectorAll(".profile-img").forEach((el) => {
+            el.classList.toggle("hidden");
+        });
+
+        target.parentNode.querySelectorAll(".profile-img-button").forEach((el) => {
+            el.classList.toggle("hidden");
+        });
     }
 
     #heroValidationCssForTab(items) {
