@@ -1359,7 +1359,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 condition: () => this.actor.isOwner,
                 callback: async (target) => {
                     const document = this._getEmbeddedDocument(target);
-                    await document.deleteDialog();
+                    await document.deleteDialog({
+                        classes: Array.from(this.classList).filter(
+                            (c) => c.includes("herosystem") || c.includes("theme"),
+                        ),
+                    });
                 },
             },
 
