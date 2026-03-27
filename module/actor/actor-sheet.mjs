@@ -1057,33 +1057,37 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         const itemId = $(event.currentTarget.closest("[data-item-id]")).data().itemId;
         const item = this.actor.items.get(itemId);
 
-        const content = `You are about to delete <b>${item.name}</b>${
-            item.childItems.length ? ` and all <b>${item.childItems.length}</b> of it's sub items` : ""
-        }. ${game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")}`;
-
-        const confirmed = await Dialog.confirm({
-            title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
-            content: content,
+        await item.deleteDialog({
+            classes: ["herosystem6e", "themed", "theme-light"],
         });
 
-        if (confirmed) {
-            // Delete subitems
-            const childDeletePromises = [];
-            for (const child of item.childItems) {
-                const child2DeletePromises = [];
-                for (const child2 of child.childItems) {
-                    child2DeletePromises.push(child2.delete());
-                }
-                await Promise.all(child2DeletePromises);
+        // const content = `You are about to delete <b>${item.name}</b>${
+        //     item.childItems.length ? ` and all <b>${item.childItems.length}</b> of it's sub items` : ""
+        // }. ${game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content")}`;
 
-                childDeletePromises.push(child.delete());
-            }
-            await Promise.all(childDeletePromises);
+        // const confirmed = await Dialog.confirm({
+        //     title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title"),
+        //     content: content,
+        // });
 
-            await item.delete();
+        // if (confirmed) {
+        //     // Delete subitems
+        //     const childDeletePromises = [];
+        //     for (const child of item.childItems) {
+        //         const child2DeletePromises = [];
+        //         for (const child2 of child.childItems) {
+        //             child2DeletePromises.push(child2.delete());
+        //         }
+        //         await Promise.all(child2DeletePromises);
 
-            this.render();
-        }
+        //         childDeletePromises.push(child.delete());
+        //     }
+        //     await Promise.all(childDeletePromises);
+
+        //     await item.delete();
+
+        //     this.render();
+        // }
     }
 
     async _onItemCreate(event) {

@@ -440,6 +440,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 case "other": // really nothing to do
                 case "invalid":
                     context.items = this._items[partId];
+                    context.searchValue = this.searchValues[partId];
                     break;
                 case "background":
                     context.enriched ??= {};
@@ -853,6 +854,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         // SEARCH
         this.element.querySelectorAll('[data-action="search"]').forEach((el) => {
             el.addEventListener("keydown", this.#debouncedSearch, { passive: true });
+            if (el.value) {
+                this.#onSearch({ target: el });
+            }
         });
 
         // DRAGDROP
@@ -1277,10 +1281,23 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     #debouncedSearch = foundry.utils.debounce(this.#onSearch.bind(this), this.constructor.SEARCH_DELAY);
 
+    searchValues = [];
+
     #onSearch(ev) {
         const filter = ev.target.value;
         const regex = new RegExp(RegExp.escape(filter), "i");
-        const itemList = ev.target.closest(".tab.active").querySelector(".item-list");
+        const itemList = ev.target.closest(".tab")?.querySelector(".item-list");
+        if (!itemList) {
+            console.error(`unable to find itemList`);
+            return;
+        }
+        const applicationPart = itemList.closest("[data-application-part]")?.dataset.applicationPart;
+        if (applicationPart) {
+            this.searchValues[applicationPart] = filter;
+        } else {
+            console.error(`unable to find applicationPart`);
+        }
+
         for (const li of itemList.children) {
             const item = this._getEmbeddedDocument(li);
             if (!item) {
@@ -1342,7 +1359,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 condition: () => this.actor.isOwner,
                 callback: async (target) => {
                     const document = this._getEmbeddedDocument(target);
-                    await document.deleteDialog();
+                    await document.deleteDialog({
+                        classes: Array.from(this.classList).filter(
+                            (c) => c.includes("herosystem") || c.includes("theme"),
+                        ),
+                    });
                 },
             },
 
@@ -1386,6 +1407,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         if (inputSearch) {
             inputSearch.value = "";
             const itemList = target.closest(".tab.active").querySelector(".item-list");
+            const applicationPart = itemList?.closest("[data-application-part]")?.dataset.applicationPart;
+            if (applicationPart) {
+                this.searchValues[applicationPart] = null;
+            } else {
+                console.error(`unable to find applicationPart`);
+            }
             for (const li of itemList.children) {
                 li.classList.remove("hidden");
             }

@@ -6963,6 +6963,67 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
     //     return canvas.templates.createPreview(templateData);
     // }
+
+    // The default deleteDialog doens't prompt for children
+    async deleteDialog(options = {}, operation = {}) {
+        // If no chidItems use the built in Foundry Delete Prompt
+        if (this.childItems.length === 0) {
+            return super.deleteDialog(options, operation);
+        }
+
+        // Custom Delete Prompt to delete container + children or keep children
+        const positionKeys = ["top", "left", "width", "height", "scale", "zIndex"];
+        if (positionKeys.some((k) => k in options)) {
+            foundry.utils.logCompatibilityWarning(
+                "options is now an object containing entries supported by DialogV2.confirm.",
+                { since: 13, until: 15 },
+            );
+            options.position = positionKeys.reduce((position, key) => {
+                if (options[key] !== undefined) position[key] = options[key];
+                delete options[key];
+                return position;
+            }, {});
+        }
+        const type = game.i18n.localize(this.constructor.metadata.label);
+        const content =
+            `Delete ${this.system.XMLID} only, or delete ${this.system.XMLID} and all ${this.childItems.length} children? ` +
+            game.i18n.format("SIDEBAR.DeleteWarning", { type });
+        return new foundry.applications.api.DialogV2(
+            foundry.utils.mergeObject(
+                {
+                    content,
+                    buttons: [
+                        {
+                            action: "containerOnly",
+                            label: `${this.system.XMLID} only`,
+                            callback: () => {
+                                this.delete(operation);
+                            },
+                        },
+                        {
+                            action: "containerAndChildren",
+                            label: `${this.system.XMLID} + children`,
+                            callback: () => {
+                                let idsToDelete = this.childItems.map((child) => child.id);
+                                idsToDelete.push(this.id);
+                                this.actor.deleteEmbeddedDocuments("Item", idsToDelete);
+                            },
+                        },
+                        {
+                            action: "cancel",
+                            label: `Cancel`,
+                            default: true,
+                        },
+                    ],
+                    window: {
+                        icon: "fa-solid fa-trash",
+                        title: `${game.i18n.format("DOCUMENT.Delete", { type })}: ${this.name}`, // FIXME: double localization
+                    },
+                },
+                options,
+            ),
+        ).render({ force: true });
+    }
 }
 
 // Prepare the modifier object. This is not really an item, but a MODIFER or ADDER
