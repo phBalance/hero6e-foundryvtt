@@ -489,6 +489,8 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
             formData.name = this.item.system.DISPLAY || this.item.system.XMLID;
         }
 
+        const previousOPTIONID = this.item.system.OPTIONID;
+
         // Do all the standard things like updating item properies that match the name of input boxes
         await super._updateObject(event, formData);
 
@@ -497,17 +499,20 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         if (choices) {
             // Deal with OPTION which might have changed
             const choice = choices.find((choice) => choice.OPTION === expandedData.system.OPTION);
-            for (const key of Object.keys(choice)) {
-                if (this.data.system[key] !== choice[key]) {
-                    // Update everything and we're done with the loop.
-                    await this.item.update(
-                        Object.keys(choice).reduce((accum, key) => {
-                            accum[`system.${key}`] = choice[key];
-                            return accum;
-                        }, {}),
-                    );
+            // Only overwrite OPTION_ALIAS, etc if the OPTIONID has changed
+            if (previousOPTIONID !== choice.OPTIONID) {
+                for (const key of Object.keys(choice)) {
+                    if (this.data.system[key] !== choice[key]) {
+                        // Update everything and we're done with the loop.
+                        await this.item.update(
+                            Object.keys(choice).reduce((accum, key) => {
+                                accum[`system.${key}`] = choice[key];
+                                return accum;
+                            }, {}),
+                        );
 
-                    break;
+                        break;
+                    }
                 }
             }
         }

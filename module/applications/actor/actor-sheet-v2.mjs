@@ -797,7 +797,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             `input[name]:not([name=""]), textarea[name]:not([name=""]), select[name]:not([name=""])`,
         );
         for (const input of editableInputButtons) {
-            const attributeName = input.name;
+            // Sidebar uses "Xsystem" to avoid duplicates with the characteristics tab
+            const attributeName = input.name.replace("Xsystem", "system");
             if (foundry.utils.hasProperty(this.actor, attributeName)) {
                 if (attributeName.endsWith("HEIGHT")) {
                     input.addEventListener("change", async (e) => {
