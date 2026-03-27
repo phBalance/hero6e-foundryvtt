@@ -4,6 +4,7 @@
 
 - Turning on (or carrying) items with ACTIVATIONROLL or that are used EVERYPHASE no longer consume resources during item toggle. This is meant to resolve issues with ARMORs that should not consume resources to put on, but do consume resources when the defense is used as part of an attack. [#1751](https://github.com/dmdorman/hero6e-foundryvtt/issues/1751)
 - Initial support for sectional defenses. Put "locations x-y" in the comments for ACTIVATIONROLL or REQUIRESAROLL. More complicated locations are not yet supported. REQUIRESAROLL also requires the "Must be made each Phase/use" adder. [#3876](https://github.com/dmdorman/hero6e-foundryvtt/issues/3876) [#1652](https://github.com/dmdorman/hero6e-foundryvtt/issues/1652)
+- Fix ability to edit OPTION_ALIAS of 6e Penalty Skill Levels. [#3964](https://github.com/dmdorman/hero6e-foundryvtt/issues/3964)
 
 ### Version 4.3.0 20260322
 
