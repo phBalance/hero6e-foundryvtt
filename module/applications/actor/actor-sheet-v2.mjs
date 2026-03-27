@@ -1356,7 +1356,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             {
                 name: "Delete",
                 icon: '<i class="fa-solid fa-fw fa-trash"></i>',
-                condition: () => this.actor.isOwner,
+                condition: (target) => {
+                    const document = this._getEmbeddedDocument(target);
+                    return this.actor.isOwner && !document.isFreeStuff;
+                },
                 callback: async (target) => {
                     const document = this._getEmbeddedDocument(target);
                     await document.deleteDialog({

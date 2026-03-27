@@ -1585,6 +1585,17 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
     }
 
+    get isFreeStuff() {
+        // Free items don't have a system.ID
+        if (
+            this.system?.ID === undefined &&
+            (this.type === "maneuver" || (this.type === "skill" && this.system?.XMLID === "PERCEPTION"))
+        ) {
+            return true;
+        }
+        return false;
+    }
+
     get isAblativeDefense() {
         return !!this.findModsByXmlid("ABLATIVE");
     }
