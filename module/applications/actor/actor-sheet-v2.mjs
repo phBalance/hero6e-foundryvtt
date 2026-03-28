@@ -2,12 +2,7 @@ import { getActorDefensesVsAttack } from "../../utility/defense.mjs";
 import { HeroSystem6eActor } from "../../actor/actor.mjs";
 import { HeroSystem6eItem } from "../../item/item.mjs";
 import { foundryVttParseUuid } from "../../utility/compatibility.mjs";
-import {
-    getPowerInfo,
-    getCharacteristicInfoArrayForActor,
-    tokenEducatedGuess,
-    whisperUserTargetsForActor,
-} from "../../utility/util.mjs";
+import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../../utility/util.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -54,8 +49,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             toggleChevron: HeroSystemActorSheetV2.#onToggleChevron,
             toggleEffect: HeroSystemActorSheetV2.#onToggleEffect,
             toggleItemContainer: HeroSystemActorSheetV2.#onToggleItemContainer,
+            togglePortrait: HeroSystemActorSheetV2.#onTogglePortrait,
             toggleStatus: HeroSystemActorSheetV2.#onToggleStatus,
             updateActorImage: HeroSystemActorSheetV2.#onUpdateActorImage,
+            updateTokenImage: HeroSystemActorSheetV2.#onUpdateTokenImage,
             vpp: HeroSystemActorSheetV2.#onVpp,
         },
         //tag: "form", // The default is "div"
@@ -246,6 +243,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     get title() {
+        if (this.token) return `${this.actor.type.toUpperCase()}: ${this.token.name} [${this.actor.name}]`;
         return `${this.actor.type.toUpperCase()}: ${this.actor.name}`;
     }
 
@@ -343,12 +341,6 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 scrollable: [""],
             },
         };
-    }
-
-    #token;
-
-    get token() {
-        return this.document.token ?? this.#token ?? tokenEducatedGuess({ actor: this.actor });
     }
 
     static TABS = {
@@ -738,9 +730,6 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     async _onFirstRender(context, options) {
         await super._onFirstRender(context, options);
-
-        // Keep track of token; needed for linked actors
-        this.#token = options.token ?? tokenEducatedGuess({ actor: this.actor });
 
         // General right click on row
         this._createContextMenu(this._getDocumentListContextOptions, "[data-document-uuid]", {
@@ -1572,13 +1561,49 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             type: "image",
             redirectToRoot: img ? [img] : [],
             callback: async (path) => {
-                // Potential improvement: If we want to manage token here or separately (see DND5e sheet for potential inspiration on UI), path is 'tokenPrototype.texture.src'
                 await this.document.update({ img: path });
             },
             top: this.position.top + 40,
             left: this.position.left + 10,
         });
         return fp.browse();
+    }
+
+    static async #onUpdateTokenImage(event, target) {
+        const isToken = !!this.token && this.token.actorLink;
+        if (window.Tokenizer) {
+            if (isToken) return window.Tokenizer.tokenizeSceneToken(this);
+            else return window.Tokenizer.tokenizeActor(this.actor);
+        }
+
+        const attr = target.dataset.edit;
+        const current = foundry.utils.getProperty(this.object, attr);
+        const { img } = this.document.constructor.getDefaultArtwork?.(this.document.toObject()) ?? {};
+        const fp = new FilePicker.implementation({
+            current,
+            type: "image",
+            redirectToRoot: img ? [img] : [],
+            callback: async (path) => {
+                if (isToken) {
+                    target.src = path;
+                    await this.token.update({ ["texture.src"]: path });
+                } else await this.document.update({ ["prototypeToken.texture.src"]: path });
+            },
+            top: this.position.top + 40,
+            left: this.position.left + 10,
+        });
+        return fp.browse();
+    }
+
+    static async #onTogglePortrait(event, target) {
+        // The double parent node traversal here isn't great but there's not a clean way around it without a bit of a rework of the template
+        target.parentNode.parentNode.querySelectorAll(".profile-img").forEach((el) => {
+            el.classList.toggle("hidden");
+        });
+
+        target.parentNode.querySelectorAll(".profile-img-button").forEach((el) => {
+            el.classList.toggle("hidden");
+        });
     }
 
     #heroValidationCssForTab(items) {
