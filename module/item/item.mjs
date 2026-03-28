@@ -4138,7 +4138,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             let perkRollValue = parseInt(skillData.ADDER.find((adder) => adder.XMLID === "HOWWELL")?.OPTIONID || 0);
 
             if (!perkRollValue) {
-                const disadRollName = skillData.ADDER.find((adder) => adder.XMLID === "RECOGNIZED").OPTIONID;
+                const disadRollName = skillData.ADDER.find((adder) => adder.XMLID === "RECOGNIZED")?.OPTIONID;
 
                 if (disadRollName === "SOMETIMES") {
                     perkRollValue = 8;
