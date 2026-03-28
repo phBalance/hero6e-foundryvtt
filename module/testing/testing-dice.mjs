@@ -1331,6 +1331,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
+                            num: 18,
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
@@ -1355,6 +1356,7 @@ export function registerDiceTests(quench) {
                             name: "Head",
                             side: "none",
                             fullName: "Head",
+                            num: 3,
                             stunMultiplier: 2,
                             bodyMultiplier: 2,
                         });
@@ -1379,6 +1381,7 @@ export function registerDiceTests(quench) {
                             name: "Head",
                             side: "none",
                             fullName: "Head",
+                            num: 3,
                             stunMultiplier: 2,
                             bodyMultiplier: 2,
                         });
@@ -1403,6 +1406,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
+                            num: 17, // Foot is either 17 or 18. The code happens to choose 17.
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
@@ -1427,6 +1431,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
+                            num: 17, // Foot is either 17 or 18. The code happens to choose 17.
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
@@ -1451,6 +1456,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "Right",
                             fullName: "Right Foot",
+                            num: 17, // Foot is either 17 or 18. The code happens to choose 17.
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
@@ -2454,6 +2460,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
+                            num: 18,
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
@@ -2495,6 +2502,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
+                            num: 18,
                             stunMultiplier: 8,
                             bodyMultiplier: 0.5,
                         });
@@ -2533,6 +2541,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
+                            num: 18,
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
@@ -2555,6 +2564,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
+                            num: 18,
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
@@ -2577,6 +2587,7 @@ export function registerDiceTests(quench) {
                             name: "Head",
                             side: "none",
                             fullName: "Head",
+                            num: 3,
                             stunMultiplier: 5,
                             bodyMultiplier: 2,
                         });
