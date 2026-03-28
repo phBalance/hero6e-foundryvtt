@@ -395,7 +395,9 @@ export async function getConditionalDefenses(token, item, avad) {
             (o.baseInfo?.type?.includes("defense") || o.baseInfo?.type?.includes("defense")) &&
             (o.isActive || o.effects.find(() => true)?.disabled === false) &&
             (o.modifiers.find((p) =>
-                ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER", "ONLYAGAINSTLIMITEDTYPE"].includes(p.XMLID),
+                ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER", "LIMITEDPOWER", "ONLYAGAINSTLIMITEDTYPE"].includes(
+                    p.XMLID,
+                ),
             ) ||
                 avad),
     );

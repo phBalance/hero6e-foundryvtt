@@ -2,7 +2,12 @@ import { getActorDefensesVsAttack } from "../../utility/defense.mjs";
 import { HeroSystem6eActor } from "../../actor/actor.mjs";
 import { HeroSystem6eItem } from "../../item/item.mjs";
 import { foundryVttParseUuid } from "../../utility/compatibility.mjs";
-import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../../utility/util.mjs";
+import {
+    getPowerInfo,
+    getCharacteristicInfoArrayForActor,
+    tokenEducatedGuess,
+    whisperUserTargetsForActor,
+} from "../../utility/util.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -28,7 +33,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         classes: ["herosystem6e", "actor-sheet-v2a"],
         position: {
             width: 800,
-            height: 700,
+            height: 717,
         },
         actions: {
             actorDescription: HeroSystemActorSheetV2.#onActorDescription,
@@ -243,7 +248,6 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     get title() {
-        if (this.token) return `${this.actor.type.toUpperCase()}: ${this.token.name} [${this.actor.name}]`;
         return `${this.actor.type.toUpperCase()}: ${this.actor.name}`;
     }
 
@@ -341,6 +345,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 scrollable: [""],
             },
         };
+    }
+
+    #token;
+
+    get token() {
+        return this.document.token ?? this.#token ?? tokenEducatedGuess({ actor: this.actor });
     }
 
     static TABS = {
@@ -731,6 +741,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     async _onFirstRender(context, options) {
         await super._onFirstRender(context, options);
+
+        // Keep track of token; needed for linked actors
+        this.#token = options.token ?? tokenEducatedGuess({ actor: this.actor });
 
         // General right click on row
         this._createContextMenu(this._getDocumentListContextOptions, "[data-document-uuid]", {
