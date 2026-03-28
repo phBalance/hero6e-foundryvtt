@@ -386,6 +386,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 case "aside":
                     this.#prepareContextDefenseSummary(context);
                     context.endReserve = this.actor.items.find((o) => o.system.XMLID === "ENDURANCERESERVE");
+                    context.portraitToggleState = this.portraitToggleState;
                     break;
                 case "header":
                     this.#prepareContextCharacterPointTooltips(context);
@@ -1595,15 +1596,21 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         return fp.browse();
     }
 
-    static async #onTogglePortrait(event, target) {
-        // The double parent node traversal here isn't great but there's not a clean way around it without a bit of a rework of the template
-        target.parentNode.parentNode.querySelectorAll(".profile-img").forEach((el) => {
-            el.classList.toggle("hidden");
-        });
+    portraitToggleState = "portrait";
 
-        target.parentNode.querySelectorAll(".profile-img-button").forEach((el) => {
-            el.classList.toggle("hidden");
-        });
+    static async #onTogglePortrait /*event, target*/() {
+        const stateEnum = ["portrait", "token"];
+
+        if (!this.portraitToggleState || !stateEnum.includes(this.portraitToggleState)) {
+            this.portraitToggleState = stateEnum[0];
+            return;
+        }
+
+        const currentIdx = stateEnum.indexOf(this.portraitToggleState);
+        const nextIdx = (currentIdx + 1) % stateEnum.length;
+
+        this.portraitToggleState = stateEnum[nextIdx];
+        await this.render({ parts: ["aside"] });
     }
 
     #heroValidationCssForTab(items) {
