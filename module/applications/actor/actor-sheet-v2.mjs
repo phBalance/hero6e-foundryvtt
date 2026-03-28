@@ -28,7 +28,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         classes: ["herosystem6e", "actor-sheet-v2a"],
         position: {
             width: 800,
-            height: 700,
+            height: 717,
         },
         actions: {
             actorDescription: HeroSystemActorSheetV2.#onActorDescription,
