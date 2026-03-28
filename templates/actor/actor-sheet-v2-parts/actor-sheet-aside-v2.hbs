@@ -8,7 +8,7 @@
             width="100" 
         />
         <img class="profile-img hidden {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" 
-            src="{{actor.prototypeToken.texture.src}}" 
+            src="{{#if actor.token}}{{token.texture.src}}{{else}}{{actor.prototypeToken.texture.src}}{{/if}}" 
             data-edit="img" 
             data-action="{{#if actor.isOwner}}updateTokenImage{{/if}}"
             title="{{actor.name}}" height="100"
