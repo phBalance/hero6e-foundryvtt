@@ -1,5 +1,6 @@
 <aside>
     <div class="sidebar">
+        {{#if (eq portraitToggleState "portrait")}}
         <img class="profile-img {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" 
             src="{{actor.img}}" 
             data-edit="img" 
@@ -7,16 +8,21 @@
             title="{{actor.name}}" height="100"
             width="100" 
         />
-        <img class="profile-img hidden {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" 
+        {{/if}}
+        {{#if (eq portraitToggleState "token")}}
+        <img class="profile-img {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" 
             src="{{#if actor.token}}{{token.texture.src}}{{else}}{{actor.prototypeToken.texture.src}}{{/if}}" 
             data-edit="img" 
             data-action="{{#if actor.isOwner}}updateTokenImage{{/if}}"
             title="{{actor.name}}" height="100"
             width="100" 
         />
+        {{/if}}
         <div class="sidebar-actions flexrow flex-group-center">
-            <button class="profile-img-button {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" type="button" data-action="togglePortrait">Portrait</button>
-            <button class="profile-img-button hidden {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" type="button" data-action="togglePortrait">Token</button>
+            <button class="profile-img-button {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" type="button" data-action="togglePortrait">
+                {{#if (eq portraitToggleState "portrait")}} Portrait {{/if}}
+                {{#if (eq portraitToggleState "token")}} Token {{/if}}
+	    </button>
         </div>
 
         <section class="flexrow">
