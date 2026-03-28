@@ -541,7 +541,7 @@ export function registerRequiresRollCheckTests(quench) {
                         await deleteQuenchActor({ quench: this, actor });
                     });
 
-                    describe.only("cost", function () {
+                    describe("cost", function () {
                         describe("acrobatics with activation roll", function () {
                             it("should have correct cost activation 8-", function () {
                                 expect(acrobaticsActivation8Less.realCost).to.equal(14);
