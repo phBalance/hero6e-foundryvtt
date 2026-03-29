@@ -888,20 +888,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         }
 
         // Talents can be purchased as powers (duplicate them)
-        if (powerDescription6e.xmlTag === "TALENT") {
-            const talentPower = foundry.utils.deepClone(powerDescription6e);
-            talentPower.xmlTag = "POWER";
-            talentPower.xml.replace("<TALENT", "<POWER");
-            HERO.powers6e.push(talentPower);
+        // REVIEW: Why only 6e and seems to be an issue with Compendiums #3980
+        // if (powerDescription6e.xmlTag === "TALENT") {
+        //     const talentPower = foundry.utils.deepClone(powerDescription6e);
+        //     talentPower.xmlTag = "POWER";
+        //     talentPower.xml.replace("<TALENT", "<POWER");
+        //     HERO.powers6e.push(talentPower);
 
-            const existing = HERO.powers6eDict.get(powerDescription6e.key);
-            if (existing) {
-                existing.push(talentPower);
-                HERO.powers6eDict.set(powerDescription6e.key, existing);
-            } else {
-                HERO.powers6eDict.set(powerDescription6e.key, [talentPower]);
-            }
-        }
+        //     const existing = HERO.powers6eDict.get(powerDescription6e.key);
+        //     if (existing) {
+        //         existing.push(talentPower);
+        //         HERO.powers6eDict.set(powerDescription6e.key, existing);
+        //     } else {
+        //         HERO.powers6eDict.set(powerDescription6e.key, [talentPower]);
+        //     }
+        // }
     }
 
     if (powerOverrideFor5e) {
