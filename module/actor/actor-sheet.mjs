@@ -1030,7 +1030,9 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     }
 
     #changeType() {
-        this.actor.changeType();
+        this.actor.changeTypeDialog({
+            classes: ["herosystem6e", "themed", "theme-light"],
+        });
     }
 
     async _onItemChangeClips(event) {

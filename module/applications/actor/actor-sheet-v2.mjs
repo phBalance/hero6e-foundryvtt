@@ -72,6 +72,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     icon: "fal fa-user-robot",
                     label: "Actor type",
                     ownership: "OWNER",
+                    visible: HeroSystemActorSheetV2.#canConfigureActorType,
                 },
             ],
             tabs: [
@@ -110,6 +111,18 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             };
             return new FoundryVttDragDrop(dragDropHandler);
         });
+    }
+
+    // REF: foundry.applications.api.DocumentSheetV2
+    static #canConfigureSheet() {
+        if (!this.options.sheetConfig || !this.isEditable) return false;
+        const document = this.document;
+        return !!document.collection?.has(document.id) && !document.flags.core?.sheetLock;
+    }
+
+    static #canConfigureActorType() {
+        // Do not allow changing actor type of unlinked token actor
+        return HeroSystemActorSheetV2.#canConfigureSheet && !this.actor.token;
     }
 
     static async #onActorDescription() {
@@ -220,7 +233,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     static #onConfigureActorType() {
-        this.actor.changeType();
+        this.actor.changeTypeDialog({
+            classes: Array.from(this.classList).filter((c) => c.includes("herosystem") || c.includes("theme")),
+        });
     }
 
     static #onConfigureToken() {

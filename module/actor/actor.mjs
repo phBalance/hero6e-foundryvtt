@@ -356,7 +356,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
     }
 
-    async changeType() {
+    async changeTypeDialog(options = {}) {
         const template = `systems/${HEROSYS.module}/templates/chat/actor-change-type-dialog.hbs`;
         const actor = this;
         let cardData = {
@@ -370,21 +370,35 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         };
         const content = await foundryVttRenderTemplate(template, cardData);
 
-        await foundry.applications.api.DialogV2.prompt({
-            window: { title: `Change ${this.name} Type` },
-            content,
-            ok: {
-                label: "Apply",
-                callback: (event, button) => button.form.elements.actorType.value,
-            },
-            submit: async (result) => {
-                if (result) await this._changeType(result);
-                else console.error(`User picked option: ${result}`);
-            },
-        });
+        await foundry.applications.api.DialogV2.prompt(
+            foundry.utils.mergeObject(
+                {
+                    window: { title: `Change ${this.name} Type` },
+                    content,
+                    ok: {
+                        label: "Apply",
+                        callback: (event, button) => button.form.elements.actorType.value,
+                    },
+                    submit: async (result) => {
+                        if (result) await this._changeType(result);
+                        else console.error(`User picked option: ${result}`);
+                    },
+                },
+                options,
+            ),
+        );
     }
 
     async _changeType(newType) {
+        // Cannot change unlinked actor type
+        if (this.token) {
+            return ui.notifications.error(
+                `Cannot change actor type for an unlinked actor. Try again with sidebar prototype token.`,
+            );
+        }
+        //   system: may not be undefined
+        await this.restoreUnlinkedActorToMatchPrototype();
+
         await this.update(
             {
                 type: newType,

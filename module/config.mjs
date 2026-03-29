@@ -1026,7 +1026,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "EGO",
             name: "Ego",
-            base: fixedValueFunction(10),
+            base: function (actor) {
+                if (actor.type === "automaton") {
+                    // Automaton get 0 EGO by default and they can't have EGO rolls.
+                    // Apparently there are automaton villains around that buy up their EGO and have mental attacks.
+                    return 0;
+                }
+                return 10;
+            },
             costPerLevel: fixedValueFunction(1),
             type: ["characteristic"],
             behaviors: ["success"],
@@ -1034,8 +1041,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
-            ignoreForActor: staticIgnoreForActorFunction(["automaton", "vehicle", "base2", "computer"]),
+            ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2", "computer"]),
             baseEffectDicePartsBundle: characteristicBaseEffectDiceParts,
+            notes: function (char) {
+                if (char.actor?.type === "automaton") {
+                    return "cannot make EGO Rolls";
+                }
+                return null;
+            },
             xml: `<EGO XMLID="EGO" ID="1712377272129" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></EGO>`,
         },
         {

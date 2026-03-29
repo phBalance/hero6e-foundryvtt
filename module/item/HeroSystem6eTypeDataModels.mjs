@@ -1637,7 +1637,7 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         // Not every actor will have all characteristics
         // return null when this characteristic isn't valid
 
-        return this.baseInfo.base?.(this.actor) ?? null;
+        return this.baseInfo?.base?.(this.actor) ?? null;
     }
 
     get basePlusLevels() {
@@ -1690,6 +1690,11 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
 
     get roll() {
         if (this.baseInfo?.behaviors.includes("success")) {
+            // Override for automaton/EGO
+            // An automaton cannot make EGO Rolls
+            if (this.baseInfo.key === "EGO" && this.actor?.type === "automaton") {
+                return null;
+            }
             const newRoll = Math.round(9 + this.value * 0.2);
             if (!this.actor.is5e && this.value < 0) {
                 return 9;

@@ -709,7 +709,7 @@ Hooks.on("getActorDirectoryEntryContext", (_dialog, html) => {
         callback: async function (target) {
             const dataset = { ...target[0].dataset };
             const actor = game.actors.get(dataset.entryId);
-            return actor.changeType();
+            return actor.changeTypeDialog();
         },
     };
     html.push(menu);
