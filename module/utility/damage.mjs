@@ -801,7 +801,7 @@ export function calculateDicePartsFromDcForItem(item, dc) {
     }
 
     // NOTE: Work in positive values and positive 0 for obviousness to users
-    const diceOfDamage = Math.abs(dc * (5 / apPerDie));
+    const diceOfDamage = Math.abs((5 * dc) / apPerDie);
     const diceSign = Math.sign(dc) || 0;
 
     // Since the smallest interval is between 1 pip and 1/2 die (0.3 to 0.5), 0.099 is probably the smallest possible epsilon.
