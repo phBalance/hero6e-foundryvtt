@@ -7091,6 +7091,10 @@ export function replaceBaseCostForHalfDieAdderXml(item, xml) {
             baseCost = 3;
             break;
 
+        case 6:
+            baseCost = 3;
+            break;
+
         case 10:
             baseCost = 5;
             break;
@@ -7112,7 +7116,7 @@ export function replaceBaseCostForHalfDieAdderXml(item, xml) {
 export function replaceBaseCostForPipAdderXml(item, xml) {
     const { baseApPerDie } = calculateApPerDieForItem(item);
 
-    // BASECOST is either 1,2,3, or 5 depending on the base LEVELS cost. See FRed pg. 114 assumed to be same in 6e but can't find rule.
+    // BASECOST is either 1, 2, 3, or 5 depending on the base LEVELS cost. See FRed pg. 114 assumed to be same in 6e but can't find rule.
     let baseCost = 0;
     switch (baseApPerDie) {
         case 3:
@@ -7120,6 +7124,10 @@ export function replaceBaseCostForPipAdderXml(item, xml) {
             break;
 
         case 5:
+            baseCost = 2;
+            break;
+
+        case 6:
             baseCost = 2;
             break;
 
