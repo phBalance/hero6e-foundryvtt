@@ -101,7 +101,6 @@ async function CreateHeroItems() {
     }
     pack = await FoundryVttCompendiumCollection.createCompendium(metadata);
 
-    // V13 seems to default new compendiums to locked
     if (pack.locked) {
         await pack.configure({ locked: false });
     }
@@ -188,7 +187,8 @@ async function CreateHeroItems() {
             !o.type.includes("disadvantage") &&
             !o.behaviors.includes("modifier") &&
             !o.behaviors.includes("adder") &&
-            o.xml,
+            o.xml &&
+            !o.key.startsWith("__"),
     )) {
         const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
         itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
@@ -269,13 +269,6 @@ async function CreateHeroItems() {
         await createItem(itemDataArray, pack.metadata.id);
     } catch (e) {
         console.error(e);
-
-        // KLUGE: Try again because we it commonly thinks we are locked
-        if (pack.locked) {
-            console.error(`${pack.name} compendium was unexpectedly locked`);
-            await pack.configure({ locked: false });
-            await createItem(itemDataArray, pack.metadata.id);
-        }
     }
 
     // Lock Compendium
