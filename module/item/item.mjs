@@ -27,7 +27,7 @@ import {
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import {
     buildStrengthItem,
-    calculateApPerDieForItem,
+    calculateCpPerDieForItem,
     calculateDicePartsFromDcForItem,
     combatSkillLevelsForAttack,
     getEffectFormulaFromItem,
@@ -7070,24 +7070,19 @@ export function createModifierOrAdderFromXml(xml) {
     return modifierOrAdderData;
 }
 
-/**
- * Replace the base cost for a particular item. This is sometimes required because when creating a 1/2 die
- * or 1d6-1 die adder will have a different base cost based on the item it's applying to. For instance a killing attack
- * will cost 10 ap and a normal sight flash is 1.5 ap.
- *
- * @param {String} xml
- */
-export function replaceBaseCostForHalfDieAdderXml(item, xml) {
-    const { baseApPerDie } = calculateApPerDieForItem(item);
-
-    // BASECOST is either 1.5, 3, 5, or 10 depending on the base LEVELS cost
-    let baseCost = 0;
-    switch (baseApPerDie) {
+// BASECOST is either 1.5, 3, 5, or 10 depending on the base LEVELS cost
+export function getCostPerHalfDie(item, baseCpPerDie) {
+    let baseCost;
+    switch (baseCpPerDie) {
         case 3:
             baseCost = 1.5;
             break;
 
         case 5:
+            baseCost = 3;
+            break;
+
+        case 6:
             baseCost = 3;
             break;
 
@@ -7100,26 +7095,29 @@ export function replaceBaseCostForHalfDieAdderXml(item, xml) {
             break;
 
         default:
-            console.error(`${item.detailedName()} for ${item.actor.name} has unknown base active points per die`);
+            console.error(`${item.detailedName()} for ${item.actor.name} has unknown base character points per die`);
+
+            // make a guess since we don't know
+            baseCost = roundFavorPlayerTowardsZero(baseCpPerDie / 2);
             break;
     }
 
-    xml = xml.replace(/BASECOST="[\d.]+"/, `BASECOST="${baseCost}"`);
-
-    return xml;
+    return baseCost;
 }
 
-export function replaceBaseCostForPipAdderXml(item, xml) {
-    const { baseApPerDie } = calculateApPerDieForItem(item);
-
-    // BASECOST is either 1,2,3, or 5 depending on the base LEVELS cost. See FRed pg. 114 assumed to be same in 6e but can't find rule.
+export function getCostPerDiePip(item, baseCpPerDie) {
+    // BASECOST is either 1, 2, 3, or 5 depending on the base LEVELS cost. See FRed pg. 114 assumed to be same in 6e but can't find rule.
     let baseCost = 0;
-    switch (baseApPerDie) {
+    switch (baseCpPerDie) {
         case 3:
             baseCost = 1;
             break;
 
         case 5:
+            baseCost = 2;
+            break;
+
+        case 6:
             baseCost = 2;
             break;
 
@@ -7135,6 +7133,44 @@ export function replaceBaseCostForPipAdderXml(item, xml) {
             console.error(`${item.detailedName()} for ${item.actor.name} has unknown base active points per die`);
             break;
     }
+
+    return baseCost;
+}
+
+/**
+ * Replace the base cost for a particular item. This is sometimes required because when creating a 1/2 die
+ * or 1d6-1 die adder will have a different base cost based on the item it's applying to. For instance a killing attack
+ * will cost 10 cp and a normal sight flash is 1.5 cp.
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {String} xml
+ *
+ * @returns {String} - modified xml
+ */
+export function replaceBaseCostForHalfDieAdderXml(item, xml) {
+    const { baseCpPerDie } = calculateCpPerDieForItem(item);
+
+    const baseCost = getCostPerHalfDie(item, baseCpPerDie);
+
+    xml = xml.replace(/BASECOST="[\d.]+"/, `BASECOST="${baseCost}"`);
+
+    return xml;
+}
+
+/**
+ * Replace the base cost for a particular item. This is sometimes required because when creating a +1 pip
+ * die adder will have a different base cost based on the item it's applying to. For instance a killing attack
+ * will cost 5 cp and a normal sight flash is 1.5 cp.
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {String} xml
+ *
+ * @returns {String} - modified xml
+ */
+export function replaceBaseCostForPipAdderXml(item, xml) {
+    const { baseCpPerDie } = calculateCpPerDieForItem(item);
+
+    const baseCost = getCostPerDiePip(item, baseCpPerDie);
 
     xml = xml.replace(/BASECOST="[\d.]+"/, `BASECOST="${baseCost}"`);
 

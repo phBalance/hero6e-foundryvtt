@@ -1,8 +1,9 @@
-import { HEROSYS } from "../herosystem6e.mjs";
-import { HeroSystem6eItem } from "../item/item.mjs";
 import { roundFavorPlayerAwayFromZero } from "./round.mjs";
 import { getSystemDisplayUnits } from "./units.mjs";
-import { squelch } from "./util.mjs";
+
+import { HEROSYS } from "../herosystem6e.mjs";
+
+import { getCostPerHalfDie, getCostPerDiePip, HeroSystem6eItem } from "../item/item.mjs";
 
 export function combatSkillLevelsForAttack(item) {
     if (!item.system._active) {
@@ -698,7 +699,14 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
     };
 }
 
-export function calculateApPerDieForItem(item) {
+/**
+ * Calculate the base Character Points for this item.
+ * This is one of those cases where Character Points means base cost.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {Object}
+ */
+export function calculateCpPerDieForItem(item) {
     const isMartialOrManeuver = ["maneuver", "martialart"].includes(item.type);
     let martialOrManeuverEquivalentApPerDice = 0;
     if (isMartialOrManeuver) {
@@ -723,12 +731,12 @@ export function calculateApPerDieForItem(item) {
         }
     }
 
-    const baseApPerDie =
+    const baseCpPerDie =
         martialOrManeuverEquivalentApPerDice ||
         (item.system.XMLID === "TELEKINESIS" ? 5 : undefined) || // PH: FIXME: Kludge for time being. TK Behaves like strength
         item.baseInfo.costPerLevel(item);
 
-    return { baseApPerDie, isMartialOrManeuver };
+    return { baseCpPerDie, isMartialOrManeuver };
 }
 
 /**
@@ -752,7 +760,7 @@ export function calculateApPerDieForItem(item) {
  * @returns
  */
 export function calculateDicePartsFromDcForItem(item, dc) {
-    const { baseApPerDie, isMartialOrManeuver } = calculateApPerDieForItem(item);
+    const { baseCpPerDie, isMartialOrManeuver } = calculateCpPerDieForItem(item);
 
     // PH: FIXME: Some powers have "fixed" damage that doesn't get modified by advantages and DC modifiers (or at least not
     // in ways that I have taken the time to think through).
@@ -764,39 +772,14 @@ export function calculateDicePartsFromDcForItem(item, dc) {
 
     // What break points do we have for 1 pip and 1/2 die?
     const fullDieValue = 1;
-    let halfDieValue;
-    let pipValue;
-    if (baseApPerDie === 5) {
-        halfDieValue = 3 / 5;
-        pipValue = 2 / 5;
-    } else if (baseApPerDie === 10) {
-        halfDieValue = 5 / 10;
-        pipValue = 3 / 10;
-    } else if (baseApPerDie === 15 || baseApPerDie === 6) {
-        halfDieValue = 10 / 15;
-        pipValue = 5 / 15;
-    } else if (baseApPerDie === 3) {
-        // FLASH has an exception, because why not. It only has a 1/2d6 adder and doesn't have +1 pip. To work around this
-        // set the pipValue to the same as the halfDieValue so that we prefer the half die over a pip.
-        if (item.system.XMLID === "FLASH") {
-            pipValue = 1.5 / 3;
-        } else {
-            pipValue = 1 / 3;
-        }
+    const halfDieValue = getCostPerHalfDie(item, baseCpPerDie) / baseCpPerDie;
 
-        halfDieValue = 1.5 / 3;
-    } else {
-        if (!squelch(item.id)) {
-            console.error(
-                `${item.actor?.name}: Unhandled die of damage cost ${baseApPerDie} for ${item.detailedName()}`,
-                item,
-            );
-        }
-
-        // Don't know how to process this. Just return the base diceParts.
-        const { diceParts } = item.baseInfo.baseEffectDicePartsBundle(item, {});
-        return diceParts;
-    }
+    // FLASH has an exception, because why not. It only has a 1/2d6 adder and doesn't have +1 pip. To work around this
+    // set the pipValue to the same as the halfDieValue so that we prefer the half die over a pip.
+    const pipValue =
+        baseCpPerDie === 3 && item.system.XMLID === "FLASH"
+            ? 1.5 / 3
+            : getCostPerDiePip(item, baseCpPerDie) / baseCpPerDie;
 
     let apPerDie;
     if (!isMartialOrManeuver && item._activePointsAffectingDcRaw !== 0) {
@@ -813,12 +796,12 @@ export function calculateDicePartsFromDcForItem(item, dc) {
                 ? 5 * (1 + item._advantagesAffectingDc)
                 : item._activePointsAffectingDcRaw / diceValue;
     } else {
-        // NOTE: Maneuvers shouldn't be able to be advantaged but will keep this here because I'm not sure if there are exceptions
-        apPerDie = baseApPerDie * (1 + item._advantagesAffectingDc);
+        // NOTE: Standard and optional maneuvers shouldn't be able to be advantaged but martials can
+        apPerDie = baseCpPerDie * (1 + item._advantagesAffectingDc);
     }
 
     // NOTE: Work in positive values and positive 0 for obviousness to users
-    const diceOfDamage = Math.abs(dc * (5 / apPerDie));
+    const diceOfDamage = Math.abs((5 * dc) / apPerDie);
     const diceSign = Math.sign(dc) || 0;
 
     // Since the smallest interval is between 1 pip and 1/2 die (0.3 to 0.5), 0.099 is probably the smallest possible epsilon.
