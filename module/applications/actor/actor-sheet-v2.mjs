@@ -403,6 +403,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         context = await super._preparePartContext(partId, context);
         context.tab = context.tabs[partId];
         context.actor ??= this.actor;
+        context.token ??= this.token;
         context.gameSystemId ??= game.system.id;
         context.items = null;
 
