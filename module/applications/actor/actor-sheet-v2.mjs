@@ -1071,7 +1071,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         }
 
         const target = event.currentTarget;
-        const targetTab = target.closest("[data-tab]")?.dataset?.tab;
+        const targetTab = target?.closest("[data-tab]")?.dataset?.tab;
         if (targetTab) {
             return this._onDropItemOnTab(event, data, item, targetTab);
         }

@@ -806,6 +806,21 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             }
         }
 
+        // Automaton
+        if (this.actor?.type === "automaton") {
+            if (this.type === "perk") {
+                _heroValidations.push({
+                    message: `Automatons generally should not buy Perks`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
+                });
+            } else if (this.type === "skill" && this.system.EVERYMAN) {
+                _heroValidations.push({
+                    message: `Automatons do get Everyman Skills, must by those skills`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
+                });
+            }
+        }
+
         const e = this.system.debugModelProps();
         if (e) {
             _heroValidations.push({

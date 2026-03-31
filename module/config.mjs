@@ -1028,8 +1028,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             name: "Ego",
             base: function (actor) {
                 if (actor.type === "automaton") {
-                    // Automaton get 0 EGO by default and they can't have EGO rolls.
-                    // Apparently there are automaton villains around that buy up their EGO and have mental attacks.
+                    // Automaton automatically has a 0 EGO, 0 OMCV,
+                    // and 0 DMCV, and is immune to all Mental Powers.
                     return 0;
                 }
                 return 10;
@@ -1199,7 +1199,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "OMCV",
             name: "Offensive Mental Combat Value",
-            base: fixedValueFunction(3),
+            base: function (actor) {
+                if (actor.type === "automaton") {
+                    // Automaton automatically has a 0 EGO, 0 OMCV,
+                    // and 0 DMCV, and is immune to all Mental Powers.
+                    return 0;
+                }
+                return 3;
+            },
             costPerLevel: fixedValueFunction(3),
             type: ["characteristic"],
             behaviors: ["calculated", "calculatedEGO"],
@@ -1207,7 +1214,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
-            ignoreForActor: staticIgnoreForActorFunction(["automaton", "vehicle", "base2"]),
+            ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
                 if (char.actor.is5e) {
@@ -1229,7 +1236,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "DMCV",
             name: "Defensive Mental Combat Value",
-            base: fixedValueFunction(3),
+            base: function (actor) {
+                if (actor.type === "automaton") {
+                    // Automaton automatically has a 0 EGO, 0 OMCV,
+                    // and 0 DMCV, and is immune to all Mental Powers.
+                    return 0;
+                }
+                return 3;
+            },
             costPerLevel: fixedValueFunction(3),
             type: ["characteristic"],
             behaviors: ["defense", "calculated", "calculatedEGO"],
@@ -1237,7 +1251,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
-            ignoreForActor: staticIgnoreForActorFunction(["automaton", "vehicle", "base2"]),
+            ignoreForActor: staticIgnoreForActorFunction(["vehicle", "base2"]),
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             notes: function (char) {
                 const actor = char.actor;
@@ -1258,6 +1272,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 if (dmcvLevels) {
                     notes.push(`Extra CSL defenses: DMCV ${dmcvLevels.signedString()}`);
+                }
+
+                if (char.actor?.type === "automaton") {
+                    notes.push("immune to all Mental Powers");
                 }
 
                 return notes.join(", ");
