@@ -1,5 +1,5 @@
 <li class="item powers draggable expandable-document" data-item-id="{{this.id}}" data-document-uuid="{{this.uuid}}">
-    <div class="item-row {{css}}">
+    <div class="item-row draggable {{this.validationCss}}">
         <div class="item-column item-cost">
             {{#if (eq this.system.XMLID "COMPOUNDPOWER")}}
                 {{this.compoundCostForDisplay}}
@@ -16,7 +16,9 @@
             {{/if}}
         </div>
 
-        <div class="item-column item-description item-depth-{{this.childDepth}}">
+        <div class="item-column item-description item-depth-{{this.childDepth}}"
+            data-tooltip="{{this.validationTooltip}}"
+        >
             
             {{#if this.validationTooltip}}
                 <i class="fa-regular fa-circle-exclamation fa-2xl"></i>
