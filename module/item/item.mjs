@@ -7045,6 +7045,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         icon: "fa-solid fa-trash",
                         title: `${game.i18n.format("DOCUMENT.Delete", { type })}: ${this.name}`, // FIXME: double localization
                     },
+                    options: { popOutModuleDisable: true },
                 },
                 options,
             ),

@@ -116,6 +116,12 @@ input.over-max {
         border: 1px solid var(--color-tabs-border);
     }
 
+    fieldset {
+        margin-left: -1px;
+        padding: 0;
+        margin-right: 0;
+    }
+
     .attributes {
         text-align: center;
         margin: 1rem 0;
@@ -129,11 +135,6 @@ input.over-max {
             text-align: center;
             line-height: normal;
             height: var(--form-field-height);
-        }
-
-        fieldset.attribute {
-            margin-left: -1px;
-            padding: 0;
         }
 
         ul > li {
