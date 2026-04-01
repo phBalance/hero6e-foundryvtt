@@ -6,7 +6,8 @@ $c-warning: orangered;
 $c-hit: $c-success;
 $c-miss: $c-failure;
 
-.herosystem6e {
+.herosystem6e,
+.herosystem6e.theme-hc {
     --herosystem-blue: #286293;
     --herosystem-table-header-bg-color: var(--table-header-bg-color);
     --herosystem-shadow-45: rgb(0 0 0 / 45%);
@@ -27,6 +28,7 @@ body.theme-light .herosystem6e,
     --herosystem-header-background: #cac7bf;
 }
 
+body.theme-dark .herosystem6e:not(.themed),
 .herosystem6e.theme-dark {
     --herosystem-table-header-bg-color: var(--color-cool-4); // #333
     --background: black;
@@ -35,7 +37,7 @@ body.theme-light .herosystem6e,
 }
 
 // ref: https://venngage.com/tools/accessible-color-palette-generator
-.herosystem6e.theme-hc {
+form.herosystem6e.theme-hc {
     --herosystem-table-header-bg-color: var(--color-dark-1);
     --table-header-text-color: white;
     --background: var(--color-light-1);
@@ -44,7 +46,27 @@ body.theme-light .herosystem6e,
     --input-text-color: var(--color-dark-2);
     --input-background-color: var(--color-light-2);
 
-    img.item-image {
-        filter: brightness(0.1);
+    border: 1px solid white;
+
+    button:not(.unbutton),
+    header {
+        background-color: black;
+        color: white;
+
+        div {
+            background-color: var(--color-light-1);
+            color: black;
+        }
+    }
+
+    input {
+        color: black;
+        background-color: var(--color-light-2);
+        border: 1px solid black;
+    }
+
+    fieldset {
+        border-width: 1px;
+        margin-bottom: 2px;
     }
 }

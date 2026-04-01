@@ -8,7 +8,6 @@ import {
     tokenEducatedGuess,
     whisperUserTargetsForActor,
 } from "../../utility/util.mjs";
-import { HeroSystem6eActorActiveEffects } from "../../actor/actor-active-effects.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
