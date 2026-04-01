@@ -8,6 +8,7 @@ import {
     tokenEducatedGuess,
     whisperUserTargetsForActor,
 } from "../../utility/util.mjs";
+import { HeroSystem6eActorActiveEffects } from "../../actor/actor-active-effects.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -43,6 +44,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             clips: HeroSystemActorSheetV2.#onClips,
             configureActorType: HeroSystemActorSheetV2.#onConfigureActorType,
             configureToken: HeroSystemActorSheetV2.#onConfigureToken,
+            createActiveEffect: HeroSystemActorSheetV2.#onCreateActiveEffect,
             fullHealth: HeroSystemActorSheetV2.#onFullHealth,
             presenceAttack: HeroSystemActorSheetV2.#onPresenceAttack,
             recovery: HeroSystemActorSheetV2.#onRecovery,
@@ -240,6 +242,14 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     static #onConfigureToken() {
         this.token.sheet.render({ force: true });
+    }
+
+    static #onCreateActiveEffect() {
+        const activeEffect = {
+            name: "New Effect",
+            img: "icons/svg/aura.svg",
+        };
+        this.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
     }
 
     /*
