@@ -2,13 +2,15 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 
 // Compatibility V14
-const _ActiveEffectTypeDataModel = foundry.data.ActiveEffectTypeDataModel ?? foundry.abstract.TypeDataModel;
+const _ActiveEffectTypeDataModel = foundry.data?.ActiveEffectTypeDataModel ?? foundry.abstract.TypeDataModel;
 
 export class HeroSystem6eActorActiveEffectsSystemData extends _ActiveEffectTypeDataModel {
     static defineSchema() {
         const fields = foundry.data.fields;
+        // Compatibility V14
+        const _schema = foundry.data?.ActiveEffectTypeDataModel == undefined ? {} : super.defineSchema();
         return {
-            ...super.defineSchema(),
+            ..._schema,
             // Make sure active-effect-config.hbs has all these fields so they don't get lost during editing
             XMLID: new fields.StringField(),
         };
