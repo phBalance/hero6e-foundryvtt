@@ -1,7 +1,10 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 
-export class HeroSystem6eActorActiveEffectsSystemData extends foundry.abstract.TypeDataModel {
+// Compatibility V14
+const _ActiveEffectTypeDataModel = foundry.data.ActiveEffectTypeDataModel ?? foundry.abstract.TypeDataModel;
+
+export class HeroSystem6eActorActiveEffectsSystemData extends _ActiveEffectTypeDataModel {
     static defineSchema() {
         const fields = foundry.data.fields;
         return {
