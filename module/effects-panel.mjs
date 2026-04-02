@@ -46,7 +46,6 @@ export class EffectsPanel extends Application {
             const context = await super.getData(options);
             context.gameSystemId = game.system.id;
             context.effects = [];
-            context.css = `game-version-major-${game.version.split(".")[0]}`;
 
             for (const ae of foundry.utils.deepClone(this.actor?.appliedEffects)) {
                 const d = ae._prepareDuration();
