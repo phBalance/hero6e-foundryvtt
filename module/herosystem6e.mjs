@@ -346,7 +346,7 @@ Hooks.once("init", async function () {
     // Insert EffectsPanel template into DOM tree so it can render
     if (parseInt(game.version.split(".")[0] || 0) === 12) {
         // Template element for effects-panel
-        const ui = document.querySelector("#ui-top");
+        const ui = document.querySelector("#ui-right-column-1");
         if (ui) {
             const template = document.createElement("template");
             template.setAttribute("id", "hero-effects-panel");
