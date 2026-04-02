@@ -10,7 +10,7 @@ export class EffectsPanel extends Application {
         };
     }
 
-    // Addlistners
+    // Add listeners
     // effect-item
     activateListeners(html) {
         super.activateListeners(html);
