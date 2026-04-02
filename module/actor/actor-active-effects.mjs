@@ -8,6 +8,7 @@ export class HeroSystem6eActorActiveEffectsSystemData extends _ActiveEffectTypeD
     static defineSchema() {
         const fields = foundry.data.fields;
         return {
+            ...super.defineSchema(),
             // Make sure active-effect-config.hbs has all these fields so they don't get lost during editing
             XMLID: new fields.StringField(),
         };

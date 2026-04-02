@@ -2440,23 +2440,44 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             //     .replace("standardsuper", "pc"); // super old HDC
 
             if (this.id) {
+                // Delete maneuvers (or any other existing items) that don't
+                // match template prior to possibly changing is5e
+                if (heroJson.CHARACTER.TEMPLATE !== this.system.CHARACTER?.TEMPLATE) {
+                    const itemsToDeleteIs5e = this.items
+                        .filter((i) => i.system.is5e !== this.is5ePreview(heroJson.CHARACTER.TEMPLATE))
+                        .map((m) => m.id);
+                    if (itemsToDeleteIs5e.length > 0) {
+                        console.warn(`Deleting ${itemsToDeleteIs5e.length} is5e mismatches`);
+                        await this.deleteEmbeddedDocuments("Item", itemsToDeleteIs5e, {
+                            render: false,
+                        });
+                    }
+                }
+
                 // We can't delay this with the changes array because any items based on this actor needs this value.
                 // Specifically compound power is a problem if we don't set is5e properly for a 5e actor.
-                await this.update({
-                    ...changes,
-                    //"system.is5e": _is5e,
-                    "system.CHARACTER.BASIC_CONFIGURATION": heroJson.CHARACTER.BASIC_CONFIGURATION,
-                    "system.CHARACTER.CHARACTER_INFO": heroJson.CHARACTER.CHARACTER_INFO,
-                    "system.CHARACTER.TEMPLATE": heroJson.CHARACTER.TEMPLATE,
-                    "system.CHARACTER.version": heroJson.CHARACTER.version,
-                });
+                await this.update(
+                    {
+                        ...changes,
+                        "system.is5e": this.is5ePreview(heroJson.CHARACTER.TEMPLATE),
+                        "system.CHARACTER.BASIC_CONFIGURATION": heroJson.CHARACTER.BASIC_CONFIGURATION,
+                        "system.CHARACTER.CHARACTER_INFO": heroJson.CHARACTER.CHARACTER_INFO,
+                        "system.CHARACTER.TEMPLATE": heroJson.CHARACTER.TEMPLATE,
+                        "system.CHARACTER.version": heroJson.CHARACTER.version,
+                    },
+                    {
+                        render: false,
+                    },
+                );
                 changes = {};
 
                 if (this.is5e !== this.system.is5e) {
                     if (this.name.startsWith("_Quench")) {
                         console.error(`${this.name} is5e mismatch`);
                     }
-                    await this.update({ "system.is5e": this.is5e });
+
+                    // Finally update is5e
+                    await this.update({ "system.is5e": this.is5e }, { render: false });
                 }
 
                 const targetType = this._templateType
@@ -2478,13 +2499,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     } else {
                         ui.notifications.error(`${targetType} is not a valid actor type`);
                     }
-                }
-
-                // Delete maneuvers (or any other item) when changing is5e
-                const itemsToDeleteIs5e = this.items.filter((i) => i.system.is5e !== this.is5e).map((m) => m.id);
-                if (itemsToDeleteIs5e.length > 0) {
-                    console.warn(`Deleting ${itemsToDeleteIs5e.length} is5e mismatches`);
-                    await this.deleteEmbeddedDocuments("Item", itemsToDeleteIs5e);
                 }
             }
 
@@ -2512,7 +2526,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     // Update normal values first
                     await this.update(changesNormal);
 
-                    // Then any figured or calculated characteristis
+                    // Then any figured or calculated characteristics
                     await this.update(changesFiguredOrCalculated);
                 }
             }
@@ -3767,26 +3781,24 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return valueSum;
     }
 
-    get is5e() {
-        const _template = this.system.CHARACTER?.TEMPLATE?.name;
-        let _is5e;
-
-        // if (!_template) {
-        //     if (this.id) {
-        //         console.warn(`${this.name} has no TEMPLATE`);
-        //     }
-        // }
-
-        if (_template?.includes("6")) {
-            _is5e = false;
+    is5ePreview(template) {
+        if (template?.includes("6")) {
+            return false;
         }
 
         // 5e templates don't have the number 6
-        if (_template?.includes("hdt") && !_template?.includes("6")) {
-            _is5e = true;
+        if (template?.includes("hdt") && !template?.includes("6")) {
+            return true;
         }
 
-        if (_is5e !== undefined && this.system.is5e !== _is5e) {
+        return null;
+    }
+
+    get is5e() {
+        const _template = this.system.CHARACTER?.TEMPLATE?.name;
+        const _is5e = this.is5ePreview(_template);
+
+        if (_is5e != undefined && this.system.is5e !== _is5e) {
             if (!squelch(this.id)) {
                 console.error(`${this.name} is5e mismatch.  Template=${_template}`);
             }
