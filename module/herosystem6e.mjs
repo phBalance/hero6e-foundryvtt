@@ -403,7 +403,7 @@ Hooks.once("ready", async function () {
 
     // When using a square grid for scenes, the system needs the realistic square diagonals. Warn users if they don't have that setting.
     if (game.settings.get("core", "gridDiagonals") !== CONST.GRID_DIAGONALS.EXACT) {
-        ui.notifications.warn(
+        ui.notifications.info(
             'The Core FoundryVTT setting, "Square Grid Diagonals", was set to be "Exact (√2)" for correct measurement and behavior for scenes with square grids.',
         );
         await game.settings.set("core", "gridDiagonals", CONST.GRID_DIAGONALS.EXACT);
