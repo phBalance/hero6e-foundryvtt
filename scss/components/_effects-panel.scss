@@ -1,11 +1,11 @@
 #effects-panel {
     pointer-events: none;
-    position: absolute;
     top: 5px;
     right: 0;
-    overflow: hidden;
     max-height: calc(100% - 10px);
     height: calc(100% - 10px);
+    position: relative;
+    overflow: visible;
 
     .effect-item {
         pointer-events: auto;
@@ -50,6 +50,10 @@
             margin-right: 0.5em;
             max-width: 350px;
             padding: 0.25em 0.5rem;
+
+            table {
+                margin: 0;
+            }
 
             h1 {
                 // @include p-reset;
@@ -204,20 +208,5 @@
     > hr {
         margin-right: 0;
         width: 48px;
-    }
-}
-
-#effects-panel {
-    position: relative;
-    overflow: visible;
-
-    .effect-item {
-        .effect-info {
-            max-width: inherit;
-
-            table {
-                margin: 0;
-            }
-        }
     }
 }
