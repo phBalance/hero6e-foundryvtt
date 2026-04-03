@@ -410,22 +410,11 @@ Hooks.once("ready", async function () {
     }
 });
 
-// The renderChatMessage hook is deprecated. Please use renderChatMessageHTML instead, which now passes an HTMLElement argument instead of jQuery.
-// Deprecated since Version 13
-// Backwards-compatible support will be removed in Version 15
-if (isGameV13OrLater()) {
-    Hooks.on("renderChatMessageHTML", (app, html, data) => {
-        // Display action buttons
-        chat.displayChatActionButtons(app, $(html), data);
-        //HeroSystem6eCardHelpers.onMessageRendered($(html));
-    });
-} else {
-    Hooks.on("renderChatMessage", (app, html, data) => {
-        // Display action buttons
-        chat.displayChatActionButtons(app, html, data);
-        //HeroSystem6eCardHelpers.onMessageRendered(html);
-    });
-}
+Hooks.on("renderChatMessageHTML", (app, html, data) => {
+    // Display action buttons
+    chat.displayChatActionButtons(app, $(html), data);
+    //HeroSystem6eCardHelpers.onMessageRendered($(html));
+});
 
 // Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
 // Hooks.on("renderChatPopout", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));

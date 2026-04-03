@@ -558,7 +558,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
 
             if (totalSeconds < 0) {
                 console.warn(
-                    `Active Effect ${this.name} has negative remaining duration = ${totalSeconds}.`,
+                    `Active Effect ${this.name}/${this.parent.name}/${this.parent?.actor?.name} has negative remaining duration = ${totalSeconds}.`,
                     this.duration,
                     wt,
                 );
