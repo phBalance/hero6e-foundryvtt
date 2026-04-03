@@ -412,6 +412,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         context = await super._preparePartContext(partId, context);
         context.tab = context.tabs[partId];
         context.actor ??= this.actor;
+        context.token ??= this.token;
         context.gameSystemId ??= game.system.id;
         context.items = null;
 
@@ -1608,9 +1609,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     static async #onUpdateTokenImage(event, target) {
-        const isToken = !!this.token && this.token.actorLink;
         if (window.Tokenizer) {
-            if (isToken) return window.Tokenizer.tokenizeSceneToken(this);
+            if (this.document.isToken) return window.Tokenizer.tokenizeSceneToken(this);
             else return window.Tokenizer.tokenizeActor(this.actor);
         }
 
@@ -1622,10 +1622,13 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             type: "image",
             redirectToRoot: img ? [img] : [],
             callback: async (path) => {
-                if (isToken) {
-                    target.src = path;
+                target.src = path;
+                if (this.token) {
                     await this.token.update({ ["texture.src"]: path });
-                } else await this.document.update({ ["prototypeToken.texture.src"]: path });
+                }
+                if (!this.document.isToken) {
+                    await this.document.update({ ["prototypeToken.texture.src"]: path });
+                }
             },
             top: this.position.top + 40,
             left: this.position.left + 10,

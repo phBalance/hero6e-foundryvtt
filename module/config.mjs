@@ -16423,6 +16423,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // 6e (resistant defense) FORCEFIELD, FORCEWALL related
+            key: "ALLOCATABLE",
+            behaviors: ["modifier"],
+            type: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="ALLOCATABLE" ID="1775232087686" BASECOST="0.25" LEVELS="0" ALIAS="Allocatable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        undefined,
+    );
+    addPower(
+        {
             // TRANSFORM related
             key: "ALLORNOTHING",
             behaviors: ["modifier"],
@@ -16930,6 +16942,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // 6e FORCEWALL/BARRIER related
+            key: "CONFIGURABLE",
+            behaviors: ["modifier"],
+            type: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="CONFIGURABLE" ID="1775232093274" BASECOST="0.25" LEVELS="0" ALIAS="Configurable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        undefined,
+    );
+    addPower(
+        {
             // INCANTATIONS related
             key: "CONSTANT",
             behaviors: ["modifier"],
@@ -17383,6 +17407,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(
+        {
+            // DUPLICATION, FORCEWALL, MINDLINK related
+            key: "FEEDBACK",
+            behaviors: ["modifier"],
+            type: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="FEEDBACK" ID="1775232124518" BASECOST="-1.0" LEVELS="0" ALIAS="Feedback" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
     addPower(
         {
             key: "FOCUS",
@@ -18749,6 +18785,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="RESTRAINABLE" ID="1736707497175" BASECOST="-0.5" LEVELS="0" ALIAS="Restrainable" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // FORCEWALL/BARRIER related
+            key: "RESTRICTEDSHAPE",
+            behaviors: ["modifier"],
+            type: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="RESTRICTEDSHAPE" ID="1775232145081" BASECOST="-0.25" LEVELS="0" ALIAS="Restricted Shape" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
