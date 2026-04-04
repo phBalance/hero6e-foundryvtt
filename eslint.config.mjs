@@ -79,7 +79,6 @@ export default [
                 SceneNavigation: "readonly",
                 SimpleCalendar: "readonly",
                 TemplateLayer: "readonly",
-                TextEditor: "readonly",
                 Token: "readonly",
                 TokenDocument: "readonly",
                 TokenHUD: "readonly",

@@ -473,7 +473,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     break;
                 case "background":
                     context.enriched ??= {};
-                    context.enriched.BACKGROUND = await TextEditor.enrichHTML(
+                    context.enriched.BACKGROUND = await foundry.applications.ux.TextEditor.enrichHTML(
                         this.actor.system.CHARACTER.CHARACTER_INFO.BACKGROUND,
                         {
                             relativeTo: this.document,
@@ -973,7 +973,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
      */
     async _onDrop(event) {
         console.log(event);
-        const data = TextEditor.getDragEventData(event);
+        const data = foundry.applications.ux.TextEditor.getDragEventData(event);
         // Handle different data types
         switch (data?.type) {
             case "Item":
