@@ -2499,8 +2499,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     .replace("competentpc", "pc"); // super old HDC
 
                 if (targetType && this.type.replace("npc", "pc") !== targetType) {
-                    if (Object.keys(game.system.template.Actor).includes(targetType)) {
-                        await this.update({ type: targetType, [`==system`]: this.system });
+                    if (Object.keys(game.system.documentTypes.Actor).includes(targetType)) {
+                        await this.update({ type: targetType, [`==system`]: this.system }, { ForcedReplacement: true });
                     } else {
                         ui.notifications.error(`${targetType} is not a valid actor type`);
                     }
