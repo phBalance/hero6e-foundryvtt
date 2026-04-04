@@ -2443,14 +2443,19 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 // Delete maneuvers (or any other existing items) that don't
                 // match template prior to possibly changing is5e
                 if (heroJson.CHARACTER.TEMPLATE !== this.system.CHARACTER?.TEMPLATE) {
-                    const itemsToDeleteIs5e = this.items
-                        .filter((i) => i.system.is5e !== this.is5ePreview(heroJson.CHARACTER.TEMPLATE))
-                        .map((m) => m.id);
+                    const itemsToDeleteIs5e = this.items.filter(
+                        (i) => i.system.is5e !== this.is5ePreview(heroJson.CHARACTER.TEMPLATE),
+                    );
+
                     if (itemsToDeleteIs5e.length > 0) {
                         console.warn(`Deleting ${itemsToDeleteIs5e.length} is5e mismatches`);
-                        await this.deleteEmbeddedDocuments("Item", itemsToDeleteIs5e, {
-                            render: false,
-                        });
+                        if (itemsToDeleteIs5e.length === this.items.size) {
+                            await this.items.clear();
+                        } else {
+                            await this.deleteEmbeddedDocuments("Item", itemsToDeleteIs5e, {
+                                render: false,
+                            });
+                        }
                     }
                 }
 
@@ -2546,11 +2551,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             // NOTE don't put this into the promiseArray because we create things in here that are absolutely required by later items (e.g. strength placeholder).
             // if (this.type === "pc" || this.type === "npc" || this.type === "automaton") {
-            uploadProgressBar.advance(`${this.name}: Evaluating non HDC items for PCs, NPCs, and Automatons`, 0);
+            uploadProgressBar.advance(`${this.name}: addFreeStuff`, 0);
 
             await this.addFreeStuff();
 
-            uploadProgressBar.advance(`${this.name}: Evaluated non HDC items for PCs, NPCs, and Automatons`, 0);
+            uploadProgressBar.advance(`${this.name}: addFreeStuff completed`, 0);
             //}
 
             uploadPerformance.progressBarFreeStuff - uploadPerformance._d;

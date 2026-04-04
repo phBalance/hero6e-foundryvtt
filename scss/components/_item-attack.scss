@@ -1,6 +1,4 @@
 #item-attack-form-application-v2 {
-    color: blue;
-
     .form-group {
         clear: both;
         display: flex;
@@ -22,5 +20,15 @@
         width: auto;
         margin-right: 5px;
         margin-left: -7px;
+    }
+
+    .window-content {
+        overflow-y: auto;
+    }
+
+    div.description {
+        border: 1px solid var(--input-border-color);
+        background: var(--input-background-color);
+        color: var(--input-text-color);
     }
 }
