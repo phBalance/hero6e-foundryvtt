@@ -7,14 +7,11 @@ import {
     gridUnitsToMeters,
 } from "./utility/units.mjs";
 
-// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
-const FoundryVttMeasuredTemplate = foundry.canvas?.placeables?.MeasuredTemplate || MeasuredTemplate;
-
 function isHexTemplatesEnabled() {
     return game.settings.get(HEROSYS.module, "HexTemplates");
 }
 
-export default class HeroSystem6eMeasuredTemplate extends FoundryVttMeasuredTemplate {
+export default class HeroSystem6eMeasuredTemplate extends foundry.canvas.placeables.MeasuredTemplate {
     async _onClickLeft(event) {
         await super._onClickLeft(event);
 
