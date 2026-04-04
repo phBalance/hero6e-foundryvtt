@@ -126,7 +126,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                 "CAMPAIGN_USE",
                 "APPEARANCE",
             ]) {
-                data[`enriched${field}`] = await FoundryVttTextEditor.enrichHTML(
+                data[`enriched${field}`] = await foundry.applications.ux.TextEditor.enrichHTML(
                     data.actor.system.CHARACTER?.CHARACTER_INFO?.[field],
                     { async: true },
                 );
