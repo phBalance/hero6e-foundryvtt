@@ -5,6 +5,7 @@
 
 .herosystem6e.actor-sheet-v2a .uploading-blur {
     filter: blur(2px) grayscale(1);
+    pointer-events: none;
 }
 
 .herosystem6e.actor-sheet-v2a [data-application-part="uploading"] {
@@ -19,9 +20,18 @@
     pointer-events: none;
 
     div {
-        pointer-events: all;
-        background: rgb(255 255 255 / 70%);
+        background: white;
         padding: 5px;
+        width: 95%;
+        border: 2px solid red;
+        margin: 5px;
+        border-radius: 5px;
+        pointer-events: auto;
+        user-select: text;
+
+        pre {
+            text-wrap: auto;
+        }
     }
 }
 
