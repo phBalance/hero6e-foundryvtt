@@ -8,6 +8,10 @@ export function isGameV13OrLater() {
     return foundry.utils.isNewerVersion(game.version, "12.343");
 }
 
+export function isGameV14OrLater() {
+    return foundry.utils.isNewerVersion(game.version, "14.0");
+}
+
 /**
  * FoundryVTT overloads Math to add the clamped or clamp method depending on the version.
  * Just provide a straight implementation.

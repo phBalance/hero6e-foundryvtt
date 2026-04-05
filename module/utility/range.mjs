@@ -76,7 +76,7 @@ export function calculateDistanceBetween(origin, target) {
 
     // We need to decide on an actor to use for the system units. Since both objects being measured are tokens,
     // we can use the origin token's actor.
-    const rulesActor = origin.actor;
+    const rulesActor = origin.actor ?? fromUuidSync(origin.flags[game.system.id]?.actorUuid);
     const threeDDistance = Math.sqrt(
         Math.pow(originElevation - targetElevation, 2) + Math.pow(originalMeasureDistanceMeters, 2),
     );

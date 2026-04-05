@@ -7,8 +7,10 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { getOffHandDefenseDcv } from "../actor/actor-utils.mjs";
 
-import { ItemAttackFormApplication, getAoeTemplateForBaseItem } from "../item/item-attack-application.mjs";
+import { isGameV14OrLater } from "../utility/compatibility.mjs";
+import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { ItemAttackFormApplicationV2 } from "../applications/item/item-attack-application-v2.mjs";
+
 import { ItemAttackClubWeaponApplicationV2 } from "../applications/item/item-attack-application-club-weapon.mjs";
 
 import { HeroSystem6eItem, requiresACharacteristicRollCheck, rollAblativeActivationCheck } from "../item/item.mjs";
@@ -270,22 +272,22 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
         data.velocitySystemUnits = getSystemDisplayUnits(item.is5e);
     }
 
-    //await
+    const HeroItemAttackFormApplication = isGameV14OrLater() ? ItemAttackFormApplicationV2 : ItemAttackFormApplication;
     if (options.allInOne) {
         if (item.system.XMLID === "CLUBWEAPON") {
             data.previousApplication = [];
-            data.nextApplication = ItemAttackFormApplication;
+            data.nextApplication = HeroItemAttackFormApplication;
             await new ItemAttackClubWeaponApplicationV2(data).render(true);
         } else {
-            await new ItemAttackFormApplicationV2(data).render(true);
+            await new HeroItemAttackFormApplication(data).render(true);
         }
     } else {
         if (item.system.XMLID === "CLUBWEAPON") {
             data.previousApplication = [];
-            data.nextApplication = ItemAttackFormApplication;
+            data.nextApplication = HeroItemAttackFormApplication;
             await new ItemAttackClubWeaponApplicationV2(data).render(true);
         } else {
-            await new ItemAttackFormApplication(data).render(true);
+            await new HeroItemAttackFormApplication(data).render(true);
         }
     }
 }
@@ -589,11 +591,11 @@ export async function doAoeActionToHit(action, options) {
     // Paranoia setting = HIGH. Can be removed if we feel the need.
     const tokenId = token.id || token.document.id;
     const storedTokenId = action.system.attackerToken.id || action.system.attackerToken.document.id;
-    if (tokenId === storedTokenId) {
+    if (tokenId !== storedTokenId) {
         console.error(
             `Token stored for attacker in action is not the same as the educated guess!`,
-            action.system.attackerToken,
-            token,
+            tokenId,
+            storedTokenId,
         );
     }
 
@@ -610,7 +612,7 @@ export async function doAoeActionToHit(action, options) {
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(setManeuver?.system.ocv || 0, "Set Maneuver");
 
-    const aoeTemplate = getAoeTemplateForBaseItem(item);
+    const aoeTemplate = item.getAoeTemplateForBaseItem;
     if (!aoeTemplate) {
         return ui.notifications.error(`Attack AoE template was not found.`);
     }
@@ -925,7 +927,7 @@ async function doSingleTargetActionToHit(action, options) {
         .addNumber(setManeuver?.system.ocv || 0, "Set Maneuver");
 
     const isAoE = item.effectiveAttackItem.getAoeModifier();
-    const aoeTemplate = isAoE ? getAoeTemplateForBaseItem(item) : null;
+    const aoeTemplate = isAoE ? item.getAoeTemplateForBaseItem : null;
     if (isAoE && !aoeTemplate) {
         return ui.notifications.error(`Attack AOE template was not found.`);
     }
@@ -2681,7 +2683,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     const explosion = item.effectiveAttackItem.hasExplosionAdvantage();
     if (explosion) {
-        const aoeTemplate = getAoeTemplateForBaseItem(item);
+        const aoeTemplate = this.getAoeTemplateForBaseItem;
 
         if (aoeTemplate) {
             // Distance from center

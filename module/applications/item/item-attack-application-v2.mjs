@@ -1,17 +1,32 @@
 // REF: https://foundryvtt.wiki/en/development/api/applicationv2
 import { HEROSYS } from "../../herosystem6e.mjs";
 import { filterIgnoreCompoundAndFrameworkItems } from "../../config.mjs";
-import { calculateRequiredResourcesToUse } from "../../item/item-attack.mjs";
-import { ItemAttackV2 } from "../../item/item-attack-v2.mjs";
+import { calculateRequiredResourcesToUse, processActionToHit } from "../../item/item-attack.mjs";
 import { buildEffectiveObject } from "../../item/item.mjs";
 import { Attack } from "../../utility/attack.mjs";
-import { AttackAction } from "../../utility/attack-action.mjs";
 import {
+    calculateReduceOrPushRealCost,
     combatSkillLevelsForAttack,
     isManeuverThatDoesNormalDamage,
     isRangedCombatManeuver,
 } from "../../utility/damage.mjs";
-import { getSystemDisplayUnits } from "../../utility/units.mjs";
+import {
+    convertSystemUnitsToMetres,
+    currentSceneUsesHexGrid,
+    getSystemDisplayUnits,
+    gridUnitsToMeters,
+} from "../../utility/units.mjs";
+
+/**
+ * 5e HEX type and NORMAL are converted to RADIUS
+ */
+const heroAoeTypeToFoundryAoeTypeConversions = Object.freeze({
+    any: "rect",
+    cone: "cone",
+    line: "ray",
+    radius: "circle",
+    surface: "rect",
+});
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -21,6 +36,26 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         Hooks.once("init", async function () {
             ItemAttackFormApplicationV2.initializeTemplate();
         });
+
+        // Hooks.on("updateRegion", (document, changed, options, userId) => {
+        //     //console.log(changed);
+        //     // Only run if the position (x, y) or the actual shapes were updated
+        //     // if (!changed.shapes && !changed.x && !changed.y) return;
+        //     // // Only the user who moved the region should update their targets
+        //     // if (userId !== game.user.id) return;
+        //     // const region = document.object;
+        //     // if (!region) return;
+        //     // // 1. Get tokens currently inside the region's geometry
+        //     // const tokensInside = region.tokens; // Returns a Set of Token objects
+        //     // // 2. Clear current targets and add the new ones
+        //     // game.user.targets.clear();
+        //     // tokensInside.forEach((token) => {
+        //     //     // setTarget(targeted, {user, releaseOthers})
+        //     //     token.setTarget(true, { releaseOthers: false });
+        //     // });
+        //     // // 3. Broadcast the targeting reticule to other players
+        //     // game.user.broadcastActivity({ targets: game.user.targets.ids });
+        // });
     }
 
     data;
@@ -60,10 +95,11 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         id: "item-attack-form-application-v2",
         position: {
             width: "400",
+            height: "auto",
         },
         form: {
             handler: ItemAttackFormApplicationV2.#onSubmit,
-            closeOnSubmit: true,
+            closeOnSubmit: false,
         },
         window: {
             icon: "fas fa-swords",
@@ -83,9 +119,6 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 template: `systems/${systemId}/templates/attack/item-attack-application-v2.hbs`,
                 scrollable: [""],
             },
-            // footer: {
-            //     template: "templates/generic/form-footer.hbs",
-            // },
         };
     }
 
@@ -290,15 +323,16 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 );
                 this.data.hthAttackItems ??= hthAttacks.reduce((attacksObj, hthAttack) => {
                     // If already exists we're updating so no need to recreate.
-                    if (attacksObj[hthAttack.uuid]) {
+                    if (attacksObj[hthAttack.id]) {
                         return attacksObj;
                     }
 
-                    attacksObj[hthAttack.uuid] = {
+                    attacksObj[hthAttack.id] = {
                         _canUseForAttack: false,
                         reasonForCantUse: "",
                         description: hthAttack.system.description,
                         name: hthAttack.name,
+                        uuid: hthAttack.uuid,
                     };
                     return attacksObj;
                 }, {});
@@ -358,12 +392,13 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                     return naObj;
                 }
 
-                naObj[naItem.uuid] = {
+                naObj[naItem.id] = {
                     _canUseForAttack: false,
                     reasonForCantUse: "",
                     description: naItem.system.description,
                     name: naItem.name,
                     item: naItem,
+                    uuid: naItem.uuid,
                 };
                 return naObj;
             }, {});
@@ -479,12 +514,244 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
     static async #onSubmit(event, form, formData) {
         // Do things with the returned FormData
         //this.data.effectiveItem, formData, { token: this.data.token, allInOne: true }
-        return ItemAttackV2.processActionToHitV2(
-            new AttackAction({
-                ...formData.object,
-                effectiveItem: this.data.effectiveItem,
-                attackerTokenUuid: this.data.token.uuid,
-            }),
+
+        const extendedFormData = foundry.utils.expandObject(formData.object);
+
+        switch (event.submitter?.name) {
+            case "roll": {
+                const aoe = this.data.effectiveItem.effectiveAttackItem.aoeAttackParameters;
+
+                if (aoe && !this.getAoeTemplate()) {
+                    return ui.notifications.error(
+                        `No area of effect template found for this attack. Please place the template before rolling the attack.`,
+                    );
+                }
+                await this.close();
+                return processActionToHit(this.data.effectiveItem, extendedFormData, { token: this.data.token });
+            }
+
+            case "continueMultiattack":
+                this.data.formData.continueMultiattack = true;
+                break;
+
+            case "executeMultiattack":
+                {
+                    const begin = this.data.action.current.execute === undefined;
+                    // we pressed the button to execute multiple attacks
+                    // the first time does not get a roll, but sets up the first attack
+                    if (begin) {
+                        this.data.formData.execute = 0;
+                    } else {
+                        // the subsequent presses will roll the attack and set up the next attack
+                        // TODO: if any roll misses, the multiattack ends, and the end cost for the remainding attacks are forfeit
+
+                        // this is the roll:
+                        await processActionToHit(this.data.effectiveItem, this.data.formData);
+
+                        this.data.formData.execute = this.data.action.current.execute + 1;
+                    }
+
+                    // Is this is the last step?
+                    const end = this.data.formData.execute >= this.data.action.maneuver.attackKeys.length;
+                    if (end) {
+                        canvas.tokens.activate();
+                        await this.close();
+                    } else {
+                        return await new ItemAttackFormApplicationV2(this.data).render(true);
+                    }
+                }
+
+                break;
+
+            case "missedMultiattack":
+                // TODO: charge user the end cost for the remaining attacks
+                canvas.tokens.activate();
+                await this.close();
+                return;
+
+            case "cancelMultiattack":
+                this.data.formData.continueMultiattack = false;
+
+                // PH: FIXME: Do we have to do anything to action to clear it out? Should we just "delete" it?
+
+                canvas.tokens.activate();
+                await this.close();
+
+                return;
+
+            case "aoe":
+                return this._spawnAreaOfEffect();
+
+            default:
+                console.log(`${event.submitter?.name} was submitted, but no handler is set up for that yet.`);
+        }
+
+        console.warn(`Fall thru on ${event.submitter?.name}`);
+    }
+
+    /**
+     *
+     * 5e is a hex based system with defined AOE templates. The first hex is the target hex (even though it's only a 0.5" radius).
+     * 6e is a gridless system with distances and AOE templates defined by the grid/gridless system being used for this scene.
+     *
+     */
+    async _spawnAreaOfEffect() {
+        const item = this.data.effectiveItem;
+
+        const areaOfEffect = item.effectiveAttackItem.aoeAttackParameters;
+        if (!areaOfEffect) return;
+
+        const aoeType = areaOfEffect.type;
+        const aoeValue = areaOfEffect.value;
+
+        const actor = item.actor;
+        const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
+        if (!token) {
+            return ui.notifications.error(`${actor.name} has no token in this scene.  Unable to place AOE template.`);
+        }
+
+        // Close all windows except us
+        for (let id of Object.keys(ui.windows)) {
+            if (id != this.appId) {
+                ui.windows[id].close();
+            }
+        }
+
+        const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
+
+        const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor.is5e);
+
+        const hexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
+        const hexGrid = currentSceneUsesHexGrid();
+
+        // NOTE: If we're using hex templates (i.e. 5e), the target hex is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
+        //       for distance we need to subtract 0.5"/1m from the radius.
+        // NOTE: MeasuredTemplates assume that the distance is in grid units.
+        const distanceInMeters = aoeValue * sizeConversionToMeters - (hexTemplates && hexGrid ? 1 : 0);
+        const distanceInGridUnits = distanceInMeters / gridUnitsToMeters();
+
+        const effectiveAttackItemOriginalItemId = item.effectiveAttackItem.getEffectiveItemOriginalItemId;
+        const regionData = {
+            name: `${item.name}-${item.system.XMLID}-${token.name}`,
+            color: game.user.color,
+            shapes: [
+                {
+                    type: templateType,
+                    x: token.center.x,
+                    y: token.center.y,
+                    rotation: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
+                    radius: (distanceInGridUnits * canvas.grid.size) / 2,
+                },
+            ],
+            displayMeasurements: true,
+            highlightMode: "coverage",
+            visibility: CONST.REGION_VISIBILITY.ALWAYS,
+            flags: {
+                [game.system.id]: {
+                    purpose: "AoE",
+                    itemId: effectiveAttackItemOriginalItemId,
+                    actorUuid: actor.uuid,
+                    effectiveItemJson: item.effectiveAttackItem.toJSON(),
+                    //item,
+                    //actor,
+                    //aoeType,
+                    //aoeValue,
+                    //sizeConversionToMeters,
+                    //usesHexTemplate: hexTemplates && hexGrid,
+                    //is5e: item.effectiveAttackItem.is5e,
+                },
+            },
+            behaviors: [
+                {
+                    name: "Token Automatic Targeting",
+                    type: "executeScript",
+                    system: {
+                        events: ["tokenEnter", "tokenExit"],
+                        source: `const token = event.data.token;\nif (token) {\n!!token.object.setTarget(region.tokens.find(t=> t.id === token.id),\n{releaseOthers: false });\n}`,
+                    },
+                },
+            ],
+            // AARON WAS HERE 4/4/2026: Foundry bug?  Can't create with restriction
+            // restriction: {
+            //     enabled: true,
+            // },
+        };
+
+        switch (templateType) {
+            case "circle":
+                break;
+
+            case "cone":
+                {
+                    if ((areaOfEffect.ADDER || []).find((adder) => adder.XMLID === "THINCONE")) {
+                        regionData.shapes[0].angle = 30;
+                    } else {
+                        regionData.shapes[0].angle = 60;
+                    }
+                }
+
+                break;
+
+            // case "ray":
+            //     {
+            //         regionData[game.system.id] = {};
+            //         regionData.width = sizeConversionToMeters * areaOfEffect.width;
+            //         regionData.flags[game.system.id].width = areaOfEffect.width;
+            //         regionData.flags[game.system.id].height = areaOfEffect.height;
+            //     }
+            //     break;
+
+            // case "rect": {
+            //     // if (areaOfEffect.type === "surface" && item.findModsByXmlid("CONTINUOUS")) {
+            //     //     // This is likely a damage shield
+            //     // }
+
+            //     // rectangle templates are defined as a distance/hypotenuse and an angle
+            //     regionData.direction = areaOfEffect.direction;
+            //     regionData.distance = sizeConversionToMeters * areaOfEffect.distance;
+            //     break;
+            // }
+
+            default:
+                console.error(`unsupported template type ${templateType}`);
+                break;
+        }
+
+        const existingTemplate = this.getAoeTemplate();
+        if (existingTemplate) {
+            // delete exiting region,
+            await existingTemplate.delete();
+        }
+
+        // Remove all targets
+        canvas.tokens.ownedTokens?.[0].setTarget(false, { releaseOthers: true });
+
+        // Create the region
+        await canvas.scene.createEmbeddedDocuments("Region", [regionData]);
+
+        // canvas.templates.activate({ tool: templateType });
+        // canvas.templates.selectObjects({
+        //     x: regionData.x,
+        //     y: regionData.y,
+        //     releaseOthers: true,
+        //     control: true,
+        //     toggle: false,
+        // });
+    }
+
+    /**
+     * Find the first matching template for the effective attack item.
+     *
+     * @returns
+     */
+    getAoeTemplate() {
+        const effectiveAttackItemOriginalItemId = this.data.effectiveItem.getEffectiveItemOriginalItemId;
+
+        return Array.from(canvas.regions.viewedDocuments()).find(
+            (template) =>
+                template.color?.css === game.user.color.css &&
+                template.flags[game.system.id]?.purpose === "AoE" &&
+                template.flags[game.system.id]?.itemId === effectiveAttackItemOriginalItemId,
         );
     }
 
@@ -519,62 +786,213 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
      *  PH: FIXME: How should pushing play with HTH Attack and Naked Advantages? I assume that they don't interact.
      * @param {Object} formData
      */
-    // #processReduceOrPush(formData) {
-    //     // Limit the item's reduce or push
-    //     const desiredEffectiveItemRealCost = formData.effectiveRealCost || 0;
+    #processReduceOrPush(formData) {
+        // Limit the item's reduce or push
+        const desiredEffectiveItemRealCost = formData.effectiveRealCost || 0;
 
-    //     ({ effectiveRealCost: this.data.effectiveRealCost, pushedRealPoints: this.data.pushedRealPoints } =
-    //         calculateReduceOrPushRealCost(this.data.originalItem._realCost, desiredEffectiveItemRealCost));
+        ({ effectiveRealCost: this.data.effectiveRealCost, pushedRealPoints: this.data.pushedRealPoints } =
+            calculateReduceOrPushRealCost(this.data.originalItem._realCost, desiredEffectiveItemRealCost));
 
-    //     if (this.data.effectiveRealCost < desiredEffectiveItemRealCost) {
-    //         ui.notifications.warn(
-    //             "Pushing a power is limited to the lesser of 10 character points or the original total character points",
-    //         );
-    //     } else if (this.data.effectiveRealCost > desiredEffectiveItemRealCost) {
-    //         ui.notifications.warn("The minimum power cost is 1 character point");
-    //     }
+        if (this.data.effectiveRealCost < desiredEffectiveItemRealCost) {
+            ui.notifications.warn(
+                "Pushing a power is limited to the lesser of 10 character points or the original total character points",
+            );
+        } else if (this.data.effectiveRealCost > desiredEffectiveItemRealCost) {
+            ui.notifications.warn("The minimum power cost is 1 character point");
+        }
 
-    //     // Limit strength's push
-    //     // PH: FIXME: Should be working with limited strength and not desired strength
-    //     const desiredStrengthRealCost = formData.effectiveStr || 0;
-    //     if (this.data.effectiveStr > 0) {
-    //         ({ effectiveRealCost: this.data.effectiveStr, pushedRealPoints: this.data.effectiveStrPushedRealPoints } =
-    //             calculateReduceOrPushRealCost(this.data.str, desiredStrengthRealCost));
+        // Limit strength's push
+        // PH: FIXME: Should be working with limited strength and not desired strength
+        const desiredStrengthRealCost = formData.effectiveStr || 0;
+        if (this.data.effectiveStr > 0) {
+            ({ effectiveRealCost: this.data.effectiveStr, pushedRealPoints: this.data.effectiveStrPushedRealPoints } =
+                calculateReduceOrPushRealCost(this.data.str, desiredStrengthRealCost));
 
-    //         if (this.data.effectiveStr < desiredStrengthRealCost) {
-    //             ui.notifications.warn(
-    //                 "Pushing strength is limited to the lesser of 10 character points or the original total character points",
-    //             );
-    //         }
-    //     } else {
-    //         this.data.effectiveStrPushedRealPoints = 0;
-    //     }
-    // }
+            if (this.data.effectiveStr < desiredStrengthRealCost) {
+                ui.notifications.warn(
+                    "Pushing strength is limited to the lesser of 10 character points or the original total character points",
+                );
+            }
+        } else {
+            this.data.effectiveStrPushedRealPoints = 0;
+        }
+    }
 
     /**
      * Determine what Hand-to-Hand and Naked Advantages should be enabled.
      *
      * @param {Object} formData
      */
-    // #processFormDataForHthAndNa(formData) {
-    //     // Restructure HTH Attacks
-    //     Object.entries(formData).forEach(([key, value]) => {
-    //         const match = key.match(/^hthAttackItems.(.*)._canUseForAttack$/);
-    //         if (!match) {
-    //             return;
-    //         }
+    #processFormDataForHthAndNa(formData) {
+        // Restructure HTH Attacks
+        // Object.entries(formData.hthAttackItems).forEach(([key, value]) => {
+        //     this.data.hthAttackItems[key] = value;
+        // });
 
-    //         this.data.hthAttackItems[match[1]]._canUseForAttack = value;
-    //     });
+        // Restructure Naked Advantages
+        Object.entries(formData).forEach(([key, value]) => {
+            const match = key.match(/^nakedAdvantagesItems.(.*)._canUseForAttack$/);
+            if (!match) {
+                return;
+            }
 
-    //     // Restructure Naked Advantages
-    //     Object.entries(formData).forEach(([key, value]) => {
-    //         const match = key.match(/^nakedAdvantagesItems.(.*)._canUseForAttack$/);
-    //         if (!match) {
-    //             return;
-    //         }
+            this.data.nakedAdvantagesItems[match[1]]._canUseForAttack = value;
+        });
+    }
 
-    //         this.data.nakedAdvantagesItems[match[1]]._canUseForAttack = value;
-    //     });
-    // }
+    async _onChange(event, formData) {
+        const extendedFormData = foundry.utils.expandObject(formData.object);
+
+        // PH: FIXME: There has to be a better way than this?
+        delete extendedFormData.effectiveRealCost;
+
+        // CSL & PSL format is non-standard, need to deal with those
+        const updates = [];
+        for (const key of Object.keys(extendedFormData)) {
+            if (key.length === 16) {
+                const extendedItem = this.data.actor.items.find((o) => o.id === key);
+                if (extendedItem) {
+                    updates.push({ _id: key, ...extendedFormData[key] });
+                    delete extendedFormData[key];
+                }
+            }
+        }
+        if (updates.length > 0) {
+            await this.data.actor.updateEmbeddedDocuments("Item", updates);
+        }
+
+        // Take all the data we updated in the form and apply it.
+        this.data = foundry.utils.mergeObject(this.data, extendedFormData);
+
+        this.#processReduceOrPush(extendedFormData);
+
+        this.#processFormDataForHthAndNa(extendedFormData);
+
+        // PH: FIXME: Build the item to use. Is there a way to only have this code once in getData?
+        this.data.effectiveItem = await this.#buildEffectiveObjectFromOriginalAndData();
+        this.data.effectiveItemResourceUsage = calculateRequiredResourcesToUse(
+            [
+                this.data.effectiveItem,
+                ...(this.data.effectiveItem.system._active.linkedEnd || []).map((linkedEndInfo) => linkedEndInfo.item),
+
+                // PH: FIXME: This should probably be recursive as these linked items could have linked endurance
+                // only items or linked items of their own (presumably).
+                ...(this.data.effectiveItem.system._active.linked || []).map((linkedInfo) => linkedInfo.item),
+            ],
+            formData,
+        );
+
+        this.#setAoeAndHitLocationDataForEffectiveItem();
+
+        // if (event.submitter?.name === "roll") {
+
+        //     await this.close();
+
+        //     return processActionToHit(this.data.effectiveItem, extendedFormData, { token: this.data.token });
+        // }
+
+        this.data.formData ??= {};
+
+        // if (event.submitter?.name === "continueMultiattack") {
+        //     this.data.formData.continueMultiattack = true;
+        // } else if (event.submitter?.name === "executeMultiattack") {
+        //     const begin = this.data.action.current.execute === undefined;
+        //     // we pressed the button to execute multiple attacks
+        //     // the first time does not get a roll, but sets up the first attack
+        //     if (begin) {
+        //         this.data.formData.execute = 0;
+        //     } else {
+        //         // the subsequent presses will roll the attack and set up the next attack
+        //         // TODO: if any roll misses, the multiattack ends, and the end cost for the remainding attacks are forfeit
+
+        //         // this is the roll:
+        //         await processActionToHit(this.data.effectiveItem, this.data.formData);
+
+        //         this.data.formData.execute = this.data.action.current.execute + 1;
+        //     }
+
+        //     // Is this is the last step?
+        //     const end = this.data.formData.execute >= this.data.action.maneuver.attackKeys.length;
+        //     if (end) {
+        //         canvas.tokens.activate();
+        //         await this.close();
+        //     } else {
+        //         return await new ItemAttackFormApplicationV2(this.data).render(true);
+        //     }
+        // } else if (event.submitter?.name === "missedMultiattack") {
+        //     // TODO: charge user the end cost for the remaining attacks
+        //     canvas.tokens.activate();
+        //     await this.close();
+        //     return;
+        // } else if (event.submitter?.name === "cancelMultiattack") {
+        //     this.data.formData.continueMultiattack = false;
+
+        //     // PH: FIXME: Do we have to do anything to action to clear it out? Should we just "delete" it?
+
+        //     canvas.tokens.activate();
+        //     await this.close();
+
+        //     return;
+        // } else if (event.submitter?.name === "aoe") {
+        //     return this._spawnAreaOfEffect();
+        // }
+
+        // A max of 4 boostable charges may be used and a min of 0.
+        if (formData.boostableChargesToUse) {
+            this.data.boostableChargesToUse = extendedFormData.boostableChargesToUse = Math.max(
+                0,
+                Math.min(formData.boostableChargesToUse, 4),
+            );
+        }
+
+        // A minimum of 1 shot and a maximum of max autofire charges can be used.
+        this.data.autofireShotsToUse = extendedFormData.autofireShotsToUse = Math.max(
+            1,
+            Math.min(extendedFormData.autofireShotsToUse, this.data.autofireShotsAvailable),
+        );
+
+        // Can only push so much
+        if (extendedFormData.effectiveActivePoints) {
+            const desiredEffectiveActivePoints = extendedFormData.effectiveActivePoints;
+            // PH: FIXME: Is this right? What should we be showing for something like stike with weapon or fist?
+            this.data.effectiveActivePoints = Math.min(
+                desiredEffectiveActivePoints,
+                this.data.originalItem.activePoints + Math.min(10, this.data.originalItem.activePoints),
+            );
+
+            if (this.data.effectiveActivePoints < desiredEffectiveActivePoints) {
+                ui.notifications.warn(
+                    `Pushing is limited to the lesser of 10 active points or the original total active points`,
+                );
+            }
+        }
+
+        // collect the changed data; all of these changes can go into get data
+        this.data.formData = { ...this.data.formData, ...extendedFormData };
+
+        // Save conditionalAttack check
+        // PH: FIXME: Is originalItem use here correct?
+        const expandedData = foundry.utils.expandObject(extendedFormData);
+        for (const ca in expandedData?.system?.conditionalAttacks) {
+            await this.data.originalItem.system.conditionalAttacks[ca].update({
+                [`system.checked`]: expandedData.system.conditionalAttacks[ca].system.checked,
+            });
+        }
+
+        // Show any changes
+        this.render();
+    }
+
+    _onRender(context, options) {
+        super._onRender(context, options);
+
+        // onChange
+        this.element.querySelectorAll("input, select").forEach((el) => {
+            el.addEventListener("change", (ev) => {
+                ev.preventDefault();
+                ev.stopImmediatePropagation();
+                return this._onChange.call(this, ev, new FormDataExtended(this.element));
+            });
+        });
+    }
 }

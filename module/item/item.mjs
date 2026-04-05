@@ -7051,6 +7051,50 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             ),
         ).render({ force: true });
     }
+
+    get getAoeTemplateForBaseItem() {
+        const effectiveAttackItemOriginalItemId = this.getEffectiveItemOriginalItemId;
+
+        // V14 uses regions, v13 still uses templates
+        const aoeTemplate =
+            game.scenes.current.regions.find(
+                (o) => o.flags[game.system.id]?.itemId === effectiveAttackItemOriginalItemId,
+            ) ??
+            game.scenes.current.templates.find(
+                (o) => o.flags[game.system.id]?.itemId === effectiveAttackItemOriginalItemId,
+            );
+        if (aoeTemplate) return aoeTemplate;
+
+        console.warn(`Unable to match aoeTemplate with item. Why are you looking for a template?`);
+
+        const anyAoeTemplate = game.scenes.current.templates.find((o) => o.author.id === game.user.id);
+        if (anyAoeTemplate) {
+            console.warn(`Found a template user owns, so using that as a fallback`);
+        }
+
+        return anyAoeTemplate;
+    }
+
+    get getEffectiveItemOriginalItemId() {
+        //const effectiveAttackItem = item.effectiveAttackItem;
+        const effectiveAttackItemUuid = this.system._active.__originalUuid;
+
+        // Is the effective attack item an temporary effective item?
+        if (effectiveAttackItemUuid) {
+            return foundryVttParseUuid(effectiveAttackItemUuid).id;
+        }
+
+        // Is the effective attack item an actual original item?
+        if (this.id) {
+            return this.id;
+        }
+
+        console.error(
+            `${this.detailedName()} doesn't have an originating UUID stored and the effective item doesn't have an id`,
+        );
+
+        return null;
+    }
 }
 
 // Prepare the modifier object. This is not really an item, but a MODIFER or ADDER
@@ -7520,7 +7564,7 @@ export function buildEffectiveObject(effectiveObjectParameters) {
 
             return true;
         })
-        .map(([uuid]) => fromUuidSync(uuid))
+        .map((entry) => fromUuidSync(entry[1]?.uuid))
         .forEach((hthAttack) => {
             // 5e only: Can use the HA with STR if HA's unmodified active points don't exceed the STR used. Get the advantages for free on STR if can use the HA.
             // 6e only: The HA becomes the base attack item.

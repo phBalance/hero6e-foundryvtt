@@ -5,7 +5,6 @@ import { onManageActiveEffect } from "../utility/effects.mjs";
 import { getPowerInfo, getCharacteristicInfoArrayForActor, whisperUserTargetsForActor } from "../utility/util.mjs";
 
 // v13 has namespaced these. When we remove this backwards compatibility then the eslint exception can be cleaned up.
-const FoundryVttTextEditor = foundry.applications.ux?.TextEditor.implementation || TextEditor;
 const FoundryVttActorSheet = foundry.appv1?.sheets?.ActorSheet || ActorSheet;
 const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended || FormDataExtended;
 
@@ -127,7 +126,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
                 "CAMPAIGN_USE",
                 "APPEARANCE",
             ]) {
-                data[`enriched${field}`] = await FoundryVttTextEditor.enrichHTML(
+                data[`enriched${field}`] = await foundry.applications.ux.TextEditor.enrichHTML(
                     data.actor.system.CHARACTER?.CHARACTER_INFO?.[field],
                     { async: true },
                 );

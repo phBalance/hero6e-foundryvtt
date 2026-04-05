@@ -1,4 +1,4 @@
-{{ log 'HEROSYS ITEM ATTACK APPLICATION CARD item-attack-application' this }}
+{{ log 'HEROSYS ITEM ATTACK APPLICATION CARD item-attack-application-v2' this }}
 <div>
   <div class="hero chat-card item-card attack-card">
     <header class="card-header flexrow">
@@ -49,16 +49,8 @@
                 {{/each}}
               </select>
               <select name="{{multiAttack.attackKey}}" id="{{multiAttack.attackKey}}" {{#if @root/action.current.missed}}disabled{{/if}}>
-                {{!-- keep strike at top --}}
-                {{#each @root/actor.items as |item|}}
-                  {{#if (eq item.system.XMLID "STRIKE")}}
-                    <option value={{item.id}}{{#if (eq item.id multiAttack.itemKey)}} selected{{/if}}>{{{itemName item}}}</option>
-                  {{/if}}
-                {{/each}}
-                {{#each @root/actor.items as |item|}}
-                  {{#if (or (includes item.baseInfo.type "attack") (and (ne item.type "maneuver")))}}
-                    <option value={{item.id}}{{#if (eq item.id multiAttack.itemKey)}} selected{{/if}}>{{item.name}}</option>
-                  {{/if}}
+                {{#each @root/multiAttackItems as |item|}}
+                  <option value={{item.id}}{{#if (eq item.id multiAttack.itemKey)}} selected{{/if}}>{{item.name}}</option>
                 {{/each}}
               </select>
               <label>
@@ -225,7 +217,14 @@
               {{#each hthAttackItems}}
                 <li>
                     <label>
-                      <input class="item-toggle" title="{{this.reasonForCantUse}}" id="{{this.uuid}}" type="checkbox" name="hthAttackItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
+                      {{log this}}
+                      <input class="item-toggle" title="{{this.reasonForCantUse}}" 
+                        type="checkbox" 
+                        name="hthAttackItems.{{@key}}._canUseForAttack"
+                        data-uuid="{{this.uuid}}"
+                        {{checked this._canUseForAttack}} 
+                        data-dtype="Boolean" 
+                      />
                       <span title="{{this.description}}">{{this.name}}</span>
                     </label>
                   </li>
@@ -257,7 +256,13 @@
             {{#each nakedAdvantagesItems}}
               <li>
                   <label>
-                    <input class="item-toggle" title="{{this.reasonForCantUse}}" id="{{this.uuid}}" type="checkbox" name="nakedAdvantagesItems.{{@key}}._canUseForAttack" {{checked this._canUseForAttack}} data-dtype="Boolean" />
+                    <input class="item-toggle" 
+                    title="{{this.reasonForCantUse}}" 
+                    type="checkbox" 
+                    name="nakedAdvantagesItems.{{@key}}._canUseForAttack" 
+                    {{checked this._canUseForAttack}} 
+                    data-uuid="{{this.uuid}}"
+                    data-dtype="Boolean" />
                     <span  title="{{this.description}}">{{this.name}}</span>
                   </label>
                 </li>
@@ -410,10 +415,45 @@
       </div>
     {{/if}}
     
+    {{#if aoeText}}
+      <button class="aoe-button" type="submit" name="aoe">
+        Place {{aoeText}} template
+      </button>
+    {{/if}}
 
-    <button type="submit" name="roll">
-      Roll Attack
-  </button>
+    {{#if action.maneuver.isMultipleAttackManeuver}}
+
+      {{#if action.current.missed}}
+        <button type="submit" name="missedMultiattack"  >
+            Missed After {{action.current.missed.execute}} Attack(s)
+        </button>
+        <button type="submit" name="continueMultiattack">
+            Continue Multiple Attacks Anyway
+        </button>
+      {{else}}
+        <button type="submit" name="executeMultiattack"  {{#unless action.maneuver.attack-1}}disabled
+                title="The Multiple Attack is not set up." {{/unless}}>      {{!-- TODO: this needs to be more rigorous --}}
+          {{#if action.current.isMultipleAttackManeuver}}
+            Begin Multiple Attacks
+          {{else}}
+            Continue Multiple Attacks 
+          {{/if}}
+        </button>
+      {{/if}}
+      
+      
+      {{#if (ne action.maneuver.isMultipleAttackManeuver action.current.isMultipleAttack)}}
+        <button type="submit" name="cancelMultiattack">
+          Cancel Remaining Multiple Attacks
+        </button>
+      {{/if}}
+    {{else}}
+      <button type="submit" name="roll" {{#if rollHide}}
+              disabled title="You must select at least 1 target token, preferably by using the AOE template." {{/if}} >
+        {{#if aoeText}}Roll Placement{{else}}Roll to Hit{{/if}}
+        {{#if cannotAttack}} Anyway{{/if}}
+      </button>
+    {{/if}}
     
   </footer>
 </div>
