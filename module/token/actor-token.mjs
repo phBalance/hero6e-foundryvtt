@@ -392,4 +392,12 @@ export class HeroSystem6eToken extends FoundryVttToken {
         }
         return super._onRelease(options);
     }
+
+    // async _onUpdate(changed, options, userId) {
+    //     await super._onUpdate(changed, options, userId);
+    //     if (changed._regions) {
+    //         debugger;
+    //     }
+
+    // }
 }

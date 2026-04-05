@@ -7055,9 +7055,14 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     get getAoeTemplateForBaseItem() {
         const effectiveAttackItemOriginalItemId = this.getEffectiveItemOriginalItemId;
 
-        const aoeTemplate = game.scenes.current.templates.find(
-            (o) => o.flags[game.system.id]?.itemId === effectiveAttackItemOriginalItemId,
-        );
+        // V14 uses regions, v13 still uses templates
+        const aoeTemplate =
+            game.scenes.current.regions.find(
+                (o) => o.flags[game.system.id]?.itemId === effectiveAttackItemOriginalItemId,
+            ) ??
+            game.scenes.current.templates.find(
+                (o) => o.flags[game.system.id]?.itemId === effectiveAttackItemOriginalItemId,
+            );
         if (aoeTemplate) return aoeTemplate;
 
         console.warn(`Unable to match aoeTemplate with item. Why are you looking for a template?`);

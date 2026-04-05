@@ -36,6 +36,26 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         Hooks.once("init", async function () {
             ItemAttackFormApplicationV2.initializeTemplate();
         });
+
+        // Hooks.on("updateRegion", (document, changed, options, userId) => {
+        //     //console.log(changed);
+        //     // Only run if the position (x, y) or the actual shapes were updated
+        //     // if (!changed.shapes && !changed.x && !changed.y) return;
+        //     // // Only the user who moved the region should update their targets
+        //     // if (userId !== game.user.id) return;
+        //     // const region = document.object;
+        //     // if (!region) return;
+        //     // // 1. Get tokens currently inside the region's geometry
+        //     // const tokensInside = region.tokens; // Returns a Set of Token objects
+        //     // // 2. Clear current targets and add the new ones
+        //     // game.user.targets.clear();
+        //     // tokensInside.forEach((token) => {
+        //     //     // setTarget(targeted, {user, releaseOthers})
+        //     //     token.setTarget(true, { releaseOthers: false });
+        //     // });
+        //     // // 3. Broadcast the targeting reticule to other players
+        //     // game.user.broadcastActivity({ targets: game.user.targets.ids });
+        // });
     }
 
     data;
@@ -498,10 +518,17 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         const extendedFormData = foundry.utils.expandObject(formData.object);
 
         switch (event.submitter?.name) {
-            case "roll":
-                canvas.tokens.activate();
+            case "roll": {
+                const aoe = this.data.effectiveItem.effectiveAttackItem.aoeAttackParameters;
+
+                if (aoe && !this.getAoeTemplate()) {
+                    return ui.notifications.error(
+                        `No area of effect template found for this attack. Please place the template before rolling the attack.`,
+                    );
+                }
                 await this.close();
                 return processActionToHit(this.data.effectiveItem, extendedFormData, { token: this.data.token });
+            }
 
             case "continueMultiattack":
                 this.data.formData.continueMultiattack = true;
@@ -604,25 +631,50 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         const distanceInGridUnits = distanceInMeters / gridUnitsToMeters();
 
         const effectiveAttackItemOriginalItemId = item.effectiveAttackItem.getEffectiveItemOriginalItemId;
-        const templateData = {
-            t: templateType,
-            author: game.user.id,
-            distance: distanceInGridUnits,
-            direction: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
-            fillColor: game.user.color,
+        const regionData = {
+            name: `${item.name}-${item.system.XMLID}-${token.name}`,
+            color: game.user.color,
+            shapes: [
+                {
+                    type: templateType,
+                    x: token.center.x,
+                    y: token.center.y,
+                    rotation: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
+                    radius: (distanceInGridUnits * canvas.grid.size) / 2,
+                },
+            ],
+            displayMeasurements: true,
+            highlightMode: "coverage",
+            visibility: CONST.REGION_VISIBILITY.ALWAYS,
             flags: {
                 [game.system.id]: {
                     purpose: "AoE",
                     itemId: effectiveAttackItemOriginalItemId,
-                    item,
-                    actor,
-                    aoeType,
-                    aoeValue,
-                    sizeConversionToMeters,
-                    usesHexTemplate: hexTemplates && hexGrid,
-                    is5e: item.effectiveAttackItem.is5e,
+                    actorUuid: actor.uuid,
+                    effectiveItemJson: item.effectiveAttackItem.toJSON(),
+                    //item,
+                    //actor,
+                    //aoeType,
+                    //aoeValue,
+                    //sizeConversionToMeters,
+                    //usesHexTemplate: hexTemplates && hexGrid,
+                    //is5e: item.effectiveAttackItem.is5e,
                 },
             },
+            behaviors: [
+                {
+                    name: "Token Automatic Targeting",
+                    type: "executeScript",
+                    system: {
+                        events: ["tokenEnter", "tokenExit"],
+                        source: `const token = event.data.token;\nif (token) {\n!!token.object.setTarget(region.tokens.find(t=> t.id === token.id),\n{releaseOthers: false });\n}`,
+                    },
+                },
+            ],
+            // AARON WAS HERE 4/4/2026: Foundry bug?  Can't create with restriction
+            // restriction: {
+            //     enabled: true,
+            // },
         };
 
         switch (templateType) {
@@ -632,61 +684,59 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             case "cone":
                 {
                     if ((areaOfEffect.ADDER || []).find((adder) => adder.XMLID === "THINCONE")) {
-                        templateData.angle = 30;
+                        regionData.shapes[0].angle = 30;
                     } else {
-                        templateData.angle = 60;
+                        regionData.shapes[0].angle = 60;
                     }
                 }
 
                 break;
 
-            case "ray":
-                {
-                    templateData[game.system.id] = {};
-                    templateData.width = sizeConversionToMeters * areaOfEffect.width;
-                    templateData.flags[game.system.id].width = areaOfEffect.width;
-                    templateData.flags[game.system.id].height = areaOfEffect.height;
-                }
-                break;
+            // case "ray":
+            //     {
+            //         regionData[game.system.id] = {};
+            //         regionData.width = sizeConversionToMeters * areaOfEffect.width;
+            //         regionData.flags[game.system.id].width = areaOfEffect.width;
+            //         regionData.flags[game.system.id].height = areaOfEffect.height;
+            //     }
+            //     break;
 
-            case "rect": {
-                // if (areaOfEffect.type === "surface" && item.findModsByXmlid("CONTINUOUS")) {
-                //     // This is likely a damage shield
-                // }
+            // case "rect": {
+            //     // if (areaOfEffect.type === "surface" && item.findModsByXmlid("CONTINUOUS")) {
+            //     //     // This is likely a damage shield
+            //     // }
 
-                // rectangle templates are defined as a distance/hypotenuse and an angle
-                templateData.direction = areaOfEffect.direction;
-                templateData.distance = sizeConversionToMeters * areaOfEffect.distance;
-                break;
-            }
+            //     // rectangle templates are defined as a distance/hypotenuse and an angle
+            //     regionData.direction = areaOfEffect.direction;
+            //     regionData.distance = sizeConversionToMeters * areaOfEffect.distance;
+            //     break;
+            // }
 
             default:
                 console.error(`unsupported template type ${templateType}`);
                 break;
         }
 
-        templateData.x = token.center.x;
-        templateData.y = token.center.y;
-
         const existingTemplate = this.getAoeTemplate();
         if (existingTemplate) {
-            // reuse exiting template, just update position
-            await existingTemplate.update({
-                x: templateData.x,
-                y: templateData.y,
-            });
-        } else {
-            canvas.scene.createEmbeddedDocuments("MeasuredTemplate", [templateData]);
+            // delete exiting region,
+            await existingTemplate.delete();
         }
 
-        canvas.templates.activate({ tool: templateType });
-        canvas.templates.selectObjects({
-            x: templateData.x,
-            y: templateData.y,
-            releaseOthers: true,
-            control: true,
-            toggle: false,
-        });
+        // Remove all targets
+        canvas.tokens.ownedTokens?.[0].setTarget(false, { releaseOthers: true });
+
+        // Create the region
+        await canvas.scene.createEmbeddedDocuments("Region", [regionData]);
+
+        // canvas.templates.activate({ tool: templateType });
+        // canvas.templates.selectObjects({
+        //     x: regionData.x,
+        //     y: regionData.y,
+        //     releaseOthers: true,
+        //     control: true,
+        //     toggle: false,
+        // });
     }
 
     /**
@@ -697,9 +747,9 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
     getAoeTemplate() {
         const effectiveAttackItemOriginalItemId = this.data.effectiveItem.getEffectiveItemOriginalItemId;
 
-        return Array.from(canvas.templates.getDocuments()).find(
+        return Array.from(canvas.regions.viewedDocuments()).find(
             (template) =>
-                template.author.id === game.user.id &&
+                template.color?.css === game.user.color.css &&
                 template.flags[game.system.id]?.purpose === "AoE" &&
                 template.flags[game.system.id]?.itemId === effectiveAttackItemOriginalItemId,
         );
@@ -834,58 +884,58 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
         this.#setAoeAndHitLocationDataForEffectiveItem();
 
-        if (event.submitter?.name === "roll") {
-            canvas.tokens.activate();
-            await this.close();
+        // if (event.submitter?.name === "roll") {
 
-            return processActionToHit(this.data.effectiveItem, extendedFormData, { token: this.data.token });
-        }
+        //     await this.close();
+
+        //     return processActionToHit(this.data.effectiveItem, extendedFormData, { token: this.data.token });
+        // }
 
         this.data.formData ??= {};
 
-        if (event.submitter?.name === "continueMultiattack") {
-            this.data.formData.continueMultiattack = true;
-        } else if (event.submitter?.name === "executeMultiattack") {
-            const begin = this.data.action.current.execute === undefined;
-            // we pressed the button to execute multiple attacks
-            // the first time does not get a roll, but sets up the first attack
-            if (begin) {
-                this.data.formData.execute = 0;
-            } else {
-                // the subsequent presses will roll the attack and set up the next attack
-                // TODO: if any roll misses, the multiattack ends, and the end cost for the remainding attacks are forfeit
+        // if (event.submitter?.name === "continueMultiattack") {
+        //     this.data.formData.continueMultiattack = true;
+        // } else if (event.submitter?.name === "executeMultiattack") {
+        //     const begin = this.data.action.current.execute === undefined;
+        //     // we pressed the button to execute multiple attacks
+        //     // the first time does not get a roll, but sets up the first attack
+        //     if (begin) {
+        //         this.data.formData.execute = 0;
+        //     } else {
+        //         // the subsequent presses will roll the attack and set up the next attack
+        //         // TODO: if any roll misses, the multiattack ends, and the end cost for the remainding attacks are forfeit
 
-                // this is the roll:
-                await processActionToHit(this.data.effectiveItem, this.data.formData);
+        //         // this is the roll:
+        //         await processActionToHit(this.data.effectiveItem, this.data.formData);
 
-                this.data.formData.execute = this.data.action.current.execute + 1;
-            }
+        //         this.data.formData.execute = this.data.action.current.execute + 1;
+        //     }
 
-            // Is this is the last step?
-            const end = this.data.formData.execute >= this.data.action.maneuver.attackKeys.length;
-            if (end) {
-                canvas.tokens.activate();
-                await this.close();
-            } else {
-                return await new ItemAttackFormApplicationV2(this.data).render(true);
-            }
-        } else if (event.submitter?.name === "missedMultiattack") {
-            // TODO: charge user the end cost for the remaining attacks
-            canvas.tokens.activate();
-            await this.close();
-            return;
-        } else if (event.submitter?.name === "cancelMultiattack") {
-            this.data.formData.continueMultiattack = false;
+        //     // Is this is the last step?
+        //     const end = this.data.formData.execute >= this.data.action.maneuver.attackKeys.length;
+        //     if (end) {
+        //         canvas.tokens.activate();
+        //         await this.close();
+        //     } else {
+        //         return await new ItemAttackFormApplicationV2(this.data).render(true);
+        //     }
+        // } else if (event.submitter?.name === "missedMultiattack") {
+        //     // TODO: charge user the end cost for the remaining attacks
+        //     canvas.tokens.activate();
+        //     await this.close();
+        //     return;
+        // } else if (event.submitter?.name === "cancelMultiattack") {
+        //     this.data.formData.continueMultiattack = false;
 
-            // PH: FIXME: Do we have to do anything to action to clear it out? Should we just "delete" it?
+        //     // PH: FIXME: Do we have to do anything to action to clear it out? Should we just "delete" it?
 
-            canvas.tokens.activate();
-            await this.close();
+        //     canvas.tokens.activate();
+        //     await this.close();
 
-            return;
-        } else if (event.submitter?.name === "aoe") {
-            return this._spawnAreaOfEffect();
-        }
+        //     return;
+        // } else if (event.submitter?.name === "aoe") {
+        //     return this._spawnAreaOfEffect();
+        // }
 
         // A max of 4 boostable charges may be used and a min of 0.
         if (formData.boostableChargesToUse) {

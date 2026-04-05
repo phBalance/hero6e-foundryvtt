@@ -10,7 +10,7 @@ import {
     tokenEducatedGuess,
 } from "../utility/util.mjs";
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
-import { clamp } from "../utility/compatibility.mjs";
+import { clamp, isGameV14OrLater } from "../utility/compatibility.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import { HeroItemCharacteristic } from "../item/HeroSystem6eTypeDataModels.mjs";
@@ -2500,7 +2500,22 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
                 if (targetType && this.type.replace("npc", "pc") !== targetType) {
                     if (Object.keys(game.system.documentTypes.Actor).includes(targetType)) {
-                        await this.update({ type: targetType, [`==system`]: this.system }, { ForcedReplacement: true });
+                        if (isGameV14OrLater()) {
+                            // REF: https://github.com/foundryvtt/foundryvtt/issues/13090
+                            // AARON WAS HERE on 4/4/2026: Update fails, likely a foundry bug.
+                            // Error: The type of a Document may only be changed if the system field
+                            //        is also updated with a ForcedReplacement operator.
+                            // A subsequent upload works, not ready for publish.
+                            await this.update(
+                                {
+                                    type: targetType,
+                                    system: this.system,
+                                },
+                                { recursive: false },
+                            );
+                        } else {
+                            await this.update({ type: targetType, [`==system`]: this.system });
+                        }
                     } else {
                         ui.notifications.error(`${targetType} is not a valid actor type`);
                     }
