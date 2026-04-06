@@ -1,4 +1,7 @@
 import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
+import { Roll3On3Dice, Roll7On3Dice, Roll8On3Dice, Roll9On3Dice } from "./dice-testing-helper.mjs";
+
+import { isActivatedForThisUse_TestingOnly } from "../item/item-requires-roll.mjs";
 
 export function registerRequiresRollCheckTests(quench) {
     quench.registerBatch(
@@ -6,7 +9,7 @@ export function registerRequiresRollCheckTests(quench) {
         (context) => {
             const { after, before, describe, expect, it } = context;
 
-            describe("requires roll check", function () {
+            describe("ACTIVATIONROLL and REQUIRESASKILLROLL", function () {
                 // The default timeout tends to be insufficient with multiple actors being created at the same time.
                 setQuenchTimeout(this);
 
@@ -645,6 +648,35 @@ export function registerRequiresRollCheckTests(quench) {
                         });
                     });
 
+                    describe("Activates correctly", function () {
+                        it("should not activate 8- with a roll of a 9", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(acrobaticsActivation8Less, Roll9On3Dice),
+                            ).to.equal(false);
+                        });
+
+                        it("should activate 8- with a roll of a 8", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(acrobaticsActivation8Less, Roll8On3Dice),
+                            ).to.equal(true);
+                        });
+
+                        it("should activate 8- with a roll of a 7", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(acrobaticsActivation8Less, Roll7On3Dice),
+                            ).to.equal(true);
+                        });
+
+                        it("should activate 8- with a roll of a 3", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(acrobaticsActivation8Less, Roll3On3Dice),
+                            ).to.equal(true);
+                        });
+                    });
+
+                    // Quench test suite scaffolding for Activation Roll Limitation (5e, FRed)
+                    // Based on Hero System 5e rules as described in FRed (.github/RuleBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf)
+
                     describe.skip("Activation Roll Limitation (5e, FRed)", function () {
                         // Special Results: Burnout and Jammed
                         it.skip("Handles burnout on failed activation roll", function () {
@@ -683,7 +715,7 @@ export function registerRequiresRollCheckTests(quench) {
                     });
                 });
 
-                describe("rollRequiresASkillRollCheck", function () {
+                describe("isActivatedForThisUse", function () {
                     describe("6e", function () {
                         const contents = `
                             <?xml version="1.0" encoding="UTF-16"?>

@@ -267,7 +267,7 @@ export function registerDiceTests(quench) {
 
                     it("should handle removing first terms from simple formulas (damage negation)", async function () {
                         const TestRollMock = Roll1Through6Mock;
-                        TestRollMock.generatorInfo.reset();
+                        TestRollMock.resetIndex();
 
                         const roller = new HeroRoller({}, TestRollMock).addDice(10);
                         await roller.roll();
@@ -281,7 +281,7 @@ export function registerDiceTests(quench) {
 
                     it("should handle removing first terms from multi term formulas and 1 part completely (damage negation)", async function () {
                         const TestRollMock = Roll1Through6Mock;
-                        TestRollMock.generatorInfo.reset();
+                        TestRollMock.resetIndex();
 
                         const roller = new HeroRoller({}, TestRollMock).addDice(10).addNumber(7);
                         await roller.roll();
@@ -295,7 +295,7 @@ export function registerDiceTests(quench) {
 
                     it("should gracefully handle removing all terms that exist", async function () {
                         const TestRollMock = Roll1Through6Mock;
-                        TestRollMock.generatorInfo.reset();
+                        TestRollMock.resetIndex();
 
                         const roller = new HeroRoller({}, TestRollMock).addDice(10).addNumber(7);
                         await roller.roll();
@@ -309,7 +309,7 @@ export function registerDiceTests(quench) {
 
                     it("should gracefully handle removing more terms than exist", async function () {
                         const TestRollMock = Roll1Through6Mock;
-                        TestRollMock.generatorInfo.reset();
+                        TestRollMock.resetIndex();
 
                         const roller = new HeroRoller({}, TestRollMock).addDice(10).addNumber(7);
                         await roller.roll();
@@ -698,8 +698,8 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getSuccessTerms()).deep.to.equal([TestRollMock.fixedRollResult]);
-                        expect(roller.getSuccessTotal()).to.equal(TestRollMock.fixedRollResult);
+                        expect(roller.getSuccessTerms()).deep.to.equal([TestRollMock.DieClass.rollArray[0]]);
+                        expect(roller.getSuccessTotal()).to.equal(TestRollMock.DieClass.rollArray[0]);
                     });
 
                     it("should take a 2 term, 1 die equation", async function () {
@@ -709,8 +709,8 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getSuccessTerms()).deep.to.equal([TestRollMock.fixedRollResult, 1]);
-                        expect(roller.getSuccessTotal()).to.equal(TestRollMock.fixedRollResult + 1);
+                        expect(roller.getSuccessTerms()).deep.to.equal([TestRollMock.DieClass.rollArray[0], 1]);
+                        expect(roller.getSuccessTotal()).to.equal(TestRollMock.DieClass.rollArray[0] + 1);
                     });
 
                     it("should take a typical attack roll equation", async function () {
@@ -733,11 +733,11 @@ export function registerDiceTests(quench) {
                             -2,
                             -2,
                             3,
-                            -TestRollMock.fixedRollResult,
-                            -TestRollMock.fixedRollResult,
-                            -TestRollMock.fixedRollResult,
+                            -TestRollMock.DieClass.rollArray[0],
+                            -TestRollMock.DieClass.rollArray[0],
+                            -TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getSuccessTotal()).deep.to.equal(19 - 3 * TestRollMock.fixedRollResult);
+                        expect(roller.getSuccessTotal()).deep.to.equal(19 - 3 * TestRollMock.DieClass.rollArray[0]);
                     });
                 });
 
@@ -844,8 +844,8 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getSuccessTerms()).deep.to.equal([TestRollMock.fixedRollResult]);
-                        expect(roller.getSuccessTotal()).to.equal(TestRollMock.fixedRollResult);
+                        expect(roller.getSuccessTerms()).deep.to.equal([TestRollMock.DieClass.rollArray[0]]);
+                        expect(roller.getSuccessTotal()).to.equal(TestRollMock.DieClass.rollArray[0]);
                     });
 
                     it("should take a 2 term, 1 die equation", async function () {
@@ -855,8 +855,8 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getSuccessTerms()).deep.to.equal([TestRollMock.fixedRollResult, 1]);
-                        expect(roller.getSuccessTotal()).to.equal(TestRollMock.fixedRollResult + 1);
+                        expect(roller.getSuccessTerms()).deep.to.equal([TestRollMock.DieClass.rollArray[0], 1]);
+                        expect(roller.getSuccessTotal()).to.equal(TestRollMock.DieClass.rollArray[0] + 1);
                     });
 
                     it("should take a typical attack roll equation", async function () {
@@ -879,11 +879,11 @@ export function registerDiceTests(quench) {
                             -2,
                             -2,
                             3,
-                            -TestRollMock.fixedRollResult,
-                            -TestRollMock.fixedRollResult,
-                            -TestRollMock.fixedRollResult,
+                            -TestRollMock.DieClass.rollArray[0],
+                            -TestRollMock.DieClass.rollArray[0],
+                            -TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getSuccessTotal()).deep.to.equal(19 - 3 * TestRollMock.fixedRollResult);
+                        expect(roller.getSuccessTotal()).deep.to.equal(19 - 3 * TestRollMock.DieClass.rollArray[0]);
                     });
 
                     it("should allow auto success determination of true without specific value set", async function () {
@@ -1063,8 +1063,8 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunTerms()).deep.to.equal([TestRollMock.fixedRollResult]);
-                        expect(roller.getStunTotal()).deep.to.equal(TestRollMock.fixedRollResult);
+                        expect(roller.getStunTerms()).deep.to.equal([TestRollMock.DieClass.rollArray[0]]);
+                        expect(roller.getStunTotal()).deep.to.equal(TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getBodyTerms()).deep.to.equal([2]);
                         expect(roller.getBodyTotal()).deep.to.equal(2);
@@ -1077,8 +1077,8 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunTerms()).deep.to.equal([-TestRollMock.fixedRollResult]);
-                        expect(roller.getStunTotal()).deep.to.equal(-TestRollMock.fixedRollResult);
+                        expect(roller.getStunTerms()).deep.to.equal([-TestRollMock.DieClass.rollArray[0]]);
+                        expect(roller.getStunTotal()).deep.to.equal(-TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getBodyTerms()).deep.to.equal([-2]);
                         expect(roller.getBodyTotal()).deep.to.equal(-2);
@@ -1091,8 +1091,8 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunTerms()).deep.to.equal([TestRollMock.fixedRollResult - 1]);
-                        expect(roller.getStunTotal()).deep.to.equal(TestRollMock.fixedRollResult - 1);
+                        expect(roller.getStunTerms()).deep.to.equal([TestRollMock.DieClass.rollArray[0] - 1]);
+                        expect(roller.getStunTotal()).deep.to.equal(TestRollMock.DieClass.rollArray[0] - 1);
 
                         expect(roller.getBodyTerms()).deep.to.equal([1]);
                         expect(roller.getBodyTotal()).deep.to.equal(1);
@@ -1105,8 +1105,8 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunTerms()).deep.to.equal([TestRollMock.fixedRollResult - 1]);
-                        expect(roller.getStunTotal()).deep.to.equal(TestRollMock.fixedRollResult - 1);
+                        expect(roller.getStunTerms()).deep.to.equal([TestRollMock.DieClass.rollArray[0] - 1]);
+                        expect(roller.getStunTotal()).deep.to.equal(TestRollMock.DieClass.rollArray[0] - 1);
 
                         expect(roller.getBodyTerms()).deep.to.equal([0]);
                         expect(roller.getBodyTotal()).deep.to.equal(0);
@@ -1119,8 +1119,8 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunTerms()).deep.to.equal([-1 * (TestRollMock.fixedRollResult - 1)]);
-                        expect(roller.getStunTotal()).deep.to.equal(-1 * (TestRollMock.fixedRollResult - 1));
+                        expect(roller.getStunTerms()).deep.to.equal([-1 * (TestRollMock.DieClass.rollArray[0] - 1)]);
+                        expect(roller.getStunTotal()).deep.to.equal(-1 * (TestRollMock.DieClass.rollArray[0] - 1));
 
                         expect(roller.getBodyTerms()).deep.to.equal([-1]);
                         expect(roller.getBodyTotal()).deep.to.equal(-1);
@@ -1134,11 +1134,11 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getStunTotal()).deep.to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getStunTotal()).deep.to.equal(3 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getBodyTerms()).deep.to.equal([2, 2, 2]);
                         expect(roller.getBodyTotal()).deep.to.equal(6);
@@ -1152,11 +1152,11 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            -TestRollMock.fixedRollResult,
-                            -TestRollMock.fixedRollResult,
-                            -TestRollMock.fixedRollResult,
+                            -TestRollMock.DieClass.rollArray[0],
+                            -TestRollMock.DieClass.rollArray[0],
+                            -TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getStunTotal()).deep.to.equal(-3 * TestRollMock.fixedRollResult);
+                        expect(roller.getStunTotal()).deep.to.equal(-3 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getBodyTerms()).deep.to.equal([-2, -2, -2]);
                         expect(roller.getBodyTotal()).deep.to.equal(-6);
@@ -1170,11 +1170,11 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                            TestRollMock.DieClass.rollArray[0],
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            TestRollMock.fixedRollResult + Math.ceil(TestRollMock.fixedRollResult / 2),
+                            TestRollMock.DieClass.rollArray[0] + Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         );
 
                         expect(roller.getBodyTerms()).deep.to.equal([1, 0]);
@@ -1189,13 +1189,13 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            3 * TestRollMock.fixedRollResult + Math.ceil(TestRollMock.fixedRollResult / 2),
+                            3 * TestRollMock.DieClass.rollArray[0] + Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         );
 
                         expect(roller.getBodyTerms()).deep.to.equal([2, 2, 2, 1]);
@@ -1210,12 +1210,12 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                             1,
                         ]);
-                        expect(roller.getStunTotal()).deep.to.equal(3 * TestRollMock.fixedRollResult + 1);
+                        expect(roller.getStunTotal()).deep.to.equal(3 * TestRollMock.DieClass.rollArray[0] + 1);
 
                         expect(roller.getBodyTerms()).deep.to.equal([2, 2, 2, 0]);
                         expect(roller.getBodyTotal()).deep.to.equal(6);
@@ -1229,13 +1229,13 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult - 1,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0] - 1,
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            3 * TestRollMock.fixedRollResult + TestRollMock.fixedRollResult - 1,
+                            3 * TestRollMock.DieClass.rollArray[0] + TestRollMock.DieClass.rollArray[0] - 1,
                         );
 
                         expect(roller.getBodyTerms()).deep.to.equal([2, 2, 2, 1]);
@@ -1464,7 +1464,7 @@ export function registerDiceTests(quench) {
 
                     it("should work in the presence of an explosion modifier", async function () {
                         const TestRollMock = Roll1Through6Mock;
-                        TestRollMock.generatorInfo.reset();
+                        TestRollMock.resetIndex();
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
@@ -1666,7 +1666,7 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult - 1);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0] - 1);
                     });
 
                     it("should not calculate the default stun multiplier correctly for 5e in reverse order", async function () {
@@ -1679,7 +1679,7 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.not.equal(TestRollMock.fixedRollResult - 1);
+                        expect(roller.getStunMultiplier()).to.not.equal(TestRollMock.DieClass.rollArray[0] - 1);
                     });
 
                     it("should calculate default stun multiplier correctly for 6e", async function () {
@@ -1692,7 +1692,7 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.DieClass.rollArray[0] / 2));
                     });
 
                     it("should calculate default stun multiplier correctly for 6e in reverse order", async function () {
@@ -1705,7 +1705,7 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.DieClass.rollArray[0] / 2));
                     });
 
                     it("should calculate a stun multiplier with no parts correctly for 5e as a minimum 1", async function () {
@@ -1777,7 +1777,7 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult / 2);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0] / 2);
                     });
 
                     it("should calculate a stun multiplier with a die minus a pip correctly for 5e", async function () {
@@ -1795,7 +1795,7 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult - 1);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0] - 1);
                     });
 
                     it("should calculate a stun multiplier with a die correctly for 5e", async function () {
@@ -1813,7 +1813,7 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0]);
                     });
 
                     it("should calculate a multipart stun multiplier with a die and constant correctly for 5e", async function () {
@@ -1831,7 +1831,7 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult + 1);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0] + 1);
                     });
 
                     it("should calculate a multipart stun multiplier with a die and half die correctly for 5e", async function () {
@@ -1850,7 +1850,7 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getStunMultiplier()).to.equal(
-                            TestRollMock.fixedRollResult + TestRollMock.fixedRollResult / 2,
+                            TestRollMock.DieClass.rollArray[0] + TestRollMock.DieClass.rollArray[0] / 2,
                         );
                     });
 
@@ -1870,7 +1870,7 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getStunMultiplier()).to.equal(
-                            TestRollMock.fixedRollResult + (TestRollMock.fixedRollResult - 1),
+                            TestRollMock.DieClass.rollArray[0] + (TestRollMock.DieClass.rollArray[0] - 1),
                         );
                     });
 
@@ -1943,7 +1943,7 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult / 2);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0] / 2);
                     });
 
                     it("should calculate a stun multiplier with a die minus a pip correctly for 6e", async function () {
@@ -1961,7 +1961,7 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult - 1);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0] - 1);
                     });
 
                     it("should calculate a stun multiplier with a die correctly for 6e", async function () {
@@ -1979,7 +1979,7 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0]);
                     });
 
                     it("should calculate a multipart stun multiplier with a die and constant correctly for 6e", async function () {
@@ -1997,7 +1997,7 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult + 1);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0] + 1);
                     });
 
                     it("should calculate a multipart stun multiplier with a die and half die correctly for 6e", async function () {
@@ -2016,7 +2016,7 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getStunMultiplier()).to.equal(
-                            TestRollMock.fixedRollResult + TestRollMock.fixedRollResult / 2,
+                            TestRollMock.DieClass.rollArray[0] + TestRollMock.DieClass.rollArray[0] / 2,
                         );
                     });
 
@@ -2036,7 +2036,7 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getStunMultiplier()).to.equal(
-                            TestRollMock.fixedRollResult + (TestRollMock.fixedRollResult - 1),
+                            TestRollMock.DieClass.rollArray[0] + (TestRollMock.DieClass.rollArray[0] - 1),
                         );
                     });
 
@@ -2053,10 +2053,10 @@ export function registerDiceTests(quench) {
                         expect(roller.getBodyTerms()).deep.to.equal([1]);
                         expect(roller.getBodyTotal()).to.equal(1);
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult - 1);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0] - 1);
 
-                        expect(roller.getStunTerms()).deep.to.equal([1 * (TestRollMock.fixedRollResult - 1)]);
-                        expect(roller.getStunTotal()).deep.to.equal(1 * (TestRollMock.fixedRollResult - 1));
+                        expect(roller.getStunTerms()).deep.to.equal([1 * (TestRollMock.DieClass.rollArray[0] - 1)]);
+                        expect(roller.getStunTotal()).deep.to.equal(1 * (TestRollMock.DieClass.rollArray[0] - 1));
                     });
 
                     it("should handle a half die", async function () {
@@ -2066,16 +2066,20 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getBodyTerms()).deep.to.equal([Math.ceil(TestRollMock.fixedRollResult / 2)]);
-                        expect(roller.getBodyTotal()).to.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getBodyTerms()).deep.to.equal([
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                        ]);
+                        expect(roller.getBodyTotal()).to.equal(Math.ceil(TestRollMock.DieClass.rollArray[0] / 2));
 
-                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.DieClass.rollArray[0] / 2));
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            Math.ceil(TestRollMock.fixedRollResult / 2) * Math.ceil(TestRollMock.fixedRollResult / 2),
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) *
+                                Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            Math.ceil(TestRollMock.fixedRollResult / 2) * Math.ceil(TestRollMock.fixedRollResult / 2),
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) *
+                                Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         );
                     });
 
@@ -2089,16 +2093,16 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getBodyTerms()).deep.to.equal([TestRollMock.fixedRollResult]);
-                        expect(roller.getBodyTotal()).to.equal(TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTerms()).deep.to.equal([TestRollMock.DieClass.rollArray[0]]);
+                        expect(roller.getBodyTotal()).to.equal(TestRollMock.DieClass.rollArray[0]);
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult - 1);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0] - 1);
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult * (TestRollMock.fixedRollResult - 1),
+                            TestRollMock.DieClass.rollArray[0] * (TestRollMock.DieClass.rollArray[0] - 1),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            TestRollMock.fixedRollResult * (TestRollMock.fixedRollResult - 1),
+                            TestRollMock.DieClass.rollArray[0] * (TestRollMock.DieClass.rollArray[0] - 1),
                         );
                     });
 
@@ -2109,16 +2113,18 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getBodyTerms()).deep.to.equal([TestRollMock.fixedRollResult - 1]);
-                        expect(roller.getBodyTotal()).to.equal(TestRollMock.fixedRollResult - 1);
+                        expect(roller.getBodyTerms()).deep.to.equal([TestRollMock.DieClass.rollArray[0] - 1]);
+                        expect(roller.getBodyTotal()).to.equal(TestRollMock.DieClass.rollArray[0] - 1);
 
-                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.DieClass.rollArray[0] / 2));
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            (TestRollMock.fixedRollResult - 1) * Math.ceil(TestRollMock.fixedRollResult / 2),
+                            (TestRollMock.DieClass.rollArray[0] - 1) *
+                                Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            (TestRollMock.fixedRollResult - 1) * Math.ceil(TestRollMock.fixedRollResult / 2),
+                            (TestRollMock.DieClass.rollArray[0] - 1) *
+                                Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         );
                     });
 
@@ -2133,14 +2139,14 @@ export function registerDiceTests(quench) {
 
                         await roller.roll();
 
-                        expect(roller.getBodyTerms()).deep.to.equal([TestRollMock.fixedRollResult, 1]);
-                        expect(roller.getBodyTotal()).to.equal(TestRollMock.fixedRollResult + 1);
+                        expect(roller.getBodyTerms()).deep.to.equal([TestRollMock.DieClass.rollArray[0], 1]);
+                        expect(roller.getBodyTotal()).to.equal(TestRollMock.DieClass.rollArray[0] + 1);
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult - 1);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0] - 1);
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult * (TestRollMock.fixedRollResult - 1),
-                            1 * (TestRollMock.fixedRollResult - 1),
+                            TestRollMock.DieClass.rollArray[0] * (TestRollMock.DieClass.rollArray[0] - 1),
+                            1 * (TestRollMock.DieClass.rollArray[0] - 1),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(roller.getBodyTotal() * roller.getStunMultiplier());
                     });
@@ -2153,21 +2159,21 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getBodyTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0]);
 
-                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.DieClass.rollArray[0] / 2));
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult * Math.ceil(TestRollMock.fixedRollResult / 2),
-                            TestRollMock.fixedRollResult * Math.ceil(TestRollMock.fixedRollResult / 2),
-                            TestRollMock.fixedRollResult * Math.ceil(TestRollMock.fixedRollResult / 2),
+                            TestRollMock.DieClass.rollArray[0] * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                            TestRollMock.DieClass.rollArray[0] * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                            TestRollMock.DieClass.rollArray[0] * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            3 * TestRollMock.fixedRollResult * Math.ceil(TestRollMock.fixedRollResult / 2),
+                            3 * TestRollMock.DieClass.rollArray[0] * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         );
                     });
 
@@ -2182,21 +2188,28 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getBodyTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0]);
 
-                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.fixedRollResult / 2) + 7);
+                        expect(roller.getStunMultiplier()).to.equal(
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) + 7,
+                        );
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult * (Math.ceil(TestRollMock.fixedRollResult / 2) + 7),
-                            TestRollMock.fixedRollResult * (Math.ceil(TestRollMock.fixedRollResult / 2) + 7),
-                            TestRollMock.fixedRollResult * (Math.ceil(TestRollMock.fixedRollResult / 2) + 7),
+                            TestRollMock.DieClass.rollArray[0] *
+                                (Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) + 7),
+                            TestRollMock.DieClass.rollArray[0] *
+                                (Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) + 7),
+                            TestRollMock.DieClass.rollArray[0] *
+                                (Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) + 7),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            3 * TestRollMock.fixedRollResult * (Math.ceil(TestRollMock.fixedRollResult / 2) + 7),
+                            3 *
+                                TestRollMock.DieClass.rollArray[0] *
+                                (Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) + 7),
                         );
                     });
 
@@ -2211,25 +2224,28 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getBodyTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getStunMultiplier()).to.equal(
-                            Math.max(1, Math.ceil(TestRollMock.fixedRollResult / 2) - 1),
+                            Math.max(1, Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) - 1),
                         );
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult * Math.max(1, Math.ceil(TestRollMock.fixedRollResult / 2) - 1),
-                            TestRollMock.fixedRollResult * Math.max(1, Math.ceil(TestRollMock.fixedRollResult / 2) - 1),
-                            TestRollMock.fixedRollResult * Math.max(1, Math.ceil(TestRollMock.fixedRollResult / 2) - 1),
+                            TestRollMock.DieClass.rollArray[0] *
+                                Math.max(1, Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) - 1),
+                            TestRollMock.DieClass.rollArray[0] *
+                                Math.max(1, Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) - 1),
+                            TestRollMock.DieClass.rollArray[0] *
+                                Math.max(1, Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) - 1),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
                             3 *
-                                TestRollMock.fixedRollResult *
-                                Math.max(1, Math.ceil(TestRollMock.fixedRollResult / 2) - 1),
+                                TestRollMock.DieClass.rollArray[0] *
+                                Math.max(1, Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) - 1),
                         );
                     });
 
@@ -2244,20 +2260,20 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getBodyTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getStunMultiplier()).to.equal(1);
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult * 1,
-                            TestRollMock.fixedRollResult * 1,
-                            TestRollMock.fixedRollResult * 1,
+                            TestRollMock.DieClass.rollArray[0] * 1,
+                            TestRollMock.DieClass.rollArray[0] * 1,
+                            TestRollMock.DieClass.rollArray[0] * 1,
                         ]);
-                        expect(roller.getStunTotal()).deep.to.equal(3 * TestRollMock.fixedRollResult * 1);
+                        expect(roller.getStunTotal()).deep.to.equal(3 * TestRollMock.DieClass.rollArray[0] * 1);
                     });
 
                     it("should clamp decreased stun multiplier at 2 levels (which means always 1 STUNx) for 6e", async function () {
@@ -2271,20 +2287,20 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getBodyTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getStunMultiplier()).to.equal(1);
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult * 1,
-                            TestRollMock.fixedRollResult * 1,
-                            TestRollMock.fixedRollResult * 1,
+                            TestRollMock.DieClass.rollArray[0] * 1,
+                            TestRollMock.DieClass.rollArray[0] * 1,
+                            TestRollMock.DieClass.rollArray[0] * 1,
                         ]);
-                        expect(roller.getStunTotal()).deep.to.equal(3 * TestRollMock.fixedRollResult * 1);
+                        expect(roller.getStunTotal()).deep.to.equal(3 * TestRollMock.DieClass.rollArray[0] * 1);
                     });
 
                     it("should support decreased stun multiplier at 1 level for 5e", async function () {
@@ -2299,21 +2315,21 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getBodyTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0]);
 
-                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.fixedRollResult - 1 - 1);
+                        expect(roller.getStunMultiplier()).to.equal(TestRollMock.DieClass.rollArray[0] - 1 - 1);
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult * (TestRollMock.fixedRollResult - 1 - 1),
-                            TestRollMock.fixedRollResult * (TestRollMock.fixedRollResult - 1 - 1),
-                            TestRollMock.fixedRollResult * (TestRollMock.fixedRollResult - 1 - 1),
+                            TestRollMock.DieClass.rollArray[0] * (TestRollMock.DieClass.rollArray[0] - 1 - 1),
+                            TestRollMock.DieClass.rollArray[0] * (TestRollMock.DieClass.rollArray[0] - 1 - 1),
+                            TestRollMock.DieClass.rollArray[0] * (TestRollMock.DieClass.rollArray[0] - 1 - 1),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            3 * TestRollMock.fixedRollResult * (TestRollMock.fixedRollResult - 1 - 1),
+                            3 * TestRollMock.DieClass.rollArray[0] * (TestRollMock.DieClass.rollArray[0] - 1 - 1),
                         );
                     });
 
@@ -2329,20 +2345,20 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getBodyTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getStunMultiplier()).to.equal(1);
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult * 1,
-                            TestRollMock.fixedRollResult * 1,
-                            TestRollMock.fixedRollResult * 1,
+                            TestRollMock.DieClass.rollArray[0] * 1,
+                            TestRollMock.DieClass.rollArray[0] * 1,
+                            TestRollMock.DieClass.rollArray[0] * 1,
                         ]);
-                        expect(roller.getStunTotal()).deep.to.equal(3 * TestRollMock.fixedRollResult * 1);
+                        expect(roller.getStunTotal()).deep.to.equal(3 * TestRollMock.DieClass.rollArray[0] * 1);
                     });
 
                     it("should handle a standard effect full roll", async function () {
@@ -2370,20 +2386,25 @@ export function registerDiceTests(quench) {
                         );
 
                         // The STUN multiplier is not subject to the standard effect rule!
-                        expect(roller.getStunMultiplier()).to.equal(Math.max(1, TestRollMock.fixedRollResult - 1));
+                        expect(roller.getStunMultiplier()).to.equal(
+                            Math.max(1, TestRollMock.DieClass.rollArray[0] - 1),
+                        );
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.max(1, TestRollMock.fixedRollResult - 1),
-                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.max(1, TestRollMock.fixedRollResult - 1),
-                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.max(1, TestRollMock.fixedRollResult - 1),
-                            HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL * Math.max(1, TestRollMock.fixedRollResult - 1),
-                            1 * Math.max(1, TestRollMock.fixedRollResult - 1),
+                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.max(1, TestRollMock.DieClass.rollArray[0] - 1),
+                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.max(1, TestRollMock.DieClass.rollArray[0] - 1),
+                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.max(1, TestRollMock.DieClass.rollArray[0] - 1),
+                            HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL *
+                                Math.max(1, TestRollMock.DieClass.rollArray[0] - 1),
+                            1 * Math.max(1, TestRollMock.DieClass.rollArray[0] - 1),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            3 * HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.max(1, TestRollMock.fixedRollResult - 1) +
+                            3 *
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL *
+                                Math.max(1, TestRollMock.DieClass.rollArray[0] - 1) +
                                 HeroRoller.STANDARD_EFFECT_HALF_DIE_ROLL *
-                                    Math.max(1, TestRollMock.fixedRollResult - 1) +
-                                1 * Math.max(1, TestRollMock.fixedRollResult - 1),
+                                    Math.max(1, TestRollMock.DieClass.rollArray[0] - 1) +
+                                1 * Math.max(1, TestRollMock.DieClass.rollArray[0] - 1),
                         );
                     });
 
@@ -2411,19 +2432,23 @@ export function registerDiceTests(quench) {
                         );
 
                         // The STUN multiplier is not subject to the standard effect rule!
-                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.equal(Math.ceil(TestRollMock.DieClass.rollArray[0] / 2));
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.ceil(TestRollMock.fixedRollResult / 2),
-                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.ceil(TestRollMock.fixedRollResult / 2),
-                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.ceil(TestRollMock.fixedRollResult / 2),
-                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.ceil(TestRollMock.fixedRollResult / 2),
-                            1 * Math.ceil(TestRollMock.fixedRollResult / 2),
+                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                            HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                            1 * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            3 * HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.ceil(TestRollMock.fixedRollResult / 2) +
-                                1 * HeroRoller.STANDARD_EFFECT_DIE_ROLL * Math.ceil(TestRollMock.fixedRollResult / 2) +
-                                1 * Math.ceil(TestRollMock.fixedRollResult / 2),
+                            3 *
+                                HeroRoller.STANDARD_EFFECT_DIE_ROLL *
+                                Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) +
+                                1 *
+                                    HeroRoller.STANDARD_EFFECT_DIE_ROLL *
+                                    Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) +
+                                1 * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         );
                     });
 
@@ -2438,22 +2463,22 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getBodyTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(function () {
                             return roller.getStunMultiplier();
                         }).to.throw();
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            1 * TestRollMock.fixedRollResult,
-                            1 * TestRollMock.fixedRollResult,
-                            1 * TestRollMock.fixedRollResult,
+                            1 * TestRollMock.DieClass.rollArray[0],
+                            1 * TestRollMock.DieClass.rollArray[0],
+                            1 * TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getStunTotal()).deep.to.equal(3 * 1 * TestRollMock.fixedRollResult);
+                        expect(roller.getStunTotal()).deep.to.equal(3 * 1 * TestRollMock.DieClass.rollArray[0]);
 
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
@@ -2479,23 +2504,23 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getBodyTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(function () {
                             return roller.getStunMultiplier();
                         }).to.throw();
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            (1 + increasedStunMultiplier) * TestRollMock.fixedRollResult,
-                            (1 + increasedStunMultiplier) * TestRollMock.fixedRollResult,
-                            (1 + increasedStunMultiplier) * TestRollMock.fixedRollResult,
+                            (1 + increasedStunMultiplier) * TestRollMock.DieClass.rollArray[0],
+                            (1 + increasedStunMultiplier) * TestRollMock.DieClass.rollArray[0],
+                            (1 + increasedStunMultiplier) * TestRollMock.DieClass.rollArray[0],
                         ]);
                         expect(roller.getStunTotal()).deep.to.equal(
-                            3 * (1 + increasedStunMultiplier) * TestRollMock.fixedRollResult,
+                            3 * (1 + increasedStunMultiplier) * TestRollMock.DieClass.rollArray[0],
                         );
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
@@ -2520,22 +2545,22 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getBodyTerms()).deep.to.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(function () {
                             return roller.getStunMultiplier();
                         }).to.throw();
 
                         expect(roller.getStunTerms()).deep.to.equal([
-                            1 * TestRollMock.fixedRollResult,
-                            1 * TestRollMock.fixedRollResult,
-                            1 * TestRollMock.fixedRollResult,
+                            1 * TestRollMock.DieClass.rollArray[0],
+                            1 * TestRollMock.DieClass.rollArray[0],
+                            1 * TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getStunTotal()).deep.to.equal(3 * 1 * TestRollMock.fixedRollResult);
+                        expect(roller.getStunTotal()).deep.to.equal(3 * 1 * TestRollMock.DieClass.rollArray[0]);
                         const hitLocation = roller.getHitLocation();
                         expect(hitLocation).to.deep.equal({
                             name: "Foot",
@@ -2604,18 +2629,18 @@ export function registerDiceTests(quench) {
                         roller.removeNDC(3);
 
                         expect(roller.getBodyTerms()).to.deep.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.deep.equal(2 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.deep.equal(2 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getStunMultiplier()).to.deep.equal(1);
 
                         expect(roller.getStunTerms()).to.deep.equal([
-                            1 * TestRollMock.fixedRollResult,
-                            1 * TestRollMock.fixedRollResult,
+                            1 * TestRollMock.DieClass.rollArray[0],
+                            1 * TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getStunTotal()).to.deep.equal(2 * TestRollMock.fixedRollResult);
+                        expect(roller.getStunTotal()).to.deep.equal(2 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getFormula()).to.equal("2d6");
                     });
@@ -2631,18 +2656,18 @@ export function registerDiceTests(quench) {
                         roller.removeNDC(2);
 
                         expect(roller.getBodyTerms()).to.deep.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.deep.equal(2 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.deep.equal(2 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getStunMultiplier()).to.deep.equal(1);
 
                         expect(roller.getStunTerms()).to.deep.equal([
-                            1 * TestRollMock.fixedRollResult,
-                            1 * TestRollMock.fixedRollResult,
+                            1 * TestRollMock.DieClass.rollArray[0],
+                            1 * TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getStunTotal()).to.deep.equal(2 * TestRollMock.fixedRollResult);
+                        expect(roller.getStunTotal()).to.deep.equal(2 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getFormula()).to.equal("2d6");
                     });
@@ -2661,18 +2686,18 @@ export function registerDiceTests(quench) {
                         roller.removeNDC(2);
 
                         expect(roller.getBodyTerms()).to.deep.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.deep.equal(2 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.deep.equal(2 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getStunMultiplier()).to.deep.equal(1);
 
                         expect(roller.getStunTerms()).to.deep.equal([
-                            1 * TestRollMock.fixedRollResult,
-                            1 * TestRollMock.fixedRollResult,
+                            1 * TestRollMock.DieClass.rollArray[0],
+                            1 * TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getStunTotal()).to.deep.equal(2 * TestRollMock.fixedRollResult);
+                        expect(roller.getStunTotal()).to.deep.equal(2 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getFormula()).to.equal("2d6");
                     });
@@ -2688,18 +2713,18 @@ export function registerDiceTests(quench) {
                         roller.removeNDC(1);
 
                         expect(roller.getBodyTerms()).to.deep.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getBodyTotal()).to.deep.equal(2 * TestRollMock.fixedRollResult);
+                        expect(roller.getBodyTotal()).to.deep.equal(2 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getStunMultiplier()).to.deep.equal(1);
 
                         expect(roller.getStunTerms()).to.deep.equal([
-                            1 * TestRollMock.fixedRollResult,
-                            1 * TestRollMock.fixedRollResult,
+                            1 * TestRollMock.DieClass.rollArray[0],
+                            1 * TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getStunTotal()).to.deep.equal(2 * TestRollMock.fixedRollResult);
+                        expect(roller.getStunTotal()).to.deep.equal(2 * TestRollMock.DieClass.rollArray[0]);
 
                         expect(roller.getFormula()).to.equal("2d6");
                     });
@@ -2714,13 +2739,19 @@ export function registerDiceTests(quench) {
                         // Remove 1 DC to a 1/2 die term
                         roller.removeNDC(1);
 
-                        expect(roller.getBodyTerms()).to.deep.equal([Math.ceil(TestRollMock.fixedRollResult / 2)]);
-                        expect(roller.getBodyTotal()).to.deep.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getBodyTerms()).to.deep.equal([
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                        ]);
+                        expect(roller.getBodyTotal()).to.deep.equal(Math.ceil(TestRollMock.DieClass.rollArray[0] / 2));
 
                         expect(roller.getStunMultiplier()).to.deep.equal(1);
 
-                        expect(roller.getStunTerms()).to.deep.equal([1 * Math.ceil(TestRollMock.fixedRollResult / 2)]);
-                        expect(roller.getStunTotal()).to.deep.equal(1 * Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            1 * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(
+                            1 * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                        );
 
                         expect(roller.getFormula()).to.equal("½d6");
                     });
@@ -2735,16 +2766,22 @@ export function registerDiceTests(quench) {
                         // Remove 1 DC to a 1/2 die term
                         roller.removeNDC(1);
 
-                        expect(roller.getBodyTerms()).to.deep.equal([Math.ceil(TestRollMock.fixedRollResult / 2)]);
-                        expect(roller.getBodyTotal()).to.deep.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getBodyTerms()).to.deep.equal([
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                        ]);
+                        expect(roller.getBodyTotal()).to.deep.equal(Math.ceil(TestRollMock.DieClass.rollArray[0] / 2));
 
-                        expect(roller.getStunMultiplier()).to.deep.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.deep.equal(
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                        );
 
                         expect(roller.getStunTerms()).to.deep.equal([
-                            Math.ceil(TestRollMock.fixedRollResult / 2) * Math.ceil(TestRollMock.fixedRollResult / 2),
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) *
+                                Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         ]);
                         expect(roller.getStunTotal()).to.deep.equal(
-                            Math.ceil(TestRollMock.fixedRollResult / 2) * Math.ceil(TestRollMock.fixedRollResult / 2),
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) *
+                                Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         );
 
                         expect(roller.getFormula()).to.equal("½d6");
@@ -2763,10 +2800,16 @@ export function registerDiceTests(quench) {
                         expect(roller.getBodyTerms()).to.deep.equal([1]);
                         expect(roller.getBodyTotal()).to.deep.equal(1);
 
-                        expect(roller.getStunMultiplier()).to.deep.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.deep.equal(
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                        );
 
-                        expect(roller.getStunTerms()).to.deep.equal([Math.ceil(TestRollMock.fixedRollResult / 2) * 1]);
-                        expect(roller.getStunTotal()).to.deep.equal(Math.ceil(TestRollMock.fixedRollResult / 2) * 1);
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) * 1,
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) * 1,
+                        );
 
                         expect(roller.getFormula()).to.equal("1");
                     });
@@ -2784,10 +2827,16 @@ export function registerDiceTests(quench) {
                         expect(roller.getBodyTerms()).to.deep.equal([1]);
                         expect(roller.getBodyTotal()).to.deep.equal(1);
 
-                        expect(roller.getStunMultiplier()).to.deep.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.deep.equal(
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                        );
 
-                        expect(roller.getStunTerms()).to.deep.equal([Math.ceil(TestRollMock.fixedRollResult / 2) * 1]);
-                        expect(roller.getStunTotal()).to.deep.equal(Math.ceil(TestRollMock.fixedRollResult / 2) * 1);
+                        expect(roller.getStunTerms()).to.deep.equal([
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) * 1,
+                        ]);
+                        expect(roller.getStunTotal()).to.deep.equal(
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) * 1,
+                        );
 
                         expect(roller.getFormula()).to.equal("1");
                     });
@@ -2803,23 +2852,26 @@ export function registerDiceTests(quench) {
                         roller.removeNDC(4);
 
                         expect(roller.getBodyTerms()).to.deep.equal([
-                            TestRollMock.fixedRollResult,
-                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                            TestRollMock.DieClass.rollArray[0],
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         ]);
                         expect(roller.getBodyTotal()).to.deep.equal(
-                            TestRollMock.fixedRollResult + Math.ceil(TestRollMock.fixedRollResult / 2),
+                            TestRollMock.DieClass.rollArray[0] + Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         );
 
-                        expect(roller.getStunMultiplier()).to.deep.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.deep.equal(
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                        );
 
                         expect(roller.getStunTerms()).to.deep.equal([
-                            Math.ceil(TestRollMock.fixedRollResult / 2) * TestRollMock.fixedRollResult,
-                            Math.ceil(TestRollMock.fixedRollResult / 2) * Math.ceil(TestRollMock.fixedRollResult / 2),
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) * TestRollMock.DieClass.rollArray[0],
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) *
+                                Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         ]);
                         expect(roller.getStunTotal()).to.deep.equal(
-                            Math.ceil(TestRollMock.fixedRollResult / 2) * TestRollMock.fixedRollResult +
-                                Math.ceil(TestRollMock.fixedRollResult / 2) *
-                                    Math.ceil(TestRollMock.fixedRollResult / 2),
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) * TestRollMock.DieClass.rollArray[0] +
+                                Math.ceil(TestRollMock.DieClass.rollArray[0] / 2) *
+                                    Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         );
 
                         expect(roller.getFormula()).to.equal("1d6 + ½d6");
@@ -2841,7 +2893,9 @@ export function registerDiceTests(quench) {
                         expect(roller.getBodyTerms()).to.deep.equal([]);
                         expect(roller.getBodyTotal()).to.deep.equal(0);
 
-                        expect(roller.getStunMultiplier()).to.deep.equal(Math.ceil(TestRollMock.fixedRollResult / 2));
+                        expect(roller.getStunMultiplier()).to.deep.equal(
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
+                        );
 
                         expect(roller.getStunTerms()).to.deep.equal([]);
                         expect(roller.getStunTotal()).to.deep.equal(0);
@@ -2914,11 +2968,11 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getAdjustmentTerms()).to.deep.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getAdjustmentTotal()).to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getAdjustmentTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0]);
                     });
 
                     it("should return the rolled active points for a highest roll", async function () {
@@ -2929,11 +2983,11 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getAdjustmentTerms()).to.deep.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                         ]);
-                        expect(roller.getAdjustmentTotal()).to.equal(3 * TestRollMock.fixedRollResult);
+                        expect(roller.getAdjustmentTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0]);
                     });
 
                     it("should return the rolled active points for a multi term roll", async function () {
@@ -2944,13 +2998,14 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getAdjustmentTerms()).to.deep.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            Math.ceil(TestRollMock.fixedRollResult / 2),
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         ]);
                         expect(roller.getAdjustmentTotal()).to.equal(
-                            3 * TestRollMock.fixedRollResult + 1 * Math.ceil(TestRollMock.fixedRollResult / 2),
+                            3 * TestRollMock.DieClass.rollArray[0] +
+                                1 * Math.ceil(TestRollMock.DieClass.rollArray[0] / 2),
                         );
                     });
 
@@ -2962,12 +3017,12 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getAdjustmentTerms()).to.deep.equal([
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
-                            TestRollMock.fixedRollResult,
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
+                            TestRollMock.DieClass.rollArray[0],
                             1,
                         ]);
-                        expect(roller.getAdjustmentTotal()).to.equal(3 * TestRollMock.fixedRollResult + 1 * 1);
+                        expect(roller.getAdjustmentTotal()).to.equal(3 * TestRollMock.DieClass.rollArray[0] + 1 * 1);
                     });
 
                     it("should return the rolled active points for a negative term roll", async function () {
@@ -2978,12 +3033,12 @@ export function registerDiceTests(quench) {
                         await roller.roll();
 
                         expect(roller.getAdjustmentTerms()).to.deep.equal([
-                            -TestRollMock.fixedRollResult,
-                            -TestRollMock.fixedRollResult,
-                            -TestRollMock.fixedRollResult,
+                            -TestRollMock.DieClass.rollArray[0],
+                            -TestRollMock.DieClass.rollArray[0],
+                            -TestRollMock.DieClass.rollArray[0],
                             1,
                         ]);
-                        expect(roller.getAdjustmentTotal()).to.equal(-3 * TestRollMock.fixedRollResult + 1 * 1);
+                        expect(roller.getAdjustmentTotal()).to.equal(-3 * TestRollMock.DieClass.rollArray[0] + 1 * 1);
                     });
                 });
 
@@ -3532,7 +3587,7 @@ export function registerDiceTests(quench) {
 
                     it("should support calculations with alternating dice rolls", async function () {
                         const TestRollMock = RollAlternatingLuckAndUnluck;
-                        TestRollMock.generatorInfo.reset();
+                        TestRollMock.resetIndex();
 
                         const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(5);
 
@@ -3545,7 +3600,7 @@ export function registerDiceTests(quench) {
 
                     it("should support calculations with ramping dice rolls", async function () {
                         const TestRollMock = Roll1Through6Mock;
-                        TestRollMock.generatorInfo.reset();
+                        TestRollMock.resetIndex();
 
                         const roller = new HeroRoller({}, TestRollMock).makeLuckRoll().addDice(14);
 
@@ -3731,7 +3786,7 @@ export function registerDiceTests(quench) {
 
                     it("should support calculations with alternating dice rolls", async function () {
                         const TestRollMock = RollAlternatingLuckAndUnluck;
-                        TestRollMock.generatorInfo.reset();
+                        TestRollMock.resetIndex();
 
                         const roller = new HeroRoller({}, TestRollMock).makeUnluckRoll().addDice(5);
 
@@ -3744,7 +3799,7 @@ export function registerDiceTests(quench) {
 
                     it("should support calculations with ramping dice rolls", async function () {
                         const TestRollMock = Roll1Through6Mock;
-                        TestRollMock.generatorInfo.reset();
+                        TestRollMock.resetIndex();
 
                         const roller = new HeroRoller({}, TestRollMock).makeUnluckRoll().addDice(14);
 

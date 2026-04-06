@@ -1,7 +1,9 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { HeroRoller } from "../utility/dice.mjs";
-import { calculateDicePartsForItem } from "../utility/damage.mjs";
+
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
+
+import { calculateDicePartsForItem } from "../utility/damage.mjs";
+import { HeroRoll, HeroRoller } from "../utility/dice.mjs";
 import { tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 
 const backgroundSkillKeys = Object.freeze({
@@ -265,8 +267,16 @@ function getRequiredCharacteristicKey(rar, item) {
  *
  *
  */
-// PH: FIXME: The name of the function is not what it is doing. It is not checking if it requires a roll...
 export async function isActivatedForThisUse(item, options = {}) {
+    // PH: FIXME: options to be removed. Should never be using a default parameter.
+    return isActivatedForThisUseInternal(item, HeroRoll, options);
+}
+
+export async function isActivatedForThisUse_TestingOnly(item, rollClass) {
+    return isActivatedForThisUseInternal(item, rollClass, {});
+}
+
+async function isActivatedForThisUseInternal(item, rollClass, options = {}) {
     // if(!item.isActive) {
     //     return false;
     // }
@@ -280,6 +290,7 @@ export async function isActivatedForThisUse(item, options = {}) {
     const token = options.token ?? tokenEducatedGuess({ actor });
     const speaker = ChatMessage.getSpeaker({ actor, token });
 
+    // PH: FIXME: This should be extracted
     // Sectional Defense is new, so putting a safety TRY/CATCH around the new code
     try {
         function determineSectionalDefenses(comment, hitLocationNum) {
@@ -400,7 +411,7 @@ export async function isActivatedForThisUse(item, options = {}) {
     if (skill?.system.XMLID === "LUCK") {
         const { diceParts } = calculateDicePartsForItem(skill, {});
 
-        roller = new HeroRoller()
+        roller = new HeroRoller({}, rollClass)
             .modifyTo5e(skill.actor.system.is5e)
             .makeLuckRoll()
             .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0);
@@ -438,8 +449,10 @@ export async function isActivatedForThisUse(item, options = {}) {
         const successValue = parseInt(value);
 
         //TODO what about additional skill levels used to influence the activation roll?
-        roller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
+        roller = new HeroRoller({}, rollClass).makeSuccessRoll(true, successValue).addDice(3);
+
         await roller.roll();
+
         succeeded = roller.getSuccess();
         const autoSuccess = roller.getAutoSuccess();
         const total = roller.getSuccessTotal();
