@@ -317,7 +317,7 @@ export async function isActivatedForThisUse(item, options = {}) {
                 if (sectionalDefenses) {
                     // ChatMessage
                     const chatData = {
-                        style: CONST.CHAT_MESSAGE_STYLES.IC,
+                        style: CONST.CHAT_MESSAGE_STYLES.OOC,
                         author: game.user._id,
                         content: `The sectional defense from <b>${item.name}</b> ${sectionalDefenses.success ? "successfully applied" : "failed to apply"}`,
                         speaker: speaker,
@@ -373,7 +373,7 @@ export async function isActivatedForThisUse(item, options = {}) {
                     const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
 
                     const chatData = {
-                        style: CONST.CHAT_MESSAGE_STYLES.IC,
+                        style: CONST.CHAT_MESSAGE_STYLES.OOC,
                         author: game.user._id,
                         content:
                             `<div class="dice-roll"><div class="dice-flavor">${item.name} (${item.system.OPTION_ALIAS || item.system.COMMENTS}) activation failed because the appropriate skill is not owned.</div></div>` +
@@ -471,7 +471,7 @@ export async function isActivatedForThisUse(item, options = {}) {
     }
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.IC,
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: roller.rawRolls(),
         author: game.user._id,
         content: cardHtml,
