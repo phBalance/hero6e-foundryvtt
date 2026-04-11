@@ -7564,7 +7564,7 @@ export function buildEffectiveObject(effectiveObjectParameters) {
 
             return true;
         })
-        .map((entry) => fromUuidSync(entry[1]?.uuid))
+        .map(([uuid]) => fromUuidSync(uuid))
         .forEach((hthAttack) => {
             // 5e only: Can use the HA with STR if HA's unmodified active points don't exceed the STR used. Get the advantages for free on STR if can use the HA.
             // 6e only: The HA becomes the base attack item.

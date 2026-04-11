@@ -2449,19 +2449,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 // Delete maneuvers (or any other existing items) that don't
                 // match template prior to possibly changing is5e
                 if (heroJson.CHARACTER.TEMPLATE !== this.system.CHARACTER?.TEMPLATE) {
-                    const itemsToDeleteIs5e = this.items.filter(
-                        (i) => i.system.is5e !== this.is5ePreview(heroJson.CHARACTER.TEMPLATE),
-                    );
-
+                    const itemsToDeleteIs5e = this.items
+                        .filter((i) => i.system.is5e !== this.is5ePreview(heroJson.CHARACTER.TEMPLATE))
+                        .map((m) => m.id);
                     if (itemsToDeleteIs5e.length > 0) {
                         console.warn(`Deleting ${itemsToDeleteIs5e.length} is5e mismatches`);
-                        if (itemsToDeleteIs5e.length === this.items.size) {
-                            await this.items.clear();
-                        } else {
-                            await this.deleteEmbeddedDocuments("Item", itemsToDeleteIs5e, {
-                                render: false,
-                            });
-                        }
+                        await this.deleteEmbeddedDocuments("Item", itemsToDeleteIs5e, {
+                            render: false,
+                        });
                     }
                 }
 
