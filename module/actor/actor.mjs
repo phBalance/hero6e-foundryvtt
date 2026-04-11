@@ -127,9 +127,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             // so we merge in the entire system
             // Also need to use force replace ==items for this to work in v13
             const items = this.items.map((i) => ({ ...i.toObject(), system: i.system }));
-            this.updateSource({
-                [`==items`]: items,
-            });
+            if (isGameV14OrLater()) {
+                this.updateSource({
+                    items: foundry.data.operators.ForcedReplacement.create(items),
+                });
+            } else {
+                this.updateSource({
+                    [`==items`]: items,
+                });
+            }
         }
 
         // For debugging purposes
@@ -2506,13 +2512,18 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                             // Error: The type of a Document may only be changed if the system field
                             //        is also updated with a ForcedReplacement operator.
                             // A subsequent upload works, not ready for publish.
-                            await this.update(
-                                {
-                                    type: targetType,
-                                    system: this.system,
-                                },
-                                { recursive: false },
-                            );
+                            await this.update({
+                                type: targetType,
+                                system: _replace(this.system.toObject()),
+                            });
+
+                            // await this.update(
+                            //     {
+                            //         type: targetType,
+                            //         system: this.system,
+                            //     },
+                            //     { recursive: false },
+                            // );
                         } else {
                             await this.update({ type: targetType, [`==system`]: this.system });
                         }

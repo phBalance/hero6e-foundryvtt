@@ -667,7 +667,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                     type: "executeScript",
                     system: {
                         events: ["tokenEnter", "tokenExit"],
-                        source: `const token = event.data.token;\nif (token) {\n!!token.object.setTarget(region.tokens.find(t=> t.id === token.id),\n{releaseOthers: false });\n}`,
+                        source: `const token = event.data.token;\nif (token) {\n!!token.object.setTarget(!!region.tokens.find(t=> t.id === token.id),\n{releaseOthers: false });\n}`,
                     },
                 },
             ],
