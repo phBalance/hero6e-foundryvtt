@@ -697,7 +697,7 @@ export async function doAoeActionToHit(action, options) {
     //speaker.alias = actor.name;
 
     const chatData = {
-        style: CONST.CHAT_MESSAGE_STYLES.OOC, //CONST.CHAT_MESSAGE_STYLES.OOC
+        style: CONST.CHAT_MESSAGE_STYLES.OOC,
         rolls: attackHeroRoller.rawRolls(),
         author: game.user._id,
         content: cardHtml,

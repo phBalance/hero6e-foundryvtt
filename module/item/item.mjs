@@ -1261,7 +1261,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         const chatData = {
             author: game.user._id,
             speaker: ChatMessage.getSpeaker({ actor: this.actor }),
-            style: CONST.CHAT_MESSAGE_STYLES.OOC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            style: CONST.CHAT_MESSAGE_STYLES.OOC,
             content: content,
             whisper: [game.user.id],
         };
@@ -1351,7 +1351,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             //         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
             //         //speaker.alias = actor.name;
             //         const chatData = {
-            //             style: CONST.CHAT_MESSAGE_STYLES.OOC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            //             style: CONST.CHAT_MESSAGE_STYLES.OOC,
             //             author: game.user._id,
             //             content: `Unable to activate ${item.name} because it would exceed the ${VPP.name} active point pool of ${VPP.system.LEVELS}RC.`,
             //             speaker: speaker,
@@ -1365,7 +1365,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             //         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
             //         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
             //         const chatData = {
-            //             style: CONST.CHAT_MESSAGE_STYLES.OOC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            //             style: CONST.CHAT_MESSAGE_STYLES.OOC,
             //             author: game.user._id,
             //             content:
             //                 `Unable to activate ${item.name} because it would exceed the ${VPP.name} pool of ${VPP.system.LEVELS}RC.` +
@@ -1396,7 +1396,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             //         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
             //         //speaker.alias = actor.name;
             //         const chatData = {
-            //             style: CONST.CHAT_MESSAGE_STYLES.OOC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            //             style: CONST.CHAT_MESSAGE_STYLES.OOC,
             //             author: game.user._id,
             //             content: `${item.name} was activated even though it exceed the ${VPP.name} control cost`,
             //             speaker: speaker,
@@ -1411,7 +1411,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             //         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
             //         //speaker.alias = actor.name;
             //         const chatData = {
-            //             style: CONST.CHAT_MESSAGE_STYLES.OOC, //CONST.CHAT_MESSAGE_STYLES.OOC
+            //             style: CONST.CHAT_MESSAGE_STYLES.OOC,
             //             author: game.user._id,
             //             content:
             //                 `Unable to activate ${item.name} because it would exceed the ${VPP.name} control cost of ${controlCost}AP. ` +
@@ -6990,9 +6990,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     //     return canvas.templates.createPreview(templateData);
     // }
 
-    // The default deleteDialog doens't prompt for children
+    // The default deleteDialog doesn't prompt for children
     async deleteDialog(options = {}, operation = {}) {
-        // If no chidItems use the built in Foundry Delete Prompt
+        // If no childItems use the built in Foundry Delete Prompt
         if (this.childItems.length === 0) {
             return super.deleteDialog(options, operation);
         }
@@ -7564,7 +7564,7 @@ export function buildEffectiveObject(effectiveObjectParameters) {
 
             return true;
         })
-        .map((entry) => fromUuidSync(entry[1]?.uuid))
+        .map(([uuid]) => fromUuidSync(uuid))
         .forEach((hthAttack) => {
             // 5e only: Can use the HA with STR if HA's unmodified active points don't exceed the STR used. Get the advantages for free on STR if can use the HA.
             // 6e only: The HA becomes the base attack item.

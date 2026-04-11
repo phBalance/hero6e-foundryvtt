@@ -5,6 +5,7 @@
 - Fix duplicate TALENT entries in HeroItems compendium [#3980](https://github.com/dmdorman/hero6e-foundryvtt/issues/3980)
 - Automatons now have EGO characteristic. [#3989
   ](https://github.com/dmdorman/hero6e-foundryvtt/issues/3989) [#3986](https://github.com/dmdorman/hero6e-foundryvtt/issues/3986) [#3768](https://github.com/dmdorman/hero6e-foundryvtt/issues/3768)
+- Correct dice of damage calculations where there are large advantage values. [#3961](https://github.com/dmdorman/hero6e-foundryvtt/issues/3961)
 
 ### Version 4.3.1 20260327
 
