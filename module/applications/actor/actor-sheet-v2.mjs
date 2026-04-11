@@ -1624,7 +1624,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             callback: async (path) => {
                 target.src = path;
                 if (this.token) {
-                    await this.token.update({ ["texture.src"]: path });
+                    await (this.token.document || this.token).update({ ["texture.src"]: path });
                 }
                 if (!this.document.isToken) {
                     await this.document.update({ ["prototypeToken.texture.src"]: path });
