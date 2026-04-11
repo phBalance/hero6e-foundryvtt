@@ -423,9 +423,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     context.endReserve = this.actor.items.find((o) => o.system.XMLID === "ENDURANCERESERVE");
                     context.portraitToggleState = this.portraitToggleState;
                     break;
+
                 case "header":
                     this.#prepareContextCharacterPointTooltips(context);
                     break;
+
                 case "tabs":
                     for (const tabName of HeroSystemActorSheetV2.TABS.primary.tabs.map((m) => m.id)) {
                         context.tabs[tabName].cssClass = context.tabs[tabName].cssClass?.split(" ") ?? [];
@@ -454,6 +456,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     }
 
                     break;
+
+                case "other":
+                    // really nothing to do
+                    break;
+
                 case "attacks":
                 case "defenses":
                 case "movements":
@@ -466,11 +473,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 case "perks":
                 case "talents":
                 case "complications":
-                case "other": // really nothing to do
                 case "invalid":
                     context.items = this._items[partId];
                     context.searchValue = this.searchValues[partId];
                     break;
+
                 case "background":
                     context.enriched ??= {};
                     context.enriched.BACKGROUND = await foundry.applications.ux.TextEditor.enrichHTML(
@@ -481,6 +488,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     );
                     context.metricUnits = game.settings.get(game.system.id, "metricUnits");
                     break;
+
                 case "effects":
                     context.allTemporaryEffects = Array.from(this.actor.allApplicableEffects())
                         .filter((o) => o.duration.duration > 0 || o.statuses.size)
@@ -490,16 +498,21 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     context.allInherentEffects = this.actor.getInherentEffects();
                     context.allMiscEffects = this.actor.getMiscEffects();
                     break;
+
                 case "conditions":
                     context.statuses = await this._prepareStatusEffects();
                     break;
+
                 case "analysis":
                     context.analysis = await this._prepareAnalysis();
                     break;
+
                 case "uploading":
                     break;
+
                 default:
                     console.warn(`unhandled part=${partId}`);
+                    break;
             }
 
             //this.#heroValidationCssByItemType(context);
