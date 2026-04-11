@@ -18,6 +18,7 @@ export default [
                 ...globals.jquery,
                 ...globals.node,
 
+                _replace: "readonly",
                 ActiveEffect: "readonly",
                 ActiveEffectConfig: "readonly",
                 Actor: "readonly",
