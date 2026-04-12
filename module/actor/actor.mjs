@@ -2448,7 +2448,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             if (this.id) {
                 // Delete maneuvers (or any other existing items) that don't
                 // match template prior to possibly changing is5e
-                if (heroJson.CHARACTER.TEMPLATE !== this.system.CHARACTER?.TEMPLATE) {
+                if (this.is5ePreview(heroJson.CHARACTER.TEMPLATE) !== this.system.is5e) {
                     const itemsToDeleteIs5e = this.items
                         .filter((i) => i.system.is5e !== this.is5ePreview(heroJson.CHARACTER.TEMPLATE))
                         .map((m) => m.id);
@@ -3808,13 +3808,21 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     is5ePreview(template) {
-        if (template?.includes("6")) {
-            return false;
-        }
+        try {
+            const _template = template?.extends ?? template;
+            if (_template?.includes("6")) {
+                return false;
+            }
 
-        // 5e templates don't have the number 6
-        if (template?.includes("hdt") && !template?.includes("6")) {
-            return true;
+            // 5e templates don't have the number 6
+            if (_template?.includes("hdt") && !_template?.includes("6")) {
+                return true;
+            }
+        } catch (e) {
+            console.error(e);
+            if (squelch("is5ePreview")) {
+                ui.notifications.error("Error occurred while checking for 5e template.");
+            }
         }
 
         return null;

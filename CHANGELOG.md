@@ -1,14 +1,17 @@
 # Releases
 
-### Version 4.3.3 20260411 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)4
+### Version 4.3.4 20260411 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix upload failure for HDC files with custom Hero Designer templates [#4016](https://github.com/dmdorman/hero6e-foundryvtt/issues/4016)
+
+### Version 4.3.3 20260411
 
 - Fix for AOE attacks
 
 ### Version 4.3.2 20260411
 
 - Fix duplicate TALENT entries in HeroItems compendium [#3980](https://github.com/dmdorman/hero6e-foundryvtt/issues/3980)
-- Automatons now have EGO characteristic. [#3989
-  ](https://github.com/dmdorman/hero6e-foundryvtt/issues/3989) [#3986](https://github.com/dmdorman/hero6e-foundryvtt/issues/3986) [#3768](https://github.com/dmdorman/hero6e-foundryvtt/issues/3768)
+- Automatons now have EGO characteristic. [#3989](https://github.com/dmdorman/hero6e-foundryvtt/issues/3989) [#3986](https://github.com/dmdorman/hero6e-foundryvtt/issues/3986) [#3768](https://github.com/dmdorman/hero6e-foundryvtt/issues/3768)
 - Correct dice of damage calculations where there are large advantage values. [#3961](https://github.com/dmdorman/hero6e-foundryvtt/issues/3961)
 
 ### Version 4.3.1 20260327
