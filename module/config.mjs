@@ -11918,6 +11918,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(undefined, {
+        // MOBILE related
+        key: "FASTER",
+        behaviors: ["adder"],
+        type: ["adder"],
+        costPerLevel: fixedValueFunction(1 / 2),
+        xml: `<ADDER XMLID="FASTER" ID="1775232848592" BASECOST="0.0" LEVELS="1" ALIAS="x2 rate of movement" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" LVLCOST="0.5" LVLVAL="1.0" SELECTED="YES"></ADDER>`,
+    });
     addPower(
         {
             // FRINGE_BENEFIT related
@@ -12720,6 +12728,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="INSECTS" ID="1762052685705" BASECOST="2.0" LEVELS="0" ALIAS="Insects &amp; Anthropods" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // SHAPESHIFT related
+            key: "INSTANTCHANGE",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="INSTANTCHANGE" ID="1775955297873" BASECOST="5.0" LEVELS="0" ALIAS="Instant Change" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -13841,6 +13860,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         undefined,
     );
+    addPower(undefined, {
+        // MOBILE related
+        key: "NONATTACK",
+        behaviors: ["adder"],
+        type: ["adder"],
+        costPerLevel: fixedValueFunction(0),
+        xml: `<ADDER XMLID="NONATTACK" ID="1775232847262" BASECOST="-0.5" LEVELS="0" ALIAS="Non-Attack Power (GM-approval required)" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="No" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+    });
     addPower(
         {
             // AOE related
