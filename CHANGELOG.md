@@ -1,6 +1,6 @@
 # Releases
 
-### Version 4.3.2 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.2 20260411 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix duplicate TALENT entries in HeroItems compendium [#3980](https://github.com/dmdorman/hero6e-foundryvtt/issues/3980)
 - Automatons now have EGO characteristic. [#3989
