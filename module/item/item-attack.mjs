@@ -2683,7 +2683,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     const explosion = item.effectiveAttackItem.hasExplosionAdvantage();
     if (explosion) {
-        const aoeTemplate = this.getAoeTemplateForBaseItem;
+        const aoeTemplate = item.effectiveAttackItem.getAoeTemplateForBaseItem;
 
         if (aoeTemplate) {
             // Distance from center
