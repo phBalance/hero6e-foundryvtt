@@ -910,27 +910,4 @@ function getEffectiveItemOriginalItemId(item) {
     return null;
 }
 
-/**
- *
- * @param {HeroSystem6eItem} item - base attack item
- * @returns
- */
-export function getAoeTemplateForBaseItem(item) {
-    const effectiveAttackItemOriginalItemId = getEffectiveItemOriginalItemId(item);
-
-    const aoeTemplate = game.scenes.current.templates.find(
-        (o) => o.flags[game.system.id]?.itemId === effectiveAttackItemOriginalItemId,
-    );
-    if (aoeTemplate) return aoeTemplate;
-
-    console.warn(`Unable to match aoeTemplate with item. Why are you looking for a template?`);
-
-    const anyAoeTemplate = game.scenes.current.templates.find((o) => o.author.id === game.user.id);
-    if (anyAoeTemplate) {
-        console.warn(`Found a template user owns, so using that as a fallback`);
-    }
-
-    return anyAoeTemplate;
-}
-
 window.ItemAttackFormApplication = ItemAttackFormApplication;
