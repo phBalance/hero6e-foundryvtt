@@ -1,5 +1,9 @@
 # Releases
 
+### Version 4.3.4 20260411 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix upload failure for HDC files with custom Hero Designer templates [#4016](https://github.com/dmdorman/hero6e-foundryvtt/issues/4016)
+
 ### Version 4.3.3 20260411 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix for AOE attacks
