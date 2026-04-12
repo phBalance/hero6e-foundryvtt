@@ -1,5 +1,7 @@
 import { HeroRoll } from "../utility/dice.mjs";
 
+// PH: FIXME: Need to make the chat message capable of deserializing.
+
 class SequentialDie extends foundry.dice.terms.Die {
     static fixedRollResult = null;
 
@@ -13,7 +15,7 @@ class SequentialDie extends foundry.dice.terms.Die {
     constructor(termData) {
         super(termData);
 
-        if (this.constructor.rollArray.length == null || this.constructor.rollArray.length === 0) {
+        if (this.constructor.rollArray == null || this.constructor.rollArray.length === 0) {
             throw new Error("Invalid rollArray - need to override it");
         }
     }
@@ -207,9 +209,10 @@ export class RollMock extends HeroRoll {
     }
 
     static fromData(dataObj) {
-        const formula = dataObj.formula ? JSON.parse(dataObj.formula) : undefined;
-        const data = dataObj.data ? JSON.parse(dataObj.data) : undefined;
-        const options = dataObj.options ? JSON.parse(dataObj.options) : undefined;
+        const formula = dataObj.formula;
+        const data = dataObj.data;
+        const options = dataObj.options;
+
         // PH: FIXME: This needs to be making it based on the invoked function so that it can be inherited without duplication.
         const rollMock = new RollMock(formula, data, options);
 
@@ -217,7 +220,7 @@ export class RollMock extends HeroRoll {
         //     rollMock[prop] = dataObj[prop] ? JSON.parse(dataObj[prop]) : undefined;
         // }
 
-        rollMock._dice = dataObj._evaluated ? JSON.parse(dataObj._dice) : undefined;
+        rollMock._dice = dataObj._dice ? JSON.parse(dataObj._dice) : undefined;
         rollMock._evaluated = dataObj._evaluated ? JSON.parse(dataObj._evaluated) : undefined;
         rollMock._formula = dataObj._formula ? JSON.parse(dataObj._formula) : undefined;
         rollMock._resolver = dataObj._resolver ? JSON.parse(dataObj._resolver) : undefined;
@@ -360,6 +363,10 @@ const mockDiceRegistry = {
     Roll2LuckOn3Dice,
     Roll3LuckOn3Dice,
 
+    Roll3On3Dice,
+    Roll4On3Dice,
+    Roll5On3Dice,
+    Roll6On3Dice,
     Roll7On3Dice,
     Roll8On3Dice,
     Roll9On3Dice,
@@ -371,14 +378,10 @@ const mockDiceRegistry = {
     Roll15On3Dice,
     Roll16On3Dice,
     Roll17On3Dice,
+    Roll18On3Dice,
 };
 
 export function testingMockRollInitialize() {
-    // PH: FIXME: can only have 1 character denomination (not a string) so don't bother ... we'll just override the "d" denomination
-    // for (const fixedDieClass of Object.values(fixedDieRegistry)) {
-    //     CONFIG.Dice.terms[fixedDieClass.DENOMINATION] = fixedDieClass;
-    // }
-
     for (const mockDiceClass of Object.values(mockDiceRegistry)) {
         CONFIG.Dice.rolls.push(mockDiceClass);
     }
