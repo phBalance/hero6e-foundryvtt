@@ -417,7 +417,7 @@ export function addRangeIntoToHitRoll(distance, attackItem, actor, attackHeroRol
             // Requires A Roll? Only include if successful.
             // PH: FIXME: This should store the active state until the next phase? DCV and DC should,
             //            presumably, also not be active for the next phase.
-            // if (!(await isActivatedForThisUse(pslItem))) {
+            // if (!(await isActivatedForThisUse(pslItem, {}))) {
             //     continue;
             // }
 
@@ -490,7 +490,7 @@ export async function addAttackCslsIntoToHitRoll(action, attackHeroRoller, _item
         // Requires A Roll? Only include if successful.
         // PH: FIXME: This should store the active state until the next phase? DCV and DC should,
         //            presumably, also not be active for the next phase.
-        if (!(await isActivatedForThisUse(csl.item))) {
+        if (!(await isActivatedForThisUse(csl.item, {}))) {
             continue;
         }
 
@@ -556,7 +556,7 @@ async function addAttackHitLocationsIntoToHitRoll(item, attackHeroRoller, option
             // Requires A Roll? Only include if successful.
             // PH: FIXME: This should store the active state until the next phase? DCV and DC should,
             //            presumably, also not be active for the next phase.
-            if (!(await isActivatedForThisUse(psl))) {
+            if (!(await isActivatedForThisUse(psl, {}))) {
                 continue;
             }
 
@@ -2849,7 +2849,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         if (rar) {
             // Passing damageRoller for SectionalDefense check
             rarSuccess = await isActivatedForThisUse(defense, {
-                damageRoller,
+                hitLocationNum: damageRoller.getHitLocation().num,
             });
         }
 
