@@ -1,27 +1,137 @@
-const Die = foundry.dice.terms.Die;
+import { HeroRoll } from "../utility/dice.mjs";
 
-export function FixedDieRoll(fixedRollResult) {
-    return class extends Die {
-        constructor(termData = {}) {
-            super(termData);
+// PH: FIXME: Need to make the chat message capable of deserializing.
+
+class SequentialDie extends foundry.dice.terms.Die {
+    static fixedRollResult = null;
+
+    static rollArray = [];
+    static rollIndex = 0;
+
+    static resetIndex() {
+        this.rollIndex = 0;
+    }
+
+    constructor(termData) {
+        super(termData);
+
+        if (this.constructor.rollArray == null || this.constructor.rollArray.length === 0) {
+            throw new Error("Invalid rollArray - need to override it");
+        }
+    }
+
+    /**
+     * Roll for this die, but always roll rollResult (i.e. it's not random)
+     */
+    _evaluate() {
+        for (let i = 0; i < this.number; ++i) {
+            const result = this.constructor.rollArray[this.constructor.rollIndex];
+            this.constructor.rollIndex = (this.constructor.rollIndex + 1) % this.constructor.rollArray.length;
+            const roll = { result: result, active: true };
+            this.results.push(roll);
         }
 
-        /**
-         * Roll for this die, but always roll rollResult (i.e. it's not random)
-         */
-        _evaluate() {
-            for (let i = 0; i < this.number; ++i) {
-                const roll = { result: fixedRollResult, active: true };
-                this.results.push(roll);
-            }
+        return this;
+    }
+}
 
-            return this;
-        }
-    };
+export class DieRolls1 extends SequentialDie {
+    static fixedRollResult = 1;
+
+    static rollArray = [1];
+}
+
+export class DieRolls2 extends SequentialDie {
+    static fixedRollResult = 2;
+    static rollArray = [2];
+}
+
+export class DieRolls3 extends SequentialDie {
+    static fixedRollResult = 3;
+    static rollArray = [3];
+}
+
+export class DieRolls4 extends SequentialDie {
+    static fixedRollResult = 4;
+    static rollArray = [4];
+}
+
+export class DieRolls5 extends SequentialDie {
+    static fixedRollResult = 5;
+    static rollArray = [5];
+}
+
+export class DieRolls6 extends SequentialDie {
+    static fixedRollResult = 6;
+    static rollArray = [6];
+}
+
+export class DieRolls123456 extends SequentialDie {
+    static rollArray = [1, 2, 3, 4, 5, 6];
+}
+
+export class DieRolls61 extends SequentialDie {
+    static rollArray = [6, 1];
+}
+
+export class DieRolls611 extends SequentialDie {
+    static rollArray = [6, 1, 1];
+}
+
+export class DieRolls661 extends SequentialDie {
+    static rollArray = [6, 6, 1];
+}
+
+export class DieRolls112 extends SequentialDie {
+    static rollArray = [1, 1, 2];
+}
+
+export class DieRolls113 extends SequentialDie {
+    static rollArray = [1, 1, 3];
+}
+
+export class DieRolls114 extends SequentialDie {
+    static rollArray = [1, 1, 4];
+}
+
+export class DieRolls223 extends SequentialDie {
+    static rollArray = [2, 2, 3];
+}
+
+export class DieRolls323 extends SequentialDie {
+    static rollArray = [3, 2, 3];
+}
+
+export class DieRolls433 extends SequentialDie {
+    static rollArray = [4, 3, 3];
+}
+
+export class DieRolls515 extends SequentialDie {
+    static rollArray = [5, 1, 5];
+}
+
+export class DieRolls525 extends SequentialDie {
+    static rollArray = [5, 2, 5];
+}
+
+export class DieRolls446 extends SequentialDie {
+    static rollArray = [4, 4, 6];
+}
+
+export class DieRolls465 extends SequentialDie {
+    static rollArray = [4, 6, 5];
+}
+
+export class DieRolls565 extends SequentialDie {
+    static rollArray = [5, 6, 5];
+}
+
+export class DieRolls566 extends SequentialDie {
+    static rollArray = [5, 6, 6];
 }
 
 export function DynamicDieRoll(generateRollResult) {
-    return class extends Die {
+    return class extends foundry.dice.terms.Die {
         constructor(termData = {}) {
             super(termData);
         }
@@ -40,13 +150,17 @@ export function DynamicDieRoll(generateRollResult) {
     };
 }
 
-export class RollMock extends Roll {
-    static DieClass = Die;
+export class RollMock extends HeroRoll {
+    static DieClass = foundry.dice.terms.Die;
+
+    static resetIndex() {
+        this.DieClass.resetIndex();
+    }
 
     static fromTerms(terms, options) {
         const newTerms = terms.map((term) => {
             // Replace all Die with a DieClass that will always return an expected behavior when rolling
-            if (term instanceof Die) {
+            if (term instanceof foundry.dice.terms.Die) {
                 return new this.DieClass({
                     number: term.number,
                     faces: term.faces,
@@ -59,11 +173,65 @@ export class RollMock extends Roll {
 
         const formula = Roll.getFormula(newTerms);
 
-        // eslint-disable-next-line no-use-before-define -- Recursive definition should be fine here
-        const mock = new Roll1Mock(formula, options);
+        const mock = new this(formula, options);
         mock.terms = newTerms;
 
         return mock;
+    }
+
+    toData() {
+        // const obj = {};
+        // for (const prop in this) {
+        //     obj[prop] = JSON.stringify(this[prop]);
+        // }
+        // return obj;
+
+        return {
+            data: this.data,
+            formula: this.formula,
+            options: this.options,
+
+            terms: JSON.stringify(this.terms),
+
+            _dice: JSON.stringify(this._dice),
+            _evaluated: JSON.stringify(this._evaluated),
+            _formula: JSON.stringify(this._formula),
+            _resolver: JSON.stringify(this._resolver),
+            _root: JSON.stringify(this._root),
+            _total: JSON.stringify(this._total),
+        };
+    }
+
+    toJSON() {
+        return this.toData();
+        // PH: FIXME: toJSON is just data return? If so, fix HeroRoller.
+        // return JSON.stringify(this.toData());
+    }
+
+    static fromData(dataObj) {
+        const formula = dataObj.formula;
+        const data = dataObj.data;
+        const options = dataObj.options;
+
+        // PH: FIXME: This needs to be making it based on the invoked function so that it can be inherited without duplication.
+        const rollMock = new RollMock(formula, data, options);
+
+        // for (const prop in dataObj) {
+        //     rollMock[prop] = dataObj[prop] ? JSON.parse(dataObj[prop]) : undefined;
+        // }
+
+        rollMock._dice = dataObj._dice ? JSON.parse(dataObj._dice) : undefined;
+        rollMock._evaluated = dataObj._evaluated ? JSON.parse(dataObj._evaluated) : undefined;
+        rollMock._formula = dataObj._formula ? JSON.parse(dataObj._formula) : undefined;
+        rollMock._resolver = dataObj._resolver ? JSON.parse(dataObj._resolver) : undefined;
+        rollMock._root = dataObj._root ? JSON.parse(dataObj._root) : undefined;
+        rollMock._total = dataObj._total ? JSON.parse(dataObj._total) : undefined;
+
+        return rollMock;
+    }
+
+    static fromJSON(json) {
+        return RollMock.fromData(JSON.parse(json));
     }
 
     constructor(formula, data, options) {
@@ -72,68 +240,149 @@ export class RollMock extends Roll {
 }
 
 export class Roll6Mock extends RollMock {
-    static fixedRollResult = 6;
-    static DieClass = FixedDieRoll(this.fixedRollResult);
+    static DieClass = DieRolls6;
 }
 
 export class Roll5Mock extends RollMock {
-    static fixedRollResult = 5;
-    static DieClass = FixedDieRoll(this.fixedRollResult);
+    static DieClass = DieRolls5;
+}
+
+export class Roll4Mock extends RollMock {
+    static DieClass = DieRolls4;
 }
 
 export class Roll3Mock extends RollMock {
-    static fixedRollResult = 3;
-    static DieClass = FixedDieRoll(this.fixedRollResult);
+    static DieClass = DieRolls3;
 }
 
 export class Roll2Mock extends RollMock {
-    static fixedRollResult = 2;
-    static DieClass = FixedDieRoll(this.fixedRollResult);
+    static DieClass = DieRolls2;
 }
 
 export class Roll1Mock extends RollMock {
-    static fixedRollResult = 1;
-    static DieClass = FixedDieRoll(this.fixedRollResult);
-}
-
-export function buildGenerateLinearRollResultFunction(start, end, step) {
-    let result = start;
-
-    return {
-        generate: function generateRoll() {
-            const value = result;
-            result = result + step;
-            if (result > end) result = start;
-            if (result < start) result = end;
-            return value;
-        },
-        reset: function resetRollResult() {
-            result = start;
-        },
-    };
-}
-
-export function buildGenerateAlternatingRollResultFunction(first, other) {
-    let result = first;
-
-    return {
-        generate: function generateRoll() {
-            const value = result;
-            result = result === first ? other : first;
-            return value;
-        },
-        reset: function resetRollResult() {
-            result = first;
-        },
-    };
+    static DieClass = DieRolls1;
 }
 
 export class Roll1Through6Mock extends RollMock {
-    static generatorInfo = buildGenerateLinearRollResultFunction(1, 6, 1);
-    static DieClass = DynamicDieRoll(Roll1Through6Mock.generatorInfo.generate);
+    static DieClass = DieRolls123456;
 }
 
 export class RollAlternatingLuckAndUnluck extends RollMock {
-    static generatorInfo = buildGenerateAlternatingRollResultFunction(6, 1);
-    static DieClass = DynamicDieRoll(RollAlternatingLuckAndUnluck.generatorInfo.generate);
+    static DieClass = DieRolls61;
+}
+
+export class Roll1LuckOn3Dice extends RollMock {
+    static DieClass = DieRolls611;
+}
+
+export class Roll2LuckOn3Dice extends RollMock {
+    static DieClass = DieRolls661;
+}
+
+export class Roll3LuckOn3Dice extends RollMock {
+    static DieClass = DieRolls6;
+}
+
+export class Roll3On3Dice extends RollMock {
+    static DieClass = DieRolls1;
+}
+
+export class Roll4On3Dice extends RollMock {
+    static DieClass = DieRolls112;
+}
+
+export class Roll5On3Dice extends RollMock {
+    static DieClass = DieRolls113;
+}
+
+export class Roll6On3Dice extends RollMock {
+    static DieClass = DieRolls114;
+}
+
+export class Roll7On3Dice extends RollMock {
+    static DieClass = DieRolls223;
+}
+
+export class Roll8On3Dice extends RollMock {
+    static DieClass = DieRolls323;
+}
+
+export class Roll9On3Dice extends RollMock {
+    static DieClass = DieRolls3;
+}
+
+export class Roll10On3Dice extends RollMock {
+    static DieClass = DieRolls433;
+}
+
+export class Roll11On3Dice extends RollMock {
+    static DieClass = DieRolls515;
+}
+
+export class Roll12On3Dice extends RollMock {
+    static DieClass = DieRolls525;
+}
+
+export class Roll13On3Dice extends RollMock {
+    static DieClass = DieRolls661;
+}
+
+export class Roll14On3Dice extends RollMock {
+    static DieClass = DieRolls446;
+}
+
+export class Roll15On3Dice extends RollMock {
+    static DieClass = DieRolls465;
+}
+
+export class Roll16On3Dice extends RollMock {
+    static DieClass = DieRolls565;
+}
+
+export class Roll17On3Dice extends RollMock {
+    static DieClass = DieRolls566;
+}
+
+export class Roll18On3Dice extends RollMock {
+    static DieClass = DieRolls6;
+}
+
+const mockDiceRegistry = {
+    RollMock,
+
+    Roll1Mock,
+    Roll2Mock,
+    Roll3Mock,
+    Roll4Mock,
+    Roll5Mock,
+    Roll6Mock,
+    Roll1Through6Mock,
+
+    RollAlternatingLuckAndUnluck,
+    Roll1LuckOn3Dice,
+    Roll2LuckOn3Dice,
+    Roll3LuckOn3Dice,
+
+    Roll3On3Dice,
+    Roll4On3Dice,
+    Roll5On3Dice,
+    Roll6On3Dice,
+    Roll7On3Dice,
+    Roll8On3Dice,
+    Roll9On3Dice,
+    Roll10On3Dice,
+    Roll11On3Dice,
+    Roll12On3Dice,
+    Roll13On3Dice,
+    Roll14On3Dice,
+    Roll15On3Dice,
+    Roll16On3Dice,
+    Roll17On3Dice,
+    Roll18On3Dice,
+};
+
+export function testingMockRollInitialize() {
+    for (const mockDiceClass of Object.values(mockDiceRegistry)) {
+        CONFIG.Dice.rolls.push(mockDiceClass);
+    }
 }

@@ -1,7 +1,9 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { HeroRoller } from "../utility/dice.mjs";
-import { calculateDicePartsForItem } from "../utility/damage.mjs";
+
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
+
+import { calculateDicePartsForItem } from "../utility/damage.mjs";
+import { HeroRoll, HeroRoller } from "../utility/dice.mjs";
 import { tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 
 const backgroundSkillKeys = Object.freeze({
@@ -228,6 +230,58 @@ function getRequiredCharacteristicKey(rar, item) {
 
 /**
  *
+ * @param {*} activationRoll
+ * @param {*} hitLocation
+ * @returns {boolean | null} - null if not applicable otherwise boolean value indicating activation
+ */
+function determineSectionalDefenses(potentialSectionalComment, hitLocationNum) {
+    // Are there comments that could be sectional instructions?
+    if (!potentialSectionalComment) {
+        return null;
+    }
+
+    // Are there sectional instructions that we understand?
+    const sectionalRangeComment = potentialSectionalComment.trim().match(/^locations? (.*)$/i);
+    if (!sectionalRangeComment) {
+        return null;
+    }
+
+    // Are hit locations turned on? If not, then sectional defense don't make sense to consider.
+    if (!game.settings.get(HEROSYS.module, "hit locations")) {
+        return null;
+    }
+
+    // Remove any gramatically correct phrasing (3-5, 7-8, and 12-13)
+    const sectionalRanges = sectionalRangeComment[1].replace("and", "").split(",");
+    for (const rangeChunk of sectionalRanges) {
+        // rangeChunk can be a single value or a range separated by "-". If a single value, then startEndRange will be length 1.
+        const startEndRange = rangeChunk.trim().split("-");
+        const first = startEndRange[0] ? parseInt(startEndRange[0]) : null;
+        const second = startEndRange[1] ? parseInt(startEndRange[1]) : null;
+
+        if (startEndRange.length === 1) {
+            if (first === hitLocationNum) {
+                return true;
+            }
+        } else if (startEndRange.length === 2) {
+            // First index of range doesn't have to be start.
+            const start = first < second ? first : second;
+            const end = first < second ? second : first;
+
+            // Is it within the range's start and end? If so, this sectional defense applies
+            if (start <= hitLocationNum && end >= hitLocationNum) {
+                return true;
+            }
+        } else {
+            console.error(`Malformed sectional defense range chunk ${rangeChunk} ignored`);
+        }
+    }
+
+    return false;
+}
+
+/**
+ *
  * @param {HeroSystem6eItem} item
  * @param {Object} options
  * @returns {Boolean} - success
@@ -265,8 +319,16 @@ function getRequiredCharacteristicKey(rar, item) {
  *
  *
  */
-// PH: FIXME: The name of the function is not what it is doing. It is not checking if it requires a roll...
-export async function isActivatedForThisUse(item, options = {}) {
+export async function isActivatedForThisUse(item, options) {
+    // PH: FIXME: options to be removed.
+    return isActivatedForThisUseInternal(item, HeroRoll, options);
+}
+
+export async function isActivatedForThisUse_TestingOnly(item, rollClass, options) {
+    return isActivatedForThisUseInternal(item, rollClass, options);
+}
+
+async function isActivatedForThisUseInternal(item, rollClass, options = {}) {
     // if(!item.isActive) {
     //     return false;
     // }
@@ -280,60 +342,26 @@ export async function isActivatedForThisUse(item, options = {}) {
     const token = options.token ?? tokenEducatedGuess({ actor });
     const speaker = ChatMessage.getSpeaker({ actor, token });
 
-    // Sectional Defense is new, so putting a safety TRY/CATCH around the new code
-    try {
-        function determineSectionalDefenses(comment, hitLocationNum) {
-            // We should always have a hitLocationNum, being paranoid
-            if (!hitLocationNum) {
-                console.error(`hitLocationNum was not found`);
-                return null;
-            }
+    // Sectional Defense overrides a standard activation roll.
+    // PH: FIXME: should not pass in damageRoller.
+    const activationRoll =
+        item.modifiers.find((o) => o.XMLID === "ACTIVATIONROLL") ?? item.findModsByXmlid("EVERYPHASE")?.parent;
+    if (options.hitLocationNum && activationRoll) {
+        const sectionalDefense = await determineSectionalDefenses(activationRoll.COMMENTS, options.hitLocationNum);
+        if (sectionalDefense != null) {
+            // PH: FIXME: The chat message should not be burried down in here.
+            // ChatMessage
+            const chatData = {
+                style: CONST.CHAT_MESSAGE_STYLES.OOC,
+                author: game.user._id,
+                content: `The sectional defense from <b>${item.name}</b> ${sectionalDefense ? "successfully applied" : "failed to apply"}`,
+                speaker: speaker,
+                whisper: whisperUserTargetsForActor(actor),
+            };
+            await ChatMessage.create(chatData);
 
-            // Expecting comment to contain hit location details.  For example "locations 1-18".
-            // TODO: Support "locations 3-5, 9-14, 16-18"
-            // TODO: Move this to be an item getter so we can use it in HeroValidation to determine if the RAR 8- 14-, etc are correct.
-            const hitLocationMatch = comment?.match(/locations (\d+)-(\d+)/i);
-            if (hitLocationMatch) {
-                return {
-                    // lower: hitLocationMatch[1], // lower/upper are not used and should be array of ranges if we want to keep
-                    // upper: hitLocationMatch[2],
-                    success: hitLocationNum >= hitLocationMatch[1] && hitLocationNum <= hitLocationMatch[2],
-                };
-            }
-            console.warn(`Sectional Defense location matching failed`);
-            return null;
+            return sectionalDefense;
         }
-
-        // Sectional Defense will bypass the roll
-        if (options.damageRoller) {
-            const activationRoll =
-                item.modifiers.find((o) => o.XMLID === "ACTIVATIONROLL") ?? item.findModsByXmlid("EVERYPHASE")?.parent;
-            if (activationRoll) {
-                const sectionalDefenses = determineSectionalDefenses(
-                    activationRoll.COMMENTS,
-                    options.damageRoller.getHitLocation().num,
-                );
-
-                if (sectionalDefenses) {
-                    // ChatMessage
-                    const chatData = {
-                        style: CONST.CHAT_MESSAGE_STYLES.OOC,
-                        author: game.user._id,
-                        content: `The sectional defense from <b>${item.name}</b> ${sectionalDefenses.success ? "successfully applied" : "failed to apply"}`,
-                        speaker: speaker,
-                        whisper: whisperUserTargetsForActor(actor),
-                    };
-                    await ChatMessage.create(chatData);
-                    return sectionalDefenses.success;
-                } else {
-                    console.warn(
-                        `Check for Sectional Defense failed, expected "locations x-y" in the COMMENTS. Will use standard activation roll instead.`,
-                    );
-                }
-            }
-        }
-    } catch (e) {
-        console.error(`Unexpected sectional defense error`, e);
     }
 
     // FIXME: This doesn't support 2 RAR. See https://github.com/dmdorman/hero6e-foundryvtt/issues/3873
@@ -400,7 +428,7 @@ export async function isActivatedForThisUse(item, options = {}) {
     if (skill?.system.XMLID === "LUCK") {
         const { diceParts } = calculateDicePartsForItem(skill, {});
 
-        roller = new HeroRoller()
+        roller = new HeroRoller({}, rollClass)
             .modifyTo5e(skill.actor.system.is5e)
             .makeLuckRoll()
             .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0);
@@ -438,8 +466,10 @@ export async function isActivatedForThisUse(item, options = {}) {
         const successValue = parseInt(value);
 
         //TODO what about additional skill levels used to influence the activation roll?
-        roller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
+        roller = new HeroRoller({}, rollClass).makeSuccessRoll(true, successValue).addDice(3);
+
         await roller.roll();
+
         succeeded = roller.getSuccess();
         const autoSuccess = roller.getAutoSuccess();
         const total = roller.getSuccessTotal();

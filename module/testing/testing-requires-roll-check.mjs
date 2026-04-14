@@ -1,4 +1,20 @@
 import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
+import {
+    Roll3On3Dice,
+    Roll6On3Dice,
+    Roll7On3Dice,
+    Roll8On3Dice,
+    Roll9On3Dice,
+    Roll10On3Dice,
+    Roll12On3Dice,
+    Roll13On3Dice,
+} from "./dice-testing-helper.mjs";
+
+import { isActivatedForThisUse_TestingOnly } from "../item/item-requires-roll.mjs";
+
+import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
+
+import { HeroRoll } from "../utility/dice.mjs";
 
 export function registerRequiresRollCheckTests(quench) {
     quench.registerBatch(
@@ -6,7 +22,7 @@ export function registerRequiresRollCheckTests(quench) {
         (context) => {
             const { after, before, describe, expect, it } = context;
 
-            describe("requires roll check", function () {
+            describe("ACTIVATIONROLL and REQUIRESASKILLROLL", function () {
                 // The default timeout tends to be insufficient with multiple actors being created at the same time.
                 setQuenchTimeout(this);
 
@@ -206,231 +222,278 @@ export function registerRequiresRollCheckTests(quench) {
                         </CHARACTERISTICS>
                         <SKILLS>
                             <SKILL XMLID="ACROBATICS" ID="1774142644678" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 8-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144246591" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144246591" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774144750794" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 8- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144800582" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774144800569" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144800582" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774144800569" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774146160475" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 8- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146299672" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774146302202" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                                <ADDER XMLID="BURNOUT" ID="1774146303922" BASECOST="0.5" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146299672" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774146302202" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="BURNOUT" ID="1774146303922" BASECOST="0.5" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774143298339" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 9-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144255902" BASECOST="-1.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144255902" BASECOST="-1.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774144777528" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 9- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144833320" BASECOST="-1.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774144833307" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144833320" BASECOST="-1.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774144833307" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774146165573" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 9- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146286632" BASECOST="-1.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774146291491" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                                <ADDER XMLID="BURNOUT" ID="1774146292690" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146286632" BASECOST="-1.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774146291491" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="BURNOUT" ID="1774146292690" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774143301295" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 10-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144260607" BASECOST="-1.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="10" OPTIONID="10" OPTION_ALIAS="10-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144260607" BASECOST="-1.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="10" OPTIONID="10" OPTION_ALIAS="10-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774144781077" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 10- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144854707" BASECOST="-1.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="10" OPTIONID="10" OPTION_ALIAS="10-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774144863126" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144854707" BASECOST="-1.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="10" OPTIONID="10" OPTION_ALIAS="10-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774144863126" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774146171326" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 10- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146274809" BASECOST="-1.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="10" OPTIONID="10" OPTION_ALIAS="10-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774146277740" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                                <ADDER XMLID="BURNOUT" ID="1774146279691" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146274809" BASECOST="-1.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="10" OPTIONID="10" OPTION_ALIAS="10-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774146277740" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="BURNOUT" ID="1774146279691" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774143303272" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 11-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144268402" BASECOST="-1.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144268402" BASECOST="-1.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774144783547" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 11- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144874298" BASECOST="-1.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774144874285" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144874298" BASECOST="-1.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774144874285" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774146176105" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 11- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146263211" BASECOST="-1.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774146266046" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                                <ADDER XMLID="BURNOUT" ID="1774146267964" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146263211" BASECOST="-1.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774146266046" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="BURNOUT" ID="1774146267964" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774143304943" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 12-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144274027" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144274027" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774144786628" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 12- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144890805" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774144890792" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144890805" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774144890792" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774146181084" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 12- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146251051" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774146255358" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                                <ADDER XMLID="BURNOUT" ID="1774146256989" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146251051" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774146255358" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="BURNOUT" ID="1774146256989" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774143306539" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 13-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144280054" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="13" OPTIONID="13" OPTION_ALIAS="13-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144280054" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="13" OPTIONID="13" OPTION_ALIAS="13-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774144788939" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 13- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144908728" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="13" OPTIONID="13" OPTION_ALIAS="13-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774144908715" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144908728" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="13" OPTIONID="13" OPTION_ALIAS="13-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774144908715" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774146184997" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 13- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146238059" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="13" OPTIONID="13" OPTION_ALIAS="13-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774146241447" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                                <ADDER XMLID="BURNOUT" ID="1774146243214" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146238059" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="13" OPTIONID="13" OPTION_ALIAS="13-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774146241447" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="BURNOUT" ID="1774146243214" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774143314132" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 14-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144285000" BASECOST="-0.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144285000" BASECOST="-0.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774144791152" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 14- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144921017" BASECOST="-0.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774144921004" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144921017" BASECOST="-0.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774144921004" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774146189432" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 14- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146222357" BASECOST="-0.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774146225976" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                                <ADDER XMLID="BURNOUT" ID="1774146227583" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146222357" BASECOST="-0.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774146225976" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="BURNOUT" ID="1774146227583" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774143316149" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="21" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 15-" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144290342" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144290342" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774144793614" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="22" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 15- Jamming" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144932019" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774144932006" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774144932019" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774144932006" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                             <SKILL XMLID="ACROBATICS" ID="1774146194130" BASECOST="3.0" LEVELS="20" ALIAS="Acrobatics" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Acrobatics Activation 15- Jamming Burnout" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
-                            <NOTES />
-                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146196278" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="JAMMED" ID="1774146203457" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                                <ADDER XMLID="BURNOUT" ID="1774146204904" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1774146196278" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1774146203457" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="BURNOUT" ID="1774146204904" BASECOST="0.25" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </SKILL>
                         </SKILLS>
                         <PERKS />
                         <TALENTS />
                         <MARTIALARTS />
-                        <POWERS />
+                        <POWERS>
+                            <LIST XMLID="GENERIC_OBJECT" ID="1776049267635" BASECOST="0.0" LEVELS="0" ALIAS="Sectional Defense" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                            </LIST>
+                            <POWER XMLID="ARMOR" ID="1776048632952" BASECOST="0.0" LEVELS="2" ALIAS="Armor" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776049267635" NAME="Short Vest (location 12-13)" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1776049506195" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="location 12-13" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="ARMOR" ID="1776049476589" BASECOST="0.0" LEVELS="2" ALIAS="Armor" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776049267635" NAME="Standard Vest (location 11-13)" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1776049529729" BASECOST="-1.5" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="location 11-13" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="ARMOR" ID="1776049526341" BASECOST="0.0" LEVELS="2" ALIAS="Armor" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776049267635" NAME="Cap, Long Vest (location 10-13)" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1776049539352" BASECOST="-1.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="10" OPTIONID="10" OPTION_ALIAS="10-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="location 10-13" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="ARMOR" ID="1776049578213" BASECOST="0.0" LEVELS="2" ALIAS="Armor" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776049267635" NAME="Helmet, Jacket (location 4-5,9-13)" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1776049684645" BASECOST="-1.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="location 4-5,9-13" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="ARMOR" ID="1776049618870" BASECOST="0.0" LEVELS="2" ALIAS="Armor" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776049267635" NAME="Full Coverage Helmet, Long Jacket, High Boots (location 3-5,9-14, 16-18)" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1776049620282" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="location 3-5,9-14, 16-18" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="ARMOR" ID="1776049702240" BASECOST="0.0" LEVELS="2" ALIAS="Armor" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776049267635" NAME="Full Coverage Helmet, Long Jacket, High Boots (locations 3-5,9-14, and 16-18)" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1776054990928" BASECOST="-0.75" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="location 3-5,9-14, and 16-18" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="ARMOR" ID="1776050235631" BASECOST="0.0" LEVELS="2" ALIAS="Armor" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776049267635" NAME="Weird Coverage (locations   3,5 ,9- 10,12, 14 -15, and 17 - 18)" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1">
+                            <NOTES />
+                            <MODIFIER XMLID="ACTIVATIONROLL" ID="1776055483709" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locations   3,5 ,9- 10,12, 14 -15, and 17 - 18" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                        </POWERS>                        
                         <DISADVANTAGES />
                         <EQUIPMENT />
                         </CHARACTER>
                         `;
                     let actor;
+
                     let acrobaticsActivation8Less;
                     let acrobaticsActivation9Less;
                     let acrobaticsActivation10Less;
@@ -457,6 +520,14 @@ export function registerRequiresRollCheckTests(quench) {
                     let acrobaticsActivation13LessJammingBurnout;
                     let acrobaticsActivation14LessJammingBurnout;
                     let acrobaticsActivation15LessJammingBurnout;
+
+                    let sectionalArmorShortVest;
+                    let sectionalArmorStandardVest;
+                    let sectionalArmorCapLongVest;
+                    let sectionalArmorHelmetJacket;
+                    let sectionalArmorFullCoverageHelmetVestHighBoots;
+                    let sectionalArmorFullCoverageHelmetVestAndHighBoots;
+                    let sectionalArmorWeirdCoverage;
 
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true });
@@ -534,6 +605,32 @@ export function registerRequiresRollCheckTests(quench) {
                         );
                         acrobaticsActivation15LessJammingBurnout = actor.items.find(
                             (item) => item.name === "Acrobatics Activation 15- Jamming Burnout",
+                        );
+
+                        sectionalArmorShortVest = actor.items.find(
+                            (item) => item.name === "Short Vest (location 12-13)",
+                        );
+                        sectionalArmorStandardVest = actor.items.find(
+                            (item) => item.name === "Standard Vest (location 11-13)",
+                        );
+                        sectionalArmorCapLongVest = actor.items.find(
+                            (item) => item.name === "Cap, Long Vest (location 10-13)",
+                        );
+                        sectionalArmorHelmetJacket = actor.items.find(
+                            (item) => item.name === "Helmet, Jacket (location 4-5,9-13)",
+                        );
+                        sectionalArmorFullCoverageHelmetVestHighBoots = actor.items.find(
+                            (item) =>
+                                item.name ===
+                                "Full Coverage Helmet, Long Jacket, High Boots (location 3-5,9-14, 16-18)",
+                        );
+                        sectionalArmorFullCoverageHelmetVestAndHighBoots = actor.items.find(
+                            (item) =>
+                                item.name ===
+                                "Full Coverage Helmet, Long Jacket, High Boots (locations 3-5,9-14, and 16-18)",
+                        );
+                        sectionalArmorWeirdCoverage = actor.items.find(
+                            (item) => item.name === "Weird Coverage (locations   3,5 ,9- 10,12, 14 -15, and 17 - 18)",
                         );
                     });
 
@@ -645,24 +742,678 @@ export function registerRequiresRollCheckTests(quench) {
                         });
                     });
 
+                    describe("basic activation roll", function () {
+                        describe("Acrobatics 8- activates correctly", function () {
+                            it("should not activate 8- with a roll of a 9", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(acrobaticsActivation8Less, Roll9On3Dice),
+                                ).to.equal(false);
+                            });
+
+                            it("should activate 8- with a roll of a 8", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(acrobaticsActivation8Less, Roll8On3Dice),
+                                ).to.equal(true);
+                            });
+
+                            it("should activate 8- with a roll of a 7", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(acrobaticsActivation8Less, Roll7On3Dice),
+                                ).to.equal(true);
+                            });
+
+                            it("should activate 8- with a roll of a 3", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(acrobaticsActivation8Less, Roll3On3Dice),
+                                ).to.equal(true);
+                            });
+                        });
+
+                        describe("Acrobatics 12- activates correctly", function () {
+                            it("should not activate 12- with a roll of a 13", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(acrobaticsActivation12Less, Roll13On3Dice),
+                                ).to.equal(false);
+                            });
+
+                            it("should activate 12- with a roll of a 12", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(acrobaticsActivation12Less, Roll12On3Dice),
+                                ).to.equal(true);
+                            });
+                        });
+                    });
+
+                    describe("sectional activation roll with hit locations active", function () {
+                        let defaultHitLocationsEnabled;
+
+                        before(async function () {
+                            defaultHitLocationsEnabled = await getAndSetGameSetting("hit locations", true);
+                        });
+
+                        after(async function () {
+                            await getAndSetGameSetting("DoubleDamageLimit", defaultHitLocationsEnabled);
+                        });
+
+                        describe("simple 1 range sectional activation roll (12-13) (equivalent of 8-)", function () {
+                            it("should not auto success activate with a hit location 3", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, HeroRoll, {
+                                        hitLocationNum: 3,
+                                    }),
+                                ).to.equal(false);
+                            });
+
+                            it("should not activate with a hit location of 11", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, HeroRoll, {
+                                        hitLocationNum: 11,
+                                    }),
+                                ).to.equal(false);
+                            });
+
+                            it("should activate with a hit location of 12", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, HeroRoll, {
+                                        hitLocationNum: 12,
+                                    }),
+                                ).to.equal(true);
+                            });
+
+                            it("should activate with a hit location of 13", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, HeroRoll, {
+                                        hitLocationNum: 13,
+                                    }),
+                                ).to.equal(true);
+                            });
+
+                            it("should not activate with a hit location of 14", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, HeroRoll, {
+                                        hitLocationNum: 14,
+                                    }),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe("simple 1 range sectional activation roll (11-13) (equivalent of 9-)", function () {
+                            it("should not activate with a hit location of 10", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorStandardVest, HeroRoll, {
+                                        hitLocationNum: 10,
+                                    }),
+                                ).to.equal(false);
+                            });
+
+                            it("should activate with a hit location of 11", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorStandardVest, HeroRoll, {
+                                        hitLocationNum: 11,
+                                    }),
+                                ).to.equal(true);
+                            });
+
+                            it("should activate with a hit location of 13", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorStandardVest, HeroRoll, {
+                                        hitLocationNum: 13,
+                                    }),
+                                ).to.equal(true);
+                            });
+
+                            it("should not activate with a hit location of 14", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorStandardVest, HeroRoll, {
+                                        hitLocationNum: 14,
+                                    }),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe("simple 1 range sectional activation roll (10-13) (equivalent of 10-)", function () {
+                            it("should not activate with a hit location of 9", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorCapLongVest, HeroRoll, {
+                                        hitLocationNum: 9,
+                                    }),
+                                ).to.equal(false);
+                            });
+
+                            it("should activate with a hit location of 10", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorCapLongVest, HeroRoll, {
+                                        hitLocationNum: 10,
+                                    }),
+                                ).to.equal(true);
+                            });
+
+                            it("should activate with a hit location of 13", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorCapLongVest, HeroRoll, {
+                                        hitLocationNum: 13,
+                                    }),
+                                ).to.equal(true);
+                            });
+
+                            it("should not activate with a hit location of 14", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorCapLongVest, HeroRoll, {
+                                        hitLocationNum: 14,
+                                    }),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe("2 range sectional activation roll (4-5, 9-13) (equivalent of 12-)", function () {
+                            describe("first range 4-5", function () {
+                                it("should not activate with a hit location of 3", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorHelmetJacket, HeroRoll, {
+                                            hitLocationNum: 3,
+                                        }),
+                                    ).to.equal(false);
+                                });
+
+                                it("should activate with a hit location of 4", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorHelmetJacket, HeroRoll, {
+                                            hitLocationNum: 4,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 5", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorHelmetJacket, HeroRoll, {
+                                            hitLocationNum: 5,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 6", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorHelmetJacket, HeroRoll, {
+                                            hitLocationNum: 6,
+                                        }),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("second range 9-13", function () {
+                                it("should not activate with a hit location of 8", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorHelmetJacket, HeroRoll, {
+                                            hitLocationNum: 8,
+                                        }),
+                                    ).to.equal(false);
+                                });
+
+                                it("should activate with a hit location of 9", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorHelmetJacket, HeroRoll, {
+                                            hitLocationNum: 9,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 13", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorHelmetJacket, HeroRoll, {
+                                            hitLocationNum: 13,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 14", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorHelmetJacket, HeroRoll, {
+                                            hitLocationNum: 14,
+                                        }),
+                                    ).to.equal(false);
+                                });
+                            });
+                        });
+
+                        describe("3 range sectional activation roll (3-5,9-14,16-18) (equivalent of 12-)", function () {
+                            describe("first range 3-5", function () {
+                                it("should not activate with a hit location of 2", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 2 },
+                                        ),
+                                    ).to.equal(false);
+                                });
+
+                                it("should activate with a hit location of 4", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 4 },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 5", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 5 },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 6", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 6 },
+                                        ),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("second range 9-14", function () {
+                                it("should not activate with a hit location of 8", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 8 },
+                                        ),
+                                    ).to.equal(false);
+                                });
+
+                                it("should activate with a hit location of 9", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 9 },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 14", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 14 },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 15", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 15 },
+                                        ),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("third range 16-18", function () {
+                                it("should activate with a hit location of 16", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 16 },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 18", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 18 },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 19", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 19 },
+                                        ),
+                                    ).to.equal(false);
+                                });
+                            });
+                        });
+
+                        describe("3 range sectional activation roll (3-5,9-14, and 16-18) (equivalent of 12-)", function () {
+                            describe("first range 3-5", function () {
+                                it("should not activate with a hit location of 2", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestAndHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 2 },
+                                        ),
+                                    ).to.equal(false);
+                                });
+
+                                it("should activate with a hit location of 3", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestAndHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 3 },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 5", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestAndHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 5 },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 6", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestAndHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 6 },
+                                        ),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("second range 9-14", function () {
+                                it("should not activate with a hit location of 8", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestAndHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 8 },
+                                        ),
+                                    ).to.equal(false);
+                                });
+
+                                it("should activate with a hit location of 9", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestAndHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 9 },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 14", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestAndHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 14 },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 15", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestAndHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 15 },
+                                        ),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("third range 16-18", function () {
+                                it("should activate with a hit location of 16", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestAndHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 16 },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 18", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestAndHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 18 },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 19", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            sectionalArmorFullCoverageHelmetVestAndHighBoots,
+                                            HeroRoll,
+                                            { hitLocationNum: 19 },
+                                        ),
+                                    ).to.equal(false);
+                                });
+                            });
+                        });
+
+                        describe("multi range sectional activation roll(3,5 ,9- 10,12, 14 -15, and 17 - 18) (equivalent of >= 15-)", function () {
+                            describe("first range 3", function () {
+                                it("should not activate with a hit location of 2", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 2,
+                                        }),
+                                    ).to.equal(false);
+                                });
+
+                                it("should activate with a hit location of 3", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 3,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 4", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 4,
+                                        }),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("second range 5", function () {
+                                it("should activate with a hit location of 5", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 5,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 6", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 6,
+                                        }),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("third range 9-10", function () {
+                                it("should not activate with a hit location of 8", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 8,
+                                        }),
+                                    ).to.equal(false);
+                                });
+
+                                it("should activate with a hit location of 9", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 9,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 10", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 10,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 11", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 11,
+                                        }),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("fourth range 12", function () {
+                                it("should activate with a hit location of 12", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 12,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 13", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 13,
+                                        }),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("fifth range 14 -15", function () {
+                                it("should activate with a hit location of 14", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 14,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 15", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 15,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 16", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 16,
+                                        }),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("sixth range 17 - 18", function () {
+                                it("should activate with a hit location of 17", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 17,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 18", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 18,
+                                        }),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 19", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
+                                            hitLocationNum: 19,
+                                        }),
+                                    ).to.equal(false);
+                                });
+                            });
+                        });
+                    });
+
+                    describe("sectional activation roll with hit locations not active", function () {
+                        let defaultHitLocationsEnabled;
+
+                        before(async function () {
+                            defaultHitLocationsEnabled = await getAndSetGameSetting("hit locations", false);
+                        });
+
+                        after(async function () {
+                            await getAndSetGameSetting("DoubleDamageLimit", defaultHitLocationsEnabled);
+                        });
+
+                        describe("simple 1 range sectional activation roll (12-13) (equivalent of 8-)", function () {
+                            it("should not activate with a hit location of 12 if rolling an 9 for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, Roll9On3Dice, {
+                                        hitLocationNum: 12,
+                                    }),
+                                ).to.equal(false);
+                            });
+
+                            it("should activate with a hit location of 12 if rolling a 6 for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, Roll6On3Dice, {
+                                        hitLocationNum: 12,
+                                    }),
+                                ).to.equal(true);
+                            });
+                        });
+
+                        describe("simple 1 range sectional activation roll (11-13) (equivalent of 9-)", function () {
+                            it("should not activate with a hit location of 11 if rolling an 10 for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorStandardVest, Roll10On3Dice, {
+                                        hitLocationNum: 11,
+                                    }),
+                                ).to.equal(false);
+                            });
+
+                            it("should activate with a hit location of 12 if rolling a 6 for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorStandardVest, Roll9On3Dice, {
+                                        hitLocationNum: 11,
+                                    }),
+                                ).to.equal(true);
+                            });
+                        });
+                    });
+
                     // Quench test suite scaffolding for Activation Roll Limitation (5e, FRed)
                     // Based on Hero System 5e rules as described in FRed (.github/RuleBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf)
 
                     describe.skip("Activation Roll Limitation (5e, FRed)", function () {
-                        // Activation Roll Cost Possibilities (8- to 15-)
-                        for (let n = 8; n <= 15; n++) {
-                            it.skip(`Succeeds on ${n}- activation roll`, function () {
-                                // Preconditions: Activation roll set to `${n}-`, roll <= n
-                                // Expected: Success, power activates
-                                // Rule: Activation Roll, private/RulesBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf
-                            });
-                            it.skip(`Fails on ${n}- activation roll`, function () {
-                                // Preconditions: Activation roll set to `${n}-`, roll > n
-                                // Expected: Failure, power does not activate
-                                // Rule: Activation Roll, private/RulesBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf
-                            });
-                        }
-
                         // Special Results: Burnout and Jammed
                         it.skip("Handles burnout on failed activation roll", function () {
                             // Preconditions: Activation roll with Burnout Limitation, failed roll
@@ -700,7 +1451,7 @@ export function registerRequiresRollCheckTests(quench) {
                     });
                 });
 
-                describe("rollRequiresASkillRollCheck", function () {
+                describe("isActivatedForThisUse", function () {
                     describe("6e", function () {
                         const contents = `
                             <?xml version="1.0" encoding="UTF-16"?>

@@ -92,6 +92,8 @@ Hooks.once("diceSoNiceReady", (diceSoNice) => {
  * We override aspects of the FoundryVTT Roll class.
  */
 export class HeroRoll extends Roll {
+    static DieClass = Die;
+
     static initialize() {
         // Override the default chat template so that we can have HTML in our flavour text.
         HeroRoll.CHAT_TEMPLATE = `systems/${game.system.id}/templates/chat/roll.hbs`;
@@ -461,7 +463,7 @@ export class HeroRoller {
         numDice = this.#prefixFormula(numDice);
 
         this._formulaTerms.push(
-            new Die({
+            new this._buildRollClass.DieClass({
                 faces: 6,
                 number: numDice,
                 options: {
@@ -493,7 +495,7 @@ export class HeroRoller {
         numHalfDice = this.#prefixFormula(numHalfDice);
 
         this._formulaTerms.push(
-            new Die({
+            new this._buildRollClass.DieClass({
                 faces: 6,
                 number: numHalfDice,
                 options: {
@@ -525,7 +527,7 @@ export class HeroRoller {
         numDiceMinusOne = this.#prefixFormula(numDiceMinusOne);
 
         this._formulaTerms.push(
-            new Die({
+            new this._buildRollClass.DieClass({
                 faces: 6,
                 number: numDiceMinusOne,
                 options: {
@@ -557,7 +559,7 @@ export class HeroRoller {
         numDice = this.#prefixFormula(numDice);
 
         this._formulaTerms.push(
-            new Die({
+            new this._buildRollClass.DieClass({
                 faces: 6,
                 number: numDice,
                 options: {
@@ -1038,7 +1040,7 @@ export class HeroRoller {
 
     toData() {
         return {
-            // _buildRollClass: this._buildRollClass.name, // TODO: This is just wrong.
+            _buildRollClass: this._buildRollClass.name,
             _options: this._options,
             _rollObj: this._rollObj ? this._rollObj.toJSON() : undefined,
 
@@ -1082,9 +1084,8 @@ export class HeroRoller {
     }
 
     static fromData(dataObj) {
-        // TODO: Finish this.
-        // TODO: I suspect that will only be able to support HeroRoll class.
-        const heroRoller = new HeroRoller(dataObj.options, HeroRoll);
+        const rollClass = CONFIG.Dice.rolls.find((klass) => klass.name === dataObj._buildRollClass);
+        const heroRoller = new HeroRoller(dataObj.options, rollClass);
         heroRoller._rollObj = dataObj._rollObj ? HeroRoll.fromData(dataObj._rollObj) : undefined;
 
         heroRoller._formulaTerms = dataObj._formulaTerms.map((_term, index) =>
