@@ -235,12 +235,19 @@ function getRequiredCharacteristicKey(rar, item) {
  * @returns {boolean | null} - null if not applicable otherwise boolean value indicating activation
  */
 function determineSectionalDefenses(potentialSectionalComment, hitLocationNum) {
+    // Are there comments that could be sectional instructions?
     if (!potentialSectionalComment) {
         return null;
     }
 
+    // Are there sectional instructions that we understand?
     const sectionalRangeComment = potentialSectionalComment.trim().match(/^locations? (.*)$/i);
     if (!sectionalRangeComment) {
+        return null;
+    }
+
+    // Are hit locations turned on? If not, then sectional defense don't make sense to consider.
+    if (!game.settings.get(HEROSYS.module, "hit locations")) {
         return null;
     }
 
@@ -271,32 +278,6 @@ function determineSectionalDefenses(potentialSectionalComment, hitLocationNum) {
     }
 
     return false;
-
-    // // We should always have a hitLocationNum, being paranoid
-    // if (!hitLocationNum) {
-    //     console.error(`hitLocationNum was not found`);
-    //     return null;
-    // }
-
-    // //     } else {
-    // //     console.error(
-    // //         `Check for Sectional Defense failed, expected "locations x-y" in the COMMENTS. Will use standard activation roll instead.`,
-    // //     );
-    // // }
-
-    // // Expecting comment to contain hit location details.  For example "locations 1-18".
-    // // TODO: Support "locations 3-5, 9-14, 16-18"
-    // // TODO: Move this to be an item getter so we can use it in HeroValidation to determine if the RAR 8- 14-, etc are correct.
-    // const hitLocationMatch = potentialSectionalComment?.match(/locations (\d+)-(\d+)/i);
-    // if (hitLocationMatch) {
-    //     return {
-    //         // lower: hitLocationMatch[1], // lower/upper are not used and should be array of ranges if we want to keep
-    //         // upper: hitLocationMatch[2],
-    //         success: hitLocationNum >= hitLocationMatch[1] && hitLocationNum <= hitLocationMatch[2],
-    //     };
-    // }
-    // console.warn(`Sectional Defense location matching failed`);
-    // return null;
 }
 
 /**

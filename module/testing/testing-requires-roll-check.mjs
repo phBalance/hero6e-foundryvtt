@@ -1,24 +1,18 @@
 import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 import {
     Roll3On3Dice,
-    // Roll4On3Dice,
-    // Roll5On3Dice,
-    // Roll6On3Dice,
+    Roll6On3Dice,
     Roll7On3Dice,
     Roll8On3Dice,
     Roll9On3Dice,
-    // Roll10On3Dice,
-    // Roll11On3Dice,
+    Roll10On3Dice,
     Roll12On3Dice,
     Roll13On3Dice,
-    // Roll14On3Dice,
-    // Roll15On3Dice,
-    // Roll16On3Dice,
-    // Roll17On3Dice,
-    // Roll18On3Dice,
 } from "./dice-testing-helper.mjs";
 
 import { isActivatedForThisUse_TestingOnly } from "../item/item-requires-roll.mjs";
+
+import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
 
 import { HeroRoll } from "../utility/dice.mjs";
 
@@ -790,7 +784,17 @@ export function registerRequiresRollCheckTests(quench) {
                         });
                     });
 
-                    describe("sectional activation roll", function () {
+                    describe("sectional activation roll with hit locations active", function () {
+                        let defaultHitLocationsEnabled;
+
+                        before(async function () {
+                            defaultHitLocationsEnabled = await getAndSetGameSetting("hit locations", true);
+                        });
+
+                        after(async function () {
+                            await getAndSetGameSetting("DoubleDamageLimit", defaultHitLocationsEnabled);
+                        });
+
                         describe("simple 1 range sectional activation roll (12-13) (equivalent of 8-)", function () {
                             it("should not auto success activate with a hit location 3", async function () {
                                 expect(
@@ -1354,6 +1358,54 @@ export function registerRequiresRollCheckTests(quench) {
                                         }),
                                     ).to.equal(false);
                                 });
+                            });
+                        });
+                    });
+
+                    describe("sectional activation roll with hit locations not active", function () {
+                        let defaultHitLocationsEnabled;
+
+                        before(async function () {
+                            defaultHitLocationsEnabled = await getAndSetGameSetting("hit locations", false);
+                        });
+
+                        after(async function () {
+                            await getAndSetGameSetting("DoubleDamageLimit", defaultHitLocationsEnabled);
+                        });
+
+                        describe("simple 1 range sectional activation roll (12-13) (equivalent of 8-)", function () {
+                            it("should not activate with a hit location of 12 if rolling an 9 for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, Roll9On3Dice, {
+                                        hitLocationNum: 12,
+                                    }),
+                                ).to.equal(false);
+                            });
+
+                            it("should activate with a hit location of 12 if rolling a 6 for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, Roll6On3Dice, {
+                                        hitLocationNum: 12,
+                                    }),
+                                ).to.equal(true);
+                            });
+                        });
+
+                        describe("simple 1 range sectional activation roll (11-13) (equivalent of 9-)", function () {
+                            it("should not activate with a hit location of 11 if rolling an 10 for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorStandardVest, Roll10On3Dice, {
+                                        hitLocationNum: 11,
+                                    }),
+                                ).to.equal(false);
+                            });
+
+                            it("should activate with a hit location of 12 if rolling a 6 for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(sectionalArmorStandardVest, Roll9On3Dice, {
+                                        hitLocationNum: 11,
+                                    }),
+                                ).to.equal(true);
                             });
                         });
                     });
