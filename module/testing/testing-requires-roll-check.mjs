@@ -1410,45 +1410,74 @@ export function registerRequiresRollCheckTests(quench) {
                         });
                     });
 
-                    // Quench test suite scaffolding for Activation Roll Limitation (5e, FRed)
-                    // Based on Hero System 5e rules as described in FRed (.github/RuleBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf)
-
-                    describe.skip("Activation Roll Limitation (5e, FRed)", function () {
-                        // Special Results: Burnout and Jammed
-                        it.skip("Handles burnout on failed activation roll", function () {
-                            // Preconditions: Activation roll with Burnout Limitation, failed roll
+                    describe.skip("Activation Roll - Jammed and Burnout", function () {
+                        it("Handles burnout on failed activation roll", function () {
                             // Expected: Power is lost or disabled per Burnout rules
-                            // Rule: Burnout, private/RulesBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf
                         });
-                        it.skip("Handles jammed on failed activation roll", function () {
-                            // Preconditions: Activation roll with Jammed Limitation, failed roll
+
+                        it("Handles jammed on failed activation roll", function () {
                             // Expected: Power is jammed and cannot be used until cleared
-                            // Rule: Jammed, private/RulesBooks/DOJHERO 109 - Hero System Rulebook 5E Revised.pdf
-                        });
-                        // Standard Success/Failure Scenarios
-                        it.skip("Succeeds when roll is equal to or less than activation number", function () {
-                            // Implementation goes here
-                        });
-                        it.skip("Fails when roll is greater than activation number", function () {
-                            // Implementation goes here
                         });
 
-                        // Automatic Success/Failure
-                        it.skip("Always succeeds on a roll of 3", function () {
-                            // Implementation goes here
-                        });
-                        it.skip("Always fails on a roll of 18", function () {
-                            // Implementation goes here
-                        });
-
-                        // Modifiers
-                        it.skip("Succeeds with positive modifier applied to activation number", function () {
-                            // Implementation goes here
-                        });
-                        it.skip("Fails with negative modifier applied to activation number", function () {
-                            // Implementation goes here
+                        it("Succeeds when roll is equal to or less than activation number", function () {
+                            // Expected: Standard Success/Failure Scenarios
                         });
                     });
+                });
+
+                describe.skip("5e - requires a skill roll", function () {
+                    describe("RSR costs in all the various flavours", function () {
+                        // TODO: attack roll vs background skill
+                        // TODO: perception, characteristics etc
+                        // TODO: 2 RSR (not yet implemented)
+
+                        it("should have the correct cost for a 3/2 skill with no penalty based on AP", function () {});
+
+                        it("should have the correct cost for a 3/2 skill with -1 per 20 AP", function () {});
+
+                        it("should have the correct cost for a 3/2 skill with -1 per 10 AP", function () {});
+
+                        it("should have the correct cost for a 3/2 skill with -1 per 5 AP", function () {});
+
+                        it("should have the correct cost for the choice between 2 x 3/2 skill with -1 per 10 AP", function () {});
+
+                        it("should have the correct cost for a 3/2 skill with -1 per 5 AP used in a skill vs skill context", function () {});
+
+                        it("should have the correct cost for a 1 luck roll with no penalty based on AP", function () {});
+
+                        it("should have the correct cost for a 2 luck roll with no penalty based on AP", function () {});
+
+                        it("should have the correct cost for a 3 luck roll with no penalty based on AP", function () {});
+                    });
+
+                    describe.skip("RSRs have hero validations", function () {
+                        // TODO: the character has listed skill (success)
+                        // TODO: the character does not have listed skill (error)
+                        // TODO: the character does not have both listed skills for variable skill RSR (error)
+                        // TODO: the character does not have both listed skills for 2 skill RSR (error)
+                        // TODO: the character does not have listed characteristic (vehicle for instance?) (error)
+                        // TODO: the character does not have listed perception (vehicle for instance?) (error)
+                        // TODO: the character does not have the listed movement type (error)
+                        // TODO: the character does not have luck for a luck skill (error)
+                        // TODO: the character does have luck for a luck skill (success)
+                        // TODO: the character with luck skill roll has no penalty per AP (warning as GM will have to arbitrate)
+                    });
+
+                    describe("works with skill that actor has", function () {
+                        describe("RSR with skill and no penalty based on active points", function () {});
+
+                        describe("RSR with skill and various penalty levels based on active points", function () {});
+                    });
+
+                    describe("RSR with skill that doesn't exist", function () {});
+
+                    describe("RSR with CSL", function () {});
+
+                    describe("RSR with 2 skill rolls", function () {});
+
+                    describe("RSR with skill vs skill contest", function () {});
+
+                    describe("RSR with luck rolls", function () {});
                 });
 
                 describe("isActivatedForThisUse", function () {
