@@ -1132,7 +1132,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             const isSkill = powerInfo?.type.includes("skill");
 
             if (hasSuccessRoll && isSkill) {
-                if (!(await isActivatedForThisUse(this))) {
+                if (!(await isActivatedForThisUse(this, {}))) {
                     return;
                 }
 
@@ -4928,39 +4928,23 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         try {
             if (!this.baseInfo) {
                 return false;
-            }
-
-            if (this.disabledOIHID) {
+            } else if (this.disabledOIHID) {
                 return false;
-            }
-
-            if (this.vppUnSlotted) {
+            } else if (this.vppUnSlotted) {
                 return false;
-            }
-
-            if (this.type === "equipment" && this.system.CARRIED !== true) {
+            } else if (this.type === "equipment" && this.system.CARRIED !== true) {
                 return false;
-            }
-
-            if (this.system.XMLID === "STRIKE") {
+            } else if (this.system.XMLID === "STRIKE") {
                 return true;
-            }
-
-            if (this.isCombatManeuver) {
+            } else if (this.isCombatManeuver) {
                 return false;
-            }
-
-            if (this.system.XMLID === "HANDTOHANDATTACK") {
+            } else if (this.system.XMLID === "HANDTOHANDATTACK") {
                 // TODO: Collaborate with Peter.
                 // Aaron would like to show the HTH attack, but roll as a STRIKE + HTH
                 return false;
-            }
-
-            if (this.baseInfo.behaviors.includes("attack")) {
+            } else if (this.baseInfo.behaviors.includes("attack")) {
                 return true;
-            }
-
-            if (this.baseInfo.behaviors.includes("to-hit")) {
+            } else if (this.baseInfo.behaviors.includes("to-hit")) {
                 return true;
             }
         } catch (e) {
