@@ -750,7 +750,7 @@ export async function performAdjustment(
                 (a, c) =>
                     a +
                     (c.changes.find((cc) => cc.key === change.key)
-                        ? c.flags[game.system.id].adjustmentActivePoints
+                        ? (c.flags[game.system.id]?.adjustmentActivePoints ?? 0)
                         : 0),
                 0,
             );
