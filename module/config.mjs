@@ -13502,6 +13502,28 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // REQUIRESASKILLROLL related
+            key: "MINUS1PER20",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="MINUS1PER20" ID="1776305479186" BASECOST="0.25" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 20 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // REQUIRESASKILLROLL related
+            key: "MINUS1PER5",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="MINUS1PER5" ID="1776305531280" BASECOST="-0.5" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 5 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "MINUSONEPIP",
             behaviors: ["adder"],
             type: ["adder"],
@@ -13813,6 +13835,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["adder"],
             costPerLevel: fixedValueFunction(0),
             xml: `<ADDER XMLID="NND" ID="1696022407526" BASECOST="-0.5" LEVELS="0" ALIAS="All Or Nothing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // REQUIRESASKILLROLL related
+            key: "NOAPPENALTY",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="NOAPPENALTY" ID="1776305429510" BASECOST="0.5" LEVELS="0" ALIAS="No Active Point penalty to Skill Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
@@ -15095,6 +15128,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // REQUIRESASKILLROLL related
+            key: "SKILLVSSKILL",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="SKILLVSSKILL" ID="1776305693377" BASECOST="-0.25" LEVELS="0" ALIAS="RSR Skill is subject to Skill vs. Skill contests" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             // CONTACT related
             key: "SLAVISHLYLOYAL",
             behaviors: ["adder"],
@@ -16130,6 +16174,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
+    addPower(
+        {
+            // REQUIRESASKILLROLL related
+            key: "VARIABLERSR",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            xml: `<ADDER XMLID="VARIABLERSR" ID="1776305655592" BASECOST="0.25" LEVELS="0" ALIAS="Variable RSR" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
     addPower(
         {
             // CHANGEENVIRONMENT related
@@ -18829,7 +18884,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             type: ["modifier"],
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
-            minimumLimitation: -0.25,
+            minimumLimitation: 0,
             xml: `<MODIFIER XMLID="REQUIRESASKILLROLL" ID="1596334078849" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},

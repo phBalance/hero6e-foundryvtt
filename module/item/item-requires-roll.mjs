@@ -228,13 +228,7 @@ function getRequiredCharacteristicKey(rar, item) {
     return matchedKeyInOption ?? "";
 }
 
-/**
- *
- * @param {*} activationRoll
- * @param {*} hitLocation
- * @returns {boolean | null} - null if not applicable otherwise boolean value indicating activation
- */
-function determineSectionalDefenses(potentialSectionalComment, hitLocationNum) {
+function validateSectionalComments(item, potentialSectionalComment) {
     // Are there comments that could be sectional instructions?
     if (!potentialSectionalComment) {
         return null;
@@ -246,14 +240,28 @@ function determineSectionalDefenses(potentialSectionalComment, hitLocationNum) {
         return null;
     }
 
-    // Are hit locations turned on? If not, then sectional defense don't make sense to consider.
-    if (!game.settings.get(HEROSYS.module, "hit locations")) {
+    // Are the locations provided reasonable (i.e. is it composed of digits, commas, dashes, and whitespace)?
+    const locationString = sectionalRangeComment[1].replace("and", "");
+    if (locationString.search(/[^0-9,\-\s]/) !== -1) {
+        console.warn(
+            `${item.detailedName()} sectional defense comment is invalid '${locationString}' is not composed of digits, commas, and dashes.`,
+        );
         return null;
     }
 
-    // Remove any gramatically correct phrasing (3-5, 7-8, and 12-13)
-    const sectionalRanges = sectionalRangeComment[1].replace("and", "").split(",");
-    for (const rangeChunk of sectionalRanges) {
+    return locationString;
+}
+
+/**
+ *
+ * @param {string} sectionalDefenseRanges - Something like "3-5, 7-8, 10, 12-13"
+ * @param {number} hitLocationNum
+ * @returns {boolean} - boolean value indicating activation
+ */
+function doSectionalDefensesApply(sectionalDefenseRanges, hitLocationNum) {
+    // Split along the comma separated ranges
+    const splitSectionalRanges = sectionalDefenseRanges.split(",");
+    for (const rangeChunk of splitSectionalRanges) {
         // rangeChunk can be a single value or a range separated by "-". If a single value, then startEndRange will be length 1.
         const startEndRange = rangeChunk.trim().split("-");
         const first = startEndRange[0] ? parseInt(startEndRange[0]) : null;
@@ -347,20 +355,27 @@ async function isActivatedForThisUseInternal(item, rollClass, options = {}) {
     const activationRoll =
         item.modifiers.find((o) => o.XMLID === "ACTIVATIONROLL") ?? item.findModsByXmlid("EVERYPHASE")?.parent;
     if (options.hitLocationNum && activationRoll) {
-        const sectionalDefense = await determineSectionalDefenses(activationRoll.COMMENTS, options.hitLocationNum);
-        if (sectionalDefense != null) {
+        const sectionalDefenseRanges = validateSectionalComments(item, activationRoll.COMMENTS);
+
+        // Do we have valid ranges defined and are hit locations turned on? If not, then sectional defense don't make sense to consider.
+        if (sectionalDefenseRanges && game.settings.get(HEROSYS.module, "hit locations")) {
+            const sectionalDefenseApply = await doSectionalDefensesApply(
+                sectionalDefenseRanges,
+                options.hitLocationNum,
+            );
+
             // PH: FIXME: The chat message should not be burried down in here.
-            // ChatMessage
+            // Success or failure message
             const chatData = {
                 style: CONST.CHAT_MESSAGE_STYLES.OOC,
                 author: game.user._id,
-                content: `The sectional defense from <b>${item.name}</b> ${sectionalDefense ? "successfully applied" : "failed to apply"}`,
+                content: `The sectional defense from <b>${item.name}</b> ${sectionalDefenseApply ? "successfully applied" : "failed to apply"}`,
                 speaker: speaker,
                 whisper: whisperUserTargetsForActor(actor),
             };
             await ChatMessage.create(chatData);
 
-            return sectionalDefense;
+            return sectionalDefenseApply;
         }
     }
 
