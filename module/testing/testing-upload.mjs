@@ -1227,7 +1227,6 @@ export function registerUploadTests(quench) {
                     });
                 });
 
-                // WillForce362.hdc
                 describe("TELEKINESIS", async function () {
                     const contents = `
                         <POWER XMLID="TELEKINESIS" ID="1589145928828" BASECOST="0.0" LEVELS="62" ALIAS="Telekinesis" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Psychokinesis" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -1268,6 +1267,9 @@ export function registerUploadTests(quench) {
 
                         actor.items.set(item.system.XMLID, item);
                     });
+
+                    // FIXME: REQUIRESASKILLROLL's BASECOST is broken in HDC. It shows in UI correctly, but MODIFIER is all over the place. This
+                    // It just happened to work previously as we were clamping at -0.25 for the limitation. 14-, 11-, etc all show the problem.
 
                     it("description", function () {
                         assert.equal(
