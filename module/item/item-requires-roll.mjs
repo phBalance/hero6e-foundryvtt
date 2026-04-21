@@ -228,28 +228,39 @@ function getRequiredCharacteristicKey(rar, item) {
     return matchedKeyInOption ?? "";
 }
 
-function validateSectionalComments(item, potentialSectionalComment) {
+export const VALIDATE_SECTION_DEFENSE_ERROR_REASON = Object.freeze({
+    NO_COMMENT: "no comment",
+    NOT_DECLARATION: "not sectional defense declaration",
+    INVALID_RANGE: "sectional defense declaration range invalid",
+});
+/**
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {string} potentialSectionalComment
+ * @returns {string | null} - returns the location range portion of the string if it exists or null if the potentialSectionalComment is not a valid sectional defense declaration
+ */
+export function validateSectionalComments(item, potentialSectionalComment) {
     // Are there comments that could be sectional instructions?
     if (!potentialSectionalComment) {
-        return null;
+        return { valid: false, reason: VALIDATE_SECTION_DEFENSE_ERROR_REASON.NO_COMMENT };
     }
 
     // Are there sectional instructions that we understand?
     const sectionalRangeComment = potentialSectionalComment.trim().match(/^locations? (.*)$/i);
     if (!sectionalRangeComment) {
-        return null;
+        return { valid: false, reason: VALIDATE_SECTION_DEFENSE_ERROR_REASON.NOT_DECLARATION };
     }
 
     // Are the locations provided reasonable (i.e. is it composed of digits, commas, dashes, and whitespace)?
-    const locationString = sectionalRangeComment[1].replace("and", "");
-    if (locationString.search(/[^0-9,\-\s]/) !== -1) {
+    const sectionalLocationString = sectionalRangeComment[1].replace("and", "");
+    if (sectionalLocationString.search(/[^0-9,\-\s]/) !== -1) {
         console.warn(
-            `${item.detailedName()} sectional defense comment is invalid '${locationString}' is not composed of digits, commas, and dashes.`,
+            `${item.detailedName()} sectional defense comment is invalid '${sectionalLocationString}' is not composed of digits, commas, and dashes.`,
         );
-        return null;
+        return { valid: false, reason: VALIDATE_SECTION_DEFENSE_ERROR_REASON.INVALID_RANGE };
     }
 
-    return locationString;
+    return { valid: true, sectionalLocationString };
 }
 
 /**
@@ -355,12 +366,15 @@ async function isActivatedForThisUseInternal(item, rollClass, options = {}) {
     const activationRoll =
         item.modifiers.find((o) => o.XMLID === "ACTIVATIONROLL") ?? item.findModsByXmlid("EVERYPHASE")?.parent;
     if (options.hitLocationNum && activationRoll) {
-        const sectionalDefenseRanges = validateSectionalComments(item, activationRoll.COMMENTS);
+        const { valid: validSectionalComment, sectionalLocationString } = validateSectionalComments(
+            item,
+            activationRoll.COMMENTS,
+        );
 
         // Do we have valid ranges defined and are hit locations turned on? If not, then sectional defense don't make sense to consider.
-        if (sectionalDefenseRanges && game.settings.get(HEROSYS.module, "hit locations")) {
+        if (validSectionalComment && game.settings.get(HEROSYS.module, "hit locations")) {
             const sectionalDefenseApply = await doSectionalDefensesApply(
-                sectionalDefenseRanges,
+                sectionalLocationString,
                 options.hitLocationNum,
             );
 
