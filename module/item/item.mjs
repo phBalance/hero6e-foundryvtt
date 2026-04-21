@@ -815,8 +815,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 });
             } else if (this.type === "skill" && this.system.EVERYMAN) {
                 _heroValidations.push({
-                    message: `Automatons do get Everyman Skills, must by those skills`,
-                    severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
+                    message: `Automatons do not get Everyman Skills. They must buy those skills`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                 });
             }
         }
