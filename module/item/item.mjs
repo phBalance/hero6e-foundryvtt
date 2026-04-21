@@ -742,7 +742,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 }
             }
             for (const modifier of this.modifiers.filter((m) => m.baseInfo?.heroValidation)) {
-                const v2 = modifier.baseInfo.heroValidation(modifier);
+                const v2 = modifier.baseInfo.heroValidation(modifier, this);
                 _heroValidations.push(...v2.map((m) => ({ ...m, itemId: this.id })));
             }
         } else {
