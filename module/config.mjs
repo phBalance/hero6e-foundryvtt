@@ -17,6 +17,7 @@ import {
     maneuverDoesKillingDamage,
 } from "./utility/damage.mjs";
 import { HeroSystem6eItem } from "./item/item.mjs";
+import { VALIDATE_SECTION_DEFENSE_ERROR_REASON, validateSectionalComments } from "./item/item-requires-roll.mjs";
 import {
     maneuverHasBindTrait,
     maneuverHasBlockTrait,
@@ -16441,17 +16442,43 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {},
     );
 
-    addPower(
-        {
-            key: "ACTIVATIONROLL",
-            behaviors: ["modifier"],
-            type: ["modifier"],
-            costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="ACTIVATIONROLL" ID="1707283846531" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    addPower(undefined, {
+        key: "ACTIVATIONROLL",
+        behaviors: ["modifier"],
+        type: ["modifier"],
+        costPerLevel: fixedValueFunction(0),
+        dcAffecting: fixedValueFunction(false),
+        heroValidation: function (modifier, item) {
+            const validations = [];
+
+            // Since sectional defenses are optional we can only check a subset of errors
+            const sectionalDefenseRanges = validateSectionalComments(item, modifier.COMMENTS);
+            if (
+                !sectionalDefenseRanges.valid &&
+                sectionalDefenseRanges.reason === VALIDATE_SECTION_DEFENSE_ERROR_REASON.INVALID_RANGE
+            ) {
+                validations.push({
+                    property: "COMMENTS",
+                    message: sectionalDefenseRanges.reason,
+                    example: "locations 4-6, 8, and 10-12",
+                    severity: HERO.VALIDATION_SEVERITY.ERROR,
+                });
+            }
+
+            // A sectional defense only makes sense for a defense
+            if (sectionalDefenseRanges.valid && !item.baseInfo.type.includes("defense")) {
+                validations.push({
+                    property: undefined,
+                    message: `${item.detailedName()} should not have a sectional defense declaration as it is not a defensive power`,
+                    example: "locations 4-6, 8, and 10-12",
+                    severity: HERO.VALIDATION_SEVERITY.ERROR,
+                });
+            }
+
+            return validations;
         },
-        {},
-    );
+        xml: `<MODIFIER XMLID="ACTIVATIONROLL" ID="1707283846531" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+    });
 
     addPower(
         {
