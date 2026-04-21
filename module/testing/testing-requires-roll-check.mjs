@@ -1410,6 +1410,16 @@ export function registerRequiresRollCheckTests(quench) {
                         });
                     });
 
+                    describe("Activation rolls with sectional defenses have hero validations", function () {
+                        // TODO: the character has a valid sectional defense declaration (success)
+                        it("should recognize a valid section defense declaration", function () {
+                            expect(sectionalArmorShortVest.heroValidation).to.have.deep.members([]);
+                        });
+
+                        // TODO: the character has an invalid sectional defense declaration (error)
+                        // TODO: the sectional defense declaration has an invalid matching limitation value (warn)
+                    });
+
                     describe.skip("Activation Roll - Jammed and Burnout", function () {
                         it("Handles burnout on failed activation roll", function () {
                             // Expected: Power is lost or disabled per Burnout rules
@@ -1533,76 +1543,103 @@ export function registerRequiresRollCheckTests(quench) {
                             </MODIFIER>
                             </POWER>
                             <POWER XMLID="AID" ID="1776305448133" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires Breakfall with -1 per 10 AP" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776305487551" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Breakfall Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="0" ROLLALIAS="Breakfall">
                                 <NOTES />
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776305487551" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Breakfall Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="0" ROLLALIAS="Breakfall">
+                                    <NOTES />
+                                </MODIFIER>
                             </POWER>
                             <POWER XMLID="AID" ID="1776305450850" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires Breakfall with -1 per 5 AP" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776305511371" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Breakfall Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="0" ROLLALIAS="Breakfall">
                                 <NOTES />
-                                <ADDER XMLID="MINUS1PER5" ID="1776305531280" BASECOST="-0.5" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 5 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776305511371" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Breakfall Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="0" ROLLALIAS="Breakfall">
+                                    <NOTES />
+                                    <ADDER XMLID="MINUS1PER5" ID="1776305531280" BASECOST="-0.5" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 5 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </POWER>
                             <POWER XMLID="AID" ID="1776305670855" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires Breakfall with -1 per 5 AP with skill vs skill contest" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776305673413" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Breakfall Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="0" ROLLALIAS="Breakfall">
                                 <NOTES />
-                                <ADDER XMLID="MINUS1PER5" ID="1776305689600" BASECOST="-0.5" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 5 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                                <ADDER XMLID="SKILLVSSKILL" ID="1776305693377" BASECOST="-0.25" LEVELS="0" ALIAS="RSR Skill is subject to Skill vs. Skill contests" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776305673413" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Breakfall Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="0" ROLLALIAS="Breakfall">
+                                    <NOTES />
+                                    <ADDER XMLID="MINUS1PER5" ID="1776305689600" BASECOST="-0.5" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 5 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="SKILLVSSKILL" ID="1776305693377" BASECOST="-0.25" LEVELS="0" ALIAS="RSR Skill is subject to Skill vs. Skill contests" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </POWER>
                             <POWER XMLID="AID" ID="1776305556832" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires Breakfall or Acrobatics with -1 per 10 AP" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776305655605" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Breakfall or Acrobatics Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="0" ROLLALIAS="Breakfall or Acrobatics">
                                 <NOTES />
-                                <ADDER XMLID="VARIABLERSR" ID="1776305655592" BASECOST="0.25" LEVELS="0" ALIAS="Variable RSR" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776305655605" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Breakfall or Acrobatics Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="0" ROLLALIAS="Breakfall or Acrobatics">
+                                    <NOTES />
+                                    <ADDER XMLID="VARIABLERSR" ID="1776305655592" BASECOST="0.25" LEVELS="0" ALIAS="Variable RSR" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </POWER>
                             <POWER XMLID="AID" ID="1776633750643" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires Breakfall and Acrobatics with -1 per 20 AP" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776633754026" BASECOST="-0.75" LEVELS="0" ALIAS="Requires A Breakfall Roll And An Acrobatics Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOROLLS" OPTIONID="TWOROLLS" OPTION_ALIAS="Two RSRs on same Power" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="0" TYPE2="0" ROLLALIAS="Breakfall" ROLLALIAS2="Acrobatics">
                                 <NOTES />
-                                <ADDER XMLID="MINUS1PER20" ID="1776633809340" BASECOST="0.25" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 20 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776633754026" BASECOST="-0.75" LEVELS="0" ALIAS="Requires A Breakfall Roll And An Acrobatics Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOROLLS" OPTIONID="TWOROLLS" OPTION_ALIAS="Two RSRs on same Power" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="0" TYPE2="0" ROLLALIAS="Breakfall" ROLLALIAS2="Acrobatics">
+                                    <NOTES />
+                                    <ADDER XMLID="MINUS1PER20" ID="1776633809340" BASECOST="0.25" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 20 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </POWER>
                             <POWER XMLID="AID" ID="1776305729982" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires 1 Luck" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776633665888" BASECOST="-1.0" LEVELS="0" ALIAS="Requires A Luck Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONELUCK" OPTIONID="ONELUCK" OPTION_ALIAS="One level of Luck required" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="NOAPPENALTY" ID="1776633679812" BASECOST="0.5" LEVELS="0" ALIAS="No Active Point penalty to Skill Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776633665888" BASECOST="-1.0" LEVELS="0" ALIAS="Requires A Luck Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ONELUCK" OPTIONID="ONELUCK" OPTION_ALIAS="One level of Luck required" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="NOAPPENALTY" ID="1776633679812" BASECOST="0.5" LEVELS="0" ALIAS="No Active Point penalty to Skill Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </POWER>
                             <POWER XMLID="AID" ID="1776634671679" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires 2 Luck" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776634675562" BASECOST="-1.5" LEVELS="0" ALIAS="Requires Two Levels of Luck" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOLUCK" OPTIONID="TWOLUCK" OPTION_ALIAS="Two levels of Luck required" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="NOAPPENALTY" ID="1776634675549" BASECOST="0.5" LEVELS="0" ALIAS="No Active Point penalty to Skill Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776634675562" BASECOST="-1.5" LEVELS="0" ALIAS="Requires Two Levels of Luck" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOLUCK" OPTIONID="TWOLUCK" OPTION_ALIAS="Two levels of Luck required" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="NOAPPENALTY" ID="1776634675549" BASECOST="0.5" LEVELS="0" ALIAS="No Active Point penalty to Skill Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </POWER>
                             <POWER XMLID="AID" ID="1776634667853" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires 3 Luck" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776634686773" BASECOST="-2.0" LEVELS="0" ALIAS="Requires Three Levels of Luck" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="THREELUCK" OPTIONID="THREELUCK" OPTION_ALIAS="Three levels of Luck required" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
                                 <NOTES />
-                                <ADDER XMLID="NOAPPENALTY" ID="1776634686760" BASECOST="0.5" LEVELS="0" ALIAS="No Active Point penalty to Skill Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776634686773" BASECOST="-2.0" LEVELS="0" ALIAS="Requires Three Levels of Luck" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="THREELUCK" OPTIONID="THREELUCK" OPTION_ALIAS="Three levels of Luck required" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="NOAPPENALTY" ID="1776634686760" BASECOST="0.5" LEVELS="0" ALIAS="No Active Point penalty to Skill Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="AID" ID="1776733414418" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires KS: sandwiches and KS: potato chips with no penalty based on AP" INPUT="STR" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776734381825" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A KS: sandwiches Roll And A KS: potato chips Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOROLLS" OPTIONID="TWOROLLS" OPTION_ALIAS="Two RSRs on same Power" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" TYPE2="1" ROLLALIAS="KS: sandwiches" ROLLALIAS2="KS: potato chips">
+                                    <NOTES />
+                                    <ADDER XMLID="NOAPPENALTY" ID="1776734383328" BASECOST="0.5" LEVELS="0" ALIAS="No Active Point penalty to Skill Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="AID" ID="1776734031307" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires KS: sandwiches and KS: potato chips with -1 per 5 AP" INPUT="STR" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776734034466" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A KS: sandwiches Roll And A KS: potato chips Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOROLLS" OPTIONID="TWOROLLS" OPTION_ALIAS="Two RSRs on same Power" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" TYPE2="1" ROLLALIAS="KS: sandwiches" ROLLALIAS2="KS: potato chips">
+                                    <NOTES />
+                                    <ADDER XMLID="MINUS1PER5" ID="1776734054481" BASECOST="-0.5" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 5 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="AID" ID="1776735639686" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires Perception with -1 per 5 AP" INPUT="STR" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1776735643094" BASECOST="-1.0" LEVELS="0" ALIAS="Requires A PER Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="3" ROLLALIAS="PER">
+                                    <NOTES />
+                                    <ADDER XMLID="MINUS1PER5" ID="1776735679382" BASECOST="-0.5" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 5 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </POWER>
                         </POWERS>
                         <DISADVANTAGES />
@@ -1621,6 +1658,9 @@ export function registerRequiresRollCheckTests(quench) {
                     let aidRequires1Luck;
                     let aidRequires2Luck;
                     let aidRequires3Luck;
+                    let aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty;
+                    let aidRequiresKsSandwichesAndKsPotatoChipsWith1Per5ApPenalty;
+                    let aidRequiresPerceptionWith1Per5ApPenalty;
 
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true });
@@ -1649,6 +1689,17 @@ export function registerRequiresRollCheckTests(quench) {
                         aidRequires1Luck = actor.items.find((item) => item.name === "Requires 1 Luck");
                         aidRequires2Luck = actor.items.find((item) => item.name === "Requires 2 Luck");
                         aidRequires3Luck = actor.items.find((item) => item.name === "Requires 3 Luck");
+                        aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty = actor.items.find(
+                            (item) =>
+                                item.name ===
+                                "Requires KS: sandwiches and KS: potato chips with no penalty based on AP",
+                        );
+                        aidRequiresKsSandwichesAndKsPotatoChipsWith1Per5ApPenalty = actor.items.find(
+                            (item) => item.name === "Requires KS: sandwiches and KS: potato chips with -1 per 5 AP",
+                        );
+                        aidRequiresPerceptionWith1Per5ApPenalty = actor.items.find(
+                            (item) => item.name === "Requires Perception with -1 per 5 AP",
+                        );
                     });
 
                     after(async function () {
@@ -1656,9 +1707,6 @@ export function registerRequiresRollCheckTests(quench) {
                     });
 
                     describe("RSR costs in all the various flavours", function () {
-                        // TODO: attack roll vs background skill
-                        // TODO: perception, characteristics etc
-
                         it("should have the correct cost for a 3/2 skill with no penalty based on AP", function () {
                             expect(aidRequiresBreakfallWithNoApPenalty.realCost).to.equal(10);
                         });
@@ -1697,6 +1745,18 @@ export function registerRequiresRollCheckTests(quench) {
 
                         it("should have the correct cost for a 3 luck roll with no penalty based on AP", function () {
                             expect(aidRequires3Luck.realCost).to.equal(4);
+                        });
+
+                        it("should have the correct cost for 2 x background skills with no penalty based on AP", function () {
+                            expect(aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty.realCost).to.equal(10);
+                        });
+
+                        it("should have the correct cost for 2 x background skills with -1 per 5 AP", function () {
+                            expect(aidRequiresKsSandwichesAndKsPotatoChipsWith1Per5ApPenalty.realCost).to.equal(5);
+                        });
+
+                        it("should have the correct cost for perception with -1 per 5 AP", function () {
+                            expect(aidRequiresPerceptionWith1Per5ApPenalty.realCost).to.equal(4);
                         });
                     });
 
