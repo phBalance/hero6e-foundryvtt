@@ -736,14 +736,17 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         if (this.baseInfo) {
             if (this.baseInfo.heroValidation) {
-                const v = this.baseInfo.heroValidation(this);
-                if (v) {
-                    _heroValidations.push(...v.map((m) => ({ ...m, itemId: this.id })));
+                const validationArray = this.baseInfo.heroValidation(this);
+                if (Array.isArray(validationArray) && validationArray.length) {
+                    _heroValidations.push(...validationArray.map((m) => ({ ...m, itemId: this.id })));
                 }
             }
+
             for (const modifier of this.modifiers.filter((m) => m.baseInfo?.heroValidation)) {
-                const v2 = modifier.baseInfo.heroValidation(modifier, this);
-                _heroValidations.push(...v2.map((m) => ({ ...m, itemId: this.id })));
+                const validationArray = modifier.baseInfo.heroValidation(modifier, this);
+                if (Array.isArray(validationArray) && validationArray.length) {
+                    _heroValidations.push(...validationArray.map((m) => ({ ...m, itemId: this.id })));
+                }
             }
         } else {
             _heroValidations.push({

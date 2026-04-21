@@ -237,7 +237,7 @@ export const VALIDATE_SECTION_DEFENSE_ERROR_REASON = Object.freeze({
  *
  * @param {HeroSystem6eItem} item
  * @param {string} potentialSectionalComment
- * @returns {string | null} - returns the location range portion of the string if it exists or null if the potentialSectionalComment is not a valid sectional defense declaration
+ * @returns {{ valid: boolean, reason?: string, sectionalLocationString?: string }} - returns validation result with location range on success or error reason on failure
  */
 export function validateSectionalComments(item, potentialSectionalComment) {
     // Are there comments that could be sectional instructions?
@@ -252,7 +252,7 @@ export function validateSectionalComments(item, potentialSectionalComment) {
     }
 
     // Are the locations provided reasonable (i.e. is it composed of digits, commas, dashes, and whitespace)?
-    const sectionalLocationString = sectionalRangeComment[1].replace("and", "");
+    const sectionalLocationString = sectionalRangeComment[1].replaceAll("and", "");
     if (sectionalLocationString.search(/[^0-9,\-\s]/) !== -1) {
         console.warn(
             `${item.detailedName()} sectional defense comment is invalid '${sectionalLocationString}' is not composed of digits, commas, and dashes.`,

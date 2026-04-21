@@ -16466,7 +16466,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             }
 
             // A sectional defense only makes sense for a defense
-            if (sectionalDefenseRanges.valid && !item.baseInfo.type.includes("defense")) {
+            if (sectionalDefenseRanges.valid && !item.baseInfo?.type.includes("defense")) {
                 validations.push({
                     property: undefined,
                     message: `${item.detailedName()} should not have a sectional defense declaration as it is not a defensive power`,
