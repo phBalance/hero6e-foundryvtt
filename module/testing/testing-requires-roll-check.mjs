@@ -487,6 +487,36 @@ export function registerRequiresRollCheckTests(quench) {
                                 <NOTES />
                             </MODIFIER>
                             </POWER>
+                            <LIST XMLID="GENERIC_OBJECT" ID="1776821785016" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                            </LIST>
+                            <LIST XMLID="GENERIC_OBJECT" ID="1776821806893" BASECOST="0.0" LEVELS="0" ALIAS="Invalid Sectional Defense Declarations" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                            </LIST>
+                            <POWER XMLID="FORCEFIELD" ID="1776821287228" BASECOST="0.0" LEVELS="4" ALIAS="Force Field" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776821806893" NAME="Sectional Defense with Invalid Declaration Words" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1" MDLEVELS="1" POWDLEVELS="1">
+                                <NOTES />
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1776821901336" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locationss 8-12, invalid, 18" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="FORCEFIELD" ID="1776822881085" BASECOST="0.0" LEVELS="4" ALIAS="Force Field" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776821806893" NAME="Sectional Defense with Invalid Declaration Words 2" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1" MDLEVELS="1" POWDLEVELS="1">
+                                <NOTES />
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1776822884488" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locations 8-12, invalid, 18" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="FORCEFIELD" ID="1776821418500" BASECOST="0.0" LEVELS="4" ALIAS="Force Field" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776821806893" NAME="Sectional Defense with Invalid Declaration Invalid Hit Locations" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1" MDLEVELS="1" POWDLEVELS="1">
+                                <NOTES />
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1776821972799" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locations 19-34" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="FLASH" ID="1776821547972" BASECOST="0.0" LEVELS="1" ALIAS="Flash" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776821806893" NAME="Sectional Declaration For Non Defense" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1776822093194" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locations 8-12" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </POWER>
                         </POWERS>                        
                         <DISADVANTAGES />
                         <EQUIPMENT />
@@ -528,6 +558,11 @@ export function registerRequiresRollCheckTests(quench) {
                     let sectionalArmorFullCoverageHelmetVestHighBoots;
                     let sectionalArmorFullCoverageHelmetVestAndHighBoots;
                     let sectionalArmorWeirdCoverage;
+
+                    let sectionalArmorInvalidDeclarationWords;
+                    let sectionalArmorInvalidDeclarationWordsTwo;
+                    let sectionalArmorInvalidDeclarationInvalidHitLocations;
+                    let sectionalDeclarationInFlash;
 
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true });
@@ -631,6 +666,19 @@ export function registerRequiresRollCheckTests(quench) {
                         );
                         sectionalArmorWeirdCoverage = actor.items.find(
                             (item) => item.name === "Weird Coverage (locations   3,5 ,9- 10,12, 14 -15, and 17 - 18)",
+                        );
+
+                        sectionalArmorInvalidDeclarationWords = actor.items.find(
+                            (item) => item.name === "Sectional Defense with Invalid Declaration Words",
+                        );
+                        sectionalArmorInvalidDeclarationWordsTwo = actor.items.find(
+                            (item) => item.name === "Sectional Defense with Invalid Declaration Words 2",
+                        );
+                        sectionalArmorInvalidDeclarationInvalidHitLocations = actor.items.find(
+                            (item) => item.name === "Sectional Defense with Invalid Declaration Invalid Hit Locations",
+                        );
+                        sectionalDeclarationInFlash = actor.items.find(
+                            (item) => item.name === "Sectional Declaration For Non Defense",
                         );
                     });
 
@@ -1411,12 +1459,36 @@ export function registerRequiresRollCheckTests(quench) {
                     });
 
                     describe("Activation rolls with sectional defenses have hero validations", function () {
-                        // TODO: the character has a valid sectional defense declaration (success)
                         it("should recognize a valid section defense declaration", function () {
                             expect(sectionalArmorShortVest.heroValidation).to.have.deep.members([]);
                         });
 
-                        // TODO: the character has an invalid sectional defense declaration (error)
+                        // We can't distinguish between an invalid sectional defense location and a regular comment
+                        it("should recognize an invalid section defense declaration (words - locationss)", function () {
+                            expect(sectionalArmorInvalidDeclarationWords.heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should recognize an invalid section defense declaration (words - invalid)", function () {
+                            const heroValidation = sectionalArmorInvalidDeclarationWordsTwo.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should recognize an invalid section defense declaration (invalid hit locations)", function () {
+                            const heroValidation = sectionalArmorInvalidDeclarationInvalidHitLocations.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should recognize an invalid section defense declaration (for non defense power)", function () {
+                            const heroValidation = sectionalDeclarationInFlash.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
                         // TODO: the sectional defense declaration has an invalid matching limitation value (warn)
                     });
 

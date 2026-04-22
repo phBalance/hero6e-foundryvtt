@@ -16470,7 +16470,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 validations.push({
                     property: undefined,
                     message: `${item.detailedName()} should not have a sectional defense declaration as it is not a defensive power`,
-                    example: "locations 4-6, 8, and 10-12",
+                    example: "Armor could be a sectional defense with locations 4-6, 8, and 10-12",
                     severity: HERO.VALIDATION_SEVERITY.ERROR,
                 });
             }
