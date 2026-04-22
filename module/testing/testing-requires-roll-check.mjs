@@ -1081,14 +1081,14 @@ export function registerRequiresRollCheckTests(quench) {
                                     ).to.equal(true);
                                 });
 
-                                it("should not activate with a hit location of 19", async function () {
+                                it("should activate with a hit location of 19", async function () {
                                     expect(
                                         await isActivatedForThisUse_TestingOnly(
                                             sectionalArmorFullCoverageHelmetVestHighBoots,
                                             HeroRoll,
                                             { hitLocationNum: 19 },
                                         ),
-                                    ).to.equal(false);
+                                    ).to.equal(true);
                                 });
                             });
                         });
@@ -1199,14 +1199,14 @@ export function registerRequiresRollCheckTests(quench) {
                                     ).to.equal(true);
                                 });
 
-                                it("should not activate with a hit location of 19", async function () {
+                                it("should activate with a hit location of 19", async function () {
                                     expect(
                                         await isActivatedForThisUse_TestingOnly(
                                             sectionalArmorFullCoverageHelmetVestAndHighBoots,
                                             HeroRoll,
                                             { hitLocationNum: 19 },
                                         ),
-                                    ).to.equal(false);
+                                    ).to.equal(true);
                                 });
                             });
                         });
@@ -1351,12 +1351,12 @@ export function registerRequiresRollCheckTests(quench) {
                                     ).to.equal(true);
                                 });
 
-                                it("should not activate with a hit location of 19", async function () {
+                                it("should activate with a hit location of 19", async function () {
                                     expect(
                                         await isActivatedForThisUse_TestingOnly(sectionalArmorWeirdCoverage, HeroRoll, {
                                             hitLocationNum: 19,
                                         }),
-                                    ).to.equal(false);
+                                    ).to.equal(true);
                                 });
                             });
                         });

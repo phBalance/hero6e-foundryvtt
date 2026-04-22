@@ -233,11 +233,13 @@ export const VALIDATE_SECTION_DEFENSE_ERROR_REASON = Object.freeze({
     NOT_DECLARATION: "not sectional defense declaration",
     INVALID_RANGE: "sectional defense declaration range invalid",
 });
+
 /**
  *
  * @param {HeroSystem6eItem} item
  * @param {string} potentialSectionalComment
- * @returns {{ valid: boolean, reason?: string, sectionalLocationString?: string }} - returns validation result with location range on success or error reason on failure
+ *
+ * @returns {{ valid: boolean, reason?: string, sectionalDefenseLocationsSet?: Set }} - returns validation result with location Set on success or error reason on failure
  */
 export function validateSectionalComments(item, potentialSectionalComment) {
     // Are there comments that could be sectional instructions?
@@ -254,24 +256,12 @@ export function validateSectionalComments(item, potentialSectionalComment) {
     // Are the locations provided reasonable (i.e. is it composed of digits, commas, dashes, and whitespace)?
     const sectionalLocationString = sectionalRangeComment[1].replaceAll("and", "");
     if (sectionalLocationString.search(/[^0-9,\-\s]/) !== -1) {
-        console.warn(
-            `${item.detailedName()} sectional defense comment is invalid '${sectionalLocationString}' is not composed of digits, commas, and dashes.`,
-        );
         return { valid: false, reason: VALIDATE_SECTION_DEFENSE_ERROR_REASON.INVALID_RANGE };
     }
 
-    return { valid: true, sectionalLocationString };
-}
-
-/**
- *
- * @param {string} sectionalDefenseRanges - Something like "3-5, 7-8, 10, 12-13"
- * @param {number} hitLocationNum
- * @returns {boolean} - boolean value indicating activation
- */
-function doSectionalDefensesApply(sectionalDefenseRanges, hitLocationNum) {
-    // Split along the comma separated ranges
-    const splitSectionalRanges = sectionalDefenseRanges.split(",");
+    // Do the ranges appear to be within the 3-18 hit location range?
+    const sectionalDefenseLocationsSet = new Set();
+    const splitSectionalRanges = sectionalLocationString.split(",");
     for (const rangeChunk of splitSectionalRanges) {
         // rangeChunk can be a single value or a range separated by "-". If a single value, then startEndRange will be length 1.
         const startEndRange = rangeChunk.trim().split("-");
@@ -279,21 +269,46 @@ function doSectionalDefensesApply(sectionalDefenseRanges, hitLocationNum) {
         const second = startEndRange[1] ? parseInt(startEndRange[1]) : null;
 
         if (startEndRange.length === 1) {
-            if (first === hitLocationNum) {
-                return true;
+            // Is it a valid range declaration chunk
+            if (first >= 3 && first <= 18) {
+                sectionalDefenseLocationsSet.add(first);
+                continue;
             }
         } else if (startEndRange.length === 2) {
             // First index of range doesn't have to be start.
             const start = first < second ? first : second;
             const end = first < second ? second : first;
 
-            // Is it within the range's start and end? If so, this sectional defense applies
-            if (start <= hitLocationNum && end >= hitLocationNum) {
-                return true;
+            // Is it a valid range declaration chunk
+            if (start >= 3 && end <= 18) {
+                for (let i = start; i <= end; ++i) {
+                    sectionalDefenseLocationsSet.add(i);
+                }
+                continue;
             }
-        } else {
-            console.error(`Malformed sectional defense range chunk ${rangeChunk} ignored`);
         }
+
+        return { valid: false, reason: VALIDATE_SECTION_DEFENSE_ERROR_REASON.INVALID_RANGE };
+    }
+
+    return { valid: true, sectionalDefenseLocationsSet };
+}
+
+/**
+ *
+ * @param {Set} sectionalDefenseLocationsSet - A set of all hit locations which provide a defense
+ * @param {number} hitLocationNum
+ *
+ * @returns {boolean} - boolean value indicating the hitLocationNum is within the sectionalDefenseRanges
+ */
+function doSectionalDefensesApply(sectionalDefenseLocationsSet, hitLocationNum) {
+    // Low shots (special hit location) can generate a hit location of 19. This is supposed to be treated as
+    // a hit of foot. However, we don't have a dialog that allows this translation so it's possible we'll
+    // have a hit location of 19 carried through to here. Translate it to 18 (feet).
+    const locationNum = hitLocationNum === 19 ? 18 : hitLocationNum;
+
+    if (sectionalDefenseLocationsSet.has(locationNum)) {
+        return true;
     }
 
     return false;
@@ -362,11 +377,10 @@ async function isActivatedForThisUseInternal(item, rollClass, options = {}) {
     const speaker = ChatMessage.getSpeaker({ actor, token });
 
     // Sectional Defense overrides a standard activation roll.
-    // PH: FIXME: should not pass in damageRoller.
     const activationRoll =
         item.modifiers.find((o) => o.XMLID === "ACTIVATIONROLL") ?? item.findModsByXmlid("EVERYPHASE")?.parent;
     if (options.hitLocationNum && activationRoll) {
-        const { valid: validSectionalComment, sectionalLocationString } = validateSectionalComments(
+        const { valid: validSectionalComment, sectionalDefenseLocationsSet } = validateSectionalComments(
             item,
             activationRoll.COMMENTS,
         );
@@ -374,7 +388,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options = {}) {
         // Do we have valid ranges defined and are hit locations turned on? If not, then sectional defense don't make sense to consider.
         if (validSectionalComment && game.settings.get(HEROSYS.module, "hit locations")) {
             const sectionalDefenseApply = await doSectionalDefensesApply(
-                sectionalLocationString,
+                sectionalDefenseLocationsSet,
                 options.hitLocationNum,
             );
 
