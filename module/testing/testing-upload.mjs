@@ -4045,7 +4045,7 @@ export function registerUploadTests(quench) {
                             },
                             {},
                         );
-                        actor.system.is5e = false;
+                        actor.system.is5e = true;
 
                         item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(contents, actor), {
                             parent: actor,

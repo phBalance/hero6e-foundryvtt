@@ -736,14 +736,17 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         if (this.baseInfo) {
             if (this.baseInfo.heroValidation) {
-                const v = this.baseInfo.heroValidation(this);
-                if (v) {
-                    _heroValidations.push(...v.map((m) => ({ ...m, itemId: this.id })));
+                const validationArray = this.baseInfo.heroValidation(this);
+                if (Array.isArray(validationArray) && validationArray.length) {
+                    _heroValidations.push(...validationArray.map((m) => ({ ...m, itemId: this.id })));
                 }
             }
+
             for (const modifier of this.modifiers.filter((m) => m.baseInfo?.heroValidation)) {
-                const v2 = modifier.baseInfo.heroValidation(modifier);
-                _heroValidations.push(...v2.map((m) => ({ ...m, itemId: this.id })));
+                const validationArray = modifier.baseInfo.heroValidation(modifier, this);
+                if (Array.isArray(validationArray) && validationArray.length) {
+                    _heroValidations.push(...validationArray.map((m) => ({ ...m, itemId: this.id })));
+                }
             }
         } else {
             _heroValidations.push({
@@ -815,8 +818,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 });
             } else if (this.type === "skill" && this.system.EVERYMAN) {
                 _heroValidations.push({
-                    message: `Automatons do get Everyman Skills, must by those skills`,
-                    severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
+                    message: `Automatons do not get Everyman Skills. They must buy those skills`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                 });
             }
         }
