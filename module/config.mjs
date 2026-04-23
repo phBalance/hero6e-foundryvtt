@@ -329,6 +329,46 @@ HERO.hitLocations = Object.freeze({
     },
 });
 
+// Probability in % of that number on 3d6
+HERO.hitLocationsProbability = Object.freeze({
+    3: 0.46,
+    4: 1.38,
+    5: 2.77,
+    6: 4.62,
+    7: 6.94,
+    8: 9.72,
+    9: 11.57,
+    10: 12.5,
+    11: 12.5,
+    12: 11.57,
+    13: 9.72,
+    14: 6.94,
+    15: 4.62,
+    16: 2.77,
+    17: 1.38,
+    18: 0.46,
+});
+
+// Probability in % of that number or less on 3d6
+HERO.diceCumulativeProbability = Object.freeze({
+    3: 0.46,
+    4: 1.85,
+    5: 4.62,
+    6: 9.25,
+    7: 16.2,
+    8: 25.92,
+    9: 37.5,
+    10: 50.0,
+    11: 62.5,
+    12: 74.07,
+    13: 83.79,
+    14: 90.74,
+    15: 95.37,
+    16: 98.14,
+    17: 99.53,
+    18: 100,
+});
+
 HERO.VALIDATION_SEVERITY = {
     INFO: 1,
     WARNING: 2,
@@ -16453,26 +16493,55 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
             // Since sectional defenses are optional we can only check a subset of errors
             const sectionalDefenseRanges = validateSectionalComments(item, modifier.COMMENTS);
-            if (
-                !sectionalDefenseRanges.valid &&
-                sectionalDefenseRanges.reason === VALIDATE_SECTION_DEFENSE_ERROR_REASON.INVALID_RANGE
-            ) {
-                validations.push({
-                    property: "COMMENTS",
-                    message: sectionalDefenseRanges.reason,
-                    example: "locations 4-6, 8, and 10-12",
-                    severity: HERO.VALIDATION_SEVERITY.ERROR,
-                });
-            }
+            if (!sectionalDefenseRanges.valid) {
+                if (sectionalDefenseRanges.reason === VALIDATE_SECTION_DEFENSE_ERROR_REASON.INVALID_RANGE) {
+                    validations.push({
+                        property: "COMMENTS",
+                        message: sectionalDefenseRanges.reason,
+                        example: "locations 4-6, 8, and 10-12",
+                        severity: HERO.VALIDATION_SEVERITY.ERROR,
+                    });
+                }
+            } else {
+                // A sectional defense only makes sense for a defense
+                if (!item.baseInfo?.type.includes("defense")) {
+                    validations.push({
+                        property: undefined,
+                        message: `${item.detailedName()} should not have a sectional defense declaration as it is not a defensive power`,
+                        example: "Armor could be a sectional defense with locations 4-6, 8, and 10-12",
+                        severity: HERO.VALIDATION_SEVERITY.ERROR,
+                    });
+                }
 
-            // A sectional defense only makes sense for a defense
-            if (sectionalDefenseRanges.valid && !item.baseInfo?.type.includes("defense")) {
-                validations.push({
-                    property: undefined,
-                    message: `${item.detailedName()} should not have a sectional defense declaration as it is not a defensive power`,
-                    example: "Armor could be a sectional defense with locations 4-6, 8, and 10-12",
-                    severity: HERO.VALIDATION_SEVERITY.ERROR,
-                });
+                // Check that the sectional defense description roughly matches the expected probability based on the limitation taken
+                const activationRollLimitation = modifier.OPTIONID;
+                const activationRollCumulativeProbability = HERO.diceCumulativeProbability[activationRollLimitation];
+                let hitLocationCumulativeProbability = 0;
+                for (const hitLocation of sectionalDefenseRanges.sectionalDefenseLocationsSet.values()) {
+                    hitLocationCumulativeProbability += HERO.hitLocationsProbability[hitLocation];
+                }
+
+                // If cumulative probability of hit locations is larger than the probability at the activation roll (with a 1% fuzz)
+                // then this is "cheating" and the limitation should probably be bought down.
+                if (hitLocationCumulativeProbability > activationRollCumulativeProbability + 1) {
+                    // What is a more reasonable activation roll number?
+                    let shouldBeLessThanValue = 18;
+                    for (let cumulativeValue = shouldBeLessThanValue - 1; cumulativeValue >= 3; --cumulativeValue) {
+                        if (HERO.diceCumulativeProbability[cumulativeValue] < hitLocationCumulativeProbability) {
+                            break;
+                        }
+
+                        shouldBeLessThanValue = cumulativeValue;
+                    }
+
+                    validations.push({
+                        property: undefined,
+                        message: `${item.detailedName()}'s sectional defense declaration cumulative probability is ${hitLocationCumulativeProbability}% vs the matching limitation value's cumulative probability value of ${activationRollCumulativeProbability}. This limitation should most likely be bought to ${shouldBeLessThanValue}-`,
+                        example:
+                            "A 14- activation roll should reflect a section defense declaration like: 3-5, 7-14, 16-18",
+                        severity: HERO.VALIDATION_SEVERITY.WARNING,
+                    });
+                }
             }
 
             return validations;

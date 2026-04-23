@@ -511,9 +511,15 @@ export function registerRequiresRollCheckTests(quench) {
                                     <NOTES />
                                 </MODIFIER>
                             </POWER>
-                            <POWER XMLID="FLASH" ID="1776821547972" BASECOST="0.0" LEVELS="1" ALIAS="Flash" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776821806893" NAME="Sectional Declaration For Non Defense" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <POWER XMLID="FLASH" ID="1776821547972" BASECOST="0.0" LEVELS="1" ALIAS="Flash" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776821806893" NAME="Sectional Declaration For Non Defense" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1776822093194" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locations 8-12" PRIVATE="No" FORCEALLOW="No">
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1776907624818" BASECOST="-1.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locations 8-12" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="FORCEFIELD" ID="1776907290823" BASECOST="0.0" LEVELS="4" ALIAS="Force Field" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776821806893" NAME="Sectional Defense with Incorrect Probability" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1" MDLEVELS="1" POWDLEVELS="1">
+                            <NOTES />
+                                <MODIFIER XMLID="ACTIVATIONROLL" ID="1776907293178" BASECOST="-2.0" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locations 8-12, 14-16, 18" PRIVATE="No" FORCEALLOW="No">
                                     <NOTES />
                                 </MODIFIER>
                             </POWER>
@@ -563,6 +569,7 @@ export function registerRequiresRollCheckTests(quench) {
                     let sectionalArmorInvalidDeclarationWordsTwo;
                     let sectionalArmorInvalidDeclarationInvalidHitLocations;
                     let sectionalDeclarationInFlash;
+                    let sectionalArmorInvalidDeclarationInvalidProbability;
 
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true });
@@ -679,6 +686,9 @@ export function registerRequiresRollCheckTests(quench) {
                         );
                         sectionalDeclarationInFlash = actor.items.find(
                             (item) => item.name === "Sectional Declaration For Non Defense",
+                        );
+                        sectionalArmorInvalidDeclarationInvalidProbability = actor.items.find(
+                            (item) => item.name === "Sectional Defense with Incorrect Probability",
                         );
                     });
 
@@ -1489,7 +1499,12 @@ export function registerRequiresRollCheckTests(quench) {
                             expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
-                        // TODO: the sectional defense declaration has an invalid matching limitation value (warn)
+                        it("should recognize an valid section defense declaration with incorrect probability calculation", function () {
+                            const heroValidation = sectionalArmorInvalidDeclarationInvalidProbability.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.WARNING);
+                        });
                     });
 
                     describe.skip("Activation Roll - Jammed and Burnout", function () {
