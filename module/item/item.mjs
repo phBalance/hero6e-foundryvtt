@@ -2052,7 +2052,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
     // FIXME: This should be trimmed down
     isActivatable() {
-        //TODO: If ALWAYSON then not isActivable, or at least grey out box to do so.  Perpahs make it so you can't turnOff in code too.
+        //TODO: If ALWAYSON then not isActivable, or at least grey out box to do so.  Perhaps make it so you can't turnOff in code too.
 
         if (this.baseInfo?.behaviors?.includes("activatable")) {
             return true;
@@ -2062,7 +2062,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return false;
         }
 
-        const itemEffects = this.effects.find((ae) => ae.flags[game.system.id]?.type !== "adjustment");
+        const itemEffects = this.effects.find(
+            (ae) => ae.flags[game.system.id]?.type && ae.flags[game.system.id]?.type !== "adjustment",
+        );
         if (itemEffects && !["martialart", "maneuver"].includes(this.type)) {
             return true;
         }
