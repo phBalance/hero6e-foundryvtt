@@ -636,6 +636,11 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
                 for (const attribute of this.hdcHTMLCollection.firstChild.attributes) {
                     if (this.schema.fields[attribute.name] === undefined) {
                         const e = `${this.parent.type}/${this.XMLID}/${this.item?.system?.ALIAS} HeroSystem6eItemTypeDataModelGetters is missing ${attribute.name} property.`;
+                        // Equipment converted to a Power may have extra attributes in the XML that we aren't modeling, so just log for those.
+                        if (["PRICE", "WEIGHT"].includes(attribute.name) && this.item?.type === "power") {
+                            console.debug(e);
+                            return e;
+                        }
                         console.error(e);
                         return e;
                     }
