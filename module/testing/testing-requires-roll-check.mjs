@@ -840,7 +840,7 @@ export function registerRequiresRollCheckTests(quench) {
                         });
 
                         after(async function () {
-                            await getAndSetGameSetting("DoubleDamageLimit", defaultHitLocationsEnabled);
+                            await getAndSetGameSetting("hit locations", defaultHitLocationsEnabled);
                         });
 
                         describe("simple 1 range sectional activation roll (12-13) (equivalent of 8-)", function () {
@@ -1418,7 +1418,7 @@ export function registerRequiresRollCheckTests(quench) {
                         });
 
                         after(async function () {
-                            await getAndSetGameSetting("DoubleDamageLimit", defaultHitLocationsEnabled);
+                            await getAndSetGameSetting("hit locations", defaultHitLocationsEnabled);
                         });
 
                         describe("simple 1 range sectional activation roll (12-13) (equivalent of 8-)", function () {
