@@ -1848,10 +1848,59 @@ export function registerRequiresRollCheckTests(quench) {
                     });
 
                     describe.skip("RSRs have hero validations", function () {
-                        // TODO: the character has listed skill (success)
-                        // TODO: the character does not have listed skill (error)
-                        // TODO: the character does not have both listed skills for variable skill RSR (error)
-                        // TODO: the character does not have both listed skills for 2 skill RSR (error)
+                        it("should have no heroValidation concerns as the character do have listed inante skill (success)", function () {
+                            const heroValidation = aidRequiresPerceptionWith1Per5ApPenalty.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should have no heroValidation concerns as the character do have listed background skills (success)", function () {
+                            const heroValidation =
+                                aidRequiresKsSandwichesAndKsPotatoChipsWith1Per5ApPenalty.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should have a heroValidation error as the character does not have listed luck power (error)", function () {
+                            const heroValidation = aidRequires2Luck.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have a heroValidation error as the character does not have listed background skill (error)", function () {
+                            const heroValidation = xxx.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have a heroValidation error as the character does not have listed skill (error)", function () {
+                            const heroValidation = xxx.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have a heroValidation error as the character does not have one of the listed variable skills (error)", function () {
+                            const heroValidation = xxx.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have a heroValidation error as the character does not have one of the 2 listed skills (error)", function () {
+                            const heroValidation = xxx.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have a heroValidation error as the character does not have either of the 2 listed skills (error)", function () {
+                            const heroValidation = xxx.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
                         // TODO: the character does not have listed characteristic (vehicle for instance?) (error)
                         // TODO: the character does not have listed perception (vehicle for instance?) (error)
                         // TODO: the character does not have the listed movement type (error)
