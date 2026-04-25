@@ -2852,7 +2852,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 if (this.type === "disadvantage") {
                     description = `${system.ALIAS}: `;
                 } else {
-                    description = `${system.ALIAS}: ${system.LEVELS ? `+${system.LEVELS}/+${system.LEVELS}d6 ` : ""}`;
+                    description = `${system.ALIAS}: ${system.LEVELS ? `+${system.LEVELS}/+${system.LEVELS}d6` : ""}`;
                 }
 
                 break;
@@ -5216,10 +5216,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         const levels = parseInt(this.system.LEVELS) || 0;
         _basePoints += levels * costPerLevel;
 
-        if (levels > 0) {
-            _basePoints = Math.max(1, _basePoints);
-        }
-
         // Many ITEMs with no ADDERs costs min 1 point
         if (
             !["maneuver", "martialart", "characteristic"].includes(this.type) &&
@@ -5378,7 +5374,18 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             ap = roundFavorPlayerTowardsZero(ap * advantageCosts);
         }
 
-        ap = Math.max(this.baseInfo?.minimumCost || 0, ap);
+        // Assume minimum cost of 1 for everything except SKILLS (Everyman skills typically cost 0) & Combat Maneuvers (which are always free) & some containers
+        ap = Math.max(this.baseInfo?.minimumCost ?? 0, ap);
+        if (
+            !this.type.includes("skill") &&
+            !this.baseInfo?.type?.includes("maneuver") &&
+            this.system.XMLID !== "LIST"
+        ) {
+            // But wait: if there is a negative custom adder, we will assume the player/GM knows what they are doing and allow the cost to be 0.
+            if (!this.adders.find((adder) => adder.XMLID === "ADDER" && adder.cost < 0)) {
+                ap = Math.max(this.baseInfo?.minimumCost ?? 1, ap);
+            }
+        }
         return ap;
     }
 
