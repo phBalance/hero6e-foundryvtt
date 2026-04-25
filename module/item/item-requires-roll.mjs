@@ -387,7 +387,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options = {}) {
 
         // Do we have valid ranges defined and are hit locations turned on? If not, then sectional defense don't make sense to consider.
         if (validSectionalComment && game.settings.get(HEROSYS.module, "hit locations")) {
-            const sectionalDefenseApply = await doSectionalDefensesApply(
+            const sectionalDefenseApply = doSectionalDefensesApply(
                 sectionalDefenseLocationsSet,
                 options.hitLocationNum,
             );
