@@ -11806,6 +11806,156 @@ export function registerUploadTests(quench) {
                         });
                     });
                 });
+
+                describe("Positive Reputation", function () {
+                    describe("+1/+1d6 (A small to medium sized group; 8-)", function () {
+                        const contents = `
+                        <PERK XMLID="REPUTATION" ID="1777144751002" BASECOST="0.0" LEVELS="1" ALIAS="Positive Reputation" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                        <NOTES />
+                        <ADDER XMLID="HOWWIDE" ID="1777144765281" BASECOST="0.0" LEVELS="0" ALIAS="How Widely Known" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SMALLGROUP" OPTIONID="SMALLGROUP" OPTION_ALIAS="A small to medium sized group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        <ADDER XMLID="HOWWELL" ID="1777144765287" BASECOST="-1.0" LEVELS="0" ALIAS="How Well Known" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                            <NOTES />
+                        </ADDER>
+                        </PERK>
+                    `;
+                        let item;
+
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: false });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.fullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "Positive Reputation: +1/+1d6 (A small to medium sized group; 8-)",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 1);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("roll", function () {
+                            assert.equal(item.system.roll, "8-");
+                        });
+                    });
+
+                    describe("+1/+1d6 (A medium sized group; 11-)", function () {
+                        const contents = `
+                        <PERK XMLID="REPUTATION" ID="1777144751002" BASECOST="0.0" LEVELS="1" ALIAS="Positive Reputation" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <ADDER XMLID="HOWWIDE" ID="1777146453562" BASECOST="1.0" LEVELS="0" ALIAS="How Widely Known" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="MEDIUMGROUP" OPTIONID="MEDIUMGROUP" OPTION_ALIAS="A medium-sized group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <ADDER XMLID="HOWWELL" ID="1777146453568" BASECOST="0.0" LEVELS="0" ALIAS="How Well Known" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                        </PERK>
+                    `;
+                        let item;
+
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: false });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.fullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("description", function () {
+                            assert.equal(
+                                item.system.description,
+                                "Positive Reputation: +1/+1d6 (A medium-sized group; 11-)",
+                            );
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 1);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 1);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("roll", function () {
+                            assert.equal(item.system.roll, "11-");
+                        });
+                    });
+
+                    describe("+1/+1d6 (A large group; 14-)", function () {
+                        const contents = `
+                        <PERK XMLID="REPUTATION" ID="1777144751002" BASECOST="0.0" LEVELS="1" ALIAS="Positive Reputation" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <ADDER XMLID="HOWWIDE" ID="1777147458977" BASECOST="2.0" LEVELS="0" ALIAS="How Widely Known" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="LARGEGROUP" OPTIONID="LARGEGROUP" OPTION_ALIAS="A large group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                            <ADDER XMLID="HOWWELL" ID="1777147458983" BASECOST="1.0" LEVELS="0" ALIAS="How Well Known" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                            </ADDER>
+                        </PERK>
+                    `;
+                        let item;
+
+                        let actor;
+                        before(async function () {
+                            actor = await createQuenchActor({ quench: this, is5e: false });
+                            item = await HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(contents, actor), {
+                                parent: actor,
+                            });
+                            await actor.fullHealth();
+                        });
+
+                        after(async function () {
+                            await deleteQuenchActor({ quench: this, actor });
+                        });
+
+                        it("description", function () {
+                            assert.equal(item.system.description, "Positive Reputation: +1/+1d6 (A large group; 14-)");
+                        });
+
+                        it("realCost", function () {
+                            assert.equal(item.realCost, 3);
+                        });
+
+                        it("activePoints", function () {
+                            assert.equal(item.activePoints, 3);
+                        });
+
+                        it("end", function () {
+                            assert.equal(item.end, 0);
+                        });
+
+                        it("roll", function () {
+                            assert.equal(item.system.roll, "14-");
+                        });
+                    });
+                });
             });
         },
         { displayName: "HERO: Upload" },
