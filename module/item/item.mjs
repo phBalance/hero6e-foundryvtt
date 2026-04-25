@@ -7039,6 +7039,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         ).render({ force: true });
     }
 
+    /**
+     * FIXME: This function should be modified/fixed. Right now we only have 1 possible template per item. This is obviously wrong
+     *        as you can have powers like darkness which could drop many templates on the scene at the same time. To fix, we cannot
+     *        use the original item. We will have to tie a template to an effective item somehow.
+     *        As well note that 5e template sizes etc are related to their active points so something that is pushed could have a
+     *        different size. As well, surface/anything templates will always be different. Could also apply naked advantages etc.
+     */
     get getAoeTemplateForBaseItem() {
         const effectiveAttackItemOriginalItemId = this.getEffectiveItemOriginalItemId;
 
