@@ -2472,7 +2472,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         "system.CHARACTER.version": heroJson.CHARACTER.version,
                     },
                     {
-                        render: false,
+                        render: true, // Need render to make sure the actor sidebar actor.name gets updated #4010
                     },
                 );
                 changes = {};
