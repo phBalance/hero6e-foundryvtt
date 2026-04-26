@@ -5387,15 +5387,14 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // Assume minimum cost of 1 for everything except SKILLS (Everyman skills typically cost 0) & Combat Maneuvers (which are always free) & some containers
-        ap = Math.max(this.baseInfo?.minimumCost ?? 0, ap);
         if (
             !this.type.includes("skill") &&
             !this.baseInfo?.type?.includes("maneuver") &&
             this.system.XMLID !== "LIST"
         ) {
-            // But wait: if there is a negative custom adder, we will assume the player/GM knows what they are doing and allow the cost to be 0.
+            // But wait: if there is a negative custom adder, we will assume the player/GM knows what they are doing and allow the cost to be 0 or even negative.
             if (!this.adders.find((adder) => adder.XMLID === "ADDER" && adder.cost < 0)) {
-                ap = Math.max(this.baseInfo?.minimumCost ?? 1, ap);
+                ap = Math.max(1, ap);
             }
         }
         return ap;
