@@ -2050,10 +2050,15 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return true;
     }
 
+    get isToggleDisabled() {
+        // ALWAYSON can temporaryily turn the power off (x5 cost?)
+        // INHERENT cannot be Drained, Transferred,, or turned off.
+
+        return this.system.duration === "inherent";
+    }
+
     // FIXME: This should be trimmed down
     isActivatable() {
-        //TODO: If ALWAYSON then not isActivable, or at least grey out box to do so.  Perhaps make it so you can't turnOff in code too.
-
         if (this.baseInfo?.behaviors?.includes("activatable")) {
             return true;
         }
@@ -4969,6 +4974,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // VPP unslotted
         if (this.vppUnSlotted) {
             return false;
+        }
+
+        // Inherent Powers cannot be Drained, Transferred, or "turned off"
+        if (this.system.duration === "inherent") {
+            return true;
         }
 
         // Favor disable status of associated ActiveEffect
