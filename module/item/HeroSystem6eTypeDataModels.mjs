@@ -277,7 +277,6 @@ export class HeroAdderModelCommon extends HeroItemModCommonModel {
         // Some ADDERs have ADDERs (for example TRANSPORT_FAMILIARITY)
         for (const adder of this.adders) {
             _cost += adder.cost;
-            F;
         }
 
         // TRANSPORT_FAMILIARITY (and others) may have a maximum cost per category
