@@ -44,9 +44,9 @@
             </div>
             
         </div>
-        <div class="item-column item-char">
-            {{#if (ne this.system.XMLID "LIST")}}
-                {{this.system.CHARACTERISTIC}}
+        <div class="item-column item-end">
+            {{#if this.end}}
+                {{this.end}}
             {{/if}}
         </div>
         <div class="item-column item-controls">
