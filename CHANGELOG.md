@@ -1,6 +1,10 @@
 # Releases
 
-### Version 4.3.4 20260426 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.5 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix offhand defense not working against strike and other strength based attacks. [#4071](https://github.com/dmdorman/hero6e-foundryvtt/issues/4071)
+
+### Version 4.3.4 20260426
 
 - Fix upload failure for HDC files with custom Hero Designer templates [#4016](https://github.com/dmdorman/hero6e-foundryvtt/issues/4016)
 - Sectional defenses are now implemented for defense items that are activated every phase. Add a comment to the limitation in HD of the form "locations 3-5, 7, 9-14, and 16-18" where numbers reflect the 3d6 roll from the "hit location table" in your rule books. [#1652](https://github.com/dmdorman/hero6e-foundryvtt/issues/1652)
