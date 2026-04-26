@@ -1514,6 +1514,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         if (!options.silent) {
+            // TODO: Prompt for ALWAYSON & possibly spend END
+            if (this.findModsByXmlid("ALWAYSON")) {
+                ui.notifications?.warn(
+                    `${item.detailedName()} is ALWAYSON and shoudld cost ENDx5 to keep off each phase.  END consumption not implemented.`,
+                );
+            }
+
             // Let GM know power was deactivated
             const speaker = ChatMessage.getSpeaker({
                 actor: item.actor,
@@ -2048,13 +2055,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         return true;
-    }
-
-    get isToggleDisabled() {
-        // ALWAYSON can temporaryily turn the power off (x5 cost?)
-        // INHERENT cannot be Drained, Transferred,, or turned off.
-
-        return this.system.duration === "inherent";
     }
 
     // FIXME: This should be trimmed down
@@ -4976,11 +4976,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return false;
         }
 
-        // Inherent Powers cannot be Drained, Transferred, or "turned off"
-        if (this.system.duration === "inherent") {
-            return true;
-        }
-
         // Favor disable status of associated ActiveEffect
         if (this.effects.size > 0) {
             const _disabled = this.effects.contents[0].disabled;
@@ -5387,15 +5382,14 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // Assume minimum cost of 1 for everything except SKILLS (Everyman skills typically cost 0) & Combat Maneuvers (which are always free) & some containers
-        ap = Math.max(this.baseInfo?.minimumCost ?? 0, ap);
         if (
             !this.type.includes("skill") &&
             !this.baseInfo?.type?.includes("maneuver") &&
             this.system.XMLID !== "LIST"
         ) {
-            // But wait: if there is a negative custom adder, we will assume the player/GM knows what they are doing and allow the cost to be 0.
+            // But wait: if there is a negative custom adder, we will assume the player/GM knows what they are doing and allow the cost to be 0 or even negative.
             if (!this.adders.find((adder) => adder.XMLID === "ADDER" && adder.cost < 0)) {
-                ap = Math.max(this.baseInfo?.minimumCost ?? 1, ap);
+                ap = Math.max(1, ap);
             }
         }
         return ap;

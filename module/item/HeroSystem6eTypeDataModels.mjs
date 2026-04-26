@@ -637,7 +637,9 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
                     if (this.schema.fields[attribute.name] === undefined) {
                         const e = `${this.parent.type}/${this.XMLID}/${this.item?.system?.ALIAS} HeroSystem6eItemTypeDataModelGetters is missing ${attribute.name} property.`;
                         // Equipment converted to a Power may have extra attributes in the XML that we aren't modeling, so just log for those.
-                        if (["PRICE", "WEIGHT"].includes(attribute.name) && this.item?.type === "power") {
+                        // FUTURE: Consider making equipment a dedicated schema, looping thru those to determine which attributes we don't need to alert on.
+                        //         Alternatively, we could add equipment schema to the item schema.
+                        if (["PRICE", "WEIGHT"].includes(attribute.name)) {
                             console.debug(e);
                             return e;
                         }
@@ -1268,7 +1270,7 @@ export class HeroSystem6eItemEquipment extends HeroSystem6eItemPower {
         // Note that the return is just a simple object
         return {
             ...super.defineSchema(),
-            CARRIED: new BooleanField({ nullable: true }),
+            CARRIED: new BooleanField({ nullable: true }), // Consider removing as it is a duplicate definition (from HeroSystem6eItemTypeDataModelProps)
             EVER: new StringField(),
             PRICE: new StringField(),
             SKILL: new StringField(),
