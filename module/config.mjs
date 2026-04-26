@@ -8459,7 +8459,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["non-hd", "to-hit", "dice"],
             perceivability: "obvious",
             duration: HERO.DURATION_TYPES.INSTANT,
-            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.STANDARD),
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
             costPerLevel: fixedValueFunction(5),
             costEnd: true,
             usesStrength: false, // Doesn't stack with itself.
