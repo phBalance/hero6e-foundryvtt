@@ -1514,6 +1514,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         if (!options.silent) {
+            // TODO: Prompt for ALWAYSON & possibly spend END
+            if (this.findModsByXmlid("ALWAYSON")) {
+                ui.notifications?.warn(
+                    `${item.detailedName()} is ALWAYSON and shoudld cost ENDx5 to keep off each phase.  END consumption not implemented.`,
+                );
+            }
+
             // Let GM know power was deactivated
             const speaker = ChatMessage.getSpeaker({
                 actor: item.actor,
@@ -2048,13 +2055,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         return true;
-    }
-
-    get isToggleDisabled() {
-        // ALWAYSON can temporaryily turn the power off (x5 cost?)
-        // INHERENT cannot be Drained, Transferred,, or turned off.
-
-        return this.system.duration === "inherent";
     }
 
     // FIXME: This should be trimmed down
@@ -4974,11 +4974,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // VPP unslotted
         if (this.vppUnSlotted) {
             return false;
-        }
-
-        // Inherent Powers cannot be Drained, Transferred, or "turned off"
-        if (this.system.duration === "inherent") {
-            return true;
         }
 
         // Favor disable status of associated ActiveEffect
