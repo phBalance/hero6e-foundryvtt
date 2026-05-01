@@ -3,6 +3,7 @@
 ### Version 4.3.5 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix offhand defense not working against strike and other strength based attacks. [#4071](https://github.com/dmdorman/hero6e-foundryvtt/issues/4071)
+- The /heroroll command now supports being inline. Added luck "[l]" and unluck "[u]" flavours to the command. [#4077](https://github.com/dmdorman/hero6e-foundryvtt/issues/4077)
 
 ### Version 4.3.4 20260426
 
