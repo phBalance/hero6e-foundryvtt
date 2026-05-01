@@ -73,11 +73,22 @@ Hooks.on("init", function () {
 });
 
 /**
- * When chat messages are rendered, see if there are any inline /heroroll rolls. If so, register a click handler for it.
+ *
+ * @param {HTMLElement} html
  */
-Hooks.on("renderChatMessage", (message, html) => {
-    html[0].querySelectorAll("a.inline-hero-roll").forEach((a) => a.addEventListener("click", onInlineHeroRollClick));
-});
+function addInlineHeroRollerListeners(html) {
+    html.querySelectorAll("a.inline-hero-roll").forEach((a) =>
+        a.addEventListener("click", onInlineHeroRollClick, { capture: true }),
+    );
+}
+
+/**
+ * When chat messages and journal pages are rendered, see if there are any inline /heroroll rolls. If so, register a click handler for it.
+ */
+Hooks.on("renderChatMessageHTML", (_message, html) => addInlineHeroRollerListeners(html));
+Hooks.on("renderJournalEntrySheet", (_sheet, html) => addInlineHeroRollerListeners(html));
+Hooks.on("renderHeroSystemActorSheet", (_sheet, html) => addInlineHeroRollerListeners(html[0])); // V1 application
+Hooks.on("renderHeroSystemActorSheetV2", (_sheet, html) => addInlineHeroRollerListeners(html));
 
 /**
  * When a chat message is generated, check if this is a /heroroll command.
