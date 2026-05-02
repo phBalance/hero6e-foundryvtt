@@ -3350,8 +3350,60 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             await this.addPerception();
         }
 
+        await this.addUntrainedSkill();
+
         if (hasSTR) {
             await this.addHeroSystemManeuvers();
+        }
+    }
+
+    async addUntrainedSkill() {
+        const untrainedItems = this.items.filter(
+            (item) => item.system.XMLID === "UNTRAINED" && item.type === "skill" && !item.system.ID,
+        );
+
+        if (untrainedItems.length > 0) {
+            console.debug(`UNTRAINED already exists`);
+
+            // Make sure we only have one
+            const itemsToDelete = untrainedItems.splice(1);
+
+            if (itemsToDelete.length > 0) {
+                console.error(`Deleted ${itemsToDelete.length} UNTRAINED items`);
+                await this.deleteEmbeddedDocuments(
+                    "Item",
+                    itemsToDelete.map((o) => o.id),
+                );
+            }
+
+            return;
+        }
+
+        // Untrained Skill
+        const itemDataUntrained = {
+            name: "Untrained",
+            type: "skill",
+            system: {
+                XMLID: "UNTRAINED",
+                ALIAS: "Untrained",
+                CHARACTERISTIC: "GENERAL",
+                state: "untrained",
+                LEVELS: "0",
+                is5e: this.is5e,
+                xmlTag: "SKILL",
+                active: true,
+            },
+        };
+        const untrainedItem = this.id
+            ? await HeroSystem6eItem.create(itemDataUntrained, {
+                  parent: this,
+              })
+            : new HeroSystem6eItem(itemDataUntrained, {
+                  parent: this,
+              });
+
+        if (!this.id) {
+            this.items.set(untrainedItem.system.XMLID, untrainedItem);
         }
     }
 
@@ -4324,6 +4376,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         this.migrateData_4_0_26(source);
         this.migrateData_4_1_13(source);
+        this.migrateData_4_3_5_UntrainedSkill(source);
 
         this.migrateData_XmlidCharacteristics(source);
 
@@ -4350,6 +4403,31 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (_removePlaceholderWeaponItem) {
             source.items = source.items.filter((item) => item.name !== "__InternalManeuverPlaceholderWeapon");
             tagObjectForPersistence(source);
+        }
+    }
+
+    static migrateData_4_3_5_UntrainedSkill(source) {
+        // Add untrained skill data to all actors.
+        const _untrainedSkillItem = source?.items?.find((item) => item.system.XMLID === "UNTRAINED");
+
+        if (!_untrainedSkillItem) {
+            source.items.push({
+                name: "Untrained",
+                type: "skill",
+                system: {
+                    XMLID: "UNTRAINED",
+                    ALIAS: "Untrained",
+                    CHARACTERISTIC: "GENERAL",
+                    state: "untrained",
+                    LEVELS: "0",
+                    is5e: source.system.is5e,
+                    xmlTag: "SKILL",
+                    active: true,
+                },
+            });
+
+            // Confirm with Peter we like this approach before persisting.
+            // tagObjectForPersistence(source);
         }
     }
 
