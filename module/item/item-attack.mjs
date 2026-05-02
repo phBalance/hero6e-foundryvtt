@@ -927,6 +927,11 @@ async function doSingleTargetActionToHit(action, options) {
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(setManeuver?.system.ocv || 0, "Set Maneuver");
 
+    // Spreading attack +1 OCV for -1 DC
+    if (options.spread) {
+        attackHeroRoller.addNumber(parseInt(options.spread), "Spread modifier");
+    }
+
     const isAoE = item.effectiveAttackItem.getAoeModifier();
     const aoeTemplate = isAoE ? item.getAoeTemplateForBaseItem : null;
     if (isAoE && !aoeTemplate) {
