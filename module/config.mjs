@@ -5248,7 +5248,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 console.error(`rangeForItem invoked for a LIST.`);
                 return HERO.RANGE_TYPES.SELF;
             },
-            xml: `<LIST XMLID="GENERIC_OBJECT" ID="1760312857170" BASECOST="0.0" LEVELS="0" ALIAS="Disad List" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></LIST>`,
+            xml: `<LIST XMLID="GENERIC_OBJECT" ID="1760312857170" BASECOST="0.0" LEVELS="0" ALIAS="List" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></LIST>`,
         },
         {},
     );

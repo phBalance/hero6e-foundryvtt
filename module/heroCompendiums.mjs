@@ -182,7 +182,6 @@ async function CreateHeroItems() {
         (o) =>
             o.type != undefined &&
             !o.type.includes("martial") &&
-            !o.type.includes("framework") &&
             !o.type.includes("enhancer") &&
             !o.type.includes("disadvantage") &&
             !o.behaviors.includes("modifier") &&
@@ -201,10 +200,23 @@ async function CreateHeroItems() {
             itemData.folder = folderPowerSkill[0].id;
         } else if (power.type.includes("talent")) {
             itemData.folder = folderPowerTalent[0].id;
-        } else {
+        } else if (itemData.system.XMLID !== "LIST") {
             itemData.folder = folderPower[0].id;
         }
+        // LIST will not be in a folder (to match SEPARATOR below)
+
         itemDataArray.push(itemData);
+    }
+
+    // SEPARATOR is a LIST with no name
+    const seperatorItemData = HeroSystem6eItem.itemDataFromXml(powers.find((p) => p.key === "LIST")?.xml, bogusActor);
+    if (seperatorItemData.name) {
+        seperatorItemData.name = "Separator";
+        seperatorItemData.system.ALIAS = "";
+        seperatorItemData.system.NAME = "";
+        itemDataArray.push(seperatorItemData);
+    } else {
+        console.error(`Failed to create separator item`);
     }
 
     //////////////////////////////////////////////////////////////////////////////
