@@ -523,7 +523,7 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
         const baseInfoCheck = getPowerInfo({
             xmlid: item.system.XMLID,
             is5e: this.actor.is5e,
-            xmlTag: item.xmlTag,
+            xmlTag: item.system.xmlTag,
         });
         if (!baseInfoCheck) {
             ui.notifications.error(

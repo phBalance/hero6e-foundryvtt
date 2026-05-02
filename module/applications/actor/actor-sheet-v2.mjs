@@ -1031,7 +1031,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             const baseInfoCheck = getPowerInfo({
                 xmlid: item.system.XMLID,
                 is5e: this.actor.is5e,
-                xmlTag: item.xmlTag,
+                xmlTag: item.system.xmlTag,
             });
             if (!baseInfoCheck) {
                 ui.notifications.error(
@@ -1148,7 +1148,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         const baseInfoCheck = getPowerInfo({
             xmlid: item.system.XMLID,
             is5e: this.actor.is5e,
-            xmlTag: item.xmlTag,
+            xmlTag: item.system.xmlTag,
         });
         if (!baseInfoCheck) {
             ui.notifications.error(
@@ -1169,7 +1169,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         const baseInfoCheck = getPowerInfo({
             xmlid: itemData.system.XMLID,
             is5e: this.actor.is5e,
-            xmlTag: itemData.xmlTag,
+            xmlTag: itemData.system.xmlTag,
         });
 
         // Override type
@@ -1255,7 +1255,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             const baseInfoCheck = getPowerInfo({
                 xmlid: itemData.system.XMLID,
                 is5e: this.actor.is5e,
-                xmlTag: itemData.xmlTag,
+                xmlTag: itemData.system.xmlTag,
             });
             if (!baseInfoCheck) {
                 ui.notifications.error(
