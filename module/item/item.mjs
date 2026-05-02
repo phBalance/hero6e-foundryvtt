@@ -860,6 +860,15 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
     }
 
+    get canSpread() {
+        // Must be a ranged attack and not a beam or already an area of effect attack
+        if (!this.isRanged || this.findModsByXmlid("BEAM") || this.aoeAttackParameters) {
+            return false;
+        }
+
+        return true;
+    }
+
     async update(...args) {
         if (!this.id) {
             // This is either an effective item or just an item that's not in the database.
