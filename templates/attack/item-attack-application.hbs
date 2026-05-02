@@ -228,12 +228,12 @@
         {{/if}}
       {{/if}}
 
-      {{#if effectiveItem.canSpread}}
+      {{!-- {{#if effectiveItem.canSpread}}
         <div class="form-group">
           <label>Spread</label>
           {{numberInput spread name="spread" step=1 min=0 max=999}}
         </div>
-      {{/if}}
+      {{/if}} --}}
 
       {{#if (gt (objectNumKeys maPossibleWeapons) 0)}}
         <div class="form-group">
