@@ -1009,7 +1009,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             return;
         }
 
-        const targetType = targetTab.replace(/s$/, "");
+        const targetType = targetTab.replace(/s$/, "").replace("martial", "martialart");
 
         const validItemTypeChanges = ["skill", "perk", "talent", "power", "equipment"];
 
@@ -1183,6 +1183,21 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                     `"${item.name}" is a ${baseInfoCheck?.xmlTag} and cannot be added to ${options.type.toUpperCase()} items tab.`,
                 );
             }
+        } else {
+            // Try to drop item on the active tab
+            const targetType = this.tabGroups.primary.replace(/s$/, "").replace("martial", "martialart");
+            if (
+                ["power", "equipment"].includes(targetType) ||
+                baseInfoCheck?.xmlTag.toLowerCase() === targetType ||
+                (["LIST"].includes(baseInfoCheck.xmlTag) &&
+                    ["martialart", "skill", "perk", "talent", "complication"].includes(targetType))
+            ) {
+                itemData.type = targetType;
+            } else {
+                ui.notifications.warn(
+                    `"${item.name}" is a ${baseInfoCheck?.xmlTag} and cannot be added to ${targetType.toUpperCase()} items tab.  Creating item as POWER.`,
+                );
+            }
         }
 
         // Make sure we have xmlTag in itemData (some older items may be missing this)
@@ -1227,9 +1242,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         // Delete original if equipment and it belonged to an actor (as opposed to item sidebar or compendium)?
         if (item.type === "equipment" && item.actor) {
             item.delete();
-            chatData.content = `<b>${item.name}</b> was transferred from <b>${dragName}</b> to <b>${dropName}</b>.`;
+            chatData.content = `<b>${item.name}</b> was transferred from <b>${dragName}</b> to the <b>${itemData.type}</b> tab of <b>${dropName}</b>.`;
         } else {
-            chatData.content = `<b>${item.name}</b> was copied from <b>${dragName}</b> to <b>${dropName}</b>.`;
+            chatData.content = `<b>${item.name}</b> was copied from <b>${dragName}</b> to the <b>${itemData.type}</b> tab of <b>${dropName}</b>.`;
         }
         ChatMessage.create(chatData);
 

@@ -2266,7 +2266,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                             powerList
                                 .filter((o) => o.type?.includes("characteristic"))
                                 .map((o) => o.key)
-                                .includes(system.XMLID) || ["MULTIPOWER", "ELEMENTAL_CONTROL"].includes(system.XMLID)
+                                .includes(system.XMLID) || // TODO: Consider checking for GENERIC_OBJECT
+                            ["MULTIPOWER", "ELEMENTAL_CONTROL", "LIST", "VPP"].includes(system.XMLID)
                                 ? "power"
                                 : itemTag.toLowerCase().replace(/s$/, ""),
                         system: { ...system, is5e: itemData.system.is5e, xmlTag: itemSubTag },
