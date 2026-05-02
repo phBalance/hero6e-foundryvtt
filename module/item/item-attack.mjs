@@ -658,7 +658,8 @@ export async function doAoeActionToHit(action, options) {
         const moveDistance = roundFavorPlayerTowardsZero(
             Math.min(distance / 2, item.actor.system.is5e ? missBy : missBy * 2),
         );
-        hitRollText = `AoE origin MISSED by ${missBy}. Move AoE origin ${
+
+        hitRollText = `AoE origin <b class="dice-failed">MISSED by ${missBy}</b>. Move AoE origin ${
             moveDistance + getSystemDisplayUnits(item.actor.is5e)
         } in the <b>${facingRollResult}</b> direction.`;
     }
