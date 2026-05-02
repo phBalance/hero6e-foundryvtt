@@ -108,7 +108,9 @@ export class ItemAttackFormApplication extends FormApplication {
             this.data.effectiveStr = Math.max(0, this.data.effectiveStr);
 
             // Spreading attack +1 OCV for -1 DC
-            this.data.spread ??= parseInt(this.data.spread) || 0;
+            // Commenting out SPREAD code for now as it has issues with AP, MARTIAL, missing damage tags.
+            // Likely rework to resource usage and checking for "spread" thru several functions.
+            // this.data.spread ??= parseInt(this.data.spread) || 0;
 
             // PH: FIXME: Is this right? What should we be showing for something like stike with weapon or fist?
             this.data.effectiveRealCost ??= this.data.originalItem._realCost;
@@ -621,13 +623,13 @@ export class ItemAttackFormApplication extends FormApplication {
         }
 
         // Spreading -1 DC
-        if (this.data.spread) {
-            formData.spread = Math.min(formData.spread, formData.effectiveRealCost / 5);
-            formData.effectiveRealCost = Math.min(
-                formData.effectiveRealCost,
-                this.data.originalItem._realCost - formData.spread * 5,
-            );
-        }
+        // if (this.data.spread) {
+        //     formData.spread = Math.min(formData.spread, formData.effectiveRealCost / 5);
+        //     formData.effectiveRealCost = Math.min(
+        //         formData.effectiveRealCost,
+        //         this.data.originalItem._realCost - formData.spread * 5,
+        //     );
+        // }
 
         // Take all the data we updated in the form and apply it.
         this.data = foundry.utils.mergeObject(this.data, extendedFormData);
