@@ -210,6 +210,7 @@ li.directory-item.child-item {
 /* V13 buttons don't seem to default to 100% like they do in v12 */
 .hero.chat-card button {
     width: 100%;
+    height: auto;
 }
 
 /* V13 generic roller buttons don't seem to default to 100% like they do in v12 */
