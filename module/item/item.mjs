@@ -4430,7 +4430,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         } else if (skillData.CHARACTERISTIC) {
             const characteristic = skillData.CHARACTERISTIC.toLowerCase();
 
-            const baseRollValue = skillData.CHARACTERISTIC === "GENERAL" ? 11 : 9;
+            const baseRollValue = skillData.XMLID === "UNTRAINED" ? 6 : skillData.CHARACTERISTIC === "GENERAL" ? 11 : 9;
             const characteristicValue =
                 characteristic !== "general" && characteristic != ""
                     ? this.actor?.system.characteristics?.[characteristic]?.value || 0
@@ -4441,7 +4441,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
             // Provide up to 3 tags to explain how the roll was calculated:
             // 1. Base skill value without modifier due to characteristics
-            tags.push({ value: baseRollValue, name: "Base Skill" });
+            tags.push({
+                value: baseRollValue,
+                name: skillData.XMLID === "UNTRAINED" ? "Untrained Skill" : "Base Skill",
+            });
 
             // 2. Adjustment value due to characteristics.
             //    NOTE: Don't show for things like Knowledge Skills which are GENERAL, not characteristic based, or if we have a 0 adjustment

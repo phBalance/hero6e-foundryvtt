@@ -5026,6 +5026,21 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
     addPower(
         {
+            // Hero Designer doesn't have an entry for Untrained, but we want one.
+            key: "UNTRAINED",
+            type: ["skill"],
+            behaviors: ["success", "non-hd"],
+            costPerLevel: fixedValueFunction(2),
+            duration: HERO.DURATION_TYPES.CONSTANT,
+            target: "self only",
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
+            costEnd: false,
+        },
+        {},
+    );
+
+    addPower(
+        {
             key: "VENTRILOQUISM",
             type: ["skill"],
             behaviors: ["success"],

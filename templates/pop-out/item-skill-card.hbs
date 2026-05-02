@@ -1,10 +1,19 @@
-{{!-- {{ log 'item-skill-card SKILL POP OUT' this }} --}}
+{{ log 'item-skill-card SKILL POP OUT' this }}
 <form>
     <div class="hero chat-card item-card skill-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}" {{#if
         tokenId}}data-token-id="{{tokenId}}" {{/if}}>
         <header class="card-header flexrow">
             <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
-            <h3 class="item-name">{{{itemName item}}}</h3>
+            {{#if (eq item.system.XMLID "UNTRAINED")}}
+                <h3 class="item-name">
+                    <select name="untrainedSkill" data-dtype="text">
+                        {{selectOptions skillOptions valueAttr="key" labelAttr="label" selected="UNTRAINED"}}
+                    </select>
+                </h3>
+            {{else}}
+                <h3 class="item-name">{{{itemName item}}}</h3>
+            {{/if}}
+            
         </header>
     </div>
 

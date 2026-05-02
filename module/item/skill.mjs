@@ -105,6 +105,8 @@ async function _renderSkillForm(item, actor, stateData) {
             : []),
     ];
 
+    const powers = actor.system.is5e ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+
     const templateData = {
         actor: actor.system,
         tokenId: token?.uuid || null,
@@ -112,6 +114,12 @@ async function _renderSkillForm(item, actor, stateData) {
         state: stateData,
         skillLevels,
         skillMods,
+        skillOptions: [{ key: "UNTRAINED", label: "Untrained" }].concat(
+            powers
+                .filter((p) => p.type.includes("skill") && p.name)
+                .sort((a, b) => a.key.localeCompare(b.key))
+                .map((m) => ({ key: m.key, label: m.name })),
+        ),
     };
 
     var path = `systems/${HEROSYS.module}/templates/pop-out/item-skill-card.hbs`;
@@ -266,8 +274,11 @@ async function skillRoll(item, actor, target) {
     const total = skillRoller.getSuccessTotal();
     const margin = successValue - total;
 
+    const untrainedSkillXmlid = target.find("[name='untrainedSkill']")?.[0]?.value;
+    const untrainedSkillName = target.find("[name='untrainedSkill'] option:selected")?.[0]?.text;
+
     let disadFlavor = "";
-    switch (item.system.XMLID) {
+    switch (untrainedSkillXmlid ?? item.system.XMLID) {
         case "PSYCHOLOGICALLIMITATION":
             disadFlavor =
                 "Success on this roll typically means that the character must follow the psychological complication for at least one phase, after which the character is free to act against this psychological complication. Failure on this roll means that the character must continue to follow this psychological complication.";
@@ -295,9 +306,9 @@ async function skillRoll(item, actor, target) {
             break;
     }
 
-    const flavor = `${item.name.toUpperCase()}
+    const flavor = `${(untrainedSkillName ?? item.name).toUpperCase()}
     ${item.system.INPUT && !item.name.match(new RegExp(item.system.INPUT, "i")) ? `: ${item.system.INPUT}` : ``} 
-    (${successValue}-) roll 
+    (${successValue}-) skill roll 
     <b class="dice-${succeeded ? "succeeded" : "failed"}">
     ${succeeded ? "succeeded" : "failed"} by ${
         autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`
