@@ -1623,7 +1623,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // Free items don't have a system.ID
         if (
             this.system?.ID === undefined &&
-            (this.type === "maneuver" || (this.type === "skill" && this.system?.XMLID === "PERCEPTION"))
+            (this.type === "maneuver" ||
+                (this.type === "skill" && ["PERCEPTION", "UNTRAINED"].includes(this.system?.XMLID)))
         ) {
             return true;
         }
@@ -5239,7 +5240,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // Many ITEMs with no ADDERs costs min 1 point
         if (
             !["maneuver", "martialart", "characteristic"].includes(this.type) &&
-            !["PERCEPTION", "__STRENGTHDAMAGE", "LIST"].includes(this.system.XMLID) &&
+            !["PERCEPTION", "UNTRAINED", "__STRENGTHDAMAGE", "LIST"].includes(this.system.XMLID) &&
             this.adders.length === 0
         ) {
             if (_basePoints === 0) {
