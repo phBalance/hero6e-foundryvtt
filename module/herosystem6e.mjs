@@ -53,9 +53,9 @@ import "./testing/testing-main.mjs";
 import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./token/actor-token.mjs";
 import { HeroSystemTokenHud } from "./token/heroSystemTokenHud.mjs";
 
+import "./heroRoller/chat-dice.mjs";
 import { HeroRoll } from "./heroRoller/dice.mjs";
 import "./utility/adjustment.mjs";
-import "./utility/chat-dice.mjs";
 import { expireEffects } from "./utility/util.mjs";
 
 // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
