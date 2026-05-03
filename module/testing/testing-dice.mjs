@@ -10,7 +10,7 @@ import {
     Roll5Mock,
     Roll6Mock,
     RollAlternatingLuckAndUnluck,
-} from "./dice-testing-helper.mjs";
+} from "../heroRoller/dice-testing-helper.mjs";
 
 export function registerDiceTests(quench) {
     quench.registerBatch(

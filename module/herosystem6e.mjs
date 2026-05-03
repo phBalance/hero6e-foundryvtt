@@ -46,7 +46,7 @@ import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.m
 
 import SettingsHelpers from "./settings/settings-helpers.mjs";
 
-import { testingMockRollInitialize } from "./testing/dice-testing-helper.mjs";
+import { testingMockRollInitialize } from "./heroRoller/dice-testing-helper.mjs";
 import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
 import "./testing/testing-main.mjs";
 

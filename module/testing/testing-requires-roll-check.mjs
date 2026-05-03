@@ -1,3 +1,5 @@
+import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
+
 import {
     Roll10On3Dice,
     Roll12On3Dice,
@@ -7,8 +9,7 @@ import {
     Roll7On3Dice,
     Roll8On3Dice,
     Roll9On3Dice,
-} from "./dice-testing-helper.mjs";
-import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
+} from "../heroRoller/dice-testing-helper.mjs";
 
 import { isActivatedForThisUse_TestingOnly } from "../item/item-requires-roll.mjs";
 
