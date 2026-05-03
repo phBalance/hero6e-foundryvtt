@@ -1,7 +1,7 @@
-import { HEROSYS } from "./herosystem6e.mjs";
-import { actionToJSON, Attack } from "./utility/attack.mjs";
-import { dehydrateAttackItem } from "./item/item-attack.mjs";
-import { HeroSystem6eActor } from "./actor/actor.mjs";
+import { HEROSYS } from "../herosystem6e.mjs";
+import { actionToJSON, Attack } from "../utility/attack.mjs";
+import { dehydrateAttackItem } from "../item/item-attack.mjs";
+import { HeroSystem6eActor } from "../actor/actor.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
