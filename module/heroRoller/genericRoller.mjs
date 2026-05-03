@@ -1,3 +1,5 @@
+import { generateChatMessage } from "./chat-output.mjs";
+
 import { HEROSYS } from "../herosystem6e.mjs";
 import { actionToJSON, Attack } from "../utility/attack.mjs";
 import { dehydrateAttackItem } from "../item/item-attack.mjs";
@@ -9,25 +11,6 @@ const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended ||
 
 export class GenericRoller {
     static Initialize() {
-        // Hooks.on("renderSidebar", async (_sidebar, html, _context, options) => {
-        //     if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
-        //     if (options && !options.isFirstRender) return;
-
-        //     const $chat = $(html).find(".chat-form");
-        //     if ($chat.length === 0) {
-        //         console.warn(`unable to find dom element`);
-        //         return;
-        //     }
-        //     const content = await foundryVttRenderTemplate(`systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`, {
-        //         css: `game-version-major-${game.version.split(".")[0]}`,
-        //     });
-        //     const $content = $(content);
-        //     $chat.after($content);
-
-        //     GenericRoller.activateListeners($content);
-        // });
-
-        // V13
         Hooks.on("renderAbstractSidebarTab", async (_sidebar, html, _context, options) => {
             if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
             if (options && !options.isFirstRender) return;
@@ -45,28 +28,6 @@ export class GenericRoller {
             );
             const $content = $(content);
             $chat.after($content);
-
-            GenericRoller.activateListeners($content);
-        });
-
-        // V12 only
-        Hooks.on("renderSidebarTab", async (app, html) => {
-            if (app.tabName !== "chat") return;
-            if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
-
-            const $chat = $(html).find("#chat-form");
-            if ($chat.length === 0) {
-                console.warn(`unable to find dom element`);
-                return;
-            }
-            const content = await foundryVttRenderTemplate(
-                `systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`,
-                {
-                    css: `game-version-major-${game.version.split(".")[0]}`,
-                },
-            );
-            const $content = $(content);
-            html.append($content);
 
             GenericRoller.activateListeners($content);
         });
@@ -307,18 +268,18 @@ export class GenericRoller {
             }
         }
 
-        // PH: FIXME: Should put this into handlebars
-        let cardHtml = await heroRoller.render(`Roll Generic ${damageTypeString} Damage`);
-
         if (!item) {
             ui.notifications.error(`Generic roller not working for ${damageType}`);
             return;
         }
 
-        const action = Attack.buildActionInfo(item, [], {});
+        // PH: FIXME: Should put this into handlebars
+        const chatCardFlavour = `Roll Generic ${damageTypeString} Damage`;
+        let extraHtml = "";
 
         if (["NORMAL", "KILLING"].includes(damageType)) {
-            cardHtml += `
+            const action = Attack.buildActionInfo(item, [], {});
+            extraHtml += `
                         <div data-visibility="gm">
                             <button class="generic-roller-apply-damage"
                                 title="Apply damage to selected tokens."
