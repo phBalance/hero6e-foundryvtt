@@ -2,8 +2,8 @@ import { HEROSYS } from "../herosystem6e.mjs";
 
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
+import { HeroRoll, HeroRoller } from "../heroRoller/dice.mjs";
 import { calculateDicePartsForItem } from "../utility/damage.mjs";
-import { HeroRoll, HeroRoller } from "../utility/dice.mjs";
 import { tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 
 const backgroundSkillKeys = Object.freeze({

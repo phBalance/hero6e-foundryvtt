@@ -1,23 +1,8 @@
-import { createDefenseProfile } from "./utility/defense.mjs";
-import * as heroDice from "./utility/dice.mjs";
-import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "./utility/round.mjs";
-import {
-    convertHexesToSystemUnits,
-    getRoundedUpDistanceInSystemUnits,
-    getSystemDisplayUnits,
-    hexDistanceToSystemDisplayString,
-} from "./utility/units.mjs";
-import { HeroSystem6eActor } from "./actor/actor.mjs";
 import { getOffHandDefenseDcv } from "./actor/actor-utils.mjs";
-import {
-    characteristicValueToDiceParts,
-    dicePartsToFullyQualifiedEffectFormula,
-    isRangedMartialManeuver,
-    maneuverBaseEffectDicePartsBundle,
-    maneuverDoesKillingDamage,
-} from "./utility/damage.mjs";
-import { HeroSystem6eItem } from "./item/item.mjs";
+import { HeroSystem6eActor } from "./actor/actor.mjs";
+import * as heroDice from "./heroRoller/dice.mjs";
 import { VALIDATE_SECTION_DEFENSE_ERROR_REASON, validateSectionalComments } from "./item/item-requires-roll.mjs";
+import { HeroSystem6eItem } from "./item/item.mjs";
 import {
     maneuverHasBindTrait,
     maneuverHasBlockTrait,
@@ -27,15 +12,30 @@ import {
     maneuverHasFlashEffectTrait,
     maneuverHasGrabTrait,
     maneuverHasKillingDamageTrait,
-    maneuverHasNormalDamageTrait,
     maneuverHasNoNormalDefenseDamageTrait,
+    maneuverHasNormalDamageTrait,
     maneuverHasShoveTrait,
     maneuverHasStrikeTrait,
     maneuverHasTargetFallsTrait,
     maneuverHasVelocityTrait,
 } from "./item/maneuver.mjs";
-import { squelch, hdcTextNumberToNumeric } from "./utility/util.mjs";
+import {
+    characteristicValueToDiceParts,
+    dicePartsToFullyQualifiedEffectFormula,
+    isRangedMartialManeuver,
+    maneuverBaseEffectDicePartsBundle,
+    maneuverDoesKillingDamage,
+} from "./utility/damage.mjs";
+import { createDefenseProfile } from "./utility/defense.mjs";
 import * as heroEncounter from "./utility/encounter/encounter.mjs";
+import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "./utility/round.mjs";
+import {
+    convertHexesToSystemUnits,
+    getRoundedUpDistanceInSystemUnits,
+    getSystemDisplayUnits,
+    hexDistanceToSystemDisplayString,
+} from "./utility/units.mjs";
+import { hdcTextNumberToNumeric, squelch } from "./utility/util.mjs";
 
 /**
  * Function to use with the filter function. Will exclude compound powers and framework powers.

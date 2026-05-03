@@ -1,25 +1,25 @@
-import { HEROSYS } from "../herosystem6e.mjs";
-import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.mjs";
-import { HeroSystem6eItem, cloneToEffectiveAttackItem } from "../item/item.mjs";
-import { HeroObjectCacheMixin } from "../utility/cache.mjs";
-import {
-    getPowerInfo,
-    getCharacteristicInfoArrayForActor,
-    squelch,
-    whisperUserTargetsForActor,
-    tokenEducatedGuess,
-} from "../utility/util.mjs";
-import { HeroProgressBar } from "../utility/progress-bar.mjs";
-import { clamp, isGameV14OrLater } from "../utility/compatibility.mjs";
-import { overrideCanAct } from "../settings/settings-helpers.mjs";
-import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
-import { HeroItemCharacteristic } from "../item/HeroSystem6eTypeDataModels.mjs";
-import { tagObjectForPersistence } from "../migration.mjs";
-import { HeroRoller } from "../utility/dice.mjs";
-import { dehydrateAttackItem, userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
-import { characteristicValueToDiceParts } from "../utility/damage.mjs";
-import { Attack, actionToJSON } from "../utility/attack.mjs";
 import { PresenceAttackApplication } from "../applications/apps/presence-attack.mjs";
+import { HeroRoller } from "../heroRoller/dice.mjs";
+import { HEROSYS } from "../herosystem6e.mjs";
+import { HeroItemCharacteristic } from "../item/HeroSystem6eTypeDataModels.mjs";
+import { dehydrateAttackItem, userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
+import { HeroSystem6eItem, cloneToEffectiveAttackItem } from "../item/item.mjs";
+import { tagObjectForPersistence } from "../migration.mjs";
+import { overrideCanAct } from "../settings/settings-helpers.mjs";
+import { Attack, actionToJSON } from "../utility/attack.mjs";
+import { HeroObjectCacheMixin } from "../utility/cache.mjs";
+import { clamp, isGameV14OrLater } from "../utility/compatibility.mjs";
+import { characteristicValueToDiceParts } from "../utility/damage.mjs";
+import { HeroProgressBar } from "../utility/progress-bar.mjs";
+import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "../utility/round.mjs";
+import {
+    getCharacteristicInfoArrayForActor,
+    getPowerInfo,
+    squelch,
+    tokenEducatedGuess,
+    whisperUserTargetsForActor,
+} from "../utility/util.mjs";
+import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;

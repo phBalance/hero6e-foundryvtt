@@ -1,6 +1,6 @@
+import { HeroRoller } from "../../heroRoller/dice.mjs";
 import { tokenEducatedGuess } from "../../utility/util.mjs";
 import { HeroApplication } from "../api/application.mjs";
-import { HeroRoller } from "../../utility/dice.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;

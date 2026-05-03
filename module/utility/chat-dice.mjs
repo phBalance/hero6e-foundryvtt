@@ -1,4 +1,4 @@
-import { HeroRoller } from "./dice.mjs";
+import { HeroRoller } from "../heroRoller/dice.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 
 const heroRollRegExpString =
