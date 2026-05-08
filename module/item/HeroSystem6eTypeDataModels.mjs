@@ -1083,7 +1083,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             // Kluge to get v14 ForceReplacement to work, by
             // making the difference between actor types different
             // when performing an update to type.
-            // The ForcedReplacement is system requires
+            // The ForcedReplacement of system requires
             // system to be different (which isn't documented in FoundryVTT) #4047
             _type: new StringField({ initial: "null", nullable: false }),
         };
@@ -2018,7 +2018,7 @@ export class HeroActorModel extends HeroObjectCacheMixin(foundry.abstract.TypeDa
             // Kluge to get v14 ForceReplacement to work, by
             // making the difference between actor types different
             // when performing an update to type.
-            // The ForcedReplacement is system requires
+            // The ForcedReplacement of system requires
             // system to be different (which isn't documented in FoundryVTT) #4047
             _type: new StringField({ initial: "pc", nullable: false }),
         };
