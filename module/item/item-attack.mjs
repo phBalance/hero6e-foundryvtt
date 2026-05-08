@@ -2930,11 +2930,10 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         const nnd = avad.adders.find((o) => o.XMLID === "NND"); // Check for ALIAS="All Or Nothing" shouldn't be necessary
         if (nnd && damageData.defenseAvad > 0) {
             // render card
-            const speaker = ChatMessage.getSpeaker({ actor: item.actor });
-
+            const speaker = ChatMessage.getSpeaker({ actor: item.actor, token: targetToken });
             const chatData = {
                 author: game.user._id,
-                content: `${item.name} did no damage.`,
+                content: `${item.name} did no damage to ${targetToken.name}.`,
                 speaker: speaker,
             };
 

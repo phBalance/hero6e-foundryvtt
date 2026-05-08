@@ -4833,6 +4833,17 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return baseAttackItem.baseInfo.attackDefenseVs(baseAttackItem);
         }
 
+        const avad = this.findModsByXmlid("AVAD");
+        if (avad) {
+            const input = avad.INPUT.trim().toUpperCase();
+            if (input.match(/SELF-CONTAINED BREATHING/)) {
+                return "SELFCONTAINEDBREATHING";
+            } else if (input.match(/LIFE SUPPORT/)) {
+                return "LIFESUPPORT";
+            }
+            return input;
+        }
+
         // Adjustment
         if (baseAttackItem.isAdjustment) {
             return "POWERDEFENSE";

@@ -67,6 +67,8 @@ HERO.folderColors = {
 HERO.DEFENSE_ABBREVIATIONS = {
     FLASHDEFENSE: "FlashD",
     POWERDEFENSE: "PowD",
+    SELFCONTAINEDBREATHING: "LS:SCB",
+    LIFESUPPORT: "LS",
 };
 
 HERO.attacksWith = {
@@ -7880,9 +7882,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
-            defenseTagVsAttack: function () {
+            defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 // Only vs AVAD, which is poorly supported
-                return null;
+                return createDefenseProfile(actorItemDefense, attackItem, 1, options);
             },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="LIFESUPPORT" ID="1711934628815" BASECOST="0.0" LEVELS="0" ALIAS="Life Support" POSITION="56" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
