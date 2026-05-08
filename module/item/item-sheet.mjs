@@ -650,10 +650,23 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
             return;
         }
 
-        // Also need to use force replace ==items for this to work in v13
-        await this.item.update({ [`type`]: "power", [`==system`]: this.item.system }, { recursive: false });
+        const targetType = "power";
+        await this.item.update(
+            {
+                type: targetType,
+                system: foundry.utils.mergeObject(this.item.system.toObject(), { _type: targetType }),
+            },
+            { recursive: false },
+        );
+
         for (const childItem of this.item.childItems) {
-            await childItem.update({ [`type`]: "power", [`==system`]: childItem.system }, { recursive: false });
+            await childItem.update(
+                {
+                    type: targetType,
+                    system: foundry.utils.mergeObject(childItem.system.toObject(), { _type: targetType }),
+                },
+                { recursive: false },
+            );
         }
     }
 
@@ -676,9 +689,23 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         }
 
         // Also need to use force replace ==items for this to work in v13
-        await this.item.update({ [`type`]: "equipment", [`==system`]: this.item.system }, { recursive: false });
+        const targetType = "equipment";
+        await this.item.update(
+            {
+                type: targetType,
+                system: foundry.utils.mergeObject(this.item.system.toObject(), { _type: targetType }),
+            },
+            { recursive: false },
+        );
+
         for (const childItem of this.item.childItems) {
-            await childItem.update({ [`type`]: "equipment", [`==system`]: childItem.system }, { recursive: false });
+            await childItem.update(
+                {
+                    type: targetType,
+                    system: foundry.utils.mergeObject(childItem.toObject(), { _type: targetType }),
+                },
+                { recursive: false },
+            );
         }
     }
 }

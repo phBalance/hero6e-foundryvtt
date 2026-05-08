@@ -526,7 +526,10 @@ export function tokenEducatedGuess(options = {}) {
     if (options.token) {
         return options.token;
     }
-    console.warn("Pass actual token when possible");
+
+    if (!squelch(`passActualToken-${options.actor?.id}`)) {
+        console.warn("Pass actual token when possible");
+    }
 
     // ActorId
     options.actorId ??= options.item?.actor?.id;
@@ -555,7 +558,9 @@ export function tokenEducatedGuess(options = {}) {
     }
 
     if (options.actor?.id) {
-        console.warn(`Unable to find token for ${options.actor?.name}`);
+        if (!squelch(`unableToFindTokenFor-${options.actor?.id}`)) {
+            console.warn(`Unable to find token for ${options.actor?.name}`);
+        }
     } else {
         console.log(`${options.actor?.name} has no id, likely a temporary actor. No associated token is expected.`);
     }

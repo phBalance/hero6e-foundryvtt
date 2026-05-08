@@ -7497,10 +7497,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // Update item's type
-        await this.update({
-            type: targetType,
-            "==system": this.system,
-        });
+        await this.update(
+            {
+                type: targetType,
+                system: foundry.utils.mergeObject(this.system.toObject(), { _type: targetType }),
+            },
+            { recursive: false },
+        );
 
         // Update child items
         for (const child of this.childItems) {
