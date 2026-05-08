@@ -1078,7 +1078,14 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             ablative: new HeroNumberField({ initial: 0, integer: true }), // Store # of times threshold has been exceeded
 
             //attackActions: new SetField( new ObjectField()),  // Maybe not
-            //templates: new SetField( new ObjectField()), // Reference for continus END cost
+            //templates: new SetField( new ObjectField()), // Reference for continuous END cost
+
+            // Kluge to get v14 ForceReplacement to work, by
+            // making the difference between actor types different
+            // when performing an update to type.
+            // The ForcedReplacement is system requires
+            // system to be different (which isn't documented in FoundryVTT) #4047
+            _type: new StringField({ initial: "null", nullable: false }),
         };
     }
 
@@ -2007,6 +2014,13 @@ export class HeroActorModel extends HeroObjectCacheMixin(foundry.abstract.TypeDa
             heroicIdentity: new BooleanField({ initial: null, nullable: true }),
             initiativeCharacteristic: new StringField(),
             _hdcXml: new StringField(),
+
+            // Kluge to get v14 ForceReplacement to work, by
+            // making the difference between actor types different
+            // when performing an update to type.
+            // The ForcedReplacement is system requires
+            // system to be different (which isn't documented in FoundryVTT) #4047
+            _type: new StringField({ initial: "pc", nullable: false }),
         };
     }
 
@@ -2064,5 +2078,27 @@ export class HeroActorModel extends HeroObjectCacheMixin(foundry.abstract.TypeDa
         } catch (e) {
             console.error(e);
         }
+    }
+}
+
+export class HeroActorModelPc extends HeroActorModel {
+    static defineSchema() {
+        return {
+            ...super.defineSchema(),
+            // Kluge to get v14 ForceReplacement to work, by
+            // making the difference between actor types different #4047
+            _type: new StringField({ initial: "pc", nullable: false }),
+        };
+    }
+}
+
+export class HeroActorModelNpc extends HeroActorModel {
+    static defineSchema() {
+        return {
+            ...super.defineSchema(),
+            // Kluge to get v14 ForceReplacement to work, by
+            // making the difference between actor types different #4047
+            _type: new StringField({ initial: "npc", nullable: false }),
+        };
     }
 }

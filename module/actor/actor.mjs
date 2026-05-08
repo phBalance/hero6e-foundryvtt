@@ -395,20 +395,18 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         );
     }
 
-    async _changeType(newType) {
+    async _changeType(targetType) {
         // Cannot change unlinked actor type
         if (this.token) {
             return ui.notifications.error(
                 `Cannot change actor type for an unlinked actor. Try again with sidebar prototype token.`,
             );
         }
-        //   system: may not be undefined
-        await this.restoreUnlinkedActorToMatchPrototype();
 
         await this.update(
             {
-                type: newType,
-                [`==system`]: this.system,
+                type: targetType,
+                system: foundry.utils.mergeObject(this.system.toObject(), { _type: targetType }),
             },
             { recursive: false },
         );
@@ -2507,20 +2505,21 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                             // Error: The type of a Document may only be changed if the system field
                             //        is also updated with a ForcedReplacement operator.
                             // A subsequent upload works, not ready for publish.
-                            await this.update({
-                                type: targetType,
-                                system: _replace(this.system.toObject()),
-                            });
-
-                            // await this.update(
-                            //     {
-                            //         type: targetType,
-                            //         system: this.system,
-                            //     },
-                            //     { recursive: false },
-                            // );
+                            await this.update(
+                                {
+                                    type: targetType,
+                                    system: foundry.utils.mergeObject(this.system.toObject(), { _type: targetType }),
+                                },
+                                { recursive: false },
+                            );
                         } else {
-                            await this.update({ type: targetType, [`==system`]: this.system });
+                            await this.update(
+                                {
+                                    type: targetType,
+                                    system: foundry.utils.mergeObject(this.system.toObject(), { _type: targetType }),
+                                },
+                                { recursive: false },
+                            );
                         }
                     } else {
                         ui.notifications.error(`${targetType} is not a valid actor type`);
@@ -2804,10 +2803,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         `${item.name} changed from type=${itemExisting.type} to type=${item.type}`,
                     );
 
-                    // item2[`==system`] = item2.system;
-                    // delete item2.system;
-
-                    await itemExisting.update({ type: item.type, "==system": item.system });
+                    await itemExisting.update(
+                        {
+                            type: item.type,
+                            system: foundry.utils.mergeObject(item.system.toObject(), { _type: item.type }),
+                        },
+                        { recursive: false },
+                    );
                 }
             }
 
