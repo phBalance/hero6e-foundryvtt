@@ -213,7 +213,7 @@ export function determineCostPerActivePoint(targetCharacteristic, targetPower, t
     }
 
     return targetPower
-        ? parseFloat(targetPower?.baseInfo.activePoints / targetPower?.baseInfo.system.LEVELS)
+        ? parseFloat(targetPower.activePoints / targetPower.system.LEVELS)
         : parseFloat(
               characteristic?.baseInfo.cost?.(characteristic) ||
                   characteristic?.baseInfo.costPerLevel?.(characteristic) ||
@@ -366,7 +366,7 @@ function _createNewAdjustmentEffect(options) {
     // If this is 5e then some characteristics are entirely calculated based on
     // those. We only need to worry about 2 (DEX -> OCV & DCV and EGO -> OMCV & DMCV)
     // as figured characteristics aren't adjusted.
-    if (targetActor.system.is5e) {
+    if (targetActor.is5e) {
         if (potentialCharacteristic === "dex") {
             activeEffect.changes.push(_createAEChangeBlock("ocv", targetSystem));
             activeEffect.flags[game.system.id].target.push("ocv");
@@ -925,7 +925,11 @@ export async function performAdjustment(
 /// When one of multiple AE's are faded, the rounding of AP to VALUE may change.
 async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
     const targetActor = activeEffect.parent;
-    const costPerActivePoint = determineCostPerActivePoint(activeEffect.flags[game.system.id]?.key, null, targetActor);
+    const costPerActivePoint = activeEffect.flags[game.system.id]?.initialCostPerActivePoint; //determineCostPerActivePoint(activeEffect.flags[game.system.id]?.key, null, targetActor);
+    if (costPerActivePoint == null) {
+        console.error(`Failed to determine cost per active point for effect: ${activeEffect.name}`);
+        return;
+    }
     if (costPerActivePoint === 1) return;
 
     let _ap = 0;

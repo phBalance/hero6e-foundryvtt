@@ -224,7 +224,7 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
     }
 
     // Items that provide defense and are active
-    const activeDefenses = targetActor.items.filter(
+    let activeDefenses = targetActor.items.filter(
         (o) =>
             (o.baseInfo?.type?.includes("defense") || o.baseInfo?.behaviors?.includes("defense")) &&
             o.isActive &&
@@ -232,6 +232,16 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
             !(options?.ignoreDefenseIds || []).includes(o.id) &&
             !(options?.ignoreDefenseIds || []).includes(o.system.XMLID),
     );
+
+    const avad = attackItem.findModsByXmlid("AVAD");
+    if (avad) {
+        for (const defenseItem of targetActor.items.filter(
+            (item) => item.isActive && ["LIFESUPPORT"].includes(item.system.XMLID),
+        )) {
+            activeDefenses.push(defenseItem);
+        }
+    }
+
     for (const defenseItem of activeDefenses) {
         const defenseProfile = getItemDefenseVsAttack(defenseItem, attackItem, options);
 
@@ -392,14 +402,13 @@ export async function getConditionalDefenses(token, item, avad) {
     let ignoreDefenseIds = [];
     let conditionalDefenses = token.actor.items.filter(
         (o) =>
-            (o.baseInfo?.type?.includes("defense") || o.baseInfo?.type?.includes("defense")) &&
-            (o.isActive || o.effects.find(() => true)?.disabled === false) &&
-            (o.modifiers.find((p) =>
+            o.isActive &&
+            o.baseInfo?.type?.includes("defense") &&
+            o.modifiers.find((p) =>
                 ["ONLYAGAINSTLIMITEDTYPE", "CONDITIONALPOWER", "LIMITEDPOWER", "ONLYAGAINSTLIMITEDTYPE"].includes(
                     p.XMLID,
                 ),
-            ) ||
-                avad),
+            ),
     );
 
     // Remove conditional defenses that provide no defense
@@ -413,16 +422,18 @@ export async function getConditionalDefenses(token, item, avad) {
 
     // AVAD Life Support
     if (avad) {
-        const lifeSupport = token.actor.items.filter((o) => o.system.XMLID === "LIFESUPPORT");
-        conditionalDefenses.push(...lifeSupport);
+        const avadItems = token.actor.items.filter(
+            (o) => o.isActive && ["LIFESUPPORT", "MENTALDEFENSE"].includes(o.system.XMLID),
+        );
+        conditionalDefenses.push(...avadItems);
     }
 
     // AVAD characteristic defenses (PD/ED)
     if (avad) {
-        const key = item.system.INPUT.trim().toUpperCase();
+        const key = avad.INPUT.trim().toUpperCase(); //item.system.INPUT.trim().toUpperCase();
         const char = token.actor.system[key];
         if (!char) {
-            console.error(`unhandled AVAD defense vs "${key}"`);
+            console.warn(`possible unhandled AVAD defense vs "${key}"`);
         } else {
             if (!char.baseInfo) {
                 console.error(`missing baseInfo for "${key}", skipping conditional defense check`);

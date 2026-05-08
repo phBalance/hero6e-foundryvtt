@@ -4833,6 +4833,17 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return baseAttackItem.baseInfo.attackDefenseVs(baseAttackItem);
         }
 
+        const avad = this.findModsByXmlid("AVAD");
+        if (avad) {
+            const input = avad.INPUT.trim().toUpperCase();
+            if (input.match(/SELF-CONTAINED BREATHING/)) {
+                return "SELFCONTAINEDBREATHING";
+            } else if (input.match(/LIFE SUPPORT/)) {
+                return "LIFESUPPORT";
+            }
+            return input;
+        }
+
         // Adjustment
         if (baseAttackItem.isAdjustment) {
             return "POWERDEFENSE";
@@ -5276,9 +5287,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // TODO: Custom adjustedLevels in config.mjs for things that are all or nothing?
         let _adjustedLevels = parseInt(this.system.LEVELS || 0);
 
-        // Notice that we are only looking for DRAINS on "this" item.
+        // Notice that we are only looking for temporary DRAINS on "this" item.
+        // Unfortunately, the "generic" DRIAN is on the actor, not the item.
         // If there are more than one item with the same XMLID then we don't know which item is getting the drain.
-        for (const ae of this.effects) {
+        for (const ae of this.actor.temporaryEffects) {
             //console.log(ae);
             for (const change of ae.changes) {
                 if (change.key.match(new RegExp(this.system.XMLID, "i"))) {
