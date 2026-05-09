@@ -259,6 +259,10 @@ export class HeroRoller {
         return this._type;
     }
 
+    is5eRoll() {
+        return this._is5eRoll;
+    }
+
     makeBasicRoll(apply = true) {
         if (apply) {
             this._type = HeroRoller.ROLL_TYPE.BASIC;
