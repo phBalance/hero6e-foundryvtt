@@ -1491,16 +1491,6 @@ export class HeroSystem6eItemTalent extends HeroSystem6eItemTypeDataModelProps {
     }
 }
 
-export class HeroSystem6eItemComplication extends HeroSystem6eItemTypeDataModelProps {
-    /// https://foundryvtt.wiki/en/development/api/DataModel
-
-    static defineSchema() {
-        //const { ObjectField, StringField, ArrayField, EmbeddedDataField } = foundry.data.fields;
-        // Note that the return is just a simple object
-        return { ...super.defineSchema() };
-    }
-}
-
 export class HeroSystem6eItemMisc extends HeroSystem6eItemTypeDataModelProps {
     /// https://foundryvtt.wiki/en/development/api/DataModel
 
