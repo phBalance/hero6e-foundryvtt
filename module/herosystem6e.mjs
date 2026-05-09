@@ -40,6 +40,10 @@ import {
     HeroSystem6eItemEquipment,
     HeroSystem6eItemManeuver,
     HeroSystem6eItemMartialArt,
+    HeroSystem6eItemPerk,
+    HeroSystem6eItemPower,
+    HeroSystem6eItemSkill,
+    HeroSystem6eItemTalent,
 } from "./item/HeroSystem6eTypeDataModels.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
 import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
