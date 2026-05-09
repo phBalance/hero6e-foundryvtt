@@ -1,10 +1,14 @@
-import { capitalizeFirstLetter, generateChatMessage } from "./chat-output.mjs";
+import {
+    capitalizeFirstLetter,
+    createTemporaryItemAttackActionForApplyingDamage,
+    generateChatMessage,
+} from "./chat-output.mjs";
 import { HeroRoller } from "./dice.mjs";
 
 import { HEROSYS } from "../herosystem6e.mjs";
 
 const heroRollRegExpString =
-    "(?<cmd>\\/heroroll)(?:[\\s]+)(?<nonCmd>(?<numDice>[\\d\\.]+)d(?<diceSize>[\\d]+)?(?<numTerm>(?<numTermSign>[-+]?)[\\d]+)?(?<flavourTerm>\\[(?<flavourTermContent>(?<heroSystemVersion>[56]?)(?<hitLoc>h)?(?<flavour>.*))\\])?)(?<flavourModifiers>\\[[eprh]\\])?";
+    "(?<cmd>\\/heroroll)(?:[\\s]+)(?<nonCmd>(?<numDice>[\\d\\.]+)d(?<diceSize>[\\d]+)?(?<numTerm>(?<numTermSign>[-+]?)[\\d]+)?(?<flavourTerm>\\[(?<flavourTermContent>(?<heroSystemVersion>[56]?)(?<hitLoc>h)?(?<flavour>.*?))\\])?)(?<flavourDefenseTerm>\\[(?<flavourDefenseType>[emp])\\])?";
 const chatHeroRollRegExpString = `^${heroRollRegExpString}$`;
 const inlineHeroRollRegExpStr = `\\[\\[${heroRollRegExpString}\\]\\]`;
 
@@ -23,8 +27,8 @@ async function onInlineHeroRollClick(event) {
     match.groups = JSON.parse(a.dataset.groups);
     match.input = a.dataset.input;
 
-    const heroRoller = buildHeroRoller(match);
-    await rollAndGenerateChatMessage(heroRoller);
+    const { heroRoller, defenseType } = buildDamageInformation(match);
+    await rollAndGenerateChatMessage(heroRoller, defenseType);
 }
 
 /**
@@ -44,10 +48,10 @@ async function heroRollTextEditorEnricher(match /*, options*/) {
         a.dataset.groups = JSON.stringify(match.groups);
         a.dataset.input = JSON.stringify(match.input);
 
-        const heroRoller = buildHeroRoller(match);
+        const { heroRoller, defenseType } = buildDamageInformation(match);
 
         // Add a link that looks similar to Foundry's inline roll link
-        const linkActionDescription = `${match[2].replace(/\[.*\]/, "")} ${heroRoller.getType()} roll ${heroRoller.hitLocationValid() ? " with hit location" : ""}`;
+        const linkActionDescription = `${match[2].replace(/\[.*\]/, "")} ${defenseType} ${heroRoller.getType()} roll ${heroRoller.hitLocationValid() ? " with hit location" : ""}`;
         a.innerHTML = `<i class="fas fa-dice-d6"></i> ${linkActionDescription}`;
 
         return a;
@@ -117,7 +121,7 @@ Hooks.on("chatMessage", function (_this, message /*, _chatData*/) {
  *
  * @returns {HeroRoller}
  */
-function buildHeroRoller(chatMessageCmd) {
+function buildDamageInformation(chatMessageCmd) {
     let numericTerm = parseFloat(chatMessageCmd.groups.numTerm || 0);
     const negativeTermWithDice = chatMessageCmd.groups.numDice && numericTerm < 0; // e.g. 1d6-1
     if (negativeTermWithDice) {
@@ -183,6 +187,7 @@ function buildHeroRoller(chatMessageCmd) {
             break;
 
         default:
+            // Unknown or not provided
             heroRoller.makeBasicRoll();
             break;
     }
@@ -197,7 +202,26 @@ function buildHeroRoller(chatMessageCmd) {
     const useHitLocationsSide = game.settings.get(HEROSYS.module, "hitLocTracking") === "all";
     heroRoller.addToHitLocation(useHitLocations, "none", useHitLocationsSide, "none");
 
-    return heroRoller;
+    let defenseType = "PD";
+    switch (chatMessageCmd.groups.flavourDefenseType?.toLowerCase()) {
+        case "e":
+            defenseType = "ED";
+            break;
+
+        case "m":
+            defenseType = "MD";
+            break;
+
+        case "p":
+            defenseType = "PD";
+            break;
+
+        default:
+            // Unknown or not provided
+            break;
+    }
+
+    return { heroRoller, defenseType };
 }
 
 /**
@@ -205,13 +229,14 @@ function buildHeroRoller(chatMessageCmd) {
  *
  * @param {HeroRoller} heroRoller
  */
-async function rollAndGenerateChatMessage(heroRoller) {
+async function rollAndGenerateChatMessage(heroRoller, defenseType) {
     await heroRoller.roll();
 
     // Setup flavour text with capitalized first letter
-    const chatCardFlavour = `${capitalizeFirstLetter(heroRoller.getType())} attack ${heroRoller.hitLocationValid() ? ` to ${heroRoller.getHitLocation().fullName}` : ""}`;
+    const chatCardFlavour = `${capitalizeFirstLetter(heroRoller.getType())} ${defenseType} attack ${heroRoller.hitLocationValid() ? ` to ${heroRoller.getHitLocation().fullName}` : ""}`;
+    const action = createTemporaryItemAttackActionForApplyingDamage(heroRoller, defenseType);
 
-    return generateChatMessage(heroRoller, chatCardFlavour, null);
+    return generateChatMessage(heroRoller, chatCardFlavour, action);
 }
 
 /**
@@ -222,6 +247,6 @@ async function rollAndGenerateChatMessage(heroRoller) {
  * @returns
  */
 async function doRollAndGenerateChatMessage(chatMessageCmd) {
-    const heroRoller = buildHeroRoller(chatMessageCmd);
-    return rollAndGenerateChatMessage(heroRoller);
+    const { heroRoller, defenseType } = buildDamageInformation(chatMessageCmd);
+    return rollAndGenerateChatMessage(heroRoller, defenseType);
 }
