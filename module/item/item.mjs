@@ -732,24 +732,24 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     get heroValidation() {
-        const _heroValidations = [];
+        const heroValidations = [];
 
         if (this.baseInfo) {
             if (this.baseInfo.heroValidation) {
                 const validationArray = this.baseInfo.heroValidation(this);
                 if (Array.isArray(validationArray) && validationArray.length) {
-                    _heroValidations.push(...validationArray.map((m) => ({ ...m, itemId: this.id })));
+                    heroValidations.push(...validationArray.map((m) => ({ ...m, itemId: this.id })));
                 }
             }
 
             for (const modifier of this.modifiers.filter((m) => m.baseInfo?.heroValidation)) {
                 const validationArray = modifier.baseInfo.heroValidation(modifier, this);
                 if (Array.isArray(validationArray) && validationArray.length) {
-                    _heroValidations.push(...validationArray.map((m) => ({ ...m, itemId: this.id })));
+                    heroValidations.push(...validationArray.map((m) => ({ ...m, itemId: this.id })));
                 }
             }
         } else {
-            _heroValidations.push({
+            heroValidations.push({
                 property: "XMLID",
                 message: `${this.detailedName()} does not appear to be a proper (known) ${this.is5e ? `5e` : `6e`} ${this.type}`,
                 severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
@@ -788,7 +788,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         if (this.isAdjustment) {
             const result = this.splitAdjustmentSourceAndTarget();
             if (!result.valid) {
-                _heroValidations.push({
+                heroValidations.push({
                     property: "INPUT",
                     message: invalidAdjustmentMessageBasedOnInput(this),
                     example: invalidAdjustmentExampleBasedOnInput(this),
@@ -800,7 +800,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     result.reducesArray.length > maxAllowedEffects.maxReduces ||
                     result.enhancesArray.length > maxAllowedEffects.maxEnhances
                 ) {
-                    _heroValidations.push({
+                    heroValidations.push({
                         property: "INPUT",
                         message: `Has too many adjustment targets defined`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
@@ -811,12 +811,29 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // Actor specific checks
         if (this.actor) {
-            _heroValidations.push(...this.validationForActor(this.actor));
+            heroValidations.push(...this.validationForActor(this.actor));
+        }
+
+        // Is this a slot of a multipower?
+        const parentItem = this.parentItem;
+        if (parentItem?.system.XMLID === "MULTIPOWER") {
+            // Active cost of slots must be less than or equal to the base cost of the multipower reserve (excluding reserve advantages)
+            const multipowerReserveBaseCost = parentItem.system.BASECOST;
+            const slotActivePointCostWithoutInheritedAdvantages = this._activePointsWithoutExclusionList(
+                parentItem.advantages.map((advantage) => advantage.XMLID),
+            );
+            if (slotActivePointCostWithoutInheritedAdvantages > multipowerReserveBaseCost) {
+                heroValidations.push({
+                    property: "active points",
+                    message: `The active point cost, excluding advantages bought against the multipower reserve, of ${slotActivePointCostWithoutInheritedAdvantages} points may not be greater than the multipower reserve's base cost of ${multipowerReserveBaseCost} points.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                });
+            }
         }
 
         const e = this.system.debugModelProps();
         if (e) {
-            _heroValidations.push({
+            heroValidations.push({
                 //property:
                 message: `PLEASE REPORT THIS ERROR: ${e}`,
                 severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
@@ -824,7 +841,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             });
         }
 
-        return _heroValidations;
+        return heroValidations;
     }
 
     /**
@@ -5538,6 +5555,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 ap = Math.max(1, ap);
             }
         }
+
         return ap;
     }
 
