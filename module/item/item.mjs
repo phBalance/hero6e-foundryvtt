@@ -821,13 +821,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         if (parentItem?.system.XMLID === "MULTIPOWER") {
             // Active cost of slots must be less than or equal to the base cost of the multipower reserve (excluding reserve advantages)
             const multipowerReserveBaseCost = parentItem.system.BASECOST;
-            const slotActivePointCostWithoutInheritedAdvantages = this._activePointsWithoutExclusionList(
-                parentItem.advantages.map((advantage) => advantage.XMLID),
-            );
+            const slotActivePointCostWithoutInheritedAdvantages = this.activePointsWithoutInheritedAdvantages;
+
             if (slotActivePointCostWithoutInheritedAdvantages > multipowerReserveBaseCost) {
                 heroValidations.push({
                     property: "active points",
-                    message: `The active point cost, excluding advantages bought against the multipower reserve, of ${slotActivePointCostWithoutInheritedAdvantages} points may not be greater than the multipower reserve's base cost of ${multipowerReserveBaseCost} points.`,
+                    message: `This slot's active point cost (excluding advantages bought against the multipower's reserve) of ${slotActivePointCostWithoutInheritedAdvantages} points may not be greater than the multipower reserve's base cost of ${multipowerReserveBaseCost} points.`,
                     severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                 });
             }
@@ -1030,9 +1029,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // Updating item.name with NAME/ALIAS/XMLID
-        const _NAME = changes.system.NAME ?? this.system.NAME;
-        const _ALIAS = changes.system.ALIAS ?? this.system.ALIAS;
-        const _XMLID = changes.system.XMLID ?? this.system.XMLID;
+        const _NAME = changes.system?.NAME ?? this.system.NAME;
+        const _ALIAS = changes.system?.ALIAS ?? this.system.ALIAS;
+        const _XMLID = changes.system?.XMLID ?? this.system.XMLID;
         const newName = _NAME || _ALIAS || _XMLID;
         if (this.name !== newName) {
             //console.log(`Updating name from ${this.name} to ${newName}`);
@@ -5533,12 +5532,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return _cost ? -_cost : 0;
     }
 
-    get _activePoints() {
-        if (this.baseInfo?.activePoints) {
-            return this.baseInfo.activePoints(this);
-        }
-
-        const advantageCosts = 1 + this._advantageCost;
+    activePointsFromAdvantageCosts(advantageCosts) {
         let ap = this._basePoints + this._addersCost;
 
         // We must round only if we multiply (FRed pg 7, 6e vol 1 pg 12)
@@ -5559,6 +5553,33 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         return ap;
+    }
+
+    /**
+     * Useful for things like multipower where the slot's active point cost should not consider any advantages that are on the reserve.
+     * NOTE: Hero Designer INCORRECTLY uses this as the number of "active points" on a multipower's slot if the multipower has a "common modifier" advantage on the multipower's reserve.
+     */
+    get activePointsWithoutInheritedAdvantages() {
+        // PH: FIXME: This has to be removed.
+        if (this.baseInfo?.activePoints) {
+            return this.baseInfo.activePoints(this);
+        }
+
+        // Consider only the advantages on this modifier.
+        const advantageCosts = this.system.MODIFIER.reduce((accum, mod) => accum + Math.max(0, mod.cost), 1);
+
+        return this.activePointsFromAdvantageCosts(advantageCosts);
+    }
+
+    get _activePoints() {
+        // PH: FIXME: This has to be removed.
+        if (this.baseInfo?.activePoints) {
+            return this.baseInfo.activePoints(this);
+        }
+
+        const advantageCosts = 1 + this._advantageCost;
+
+        return this.activePointsFromAdvantageCosts(advantageCosts);
     }
 
     get _activePointsForEnd() {
