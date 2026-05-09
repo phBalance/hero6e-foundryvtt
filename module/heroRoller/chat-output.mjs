@@ -2,6 +2,8 @@
  * Generate a chat card for /heroroll or the GenericRoller.
  *
  * @param {HeroRoller} heroRoller
+ * @param {string} chatCardFlavour
+ * @param {string} extraHtml
  */
 export async function generateChatMessage(heroRoller, chatCardFlavour, extraHtml) {
     // PH: FIXME: should we merge the roller output flavour text between generic and /heroroll?

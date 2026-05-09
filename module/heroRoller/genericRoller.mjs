@@ -295,13 +295,6 @@ export class GenericRoller {
                     `;
         }
 
-        const chatData = {
-            style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-            rolls: heroRoller.rawRolls(),
-            author: game.user._id,
-            content: `${cardHtml}`,
-        };
-
-        return ChatMessage.create(chatData);
+        return generateChatMessage(heroRoller, chatCardFlavour, extraHtml);
     }
 }

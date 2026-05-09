@@ -4,7 +4,7 @@ import { HeroRoller } from "./dice.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 
 const heroRollRegExpString =
-    "(?<cmd>\\/heroroll)(?:[\\s]+)(?<nonCmd>(?<numDice>[\\d\\.]+)d(?<diceSize>[\\d]+)?(?<numTerm>(?<numTermSign>[-+]?)[\\d]+)?(?<flavourTerm>\\[(?<flavourTermContent>(?<heroSystemVersion>[56]?)(?<hitLoc>h)?(?<flavour>.*))\\])?)";
+    "(?<cmd>\\/heroroll)(?:[\\s]+)(?<nonCmd>(?<numDice>[\\d\\.]+)d(?<diceSize>[\\d]+)?(?<numTerm>(?<numTermSign>[-+]?)[\\d]+)?(?<flavourTerm>\\[(?<flavourTermContent>(?<heroSystemVersion>[56]?)(?<hitLoc>h)?(?<flavour>.*))\\])?)(?<flavourModifiers>\\[[eprh]\\])?";
 const chatHeroRollRegExpString = `^${heroRollRegExpString}$`;
 const inlineHeroRollRegExpStr = `\\[\\[${heroRollRegExpString}\\]\\]`;
 
@@ -210,18 +210,8 @@ async function rollAndGenerateChatMessage(heroRoller) {
 
     // Setup flavour text with capitalized first letter
     const chatCardFlavour = `${heroRoller.getType().charAt(0).toUpperCase() + heroRoller.getType().slice(1)} attack ${heroRoller.hitLocationValid() ? ` to ${heroRoller.getHitLocation().fullName}` : ""}`;
-    const cardHtml = await heroRoller.render(chatCardFlavour);
 
-    const speaker = ChatMessage.getSpeaker();
-    const chatData = {
-        style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-        rolls: heroRoller.rawRolls(),
-        author: game.user._id,
-        content: cardHtml,
-        speaker: speaker,
-    };
-
-    await ChatMessage.create(chatData);
+    return generateChatMessage(heroRoller, chatCardFlavour, "");
 }
 
 /**
