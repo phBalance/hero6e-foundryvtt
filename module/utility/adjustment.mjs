@@ -784,14 +784,14 @@ export async function performAdjustment(
         // Negative Adjustment
         else if (thisAttackActivePointsEffect < 0) {
             const change = _createAEChangeBlock(potentialCharacteristic, targetSystem);
-            const previousActivePointsForThisXmlid = targetActor.temporaryEffects.reduce(
-                (a, c) =>
-                    a +
-                    (c.changes.find((cc) => cc.key === change.key)
-                        ? c.flags[game.system.id]?.adjustmentActivePoints
-                        : 0),
-                0,
-            );
+            const previousActivePointsForThisXmlid = targetActor.temporaryEffects
+                .filter((ae) => ae.flags[game.system.id].type === "adjustment")
+                .reduce((a, c) => {
+                    const _adjustedActivePoints = c.changes.find((cc) => cc?.key === change.key)
+                        ? c.flags[game.system.id].adjustmentActivePoints
+                        : 0;
+                    return a + _adjustedActivePoints;
+                }, 0);
             activeEffect.flags[game.system.id].adjustmentActivePoints = thisAttackActivePointsEffect;
             const finalAp =
                 activeEffect.flags[game.system.id].adjustmentActivePoints +

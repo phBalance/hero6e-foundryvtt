@@ -45,7 +45,6 @@ import {
     HeroSystem6eItemPerk,
     HeroSystem6eItemMartialArt,
     HeroSystem6eItemDisadvantage,
-    HeroSystem6eItemComplication,
     HeroItemCharacteristic,
 } from "./item/HeroSystem6eTypeDataModels.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
@@ -216,7 +215,6 @@ Hooks.once("init", async function () {
         perk: HeroSystem6eItemPerk,
         martialart: HeroSystem6eItemMartialArt,
         disadvantage: HeroSystem6eItemDisadvantage,
-        complication: HeroSystem6eItemComplication,
         characteristic: HeroItemCharacteristic,
     });
 
