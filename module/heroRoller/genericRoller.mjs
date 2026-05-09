@@ -1,9 +1,9 @@
 import { generateChatMessage } from "./chat-output.mjs";
+import { HeroRoller } from "./dice.mjs";
 
-import { HEROSYS } from "../herosystem6e.mjs";
-import { actionToJSON, Attack } from "../utility/attack.mjs";
-import { dehydrateAttackItem } from "../item/item-attack.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
+import { HEROSYS } from "../herosystem6e.mjs";
+import { Attack } from "../utility/attack.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -80,7 +80,7 @@ export class GenericRoller {
         }
 
         // Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
-        const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
+        const heroRoller = new HeroRoller()
             .addNumber(Math.clamp(parseInt(userSelection.ocv) || 0, -99, 99), "OCV")
             .addNumber(11, "Base to hit")
             .addDice(-3)
@@ -192,7 +192,7 @@ export class GenericRoller {
             includeHitLocation && (damageType === "NORMAL" || damageType === "KILLING");
 
         // Luck and unluck don't support partial dice (full dice or nothing)
-        const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
+        const heroRoller = new HeroRoller()
             .modifyTo5e(is5eAttack)
 
             .makeNormalRoll(damageType === "NORMAL")
@@ -254,6 +254,9 @@ export class GenericRoller {
             xml = foundry.utils.deepClone(powers.find((power) => power.key === "LUCK").xml);
         } else if (userSelection.damageType === "UNLUCK") {
             xml = foundry.utils.deepClone(powers.find((power) => power.key === "UNLUCK").xml);
+        } else {
+            ui.notifications.error(`Generic roller not working for ${damageType}`);
+            return;
         }
 
         let item = null;
@@ -268,33 +271,11 @@ export class GenericRoller {
             }
         }
 
-        if (!item) {
-            ui.notifications.error(`Generic roller not working for ${damageType}`);
-            return;
-        }
-
-        // PH: FIXME: Should put this into handlebars
         const chatCardFlavour = `Roll Generic ${damageTypeString} Damage`;
-        let extraHtml = "";
+        const action = [HeroRoller.ROLL_TYPE.NORMAL, HeroRoller.ROLL_TYPE.KILLING].includes(heroRoller.getType())
+            ? Attack.buildActionInfo(item, [], {})
+            : null;
 
-        if (["NORMAL", "KILLING"].includes(damageType)) {
-            const action = Attack.buildActionInfo(item, [], {});
-            extraHtml += `
-                        <div data-visibility="gm">
-                            <button class="generic-roller-apply-damage"
-                                title="Apply damage to selected tokens."
-                                ${actor ? `data-actor-uuid='${actor.uuid}'` : ""}
-                                ${item ? `data-item-json-str='${dehydrateAttackItem(item)}'` : ""}
-                                data-action-data='${actionToJSON(action)}'
-                                data-roller='${heroRoller.toJSON()}'
-                                data-target-tokens='${JSON.stringify([])}'
-                            >
-                                Apply ${damageTypeString} Damage
-                            </button>
-                        </div>
-                    `;
-        }
-
-        return generateChatMessage(heroRoller, chatCardFlavour, extraHtml);
+        return generateChatMessage(heroRoller, chatCardFlavour, action);
     }
 }

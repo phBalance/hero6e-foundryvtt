@@ -1,4 +1,4 @@
-import { generateChatMessage } from "./chat-output.mjs";
+import { capitalizeFirstLetter, generateChatMessage } from "./chat-output.mjs";
 import { HeroRoller } from "./dice.mjs";
 
 import { HEROSYS } from "../herosystem6e.mjs";
@@ -209,9 +209,9 @@ async function rollAndGenerateChatMessage(heroRoller) {
     await heroRoller.roll();
 
     // Setup flavour text with capitalized first letter
-    const chatCardFlavour = `${heroRoller.getType().charAt(0).toUpperCase() + heroRoller.getType().slice(1)} attack ${heroRoller.hitLocationValid() ? ` to ${heroRoller.getHitLocation().fullName}` : ""}`;
+    const chatCardFlavour = `${capitalizeFirstLetter(heroRoller.getType())} attack ${heroRoller.hitLocationValid() ? ` to ${heroRoller.getHitLocation().fullName}` : ""}`;
 
-    return generateChatMessage(heroRoller, chatCardFlavour, "");
+    return generateChatMessage(heroRoller, chatCardFlavour, null);
 }
 
 /**
