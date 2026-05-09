@@ -1,9 +1,7 @@
-import { generateChatMessage } from "./chat-output.mjs";
+import { generateChatMessage, createTemporaryItemAttackActionForApplyingDamage } from "./chat-output.mjs";
 import { HeroRoller } from "./dice.mjs";
 
-import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
-import { Attack } from "../utility/attack.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -167,25 +165,20 @@ export class GenericRoller {
         }
 
         const damageTypeString = userSelection.damageType.replace("_", " ");
-        const damageType = userSelection.damageType.replace(/_[EMP]D/, "");
+        const damageMatch = userSelection.damageType.match(/(.*?)_?([EMP]D)?$/);
+        const damageType = damageMatch[1];
+        const defenseType = damageMatch[2];
 
         const customStunMultiplierSetting = game.settings.get(
             game.system.id,
             "NonStandardStunMultiplierForKillingAttackBackingSetting",
         );
 
-        // Canvas selected token? If so, use that as the actor
-        const actor = canvas.tokens.controlled.at(0)?.actor;
         // Roll as if 5e or 6e?
         const DefaultEdition = game.settings.get(HEROSYS.module, "DefaultEdition");
-        const is5eAttack = actor !== undefined ? canvas.tokens.controlled.at(0).actor.is5e : DefaultEdition === "five";
-        const tempActor = new HeroSystem6eActor({
-            name: "Generic Actor",
-            type: "npc",
-        });
-        tempActor.system.is5e = is5eAttack;
-
-        // NOTE: No application of damage for anything other than normal and killing attacks
+        const is5eAttack = canvas.tokens.controlled.at(0)?.actor
+            ? canvas.tokens.controlled.at(0).actor.is5e
+            : DefaultEdition === "five";
 
         // Only normal and killing attacks support hit locations
         const damageTypeSupportsHitLocation =
@@ -237,44 +230,8 @@ export class GenericRoller {
 
         await heroRoller.roll();
 
-        const powers = is5eAttack ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
-
-        let xml = "";
-        if (userSelection.damageType === "NORMAL_PD") {
-            xml = powers.find((power) => power.key === "ENERGYBLAST").xml.replace(/ INPUT="[PE]D"/, ` INPUT="PD"`);
-        } else if (userSelection.damageType === "NORMAL_ED") {
-            xml = powers.find((power) => power.key === "ENERGYBLAST").xml.replace(/ INPUT="[EP]D"/, ` INPUT="ED"`);
-        } else if (userSelection.damageType === "NORMAL_MD") {
-            xml = foundry.utils.deepClone(powers.find((power) => power.key === "EGOATTACK").xml);
-        } else if (userSelection.damageType === "KILLING_PD") {
-            xml = powers.find((power) => power.key === "RKA").xml.replace(/ INPUT="[EP]D"/, ` INPUT="PD"`);
-        } else if (userSelection.damageType === "KILLING_ED") {
-            xml = powers.find((power) => power.key === "RKA").xml.replace(/ INPUT="[EP]D"/, ` INPUT="ED"`);
-        } else if (userSelection.damageType === "LUCK") {
-            xml = foundry.utils.deepClone(powers.find((power) => power.key === "LUCK").xml);
-        } else if (userSelection.damageType === "UNLUCK") {
-            xml = foundry.utils.deepClone(powers.find((power) => power.key === "UNLUCK").xml);
-        } else {
-            ui.notifications.error(`Generic roller not working for ${damageType}`);
-            return;
-        }
-
-        let item = null;
-
-        if (xml) {
-            item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(xml, actor || tempActor), {
-                parent: actor || tempActor,
-            });
-
-            if (!actor) {
-                tempActor.items.set(item.system.XMLID, item);
-            }
-        }
-
         const chatCardFlavour = `Roll Generic ${damageTypeString} Damage`;
-        const action = [HeroRoller.ROLL_TYPE.NORMAL, HeroRoller.ROLL_TYPE.KILLING].includes(heroRoller.getType())
-            ? Attack.buildActionInfo(item, [], {})
-            : null;
+        const action = createTemporaryItemAttackActionForApplyingDamage(heroRoller, defenseType);
 
         return generateChatMessage(heroRoller, chatCardFlavour, action);
     }
