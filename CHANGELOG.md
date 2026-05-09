@@ -1,6 +1,6 @@
 # Releases
 
-### Version 4.3.6 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.6 20260509 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - ActorSheetV2 support for Hero Designer override text (in blue). [#4119](https://github.com/dmdorman/hero6e-foundryvtt/issues/4119)
 
