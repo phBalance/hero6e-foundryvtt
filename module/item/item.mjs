@@ -1,5 +1,8 @@
-import { HEROSYS } from "../herosystem6e.mjs";
+import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
+import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
+import { HeroRoller } from "../heroRoller/dice.mjs";
+import { HEROSYS } from "../herosystem6e.mjs";
 import {
     collectActionDataBeforeToHitOptions,
     rollEffect,
@@ -8,7 +11,8 @@ import {
     userInteractiveVerifyOptionallyPromptThenSpendResources,
 } from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
-import { activateManeuver, maneuverCanBeAbortedTo, enforceManeuverLimits, maneuverHasBlockTrait } from "./maneuver.mjs";
+import { tagObjectForPersistence } from "../migration.mjs";
+import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import {
     adjustmentSourcesPermissive,
     adjustmentSourcesStrict,
@@ -16,15 +20,6 @@ import {
 } from "../utility/adjustment.mjs";
 import { HeroObjectCacheMixin } from "../utility/cache.mjs";
 import { foundryVttParseUuid } from "../utility/compatibility.mjs";
-import {
-    foundryVttDeleteProperty,
-    getPowerInfo,
-    hdcTimeOptionIdToSeconds,
-    squelch,
-    tokenEducatedGuess,
-    whisperUserTargetsForActor,
-} from "../utility/util.mjs";
-import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import {
     buildStrengthItem,
     calculateCpPerDieForItem,
@@ -37,15 +32,20 @@ import {
     isManeuverThatDoesReplaceableDamageType,
     isRangedMartialManeuver,
 } from "../utility/damage.mjs";
-import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
-import { HeroRoller } from "../utility/dice.mjs";
-import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
-import { overrideCanAct } from "../settings/settings-helpers.mjs";
+import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "../utility/round.mjs";
+import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
+import {
+    foundryVttDeleteProperty,
+    getPowerInfo,
+    hdcTimeOptionIdToSeconds,
+    squelch,
+    tokenEducatedGuess,
+    whisperUserTargetsForActor,
+} from "../utility/util.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
-import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
-import { tagObjectForPersistence } from "../migration.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
+import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);

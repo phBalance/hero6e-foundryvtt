@@ -1,6 +1,10 @@
 # Releases
 
-### Version 4.3.6 20260509 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.7 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- /heroroll now supports applying normal or killing damage to selected tokens like the generic roller. See the [README.md](https://github.com/dmdorman/hero6e-foundryvtt/blob/main/README.md#manual-rolling) for more details. [#4146](https://github.com/dmdorman/hero6e-foundryvtt/issues/4146)
+
+### Version 4.3.6 20260509
 
 - ActorSheetV2 support for Hero Designer override text (in blue). [#4119](https://github.com/dmdorman/hero6e-foundryvtt/issues/4119)
 

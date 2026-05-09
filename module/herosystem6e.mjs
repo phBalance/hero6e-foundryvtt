@@ -1,66 +1,66 @@
 import { HeroSystem6eTemplateLayer } from "./canvas-layer.mjs";
 import * as chat from "./chat.mjs";
 import { HeroSystem6eCombat } from "./combat.mjs";
-import { HERO } from "./config.mjs";
-import HeroSystem6eMeasuredTemplate from "./measuretemplate.mjs";
 import { HeroSystem6eCombatTracker } from "./combatTracker.mjs";
 import { HeroSystem6eCombatant } from "./combatant.mjs";
-import { HeroRuler } from "./heroRuler.mjs";
-import { HeroTokenRuler } from "./heroTokenRuler.mjs";
-import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
-import { migrateWorld } from "./migration.mjs";
-import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
 import { HeroSystem6eCompendium } from "./compendium.mjs";
 import { HeroSystem6eCompendiumDirectory } from "./compendiumDirectory.mjs";
-import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
-import { setPerceptionModes } from "./herovision/vision.mjs";
-import { HeroPointVisionSource } from "./herovision/vision.mjs";
+import { HERO } from "./config.mjs";
 import { EffectsPanel } from "./effects-panel.mjs";
-import { GenericRoller } from "./genericRoller.mjs";
-import { HeroSocketHandler } from "./heroSocketHandler.mjs";
+import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
 import { HeroSystem6eChatMessage } from "./heroChatMessage.mjs";
+import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
+import { HeroRuler } from "./heroRuler.mjs";
+import { HeroSocketHandler } from "./heroSocketHandler.mjs";
+import { HeroTokenRuler } from "./heroTokenRuler.mjs";
+import { HeroPointVisionSource, setPerceptionModes } from "./herovision/vision.mjs";
+import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
+import HeroSystem6eMeasuredTemplate from "./measuretemplate.mjs";
+import { migrateWorld } from "./migration.mjs";
 
-import { HeroSystem6eActor } from "./actor/actor.mjs";
-import { HeroSystemActorSheet } from "./actor/actor-sheet.mjs";
-import { HeroSystemActorSheetV2 } from "./applications/actor/actor-sheet-v2.mjs";
-import { HeroSystemActorSavuoriSheet } from "./actor/actor-savuori-sheet.mjs";
-import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./token/actor-token.mjs";
+import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
 import {
     HeroSystem6eActorActiveEffects,
     HeroSystem6eActorActiveEffectsSystemData,
 } from "./actor/actor-active-effects.mjs";
-import { HeroSystemActiveEffectConfig } from "./actor/active-effect-config.mjs";
+import { HeroSystemActorSavuoriSheet } from "./actor/actor-savuori-sheet.mjs";
+import { HeroSystemActorSheet } from "./actor/actor-sheet.mjs";
+import { HeroSystem6eActor } from "./actor/actor.mjs";
+import { HeroSystemActorSheetV2 } from "./applications/actor/actor-sheet-v2.mjs";
 
-import { HeroSystemItemSheetV2 } from "./applications/item/item-sheet-v2.mjs";
+import { GenericRoller } from "./heroRoller/genericRoller.mjs";
+
 import { ItemVppConfig } from "./applications/apps/item-vpp-config.mjs";
+import { HeroSystemItemSheetV2 } from "./applications/item/item-sheet-v2.mjs";
 
-import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
 import {
     HeroActorModel,
-    HeroSystem6eItemPower,
-    HeroSystem6eItemEquipment,
-    HeroSystem6eItemSkill,
-    HeroSystem6eItemManeuver,
-    HeroSystem6eItemTalent,
-    HeroSystem6eItemPerk,
-    HeroSystem6eItemMartialArt,
-    HeroSystem6eItemDisadvantage,
     HeroItemCharacteristic,
+    HeroSystem6eItemDisadvantage,
+    HeroSystem6eItemEquipment,
+    HeroSystem6eItemManeuver,
+    HeroSystem6eItemMartialArt,
+    HeroSystem6eItemPerk,
+    HeroSystem6eItemPower,
+    HeroSystem6eItemSkill,
+    HeroSystem6eItemTalent,
 } from "./item/HeroSystem6eTypeDataModels.mjs";
 import { HeroSystem6eItemSheet } from "./item/item-sheet.mjs";
+import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.mjs";
 
 import SettingsHelpers from "./settings/settings-helpers.mjs";
 
-import { testingMockRollInitialize } from "./testing/dice-testing-helper.mjs";
-import "./testing/testing-main.mjs";
+import { testingMockRollInitialize } from "./heroRoller/dice-testing-helper.mjs";
 import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
+import "./testing/testing-main.mjs";
 
+import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./token/actor-token.mjs";
 import { HeroSystemTokenHud } from "./token/heroSystemTokenHud.mjs";
 
-import { expireEffects } from "./utility/util.mjs";
-import { HeroRoll } from "./utility/dice.mjs";
+import "./heroRoller/chat-dice.mjs";
+import { HeroRoll } from "./heroRoller/dice.mjs";
 import "./utility/adjustment.mjs";
-import "./utility/chat-dice.mjs";
+import { expireEffects } from "./utility/util.mjs";
 
 // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttActors = foundry.documents?.collections?.Actors || Actors;

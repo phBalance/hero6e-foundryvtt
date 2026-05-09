@@ -1,4 +1,4 @@
-import { HeroRoll } from "../utility/dice.mjs";
+import { HeroRoll } from "../heroRoller/dice.mjs";
 
 // PH: FIXME: Need to make the chat message capable of deserializing.
 

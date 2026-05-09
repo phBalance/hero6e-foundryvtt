@@ -1,4 +1,4 @@
-import { HeroRoller } from "./dice.mjs";
+import { HeroRoller } from "../heroRoller/dice.mjs";
 import { calculateDistanceBetween } from "./range.mjs";
 
 import { HeroSystem6eActor } from "../actor/actor.mjs";

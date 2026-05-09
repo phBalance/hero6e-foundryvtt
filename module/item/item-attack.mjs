@@ -1,15 +1,15 @@
 import { activateManeuver, doManeuverEffects, maneuverHasBlockTrait } from "./maneuver.mjs";
 
-import { HEROSYS } from "../herosystem6e.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
+import { HEROSYS } from "../herosystem6e.mjs";
 
-import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { getOffHandDefenseDcv } from "../actor/actor-utils.mjs";
+import { HeroSystem6eActor } from "../actor/actor.mjs";
 
-import { isGameV14OrLater } from "../utility/compatibility.mjs";
-import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
 import { ItemAttackFormApplicationV2 } from "../applications/item/item-attack-application-v2.mjs";
+import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
+import { isGameV14OrLater } from "../utility/compatibility.mjs";
 
 import { ItemAttackClubWeaponApplicationV2 } from "../applications/item/item-attack-application-club-weapon.mjs";
 
@@ -18,26 +18,25 @@ import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
-import { foundryVttParseUuid } from "../utility/compatibility.mjs";
-import { roundFavorPlayerTowardsZero, roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
+import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../heroRoller/dice.mjs";
+import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
+import { Attack, actionFromJSON, actionToJSON } from "../utility/attack.mjs";
+import { clamp, foundryVttParseUuid } from "../utility/compatibility.mjs";
 import {
     calculateDicePartsForItem,
     calculateStrengthMinimumForItem,
     combatSkillLevelsForAttack,
 } from "../utility/damage.mjs";
-import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
+import { getActorDefensesVsAttack, getConditionalDefenses, getItemDefenseVsAttack } from "../utility/defense.mjs";
+import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
+import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import {
     currentSceneUsesHexGrid,
     getGridSizeInMeters,
     getRoundedDownDistanceInSystemUnits,
     getSystemDisplayUnits,
 } from "../utility/units.mjs";
-import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../utility/dice.mjs";
-import { clamp } from "../utility/compatibility.mjs";
-import { Attack, actionFromJSON, actionToJSON } from "../utility/attack.mjs";
-import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 import { getPowerInfo, tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
-import { getActorDefensesVsAttack, getConditionalDefenses, getItemDefenseVsAttack } from "../utility/defense.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;

@@ -1,7 +1,7 @@
+import { HeroRoller } from "../heroRoller/dice.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { AttackAction } from "../utility/attack-action.mjs";
 import { calculateDistanceBetween } from "../utility/range.mjs";
-import { HeroRoller } from "../utility/dice.mjs";
 import { addRangeIntoToHitRoll } from "./item-attack.mjs";
 
 // v13 compatibility

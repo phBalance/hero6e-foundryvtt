@@ -1,16 +1,16 @@
 import { setQuenchTimeout } from "./quench-helper.mjs";
 
-import { HeroRoller } from "../utility/dice.mjs";
+import { HeroRoller } from "../heroRoller/dice.mjs";
 
 import {
     Roll1Mock,
+    Roll1Through6Mock,
     Roll2Mock,
     Roll3Mock,
     Roll5Mock,
     Roll6Mock,
-    Roll1Through6Mock,
     RollAlternatingLuckAndUnluck,
-} from "./dice-testing-helper.mjs";
+} from "../heroRoller/dice-testing-helper.mjs";
 
 export function registerDiceTests(quench) {
     quench.registerBatch(

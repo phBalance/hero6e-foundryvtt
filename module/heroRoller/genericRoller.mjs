@@ -1,7 +1,7 @@
-import { HEROSYS } from "./herosystem6e.mjs";
-import { actionToJSON, Attack } from "./utility/attack.mjs";
-import { dehydrateAttackItem } from "./item/item-attack.mjs";
-import { HeroSystem6eActor } from "./actor/actor.mjs";
+import { generateChatMessage, createTemporaryItemAttackActionForApplyingDamage } from "./chat-output.mjs";
+import { HeroRoller } from "./dice.mjs";
+
+import { HEROSYS } from "../herosystem6e.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -9,25 +9,6 @@ const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended ||
 
 export class GenericRoller {
     static Initialize() {
-        // Hooks.on("renderSidebar", async (_sidebar, html, _context, options) => {
-        //     if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
-        //     if (options && !options.isFirstRender) return;
-
-        //     const $chat = $(html).find(".chat-form");
-        //     if ($chat.length === 0) {
-        //         console.warn(`unable to find dom element`);
-        //         return;
-        //     }
-        //     const content = await foundryVttRenderTemplate(`systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`, {
-        //         css: `game-version-major-${game.version.split(".")[0]}`,
-        //     });
-        //     const $content = $(content);
-        //     $chat.after($content);
-
-        //     GenericRoller.activateListeners($content);
-        // });
-
-        // V13
         Hooks.on("renderAbstractSidebarTab", async (_sidebar, html, _context, options) => {
             if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
             if (options && !options.isFirstRender) return;
@@ -45,28 +26,6 @@ export class GenericRoller {
             );
             const $content = $(content);
             $chat.after($content);
-
-            GenericRoller.activateListeners($content);
-        });
-
-        // V12 only
-        Hooks.on("renderSidebarTab", async (app, html) => {
-            if (app.tabName !== "chat") return;
-            if (!game.settings.get(HEROSYS.module, "ShowGenericRoller")) return;
-
-            const $chat = $(html).find("#chat-form");
-            if ($chat.length === 0) {
-                console.warn(`unable to find dom element`);
-                return;
-            }
-            const content = await foundryVttRenderTemplate(
-                `systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`,
-                {
-                    css: `game-version-major-${game.version.split(".")[0]}`,
-                },
-            );
-            const $content = $(content);
-            html.append($content);
 
             GenericRoller.activateListeners($content);
         });
@@ -119,7 +78,7 @@ export class GenericRoller {
         }
 
         // Attacker’s OCV + 11 - 3d6 = the DCV the attacker can hit
-        const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
+        const heroRoller = new HeroRoller()
             .addNumber(Math.clamp(parseInt(userSelection.ocv) || 0, -99, 99), "OCV")
             .addNumber(11, "Base to hit")
             .addDice(-3)
@@ -206,32 +165,27 @@ export class GenericRoller {
         }
 
         const damageTypeString = userSelection.damageType.replace("_", " ");
-        const damageType = userSelection.damageType.replace(/_[EMP]D/, "");
+        const damageMatch = userSelection.damageType.match(/(.*?)_?([EMP]D)?$/);
+        const damageType = damageMatch[1];
+        const defenseType = damageMatch[2];
 
         const customStunMultiplierSetting = game.settings.get(
             game.system.id,
             "NonStandardStunMultiplierForKillingAttackBackingSetting",
         );
 
-        // Canvas selected token? If so, use that as the actor
-        const actor = canvas.tokens.controlled.at(0)?.actor;
         // Roll as if 5e or 6e?
         const DefaultEdition = game.settings.get(HEROSYS.module, "DefaultEdition");
-        const is5eAttack = actor !== undefined ? canvas.tokens.controlled.at(0).actor.is5e : DefaultEdition === "five";
-        const tempActor = new HeroSystem6eActor({
-            name: "Generic Actor",
-            type: "npc",
-        });
-        tempActor.system.is5e = is5eAttack;
-
-        // NOTE: No application of damage for anything other than normal and killing attacks
+        const is5eAttack = canvas.tokens.controlled.at(0)?.actor
+            ? canvas.tokens.controlled.at(0).actor.is5e
+            : DefaultEdition === "five";
 
         // Only normal and killing attacks support hit locations
         const damageTypeSupportsHitLocation =
             includeHitLocation && (damageType === "NORMAL" || damageType === "KILLING");
 
         // Luck and unluck don't support partial dice (full dice or nothing)
-        const heroRoller = new CONFIG.HERO.heroDice.HeroRoller()
+        const heroRoller = new HeroRoller()
             .modifyTo5e(is5eAttack)
 
             .makeNormalRoll(damageType === "NORMAL")
@@ -276,71 +230,9 @@ export class GenericRoller {
 
         await heroRoller.roll();
 
-        const powers = is5eAttack ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+        const chatCardFlavour = `Roll Generic ${damageTypeString} Damage`;
+        const action = createTemporaryItemAttackActionForApplyingDamage(heroRoller, defenseType);
 
-        let xml = "";
-        if (userSelection.damageType === "NORMAL_PD") {
-            xml = powers.find((power) => power.key === "ENERGYBLAST").xml.replace(/ INPUT="[PE]D"/, ` INPUT="PD"`);
-        } else if (userSelection.damageType === "NORMAL_ED") {
-            xml = powers.find((power) => power.key === "ENERGYBLAST").xml.replace(/ INPUT="[EP]D"/, ` INPUT="ED"`);
-        } else if (userSelection.damageType === "NORMAL_MD") {
-            xml = foundry.utils.deepClone(powers.find((power) => power.key === "EGOATTACK").xml);
-        } else if (userSelection.damageType === "KILLING_PD") {
-            xml = powers.find((power) => power.key === "RKA").xml.replace(/ INPUT="[EP]D"/, ` INPUT="PD"`);
-        } else if (userSelection.damageType === "KILLING_ED") {
-            xml = powers.find((power) => power.key === "RKA").xml.replace(/ INPUT="[EP]D"/, ` INPUT="ED"`);
-        } else if (userSelection.damageType === "LUCK") {
-            xml = foundry.utils.deepClone(powers.find((power) => power.key === "LUCK").xml);
-        } else if (userSelection.damageType === "UNLUCK") {
-            xml = foundry.utils.deepClone(powers.find((power) => power.key === "UNLUCK").xml);
-        }
-
-        let item = null;
-
-        if (xml) {
-            item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(xml, actor || tempActor), {
-                parent: actor || tempActor,
-            });
-
-            if (!actor) {
-                tempActor.items.set(item.system.XMLID, item);
-            }
-        }
-
-        // PH: FIXME: Should put this into handlebars
-        let cardHtml = await heroRoller.render(`Roll Generic ${damageTypeString} Damage`);
-
-        if (!item) {
-            ui.notifications.error(`Generic roller not working for ${damageType}`);
-            return;
-        }
-
-        const action = Attack.buildActionInfo(item, [], {});
-
-        if (["NORMAL", "KILLING"].includes(damageType)) {
-            cardHtml += `
-                        <div data-visibility="gm">
-                            <button class="generic-roller-apply-damage"
-                                title="Apply damage to selected tokens."
-                                ${actor ? `data-actor-uuid='${actor.uuid}'` : ""}
-                                ${item ? `data-item-json-str='${dehydrateAttackItem(item)}'` : ""}
-                                data-action-data='${actionToJSON(action)}'
-                                data-roller='${heroRoller.toJSON()}'
-                                data-target-tokens='${JSON.stringify([])}'
-                            >
-                                Apply ${damageTypeString} Damage
-                            </button>
-                        </div>
-                    `;
-        }
-
-        const chatData = {
-            style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-            rolls: heroRoller.rawRolls(),
-            author: game.user._id,
-            content: `${cardHtml}`,
-        };
-
-        return ChatMessage.create(chatData);
+        return generateChatMessage(heroRoller, chatCardFlavour, action);
     }
 }

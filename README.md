@@ -92,7 +92,7 @@ Custom maneuvers show under attacks. Basic maneuvers are shown in the maneuver's
 
 Sometimes you just need to manually roll the dice and you don't want to count the number of STUN and BODY on a 167d6 atomic bomb that your heroes failed to defuse. For such occasions the system has the `/heroRoll` chat command. It's syntax is similar to the FoundryVTT `/roll` command but with minimal support multiple terms.
 
-`/heroRoll <roll to perform><optional flavour of dice roll>`
+`/heroRoll <roll to perform><optional flavour of dice roll><defense type of normal or killing attack>`
 
 ### Roll to Perform
 
@@ -116,11 +116,21 @@ The command supports rolling all the expected types of rolls as you would expect
 
 Prefacing the the flavour with an `h` will give you a roll with hit locations. So `[hk]` will give you a killing attack with hit locations being rolled. Hit location side will be rolled if you have it configured. You probably won't want to roll with a hit location if the command shouldn't support it (e.g. success with hit location).
 
+### Optional Defense Type
+
+You can additionally define the defense type of the roll by appending an additional square bracket term:
+
+- `[e]` for requiring energy defense
+- `[p]` for requiring physical defense
+- `[m]` for requiring mental defense
+
 ### Examples
 
 - `/heroRoll 7d6-1[n]` performs a 6d6 + 1d6-1 normal roll
 - `/heroroll 3d6[s]` performs a 3d6 success roll
 - `/heroroll 5d6+1[hk]` performs a 5d6 + 1 pip killing attack with hit location roll
+- `/heroroll 3d6+1[k][e]` performs a 3d6+1 pip energy killing attack
+- `/heroroll 5d6[n][m]` performs a 5d6 Ego Attack/Mental Blast
 - `/heroRoll 167d6[n]` to drop an atomic bomb on the PCs
 
 ![A nasty roll you don't want to be hit with](./media/big-bomb-roll.png)

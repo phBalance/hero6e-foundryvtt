@@ -1,20 +1,21 @@
 import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
+
 import {
+    Roll10On3Dice,
+    Roll12On3Dice,
+    Roll13On3Dice,
     Roll3On3Dice,
     Roll6On3Dice,
     Roll7On3Dice,
     Roll8On3Dice,
     Roll9On3Dice,
-    Roll10On3Dice,
-    Roll12On3Dice,
-    Roll13On3Dice,
-} from "./dice-testing-helper.mjs";
+} from "../heroRoller/dice-testing-helper.mjs";
 
 import { isActivatedForThisUse_TestingOnly } from "../item/item-requires-roll.mjs";
 
 import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
 
-import { HeroRoll } from "../utility/dice.mjs";
+import { HeroRoll } from "../heroRoller/dice.mjs";
 
 export function registerRequiresRollCheckTests(quench) {
     quench.registerBatch(
