@@ -90,12 +90,14 @@ function itemFullDescription(item) {
         return "";
     }
 
-    let desc = item.system.description;
-    if (item.system.NAME) {
-        desc = `<i>${item.system.NAME}:</i> ${item.system.description}`;
+    // If the NAME/ALIAS is different than the description, include it
+    const _name =
+        item.system.NAME || (item.system.description.startsWith(item.system.ALIAS) ? null : item.system.ALIAS);
+    if (_name) {
+        return `<i>${_name}:</i> ${item.system.description}`;
     }
 
-    return desc;
+    return item.system.description;
 }
 
 // Returns HTML so expects to not be escaped in handlebars (i.e. triple braces)
