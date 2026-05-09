@@ -4233,6 +4233,113 @@ export function registerUploadTests(quench) {
                         });
                     });
 
+                    describe("MULTIPOWER hero validation", async function () {
+                        const mpContents = `
+                            <MULTIPOWER XMLID="GENERIC_OBJECT" ID="1778300034695" BASECOST="32.0" LEVELS="0" ALIAS="Multipower" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=".44 AF Special" QUANTITY="1">
+                                <NOTES />
+                                <MODIFIER XMLID="FOCUS" ID="1778300051778" BASECOST="-1.0" LEVELS="0" ALIAS="Focus" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="OAF" OPTIONID="OAF" OPTION_ALIAS="OAF" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                <MODIFIER XMLID="CHARGES" ID="1778300051844" BASECOST="-0.5" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="EIGHT" OPTIONID="EIGHT" OPTION_ALIAS="8" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" CLIPS_COST="0.5">
+                                    <NOTES />
+                                    <ADDER XMLID="CLIPS" ID="1778300051780" BASECOST="0.5" LEVELS="2" ALIAS="4 clips" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                <MODIFIER XMLID="BEAM" ID="1778300051846" BASECOST="-0.25" LEVELS="0" ALIAS="Beam" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                <MODIFIER XMLID="ARMORPIERCING" ID="1778300060907" BASECOST="0.0" LEVELS="1" ALIAS="Armor Piercing" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                <MODIFIER XMLID="INCREASEDMAXRANGE" ID="1778300069404" BASECOST="0.0" LEVELS="2" ALIAS="Increased Maximum Range" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="Yes" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </MULTIPOWER>
+                        `;
+                        const overpricedRkaContents = `
+                            <POWER XMLID="RKA" ID="1778300034712" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Ranged" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1778300034695" ULTRA_SLOT="Yes" NAME="Semi Auto Hollow Point" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <ADDER XMLID="MINUSONEPIP" ID="1778300034696" BASECOST="10.0" LEVELS="0" ALIAS="+1d6 -1" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <MODIFIER XMLID="AUTOFIRE" ID="1778300034704" BASECOST="0.25" LEVELS="0" ALIAS="Autofire" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="THREE" OPTIONID="THREE" OPTION_ALIAS="3 Shots" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                            </POWER>
+                        `;
+                        const correctlyPricedRkaContents = `
+                            <POWER XMLID="RKA" ID="1778300034719" BASECOST="0.0" LEVELS="2" ALIAS="Killing Attack - Ranged" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1778300034695" ULTRA_SLOT="Yes" NAME="Single Shot Hollow Point" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </POWER>
+                        `;
+
+                        let mpItem;
+                        let overpricedRkaItem;
+                        let correctlyPricedRkaItem;
+
+                        before(async function () {
+                            const actor = new HeroSystem6eActor(
+                                {
+                                    name: "Quench Actor",
+                                    type: "pc",
+                                },
+                                {},
+                            );
+                            actor.system.is5e = true;
+
+                            mpItem = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(mpContents, actor), {
+                                parent: actor,
+                            });
+                            actor.items.set(mpItem.system.XMLID, mpItem);
+
+                            overpricedRkaItem = new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(overpricedRkaContents, actor),
+                                {
+                                    parent: actor,
+                                },
+                            );
+                            actor.items.set(overpricedRkaItem.system.XMLID, overpricedRkaItem);
+
+                            correctlyPricedRkaItem = new HeroSystem6eItem(
+                                HeroSystem6eItem.itemDataFromXml(correctlyPricedRkaContents, actor),
+                                {
+                                    parent: actor,
+                                },
+                            );
+                            actor.items.set(overpricedRkaItem.system.XMLID, overpricedRkaItem);
+                        });
+
+                        it("should have a multipower with a base cost of 32 points", function () {
+                            assert.equal(mpItem.system.BASECOST, 32);
+                        });
+
+                        it("should have multipower with 1 hero validation info due to having advantages", function () {
+                            const validations = mpItem.heroValidation;
+                            assert.equal(validations.length, 1);
+                            assert.equal(validations[0].severity, CONFIG.HERO.VALIDATION_SEVERITY.INFO);
+                        });
+
+                        it("should have too expensive slot with active point cost of 50", function () {
+                            assert.equal(overpricedRkaItem.activePoints, 70);
+                        });
+
+                        it("should have slot with 1 hero validation error due to being too expensive", function () {
+                            const validations = overpricedRkaItem.heroValidation;
+                            assert.equal(validations.length, 1);
+                            assert.equal(validations[0].severity, CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have not too expensive slot with active point cost of 45 as Armor Piercing is inherited from the MP reserve", function () {
+                            assert.equal(correctlyPricedRkaItem.activePoints, 45);
+                        });
+
+                        it("should have slot with 0 hero validations due to being valid", function () {
+                            const validations = correctlyPricedRkaItem.heroValidation;
+                            assert.equal(validations.length, 0);
+                        });
+                    });
+
                     describe("ELEMENTAL_CONTROL 5e", async function () {
                         describe("EC with focus", function () {
                             const ecContents = `
