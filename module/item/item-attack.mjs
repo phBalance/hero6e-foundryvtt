@@ -3136,11 +3136,11 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
             (targetToken?.document ?? targetToken).actor.items.find(
                 (o) => o.system.XMLID === "BREAKFALL" && o.isActive,
             ),
-        canAcrobatics:
-            !damageDetail.preKnockBackProneStatus &&
-            (targetToken?.document ?? targetToken).actor.items.find(
-                (o) => o.system.XMLID === "ACROBATICS" && o.isActive,
-            ),
+        // canAcrobatics:
+        //     !damageDetail.preKnockBackProneStatus &&
+        //     (targetToken?.document ?? targetToken).actor.items.find(
+        //         (o) => o.system.XMLID === "ACROBATICS" && o.isActive,
+        //     ),
 
         // misc
         tags: defenseTags.filter((o) => !o.options?.knockback),
