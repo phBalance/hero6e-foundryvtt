@@ -2,6 +2,7 @@ import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mj
 import { dehydrateAttackItem } from "./item-attack.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
+import { isGameV14OrLater } from "../utility/compatibility.mjs";
 
 /**
  * Maneuvers have some rules of their own that should be considered.
@@ -275,8 +276,7 @@ export async function activateManeuver(item) {
     // Make sure we have original Item
     const originalItem = item.id ? item : fromUuidSync(item.system._active.__originalUuid);
 
-    const activeEffect = originalItem.effects.contents[0] || {
-        changes: [],
+    let activeEffect = originalItem.effects.contents[0] || {
         flags: [],
     };
 
@@ -287,7 +287,10 @@ export async function activateManeuver(item) {
             : `${item.system.XMLID} +${dcvTrait}`;
         activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect.img;
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
-        activeEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        const changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        activeEffect = foundry.utils.mergeObject(activeEffect, {
+            [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+        });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect.name];
@@ -298,7 +301,10 @@ export async function activateManeuver(item) {
         activeEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect.img;
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
-        activeEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        const changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        activeEffect = foundry.utils.mergeObject(activeEffect, {
+            [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+        });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect.name];
@@ -311,9 +317,10 @@ export async function activateManeuver(item) {
         activeEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect.img;
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
-        activeEffect.changes = foundry.utils.deepClone(
-            HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect.changes,
-        );
+        const changes = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect.changes);
+        activeEffect = foundry.utils.mergeObject(activeEffect, {
+            [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+        });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect.name];
@@ -321,9 +328,10 @@ export async function activateManeuver(item) {
         activeEffect.name = HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.name;
         activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.img;
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
-        activeEffect.changes = foundry.utils.deepClone(
-            HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.changes,
-        );
+        const changes = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.changes);
+        activeEffect = foundry.utils.mergeObject(activeEffect, {
+            [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+        });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.name];
@@ -348,7 +356,10 @@ export async function activateManeuver(item) {
         activeEffect.name = item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`;
         activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect.img;
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
-        activeEffect.changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        const changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+        activeEffect = foundry.utils.mergeObject(activeEffect, {
+            [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+        });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect.name];

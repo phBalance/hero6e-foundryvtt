@@ -3345,7 +3345,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         }`;
         body = Math.max(body, prevBody) + 1;
     }
-    const effectData = {
+    let activeEffect = {
         id: "entangled",
         img: HeroSystem6eActorActiveEffects.statusEffectsObj.entangledEffect.img,
         changes: foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.entangledEffect.changes),
@@ -3363,23 +3363,26 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         origin: item.effectiveAttackItem.uuid, // PH: FIXME: effective items don't have uuids.
     };
 
-    const changeBody = effectData.changes?.find((o) => o.key === "body");
+    const changeBody = activeEffect.changes?.find((o) => o.key === "body");
     if (changeBody) {
         changeBody.value === body;
     } else {
-        effectData.changes ??= [];
-        effectData.changes.push({ key: "body", value: body, mode: 5 });
+        const changes = [{ key: "body", value: body, mode: 5 }];
+        activeEffect = foundry.utils.mergeObject(activeEffect, {
+            [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+        });
     }
 
     if (prevEntangle) {
         prevEntangle.update({
-            name: effectData.name,
-            flags: effectData.flags,
-            changes: effectData.changes,
-            origin: effectData.origin,
+            name: activeEffect.name,
+            flags: activeEffect.flags,
+            [isGameV14OrLater() ? `system.changes` : `changes`]:
+                activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
+            origin: activeEffect.origin,
         });
     } else {
-        token.actor.addActiveEffect(effectData);
+        token.actor.addActiveEffect(activeEffect);
     }
 
     const cardData = {
@@ -3493,8 +3496,11 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
             const newBody = body - bodyDamage;
             const name = `${entangleAE.flags[game.system.id]?.XMLID} ${newBody} BODY ${entangleAE.flags[game.system.id]?.entangleDefense.string}`;
             entangleAE.update({ name });
-            entangleAE.changes[bodyChangeIdx].value = newBody;
-            entangleAE.update({ changes: entangleAE.changes });
+            entangleAE[isGameV14OrLater() ? `system.changes` : `changes`][bodyChangeIdx].value = newBody;
+            entangleAE.update({
+                [isGameV14OrLater() ? `system.changes` : `changes`]:
+                    entangleAE[isGameV14OrLater() ? `system.changes` : `changes`],
+            });
             effectsFinal = `Entangle has ${newBody} BODY remaining.`;
         } else {
             await entangleAE.parent.removeActiveEffect(entangleAE);

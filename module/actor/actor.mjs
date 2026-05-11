@@ -175,13 +175,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     /**
-     * Prepare all embedded Document instances which exist within this primary Document.
-     */
-    prepareEmbeddedDocuments() {
-        super.prepareEmbeddedDocuments();
-    }
-
-    /**
      * Apply transformations or derivations to the values of the source data object.
      * Compute data fields whose values are not stored to the database.
      *
@@ -1346,24 +1339,24 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         );
         const _sizeDetails = this.sizeDetails();
 
-        const sizeActiveEffect =
+        let activeEffect =
             this.effects.find(
                 (effect) => effect.name?.includes("size") && effect.flags[game.system.id]?.size === true,
             ) || {};
         if (_sizeDetails.body) {
-            sizeActiveEffect.name = `size${size}`;
-            sizeActiveEffect.img ??= "icons/svg/aura.svg";
-            sizeActiveEffect.flags ??= {
+            activeEffect.name = `size${size}`;
+            activeEffect.img ??= "icons/svg/aura.svg";
+            activeEffect.flags ??= {
                 [game.system.id]: {
                     size: true,
                 },
             };
-            sizeActiveEffect.changes = [];
+            const changes = [];
 
             // FIXME: This is a DCV penalty to the base/vehicle in 5e and an OCV bonus to the attacker in 6e. Because it's
             // an OCV bonus to the attacker this isn't quite right but we always add it last so that it's not halved if
             // the defenders DCV is halved. Note that we are not affecting the attacker OCV which could be halved: this is not perfect.
-            sizeActiveEffect.changes.push({
+            changes.push({
                 key: "system.characteristics.dcv.max",
                 value: _sizeDetails.dcv,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
@@ -1372,33 +1365,40 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     : CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE, // 6e don't allow this to be halved - see note above
             });
 
-            sizeActiveEffect.changes.push({
+            changes.push({
                 key: "system.characteristics.str.max",
                 value: _sizeDetails.str,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
-            sizeActiveEffect.changes.push({
+            changes.push({
                 key: "kbResistance",
                 value: _sizeDetails.kbResistance,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
-            sizeActiveEffect.changes.push({
+            changes.push({
                 key: "system.characteristics.body.max",
                 value: _sizeDetails.body,
                 mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
+            activeEffect = foundry.utils.mergeObject(activeEffect, {
+                [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+            });
 
-            if (sizeActiveEffect.id) {
-                await sizeActiveEffect.update({ name: sizeActiveEffect.name, changes: sizeActiveEffect.changes });
+            if (activeEffect.id) {
+                await activeEffect.update({
+                    name: activeEffect.name,
+                    [isGameV14OrLater() ? `system.changes` : `changes`]:
+                        activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
+                });
             } else {
-                await this.createEmbeddedDocuments("ActiveEffect", [sizeActiveEffect]);
+                await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }
         } else {
-            if (sizeActiveEffect.id) {
-                await sizeActiveEffect.delete();
+            if (activeEffect.id) {
+                await activeEffect.delete();
             }
         }
     }
@@ -1467,77 +1467,82 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
         const prevActiveEffect = prevActiveEffects?.[0];
         if (dcvDex < 0 && prevActiveEffect?.flags?.[game.system.id]?.dcvDex != dcvDex) {
-            const activeEffect = {
+            let activeEffect = {
                 name: name,
                 id: "encumbered",
                 img: `systems/${HEROSYS.module}/icons/encumbered.svg`,
-                changes: [
-                    {
-                        key: "system.characteristics.dcv.max",
-                        value: dcvDex,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                    {
-                        key: "system.characteristics.dex.max",
-                        value: dcvDex,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                    {
-                        key: "system.characteristics.running.max",
-                        value: move,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                    {
-                        key: "system.characteristics.swimming.max",
-                        value: move,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                    {
-                        key: "system.characteristics.leaping.max",
-                        value: move,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                    {
-                        key: "system.characteristics.flight.max",
-                        value: move,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                    {
-                        key: "system.characteristics.swinging.max",
-                        value: move,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                    {
-                        key: "system.characteristics.teleportation.max",
-                        value: move,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                    {
-                        key: "system.characteristics.tunneling.max",
-                        value: move,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                ],
+
                 origin: this.uuid,
                 flags: {
                     [game.system.id]: { dcvDex: dcvDex, encumbrance: true },
                 },
             };
+            const changes = [
+                {
+                    key: "system.characteristics.dcv.max",
+                    value: dcvDex,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                },
+                {
+                    key: "system.characteristics.dex.max",
+                    value: dcvDex,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                },
+                {
+                    key: "system.characteristics.running.max",
+                    value: move,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                },
+                {
+                    key: "system.characteristics.swimming.max",
+                    value: move,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                },
+                {
+                    key: "system.characteristics.leaping.max",
+                    value: move,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                },
+                {
+                    key: "system.characteristics.flight.max",
+                    value: move,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                },
+                {
+                    key: "system.characteristics.swinging.max",
+                    value: move,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                },
+                {
+                    key: "system.characteristics.teleportation.max",
+                    value: move,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                },
+                {
+                    key: "system.characteristics.tunneling.max",
+                    value: move,
+                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                },
+            ];
+            activeEffect = foundry.utils.mergeObject(activeEffect, {
+                [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+            });
 
             if (prevActiveEffect) {
                 //await prevActiveEffect.delete();
                 await prevActiveEffect.update({
                     name: name,
-                    changes: activeEffect.changes,
+                    [isGameV14OrLater() ? `system.changes` : `changes`]:
+                        activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
                     origin: activeEffect.origin,
                     flags: activeEffect.flags,
                 });
@@ -4112,12 +4117,50 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return true;
     }
 
+    // prepareEmbeddedDocuments() {
+    //     super.prepareEmbeddedDocuments();
+    // }
+
+    // _removeRedundantHalvingActiveEffects() {
+    //     debugger;
+    //     let changes = this.overrides;
+    //     // Filter out redundant multiplies, keeping lowest value
+    //     const mults = changes.filter((c) => c.mode === CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
+    //     if (mults.length > 1) {
+    //         const uniqueKeys = new Set();
+    //         mults.forEach((obj) => {
+    //             uniqueKeys.add(obj.key);
+    //         });
+
+    //         for (const key of uniqueKeys) {
+    //             const multsUniqueKey = mults.filter((c) => c.key === key);
+    //             if (multsUniqueKey.length > 1) {
+    //                 const minValue = Math.min(...multsUniqueKey.map((c) => parseFloat(c.value)));
+    //                 const keepMult = multsUniqueKey.find((c) => parseFloat(c.value) === minValue);
+    //                 // remove all multsUniqueKey and add back in the keepMult
+    //                 changes = changes.filter((c) => c.key !== key || c.mode !== CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
+    //                 changes.push(keepMult);
+    //             }
+    //         }
+
+    //         this.overrides = changes;
+    //     }
+    // }
+
+    // V13 and V14 have different ways of applying active effects
+    applyActiveEffects(phase) {
+        if (isGameV14OrLater()) {
+            return this.applyActiveEffects14(phase);
+        }
+        return this.applyActiveEffects13();
+    }
+
     // HeroSystem is unique in that we only
     // apply only one multiplier (whichever one reduces the most).
     /**
      * Apply any transformations to the Actor data which are caused by ActiveEffects.
      */
-    applyActiveEffects() {
+    applyActiveEffects13() {
         const overrides = {};
         this.statuses.clear();
 
@@ -4137,25 +4180,25 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
 
         // Filter out redundant multiplies, keeping lowest value
-        const mults = changes.filter((c) => c.mode === CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
-        if (mults.length > 1) {
-            const uniqueKeys = new Set();
-            mults.forEach((obj) => {
-                uniqueKeys.add(obj.key);
-            });
+        // const mults = changes.filter((c) => c.mode === CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
+        // if (mults.length > 1) {
+        //     const uniqueKeys = new Set();
+        //     mults.forEach((obj) => {
+        //         uniqueKeys.add(obj.key);
+        //     });
 
-            for (const key of uniqueKeys) {
-                const multsUniqueKey = mults.filter((c) => c.key === key);
-                if (multsUniqueKey.length > 1) {
-                    const minValue = Math.min(...multsUniqueKey.map((c) => parseFloat(c.value)));
-                    const keepMult = multsUniqueKey.find((c) => parseFloat(c.value) === minValue);
-                    // remove all multsUniqueKey and add back in the keepMult
-                    changes = changes.filter((c) => c.key !== key || c.mode !== CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
-                    changes.push(keepMult);
-                }
-            }
-        }
-
+        //     for (const key of uniqueKeys) {
+        //         const multsUniqueKey = mults.filter((c) => c.key === key);
+        //         if (multsUniqueKey.length > 1) {
+        //             const minValue = Math.min(...multsUniqueKey.map((c) => parseFloat(c.value)));
+        //             const keepMult = multsUniqueKey.find((c) => parseFloat(c.value) === minValue);
+        //             // remove all multsUniqueKey and add back in the keepMult
+        //             changes = changes.filter((c) => c.key !== key || c.mode !== CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
+        //             changes.push(keepMult);
+        //         }
+        //     }
+        // }
+        HeroSystem6eActorActiveEffects._removeRedundantHalvingActiveEffects(changes);
         changes.sort((a, b) => a.priority - b.priority);
 
         // Apply all changes
@@ -4167,6 +4210,70 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         // Expand the set of final overrides
         this.overrides = foundry.utils.expandObject(overrides);
+    }
+
+    /**
+     * Apply any transformations to the Actor data which are caused by ActiveEffects.
+     * @param {string} phase The application phase under which changes are to be applied.
+     */
+    applyActiveEffects14(phase) {
+        const ActiveEffect = foundry.documents.ActiveEffect.implementation;
+        if (typeof phase !== "string") {
+            phase = this._completedActiveEffectPhases.has("initial") ? "final" : "initial";
+            const message =
+                'Actor#applyActiveEffects must be called with a string phase identifier, with "initial"' +
+                " as the first phase.";
+            foundry.utils.logCompatibilityWarning(message, { since: 14, until: 16, once: true });
+        } else if (!(phase in ActiveEffect.CHANGE_PHASES)) {
+            const error = new Error(`"${phase}" is not a registered ActiveEffect application phase.`);
+            Hooks$1.onError("Actor#applyActiveEffects", error, { log: "error" });
+        }
+        if (this._completedActiveEffectPhases.has(phase)) {
+            const error = new Error(
+                `ActiveEffect application phase "${phase}" has already completed and cannot be run again` +
+                    " in this Actor's data-preparation cycle.",
+            );
+            Hooks$1.onError("Actor#applyActiveEffects", error, { log: "error" });
+            return;
+        }
+        this._completedActiveEffectPhases.add(phase);
+
+        // Organize non-disabled effects by their application priority
+        /** @type {ActiveEffectChangeData[]} */
+        const changes = [];
+        /** @type {ActiveEffectChangeData[]} */
+        const tokenChanges = [];
+        for (const effect of this.allApplicableEffects()) {
+            if (!effect.active) continue;
+            for (const change of effect.system.changes) {
+                if (change.key === "" || change.phase !== phase) continue;
+                const copy = foundry.utils.deepClone(change);
+                copy.effect = effect;
+                if (copy.key?.startsWith("token.")) {
+                    // Keep Token changes separate for later application
+                    copy.key = copy.key.slice(6);
+                    tokenChanges.push(copy);
+                } else changes.push(copy);
+            }
+            if (phase === "initial") {
+                for (const statusId of effect.statuses) this.statuses.add(statusId);
+            }
+        }
+        changes.sort((a, b) => a.priority - b.priority);
+        ActiveEffect._shimChanges(changes);
+        HeroSystem6eActorActiveEffects._removeRedundantHalvingActiveEffects(changes);
+        this.tokenActiveEffectChanges[phase] = tokenChanges;
+
+        // Apply all changes
+        const overrides = {};
+        const replacementData = this.getRollData();
+        for (const change of changes) {
+            const result = ActiveEffect.applyChange(this, change, { replacementData });
+            if (foundry.utils.isPlainObject(result)) Object.assign(overrides, result);
+        }
+
+        // Expand the set of final overrides
+        foundry.utils.mergeObject(this.overrides, foundry.utils.expandObject(overrides));
     }
 
     /**
