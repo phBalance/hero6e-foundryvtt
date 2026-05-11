@@ -1,14 +1,14 @@
-.herosystem6e.actor-sheet-v2a {
+.herosystem6e.actor-sheet-v2 {
     min-height: 310px;
     min-width: 500px;
 }
 
-.herosystem6e.actor-sheet-v2a .uploading-blur {
+.herosystem6e.actor-sheet-v2 .uploading-blur {
     filter: blur(2px) grayscale(1);
     pointer-events: none;
 }
 
-.herosystem6e.actor-sheet-v2a [data-application-part="uploading"] {
+.herosystem6e.actor-sheet-v2 [data-application-part="uploading"] {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -35,47 +35,48 @@
     }
 }
 
-.herosystem6e.actor-sheet-v2a.minimizing,
-.herosystem6e.actor-sheet-v2a.maximizing,
-.herosystem6e.actor-sheet-v2a.minimized {
+.herosystem6e.actor-sheet-v2.minimizing,
+.herosystem6e.actor-sheet-v2.maximizing,
+.herosystem6e.actor-sheet-v2.minimized {
     min-height: 0;
     min-width: 0;
 }
 
-.herosystem6e.actor-sheet-v2a .controls-dropdown {
+.herosystem6e.actor-sheet-v2 .controls-dropdown {
     z-index: 2;
 }
 
-.herosystem6e.actor-sheet-v2a nav.sheet-tabs.tabs a.empty {
+.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.empty {
     opacity: 0.3;
 }
 
-.herosystem6e.actor-sheet-v2a nav.sheet-tabs.tabs a.validation-error {
-    background-color: rgb(255 0 0 / 10%);
+.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-error {
+    // background-color: rgb(255 0 0 / 10%);
     box-shadow: 0 0 0 1px rgb(255 0 0 / 50%) inset;
+    outline: rgb(255 0 0 / 100%) solid 1px;
 }
 
-.herosystem6e.actor-sheet-v2a nav.sheet-tabs.tabs a.validation-info {
+.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-info {
     outline: rgb(0 0 255 / 80%) solid 1px;
 }
 
-.herosystem6e.actor-sheet-v2a nav.sheet-tabs.tabs a.validation-warning {
+.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-warning {
     outline: #d6aa28 solid 2px;
 }
 
-.herosystem6e.actor-sheet-v2a .item-row.validation-error > div.item-column {
+.herosystem6e.actor-sheet-v2 .item-row.validation-error > div.item-column {
     background-color: rgb(255 0 0 / 10%) !important;
     border-top: 1px solid rgb(255 0 0 / 30%);
     border-bottom: 1px solid rgb(255 0 0 / 30%);
 }
 
-.herosystem6e.actor-sheet-v2a .item-row.validation-info > div.item-column {
+.herosystem6e.actor-sheet-v2 .item-row.validation-info > div.item-column {
     background-color: rgb(0 0 255 / 10%) !important;
     border-top: 1px solid rgb(0 0 255 / 30%);
     border-bottom: 1px solid rgb(0 0 255 / 30%);
 }
 
-.herosystem6e.actor-sheet-v2a .item-row.validation-warning > div.item-column {
+.herosystem6e.actor-sheet-v2 .item-row.validation-warning > div.item-column {
     background-color: rgb(255 255 0 / 20%) !important;
     border-top: 1px solid rgb(255 255 0 / 30%);
     border-bottom: 1px solid rgb(255 255 0 / 30%);
@@ -84,7 +85,7 @@
 /************************************************************************
 * Setup Grid with header, navbar and left sidebar
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a section.window-content {
+.herosystem6e.actor-sheet-v2 section.window-content {
     display: grid;
     grid-template:
         "sidebar header" max-content
@@ -115,7 +116,7 @@ input.over-max {
 /************************************************************************
 * grid-area: sidebar
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content aside {
+.herosystem6e.actor-sheet-v2 .window-content aside {
     grid-area: sidebar;
     display: flex;
     flex-direction: column;
@@ -177,7 +178,7 @@ input.over-max {
 /************************************************************************
 * grid-area: header
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content header {
+.herosystem6e.actor-sheet-v2 .window-content header {
     grid-area: header;
 
     input[type="text"] {
@@ -212,7 +213,7 @@ input.over-max {
 /************************************************************************
 * grid-area: nav
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content nav {
+.herosystem6e.actor-sheet-v2 .window-content nav {
     grid-area: nav;
     transition: all 0.1s ease-out;
     flex-flow: row wrap;
@@ -243,7 +244,7 @@ input.over-max {
 /************************************************************************
 * Override nav.tabs
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content nav.sheet-tabs.tabs {
+.herosystem6e.actor-sheet-v2 .window-content nav.sheet-tabs.tabs {
     gap: 2px;
     padding: 2px 0;
 }
@@ -251,7 +252,7 @@ input.over-max {
 /************************************************************************
 * grid-area: content 
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content section.tab {
+.herosystem6e.actor-sheet-v2 .window-content section.tab {
     overflow: hidden auto;
     flex-direction: column;
     gap: 16px;
@@ -439,7 +440,7 @@ input.over-max {
 /************************************************************************
 * Attacks 
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content section.tab.attacks {
+.herosystem6e.actor-sheet-v2 .window-content section.tab.attacks {
     .item-column.item-name {
         flex: 1;
         justify-content: left;
@@ -474,7 +475,7 @@ input.over-max {
 /************************************************************************
 * MARTIAL 
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content section.tab.martial {
+.herosystem6e.actor-sheet-v2 .window-content section.tab.martial {
     .item-column.item-phase,
     .item-column.item-ocv,
     .item-column.item-dcv {
@@ -485,7 +486,7 @@ input.over-max {
 /************************************************************************
 * MANEUVERS 
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content section.tab.maneuvers {
+.herosystem6e.actor-sheet-v2 .window-content section.tab.maneuvers {
     .item-column.item-phase,
     .item-column.item-ocv,
     .item-column.item-dcv {
@@ -496,7 +497,7 @@ input.over-max {
 /************************************************************************
 * POWERS 
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content section.tab.powers {
+.herosystem6e.actor-sheet-v2 .window-content section.tab.powers {
     .item-column.item-end {
         width: 28px;
     }
@@ -505,7 +506,7 @@ input.over-max {
 /************************************************************************
 * CHARACTERISTICS 
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content section.tab.characteristics {
+.herosystem6e.actor-sheet-v2 .window-content section.tab.characteristics {
     box-sizing: content-box;
 
     .item-header {
@@ -560,7 +561,7 @@ input.over-max {
 /************************************************************************
 * CONDITIONS 
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content section.tab.conditions {
+.herosystem6e.actor-sheet-v2 .window-content section.tab.conditions {
     div.status-container {
         padding-top: 0.25rem;
         gap: 0.5rem;
@@ -592,7 +593,7 @@ input.over-max {
 /************************************************************************
 * EFFECTS 
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content section.tab.effects {
+.herosystem6e.actor-sheet-v2 .window-content section.tab.effects {
     .item-list-container {
         .item-header {
             position: sticky;
@@ -604,7 +605,7 @@ input.over-max {
 /************************************************************************
 * ANALYSIS 
 ************************************************************************/
-.herosystem6e.actor-sheet-v2a .window-content section.tab.analysis {
+.herosystem6e.actor-sheet-v2 .window-content section.tab.analysis {
     .item-name {
         flex: 1;
         display: flex;

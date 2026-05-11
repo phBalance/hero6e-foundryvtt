@@ -30,7 +30,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         //     //handler: TemplateApplication.#onSubmit,
         //     closeOnSubmit: false, // do not close when submitted
         // },
-        classes: ["herosystem6e", "actor-sheet-v2a"],
+        classes: ["herosystem6e", "actor-sheet-v2"],
         position: {
             width: 800,
             height: 717,

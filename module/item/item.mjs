@@ -46,6 +46,7 @@ import {
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
+import { isGameV14OrLater } from "../utility/compatibility.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -358,7 +359,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             if (this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
                 try {
                     console.log(`setActiveEffects movement`);
-                    const activeEffect =
+                    let activeEffect =
                         this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                         this.effects.find((ae) => !ae.system.XMLID) ??
                         {};
@@ -401,7 +402,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     activeEffect.transfer = true;
                     activeEffect.disabled ??= !this.system.active;
                     activeEffect.system ??= { XMLID: this.system.XMLID };
-                    activeEffect.changes = changes;
+                    activeEffect = foundry.utils.mergeObject(activeEffect, {
+                        [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+                    });
 
                     if (activeEffect.update) {
                         // Need to be careful because changes is an array
@@ -415,7 +418,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             }
 
             if (this.id && this.type !== "characteristic" && this.baseInfo?.type?.includes("characteristic")) {
-                const activeEffect =
+                let activeEffect =
                     this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                     this.effects.find((ae) => !ae.system.XMLID) ??
                     {};
@@ -423,7 +426,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} +${value}`;
                 activeEffect.img = "icons/svg/upgrade.svg";
                 activeEffect.description = this.system.description;
-                activeEffect.changes = [
+                const changes = [
                     {
                         key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
                         value: value,
@@ -431,15 +434,20 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
-                activeEffect.transfer = true;
+                activeEffect = foundry.utils.mergeObject(activeEffect, {
+                    [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+                });
                 activeEffect.disabled ??= !this.system.active;
-                activeEffect.system ??= { XMLID: this.system.XMLID };
+                activeEffect = foundry.utils.mergeObject(activeEffect, {
+                    "system.XMLID": this.system.XMLID,
+                });
 
                 if (activeEffect.update) {
                     const oldMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max;
                     await activeEffect.update({
                         name: activeEffect.name,
-                        changes: activeEffect.changes,
+                        [isGameV14OrLater() ? `system.changes` : `changes`]:
+                            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
                     });
                     const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
                     const newValue =
@@ -465,13 +473,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 const pdAdd = noDefIncreasePd ? 0 : this.system.LEVELS;
                 const edAdd = noDefIncreaseEd ? 0 : this.system.LEVELS;
 
-                const activeEffect =
+                let activeEffect =
                     this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                     this.effects.find((ae) => !ae.system.XMLID) ??
                     {};
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.LEVELS}`;
                 activeEffect.img = "icons/svg/upgrade.svg";
-                activeEffect.changes = [
+                const changes = [
                     {
                         key: "system.characteristics.str.max",
                         value: strAdd,
@@ -491,6 +499,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
+                activeEffect = foundry.utils.mergeObject(activeEffect, {
+                    [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+                });
                 activeEffect.transfer = true;
                 activeEffect.disabled ??= !this.system.active;
                 activeEffect.system ??= { XMLID: this.system.XMLID };
@@ -498,7 +509,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 if (activeEffect.update) {
                     await activeEffect.update({
                         name: activeEffect.name,
-                        changes: activeEffect.changes,
+                        [isGameV14OrLater() ? `system.changes` : `changes`]:
+                            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
                     });
                     await this.actor.update({
                         [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max,
@@ -526,7 +538,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         if (currentAE.update) {
                             await currentAE.update({
                                 name: activeEffect.name,
-                                changes: activeEffect.changes,
+                                [isGameV14OrLater() ? `system.changes` : `changes`]:
+                                    activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
                                 statuses: activeEffect.statuses, // Invisibility and such
                             });
                         } else {
@@ -541,13 +554,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             if (this.id && this.system.XMLID === "SHRINKING") {
                 const dcvAdd = Math.floor(this.system.LEVELS) * 2;
 
-                const activeEffect =
+                let activeEffect =
                     this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                     this.effects.find((ae) => !ae.system.XMLID) ??
                     {};
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
                 activeEffect.img = "icons/svg/upgrade.svg";
-                activeEffect.changes = [
+                const changes = [
                     {
                         key: "system.characteristics.dcv.max",
                         value: dcvAdd,
@@ -555,13 +568,17 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
+                activeEffect = foundry.utils.mergeObject(activeEffect, {
+                    [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+                });
                 activeEffect.transfer = true;
                 activeEffect.system ??= { XMLID: this.system.XMLID };
 
                 if (activeEffect.update) {
                     await activeEffect.update({
                         name: activeEffect.name,
-                        changes: activeEffect.changes,
+                        [isGameV14OrLater() ? `system.changes` : `changes`]:
+                            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
                     });
                     await this.actor.update({
                         [`system.characteristics.dcv.value`]: this.actor.system.characteristics.dcv.max,
@@ -576,7 +593,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             if (this.id && MOBILITY && hasDCV) {
                 const dcvValue = MOBILITY.OPTIONID === "BULKY" ? 0.5 : MOBILITY.OPTIONID === "IMMOBILE" ? 0 : null;
 
-                const activeEffect =
+                let activeEffect =
                     this.effects.find((ae) => ae.system.XMLID === "MOBILITY") ??
                     this.effects.find((ae) => !ae.system.XMLID) ??
                     {};
@@ -585,7 +602,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         (this.name ? `${this.name}/${MOBILITY.parent.name || MOBILITY.parent.ALIAS}: ` : "") +
                         `${MOBILITY.OPTIONID} ${dcvValue}`;
                     activeEffect.img = "icons/svg/downgrade.svg";
-                    activeEffect.changes = [
+                    const changes = [
                         {
                             key: "system.characteristics.dcv.max",
                             value: dcvValue,
@@ -593,6 +610,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                             priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                         },
                     ];
+                    activeEffect = foundry.utils.mergeObject(activeEffect, {
+                        [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+                    });
+
                     activeEffect.transfer = true;
                     activeEffect.disabled = !this.system.active;
                     activeEffect.system ??= {
@@ -602,7 +623,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     if (activeEffect.update) {
                         await activeEffect.update({
                             name: activeEffect.name,
-                            changes: activeEffect.changes,
+                            [isGameV14OrLater() ? `system.changes` : `changes`]:
+                                activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
                         });
                     } else {
                         await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
@@ -672,14 +694,14 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     );
                 }
 
-                const activeEffect =
+                let activeEffect =
                     this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                     this.effects.find((ae) => !ae.system.XMLID) ??
                     {};
 
                 activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.system.QUANTITY}`;
                 activeEffect.img = "icons/svg/light.svg";
-                activeEffect.changes = [
+                const changes = [
                     {
                         key: "ATL.light.bright",
                         value: parseFloat(this.system.QUANTITY),
@@ -693,13 +715,17 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                 ];
+                activeEffect = foundry.utils.mergeObject(activeEffect, {
+                    [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+                });
                 activeEffect.system ??= { XMLID: this.system.XMLID };
                 activeEffect.disabled ??= true;
 
                 if (activeEffect.update) {
                     await activeEffect.update({
                         name: activeEffect.name,
-                        changes: activeEffect.changes,
+                        [isGameV14OrLater() ? `system.changes` : `changes`]:
+                            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
                     });
                 } else {
                     await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);

@@ -500,6 +500,12 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     async #updateValueBasedOnMax(data, options) {
         // Update characteristic VALUE when MAX is modified
 
+        // Chasing down the extra +2 RUNNING from Diego 102.hdc
+        // if (isGameV14OrLater()) {
+        //     console.error("V14 skipping updateValueBasedOnMax");
+        //     return;
+        // }
+
         const actor = this.target;
         if (actor.constructor?.name !== "HeroSystem6eActor") {
             console.warn(`AE target is not an instance of HeroSystem6eActor`, this);
@@ -512,7 +518,8 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         }
 
         if (options.action === "update" && data.changes) {
-            console.error("HeroSystem updating of VALUEs based on AE is not supported", data);
+            // This is an indication that our implementation needs review
+            console.error("HeroSystem updating of VALUEs based on AE may not update correctly", data);
             return;
         }
 
@@ -592,5 +599,33 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         const sourceName = this.flags[game.system.id]?.source;
         const d = this._prepareDuration();
         return `${this.name} [${sourceName ? `${sourceName}, ` : ""}${d.label}]`;
+    }
+
+    static _removeRedundantHalvingActiveEffects(changes) {
+        console.log(`_removeRedundantHalvingActiveEffects`);
+        // Filter out redundant multiplies, keeping lowest value
+        const mults = changes.filter((c) => c.mode === CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
+        if (mults.length > 1) {
+            const uniqueKeys = new Set();
+            mults.forEach((obj) => {
+                uniqueKeys.add(obj.key);
+            });
+
+            for (const key of uniqueKeys) {
+                const multsUniqueKey = mults.filter((c) => c.key === key);
+                if (multsUniqueKey.length > 1) {
+                    const minValue = Math.min(...multsUniqueKey.map((c) => parseFloat(c.value)));
+                    const keepMult = multsUniqueKey.find((c) => parseFloat(c.value) === minValue);
+                    // remove all multsUniqueKey and add back in the keepMult
+                    let index = changes.findIndex((c) => c.key === key);
+                    while (index !== -1) {
+                        changes.splice(index, 1);
+                        index = changes.findIndex((c) => c.key === key);
+                    }
+                    //changes = changes.filter((c) => c.key !== key || c.mode !== CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
+                    changes.push(keepMult);
+                }
+            }
+        }
     }
 }

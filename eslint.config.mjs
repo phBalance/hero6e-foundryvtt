@@ -59,6 +59,7 @@ export default [
                 HeroSystem6eItem: "readonly",
                 HexagonalGrid: "readonly",
                 Hooks: "readonly",
+                Hooks$1: "readonly",
                 ImageHelper: "readonly",
                 Item: "readonly",
                 ItemDirectory: "readonly",
