@@ -602,7 +602,6 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     }
 
     static _removeRedundantHalvingActiveEffects(changes) {
-        console.log(`_removeRedundantHalvingActiveEffects`);
         // Filter out redundant multiplies, keeping lowest value
         const mults = changes.filter((c) => c.mode === CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
         if (mults.length > 1) {

@@ -318,7 +318,7 @@ function _createNewAdjustmentEffect(options) {
     });
     const itemTokenName = _attackerToken?.name || attackItem.actor?.name || "undefined";
 
-    const activeEffect = {
+    let activeEffect = {
         name: `${attackItem.system.XMLID || "undefined"} 0 ${
             (targetPower?.name || potentialCharacteristic)?.toUpperCase() // TODO: This will need to change for multiple effects
         } (0 AP) [by ${itemTokenName}]`,
@@ -326,7 +326,6 @@ function _createNewAdjustmentEffect(options) {
         //     targetPower?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         // }`,
         img: attackItem.img,
-        changes: [], //[_createAEChangeBlock(potentialCharacteristic, targetSystem)],
         duration: {
             seconds: _determineEffectDurationInSeconds(attackItem, rawActivePointsDamage),
         },
@@ -363,6 +362,10 @@ function _createNewAdjustmentEffect(options) {
         transfer: true,
         disabled: false,
     };
+
+    activeEffect = foundry.utils.mergeObject(activeEffect, {
+        [`isGameV14OrLater() ? "system.changes" : "changes"`]: [],
+    });
 
     // If this is 5e then some characteristics are entirely calculated based on
     // those. We only need to worry about 2 (DEX -> OCV & DCV and EGO -> OMCV & DMCV)
@@ -509,7 +512,7 @@ export async function performAdjustment(
         existingEffect ||
         _findExistingMatchingEffect(attackItem, potentialCharacteristic, targetSystem, thisAttackActivePointsEffect);
 
-    const activeEffect =
+    let activeEffect =
         existingEffect ||
         _createNewAdjustmentEffect({
             attackItem,
@@ -784,7 +787,16 @@ export async function performAdjustment(
             const targetValue = costPerActivePoint ? Math.trunc(finalAp / costPerActivePoint) : 0;
 
             change.value = targetValue - previousPointsForThisChangeKey;
-            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`].push(change);
+
+            // Make sure changes exist
+            if (isGameV14OrLater()) {
+                activeEffect.system ??= {};
+                activeEffect.system.changes ??= [];
+            } else {
+                activeEffect.changes ??= [];
+            }
+
+            foundry.utils.getProperty(activeEffect, isGameV14OrLater() ? `system.changes` : `changes`).push(change);
 
             thisAttackActivePointAdjustmentNotAppliedDueToMax =
                 thisAttackActivePointsEffect - activeEffect.flags[game.system.id].adjustmentActivePoints;
@@ -844,7 +856,7 @@ export async function performAdjustment(
             flags: activeEffect.flags,
         });
     } else {
-        console.warn("ActiveEffect not created because adjustmentActivePoints=0");
+        console.error(`ActiveEffect ${activeEffect.name} not created because adjustmentActivePoints=0`);
     }
 
     if (!isHealing) {
@@ -1004,7 +1016,7 @@ async function updateCharacteristicValue(activeEffect, { targetSystem, previousC
     }
 
     if (targetSystem instanceof HeroSystem6eActor) {
-        for (const change of activeEffect.changes) {
+        for (const change of activeEffect.changes ?? activeEffect.system.changes) {
             const char = change.key.match(/([a-z]+)\.max/)?.[1];
             if (char) {
                 const targetStartingValue = foundry.utils.getProperty(
@@ -1044,7 +1056,7 @@ async function updateCharacteristicValue(activeEffect, { targetSystem, previousC
 function updateEffectName(activeEffect) {
     //const item = fromUuidSync(activeEffect.origin);
     let _array = [];
-    for (const c of activeEffect.changes) {
+    for (const c of activeEffect.changes ?? activeEffect.system.changes) {
         const _name =
             c.key.match(/([a-z]+)\.max/)?.[1].replace("system", activeEffect.flags[game.system.id]?.key) ||
             c.key.match(/[a-z]+/)?.[0];
