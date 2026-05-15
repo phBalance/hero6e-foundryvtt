@@ -1,5 +1,4 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { isGameV14OrLater } from "../utility/compatibility.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 
 // Compatibility V14
