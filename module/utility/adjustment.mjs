@@ -826,6 +826,12 @@ export async function performAdjustment(
                 (previousActivePointsForThisXmlid % costPerActivePoint);
             const targetValue = costPerActivePoint ? Math.trunc(finalAp / costPerActivePoint) : 0;
             change.value = targetValue;
+            if (isGameV14OrLater()) {
+                activeEffect.system ??= {};
+                activeEffect.system.changes ??= [];
+            } else {
+                activeEffect.changes ??= [];
+            }
             activeEffect[isGameV14OrLater() ? `system.changes` : `changes`].push(change);
 
             thisAttackActivePointAdjustmentNotAppliedDueToMax = 0;
