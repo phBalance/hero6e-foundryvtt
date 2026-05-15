@@ -1,4 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
+import { isGameV14OrLater } from "../utility/compatibility.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 
 // Compatibility V14
@@ -627,4 +628,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
             }
         }
     }
+
+    // static migrateData(source) {
+    //     if (isGameV14OrLater()) {
+    //         if (source.duration?.seconds) {
+    //             source.duration.startTime ??= source.duration._worldTime;
+    //             source.duration.expiryEvent ??= "turnEnd"; // New V14 Event requirement
+    //         }
+    //     }
+    // }
 }

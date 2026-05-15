@@ -328,6 +328,8 @@ function _createNewAdjustmentEffect(options) {
         img: attackItem.img,
         duration: {
             seconds: _determineEffectDurationInSeconds(attackItem, rawActivePointsDamage),
+            startTime: game.time.worldTime, // New V14 Event requirement
+            expiryEvent: "turnEnd", // New V14 Event requirement
         },
         flags: {
             [game.system.id]: {
@@ -366,6 +368,10 @@ function _createNewAdjustmentEffect(options) {
     activeEffect = foundry.utils.mergeObject(activeEffect, {
         [`isGameV14OrLater() ? "system.changes" : "changes"`]: [],
     });
+
+    if (isGameV14OrLater()) {
+        activeEffect.start ??= ActiveEffect.getEffectStart();
+    }
 
     // If this is 5e then some characteristics are entirely calculated based on
     // those. We only need to worry about 2 (DEX -> OCV & DCV and EGO -> OMCV & DMCV)

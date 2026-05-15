@@ -2,7 +2,7 @@ import { HEROSYS } from "./herosystem6e.mjs";
 import { clamp, isGameV13OrLater } from "./utility/compatibility.mjs";
 import { whisperUserTargetsForActor, expireEffects, toHHMMSS, gmActive } from "./utility/util.mjs";
 import { rehydrateAttackItem, userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-attack.mjs";
-import { HeroSystem6eActorActiveEffect } from "./actor/actor-active-effects.mjs";
+import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 
 export class HeroSystem6eCombat extends Combat {
     // static defineSchema() {
@@ -716,7 +716,7 @@ export class HeroSystem6eCombat extends Combat {
             //const ae = combatant.actor.effects.find((effect) => effect.statuses.has("holding"));
             //combatant.actor.removeActiveEffect(ae);
             await combatant.actor.toggleStatusEffect(
-                HeroSystem6eActorActiveEffect.statusEffectsObj.holdingAnActionEffect.id,
+                HeroSystem6eActorActiveEffects.statusEffectsObj.holdingAnActionEffect.id,
                 {
                     active: false,
                 },
@@ -728,7 +728,7 @@ export class HeroSystem6eCombat extends Combat {
             //const ae = combatant.actor.effects.find((effect) => effect.statuses.has("nonCombatMovement"));
             //combatant.actor.removeActiveEffect(ae);
             await combatant.actor.toggleStatusEffect(
-                HeroSystem6eActorActiveEffect.statusEffectsObj.nonCombatMovementEffect.id,
+                HeroSystem6eActorActiveEffects.statusEffectsObj.nonCombatMovementEffect.id,
                 {
                     active: false,
                 },
@@ -749,7 +749,7 @@ export class HeroSystem6eCombat extends Combat {
 
         // Stop ABORT
         if (combatant.actor.statuses.has("aborted")) {
-            await combatant.actor.toggleStatusEffect(HeroSystem6eActorActiveEffect.statusEffectsObj.abortEffect.id);
+            await combatant.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect.id);
         }
 
         // Stop dodges and other maneuvers' active effects that expire automatically
@@ -1070,9 +1070,12 @@ export class HeroSystem6eCombat extends Combat {
         // If actor has Lightning Reflexes, then Only clear stunned/KO when on LR combatant
         if (!lightningReflexes || combatant.flags[game.system.id]?.lightningReflexes) {
             if (combatant.actor.statuses.has("stunned")) {
-                await combatant.actor.toggleStatusEffect(HeroSystem6eActorActiveEffect.statusEffectsObj.stunEffect.id, {
-                    active: false,
-                });
+                await combatant.actor.toggleStatusEffect(
+                    HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id,
+                    {
+                        active: false,
+                    },
+                );
 
                 const content = `${combatant.token.name} recovers from being stunned.`;
 

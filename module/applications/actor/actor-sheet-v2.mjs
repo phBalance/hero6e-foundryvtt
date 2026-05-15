@@ -491,7 +491,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
                 case "effects":
                     context.allTemporaryEffects = Array.from(this.actor.allApplicableEffects())
-                        .filter((o) => o.duration.duration > 0 || o.statuses.size)
+                        .filter((ae) => ae.isTemporary)
                         .sort((a, b) => a.name.localeCompare(b.name));
                     context.allConstantEffects = this.actor.getConstantEffects();
                     context.allPersistentEffects = this.actor.getPersistentEffects();
