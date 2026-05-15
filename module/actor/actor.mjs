@@ -2012,7 +2012,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
     getMiscEffects() {
         return Array.from(this.allApplicableEffects())
-            .filter((ae) => !ae.isTemporary && !ae.parent.duration)
+            .filter((ae) => !ae.isTemporary)
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 

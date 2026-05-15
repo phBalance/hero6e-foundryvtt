@@ -491,7 +491,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
                 case "effects":
                     context.allTemporaryEffects = Array.from(this.actor.allApplicableEffects())
-                        .filter((o) => o.duration.duration > 0 || o.statuses.size)
+                        .filter((ae) => ae.isTemporary)
                         .sort((a, b) => a.name.localeCompare(b.name));
                     context.allConstantEffects = this.actor.getConstantEffects();
                     context.allPersistentEffects = this.actor.getPersistentEffects();
@@ -1724,7 +1724,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
         // If the actor has the status and it's not from the canonical statusEffect
         // Then we want to force more individual control rather than allow toggleStatusEffect
-        for (const effect of this.actor.allApplicableEffects()) {
+        const allApplicableEffects = Array.from(this.actor.allApplicableEffects());
+        for (const effect of allApplicableEffects) {
             for (const id of effect.statuses) {
                 if (!(id in statusInfo)) continue;
                 statusInfo[id].active = "active";
