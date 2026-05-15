@@ -33,6 +33,10 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
     }
 
     _prepareDetectionModes() {
+        if (isGameV14OrLater()) {
+            return super._prepareDetectionModes();
+        }
+
         if (!this.sight.enabled) return;
 
         if (!this.isOwner) return;
