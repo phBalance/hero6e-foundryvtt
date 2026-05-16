@@ -645,6 +645,9 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 }
             }
 
+            // If start is earlier that worldTime
+            // TODO:
+
             const sourceItem = this.origin?.includes("Item") ? fromUuidSync(this.origin) : null;
             if (!sourceItem) {
                 heroValidations.push({

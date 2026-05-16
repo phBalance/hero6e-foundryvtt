@@ -237,7 +237,7 @@ export async function expireEffects(actor, expiresOn) {
             if (actor.inCombat && game.combat?.combatant?.actorId === actor.id) {
                 switch (validationEntry.severity) {
                     case CONFIG.HERO.VALIDATION_SEVERITY.INFO:
-                        ui.notifications.log(message);
+                        ui.notifications.info(message);
                         break;
 
                     case CONFIG.HERO.VALIDATION_SEVERITY.WARNING:
