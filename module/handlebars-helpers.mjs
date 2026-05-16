@@ -191,7 +191,7 @@ function getScopedFlagValue(obj, scope, ...args) {
 }
 
 function expandSegment(index, combat) {
-    if (index === combat.current?.segment) {
+    if (index === game.combat?.segment) {
         return true;
     }
 
@@ -207,7 +207,8 @@ function activeSegment(index, combat) {
         return false;
     }
 
-    if (index === combat.current?.segment) {
+    if (index === game.combat?.segment) {
+        //combat.current?.segment is 12 at game load, unclear why this is an issue.
         return true;
     }
 
