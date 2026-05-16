@@ -308,7 +308,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 ? true
                 : false;
 
+        const newName = this.preBuildName(data.system);
+        if (this.name !== newName) {
+            data.name = newName;
+        }
+
         this.updateSource({
+            name: data.name,
             system: {
                 versionHeroSystem6eCreated: game.system.version,
                 is5e,
@@ -1054,21 +1060,23 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             }
         }
 
-        this.preBuildName(changes);
+        const newName = this.preBuildName(changes.system);
+        if (this.name !== newName) {
+            changes.name = newName;
+        }
 
         await super._preUpdate(changes, options, user);
     }
 
-    // We are modifying changes
-    preBuildName(changes) {
+    preBuildName(changesSystem) {
         // Updating item.name with NAME/ALIAS/XMLID
         // NOTE: Doesn't work for EffectiveItems as they aren't in the database, thus no update operation. Perhaps move some of this to PrepareData for EffectiveItems.
         // We really don't need to use this.name, we can use a getter to calculate name on the fly.  Ignoring this.name all together.
-        const _NAME = changes.system?.NAME ?? this.system.NAME;
-        const _ALIAS = changes.system?.ALIAS ?? this.system.ALIAS;
-        const _XMLID = changes.system?.XMLID ?? this.system.XMLID;
-        const _INPUT = changes.system?.INPUT ?? this.system.INPUT;
-        const _TYPE = changes.system?.TYPE ?? this.system.TYPE;
+        const _NAME = changesSystem?.NAME ?? this.system.NAME;
+        const _ALIAS = changesSystem?.ALIAS ?? this.system.ALIAS;
+        const _XMLID = changesSystem?.XMLID ?? this.system.XMLID;
+        const _INPUT = changesSystem?.INPUT ?? this.system.INPUT;
+        const _TYPE = changesSystem?.TYPE ?? this.system.TYPE;
 
         let newName;
 
@@ -1099,9 +1107,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 break;
         }
 
-        if (this.name !== newName) {
-            changes.name = newName;
-        }
+        return newName;
     }
 
     async _onUpdate(changed, options, userId) {
