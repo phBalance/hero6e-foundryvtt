@@ -619,6 +619,57 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         }
     }
 
+    get validationTooltip() {
+        return this.heroValidation.map((m) => m.message).join(", ");
+    }
+
+    get heroValidation() {
+        const heroValidations = [];
+
+        if (this.isTemporary) {
+            const d = this._prepareDuration();
+
+            if (d.remaining > d.seconds) {
+                heroValidations.push({
+                    message: `${this._prepareDuration().remaining}s remaining but only ${d.seconds}s duration.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                });
+            }
+
+            if (d.remaining < 0) {
+                {
+                    heroValidations.push({
+                        message: `${this._prepareDuration().remaining}s is negative.`,
+                        severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                    });
+                }
+            }
+
+            const sourceItem = this.origin?.includes("Item") ? fromUuidSync(this.origin) : null;
+            if (!sourceItem) {
+                heroValidations.push({
+                    message: `The actor/item that created this effect no longer exists.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
+                });
+            }
+        }
+
+        return heroValidations;
+    }
+
+    get validationCss() {
+        function getKeyByValue(object, value) {
+            return Object.keys(object).find((key) => object[key] === value);
+        }
+        const severityMax = Math.max(0, ...this.heroValidation.map((m) => m.severity ?? 0));
+
+        if (severityMax > 0) {
+            return `validation validation-${getKeyByValue(CONFIG.HERO.VALIDATION_SEVERITY, severityMax).toLocaleLowerCase()}`;
+        }
+
+        return "";
+    }
+
     static _removeRedundantHalvingActiveEffects(changes) {
         // Filter out redundant multiplies, keeping lowest value
         const mults = changes.filter((c) => c.mode === CONST.ACTIVE_EFFECT_MODES.MULTIPLY);

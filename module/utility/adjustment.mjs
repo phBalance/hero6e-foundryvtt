@@ -206,7 +206,7 @@ export function determineCostPerActivePoint(targetCharacteristic, targetPower, t
         console.error(`Missing targetCharacteristic & targetPower`, targetActor);
     }
 
-    const characteristic = targetActor.system?.[targetCharacteristic.toUpperCase()];
+    const characteristic = targetActor.system?.[targetCharacteristic?.toUpperCase()];
 
     // Simplified Healing
     if (targetPower?.XMLID === "HEALING" && targetPower?.system.INPUT.match(/simplified/i)) {

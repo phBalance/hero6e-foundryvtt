@@ -227,29 +227,82 @@ export async function expireEffects(actor, expiresOn) {
     }
 
     const adjustmentChatMessages = [];
-    for (const ae of temporaryEffects) {
-        const d = ae._prepareDuration();
 
-        // Sanity Check
-        if (d.remaining > 0 && !ae.duration.startTime) {
-            console.warn(
-                `${actor.name}/${ae.name} has ${ae._prepareDuration().remaining}s remaining.  It has no duration.startTime and will likely never expire.`,
-                ae,
-            );
-            if (ae.parent instanceof HeroSystem6eItem) {
-                console.error(
-                    `${actor.name}/${ae.parent.detailedName()}/${ae.name} is a temporary effect associated with an item. This is super unusual. Try uploading the HDC file again.  If that doesn't resolve the issue then this could be a coding error and should be reported.`,
-                    ae,
-                );
+    // TODO: Move remaining sanity checks to HeroValidation
+    for (const ae of temporaryEffects) {
+        const heroValidation = ae.heroValidation;
+        for (const validationEntry of heroValidation) {
+            const message = `${actor.name}/${ae.flags[game.system.id]?.XMLID}/${ae.nameExtended}: ${validationEntry.message}`;
+            // If current combatant, show in the UI otherwise to log
+            if (actor.inCombat && game.combat?.combatant?.actorId === actor.id) {
+                switch (validationEntry.severity) {
+                    case CONFIG.HERO.VALIDATION_SEVERITY.INFO:
+                        ui.notifications.log(message);
+                        break;
+
+                    case CONFIG.HERO.VALIDATION_SEVERITY.WARNING:
+                        ui.notifications.warn(message);
+                        break;
+
+                    case CONFIG.HERO.VALIDATION_SEVERITY.ERROR:
+                        ui.notifications.error(message);
+                        break;
+
+                    default:
+                        console.error("Invalid validation severity", validationEntry.severity);
+                        break;
+                }
+            } else {
+                switch (validationEntry.severity) {
+                    case CONFIG.HERO.VALIDATION_SEVERITY.INFO:
+                        console.log(message, ae);
+                        break;
+
+                    case CONFIG.HERO.VALIDATION_SEVERITY.WARNING:
+                        console.warn(message, ae);
+                        break;
+
+                    case CONFIG.HERO.VALIDATION_SEVERITY.ERROR:
+                        console.error(message, ae);
+                        break;
+
+                    default:
+                        console.error("Invalid validation severity", validationEntry.severity);
+                        break;
+                }
             }
         }
 
-        if (d.remaining > d.seconds) {
-            console.error(
-                `${actor.name}/${ae.nameExtended} has ${ae._prepareDuration().remaining}s remaining but only ${d.seconds}s duration. This is inconsistent and may cause issues with expiration.`,
-                ae,
-            );
-        }
+        //const d = ae._prepareDuration();
+
+        //Sanity Check
+        // if (d.remaining > 0 && !ae.duration.startTime) {
+        //     console.warn(
+        //         `${actor.name}/${ae.name} has ${ae._prepareDuration().remaining}s remaining.  It has no duration.startTime and will likely never expire.`,
+        //         ae,
+        //     );
+        //     if (ae.parent instanceof HeroSystem6eItem) {
+        //         console.error(
+        //             `${actor.name}/${ae.parent.detailedName()}/${ae.name} is a temporary effect associated with an item. This is super unusual. Try uploading the HDC file again.  If that doesn't resolve the issue then this could be a coding error and should be reported.`,
+        //             ae,
+        //         );
+        //     }
+        // }
+
+        // if (d.remaining > d.seconds) {
+        //     console.error(
+        //         `${actor.name}/${ae.nameExtended} has ${ae._prepareDuration().remaining}s remaining but only ${d.seconds}s duration. ` +
+        //             `This is causing issues with expiration.`,
+        //         ae,
+        //     );
+        //     // If in current combat, show in the UI that the AE expiration is likely wrong
+        //     if (actor.inCombat && game.combat.combatants.find((c) => c.actorId === actor.id)) {
+        //         ui.notifications.error(
+        //             `${actor.name}/${ae.nameExtended} has ${ae._prepareDuration().remaining}s remaining but only ${d.seconds}s duration. ` +
+        //                 `This is causing issues with expiration.  You may want to manually track expiration of this effect.`,
+        //         );
+        //     }
+        // }
 
         // We are expecting expiresOn flag
         const aeExpiresOn =
