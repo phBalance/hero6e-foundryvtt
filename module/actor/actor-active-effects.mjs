@@ -551,49 +551,52 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         }
     }
 
-    _prepareDuration() {
-        const d = this.duration;
+    // Aaron doesn't think we need to override _prepareDuration anymore.
+    // This was largely for the label, which is now handled by ActorSheet2 in the UI.
+    // Additionally it seems to conflict with V14.
+    // _prepareDuration() {
+    //     const d = this.duration;
 
-        // Time-based duration
-        if (Number.isNumeric(d.seconds)) {
-            const wt = game.time.worldTime;
-            const start = d.startTime || wt;
-            const elapsed = wt - start;
-            const remaining = d.seconds - elapsed;
+    //     // Time-based duration
+    //     if (Number.isNumeric(d.seconds)) {
+    //         const wt = game.time.worldTime;
+    //         const start = d.startTime || wt;
+    //         const elapsed = wt - start;
+    //         const remaining = d.seconds - elapsed;
 
-            let totalSeconds = parseInt(remaining);
+    //         let totalSeconds = parseInt(remaining);
 
-            if (totalSeconds < 0) {
-                console.warn(
-                    `Active Effect ${this.name}/${this.parent.name}/${this.parent?.actor?.name} has negative remaining duration = ${totalSeconds}.`,
-                    this.duration,
-                    wt,
-                );
-                totalSeconds = 0;
-            }
+    //         if (totalSeconds < 0) {
+    //             console.warn(
+    //                 `Active Effect ${this.name}/${this.parent.name}/${this.parent?.actor?.name} has negative remaining duration = ${totalSeconds}.`,
+    //                 this.duration,
+    //                 wt,
+    //             );
+    //             totalSeconds = 0;
+    //         }
 
-            const days = Math.floor(totalSeconds / (3600 * 24)); // 3600 seconds in an hour, 24 hours in a day
-            totalSeconds %= 3600 * 24; // Remaining seconds after calculating days
+    //         const days = Math.floor(totalSeconds / (3600 * 24)); // 3600 seconds in an hour, 24 hours in a day
+    //         totalSeconds %= 3600 * 24; // Remaining seconds after calculating days
 
-            const hours = Math.floor(totalSeconds / 3600); // 3600 seconds in an hour
-            totalSeconds %= 3600; // Remaining seconds after calculating hours
+    //         const hours = Math.floor(totalSeconds / 3600); // 3600 seconds in an hour
+    //         totalSeconds %= 3600; // Remaining seconds after calculating hours
 
-            const minutes = Math.floor(totalSeconds / 60); // 60 seconds in a minute
-            totalSeconds %= 60; // Remaining seconds
+    //         const minutes = Math.floor(totalSeconds / 60); // 60 seconds in a minute
+    //         totalSeconds %= 60; // Remaining seconds
 
-            const seconds = totalSeconds;
+    //         const seconds = totalSeconds;
 
-            return {
-                type: "seconds",
-                duration: d.seconds,
-                remaining: remaining,
-                label: `${days ? `${days}d ` : ""}${hours ? `${hours}h ` : ""}${minutes ? `${minutes}m ` : ""}${seconds ? `${seconds}s` : ""}`,
-                _worldTime: wt,
-            };
-        }
+    //         return {
+    //             type: "seconds",
+    //             duration: d.seconds,
+    //             remaining: remaining,
+    //             label: `${days ? `${days}d ` : ""}${hours ? `${hours}h ` : ""}${minutes ? `${minutes}m ` : ""}${seconds ? `${seconds}s` : ""}`,
+    //             _worldTime: wt,
+    //         };
+    //     }
 
-        return super._prepareDuration();
-    }
+    //     return super._prepareDuration();
+    // }
 
     get nameExtended() {
         const sourceName = this.flags[game.system.id]?.source;
