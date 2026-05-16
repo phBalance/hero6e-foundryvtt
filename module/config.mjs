@@ -7949,7 +7949,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "MENTALILLUSIONS",
             type: ["attack", "mental"],
-            behaviors: ["activatable", "to-hit", "dice"],
+            behaviors: ["to-hit", "dice"],
             perceivability: "imperceptible",
             duration: HERO.DURATION_TYPES.INSTANT,
             target: "dmcv",
