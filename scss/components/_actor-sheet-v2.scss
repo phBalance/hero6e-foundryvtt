@@ -51,7 +51,6 @@
 }
 
 .herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-error {
-    // background-color: rgb(255 0 0 / 10%);
     box-shadow: 0 0 0 1px rgb(255 0 0 / 50%) inset;
     outline: rgb(255 0 0 / 100%) solid 1px;
 }
@@ -137,7 +136,6 @@ input.over-max {
         text-align: center;
         margin: 1rem 0;
 
-        // box-sizing: border-box;
         input[type="text"] {
             width: 35px;
             min-width: 25px;
@@ -232,7 +230,7 @@ input.over-max {
         border: thin solid var(--color-tabs-border);
         border-radius: 0.5em;
         line-height: inherit;
-        width: 95px; // `racteristics is the longest tab
+        width: 95px; // characteristics is the longest tab
     }
 
     a.active {
@@ -385,10 +383,6 @@ input.over-max {
         }
 
         li.item {
-            // max-height: auto;
-            // transform: scaleY(1);
-            // transition: all 5.25s ease-out;
-
             a.item-chevron {
                 transition: all 0.1s ease-out;
             }
@@ -403,14 +397,6 @@ input.over-max {
 
         li.item.collapsed-child {
             display: none;
-
-            // max-height: 0;
-            // overflow: hidden;
-            // transform: scaleY(0);
-            // border: none;
-            // padding: 0;
-            // margin: 0;
-            // transition: all 5.25s ease-in;
         }
 
         img.item-image {
