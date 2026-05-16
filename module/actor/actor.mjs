@@ -3984,12 +3984,45 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // NOTE: Older HD used "Main" as the template type - not sure what it means
 
         // CAREFUL: the template type is only loosely tied to actor.type
-        // TODO: See if we can tighly couple the template to actor.type
+        // TODO: See if we can tightly couple the template to actor.type
 
         // Templates can extend other templates.
         // Some HDC files include custom template info that we currently ignore.
 
-        return this.system.CHARACTER?.TEMPLATE.name;
+        // Generic template
+        let genericTemplate;
+        switch (this.type) {
+            case "pc":
+            case "npc":
+                genericTemplate = `builtIn.Superheroic${this.is5e ? "" : "6E"}.hdt`;
+                break;
+
+            case "ai":
+                genericTemplate = `builtIn.AI${this.is5e ? "" : "6E"}.hdt`;
+                break;
+
+            case "automation":
+                genericTemplate = `builtIn.Automaton${this.is5e ? "" : "6E"}.hdt`;
+                break;
+
+            case "base2":
+                genericTemplate = `builtIn.Base${this.is5e ? "" : "6E"}.hdt`;
+                break;
+
+            case "computer":
+                genericTemplate = `builtIn.Computer${this.is5e ? "" : "6E"}.hdt`;
+                break;
+
+            case "vehicle":
+                genericTemplate = `builtIn.Vehicle${this.is5e ? "" : "6E"}.hdt`;
+                break;
+
+            default:
+                console.warn(`Unhandled actor type=${this.type} for template fallback`);
+                genericTemplate = `builtIn.Main${this.is5e ? "" : "6E"}.hdt`;
+        }
+
+        return this.system.CHARACTER?.TEMPLATE.name ?? genericTemplate;
     }
 
     get _templateTypeAbreviation() {

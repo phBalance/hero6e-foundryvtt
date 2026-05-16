@@ -551,54 +551,123 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         }
     }
 
-    _prepareDuration() {
-        const d = this.duration;
+    // Aaron doesn't think we need to override _prepareDuration anymore.
+    // This was largely for the label, which is now handled by ActorSheet2 in the UI.
+    // Additionally it seems to conflict with V14.
+    // _prepareDuration() {
+    //     const d = this.duration;
 
-        // Time-based duration
-        if (Number.isNumeric(d.seconds)) {
-            const wt = game.time.worldTime;
-            const start = d.startTime || wt;
-            const elapsed = wt - start;
-            const remaining = d.seconds - elapsed;
+    //     // Time-based duration
+    //     if (Number.isNumeric(d.seconds)) {
+    //         const wt = game.time.worldTime;
+    //         const start = d.startTime || wt;
+    //         const elapsed = wt - start;
+    //         const remaining = d.seconds - elapsed;
 
-            let totalSeconds = parseInt(remaining);
+    //         let totalSeconds = parseInt(remaining);
 
-            if (totalSeconds < 0) {
-                console.warn(
-                    `Active Effect ${this.name}/${this.parent.name}/${this.parent?.actor?.name} has negative remaining duration = ${totalSeconds}.`,
-                    this.duration,
-                    wt,
-                );
-                totalSeconds = 0;
-            }
+    //         if (totalSeconds < 0) {
+    //             console.warn(
+    //                 `Active Effect ${this.name}/${this.parent.name}/${this.parent?.actor?.name} has negative remaining duration = ${totalSeconds}.`,
+    //                 this.duration,
+    //                 wt,
+    //             );
+    //             totalSeconds = 0;
+    //         }
 
-            const days = Math.floor(totalSeconds / (3600 * 24)); // 3600 seconds in an hour, 24 hours in a day
-            totalSeconds %= 3600 * 24; // Remaining seconds after calculating days
+    //         const days = Math.floor(totalSeconds / (3600 * 24)); // 3600 seconds in an hour, 24 hours in a day
+    //         totalSeconds %= 3600 * 24; // Remaining seconds after calculating days
 
-            const hours = Math.floor(totalSeconds / 3600); // 3600 seconds in an hour
-            totalSeconds %= 3600; // Remaining seconds after calculating hours
+    //         const hours = Math.floor(totalSeconds / 3600); // 3600 seconds in an hour
+    //         totalSeconds %= 3600; // Remaining seconds after calculating hours
 
-            const minutes = Math.floor(totalSeconds / 60); // 60 seconds in a minute
-            totalSeconds %= 60; // Remaining seconds
+    //         const minutes = Math.floor(totalSeconds / 60); // 60 seconds in a minute
+    //         totalSeconds %= 60; // Remaining seconds
 
-            const seconds = totalSeconds;
+    //         const seconds = totalSeconds;
 
-            return {
-                type: "seconds",
-                duration: d.seconds,
-                remaining: remaining,
-                label: `${days ? `${days}d ` : ""}${hours ? `${hours}h ` : ""}${minutes ? `${minutes}m ` : ""}${seconds ? `${seconds}s` : ""}`,
-                _worldTime: wt,
-            };
-        }
+    //         return {
+    //             type: "seconds",
+    //             duration: d.seconds,
+    //             remaining: remaining,
+    //             label: `${days ? `${days}d ` : ""}${hours ? `${hours}h ` : ""}${minutes ? `${minutes}m ` : ""}${seconds ? `${seconds}s` : ""}`,
+    //             _worldTime: wt,
+    //         };
+    //     }
 
-        return super._prepareDuration();
-    }
+    //     return super._prepareDuration();
+    // }
 
     get nameExtended() {
-        const sourceName = this.flags[game.system.id]?.source;
-        const d = this._prepareDuration();
-        return `${this.name} [${sourceName ? `${sourceName}, ` : ""}${d.label}]`;
+        try {
+            const sourceItem = this.origin?.includes("Item") ? fromUuidSync(this.origin) : null;
+            const actorName =
+                sourceItem?.actor?.token?.name ??
+                this.flags[game.system.id]?.itemTokenName ??
+                this.flags[game.system.id]?.source;
+            const itemName = sourceItem?.name;
+            const d = this._prepareDuration();
+            const components = [];
+            if (actorName) components.push(actorName);
+            if (itemName) components.push(itemName);
+            const label = d?.label?.replace("None", ""); // In v14 label is the duration in user readable format
+            if (label) components.push(label);
+            return `${this.name}${components.length > 0 ? ` [${components.filter((c) => !!c).join(", ")}]` : ""}`;
+        } catch (e) {
+            console.error("Error in nameExtended", e);
+            return this.name;
+        }
+    }
+
+    get validationTooltip() {
+        return this.heroValidation.map((m) => m.message).join(", ");
+    }
+
+    get heroValidation() {
+        const heroValidations = [];
+
+        if (this.isTemporary) {
+            const d = this._prepareDuration();
+
+            if (d.remaining > d.seconds) {
+                heroValidations.push({
+                    message: `${this._prepareDuration().remaining}s remaining but only ${d.seconds}s duration.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                });
+            }
+
+            if (d.remaining < 0) {
+                {
+                    heroValidations.push({
+                        message: `${this._prepareDuration().remaining}s is negative.`,
+                        severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                    });
+                }
+            }
+
+            const sourceItem = this.origin?.includes("Item") ? fromUuidSync(this.origin) : null;
+            if (!sourceItem) {
+                heroValidations.push({
+                    message: `The actor/item that created this effect no longer exists.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
+                });
+            }
+        }
+
+        return heroValidations;
+    }
+
+    get validationCss() {
+        function getKeyByValue(object, value) {
+            return Object.keys(object).find((key) => object[key] === value);
+        }
+        const severityMax = Math.max(0, ...this.heroValidation.map((m) => m.severity ?? 0));
+
+        if (severityMax > 0) {
+            return `validation validation-${getKeyByValue(CONFIG.HERO.VALIDATION_SEVERITY, severityMax).toLocaleLowerCase()}`;
+        }
+
+        return "";
     }
 
     static _removeRedundantHalvingActiveEffects(changes) {

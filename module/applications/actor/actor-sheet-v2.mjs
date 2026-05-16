@@ -1656,8 +1656,27 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             return "";
         }
 
-        // Make sure these are items
-        if (items[0].constructor.name !== "HeroSystem6eItem") {
+        // Are these Effects
+        if (items[0].documentName === "ActiveEffect") {
+            const severityMax = Math.max(
+                0,
+                ...items
+                    .reduce((accumulator, currentArray) => {
+                        return accumulator.concat(currentArray.heroValidation);
+                    }, [])
+                    .map((m) => m.severity ?? 0),
+            );
+            if (severityMax > 0) {
+                function getKeyByValue(object, value) {
+                    return Object.keys(object).find((key) => object[key] === value);
+                }
+                return `validation validation-${getKeyByValue(CONFIG.HERO.VALIDATION_SEVERITY, severityMax).toLocaleLowerCase()}`;
+            }
+            return "";
+        }
+
+        // Make sure these are Items
+        if (items[0].documentName !== "Item") {
             return "";
         }
 

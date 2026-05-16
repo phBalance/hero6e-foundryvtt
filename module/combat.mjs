@@ -502,7 +502,7 @@ export class HeroSystem6eCombat extends Combat {
                 );
             }
             console.debug(
-                `extraCombatants/after: ${this.current.name} segment=${this.current.segment} init=${this.current.initiative}`,
+                `extraCombatants/after: ${this.current.name} segment=${game.combat.segment} init=${this.current.initiative}`,
                 this,
             );
         } catch (e) {
@@ -1307,18 +1307,18 @@ export class HeroSystem6eCombat extends Combat {
             return;
         }
 
-        const originalRunningSegment = this.round * 12 + this.current.segment;
+        const originalRunningSegment = this.round * 12 + game.combat.segment;
 
         let turn = this.turn ?? -1;
         const skip = this.settings.skipDefeated;
 
         // Determine the next turn number
         let next = turn + 1;
-        if (this.flags[game.system.id].segment !== this.current.segment) {
+        if (this.flags[game.system.id].segment !== game.combat.segment) {
             console.warn("inconsistent segment number");
-            this.flags[game.system.id].segment = this.current.segment;
+            this.flags[game.system.id].segment = game.combat.segment;
         }
-        let newSegment = this.current.segment;
+        let newSegment = game.combat.segment;
 
         if (!HeroSystem6eCombat.singleCombatantTracker) {
             for (let [i, t] of this.turns.entries()) {
@@ -1411,7 +1411,7 @@ export class HeroSystem6eCombat extends Combat {
             console.debug(`%c Hero | nextHeroSegmentSingle ${game.time.worldTime}`, "background: #229; color: #bada55");
         }
         let segmentHasCombatants = false;
-        const segmentNumberInitial = this.current.segment || 12;
+        const segmentNumberInitial = game.combat.segment || 12;
         let segmentNumberNext = segmentNumberInitial;
         let advanceTime = 0;
         const updateData = {};
@@ -1532,7 +1532,7 @@ export class HeroSystem6eCombat extends Combat {
         }
         let previousTurn = (this.turn ?? this.turns.length) - 1;
 
-        const originalRunningSegment = this.round * 12 + this.current.segment;
+        const originalRunningSegment = this.round * 12 + game.combat.segment;
 
         // Hero combats start with round 1 and segment 12.
         // So anything less than segment 12 will call previousTurn
