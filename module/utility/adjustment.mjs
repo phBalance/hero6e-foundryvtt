@@ -813,7 +813,7 @@ export async function performAdjustment(
         else if (thisAttackActivePointsEffect < 0) {
             const change = _createAEChangeBlock(potentialCharacteristic, targetSystem);
             const previousActivePointsForThisXmlid = targetActor.temporaryEffects
-                .filter((ae) => ae.flags[game.system.id].type === "adjustment")
+                .filter((ae) => ae.flags[game.system.id]?.type === "adjustment")
                 .reduce((a, c) => {
                     const _adjustedActivePoints = c.changes.find((cc) => cc?.key === change.key)
                         ? c.flags[game.system.id].adjustmentActivePoints
