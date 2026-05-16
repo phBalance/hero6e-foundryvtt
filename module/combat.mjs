@@ -1760,9 +1760,12 @@ export class HeroSystem6eCombat extends Combat {
             return await this.previousRoundSingle();
         }
 
-        const originalRunningSegment = this.round * 12 + this.combatant?.[game.system.id]?.segment;
+        const originalRunningSegment =
+            this.round * 12 + (this.combatant?.flags[game.system.id]?.segment || this.flags?.[game.system.id]?.segment);
         const _previousRound = await super.previousRound();
-        const newRunningSegment = this.round * 12 + this.combatant?.flags[game.system.id]?.segment;
+        const newRunningSegment =
+            this.round * 12 + (this.combatant?.flags[game.system.id]?.segment || this.flags?.[game.system.id]?.segment);
+
         if (originalRunningSegment != newRunningSegment) {
             const advanceTime = newRunningSegment - originalRunningSegment;
             // NaN Typically occurs when previous round ends combat
