@@ -62,15 +62,6 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
         }
     }
 
-    // V12 getData(options) is replaced by V13 _prepareCombatContext
-    async getData(options = {}) {
-        const context = await super.getData(options);
-        await this._prepareTrackerContext(context, options);
-
-        return context;
-    }
-
-    // V12 getData(options) is replaced by V13 _prepareTrackerContext
     async _prepareTrackerContext(context, options) {
         // v13 has _prepareTrackerContext
         if (super._prepareCombatContext) {

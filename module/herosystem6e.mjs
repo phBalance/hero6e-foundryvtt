@@ -766,6 +766,11 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
 
             // Expire continuing charges
             await _expireContinuingCharges(actor);
+
+            // Update labels on AE's with durations so any open actor sheet can see the updated time remaining.
+            for (const ae of actor.temporaryEffects.filter((o) => o.duration && o.duration.seconds)) {
+                //await ae.update({ "flags.herosystem6e.lastWorldTime": game.time.worldTime });
+            }
         } catch (e) {
             console.error(e, actor, actor?.temporaryEffects[0]);
         }

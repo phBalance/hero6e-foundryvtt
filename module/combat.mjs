@@ -1283,7 +1283,8 @@ export class HeroSystem6eCombat extends Combat {
     /**
      * Advance the combat to the next turn
      * @returns {Promise<Combat>}
-     */ async nextTurn() {
+     */
+    async nextTurn() {
         if (CONFIG.debug.combat) {
             console.debug(`%c Hero | nextTurn ${game.time.worldTime}`, "background: #229; color: #bada55");
         }
@@ -1341,12 +1342,17 @@ export class HeroSystem6eCombat extends Combat {
         const newRunningSegment = this.round * 12 + newSegment;
 
         const advanceTime = newRunningSegment - originalRunningSegment;
+
         const updateData = {
             round: this.round,
             turn: next,
             [`flags.${game.system.id}.segment`]: newSegment,
         };
         const updateOptions = { direction: 1, worldTime: { delta: advanceTime } };
+
+        if (advanceTime !== 0) {
+            await this.onSegmentChange();
+        }
 
         //console.log("nextTurn before game.time.advance", game.time.worldTime, advanceTime);
         //Hooks.callAll("combatTurn", this, updateData, updateOptions);
@@ -1573,6 +1579,10 @@ export class HeroSystem6eCombat extends Combat {
         if (originalRunningSegment != newRunningSegment) {
             const advanceTime = newRunningSegment - originalRunningSegment;
             await game.time.advance(advanceTime);
+
+            if (advanceTime !== 0) {
+                await this.onSegmentChange();
+            }
         }
 
         return _previousTurn;
@@ -1687,6 +1697,7 @@ export class HeroSystem6eCombat extends Combat {
         if (originalRunningSegment != newRunningSegment) {
             const advanceTime = newRunningSegment - originalRunningSegment;
             await game.time.advance(advanceTime);
+            await this.onSegmentChange();
         }
 
         const updateData = { [`flags.${game.system.id}.segment`]: this.turns[0].flags[game.system.id].segment };
@@ -1751,6 +1762,10 @@ export class HeroSystem6eCombat extends Combat {
         return this.update(updateData, updateOptions);
     }
 
+    async onSegmentChange() {
+        console.log("onSegmentChange");
+    }
+
     async previousRound() {
         if (CONFIG.debug.combat) {
             console.debug(`Hero | previousRound`);
@@ -1772,6 +1787,7 @@ export class HeroSystem6eCombat extends Combat {
             if (!isNaN(advanceTime)) {
                 await game.time.advance(advanceTime);
             }
+            await this.onSegmentChange();
         }
 
         const updateData = {
