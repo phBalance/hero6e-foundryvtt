@@ -1054,17 +1054,54 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             }
         }
 
+        this.preBuildName(changes);
+
+        await super._preUpdate(changes, options, user);
+    }
+
+    // We are modifying changes
+    preBuildName(changes) {
         // Updating item.name with NAME/ALIAS/XMLID
+        // NOTE: Doesn't work for EffectiveItems as they aren't in the database, thus no update operation. Perhaps move some of this to PrepareData for EffectiveItems.
+        // We really don't need to use this.name, we can use a getter to calculate name on the fly.  Ignoring this.name all together.
         const _NAME = changes.system?.NAME ?? this.system.NAME;
         const _ALIAS = changes.system?.ALIAS ?? this.system.ALIAS;
         const _XMLID = changes.system?.XMLID ?? this.system.XMLID;
-        const newName = _NAME || _ALIAS || _XMLID;
-        if (this.name !== newName) {
-            //console.log(`Updating name from ${this.name} to ${newName}`);
-            changes.name = newName;
+        const _INPUT = changes.system?.INPUT ?? this.system.INPUT;
+        const _TYPE = changes.system?.TYPE ?? this.system.TYPE;
+
+        let newName;
+
+        // Custom name
+        switch (this.system.XMLID) {
+            case "AID":
+            case "DISPEL":
+            case "DRAIN":
+            case "SUCCOR":
+            case "SUPPRESS":
+            case "HEALING":
+                {
+                    newName = _NAME || `${_ALIAS} ${_INPUT}`;
+                }
+                break;
+
+            case "ANALYZE":
+            case "PROFESSIONAL_SKILL":
+            case "KNOWLEDGE_SKILL":
+            case "SCIENCE_SKILL":
+                {
+                    newName = _NAME || `${_ALIAS}: ${(_INPUT || _TYPE)?.trim()}`;
+                }
+                break;
+
+            default:
+                newName = _NAME || _ALIAS || _XMLID;
+                break;
         }
 
-        await super._preUpdate(changes, options, user);
+        if (this.name !== newName) {
+            changes.name = newName;
+        }
     }
 
     async _onUpdate(changed, options, userId) {
@@ -2867,7 +2904,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                             : "unknown"
                     } ${diceFormula}`;
 
-                    this.name = system.NAME || `${system.ALIAS} ${system.INPUT}`;
+                    //this.name = system.NAME || `${system.ALIAS} ${system.INPUT}`;
                 }
                 break;
 
@@ -2985,7 +3022,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     // KS: types of brain matter 11-, PS: Appraise 11-, or SS: tuna batteries 28-
                     const { roll } = this._getSkillRollComponents(system);
                     description = `${system.ALIAS ? system.ALIAS + ": " : ""}${system.INPUT || system.TYPE} ${roll}`;
-                    this.name = system.NAME || `${this.system.ALIAS}: ${(this.system.INPUT || system.TYPE)?.trim()}`;
+                    //this.name = system.NAME || `${this.system.ALIAS}: ${(this.system.INPUT || system.TYPE)?.trim()}`;
                 }
                 break;
 
@@ -3176,7 +3213,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 description = `Resistance (+${parseInt(system.LEVELS)} to roll)`;
                 system.ALIAS = description;
                 if (this.name.match(/Resistance \(\+\d+ to roll\)/)) {
-                    this.name = system.NAME || system.ALIAS;
+                    // this.name = system.NAME || system.ALIAS;
                 }
                 break;
 
@@ -3185,7 +3222,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 // Check to make sure ALIAS is largely folling default format before overriding
                 if (this.name.trim().length <= 1 || this.name.match(/Combat Luck \(\d+ rPD\/\d+ rED\)/)) {
                     system.ALIAS = description;
-                    this.name = system.NAME || system.ALIAS;
+                    // this.name = system.NAME || system.ALIAS;
                 }
                 break;
 
@@ -3437,10 +3474,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     if (configPowerInfo?.type?.includes("skill")) {
                         const { roll } = this._getSkillRollComponents(system);
                         description = system.ALIAS || system.XMLID;
-                        this.name = system.NAME || system.ALIAS;
+                        // this.name = system.NAME || system.ALIAS;
                         if (system?.INPUT) {
                             description += `: ${system.INPUT}`;
-                            this.name += `: ${system.INPUT}`;
+                            // this.name += `: ${system.INPUT}`;
                         }
                         // Skill enhancer?
                         if (roll) {
