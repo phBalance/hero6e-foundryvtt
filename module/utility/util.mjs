@@ -228,8 +228,10 @@ export async function expireEffects(actor, expiresOn) {
 
     const adjustmentChatMessages = [];
     for (const ae of temporaryEffects) {
+        const d = ae._prepareDuration();
+
         // Sanity Check
-        if (ae._prepareDuration().remaining > 0 && !ae.duration.startTime) {
+        if (d.remaining > 0 && !ae.duration.startTime) {
             console.warn(
                 `${actor.name}/${ae.name} has ${ae._prepareDuration().remaining}s remaining.  It has no duration.startTime and will likely never expire.`,
                 ae,
@@ -240,6 +242,13 @@ export async function expireEffects(actor, expiresOn) {
                     ae,
                 );
             }
+        }
+
+        if (d.remaining > d.seconds) {
+            console.error(
+                `${actor.name}/${ae.nameExtended} has ${ae._prepareDuration().remaining}s remaining but only ${d.seconds}s duration. This is inconsistent and may cause issues with expiration.`,
+                ae,
+            );
         }
 
         // We are expecting expiresOn flag

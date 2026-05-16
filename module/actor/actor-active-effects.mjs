@@ -599,9 +599,24 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     // }
 
     get nameExtended() {
-        const sourceName = this.flags[game.system.id]?.source;
-        const d = this._prepareDuration();
-        return `${this.name} [${sourceName ? `${sourceName}, ` : ""}${d.label}]`;
+        try {
+            const sourceItem = this.origin?.includes("Item") ? fromUuidSync(this.origin) : null;
+            const actorName =
+                sourceItem?.actor?.token?.name ??
+                this.flags[game.system.id]?.itemTokenName ??
+                this.flags[game.system.id]?.source;
+            const itemName = sourceItem?.name;
+            const d = this._prepareDuration();
+            const components = [];
+            if (actorName) components.push(actorName);
+            if (itemName) components.push(itemName);
+            const label = d?.label?.replace("None", ""); // In v14 label is the duration in user readable format
+            if (label) components.push(label);
+            return `${this.name}${components.length > 0 ? ` [${components.filter((c) => !!c).join(", ")}]` : ""}`;
+        } catch (e) {
+            console.error("Error in nameExtended", e);
+            return this.name;
+        }
     }
 
     static _removeRedundantHalvingActiveEffects(changes) {

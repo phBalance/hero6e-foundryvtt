@@ -321,16 +321,15 @@ function _createNewAdjustmentEffect(options) {
     let activeEffect = {
         name: `${attackItem.system.XMLID || "undefined"} 0 ${
             (targetPower?.name || potentialCharacteristic)?.toUpperCase() // TODO: This will need to change for multiple effects
-        } (0 AP) [by ${itemTokenName}]`,
+        } (0 AP)`,
         // id: `${item.system.XMLID}.${item.id}.${
         //     targetPower?.name || potentialCharacteristic // TODO: This will need to change for multiple effects
         // }`,
         img: attackItem.img,
         duration: {
             seconds: _determineEffectDurationInSeconds(attackItem, rawActivePointsDamage),
-            startTime: game.time.worldTime, // New V14 Event requirement
-            expiryEvent: "turnEnd", // New V14 Event requirement
         },
+        // TODO: Move all the flags into system data model
         flags: {
             [game.system.id]: {
                 type: "adjustment",
@@ -338,7 +337,7 @@ function _createNewAdjustmentEffect(options) {
                 adjustmentActivePoints: 0,
                 affectedPoints: 0,
                 XMLID: attackItem.system.XMLID,
-                source: targetActor.name,
+                source: itemTokenName ?? targetActor.name,
                 target: targetPower?.uuid || potentialCharacteristic,
                 targetDisplay: fromUuidSync(targetPower?.uuid)?.XMLID || potentialCharacteristic,
                 key: targetPower?.system?.XMLID || potentialCharacteristic,
@@ -832,7 +831,7 @@ export async function performAdjustment(
             } else {
                 activeEffect.changes ??= [];
             }
-            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`].push(change);
+            foundry.utils.getProperty(activeEffect, isGameV14OrLater() ? `system.changes` : `changes`).push(change);
 
             thisAttackActivePointAdjustmentNotAppliedDueToMax = 0;
             adjustmentDamageThisApplication = change.value; //activeEffect.changes[0].value;
@@ -1103,8 +1102,7 @@ function updateEffectName(activeEffect) {
 
     activeEffect.name =
         `${CONFIG.debug.adjustmentFadeKeep && activeEffect.flags?.[game.system.id]?.createTime ? `${activeEffect.flags[game.system.id]?.createTime} ` : ""}` +
-        `${xmlidSlug} (${Math.abs(activeEffect.flags[game.system.id]?.adjustmentActivePoints)} AP) ` +
-        `[by ${activeEffect.flags[game.system.id]?.itemTokenName}]`;
+        `${xmlidSlug} (${Math.abs(activeEffect.flags[game.system.id]?.adjustmentActivePoints)} AP) `;
 }
 
 function _generateAdjustmentChatCard(
