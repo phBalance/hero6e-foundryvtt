@@ -166,6 +166,24 @@ export async function migrateWorld() {
     // Create or recreate Compendiums
     await CreateHeroCompendiums();
 
+    // Because migrations are done by {Actor,Item}.migrateData for all the objects, we need to commit those changes to the DB.
+    await migrateToVersion(
+        game.system.version,
+        lastMigration,
+        getAllActorsInGame(),
+        "commit actor object migration",
+        async (actor) => await commitActorAndItemMigrateDataChangesByActor(actor),
+    );
+
+    // Migrate items
+    await migrateToVersion(
+        game.system.version,
+        lastMigration,
+        Array.from(game.items),
+        "commit items collection object migration",
+        async (item) => await commitItemsCollectionMigrateDataChanges(item),
+    );
+
     // Migrate maneuvers for all things that have strength (PC, NPC) but ignore Vehicles and automatons since we don't give them free stuff at this point.
     let _start = Date.now();
     await migrateToVersion(
@@ -310,23 +328,14 @@ export async function migrateWorld() {
     );
     console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.3.5`, "background: #1111FF; color: #FFFFFF");
 
-    // Because migrations are done by {Actor,Item}.migrateData for all the objects, we need to commit those changes to the DB.
     await migrateToVersion(
-        game.system.version,
+        "4.3.7",
         lastMigration,
         getAllActorsInGame(),
-        "commit actor object migration",
-        async (actor) => await commitActorAndItemMigrateDataChangesByActor(actor),
+        "preBuildName",
+        async (actor) => await migrateTo4_3_7(actor),
     );
-
-    // Migrate items
-    await migrateToVersion(
-        game.system.version,
-        lastMigration,
-        Array.from(game.items),
-        "commit items collection object migration",
-        async (item) => await commitItemsCollectionMigrateDataChanges(item),
-    );
+    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.3.7`, "background: #1111FF; color: #FFFFFF");
 
     console.log(
         `%c Took ${Date.now() - _start}ms to finalize object migration to version ${game.system.version}`,
@@ -366,17 +375,17 @@ async function commitActorAndItemMigrateDataChangesByActor(actor) {
     const itemUpdates = [];
 
     if (actor.flags[game.system.id]?.[needToPersistToDb]) {
-        const { _id, system, flags } = actor.toObject();
+        const { _id, system, flags, type } = actor.toObject();
         delete flags[game.system.id][needToPersistToDb];
-        actorUpdates.push({ _id, "==system": system, "==flags": flags });
+        actorUpdates.push({ _id, "==system": system, "==flags": flags, type: type });
     }
     promises.push(Actor.implementation.updateDocuments(actorUpdates));
 
     for (const item of actor.items) {
         if (item.flags[game.system.id]?.[needToPersistToDb]) {
-            const { _id, system, flags } = item.toObject();
+            const { _id, system, flags, type } = item.toObject();
             delete flags[game.system.id][needToPersistToDb];
-            itemUpdates.push({ _id, "==system": system, "==flags": flags });
+            itemUpdates.push({ _id, "==system": system, "==flags": flags, type: type });
         }
     }
 
@@ -391,9 +400,9 @@ async function commitActorAndItemMigrateDataChangesByActor(actor) {
  */
 async function commitItemsCollectionMigrateDataChanges(item) {
     if (item.flags[game.system.id]?.[needToPersistToDb]) {
-        const { system, flags } = item.toObject();
+        const { system, flags, type } = item.toObject();
         delete flags[game.system.id][needToPersistToDb];
-        await item.update({ "==system": system, "==flags": flags });
+        await item.update({ "==system": system, "==flags": flags, type: type });
     }
 }
 
@@ -596,6 +605,29 @@ async function fixupPslChoices4_2_17(actor) {
     return itemUpdates.length > 0
         ? Item.implementation.updateDocuments(itemUpdates, { parent: actor })
         : Promise.resolve(true);
+}
+
+async function migrateTo4_3_7(actor) {
+    try {
+        // Make sure item names have correct item.NAME
+        if (!actor.token) {
+            const itemChanges = [];
+            for (const item of actor.items) {
+                // Using preBuildName_4_3_7 instead of item.preBuildName because we want to make sure that any future changes to
+                // preBuildName don't cause migration issues.
+                const newName = preBuildName_4_3_7(item.system, item);
+                if (item.name !== newName) {
+                    itemChanges.push({ _id: item._id, name: newName });
+                    console.log(newName, item);
+                }
+            }
+            if (itemChanges.length > 0) {
+                await actor.updateEmbeddedDocuments("Item", itemChanges);
+            }
+        }
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 async function migrateTo4_3_5(actor) {
@@ -1073,4 +1105,76 @@ async function addOtherAttacksManeuversForAutomatonPcNpc(actor) {
             await ui.notifications.warn(msg);
         }
     }
+}
+
+function preBuildName_4_3_7(changesSystem, item) {
+    // Used to update item.name with NAME/ALIAS/XMLID
+    const _NAME = changesSystem?.NAME ?? item.system.NAME;
+    const _DISPLAY = changesSystem?.DISPLAY ?? item.system.DISPLAY; // For Combat Maneuvers
+    const _ALIAS = changesSystem?.ALIAS ?? item.system.ALIAS;
+    const _XMLID = changesSystem?.XMLID ?? item.system.XMLID;
+    const _INPUT = changesSystem?.INPUT ?? item.system.INPUT;
+    const _TYPE = changesSystem?.TYPE ?? item.system.TYPE;
+    const _ADDER = changesSystem?.ADDER ?? item.system.ADDER ?? [];
+
+    let newName;
+
+    // Custom name
+    switch (item.system.XMLID) {
+        case "ABSORPTION":
+        case "AID":
+        case "DISPEL":
+        case "DRAIN":
+        case "SUCCOR":
+        case "SUPPRESS":
+        case "HEALING":
+            {
+                newName = _NAME || `${_ALIAS} ${_INPUT}`;
+            }
+            break;
+
+        case "ACCIDENTALCHANGE":
+        case "ANALYZE":
+        case "PROFESSIONAL_SKILL":
+        case "KNOWLEDGE_SKILL":
+        case "SCIENCE_SKILL":
+        case "DEPENDENCE":
+        case "DEPENDENTNPC":
+        case "DISTINCTIVEFEATURES":
+        case "ENRAGED":
+        case "FAST_DRAW":
+        case "HUNTED":
+        case "LANGUAGE":
+        case "POWERSKILL":
+        case "PSYCHOLOGICALLIMITATION":
+        case "PHYSICALLIMITATION":
+        case "REPUTATION":
+        case "RIVALRY":
+        case "SOCIALLIMITATION":
+        case "SUSCEPTIBILITY":
+        case "VULNERABILITY":
+            {
+                // RIVALRY uses DESCRIPTION adder
+                const details = (
+                    _INPUT ||
+                    _TYPE ||
+                    _ADDER
+                        .find((a) => a.XMLID === "DESCRIPTION")
+                        ?.OPTION_ALIAS.replace(/^.*?\(/, "")
+                        .replace(/\).*$/, "")
+                )?.trim();
+                if (details) {
+                    newName = _NAME || `${_ALIAS}: ${details}`;
+                } else {
+                    newName = _NAME || `${_ALIAS}`;
+                }
+            }
+            break;
+
+        default:
+            newName = _NAME || _ALIAS || _DISPLAY || _XMLID;
+            break;
+    }
+
+    return newName || `${item.type} ${item.id}`; // Fallback to something identifiable if no name can be built
 }

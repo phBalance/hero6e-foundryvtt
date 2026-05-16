@@ -1072,16 +1072,20 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // Updating item.name with NAME/ALIAS/XMLID
         // NOTE: Doesn't work for EffectiveItems as they aren't in the database, thus no update operation. Perhaps move some of this to PrepareData for EffectiveItems.
         // We really don't need to use this.name, we can use a getter to calculate name on the fly.  Ignoring this.name all together.
+        // See migration:preBuildName_4_3_7
         const _NAME = changesSystem?.NAME ?? this.system.NAME;
+        const _DISPLAY = changesSystem?.DISPLAY ?? this.system.DISPLAY; // For Combat Maneuvers
         const _ALIAS = changesSystem?.ALIAS ?? this.system.ALIAS;
         const _XMLID = changesSystem?.XMLID ?? this.system.XMLID;
         const _INPUT = changesSystem?.INPUT ?? this.system.INPUT;
         const _TYPE = changesSystem?.TYPE ?? this.system.TYPE;
+        const _ADDER = changesSystem?.ADDER ?? this.system.ADDER ?? [];
 
         let newName;
 
         // Custom name
         switch (this.system.XMLID) {
+            case "ABSORPTION":
             case "AID":
             case "DISPEL":
             case "DRAIN":
@@ -1093,21 +1097,50 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 }
                 break;
 
+            case "ACCIDENTALCHANGE":
             case "ANALYZE":
             case "PROFESSIONAL_SKILL":
             case "KNOWLEDGE_SKILL":
             case "SCIENCE_SKILL":
+            case "DEPENDENCE":
+            case "DEPENDENTNPC":
+            case "DISTINCTIVEFEATURES":
+            case "ENRAGED":
+            case "FAST_DRAW":
+            case "HUNTED":
+            case "LANGUAGE":
+            case "POWERSKILL":
+            case "PSYCHOLOGICALLIMITATION":
+            case "PHYSICALLIMITATION":
+            case "REPUTATION":
+            case "RIVALRY":
+            case "SOCIALLIMITATION":
+            case "SUSCEPTIBILITY":
+            case "VULNERABILITY":
                 {
-                    newName = _NAME || `${_ALIAS}: ${(_INPUT || _TYPE)?.trim()}`;
+                    // RIVALRY uses DESCRIPTION adder
+                    const details = (
+                        _INPUT ||
+                        _TYPE ||
+                        _ADDER
+                            .find((a) => a.XMLID === "DESCRIPTION")
+                            ?.OPTION_ALIAS.replace(/^.*?\(/, "")
+                            .replace(/\).*$/, "")
+                    )?.trim();
+                    if (details) {
+                        newName = _NAME || `${_ALIAS}: ${details}`;
+                    } else {
+                        newName = _NAME || `${_ALIAS}`;
+                    }
                 }
                 break;
 
             default:
-                newName = _NAME || _ALIAS || _XMLID;
+                newName = _NAME || _ALIAS || _DISPLAY || _XMLID;
                 break;
         }
 
-        return newName;
+        return newName || `${this.type} ${this.id}`; // Fallback to something identifiable if no name can be built
     }
 
     async _onUpdate(changed, options, userId) {
@@ -7119,7 +7152,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         this.migrateData_4_0_26(source);
         this.migrateData_4_2_5(source);
         this.migrateData_4_3_6_Disadvantages(source);
-
         return super.migrateData(source);
     }
 
@@ -7302,68 +7334,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     static migrateData_4_3_6_Disadvantages(source) {
         // Migration for 4.3.6 - Disadvantages
         // This is a placeholder for any specific migration logic needed for disadvantages
+        // "complication": {}, // depricated, use disadvantage instead.  Needed for migration.  V13
         if (source.type === "complication") {
             source.type = "disadvantage";
             tagObjectForPersistence(source);
         }
     }
-
-    // async placeTemplate(message) {
-    //     if (!this.getAoeModifier()) throw Error("Attempted to create template with non-aoe item");
-    //     return this.placeItemTemplate(message);
-    // }
-
-    // async placeItemTemplate(message) {
-    //     if (!canvas.ready) throw Error("No canvas");
-
-    //     const parsedMessageContent = document.createElement("div");
-    //     parsedMessageContent.innerHTML = message.content;
-
-    //     const attackActionJson = parsedMessageContent.querySelector("[data-attack-action]")?.dataset?.attackAction;
-    //     if (!attackActionJson) {
-    //         throw new Error("missing attackAction");
-    //     }
-    //     const attackAction = AttackAction.fromJSON(attackActionJson);
-
-    //     const areaOfEffect = this.aoeAttackParameters;
-    //     if (!areaOfEffect) throw Error("No aoeAttackParameters");
-
-    //     const aoeType = areaOfEffect.type;
-    //     const aoeValue = areaOfEffect.value;
-    //     const heroAoeTypeToFoundryAoeTypeConversions = {
-    //         any: "rect",
-    //         cone: "cone",
-    //         line: "ray",
-    //         radius: "circle",
-    //         surface: "rect",
-    //     };
-    //     const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
-    //     const sizeConversionToMeters = convertSystemUnitsToMetres(1, this.actor?.is5e);
-    //     const hexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
-    //     const hexGrid = currentSceneUsesHexGrid();
-
-    //     // NOTE: If we're using hex templates (i.e. 5e), the target hex is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
-    //     //       for distance we need to subtract 0.5"/1m from the radius.
-    //     // NOTE: MeasuredTemplates assume that the distance is in grid units.
-    //     const distanceInMeters = aoeValue * sizeConversionToMeters - (hexTemplates && hexGrid ? 1 : 0);
-    //     const distanceInGridUnits = distanceInMeters / gridUnitsToMeters();
-
-    //     const templateData = {
-    //         t: templateType,
-    //         author: game.user.id,
-    //         distance: distanceInGridUnits,
-    //         fillColor: game.user.color,
-    //         flags: {
-    //             [game.system.id]: {
-    //                 messageId: message?.id,
-    //                 purpose: "AoE",
-    //                 effectiveItem: JSON.stringify(attackAction.effectiveItem),
-    //             },
-    //         },
-    //     };
-
-    //     return canvas.templates.createPreview(templateData);
-    // }
 
     // The default deleteDialog doesn't prompt for children
     async deleteDialog(options = {}, operation = {}) {

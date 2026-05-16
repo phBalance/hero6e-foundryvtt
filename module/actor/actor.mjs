@@ -2017,27 +2017,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     itemDataDefaults(itemData) {
-        // Hack in some basic information with names.
-        // TODO: This should be turned into some kind of short version of the description
-        //       and it should probably be done when building the description
-        switch (itemData.system.XMLID) {
-            case "FOLLOWER":
-                itemData.name = "Followers";
-                break;
-            case "ABSORPTION":
-            case "AID":
-            case "DISPEL":
-            case "DRAIN":
-            case "HEALING":
-            case "TRANSFER":
-            case "SUCCOR":
-            case "SUPPRESS":
-                if (!itemData.system.NAME) {
-                    itemData.name = itemData.system?.ALIAS + " " + itemData.system?.INPUT;
-                }
-                break;
-        }
-
         // Most items default to active unless they have charges or use END
         itemData.system.active = true;
         if (itemData.system.MODIFIER?.find((m) => m.XMLID === "CHARGES")) {
