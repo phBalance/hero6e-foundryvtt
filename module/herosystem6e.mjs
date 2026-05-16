@@ -746,6 +746,30 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     dt.setMilliseconds(0);
     const today = dt.valueOf();
 
+    try {
+        // Re-render any open actor sheets so we can see the updated time remaining.
+        for (const actorSheet of Array.from(foundry.applications.instances.values()).filter(
+            (app) => app.document?.documentName === "Actor",
+        )) {
+            if (actorSheet.actor.temporaryEffects.length > 0) {
+                // Fire and forget (intentionally not awaiting)
+                actorSheet.render();
+            }
+        }
+
+        // Re-render any open actor sheets so we can see the updated time remaining.
+        for (const activeEffectSheet of Array.from(foundry.applications.instances.values()).filter(
+            (app) => app.document?.documentName === "ActiveEffect",
+        )) {
+            if (activeEffectSheet.document.isTemporary) {
+                // Fire and forget (intentionally not awaiting)
+                activeEffectSheet.render();
+            }
+        }
+    } catch (e) {
+        console.error("Error re-rendering sheets on updateWorldTime", e);
+    }
+
     // All actors plus any unlinked actors in active scene
     const actors = Array.from(game.actors);
     const currentTokens = game.scenes.current?.tokens || [];
