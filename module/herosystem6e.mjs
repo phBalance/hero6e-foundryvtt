@@ -714,8 +714,11 @@ Hooks.on("getActorDirectoryEntryContext", (_dialog, html) => {
 // Hooks.on("renderTokenConfig", extendTokenConfig);
 
 // Expire ActiveEffects
+// TODO: Rework to call _outOfCombatRecovery (with multiplier) only on post12?
+// Notice we don't store secondsSinceRecovery in the database, so it varies based on
+// when the game was last loaded.
+// Not likely a problem, since out of combat STUN/END accuracy isn't typically important.
 let secondsSinceRecovery = 0;
-let lastDate = 0;
 
 /**
  * Handle follow-up actions when the official World time is changed
@@ -725,12 +728,11 @@ let lastDate = 0;
  */
 Hooks.on("updateWorldTime", async (worldTime, options) => {
     //console.log(`updateWorldTime`, game.time.worldTime);
-    const start = Date.now();
+    const _start = Date.now();
 
     // Ensure that this only runs for 1 user to we don't have multiple user attempting to
     // initiate actions. For simplicity we will limit it to the GM.
-    if (!game.user.isGM) return;
-    if (!lastDate) game.user.getFlag(game.system.id, "lastDate") || 0;
+    if (game.user !== game.users.activeGM) return;
 
     let deltaSeconds = parseInt(options || 0);
     secondsSinceRecovery += deltaSeconds;
@@ -744,9 +746,64 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     dt.setMinutes(0);
     dt.setSeconds(0);
     dt.setMilliseconds(0);
-    const today = dt.valueOf();
 
+    await reRenderSheetsWithTemporyEffects();
+
+    // All actors plus any unlinked actors in active scene
+    const _actorCollection = Date.now();
+    const actors = Array.from(game.actors);
+    const currentTokens = game.scenes.current?.tokens || [];
+    for (const token of currentTokens) {
+        if (token.actor && (!token.actorLink || !actors.find((o) => o.id === token.actor.id))) {
+            actors.push(token.actor);
+        }
+    }
+    console.debug(`updateWorldTime.actorCollection took ${Date.now() - _actorCollection} ms`);
+
+    const _startExpire1 = {};
+    for (const actor of actors) {
+        try {
+            // Expire effects that expire on segment end
+            const _ee = Date.now();
+            await expireEffects(actor, "segment");
+            _startExpire1.ee = (_startExpire1.ee ?? 0) + (Date.now() - _ee);
+
+            // Out of combat recovery.  When SimpleCalendar is used to advance time.
+            // This simple routine only handles increments of 12 seconds or more.
+            const _oocr = Date.now();
+            await _outOfCombatRecovery(actor, multiplier);
+            _startExpire1.oocr = (_startExpire1.oocr ?? 0) + (Date.now() - _oocr);
+
+            // Expire continuing charges
+            const _ecc = Date.now();
+            await _expireContinuingCharges(actor);
+            _startExpire1.ecc = (_startExpire1.ecc ?? 0) + (Date.now() - _ecc);
+        } catch (e) {
+            console.error(e, actor, actor?.temporaryEffects[0]);
+        }
+    }
+    console.debug(`updateWorldTime.expireEffects took ${_startExpire1.ee} ms`);
+    console.debug(`updateWorldTime.outOfCombatRecovery took ${_startExpire1.oocr} ms`);
+    console.debug(`updateWorldTime.expireContinuingCharges took ${_startExpire1.ecc} ms`);
+
+    // If there are lots of actors updateWorldTime may result in performance issues.
+    // Notify GM when this is a concern.
+    const deltaMs = Date.now() - _start;
+    if (deltaMs > 100) {
+        const msg = `updateWorldTime took ${deltaMs} ms.  This routine handles adjustment fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occurs on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`;
+        if (game.settings.get(game.system.id, "alphaTesting")) {
+            ui.notifications.warn(msg);
+        } else {
+            console.warn(msg);
+        }
+    } else {
+        console.debug(`updateWorldTime took ${deltaMs} ms`);
+    }
+});
+
+async function reRenderSheetsWithTemporyEffects() {
     try {
+        const _start = Date.now();
         // Re-render any open actor sheets so we can see the updated time remaining.
         for (const actorSheet of Array.from(foundry.applications.instances.values()).filter(
             (app) => app.document?.documentName === "Actor",
@@ -766,52 +823,11 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 activeEffectSheet.render();
             }
         }
+        console.debug(`updateWorldTime.reRenderSheetsWithTemporaryEffects took ${Date.now() - _start} ms`);
     } catch (e) {
         console.error("Error re-rendering sheets on updateWorldTime", e);
     }
-
-    // All actors plus any unlinked actors in active scene
-    const actors = Array.from(game.actors);
-    const currentTokens = game.scenes.current?.tokens || [];
-    for (const token of currentTokens) {
-        if (token.actor && (!token.actorLink || !actors.find((o) => o.id === token.actor.id))) {
-            actors.push(token.actor);
-        }
-    }
-
-    for (const actor of actors) {
-        try {
-            // Expire effects that expire on segment end
-            await expireEffects(actor, "segment");
-
-            // Out of combat recovery.  When SimpleCalendar is used to advance time.
-            // This simple routine only handles increments of 12 seconds or more.
-            await _outOfCombatRecovery(actor, multiplier);
-
-            // Expire continuing charges
-            await _expireContinuingCharges(actor);
-        } catch (e) {
-            console.error(e, actor, actor?.temporaryEffects[0]);
-        }
-    }
-
-    if (today != lastDate) {
-        lastDate = today;
-        await game.user.setFlag(game.system.id, "lastDate", lastDate);
-    }
-
-    // If there are lots of actors updateWorldTime may result in performance issues.
-    // Notify GM when this is a concern.
-    const deltaMs = Date.now() - start;
-    if (deltaMs > 100) {
-        const msg = `updateWorldTime took ${deltaMs} ms.  This routine handles adjustment fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occurs on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`;
-        if (game.settings.get(game.system.id, "alphaTesting")) {
-            ui.notifications.warn(msg);
-        } else {
-            console.warn(msg);
-        }
-    }
-});
+}
 
 async function _expireContinuingCharges(actor) {
     for (const aeWithCharges of actor.temporaryEffects.filter((o) =>
@@ -830,11 +846,21 @@ async function _expireContinuingCharges(actor) {
 }
 
 async function _outOfCombatRecovery(actor, multiplier) {
+    // If GM rewinds time, then goes forward again,
+    // some actors may get "bonus" recoveries.
+    // TODO: Somehow keep track of last recovery time so they don't get
+    // unearned recoveries.  A simple last recovery timestamp isn't likely
+    // sufficient as the GM may want to rewind time intentionally with Simple Calendar, then
+    // allow normal forward time progression from that point forward.
+    // Perhaps clear any recovery timestamp when combat ends, although we
+    // can have more than one combat.
+
+    //TODO: Can we simplify this and call actor.TakeRecovery?  May have to pass a multiplier.
     const startDate = Date.now();
     let recoveryDate;
     let enduranceReserveDate;
     if (actor.inCombat) return;
-    if (multiplier === 0) return;
+    if (multiplier <= 0) return;
 
     const automation = game.settings.get(HEROSYS.module, "automation");
 
@@ -845,53 +871,57 @@ async function _outOfCombatRecovery(actor, multiplier) {
     ) {
         recoveryDate = Date.now();
         const rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
-        const actorUpdates = {};
+        if (rec > 0) {
+            const actorUpdates = {};
 
-        if (
-            actor.hasCharacteristic("STUN") &&
-            actor.system.characteristics.stun.value < actor.system.characteristics.stun.max
-        ) {
-            // If this is an NPC and their STUN <= 0 then leave them be.
-            // Typically, you should only use the Recovery Time Table for
-            // PCs. Once an NPC is Knocked Out below the -10 STUN level
-            // they should normally remain unconscious until the fight ends.
+            if (
+                actor.hasCharacteristic("STUN") &&
+                actor.system.characteristics.stun.value < actor.system.characteristics.stun.max
+            ) {
+                // If this is an NPC and their STUN <= 0 then leave them be.
+                // Typically, you should only use the Recovery Time Table for
+                // PCs. Once an NPC is Knocked Out below the -10 STUN level
+                // they should normally remain unconscious until the fight ends.
 
-            // TODO: Implement optional longer term recovery
-            // For STUN:
-            // From 0 to -10 they get 1 recovery every phase and post 12
-            // From -11 to -20 they get 1 recovery post 12
-            // From -21 to -30 they get 1 recovery per minute
-            // From -31 they're completely out at the GM's discretion
+                // TODO: Implement optional longer term recovery
+                // For STUN:
+                // From 0 to -10 they get 1 recovery every phase and post 12
+                // From -11 to -20 they get 1 recovery post 12
+                // From -21 to -30 they get 1 recovery per minute
+                // From -31 they're completely out at the GM's discretion
 
-            if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) > -10) {
-                const stunValue = Math.min(
-                    parseInt(actor.system.characteristics.stun.max),
-                    parseInt(actor.system.characteristics.stun.value) + rec,
+                if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) > -10) {
+                    const stunValue = Math.min(
+                        parseInt(actor.system.characteristics.stun.max),
+                        parseInt(actor.system.characteristics.stun.value) + rec,
+                    );
+                    foundry.utils.setProperty(actorUpdates, "system.characteristics.stun.value", stunValue);
+                }
+            }
+
+            if (
+                actor.hasCharacteristic("END") &&
+                actor.system.characteristics.end.value < actor.system.characteristics.end.max
+            ) {
+                const endValue = Math.min(
+                    parseInt(actor.system.characteristics.end.max),
+                    parseInt(actor.system.characteristics.end.value) + rec,
                 );
-                foundry.utils.setProperty(actorUpdates, "system.characteristics.stun.value", stunValue);
+                foundry.utils.setProperty(actorUpdates, "system.characteristics.end.value", endValue);
+            }
+
+            if (Object.keys(actorUpdates).length > 0) {
+                // Intentionally not awaiting.
+                // Trying to keep updateWorldTime loop as quick as possible.
+                // This actor isn't in combat and unlikely to have actor sheet open, so not time sensitive.
+                // Stun effect (if any) should be removed during actor.onUpdate
+                actor.update(actorUpdates);
             }
         }
 
-        if (
-            actor.hasCharacteristic("END") &&
-            actor.system.characteristics.end.value < actor.system.characteristics.end.max
-        ) {
-            const endValue = Math.min(
-                parseInt(actor.system.characteristics.end.max),
-                parseInt(actor.system.characteristics.end.value) + rec,
-            );
-            foundry.utils.setProperty(actorUpdates, "system.characteristics.end.value", endValue);
-        }
-
-        if (Object.keys(actorUpdates).length > 0) {
-            // Intentionally not awaiting.
-            // Trying to keep updateWorldTime loop as quick as possible.
-            // This actor isn't in combat and unlikely to have actor sheet open, so not time sensitive.
-            // Stun effect (if any) should be removed during actor.onUpdate
-            actor.update(actorUpdates);
-        }
-
         // END RESERVE
+        // TODO: Check for negative REC
+        // TODO: Use effectiveLevels
         enduranceReserveDate = Date.now();
         for (const enduranceReserveItem of actor.items.filter((o) => o.system.XMLID === "ENDURANCERESERVE")) {
             const ENDURANCERESERVEREC = enduranceReserveItem.findModsByXmlid("ENDURANCERESERVEREC");
