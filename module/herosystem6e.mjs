@@ -715,7 +715,6 @@ Hooks.on("getActorDirectoryEntryContext", (_dialog, html) => {
 
 // Expire ActiveEffects
 let secondsSinceRecovery = 0;
-let lastDate = 0;
 
 /**
  * Handle follow-up actions when the official World time is changed
@@ -725,12 +724,11 @@ let lastDate = 0;
  */
 Hooks.on("updateWorldTime", async (worldTime, options) => {
     //console.log(`updateWorldTime`, game.time.worldTime);
-    const start = Date.now();
+    const _start = Date.now();
 
     // Ensure that this only runs for 1 user to we don't have multiple user attempting to
     // initiate actions. For simplicity we will limit it to the GM.
-    if (!game.user.isGM) return;
-    if (!lastDate) game.user.getFlag(game.system.id, "lastDate") || 0;
+    if (game.user !== game.users.activeGM) return;
 
     let deltaSeconds = parseInt(options || 0);
     secondsSinceRecovery += deltaSeconds;
@@ -744,9 +742,64 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     dt.setMinutes(0);
     dt.setSeconds(0);
     dt.setMilliseconds(0);
-    const today = dt.valueOf();
 
+    await reRenderSheetsWithTemporyEffects();
+
+    // All actors plus any unlinked actors in active scene
+    const _actorCollection = Date.now();
+    const actors = Array.from(game.actors);
+    const currentTokens = game.scenes.current?.tokens || [];
+    for (const token of currentTokens) {
+        if (token.actor && (!token.actorLink || !actors.find((o) => o.id === token.actor.id))) {
+            actors.push(token.actor);
+        }
+    }
+    console.debug(`updateWorldTime.actorCollection took ${Date.now() - _actorCollection} ms`);
+
+    const _startExpire1 = {};
+    for (const actor of actors) {
+        try {
+            // Expire effects that expire on segment end
+            const _ee = Date.now();
+            await expireEffects(actor, "segment");
+            _startExpire1.ee = (_startExpire1.ee ?? 0) + (Date.now() - _ee);
+
+            // Out of combat recovery.  When SimpleCalendar is used to advance time.
+            // This simple routine only handles increments of 12 seconds or more.
+            const _oocr = Date.now();
+            await _outOfCombatRecovery(actor, multiplier);
+            _startExpire1.oocr = (_startExpire1.oocr ?? 0) + (Date.now() - _oocr);
+
+            // Expire continuing charges
+            const _ecc = Date.now();
+            await _expireContinuingCharges(actor);
+            _startExpire1.ecc = (_startExpire1.ecc ?? 0) + (Date.now() - _ecc);
+        } catch (e) {
+            console.error(e, actor, actor?.temporaryEffects[0]);
+        }
+    }
+    console.debug(`updateWorldTime.expireEffects took ${_startExpire1.ee} ms`);
+    console.debug(`updateWorldTime.outOfCombatRecovery took ${_startExpire1.oocr} ms`);
+    console.debug(`updateWorldTime.expireContinuingCharges took ${_startExpire1.ecc} ms`);
+
+    // If there are lots of actors updateWorldTime may result in performance issues.
+    // Notify GM when this is a concern.
+    const deltaMs = Date.now() - _start;
+    if (deltaMs > 100) {
+        const msg = `updateWorldTime took ${deltaMs} ms.  This routine handles adjustment fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occurs on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`;
+        if (game.settings.get(game.system.id, "alphaTesting")) {
+            ui.notifications.warn(msg);
+        } else {
+            console.warn(msg);
+        }
+    } else {
+        console.debug(`updateWorldTime took ${deltaMs} ms`);
+    }
+});
+
+async function reRenderSheetsWithTemporyEffects() {
     try {
+        const _start = Date.now();
         // Re-render any open actor sheets so we can see the updated time remaining.
         for (const actorSheet of Array.from(foundry.applications.instances.values()).filter(
             (app) => app.document?.documentName === "Actor",
@@ -766,52 +819,11 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
                 activeEffectSheet.render();
             }
         }
+        console.debug(`updateWorldTime.reRenderSheetsWithTemporaryEffects took ${Date.now() - _start} ms`);
     } catch (e) {
         console.error("Error re-rendering sheets on updateWorldTime", e);
     }
-
-    // All actors plus any unlinked actors in active scene
-    const actors = Array.from(game.actors);
-    const currentTokens = game.scenes.current?.tokens || [];
-    for (const token of currentTokens) {
-        if (token.actor && (!token.actorLink || !actors.find((o) => o.id === token.actor.id))) {
-            actors.push(token.actor);
-        }
-    }
-
-    for (const actor of actors) {
-        try {
-            // Expire effects that expire on segment end
-            await expireEffects(actor, "segment");
-
-            // Out of combat recovery.  When SimpleCalendar is used to advance time.
-            // This simple routine only handles increments of 12 seconds or more.
-            await _outOfCombatRecovery(actor, multiplier);
-
-            // Expire continuing charges
-            await _expireContinuingCharges(actor);
-        } catch (e) {
-            console.error(e, actor, actor?.temporaryEffects[0]);
-        }
-    }
-
-    if (today != lastDate) {
-        lastDate = today;
-        await game.user.setFlag(game.system.id, "lastDate", lastDate);
-    }
-
-    // If there are lots of actors updateWorldTime may result in performance issues.
-    // Notify GM when this is a concern.
-    const deltaMs = Date.now() - start;
-    if (deltaMs > 100) {
-        const msg = `updateWorldTime took ${deltaMs} ms.  This routine handles adjustment fades and END/BODY recovery for all actors, and all tokens on this scene.  If this occurs on a regular basis, then there may be a performance issue that needs to be addressed by the developer.`;
-        if (game.settings.get(game.system.id, "alphaTesting")) {
-            ui.notifications.warn(msg);
-        } else {
-            console.warn(msg);
-        }
-    }
-});
+}
 
 async function _expireContinuingCharges(actor) {
     for (const aeWithCharges of actor.temporaryEffects.filter((o) =>
