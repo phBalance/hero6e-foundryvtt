@@ -37,7 +37,7 @@ export function createTemporaryItemAttackActionForApplyingDamage(heroRoller, def
         // Canvas selected token? If so, use that as the actor
         const actor = canvas.tokens.controlled.at(0)?.actor;
         const tempActor = new HeroSystem6eActor({
-            name: "Generic Actor",
+            name: "Generic Hero Roller Actor",
             type: "npc",
         });
         tempActor.system.is5e = is5eAttack;
@@ -62,10 +62,11 @@ export function createTemporaryItemAttackActionForApplyingDamage(heroRoller, def
  * Generate a chat card for /heroroll or the GenericRoller.
  *
  * @param {HeroRoller} heroRoller
- * @param {string} chatCardFlavour
+ * @param {string} defenseType
  * @param {Attack | null} attackAction
  */
-export async function generateChatMessage(heroRoller, chatCardFlavour, attackAction) {
+export async function generateChatMessage(heroRoller, defenseType, attackAction) {
+    const chatCardFlavour = `${capitalizeFirstLetter(heroRoller.getType())} ${attackAction ? `${defenseType} attack  ${heroRoller.hitLocationValid() ? ` to ${heroRoller.getHitLocation().fullName}` : ""}` : "roll"}`;
     let extraHtml = "";
 
     if (attackAction) {
