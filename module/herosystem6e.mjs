@@ -714,6 +714,10 @@ Hooks.on("getActorDirectoryEntryContext", (_dialog, html) => {
 // Hooks.on("renderTokenConfig", extendTokenConfig);
 
 // Expire ActiveEffects
+// TODO: Rework to call _outOfCombatRecovery (with multiplier) only on post12?
+// Notice we don't store secondsSinceRecovery in the database, so it varies based on
+// when the game was last loaded.
+// Not likely a problem, since out of combat STUN/END accuracy isn't typically important.
 let secondsSinceRecovery = 0;
 
 /**
@@ -842,11 +846,21 @@ async function _expireContinuingCharges(actor) {
 }
 
 async function _outOfCombatRecovery(actor, multiplier) {
+    // If GM rewinds time, then goes forward again,
+    // some actors may get "bonus" recoveries.
+    // TODO: Somehow keep track of last recovery time so they don't get
+    // unearned recoveries.  A simple last recovery timestamp isn't likely
+    // sufficient as the GM may want to rewind time intentionally with Simple Calendar, then
+    // allow normal forward time progression from that point forward.
+    // Perhaps clear any recovery timestamp when combat ends, although we
+    // can have more than one combat.
+
+    //TODO: Can we simplify this and call actor.TakeRecovery?  May have to pass a multiplier.
     const startDate = Date.now();
     let recoveryDate;
     let enduranceReserveDate;
     if (actor.inCombat) return;
-    if (multiplier === 0) return;
+    if (multiplier <= 0) return;
 
     const automation = game.settings.get(HEROSYS.module, "automation");
 
@@ -857,53 +871,57 @@ async function _outOfCombatRecovery(actor, multiplier) {
     ) {
         recoveryDate = Date.now();
         const rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
-        const actorUpdates = {};
+        if (rec > 0) {
+            const actorUpdates = {};
 
-        if (
-            actor.hasCharacteristic("STUN") &&
-            actor.system.characteristics.stun.value < actor.system.characteristics.stun.max
-        ) {
-            // If this is an NPC and their STUN <= 0 then leave them be.
-            // Typically, you should only use the Recovery Time Table for
-            // PCs. Once an NPC is Knocked Out below the -10 STUN level
-            // they should normally remain unconscious until the fight ends.
+            if (
+                actor.hasCharacteristic("STUN") &&
+                actor.system.characteristics.stun.value < actor.system.characteristics.stun.max
+            ) {
+                // If this is an NPC and their STUN <= 0 then leave them be.
+                // Typically, you should only use the Recovery Time Table for
+                // PCs. Once an NPC is Knocked Out below the -10 STUN level
+                // they should normally remain unconscious until the fight ends.
 
-            // TODO: Implement optional longer term recovery
-            // For STUN:
-            // From 0 to -10 they get 1 recovery every phase and post 12
-            // From -11 to -20 they get 1 recovery post 12
-            // From -21 to -30 they get 1 recovery per minute
-            // From -31 they're completely out at the GM's discretion
+                // TODO: Implement optional longer term recovery
+                // For STUN:
+                // From 0 to -10 they get 1 recovery every phase and post 12
+                // From -11 to -20 they get 1 recovery post 12
+                // From -21 to -30 they get 1 recovery per minute
+                // From -31 they're completely out at the GM's discretion
 
-            if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) > -10) {
-                const stunValue = Math.min(
-                    parseInt(actor.system.characteristics.stun.max),
-                    parseInt(actor.system.characteristics.stun.value) + rec,
+                if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) > -10) {
+                    const stunValue = Math.min(
+                        parseInt(actor.system.characteristics.stun.max),
+                        parseInt(actor.system.characteristics.stun.value) + rec,
+                    );
+                    foundry.utils.setProperty(actorUpdates, "system.characteristics.stun.value", stunValue);
+                }
+            }
+
+            if (
+                actor.hasCharacteristic("END") &&
+                actor.system.characteristics.end.value < actor.system.characteristics.end.max
+            ) {
+                const endValue = Math.min(
+                    parseInt(actor.system.characteristics.end.max),
+                    parseInt(actor.system.characteristics.end.value) + rec,
                 );
-                foundry.utils.setProperty(actorUpdates, "system.characteristics.stun.value", stunValue);
+                foundry.utils.setProperty(actorUpdates, "system.characteristics.end.value", endValue);
+            }
+
+            if (Object.keys(actorUpdates).length > 0) {
+                // Intentionally not awaiting.
+                // Trying to keep updateWorldTime loop as quick as possible.
+                // This actor isn't in combat and unlikely to have actor sheet open, so not time sensitive.
+                // Stun effect (if any) should be removed during actor.onUpdate
+                actor.update(actorUpdates);
             }
         }
 
-        if (
-            actor.hasCharacteristic("END") &&
-            actor.system.characteristics.end.value < actor.system.characteristics.end.max
-        ) {
-            const endValue = Math.min(
-                parseInt(actor.system.characteristics.end.max),
-                parseInt(actor.system.characteristics.end.value) + rec,
-            );
-            foundry.utils.setProperty(actorUpdates, "system.characteristics.end.value", endValue);
-        }
-
-        if (Object.keys(actorUpdates).length > 0) {
-            // Intentionally not awaiting.
-            // Trying to keep updateWorldTime loop as quick as possible.
-            // This actor isn't in combat and unlikely to have actor sheet open, so not time sensitive.
-            // Stun effect (if any) should be removed during actor.onUpdate
-            actor.update(actorUpdates);
-        }
-
         // END RESERVE
+        // TODO: Check for negative REC
+        // TODO: Use effectiveLevels
         enduranceReserveDate = Date.now();
         for (const enduranceReserveItem of actor.items.filter((o) => o.system.XMLID === "ENDURANCERESERVE")) {
             const ENDURANCERESERVEREC = enduranceReserveItem.findModsByXmlid("ENDURANCERESERVEREC");
