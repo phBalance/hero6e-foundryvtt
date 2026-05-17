@@ -7,13 +7,18 @@ import { calculateDicePartsForItem } from "../utility/damage.mjs";
 import { tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 
 const backgroundSkillKeys = Object.freeze({
-    // matches RaR OPTION to XMLID
     KS: "KNOWLEDGE_SKILL",
     SS: "SCIENCE_SKILL",
     PS: "PROFESSIONAL_SKILL",
 });
 
-function filterSkillRollItems(item) {
+const backgroundSkillXmlids = Object.freeze({
+    KNOWLEDGE_SKILL: "KS",
+    SCIENCE_SKILL: "SS",
+    PROFESSIONAL_SKILL: "PS",
+});
+
+function filterOutNonSkillRollItems(item) {
     if (!item.isRollable()) {
         return false;
     }
@@ -24,11 +29,6 @@ function filterSkillRollItems(item) {
         item.system.XMLID !== "SKILL_LEVELS" && // is not a bonus to skills
         item.system.XMLID !== "COMBAT_LEVELS" // is not a bonus to combat
     );
-}
-
-function findRollValue(rar) {
-    const value = parseInt(rar.OPTION, 10);
-    return value;
 }
 
 function matchRequiredSkillRoll(o, rar, rarOptionIsBackground) {
@@ -110,6 +110,7 @@ function matchBackgroundSkillRoll(o, rar, item, rarOptionIsBackground) {
         return false;
     }
 
+    // PH: FIXME: This is not correctly looking at ROLLALIAS or ROLLALIAS2 based on which we're dealing with.
     const rarAliasDisplay = rar.ALIAS?.toUpperCase() || "";
     const rarOptionsAlias = rar.OPTION_ALIAS?.toUpperCase() || "";
     const rarComments = rar.COMMENTS?.toUpperCase() || "";
@@ -128,59 +129,94 @@ function matchBackgroundSkillRoll(o, rar, item, rarOptionIsBackground) {
 }
 
 function findSkillRoll(rar, item, rarOptionIsBackground) {
-    if (rar.OPTIONID === "PER" || rar.ROLLALIAS === "PER") {
-        return item.actor.items.find((o) => o.system.XMLID === "PERCEPTION");
-    } else if (rar.OPTIONID.includes("LUCK")) {
-        return item.actor.items.find((o) => o.system.XMLID === "LUCK");
-    } else if (isBackgroundSkillType(rar, rarOptionIsBackground)) {
-        return item.actor.items.find(
-            (o) => filterSkillRollItems(o) && matchBackgroundSkillRoll(o, rar, item, rarOptionIsBackground),
-        );
+    // PH: FIXME: For at least 5e this can be simplified
+    if (isBackgroundSkillType(rar, rarOptionIsBackground)) {
+        return item.actor.items
+            .filter(filterOutNonSkillRollItems)
+            .find((o) => matchBackgroundSkillRoll(o, rar, item, rarOptionIsBackground));
     }
 
-    return item.actor.items.find(
-        (o) => filterSkillRollItems(o) && matchRequiredSkillRoll(o, rar, rarOptionIsBackground),
+    return item.actor.items
+        .filter(filterOutNonSkillRollItems)
+        .find((o) => matchRequiredSkillRoll(o, rar, rarOptionIsBackground));
+}
+
+function FIXMEisBackgroundSkillType(item) {
+    const isBackgroundSkill = !!backgroundSkillXmlids[item.system.XMLID];
+    return isBackgroundSkill;
+}
+
+function FIXMEmatchSkillRoll(item, rollAlias) {
+    return item.name.includes(rollAlias);
+}
+
+// PH: FIXME: Kludge for experimentation in simplification
+function FIXMEfindSkillRoll(actor, rollAlias) {
+    const skillsToMatchAgainst = actor.items.filter(filterOutNonSkillRollItems);
+
+    return skillsToMatchAgainst.find((potentialMatchingSkillItem) =>
+        FIXMEmatchSkillRoll(potentialMatchingSkillItem, rollAlias),
     );
 }
 
-function findRollDivisor(rar) {
-    // item.activePoints is a number
-    if (rar.OPTIONID.includes("1PER5")) {
-        return 5;
-    } else if (rar.OPTIONID.includes("1PER20")) {
-        return 20;
-    }
+/**
+ * What is the penalty divisor? -1 per X AP.
+ *
+ * NOTE: Do not call unless it is appropriate for the type of roll (i.e. don't call for activation roll)
+ *
+ * @param {HeroModifierModel } rar
+ *
+ * @returns {number}
+ */
+export function findRollDivisor(rar) {
+    // modifiers are different based on 5e or 6e
+    if (rar.parent.is5e) {
+        const divisorOption = rar.ADDER.find((o) => {
+            return o.XMLID === "MINUS1PER20" || o.XMLID === "MINUS1PER5" || o.XMLID === "NOAPPENALTY";
+        });
 
-    const divisorOption = rar.ADDER.find((o) => {
-        return o.XMLID === "MINUS1PER20" || o.XMLID === "MINUS1PER5";
-    });
+        if (divisorOption?.XMLID === "MINUS1PER20") {
+            return 20;
+        } else if (divisorOption?.XMLID === "MINUS1PER5") {
+            return 5;
+        } else if (divisorOption?.XMLID === "NOAPPENALTY") {
+            return 0;
+        }
 
-    if (divisorOption?.XMLID === "MINUS1PER20") {
-        return 20;
-    } else if (divisorOption?.XMLID === "MINUS1PER5") {
-        return 5;
-    }
-    // activation rolls have no minuses due to active points
-    else if (!isNaN(parseInt(rar.OPTION, 10))) {
-        return NaN;
-    }
+        // No AP penalty option means -1 per 10 AP
+        return 10;
+    } else {
+        // item.activePoints is a number
+        if (rar.OPTIONID.includes("1PER5")) {
+            return 5;
+        } else if (rar.OPTIONID.includes("1PER20")) {
+            return 20;
+        }
 
-    return 10;
+        // PH: FIXME: Where is no penalty per level?
+
+        // activation rolls have no minuses due to active points
+        if (!isNaN(parseInt(rar.OPTIONID, 10))) {
+            return NaN;
+        }
+
+        return 10;
+    }
 }
 
-function findRollMinus(rar, item) {
+function calculateRollMinus(item, rar) {
     const divisor = findRollDivisor(rar);
-    if (isNaN(divisor)) {
+    if (divisor === 0 || isNaN(divisor)) {
         return 0;
     }
 
-    return Math.floor(parseInt(item.activePoints) / divisor);
+    return Math.floor(item.activePoints / divisor);
 }
 
-function getRequiredCharacteristicKey(rar, item) {
-    // PH: FIXME: k is a terrible parameter name
+function getRequiredCharacteristicKey(item, rar) {
+    // PH: FIXME: This doesn't look like the right way to confirm the existance of the characteristic for the actor type
     const characteristicKeys = Object.keys(item.actor.system.characteristics).filter(
-        (k) => item.actor.system.characteristics[k].roll != null,
+        (charKey) => item.actor.system.characteristics[charKey].roll != null,
     );
     const rarDisplayMaybeHasCharKey = rar.ALIAS?.toLowerCase() || "";
     const rarOptionMaybeHasCharKey = rar.OPTION_ALIAS?.toLowerCase() || "";
@@ -226,6 +262,120 @@ function getRequiredCharacteristicKey(rar, item) {
         characteristicKeyRegex[key].test(rarOptionMaybeHasCharKey),
     );
     return matchedKeyInOption ?? "";
+}
+
+export const RSR_ROLL_TYPE = Object.freeze({
+    ACTIVATION_ROLL: "activation roll",
+    CHARACTERISTIC_ROLL: "characteristic roll",
+    LUCK_ROLL: "luck roll",
+    ITEM_ROLL: "item roll", // Skill, background skill, power
+    ATTACK_ROLL: "attack roll",
+});
+
+const TYPE_TO_ROLL_TYPE = Object.freeze({
+    0: "SKILLROLL",
+    1: "BACKGROUNDSKILL",
+    2: "CHAR",
+    3: "PER",
+});
+
+function normalizeTypeAndRollTarget(type, skillOrCharacteristic) {
+    return {
+        type: TYPE_TO_ROLL_TYPE[type] ?? `type ${type} not translated properly`,
+        target: skillOrCharacteristic,
+    };
+}
+
+/**
+ * Given a rar, extract out all the bits and pieces required to make 1 or more activation rolls.
+ *
+ * @param {*} params
+ * @returns
+ */
+export function getRollsForRar(item, rar) {
+    // 5e ACTIVATIONROLL or flat number 6e REQUIRESASKILLROLL?
+    const isOnlyDigits = /^\d+$/.test(rar.OPTIONID);
+    if (rar.XMLID === "ACTIVATIONROLL" || isOnlyDigits) {
+        return [
+            {
+                type: RSR_ROLL_TYPE.ACTIVATION_ROLL,
+                rollValue: parseInt(rar.OPTIONID),
+            },
+        ];
+    }
+    // Luck roll?
+    else if (rar.OPTIONID === "ONELUCK" || rar.OPTIONID === "TWOLUCK" || rar.OPTIONID === "THREELUCK") {
+        const numSuccessesRequired = rar.OPTIONID === "ONELUCK" ? 1 : rar.OPTIONID === "TWOLUCK" ? 2 : 3;
+        return [
+            {
+                type: RSR_ROLL_TYPE.LUCK_ROLL,
+                successesRequired: numSuccessesRequired,
+                activeItems: item.actor.items.filter((item) => item.system.XMLID === "LUCK" && item.isActive),
+                items: item.actor.items.filter((item) => item.system.XMLID === "LUCK"),
+            },
+        ];
+    }
+
+    // Figure out what we're supposed to be looking at
+    const rollsToGenerate = [];
+    if (rar.OPTIONID === "TWOROLLS") {
+        // PH: FIXME: This does not handle variable roll where the user gets to decide between 2 provided rolls. See rar.adder.XMLID === "VARIABLERSR".
+        rollsToGenerate.push(normalizeTypeAndRollTarget(rar.TYPE, rar.ROLLALIAS || rar.CHARACTERISTIC));
+        rollsToGenerate.push(normalizeTypeAndRollTarget(rar.TYPE2, rar.ROLLALIAS2 || rar.CHARACTERISTIC2));
+    } else if (rar.OPTIONID === "BASICRSR") {
+        // PH: FIXME: This does not handle variable roll where the user gets to decide between 2 provided rolls. See rar.adder.XMLID === "VARIABLERSR".
+        rollsToGenerate.push(normalizeTypeAndRollTarget(rar.TYPE, rar.ROLLALIAS || rar.CHARACTERISTIC));
+    } else {
+        // PH: FIXME: OPTIONID= attack roll?
+
+        // PH: FIXME: 6e. Don't know how to deal with it yet
+        debugger;
+        rollsToGenerate.push({ type: rar.OPTIONID, target: rar.ROLLALIAS || rar.CHARACTERISTIC });
+    }
+
+    return rollsToGenerate.map((rollToGenerate) => {
+        switch (rollToGenerate.type) {
+            case "CHAR":
+                // const charKey = getRequiredCharacteristicKey(item, rar); // PH: FIXME: Is this not required as we have it already?
+
+                return {
+                    type: RSR_ROLL_TYPE.CHARACTERISTIC_ROLL,
+                    characteristicKey: rollToGenerate.target,
+                };
+
+            case "SKILLROLL":
+            case "BACKGROUNDSKILL": {
+                const skill = FIXMEfindSkillRoll(item.actor, rollToGenerate.target); // PH: FIXME: Is toUpperCase required?
+
+                return {
+                    type: RSR_ROLL_TYPE.ITEM_ROLL,
+                    name: rollToGenerate.target,
+                    activeItems: skill ? [skill].filter((skill) => skill.isActive) : [],
+                    items: skill ? [skill] : [],
+                };
+            }
+
+            case "PER": {
+                return {
+                    type: RSR_ROLL_TYPE.ITEM_ROLL,
+                    name: "PERCEPTION",
+                    activeItems: item.actor.items.filter((item) => item.system.XMLID === "PERCEPTION" && item.isActive),
+                    items: item.actor.items.filter((item) => item.system.XMLID === "PERCEPTION"),
+                };
+            }
+
+            default: {
+                const error = `${item.detailedName()} has unhandled RSR for OPTIONID ${rar.OPTIONID} -> ${rollToGenerate.type}`;
+                console.error(error);
+                return {
+                    type: RSR_ROLL_TYPE.ITEM_ROLL,
+                    name: error,
+                    activeItems: [],
+                    items: [],
+                };
+            }
+        }
+    });
 }
 
 export const VALIDATE_SECTION_DEFENSE_ERROR_REASON = Object.freeze({
@@ -338,7 +488,7 @@ function doSectionalDefensesApply(sectionalDefenseLocationsSet, hitLocationNum) 
  * 4) ROLLALIAS: is a 5e only editable field that users might use to indicate the roll required.
  *
  * the Skills to be matched will be generally be referenced as 'o' as they are considered in anonymous find functions.
- * ex: filterSkillRollItems which filters out skill items from skill enhancers and skill level bonuses.
+ * ex: filterOutNonSkillRollItems which filters out skill items from skill enhancers and skill level bonuses.
  * Skills that are to be matched will be 'rollable' skills.
  * Most skills are only taken once, the user is warned if they purchase multiple copies of the same skill.
  * One exception is the POWERSKILL which is expected to be customized per power and purchased multiple times.
@@ -362,7 +512,7 @@ export async function isActivatedForThisUse_TestingOnly(item, rollClass, options
     return isActivatedForThisUseInternal(item, rollClass, options);
 }
 
-async function isActivatedForThisUseInternal(item, rollClass, options = {}) {
+async function isActivatedForThisUseInternal(item, rollClass, options) {
     // if(!item.isActive) {
     //     return false;
     // }
@@ -407,155 +557,167 @@ async function isActivatedForThisUseInternal(item, rollClass, options = {}) {
         }
     }
 
-    // FIXME: This doesn't support 2 RAR. See https://github.com/dmdorman/hero6e-foundryvtt/issues/3873
+    // An item with an activation roll/requires a skill roll/requires a roll can take up to 2 consecutive rolls. Figure
+    // out what we're actually rolling for.
+    const activationRolls = getRollsForRar(item, rar);
 
-    // todo why OPTION and not OPTIONID to look for background skills (OPTIONID can't be altered by user)
-    // PH: FIXME: This doesn't look right as it can and should be modified in the HDC. Also variable name indicates boolean and it's not
-    const rarOptionIsBackground = rar.OPTION.substring(0, 2).toUpperCase();
-
-    const charKey = getRequiredCharacteristicKey(rar, item);
-
-    // if the RaR is an Activation roll, then we have the value we need
-    let value = findRollValue(rar);
-    let skill = undefined;
-    let char = undefined;
-    if (isNaN(value)) {
-        if (rar.OPTIONID !== "CHAR") {
-            skill = findSkillRoll(rar, item, rarOptionIsBackground);
+    // Make sure all skill items require for the activation roll(s) exist on this character and are active before attempting
+    // any rolls.
+    for (const activationRoll of activationRolls) {
+        // Only ACTIVATION_ROLL and CHARACTERISTIC_ROLL can be without active skills
+        // PH: FIXME: ATTACK_ROLL needs to be considered
+        if (
+            activationRoll.type !== RSR_ROLL_TYPE.ACTIVATION_ROLL &&
+            activationRoll.type !== RSR_ROLL_TYPE.CHARACTERISTIC_ROLL &&
+            activationRoll.activeItems.length === 0
+        ) {
+            // PH: FIXME: This needs appropriate message
+            return false;
         }
-        if (!skill) {
-            char = item.actor.system.characteristics[charKey];
-            if (char) {
-                // if we weren't supposed to look for a char but we had to find one the rar is not constructed right
-                // 5e BASICRSR is Skills and Characteristics
-                if (rar.OPTIONID !== "CHAR" && rar.OPTIONID !== "BASICRSR") {
-                    ui.notifications.warn(
-                        `${item.actor.name} has a power ${item.name}, which is incorrectly built.  Skill Roll for ${charKey.toUpperCase()} should be a Characteristic Roll.`,
-                    );
-                }
+    }
+
+    // Perform the rolls. Because a roll might consume resources we must perform all rolls (i.e. invoke all skills etc)
+    // and then evaluate if there was success.
+    // PH: FIXME: Need to use the resources from the skills/powers etc
+    const rollPromises = activationRolls.map(async (activationRoll) => {
+        const roller = new HeroRoller({}, rollClass);
+        let succeeded = false;
+        let flavor;
+
+        if (activationRoll.type === RSR_ROLL_TYPE.ACTIVATION_ROLL) {
+            const successValue = activationRoll.rollValue;
+
+            roller.makeSuccessRoll(true, successValue).addDice(3);
+
+            await roller.roll();
+
+            // PH: FIXME: Any way of combining the success checks?
+            succeeded = roller.getSuccess();
+            const autoSuccess = roller.getAutoSuccess();
+            const total = roller.getSuccessTotal();
+            const margin = successValue - total;
+
+            flavor = `${item.name} (${successValue}-) activation ${
+                succeeded ? "succeeded" : "failed"
+            } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
+        } else if (activationRoll.type === RSR_ROLL_TYPE.LUCK_ROLL) {
+            const luckPower = activationRoll.activeItems[0]; // PH: FIXME: Kludge
+            const { diceParts } = calculateDicePartsForItem(luckPower, {});
+
+            roller
+                .modifyTo5e(item.actor.system.is5e)
+                .makeLuckRoll()
+                .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0);
+
+            await roller.roll();
+
+            const luckTotal = roller.getLuckTotal();
+            const luckOption = rar.OPTIONID;
+            if (luckOption === "ONELUCK") {
+                succeeded = luckTotal >= 1;
+            } else if (luckOption === "TWOLUCK") {
+                succeeded = luckTotal >= 2;
+            } else if (luckOption === "THREELUCK") {
+                succeeded = luckTotal >= 3;
             } else {
-                // could not find a skill or characteristic to match
-                const typeOfRollRequired = rar.OPTIONID !== "CHAR" ? "known skill" : "characteristic";
-                ui.notifications.warn(
-                    `${item.actor.name} has a power ${item.name}. Expecting '${rar.OPTION} roll', where ${rar.OPTION} is the name of a ${typeOfRollRequired} that can be rolled.
-                    <br>Put the name of the ${typeOfRollRequired} into the Options or Comments of the Requires A Roll modifier for the best results.`,
-                );
-                if (!overrideCanAct) {
-                    const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
-
-                    const chatData = {
-                        style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-                        author: game.user._id,
-                        content:
-                            `<div class="dice-roll"><div class="dice-flavor">${item.name} (${item.system.OPTION_ALIAS || item.system.COMMENTS}) activation failed because the appropriate skill is not owned.</div></div>` +
-                            `\nPress <b>${overrideKeyText}</b> to override.`,
-                        speaker: speaker,
-                    };
-
-                    await ChatMessage.create(chatData);
-
-                    return false;
-                }
+                console.error(`${item.detailedName()} has unknown luck option ${luckOption}`);
+                succeeded = false;
             }
+
+            flavor = `${item.name} (rolled ${luckTotal} points) activation ${succeeded ? "succeeded" : "failed"} `;
+        } else if (activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL) {
+            const charKey = activationRoll.characteristicKey.toLowerCase();
+            const characteristics = item.actor.system.characteristics[charKey];
+            const value = characteristics.roll;
+            const apMinus = calculateRollMinus(item, rar);
+            const successValue = value - apMinus;
+
+            // PH: FIXME: what about additional skill levels used to influence the activation roll?
+            // PH: FIXME: not including penalties in an obvious way ... should also include the tags for them
+            roller.makeSuccessRoll(true, successValue).addDice(3);
+
+            await roller.roll();
+
+            // PH: FIXME: Any way of combining the success checks?
+            succeeded = roller.getSuccess();
+            const autoSuccess = roller.getAutoSuccess();
+            const total = roller.getSuccessTotal();
+            const margin = successValue - total;
+
+            const targetRoll = `${rar.OPTION_ALIAS}:${successValue}-`;
+            const divisor = findRollDivisor(rar);
+            const penalty = isNaN(divisor) ? "" : `, -1 per ${divisor} active points`;
+
+            const penaltyString = penalty ? `${penalty}: -${apMinus}` : "";
+
+            flavor = `${item.name} (${targetRoll}${penaltyString}) activation ${
+                succeeded ? "succeeded" : "failed"
+            } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
+        } else if (activationRoll.type === RSR_ROLL_TYPE.ITEM_ROLL) {
+            const skill = activationRoll.activeItems[0]; // PH: FIXME: Kludge
+            const value = parseInt(skill.system.roll);
+
+            const apMinus = calculateRollMinus(item, rar);
+            const successValue = value - apMinus;
+
+            // PH: FIXME: what about additional skill levels used to influence the activation roll? Can they apply to this?
+            roller.makeSuccessRoll(true, successValue).addDice(3);
+
+            await roller.roll();
+
+            succeeded = roller.getSuccess();
+            const autoSuccess = roller.getAutoSuccess();
+            const total = roller.getSuccessTotal();
+            const margin = successValue - total;
+
+            const targetRoll = skill.system.roll;
+            const divisor = findRollDivisor(rar);
+            const penalty = isNaN(divisor) ? "" : `, -1 per ${divisor} active points`;
+
+            const penaltyString = penalty ? `${penalty}: -${apMinus}` : "";
+
+            flavor = `${item.name} (${targetRoll}${penaltyString}) activation ${
+                succeeded ? "succeeded" : "failed"
+            } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
+        } else {
+            console.error(`${item.detailedName()} has unknown type ${activationRoll.type} for requires roll modifier`);
         }
-    }
-    // TODO: for refactor the above should return: skill, char, value, rollModifier so that the output can be constructed.
 
-    let succeeded = false;
-    let flavor;
-    let roller;
-    const usefulAlias = rarOptionIsBackground !== skill?.system.ALIAS ? skill?.system.ALIAS : "";
-    const skillName = skill?.system.INPUT || usefulAlias || skill?.name;
-    const charName = charKey?.toUpperCase();
-    const activationFrom = skill ? `${skillName}:` : char ? `${charName}:` : "";
-    if (skill?.system.XMLID === "LUCK") {
-        const { diceParts } = calculateDicePartsForItem(skill, {});
+        let cardHtml = await roller.render(flavor);
 
-        roller = new HeroRoller({}, rollClass)
-            .modifyTo5e(skill.actor.system.is5e)
-            .makeLuckRoll()
-            .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0);
-
-        await roller.roll();
-
-        const luckTotal = roller.getLuckTotal();
-        if (rar.OPTIONID === "ONELUCK") {
-            succeeded = luckTotal >= 1;
-        } else if (rar.OPTIONID === "TWOLUCK") {
-            succeeded = luckTotal >= 2;
-        } else if (rar.OPTIONID === "THREELUCK") {
-            succeeded = luckTotal >= 3;
+        // FORCE success
+        if (!succeeded && overrideCanAct) {
+            const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+            ui.notifications.info(`${item.actor.name} succeeded roll because override key.`);
+            succeeded = true;
+            cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
         }
 
-        flavor = `${item.name} (${activationFrom} rolled ${luckTotal} points) activation ${succeeded ? "succeeded" : "failed"} `;
-    } else {
-        if (skill) {
-            // skill.system.roll is a string
-            value = parseInt(skill.system.roll);
-            if (isNaN(value)) {
-                // sumthing wrong with the skill?
-                value = 11;
-            }
-        } else if (char) {
-            // a char.roll is an int
-            value = char.roll;
-        } else if (!value) {
-            ui.notifications.warn(`${item.actor.name} has a power ${item.name}. ${rar.OPTION_ALIAS} is not supported.`);
-            // Try to continue
-            value = 11;
+        if (!succeeded && options.resourcesUsedDescription) {
+            cardHtml += `Spent ${options.resourcesUsedDescription}.`;
         }
-        const minus = findRollMinus(rar, item);
-        value -= minus;
-        const successValue = parseInt(value);
 
-        //TODO what about additional skill levels used to influence the activation roll?
-        roller = new HeroRoller({}, rollClass).makeSuccessRoll(true, successValue).addDice(3);
+        const chatData = {
+            style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
+            rolls: roller.rawRolls(),
+            author: game.user._id,
+            content: cardHtml,
+            speaker: speaker,
+        };
 
-        await roller.roll();
+        await ChatMessage.create(chatData);
 
-        succeeded = roller.getSuccess();
-        const autoSuccess = roller.getAutoSuccess();
-        const total = roller.getSuccessTotal();
-        const margin = successValue - total;
+        if (!succeeded && options.showUi) {
+            ui.notifications.warn(cardHtml);
+        }
 
-        const targetRoll = skill ? skill.system.roll : char ? char.roll : `${rar.OPTION_ALIAS}:${value}-`;
-        const divisor = findRollDivisor(rar);
-        const penalty = isNaN(divisor) ? "" : `, -1 per ${divisor} active points`;
+        return succeeded;
+    });
 
-        const penaltyString = penalty ? `${penalty}: -${minus}` : "";
+    const results = await Promise.all(rollPromises);
 
-        flavor = `${item.name} (${activationFrom}${targetRoll}${penaltyString}) activation ${
-            succeeded ? "succeeded" : "failed"
-        } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
-    }
-
-    let cardHtml = await roller.render(flavor);
-
-    // FORCE success
-    if (!succeeded && overrideCanAct) {
-        const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
-        ui.notifications.info(`${item.actor.name} succeeded roll because override key.`);
-        succeeded = true;
-        cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
-    }
-
-    if (!succeeded && options.resourcesUsedDescription) {
-        cardHtml += `Spent ${options.resourcesUsedDescription}.`;
-    }
-
-    const chatData = {
-        style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-        rolls: roller.rawRolls(),
-        author: game.user._id,
-        content: cardHtml,
-        speaker: speaker,
-    };
-
-    await ChatMessage.create(chatData);
-
-    if (!succeeded && options.showUi) {
-        ui.notifications.warn(cardHtml);
-    }
-
-    return succeeded;
+    // One failure is an overall failure
+    return results.reduce((accum, result) => {
+        return accum && result;
+    });
 }

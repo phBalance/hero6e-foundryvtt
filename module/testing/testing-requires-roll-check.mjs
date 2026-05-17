@@ -2,13 +2,18 @@ import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench
 
 import {
     Roll10On3Dice,
+    Roll11On3Dice,
     Roll12On3Dice,
     Roll13On3Dice,
+    Roll14On3Dice,
+    Roll15On3Dice,
+    Roll1LuckOn3Dice,
     Roll3On3Dice,
     Roll6On3Dice,
     Roll7On3Dice,
     Roll8On3Dice,
     Roll9On3Dice,
+    RollAlternatingLuckAndUnluck,
 } from "../heroRoller/dice-testing-helper.mjs";
 
 import { isActivatedForThisUse_TestingOnly } from "../item/item-requires-roll.mjs";
@@ -27,7 +32,6 @@ export function registerRequiresRollCheckTests(quench) {
                 // The default timeout tends to be insufficient with multiple actors being created at the same time.
                 setQuenchTimeout(this);
 
-                // PH: FIXME: Need to get a proper 5e HDC with the ACTIVATIONROLL fixed. Also need to update MigrateData appropriately.
                 describe("Old HDC 5e character with sectional defenses #3876", function () {
                     const contents = `
                         <?xml version="1.0" encoding="UTF-16"?>
@@ -805,25 +809,41 @@ export function registerRequiresRollCheckTests(quench) {
                         describe("Acrobatics 8- activates correctly", function () {
                             it("should not activate 8- with a roll of a 9", async function () {
                                 expect(
-                                    await isActivatedForThisUse_TestingOnly(acrobaticsActivation8Less, Roll9On3Dice),
+                                    await isActivatedForThisUse_TestingOnly(
+                                        acrobaticsActivation8Less,
+                                        Roll9On3Dice,
+                                        {},
+                                    ),
                                 ).to.equal(false);
                             });
 
                             it("should activate 8- with a roll of a 8", async function () {
                                 expect(
-                                    await isActivatedForThisUse_TestingOnly(acrobaticsActivation8Less, Roll8On3Dice),
+                                    await isActivatedForThisUse_TestingOnly(
+                                        acrobaticsActivation8Less,
+                                        Roll8On3Dice,
+                                        {},
+                                    ),
                                 ).to.equal(true);
                             });
 
                             it("should activate 8- with a roll of a 7", async function () {
                                 expect(
-                                    await isActivatedForThisUse_TestingOnly(acrobaticsActivation8Less, Roll7On3Dice),
+                                    await isActivatedForThisUse_TestingOnly(
+                                        acrobaticsActivation8Less,
+                                        Roll7On3Dice,
+                                        {},
+                                    ),
                                 ).to.equal(true);
                             });
 
                             it("should activate 8- with a roll of a 3", async function () {
                                 expect(
-                                    await isActivatedForThisUse_TestingOnly(acrobaticsActivation8Less, Roll3On3Dice),
+                                    await isActivatedForThisUse_TestingOnly(
+                                        acrobaticsActivation8Less,
+                                        Roll3On3Dice,
+                                        {},
+                                    ),
                                 ).to.equal(true);
                             });
                         });
@@ -831,13 +851,21 @@ export function registerRequiresRollCheckTests(quench) {
                         describe("Acrobatics 12- activates correctly", function () {
                             it("should not activate 12- with a roll of a 13", async function () {
                                 expect(
-                                    await isActivatedForThisUse_TestingOnly(acrobaticsActivation12Less, Roll13On3Dice),
+                                    await isActivatedForThisUse_TestingOnly(
+                                        acrobaticsActivation12Less,
+                                        Roll13On3Dice,
+                                        {},
+                                    ),
                                 ).to.equal(false);
                             });
 
                             it("should activate 12- with a roll of a 12", async function () {
                                 expect(
-                                    await isActivatedForThisUse_TestingOnly(acrobaticsActivation12Less, Roll12On3Dice),
+                                    await isActivatedForThisUse_TestingOnly(
+                                        acrobaticsActivation12Less,
+                                        Roll12On3Dice,
+                                        {},
+                                    ),
                                 ).to.equal(true);
                             });
                         });
@@ -1607,7 +1635,7 @@ export function registerRequiresRollCheckTests(quench) {
                             <SKILL XMLID="KNOWLEDGE_SKILL" ID="1776733214260" BASECOST="2.0" LEVELS="0" ALIAS="KS" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776635236344" NAME="" INPUT="sandwiches" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
                             <NOTES />
                             </SKILL>
-                            <SKILL XMLID="KNOWLEDGE_SKILL" ID="1776733224900" BASECOST="2.0" LEVELS="0" ALIAS="KS" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776635236344" NAME="" INPUT="potato chips" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
+                            <SKILL XMLID="KNOWLEDGE_SKILL" ID="1776733224900" BASECOST="2.0" LEVELS="1" ALIAS="KS" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776635236344" NAME="" INPUT="potato chips" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
                             <NOTES />
                             </SKILL>
                         </SKILLS>
@@ -1615,6 +1643,9 @@ export function registerRequiresRollCheckTests(quench) {
                         <TALENTS />
                         <MARTIALARTS />
                         <POWERS>
+                            <POWER XMLID="LUCK" ID="1778871856563" BASECOST="0.0" LEVELS="5" ALIAS="Luck" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                            </POWER>
                             <LIST XMLID="GENERIC_OBJECT" ID="1776305288516" BASECOST="0.0" LEVELS="0" ALIAS="Requires A Skill Roll" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                             <NOTES />
                             </LIST>
@@ -1735,6 +1766,15 @@ export function registerRequiresRollCheckTests(quench) {
                                 </ADDER>
                             </MODIFIER>
                             </POWER>
+                            <POWER XMLID="AID" ID="1777426698757" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires STR with -1 per 20 AP" INPUT="STR" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777426738566" BASECOST="-1.0" LEVELS="0" ALIAS="Requires A STR Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="2" CHARACTERISTIC="1" ROLLALIAS="STR">
+                                    <NOTES />
+                                    <ADDER XMLID="MINUS1PER20" ID="1777426738553" BASECOST="0.25" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 20 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
                             <LIST XMLID="GENERIC_OBJECT" ID="1777150889000" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                             <NOTES />
                             </LIST>
@@ -1742,43 +1782,52 @@ export function registerRequiresRollCheckTests(quench) {
                             <NOTES />
                             </LIST>
                             <POWER XMLID="DRAIN" ID="1777150364583" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777150891823" NAME="Drain Invalid RSR missing background skill KS: Hot Dogs" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777151112665" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A KS: Hot Dogs Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" ROLLALIAS="KS: Hot Dogs">
                                 <NOTES />
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777151112665" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A KS: Hot Dogs Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" ROLLALIAS="KS: Hot Dogs">
+                                    <NOTES />
+                                </MODIFIER>
                             </POWER>
                             <POWER XMLID="DRAIN" ID="1777151162933" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777150891823" NAME="Drain Invalid RSR missing skill Animal Handler" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777151167447" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A KS: Hot Dogs Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" ROLLALIAS="KS: Hot Dogs">
                                 <NOTES />
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777151167447" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A KS: Hot Dogs Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" ROLLALIAS="KS: Hot Dogs">
+                                    <NOTES />
+                                </MODIFIER>
                             </POWER>
                             <POWER XMLID="DRAIN" ID="1777151218537" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777150891823" NAME="Drain Invalid RSR missing Interrogation skill for Acrobatics or Interrogation" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777151423708" BASECOST="-0.25" LEVELS="0" ALIAS="Requires an Acrobatics or Interrogation An Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" ROLLALIAS="Acrobatics or Interrogation">
                                 <NOTES />
-                                <ADDER XMLID="VARIABLERSR" ID="1777151423695" BASECOST="0.25" LEVELS="0" ALIAS="Variable RSR" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777151423708" BASECOST="-0.25" LEVELS="0" ALIAS="Requires an Acrobatics or Interrogation An Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" ROLLALIAS="Acrobatics or Interrogation">
+                                    <NOTES />
+                                    <ADDER XMLID="VARIABLERSR" ID="1777151423695" BASECOST="0.25" LEVELS="0" ALIAS="Variable RSR" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </POWER>
                             <POWER XMLID="DRAIN" ID="1777151332220" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777150891823" NAME="Drain Invalid RSR missing both Interrogation and Stealth skills" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777151337600" BASECOST="-0.5" LEVELS="0" ALIAS="Requires An Interrogation Roll And A Stealth Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOROLLS" OPTIONID="TWOROLLS" OPTION_ALIAS="Two RSRs on same Power" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" TYPE2="0" ROLLALIAS="Interrogation" ROLLALIAS2="Stealth">
                                 <NOTES />
-                                <ADDER XMLID="VARIABLERSR" ID="1777151342181" BASECOST="0.25" LEVELS="0" ALIAS="Variable RSR" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
-                                <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777151337600" BASECOST="-0.5" LEVELS="0" ALIAS="Requires An Interrogation Roll And A Stealth Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOROLLS" OPTIONID="TWOROLLS" OPTION_ALIAS="Two RSRs on same Power" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" TYPE2="0" ROLLALIAS="Interrogation" ROLLALIAS2="Stealth">
+                                    <NOTES />
+                                    <ADDER XMLID="VARIABLERSR" ID="1777151342181" BASECOST="0.25" LEVELS="0" ALIAS="Variable RSR" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </POWER>
                             <POWER XMLID="DRAIN" ID="1777151441844" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777150891823" NAME="Drain Invalid RSR missing Stealth for both Acrobatics and Stealth skills" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777151446899" BASECOST="-0.5" LEVELS="0" ALIAS="Requires An Acrobatics Roll And A Stealth Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOROLLS" OPTIONID="TWOROLLS" OPTION_ALIAS="Two RSRs on same Power" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" TYPE2="0" ROLLALIAS="Acrobatics" ROLLALIAS2="Stealth">
                                 <NOTES />
-                                <ADDER XMLID="VARIABLERSR" ID="1777151472357" BASECOST="0.25" LEVELS="0" ALIAS="Variable RSR" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777151446899" BASECOST="-0.5" LEVELS="0" ALIAS="Requires An Acrobatics Roll And A Stealth Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOROLLS" OPTIONID="TWOROLLS" OPTION_ALIAS="Two RSRs on same Power" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" TYPE2="0" ROLLALIAS="Acrobatics" ROLLALIAS2="Stealth">
+                                    <NOTES />
+                                    <ADDER XMLID="VARIABLERSR" ID="1777151472357" BASECOST="0.25" LEVELS="0" ALIAS="Variable RSR" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="DRAIN" ID="1778949758069" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="24" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777150891823" NAME="Drain Invalid RSR Luck With -1 Per 5 AP Penalty" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                                </ADDER>
-                            </MODIFIER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1778949762645" BASECOST="-1.5" LEVELS="0" ALIAS="Requires Two Levels of Luck" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOLUCK" OPTIONID="TWOLUCK" OPTION_ALIAS="Two levels of Luck required" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="MINUS1PER5" ID="1778949807888" BASECOST="-0.5" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 5 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
                             </POWER>
                         </POWERS>
                         <DISADVANTAGES />
@@ -1800,12 +1849,14 @@ export function registerRequiresRollCheckTests(quench) {
                     let aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty;
                     let aidRequiresKsSandwichesAndKsPotatoChipsWith1Per5ApPenalty;
                     let aidRequiresPerceptionWith1Per5ApPenalty;
+                    let aidRequiresStrWith1Per20ApPenalty;
 
                     let invalidDrainMissingBackgroundSkill;
                     let invalidDrainMissingSkill;
                     let invalidDrainMissingSkillFromVariableSkillChoice;
                     let invalidDrainMissingOneSkillFromTwoRequiredSkills;
                     let invalidDrainMissingBothSkillsFromTwoRequiredSkills;
+                    let invalidDrainHasApPenaltyAgainstLuck;
 
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true });
@@ -1845,6 +1896,9 @@ export function registerRequiresRollCheckTests(quench) {
                         aidRequiresPerceptionWith1Per5ApPenalty = actor.items.find(
                             (item) => item.name === "Requires Perception with -1 per 5 AP",
                         );
+                        aidRequiresStrWith1Per20ApPenalty = actor.items.find(
+                            (item) => item.name === "Requires STR with -1 per 20 AP",
+                        );
 
                         invalidDrainMissingBackgroundSkill = actor.items.find(
                             (item) => item.name === "Drain Invalid RSR missing background skill KS: Hot Dogs",
@@ -1858,12 +1912,15 @@ export function registerRequiresRollCheckTests(quench) {
                                 "Drain Invalid RSR missing Interrogation skill for Acrobatics or Interrogation",
                         );
                         invalidDrainMissingOneSkillFromTwoRequiredSkills = actor.items.find(
-                            (item) => item.name === "Drain Invalid RSR missing both Interrogation and Stealth skills",
-                        );
-                        invalidDrainMissingBothSkillsFromTwoRequiredSkills = actor.items.find(
                             (item) =>
                                 item.name ===
                                 "Drain Invalid RSR missing Stealth for both Acrobatics and Stealth skills",
+                        );
+                        invalidDrainMissingBothSkillsFromTwoRequiredSkills = actor.items.find(
+                            (item) => item.name === "Drain Invalid RSR missing both Interrogation and Stealth skills",
+                        );
+                        invalidDrainHasApPenaltyAgainstLuck = actor.items.find(
+                            (item) => item.name === "Drain Invalid RSR Luck With -1 Per 5 AP Penalty",
                         );
                     });
 
@@ -1925,23 +1982,16 @@ export function registerRequiresRollCheckTests(quench) {
                         });
                     });
 
-                    describe.skip("RSRs have hero validations", function () {
-                        it("should have no heroValidation concerns as the character do have listed inante skill (success)", function () {
+                    describe("RSRs have hero validations", function () {
+                        it("should have no heroValidation concerns as the character does have listed inante skill (success)", function () {
                             const heroValidation = aidRequiresPerceptionWith1Per5ApPenalty.heroValidation;
                             expect(heroValidation).to.have.deep.members([]);
                         });
 
-                        it("should have no heroValidation concerns as the character do have listed background skills (success)", function () {
+                        it("should have no heroValidation concerns as the character does have listed background skills (success)", function () {
                             const heroValidation =
                                 aidRequiresKsSandwichesAndKsPotatoChipsWith1Per5ApPenalty.heroValidation;
                             expect(heroValidation).to.have.deep.members([]);
-                        });
-
-                        it("should have a heroValidation error as the character does not have listed luck power (error)", function () {
-                            const heroValidation = aidRequires2Luck.heroValidation;
-                            expect(heroValidation.length).to.equal(1);
-                            expect(heroValidation[0]).to.have.property("severity");
-                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
                         it("should have a heroValidation error as the character does not have listed background skill (error)", function () {
@@ -1974,34 +2024,173 @@ export function registerRequiresRollCheckTests(quench) {
 
                         it("should have a heroValidation error as the character does not have either of the 2 listed skills (error)", function () {
                             const heroValidation = invalidDrainMissingBothSkillsFromTwoRequiredSkills.heroValidation;
-                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation.length).to.equal(2);
                             expect(heroValidation[0]).to.have.property("severity");
                             expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
+                        it("should have a heroValidation error as the character has an AP penalty with their listed luck power (warning)", function () {
+                            const heroValidation = invalidDrainHasApPenaltyAgainstLuck.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.WARNING);
+                        });
+
+                        it("should have no heroValidation error as the character has STR (success)", function () {
+                            const heroValidation = aidRequiresStrWith1Per20ApPenalty.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
                         // TODO: the character does not have listed characteristic (vehicle for instance?) (error)
+                        it.skip("should have a heroValidation error as the character does not have EGO");
+
                         // TODO: the character does not have listed perception (vehicle for instance?) (error)
-                        // TODO: the character does not have the listed movement type (error)
-                        // TODO: the character does not have luck for a luck skill (error)
+                        it.skip("should have a heroValidation error as the character does not have perception");
+
                         // TODO: the character does have luck for a luck skill (success)
-                        // TODO: the character with luck skill roll has no penalty per AP (warning as GM will have to arbitrate)
+                        it.skip("should have a heroValidation error as the character does not have listed luck power (error)", function () {
+                            const heroValidation = aidRequires2Luck.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
                     });
 
-                    describe.skip("works with skill that actor has", function () {
-                        describe("RSR with skill and no penalty based on active points", function () {});
+                    describe("works with skill that actor has", function () {
+                        describe("RSR with skill and no penalty based on active points", function () {
+                            it("should activate with a roll of 14 (against 14-) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        aidRequiresBreakfallWithNoApPenalty,
+                                        Roll14On3Dice,
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
 
-                        describe("RSR with skill and various penalty levels based on active points", function () {});
+                            it("should fail to activate with a roll of 15 (against 14-) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        aidRequiresBreakfallWithNoApPenalty,
+                                        Roll15On3Dice,
+                                        {},
+                                    ),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe("RSR with skill and various penalty levels based on active points", function () {
+                            it("should activate with a roll of 12 (against 14- w/ -2 for AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        aidRequiresBreakfallWith1Per5ApPenalty,
+                                        Roll12On3Dice,
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+
+                            it("should fail to activate with a roll of 14 (against 14- w/ -2 for AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        aidRequiresBreakfallWith1Per5ApPenalty,
+                                        Roll13On3Dice,
+                                        {},
+                                    ),
+                                ).to.equal(false);
+                            });
+                        });
                     });
 
-                    describe.skip("RSR with skill that doesn't exist", function () {});
+                    describe("RSR with skill that doesn't exist", function () {
+                        it("should fail to activate with a missing skill for activation", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    invalidDrainMissingBackgroundSkill,
+                                    Roll3On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+                    });
 
-                    describe.skip("RSR with CSL", function () {});
+                    describe.skip("RSR with attack (should not use CSL)", function () {});
 
-                    describe.skip("RSR with 2 skill rolls", function () {});
+                    describe.skip("RSR with 1 of 2 skill rolls", function () {});
+
+                    describe("RSR with both of 2 skill rolls", function () {
+                        it("should activate with a roll of 11 (against 11- w/ 0 for AP penalty for KS: sandwiches and 12- w/ 0 for AP penalty for KS: potato chips) for activation", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty,
+                                    Roll11On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(true);
+                        });
+
+                        it("should fail to activate with a roll of 12 (against 11- w/ 0 for AP penalty for KS: sandwiches and 12- w/ 0 for AP penalty for KS: potato chips) for activation", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty,
+                                    Roll12On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+
+                        it("should fail to activate with a roll of 13 (against 11- w/ 0 for AP penalty for KS: sandwiches and 12- w/ 0 for AP penalty for KS: potato chips) for activation", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty,
+                                    Roll13On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+                    });
 
                     describe.skip("RSR with skill vs skill contest", function () {});
 
-                    describe.skip("RSR with luck rolls", function () {});
+                    describe("RSR with luck rolls", function () {
+                        it("should activate with a roll of 3 luck (against 3 luck) for activation", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequires3Luck,
+                                    RollAlternatingLuckAndUnluck,
+                                    {},
+                                ),
+                            ).to.equal(true);
+                        });
+
+                        it("should fail to activate with a roll of 2 luck (against 3 luck) for activation", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(aidRequires3Luck, Roll1LuckOn3Dice, {}),
+                            ).to.equal(false);
+                        });
+                    });
+
+                    describe("RSR with characteristics", function () {
+                        it("should activate with a roll of 11 (against 12- w/ -1 for AP penalty) for activation", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequiresStrWith1Per20ApPenalty,
+                                    Roll11On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(true);
+                        });
+
+                        it("should not activate with a roll of 12 (against 12- w/ -1 for AP penalty) for activation", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequiresStrWith1Per20ApPenalty,
+                                    Roll12On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+                    });
                 });
 
                 describe("isActivatedForThisUse", function () {

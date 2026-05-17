@@ -1266,12 +1266,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     hasSuccessRoll() {
-        const powerInfo = getPowerInfo({
-            item: this,
-            xmlTag: this.system.xmlTag,
-        });
         return (
-            powerInfo?.behaviors.includes("success") ||
+            this.baseInfo?.behaviors.includes("success") ||
             (this.system.XMLID === "CUSTOMSKILL" && parseInt(this.system.ROLL) > 0)
         );
     }
