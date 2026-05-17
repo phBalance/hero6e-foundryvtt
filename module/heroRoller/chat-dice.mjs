@@ -1,8 +1,4 @@
-import {
-    capitalizeFirstLetter,
-    createTemporaryItemAttackActionForApplyingDamage,
-    generateChatMessage,
-} from "./chat-output.mjs";
+import { createTemporaryItemAttackActionForApplyingDamage, generateChatMessage } from "./chat-output.mjs";
 import { HeroRoller } from "./dice.mjs";
 
 import { HEROSYS } from "../herosystem6e.mjs";
@@ -232,11 +228,9 @@ function buildDamageInformation(chatMessageCmd) {
 async function rollAndGenerateChatMessage(heroRoller, defenseType) {
     await heroRoller.roll();
 
-    // Setup flavour text with capitalized first letter
-    const chatCardFlavour = `${capitalizeFirstLetter(heroRoller.getType())} ${defenseType} attack ${heroRoller.hitLocationValid() ? ` to ${heroRoller.getHitLocation().fullName}` : ""}`;
     const action = createTemporaryItemAttackActionForApplyingDamage(heroRoller, defenseType);
 
-    return generateChatMessage(heroRoller, chatCardFlavour, action);
+    return generateChatMessage(heroRoller, defenseType, action);
 }
 
 /**
