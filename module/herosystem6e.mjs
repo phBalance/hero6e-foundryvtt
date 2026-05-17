@@ -845,6 +845,12 @@ async function _expireContinuingCharges(actor) {
     }
 }
 
+/**
+ *
+ * @param {HeroSystem6eActor} actor
+ * @param {Number} multiplier - integer number of turns
+ * @returns
+ */
 async function _outOfCombatRecovery(actor, multiplier) {
     // If GM rewinds time, then goes forward again,
     // some actors may get "bonus" recoveries.
