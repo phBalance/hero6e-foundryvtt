@@ -230,47 +230,51 @@ export async function expireEffects(actor, expiresOn) {
 
     // TODO: Move remaining sanity checks to HeroValidation
     for (const ae of temporaryEffects) {
-        const heroValidation = ae.heroValidation;
-        for (const validationEntry of heroValidation) {
-            const message = `${actor.name}/${ae.flags[game.system.id]?.XMLID}/${ae.nameExtended}: ${validationEntry.message}`;
-            // If current combatant, show in the UI otherwise to log
-            if (actor.inCombat && game.combat?.combatant?.actorId === actor.id) {
-                switch (validationEntry.severity) {
-                    case CONFIG.HERO.VALIDATION_SEVERITY.INFO:
-                        ui.notifications.info(message);
-                        break;
+        try {
+            const heroValidation = ae.heroValidation;
+            for (const validationEntry of heroValidation) {
+                const message = `${actor.name}/${ae.flags[game.system.id]?.XMLID}/${ae.nameExtended}: ${validationEntry.message}`;
+                // If current combatant, show in the UI otherwise to log
+                if (actor.inCombat && game.combat?.combatant?.actorId === actor.id) {
+                    switch (validationEntry.severity) {
+                        case CONFIG.HERO.VALIDATION_SEVERITY.INFO:
+                            ui.notifications.info(message);
+                            break;
 
-                    case CONFIG.HERO.VALIDATION_SEVERITY.WARNING:
-                        ui.notifications.warn(message);
-                        break;
+                        case CONFIG.HERO.VALIDATION_SEVERITY.WARNING:
+                            ui.notifications.warn(message);
+                            break;
 
-                    case CONFIG.HERO.VALIDATION_SEVERITY.ERROR:
-                        ui.notifications.error(message);
-                        break;
+                        case CONFIG.HERO.VALIDATION_SEVERITY.ERROR:
+                            ui.notifications.error(message);
+                            break;
 
-                    default:
-                        console.error("Invalid validation severity", validationEntry.severity);
-                        break;
-                }
-            } else {
-                switch (validationEntry.severity) {
-                    case CONFIG.HERO.VALIDATION_SEVERITY.INFO:
-                        console.log(message, ae);
-                        break;
+                        default:
+                            console.error("Invalid validation severity", validationEntry.severity);
+                            break;
+                    }
+                } else {
+                    switch (validationEntry.severity) {
+                        case CONFIG.HERO.VALIDATION_SEVERITY.INFO:
+                            console.log(message, ae);
+                            break;
 
-                    case CONFIG.HERO.VALIDATION_SEVERITY.WARNING:
-                        console.warn(message, ae);
-                        break;
+                        case CONFIG.HERO.VALIDATION_SEVERITY.WARNING:
+                            console.warn(message, ae);
+                            break;
 
-                    case CONFIG.HERO.VALIDATION_SEVERITY.ERROR:
-                        console.error(message, ae);
-                        break;
+                        case CONFIG.HERO.VALIDATION_SEVERITY.ERROR:
+                            console.error(message, ae);
+                            break;
 
-                    default:
-                        console.error("Invalid validation severity", validationEntry.severity);
-                        break;
+                        default:
+                            console.error("Invalid validation severity", validationEntry.severity);
+                            break;
+                    }
                 }
             }
+        } catch (e) {
+            console.error(`Error processing hero validation for ${actor.name}/${ae.nameExtended}`, e);
         }
 
         //const d = ae._prepareDuration();
