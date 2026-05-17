@@ -1867,6 +1867,12 @@ export function registerRequiresRollCheckTests(quench) {
                     let invalidDrainMissingBothSkillsFromTwoRequiredSkills;
                     let invalidDrainHasApPenaltyAgainstLuck;
 
+                    let breakfallSkill;
+                    let acrobaticsSkill;
+                    let ksSandwichesBackgroundSkill;
+                    let ksPotatoChipsBackgroundSkill;
+                    let luckPower;
+
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
@@ -1931,6 +1937,12 @@ export function registerRequiresRollCheckTests(quench) {
                         invalidDrainHasApPenaltyAgainstLuck = actor.items.find(
                             (item) => item.name === "Drain Invalid RSR Luck With -1 Per 5 AP Penalty",
                         );
+
+                        breakfallSkill = actor.items.find((item) => item.name === "Breakfall");
+                        acrobaticsSkill = actor.items.find((item) => item.name === "Acrobatics");
+                        ksSandwichesBackgroundSkill = actor.items.find((item) => item.name === "KS: sandwiches");
+                        ksPotatoChipsBackgroundSkill = actor.items.find((item) => item.name === "KS: potato chips");
+                        luckPower = actor.items.find((item) => item.name === "Luck");
                     });
 
                     after(async function () {
@@ -2217,9 +2229,302 @@ export function registerRequiresRollCheckTests(quench) {
                         });
                     });
 
-                    describe.skip("should fail when items are not active", function () {});
+                    describe("should fail when items are not active", async function () {
+                        let previousBreakfallSkillState;
+                        let previousAcrobaticsSkillState;
+                        let previousKsSandwichesBackgroundSkillState;
+                        let previousKsPotatoChipsBackgroundSkillState;
+                        let luckPowerState;
+
+                        async function turnItemOff(item) {
+                            const previousState = item.isActive;
+                            await item.turnOff({});
+                            return previousState;
+                        }
+
+                        async function restoreState(item, previousActiveState) {
+                            if (previousActiveState) {
+                                await item.turnOn({});
+                            } else {
+                                await item.turnOff({});
+                            }
+                        }
+
+                        before(async function () {
+                            previousBreakfallSkillState = await turnItemOff(breakfallSkill);
+                            previousAcrobaticsSkillState = await turnItemOff(acrobaticsSkill);
+                            previousKsSandwichesBackgroundSkillState = await turnItemOff(ksSandwichesBackgroundSkill);
+                            previousKsPotatoChipsBackgroundSkillState = await turnItemOff(ksPotatoChipsBackgroundSkill);
+                            luckPowerState = await turnItemOff(luckPower);
+                        });
+
+                        after(async function () {
+                            await restoreState(breakfallSkill, previousBreakfallSkillState);
+                            await restoreState(acrobaticsSkill, previousAcrobaticsSkillState);
+                            await restoreState(ksSandwichesBackgroundSkill, previousKsSandwichesBackgroundSkillState);
+                            await restoreState(ksPotatoChipsBackgroundSkill, previousKsPotatoChipsBackgroundSkillState);
+                            await restoreState(luckPower, luckPowerState);
+                        });
+
+                        it("should fail to activate with a roll of 3 because the luck power is inactive", async function () {
+                            Roll3LuckOn3Dice.resetIndex();
+
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(aidRequires1Luck, Roll3LuckOn3Dice, {}),
+                            ).to.equal(false);
+                        });
+
+                        it("should fail to activate with a roll of 3 because the skill is inactive", async function () {
+                            Roll3On3Dice.resetIndex();
+
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequiresBreakfallWith1Per5ApPenalty,
+                                    Roll3On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+
+                        it("should fail to activate with a roll of 3 because 1 of the 2 required skills is inactive", async function () {
+                            Roll3On3Dice.resetIndex();
+
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty,
+                                    Roll3On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+
+                        it.skip("should not prompt for the selection of variable skill if one is inactive but at least one is", async function () {});
+                    });
                 });
 
+                describe("5e - requires a skill roll (expected failures from vehicle)", function () {
+                    const contents = `
+                        <?xml version="1.0" encoding="UTF-16"?>
+                        <CHARACTER version="6.0" TEMPLATE="builtIn.Vehicle.hdt">
+                        <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
+                        <CHARACTER_INFO CHARACTER_NAME="Test 5e Requires Skill Roll Vehicle" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                            <BACKGROUND />
+                            <PERSONALITY />
+                            <QUOTE />
+                            <TACTICS />
+                            <CAMPAIGN_USE />
+                            <APPEARANCE />
+                            <NOTES1 />
+                            <NOTES2 />
+                            <NOTES3 />
+                            <NOTES4 />
+                            <NOTES5 />
+                        </CHARACTER_INFO>
+                        <CHARACTERISTICS>
+                            <SIZE XMLID="SIZE" ID="1778982880299" BASECOST="0.0" LEVELS="0" ALIAS="Size" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </SIZE>
+                            <STR XMLID="STR" ID="1778982880273" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </STR>
+                            <DEX XMLID="DEX" ID="1778982880406" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </DEX>
+                            <BODY XMLID="BODY" ID="1778982879700" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </BODY>
+                            <DEF XMLID="DEF" ID="1778982879697" BASECOST="0.0" LEVELS="0" ALIAS="DEF" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </DEF>
+                            <SPD XMLID="SPD" ID="1778982880441" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </SPD>
+                            <RUNNING XMLID="RUNNING" ID="1778982879794" BASECOST="0.0" LEVELS="0" ALIAS="Ground Movement" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </RUNNING>
+                            <SWIMMING XMLID="SWIMMING" ID="1778982880056" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </SWIMMING>
+                            <LEAPING XMLID="LEAPING" ID="1778982880519" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </LEAPING>
+                        </CHARACTERISTICS>
+                        <SKILLS />
+                        <PERKS />
+                        <TALENTS />
+                        <MARTIALARTS />
+                        <POWERS>
+                            <LIST XMLID="GENERIC_OBJECT" ID="1778983255815" BASECOST="0.0" LEVELS="0" ALIAS="RSR Rolls" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                            </LIST>
+                            <LIST XMLID="GENERIC_OBJECT" ID="1778983268663" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                            </LIST>
+                            <LIST XMLID="GENERIC_OBJECT" ID="1778983186512" BASECOST="0.0" LEVELS="0" ALIAS="Invalid RSR Rolls" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                            </LIST>
+                            <POWER XMLID="DRAIN" ID="1778983050625" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1778983186512" NAME="Drain Invalid RSR EGO with -1 per 10 AP" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1778983353098" BASECOST="-1.0" LEVELS="0" ALIAS="Requires An EGO Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="2" CHARACTERISTIC="1" ROLLALIAS="EGO">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="DRAIN" ID="1778983414424" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1778983186512" NAME="Drain Invalid RSR Perception with -1 per 10 AP" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1778983417732" BASECOST="-1.0" LEVELS="0" ALIAS="Requires A PER Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="3" ROLLALIAS="PER">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="DRAIN" ID="1778983348301" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1778983186512" NAME="Drain Invalid RSR Luck With -1 Per 5 AP Penalty" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1778983348294" BASECOST="-1.5" LEVELS="0" ALIAS="Requires Two Levels of Luck" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="TWOLUCK" OPTIONID="TWOLUCK" OPTION_ALIAS="Two levels of Luck required" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                                <ADDER XMLID="MINUS1PER5" ID="1778983348281" BASECOST="-0.5" LEVELS="0" ALIAS="Active Point penalty to Skill Roll is -1 per 5 Active Points" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </POWER>
+                        </POWERS>
+                        <DISADVANTAGES />
+                        <EQUIPMENT />
+                        </CHARACTER>
+                    `;
+                    let actor;
+
+                    let invalidDrainMissingEgoCharacteristic;
+                    let invalidDrainMissingPerception;
+                    let invalidDrainMissingLuckPower;
+
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+
+                        invalidDrainMissingEgoCharacteristic = actor.items.find(
+                            (item) => item.name === "Drain Invalid RSR EGO with -1 per 10 AP",
+                        );
+                        invalidDrainMissingPerception = actor.items.find(
+                            (item) => item.name === "Drain Invalid RSR Perception with -1 per 10 AP",
+                        );
+                        invalidDrainMissingLuckPower = actor.items.find(
+                            (item) => item.name === "Drain Invalid RSR Luck With -1 Per 5 AP Penalty",
+                        );
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    describe("RSRs have hero validations", function () {
+                        it("should have a heroValidation error as the character does not have EGO (error)", function () {
+                            const heroValidation = invalidDrainMissingEgoCharacteristic.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have a heroValidation error as the character does not have perception (error)", function () {
+                            const heroValidation = invalidDrainMissingPerception.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have a heroValidation error as the character does not have listed luck power (error)", function () {
+                            const heroValidation = invalidDrainMissingLuckPower.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+                    });
+
+                    describe("RSR with characteristics", function () {
+                        it("should not activate with a roll of 3 (against 11- w/ -1 for AP penalty) for activation", async function () {
+                            Roll3On3Dice.resetIndex();
+
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    invalidDrainMissingEgoCharacteristic,
+                                    Roll3On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+
+                        it("should not activate with a roll of 10 (against 11- w/ -1 for AP penalty) for activation", async function () {
+                            Roll10On3Dice.resetIndex();
+
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    invalidDrainMissingEgoCharacteristic,
+                                    Roll10On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+
+                        it("should not activate with a roll of 11 (against 11- w/ -1 for AP penalty) for activation", async function () {
+                            Roll11On3Dice.resetIndex();
+
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    invalidDrainMissingEgoCharacteristic,
+                                    Roll11On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+                    });
+
+                    describe("RSR with perception", function () {
+                        it("should not activate with a roll of 3 (against 9- w/ -1 for AP penalty) for activation", async function () {
+                            Roll3On3Dice.resetIndex();
+
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    invalidDrainMissingPerception,
+                                    Roll3On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+
+                        it("should not activate with a roll of 8 (against 9- w/ -1 for AP penalty) for activation", async function () {
+                            Roll8On3Dice.resetIndex();
+
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    invalidDrainMissingPerception,
+                                    Roll8On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+
+                        it("should not activate with a roll of 9 (against 9- w/ -1 for AP penalty) for activation", async function () {
+                            Roll9On3Dice.resetIndex();
+
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    invalidDrainMissingPerception,
+                                    Roll9On3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+                    });
+
+                    describe("RSR with luck rolls", function () {
+                        it("should activate with a roll of 3 luck (against 3 luck) for activation", async function () {
+                            Roll3LuckOn3Dice.resetIndex();
+
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    invalidDrainMissingLuckPower,
+                                    Roll3LuckOn3Dice,
+                                    {},
+                                ),
+                            ).to.equal(false);
+                        });
+                    });
                 });
 
                 describe("isActivatedForThisUse", function () {

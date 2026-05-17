@@ -573,6 +573,12 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
         ) {
             // PH: FIXME: This needs appropriate message
             return false;
+        } else if (
+            activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL &&
+            !item.actor.hasCharacteristic(activationRoll.characteristicKey)
+        ) {
+            // PH: FIXME: This needs appropriate message
+            return false;
         }
     }
 
