@@ -8,6 +8,7 @@ import {
     Roll14On3Dice,
     Roll15On3Dice,
     Roll1LuckOn3Dice,
+    Roll3LuckOn3Dice,
     Roll3On3Dice,
     Roll6On3Dice,
     Roll7On3Dice,
@@ -1462,6 +1463,8 @@ export function registerRequiresRollCheckTests(quench) {
 
                         describe("simple 1 range sectional activation roll (12-13) (equivalent of 8-)", function () {
                             it("should not activate with a hit location of 12 if rolling an 9 for activation", async function () {
+                                Roll9On3Dice.resetIndex();
+
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, Roll9On3Dice, {
                                         hitLocationNum: 12,
@@ -1470,6 +1473,8 @@ export function registerRequiresRollCheckTests(quench) {
                             });
 
                             it("should activate with a hit location of 12 if rolling a 6 for activation", async function () {
+                                Roll6On3Dice.resetIndex();
+
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, Roll6On3Dice, {
                                         hitLocationNum: 12,
@@ -1480,6 +1485,8 @@ export function registerRequiresRollCheckTests(quench) {
 
                         describe("simple 1 range sectional activation roll (11-13) (equivalent of 9-)", function () {
                             it("should not activate with a hit location of 11 if rolling an 10 for activation", async function () {
+                                Roll10On3Dice.resetIndex();
+
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(sectionalArmorStandardVest, Roll10On3Dice, {
                                         hitLocationNum: 11,
@@ -1488,6 +1495,8 @@ export function registerRequiresRollCheckTests(quench) {
                             });
 
                             it("should activate with a hit location of 12 if rolling a 6 for activation", async function () {
+                                Roll9On3Dice.resetIndex();
+
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(sectionalArmorStandardVest, Roll9On3Dice, {
                                         hitLocationNum: 11,
@@ -2091,6 +2100,8 @@ export function registerRequiresRollCheckTests(quench) {
                             });
 
                             it("should fail to activate with a roll of 14 (against 14- w/ -2 for AP penalty) for activation", async function () {
+                                Roll13On3Dice.resetIndex();
+
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         aidRequiresBreakfallWith1Per5ApPenalty,
@@ -2104,6 +2115,8 @@ export function registerRequiresRollCheckTests(quench) {
 
                     describe("RSR with skill that doesn't exist", function () {
                         it("should fail to activate with a missing skill for activation", async function () {
+                            Roll3On3Dice.resetIndex();
+
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     invalidDrainMissingBackgroundSkill,
@@ -2116,10 +2129,14 @@ export function registerRequiresRollCheckTests(quench) {
 
                     describe.skip("RSR with attack (should not use CSL)", function () {});
 
+                    describe.skip("RSR with skill vs skill contest", function () {});
+
                     describe.skip("RSR with 1 of 2 skill rolls", function () {});
 
                     describe("RSR with both of 2 skill rolls", function () {
                         it("should activate with a roll of 11 (against 11- w/ 0 for AP penalty for KS: sandwiches and 12- w/ 0 for AP penalty for KS: potato chips) for activation", async function () {
+                            Roll11On3Dice.resetIndex();
+
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty,
@@ -2130,6 +2147,8 @@ export function registerRequiresRollCheckTests(quench) {
                         });
 
                         it("should fail to activate with a roll of 12 (against 11- w/ 0 for AP penalty for KS: sandwiches and 12- w/ 0 for AP penalty for KS: potato chips) for activation", async function () {
+                            Roll12On3Dice.resetIndex();
+
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty,
@@ -2140,6 +2159,8 @@ export function registerRequiresRollCheckTests(quench) {
                         });
 
                         it("should fail to activate with a roll of 13 (against 11- w/ 0 for AP penalty for KS: sandwiches and 12- w/ 0 for AP penalty for KS: potato chips) for activation", async function () {
+                            Roll13On3Dice.resetIndex();
+
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty,
@@ -2150,10 +2171,10 @@ export function registerRequiresRollCheckTests(quench) {
                         });
                     });
 
-                    describe.skip("RSR with skill vs skill contest", function () {});
-
                     describe("RSR with luck rolls", function () {
                         it("should activate with a roll of 3 luck (against 3 luck) for activation", async function () {
+                            RollAlternatingLuckAndUnluck.resetIndex();
+
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequires3Luck,
@@ -2172,6 +2193,8 @@ export function registerRequiresRollCheckTests(quench) {
 
                     describe("RSR with characteristics", function () {
                         it("should activate with a roll of 11 (against 12- w/ -1 for AP penalty) for activation", async function () {
+                            Roll11On3Dice.resetIndex();
+
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequiresStrWith1Per20ApPenalty,
@@ -2182,6 +2205,8 @@ export function registerRequiresRollCheckTests(quench) {
                         });
 
                         it("should not activate with a roll of 12 (against 12- w/ -1 for AP penalty) for activation", async function () {
+                            Roll12On3Dice.resetIndex();
+
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequiresStrWith1Per20ApPenalty,
@@ -2191,6 +2216,10 @@ export function registerRequiresRollCheckTests(quench) {
                             ).to.equal(false);
                         });
                     });
+
+                    describe.skip("should fail when items are not active", function () {});
+                });
+
                 });
 
                 describe("isActivatedForThisUse", function () {
