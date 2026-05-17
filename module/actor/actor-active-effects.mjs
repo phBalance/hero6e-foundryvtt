@@ -1,5 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
+import { isGameV14OrLater } from "../utility/compatibility.mjs";
 
 // Compatibility V14
 const _ActiveEffectTypeDataModel = foundry.data?.ActiveEffectTypeDataModel ?? foundry.abstract.TypeDataModel;
@@ -551,52 +552,34 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         }
     }
 
-    // Aaron doesn't think we need to override _prepareDuration anymore.
-    // This was largely for the label, which is now handled by ActorSheet2 in the UI.
-    // Additionally it seems to conflict with V14.
-    // _prepareDuration() {
-    //     const d = this.duration;
+    _prepareDuration() {
+        const duration = super._prepareDuration();
 
-    //     // Time-based duration
-    //     if (Number.isNumeric(d.seconds)) {
-    //         const wt = game.time.worldTime;
-    //         const start = d.startTime || wt;
-    //         const elapsed = wt - start;
-    //         const remaining = d.seconds - elapsed;
+        // V14 is fine, so are non-temporary effects
+        if (isGameV14OrLater() || !this.isTemporary) {
+            return duration;
+        }
 
-    //         let totalSeconds = parseInt(remaining);
-
-    //         if (totalSeconds < 0) {
-    //             console.warn(
-    //                 `Active Effect ${this.name}/${this.parent.name}/${this.parent?.actor?.name} has negative remaining duration = ${totalSeconds}.`,
-    //                 this.duration,
-    //                 wt,
-    //             );
-    //             totalSeconds = 0;
-    //         }
-
-    //         const days = Math.floor(totalSeconds / (3600 * 24)); // 3600 seconds in an hour, 24 hours in a day
-    //         totalSeconds %= 3600 * 24; // Remaining seconds after calculating days
-
-    //         const hours = Math.floor(totalSeconds / 3600); // 3600 seconds in an hour
-    //         totalSeconds %= 3600; // Remaining seconds after calculating hours
-
-    //         const minutes = Math.floor(totalSeconds / 60); // 60 seconds in a minute
-    //         totalSeconds %= 60; // Remaining seconds
-
-    //         const seconds = totalSeconds;
-
-    //         return {
-    //             type: "seconds",
-    //             duration: d.seconds,
-    //             remaining: remaining,
-    //             label: `${days ? `${days}d ` : ""}${hours ? `${hours}h ` : ""}${minutes ? `${minutes}m ` : ""}${seconds ? `${seconds}s` : ""}`,
-    //             _worldTime: wt,
-    //         };
-    //     }
-
-    //     return super._prepareDuration();
-    // }
+        // V13 temporary effects: Making a label similar to V14 (_prepareTimeBasedDuration)
+        try {
+            const days = Math.floor(duration.remaining / 86400);
+            const hours = Math.floor((duration.remaining % 86400) / 3600);
+            const minutes = Math.floor((duration.remaining % 3600) / 60);
+            const seconds = duration.remaining % 60;
+            const label = [
+                days ? `${days} day` : null,
+                hours ? `${hours} hour` : null,
+                minutes ? `${minutes} min` : null,
+                seconds ? `${seconds} sec` : null,
+            ]
+                .filter((c) => !!c)
+                .join(", ");
+            duration.label = label;
+        } catch (e) {
+            console.error("Error in _prepareDuration", e);
+        }
+        return duration;
+    }
 
     get nameExtended() {
         try {
@@ -646,10 +629,19 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
             }
 
             // If start is earlier that worldTime
-            // TODO:
+            // AARON: _worldTime seems to equal game.time.worldTime
+            // if (d._worldTime < game.time.worldTime) {
+            //     {
+            //         heroValidations.push({
+            //             message: `Effect start time is in the future.`,
+            //             severity: CONFIG.HERO.VALIDATION_SEVERITY.WARN,
+            //         });
+            //     }
+            // }
 
+            // If an origin was specified, check if it still exists.
             const sourceItem = this.origin?.includes("Item") ? fromUuidSync(this.origin) : null;
-            if (!sourceItem) {
+            if (!!this.origin && !sourceItem) {
                 heroValidations.push({
                     message: `The actor/item that created this effect no longer exists.`,
                     severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
