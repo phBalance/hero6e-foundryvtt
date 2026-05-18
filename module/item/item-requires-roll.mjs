@@ -526,37 +526,6 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
     const token = options.token ?? tokenEducatedGuess({ actor });
     const speaker = ChatMessage.getSpeaker({ actor, token });
 
-    // Sectional Defense overrides a standard activation roll.
-    const activationRoll =
-        item.modifiers.find((o) => o.XMLID === "ACTIVATIONROLL") ?? item.findModsByXmlid("EVERYPHASE")?.parent;
-    if (options.hitLocationNum && activationRoll) {
-        const { valid: validSectionalComment, sectionalDefenseLocationsSet } = validateSectionalComments(
-            item,
-            activationRoll.COMMENTS,
-        );
-
-        // Do we have valid ranges defined and are hit locations turned on? If not, then sectional defense don't make sense to consider.
-        if (validSectionalComment && game.settings.get(HEROSYS.module, "hit locations")) {
-            const sectionalDefenseApply = doSectionalDefensesApply(
-                sectionalDefenseLocationsSet,
-                options.hitLocationNum,
-            );
-
-            // PH: FIXME: The chat message should not be burried down in here.
-            // Success or failure message
-            const chatData = {
-                style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-                author: game.user._id,
-                content: `The sectional defense from <b>${item.name}</b> ${sectionalDefenseApply ? "successfully applied" : "failed to apply"}`,
-                speaker: speaker,
-                whisper: whisperUserTargetsForActor(actor),
-            };
-            await ChatMessage.create(chatData);
-
-            return sectionalDefenseApply;
-        }
-    }
-
     // An item with an activation roll/requires a skill roll/requires a roll can take up to 2 consecutive rolls. Figure
     // out what we're actually rolling for.
     const activationRolls = getRollsForRar(item, rar);
@@ -580,6 +549,8 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             // PH: FIXME: This needs appropriate message
             return false;
         }
+
+        // PH: FIXME: Need to pay the cost of this skill/etc
     }
 
     // Perform the rolls. Because a roll might consume resources we must perform all rolls (i.e. invoke all skills etc)
@@ -591,6 +562,38 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
         let flavor;
 
         if (activationRoll.type === RSR_ROLL_TYPE.ACTIVATION_ROLL) {
+            // Sectional Defense overrides a standard activation roll.
+            const sectionalDefenseActivationRollModifier =
+                item.modifiers.find((o) => o.XMLID === "ACTIVATIONROLL") ?? item.findModsByXmlid("EVERYPHASE")?.parent;
+            if (options.hitLocationNum && sectionalDefenseActivationRollModifier) {
+                const { valid: validSectionalComment, sectionalDefenseLocationsSet } = validateSectionalComments(
+                    item,
+                    sectionalDefenseActivationRollModifier.COMMENTS,
+                );
+
+                // Do we have valid ranges defined and are hit locations turned on? If not, then sectional defense don't make sense to consider.
+                if (validSectionalComment && game.settings.get(HEROSYS.module, "hit locations")) {
+                    const sectionalDefenseApply = doSectionalDefensesApply(
+                        sectionalDefenseLocationsSet,
+                        options.hitLocationNum,
+                    );
+
+                    // PH: FIXME: The chat message should not be burried down in here.
+                    // Success or failure message
+                    const chatData = {
+                        style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
+                        author: game.user._id,
+                        content: `The sectional defense from <b>${item.name}</b> ${sectionalDefenseApply ? "successfully applied" : "failed to apply"}`,
+                        speaker: speaker,
+                        whisper: whisperUserTargetsForActor(actor),
+                    };
+                    await ChatMessage.create(chatData);
+
+                    return sectionalDefenseApply;
+                }
+            }
+
+            // Regular random activation roll
             const successValue = activationRoll.rollValue;
 
             roller.makeSuccessRoll(true, successValue).addDice(3);

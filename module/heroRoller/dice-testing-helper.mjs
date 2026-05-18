@@ -2,6 +2,11 @@ import { HeroRoll } from "../heroRoller/dice.mjs";
 
 // PH: FIXME: Need to make the chat message capable of deserializing.
 
+export function resetDiceClass(DiceClass) {
+    DiceClass.resetIndex();
+    return DiceClass;
+}
+
 class SequentialDie extends foundry.dice.terms.Die {
     static fixedRollResult = null;
 

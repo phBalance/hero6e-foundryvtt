@@ -1,6 +1,7 @@
 import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 
 import {
+    resetDiceClass,
     Roll10On3Dice,
     Roll11On3Dice,
     Roll12On3Dice,
@@ -812,7 +813,7 @@ export function registerRequiresRollCheckTests(quench) {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         acrobaticsActivation8Less,
-                                        Roll9On3Dice,
+                                        resetDiceClass(Roll9On3Dice),
                                         {},
                                     ),
                                 ).to.equal(false);
@@ -822,7 +823,7 @@ export function registerRequiresRollCheckTests(quench) {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         acrobaticsActivation8Less,
-                                        Roll8On3Dice,
+                                        resetDiceClass(Roll8On3Dice),
                                         {},
                                     ),
                                 ).to.equal(true);
@@ -832,7 +833,7 @@ export function registerRequiresRollCheckTests(quench) {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         acrobaticsActivation8Less,
-                                        Roll7On3Dice,
+                                        resetDiceClass(Roll7On3Dice),
                                         {},
                                     ),
                                 ).to.equal(true);
@@ -842,7 +843,7 @@ export function registerRequiresRollCheckTests(quench) {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         acrobaticsActivation8Less,
-                                        Roll3On3Dice,
+                                        resetDiceClass(Roll3On3Dice),
                                         {},
                                     ),
                                 ).to.equal(true);
@@ -854,7 +855,7 @@ export function registerRequiresRollCheckTests(quench) {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         acrobaticsActivation12Less,
-                                        Roll13On3Dice,
+                                        resetDiceClass(Roll13On3Dice),
                                         {},
                                     ),
                                 ).to.equal(false);
@@ -864,7 +865,7 @@ export function registerRequiresRollCheckTests(quench) {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         acrobaticsActivation12Less,
-                                        Roll12On3Dice,
+                                        resetDiceClass(Roll12On3Dice),
                                         {},
                                     ),
                                 ).to.equal(true);
@@ -1463,44 +1464,52 @@ export function registerRequiresRollCheckTests(quench) {
 
                         describe("simple 1 range sectional activation roll (12-13) (equivalent of 8-)", function () {
                             it("should not activate with a hit location of 12 if rolling an 9 for activation", async function () {
-                                Roll9On3Dice.resetIndex();
-
                                 expect(
-                                    await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, Roll9On3Dice, {
-                                        hitLocationNum: 12,
-                                    }),
+                                    await isActivatedForThisUse_TestingOnly(
+                                        sectionalArmorShortVest,
+                                        resetDiceClass(Roll9On3Dice),
+                                        {
+                                            hitLocationNum: 12,
+                                        },
+                                    ),
                                 ).to.equal(false);
                             });
 
                             it("should activate with a hit location of 12 if rolling a 6 for activation", async function () {
-                                Roll6On3Dice.resetIndex();
-
                                 expect(
-                                    await isActivatedForThisUse_TestingOnly(sectionalArmorShortVest, Roll6On3Dice, {
-                                        hitLocationNum: 12,
-                                    }),
+                                    await isActivatedForThisUse_TestingOnly(
+                                        sectionalArmorShortVest,
+                                        resetDiceClass(Roll6On3Dice),
+                                        {
+                                            hitLocationNum: 12,
+                                        },
+                                    ),
                                 ).to.equal(true);
                             });
                         });
 
                         describe("simple 1 range sectional activation roll (11-13) (equivalent of 9-)", function () {
                             it("should not activate with a hit location of 11 if rolling an 10 for activation", async function () {
-                                Roll10On3Dice.resetIndex();
-
                                 expect(
-                                    await isActivatedForThisUse_TestingOnly(sectionalArmorStandardVest, Roll10On3Dice, {
-                                        hitLocationNum: 11,
-                                    }),
+                                    await isActivatedForThisUse_TestingOnly(
+                                        sectionalArmorStandardVest,
+                                        resetDiceClass(Roll10On3Dice),
+                                        {
+                                            hitLocationNum: 11,
+                                        },
+                                    ),
                                 ).to.equal(false);
                             });
 
                             it("should activate with a hit location of 12 if rolling a 6 for activation", async function () {
-                                Roll9On3Dice.resetIndex();
-
                                 expect(
-                                    await isActivatedForThisUse_TestingOnly(sectionalArmorStandardVest, Roll9On3Dice, {
-                                        hitLocationNum: 11,
-                                    }),
+                                    await isActivatedForThisUse_TestingOnly(
+                                        sectionalArmorStandardVest,
+                                        resetDiceClass(Roll9On3Dice),
+                                        {
+                                            hitLocationNum: 11,
+                                        },
+                                    ),
                                 ).to.equal(true);
                             });
                         });
@@ -2083,7 +2092,7 @@ export function registerRequiresRollCheckTests(quench) {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         aidRequiresBreakfallWithNoApPenalty,
-                                        Roll14On3Dice,
+                                        resetDiceClass(Roll14On3Dice),
                                         {},
                                     ),
                                 ).to.equal(true);
@@ -2093,7 +2102,7 @@ export function registerRequiresRollCheckTests(quench) {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         aidRequiresBreakfallWithNoApPenalty,
-                                        Roll15On3Dice,
+                                        resetDiceClass(Roll15On3Dice),
                                         {},
                                     ),
                                 ).to.equal(false);
@@ -2105,19 +2114,17 @@ export function registerRequiresRollCheckTests(quench) {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         aidRequiresBreakfallWith1Per5ApPenalty,
-                                        Roll12On3Dice,
+                                        resetDiceClass(Roll12On3Dice),
                                         {},
                                     ),
                                 ).to.equal(true);
                             });
 
                             it("should fail to activate with a roll of 14 (against 14- w/ -2 for AP penalty) for activation", async function () {
-                                Roll13On3Dice.resetIndex();
-
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         aidRequiresBreakfallWith1Per5ApPenalty,
-                                        Roll13On3Dice,
+                                        resetDiceClass(Roll13On3Dice),
                                         {},
                                     ),
                                 ).to.equal(false);
@@ -2127,12 +2134,10 @@ export function registerRequiresRollCheckTests(quench) {
 
                     describe("RSR with skill that doesn't exist", function () {
                         it("should fail to activate with a missing skill for activation", async function () {
-                            Roll3On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     invalidDrainMissingBackgroundSkill,
-                                    Roll3On3Dice,
+                                    resetDiceClass(Roll3On3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
@@ -2147,36 +2152,30 @@ export function registerRequiresRollCheckTests(quench) {
 
                     describe("RSR with both of 2 skill rolls", function () {
                         it("should activate with a roll of 11 (against 11- w/ 0 for AP penalty for KS: sandwiches and 12- w/ 0 for AP penalty for KS: potato chips) for activation", async function () {
-                            Roll11On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty,
-                                    Roll11On3Dice,
+                                    resetDiceClass(Roll11On3Dice),
                                     {},
                                 ),
                             ).to.equal(true);
                         });
 
                         it("should fail to activate with a roll of 12 (against 11- w/ 0 for AP penalty for KS: sandwiches and 12- w/ 0 for AP penalty for KS: potato chips) for activation", async function () {
-                            Roll12On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty,
-                                    Roll12On3Dice,
+                                    resetDiceClass(Roll12On3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
                         });
 
                         it("should fail to activate with a roll of 13 (against 11- w/ 0 for AP penalty for KS: sandwiches and 12- w/ 0 for AP penalty for KS: potato chips) for activation", async function () {
-                            Roll13On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty,
-                                    Roll13On3Dice,
+                                    resetDiceClass(Roll13On3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
@@ -2185,12 +2184,10 @@ export function registerRequiresRollCheckTests(quench) {
 
                     describe("RSR with luck rolls", function () {
                         it("should activate with a roll of 3 luck (against 3 luck) for activation", async function () {
-                            RollAlternatingLuckAndUnluck.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequires3Luck,
-                                    RollAlternatingLuckAndUnluck,
+                                    resetDiceClass(RollAlternatingLuckAndUnluck),
                                     {},
                                 ),
                             ).to.equal(true);
@@ -2198,31 +2195,31 @@ export function registerRequiresRollCheckTests(quench) {
 
                         it("should fail to activate with a roll of 2 luck (against 3 luck) for activation", async function () {
                             expect(
-                                await isActivatedForThisUse_TestingOnly(aidRequires3Luck, Roll1LuckOn3Dice, {}),
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequires3Luck,
+                                    resetDiceClass(Roll1LuckOn3Dice),
+                                    {},
+                                ),
                             ).to.equal(false);
                         });
                     });
 
                     describe("RSR with characteristics", function () {
                         it("should activate with a roll of 11 (against 12- w/ -1 for AP penalty) for activation", async function () {
-                            Roll11On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequiresStrWith1Per20ApPenalty,
-                                    Roll11On3Dice,
+                                    resetDiceClass(Roll11On3Dice),
                                     {},
                                 ),
                             ).to.equal(true);
                         });
 
                         it("should not activate with a roll of 12 (against 12- w/ -1 for AP penalty) for activation", async function () {
-                            Roll12On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequiresStrWith1Per20ApPenalty,
-                                    Roll12On3Dice,
+                                    resetDiceClass(Roll12On3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
@@ -2267,32 +2264,30 @@ export function registerRequiresRollCheckTests(quench) {
                         });
 
                         it("should fail to activate with a roll of 3 because the luck power is inactive", async function () {
-                            Roll3LuckOn3Dice.resetIndex();
-
                             expect(
-                                await isActivatedForThisUse_TestingOnly(aidRequires1Luck, Roll3LuckOn3Dice, {}),
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequires1Luck,
+                                    resetDiceClass(Roll3LuckOn3Dice),
+                                    {},
+                                ),
                             ).to.equal(false);
                         });
 
                         it("should fail to activate with a roll of 3 because the skill is inactive", async function () {
-                            Roll3On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequiresBreakfallWith1Per5ApPenalty,
-                                    Roll3On3Dice,
+                                    resetDiceClass(Roll3On3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
                         });
 
                         it("should fail to activate with a roll of 3 because 1 of the 2 required skills is inactive", async function () {
-                            Roll3On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     aidRequiresKsSandwichesAndKsPotatoChipsWithNoApPenalty,
-                                    Roll3On3Dice,
+                                    resetDiceClass(Roll3On3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
@@ -2438,36 +2433,30 @@ export function registerRequiresRollCheckTests(quench) {
 
                     describe("RSR with characteristics", function () {
                         it("should not activate with a roll of 3 (against 11- w/ -1 for AP penalty) for activation", async function () {
-                            Roll3On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     invalidDrainMissingEgoCharacteristic,
-                                    Roll3On3Dice,
+                                    resetDiceClass(Roll3On3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
                         });
 
                         it("should not activate with a roll of 10 (against 11- w/ -1 for AP penalty) for activation", async function () {
-                            Roll10On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     invalidDrainMissingEgoCharacteristic,
-                                    Roll10On3Dice,
+                                    resetDiceClass(Roll10On3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
                         });
 
                         it("should not activate with a roll of 11 (against 11- w/ -1 for AP penalty) for activation", async function () {
-                            Roll11On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     invalidDrainMissingEgoCharacteristic,
-                                    Roll11On3Dice,
+                                    resetDiceClass(Roll11On3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
@@ -2476,36 +2465,30 @@ export function registerRequiresRollCheckTests(quench) {
 
                     describe("RSR with perception", function () {
                         it("should not activate with a roll of 3 (against 9- w/ -1 for AP penalty) for activation", async function () {
-                            Roll3On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     invalidDrainMissingPerception,
-                                    Roll3On3Dice,
+                                    resetDiceClass(Roll3On3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
                         });
 
                         it("should not activate with a roll of 8 (against 9- w/ -1 for AP penalty) for activation", async function () {
-                            Roll8On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     invalidDrainMissingPerception,
-                                    Roll8On3Dice,
+                                    resetDiceClass(Roll8On3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
                         });
 
                         it("should not activate with a roll of 9 (against 9- w/ -1 for AP penalty) for activation", async function () {
-                            Roll9On3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     invalidDrainMissingPerception,
-                                    Roll9On3Dice,
+                                    resetDiceClass(Roll9On3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
@@ -2514,12 +2497,10 @@ export function registerRequiresRollCheckTests(quench) {
 
                     describe("RSR with luck rolls", function () {
                         it("should activate with a roll of 3 luck (against 3 luck) for activation", async function () {
-                            Roll3LuckOn3Dice.resetIndex();
-
                             expect(
                                 await isActivatedForThisUse_TestingOnly(
                                     invalidDrainMissingLuckPower,
-                                    Roll3LuckOn3Dice,
+                                    resetDiceClass(Roll3LuckOn3Dice),
                                     {},
                                 ),
                             ).to.equal(false);
@@ -2527,13 +2508,12 @@ export function registerRequiresRollCheckTests(quench) {
                     });
                 });
 
-                describe("isActivatedForThisUse", function () {
-                    describe("6e", function () {
-                        const contents = `
+                describe("6e - requires a skills roll", function () {
+                    const contents = `
                             <?xml version="1.0" encoding="UTF-16"?>
-                            <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
+                            <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
                             <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
-                            <CHARACTER_INFO CHARACTER_NAME="Test RaR Actor" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.46224760379584" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                            <CHARACTER_INFO CHARACTER_NAME="6e Requires Activation Roll Man" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
                                 <BACKGROUND />
                                 <PERSONALITY />
                                 <QUOTE />
@@ -2547,76 +2527,782 @@ export function registerRequiresRollCheckTests(quench) {
                                 <NOTES5 />
                             </CHARACTER_INFO>
                             <CHARACTERISTICS>
-                                <STR XMLID="STR" ID="1683328673465" BASECOST="0.0" LEVELS="10" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <STR XMLID="STR" ID="1777340206063" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
                                 </STR>
-                                <DEX XMLID="DEX" ID="1683328012642" BASECOST="0.0" LEVELS="12" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <DEX XMLID="DEX" ID="1777340205550" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
                                 </DEX>
-                                <CON XMLID="CON" ID="1683331008620" BASECOST="0.0" LEVELS="13" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <CON XMLID="CON" ID="1777340206001" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
                                 </CON>
-                                <BODY XMLID="BODY" ID="1683328674200" BASECOST="0.0" LEVELS="14" ALIAS="BODY" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
-                                <NOTES />
-                                </BODY>
-                                <INT XMLID="INT" ID="1683328673466" BASECOST="0.0" LEVELS="15" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <INT XMLID="INT" ID="1777340205634" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
                                 </INT>
-                                <EGO XMLID="EGO" ID="1683328673467" BASECOST="0.0" LEVELS="16" ALIAS="EGO" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <EGO XMLID="EGO" ID="1777340205999" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
                                 </EGO>
-                                <PRE XMLID="PRE" ID="1683328673468" BASECOST="0.0" LEVELS="17" ALIAS="PRE" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <PRE XMLID="PRE" ID="1777340206092" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
                                 </PRE>
-                                <COM XMLID="COM" ID="1683328673469" BASECOST="0.0" LEVELS="18" ALIAS="COM" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <OCV XMLID="OCV" ID="1777340205633" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                                </COM>
-                                <PD XMLID="PD" ID="1683328673470" BASECOST="0.0" LEVELS="5" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                </OCV>
+                                <DCV XMLID="DCV" ID="1777340206065" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                                </PD>
-                                <ED XMLID="ED" ID="1683328673471" BASECOST="0.0" LEVELS="5" ALIAS="ED" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                </DCV>
+                                <OMCV XMLID="OMCV" ID="1777340205887" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                                </ED>
-                                <SPD XMLID="SPD" ID="1683328673472" BASECOST="0.0" LEVELS="3" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                </OMCV>
+                                <DMCV XMLID="DMCV" ID="1777340205627" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </DMCV>
+                                <SPD XMLID="SPD" ID="1777340206305" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
                                 </SPD>
-                                <REC XMLID="REC" ID="1683328673473" BASECOST="0.0" LEVELS="6" ALIAS="REC" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <PD XMLID="PD" ID="1777340205581" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </PD>
+                                <ED XMLID="ED" ID="1777340205858" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </ED>
+                                <REC XMLID="REC" ID="1777340205956" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
                                 </REC>
-                                <END XMLID="END" ID="1683328673474" BASECOST="0.0" LEVELS="20" ALIAS="END" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <END XMLID="END" ID="1777340206359" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
                                 </END>
-                                <STUN XMLID="STUN" ID="1683328673475" BASECOST="0.0" LEVELS="25" ALIAS="STUN" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <BODY XMLID="BODY" ID="1777340205424" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </BODY>
+                                <STUN XMLID="STUN" ID="1777340206323" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                                 <NOTES />
                                 </STUN>
+                                <RUNNING XMLID="RUNNING" ID="1777340206118" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </RUNNING>
+                                <SWIMMING XMLID="SWIMMING" ID="1777340205689" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </SWIMMING>
+                                <LEAPING XMLID="LEAPING" ID="1777340205460" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </LEAPING>
                             </CHARACTERISTICS>
                             <SKILLS>
-                                <SKILL XMLID="ACROBATICS" ID="1683328673476" BASECOST="3.0" LEVELS="0" ALIAS="Acrobatics" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <LIST XMLID="GENERIC_OBJECT" ID="1779049938892" BASECOST="0.0" LEVELS="0" ALIAS="Skills for Requires" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <SKILL XMLID="BREAKFALL" ID="1779049571841" BASECOST="3.0" LEVELS="0" ALIAS="Breakfall" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779049938892" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
                                 <NOTES />
                                 </SKILL>
-                                <SKILL XMLID="STEALTH" ID="1683328673477" BASECOST="3.0" LEVELS="0" ALIAS="Stealth" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <SKILL XMLID="KNOWLEDGE_SKILL" ID="1779049489120" BASECOST="2.0" LEVELS="0" ALIAS="KS" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779049938892" NAME="" INPUT="sardines" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
                                 <NOTES />
                                 </SKILL>
-                                <KNOWLEDGE_SKILL XMLID="KNOWLEDGE_SKILL" ID="1683328673478" BASECOST="2.0" LEVELS="0" ALIAS="KS: Magic" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <SKILL XMLID="PROFESSIONAL_SKILL" ID="1779049510137" BASECOST="2.0" LEVELS="0" ALIAS="PS" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779049938892" NAME="" INPUT="fisher" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
                                 <NOTES />
-                                </KNOWLEDGE_SKILL>
+                                </SKILL>
+                                <SKILL XMLID="SCIENCE_SKILL" ID="1779049551025" BASECOST="2.0" LEVELS="0" ALIAS="Science Skill" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779049938892" NAME="" INPUT="xenobotany" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                                <NOTES />
+                                </SKILL>
                             </SKILLS>
                             <PERKS />
                             <TALENTS />
                             <MARTIALARTS />
-                            <POWERS />
+                            <POWERS>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1779050236391" BASECOST="0.0" LEVELS="0" ALIAS="Valid Activation Rolls" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050452900" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 14-" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050457410" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050512094" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 14- (Burnout)" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050516264" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="BURNOUT" ID="1779050535751" BASECOST="0.0" LEVELS="0" ALIAS="Burnout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050597128" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 14- (Jammed)" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050601483" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="JAMMED" ID="1779050609021" BASECOST="-0.5" LEVELS="0" ALIAS="Jammed" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1777340234958" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 14- Every Use" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050285832" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779050285797" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050305607" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 13- Every Use" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050332406" BASECOST="0.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="13" OPTIONID="13" OPTION_ALIAS="13- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779050332371" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050676121" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 13-" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050681607" BASECOST="0.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="13" OPTIONID="13" OPTION_ALIAS="13- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050311879" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 12- Every Use" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050345103" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779050345068" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050851603" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 12-" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050856501" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="12" OPTIONID="12" OPTION_ALIAS="12- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050315735" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 11- Every Use" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050360170" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779050360135" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050881289" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 11-" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050887183" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050319538" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 10- Every Use" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050373289" BASECOST="-0.75" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="10" OPTIONID="10" OPTION_ALIAS="10- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779050373254" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050906046" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 10-" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050910660" BASECOST="-0.75" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="10" OPTIONID="10" OPTION_ALIAS="10- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050323775" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 9- Every Use" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050385963" BASECOST="-1.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779050385928" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050930621" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 9-" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050935124" BASECOST="-1.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050328115" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 8- Every Use" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050398251" BASECOST="-1.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779050398215" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050634055" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779050236391" NAME="Requires A Roll 8-" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050637991" BASECOST="-1.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                </POWER>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1779062247542" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1779062251549" BASECOST="0.0" LEVELS="0" ALIAS="Valid Section Defense Activation Rolls" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <POWER XMLID="FORCEFIELD" ID="1779061904778" BASECOST="0.0" LEVELS="14" ALIAS="Resistant Protection" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779062251549" NAME="Weird Coverage (locations   3,5 ,9- 10,12, 14 -15, and 17 - 18)" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="7" EDLEVELS="7" MDLEVELS="0" POWDLEVELS="0">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779062595594" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locations   3,5 ,9- 10,12, 14 -15, and 17 - 18" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779062595559" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1779050226817" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1777340991275" BASECOST="0.0" LEVELS="0" ALIAS="Valid Requires" POSITION="18" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <POWER XMLID="ENERGYBLAST" ID="1777427411636" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A Breakfall Roll Every Use With -1 Per 5 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777427414738" BASECOST="-1.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL1PER5" OPTIONID="SKILL1PER5" OPTION_ALIAS="Skill roll, -1 per 5 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Breakfall" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1777427417335" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779051073733" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A Breakfall Roll Every Use With -1 Per 10 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779051094846" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL" OPTIONID="SKILL" OPTION_ALIAS="Skill roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Breakfall" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779051094811" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779051079357" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="21" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A Breakfall Roll Every Use With -1 Per 20 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779051107787" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL1PER20" OPTIONID="SKILL1PER20" OPTION_ALIAS="Skill roll, -1 per 20 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Breakfall" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779051107752" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1777343717104" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="22" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A STR Roll Every Use" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777427046576" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CHAR" OPTIONID="CHAR" OPTION_ALIAS="Characteristic roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="STR" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1777427046541" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1777426866841" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A Perception Roll Every Use With a -1 per 5 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777427053230" BASECOST="-1.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PER1PER5" OPTIONID="PER1PER5" OPTION_ALIAS="PER roll, -1 per 5 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="STR" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1777427053195" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1777426928230" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="24" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires An Attack Roll Every Use With a -1 per 20 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777427059921" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="ATTACK1PER20" OPTIONID="ATTACK1PER20" OPTION_ALIAS="Attack roll, -1 per 20 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="STR" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1777427059886" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1777426968437" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="25" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A KS: sardines Roll Every Use With No AP Penalty" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777427067486" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="KS" OPTIONID="KS" OPTION_ALIAS="KS roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="KS: sardines" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1777427067451" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1777427266844" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="26" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A PS: fisher Roll Every Use With -1 Per 5 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777427269828" BASECOST="-0.75" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PS1PER5" OPTIONID="PS1PER5" OPTION_ALIAS="PS roll, -1 per 5 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="PS: fisher" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1777427272985" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1777427325848" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="27" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A SS: xenobotany Roll Every Use With -1 Per 20 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777427328904" BASECOST="0.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SS1PER20" OPTIONID="SS1PER20" OPTION_ALIAS="SS roll, -1 per 20 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="SS: xenobotany" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1777427331233" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1777427372891" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="28" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A SS: xenobotany Roll Every Use With -1 Per 10 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050065160" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SS" OPTIONID="SS" OPTION_ALIAS="SS roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="SS: xenobotany" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779050067349" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1779050088900" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="29" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A SS: xenobotany Roll Every Use With -1 Per 5 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050092095" BASECOST="-0.75" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SS1PER5" OPTIONID="SS1PER5" OPTION_ALIAS="SS roll, -1 per 5 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="SS: xenobotany" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779050099206" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1777427222004" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1777427224302" BASECOST="0.0" LEVELS="0" ALIAS="Invalid Requires" POSITION="31" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <POWER XMLID="ENERGYBLAST" ID="1777427181306" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="32" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777427224302" NAME="Requires A PS Roll Every Use With -1 Per 5 AP Invalid As Has A KS Defined" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777427237341" BASECOST="-0.75" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PS1PER5" OPTIONID="PS1PER5" OPTION_ALIAS="PS roll, -1 per 5 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="KS: sardines" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1777427237306" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                            </POWERS>
                             <DISADVANTAGES />
                             <EQUIPMENT />
                             </CHARACTER>
                         `;
-                        let actor;
+                    let actor;
 
-                        before(async function () {
-                            actor = await createQuenchActor({ quench, contents, is5e: false });
+                    let ebRequiresActivationRoll14LessEveryPhase;
+                    let ebRequiresActivationRoll14Less;
+                    let ebRequiresActivationRoll13LessEveryPhase;
+                    let ebRequiresActivationRoll13Less;
+                    let ebRequiresActivationRoll12LessEveryPhase;
+                    let ebRequiresActivationRoll12Less;
+                    let ebRequiresActivationRoll11LessEveryPhase;
+                    let ebRequiresActivationRoll11Less;
+                    let ebRequiresActivationRoll10LessEveryPhase;
+                    let ebRequiresActivationRoll10Less;
+                    let ebRequiresActivationRoll9LessEveryPhase;
+                    let ebRequiresActivationRoll9Less;
+                    let ebRequiresActivationRoll8LessEveryPhase;
+                    let ebRequiresActivationRoll8Less;
+
+                    let resistantProtectionWeirdSectionalDefense;
+
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false });
+
+                        ebRequiresActivationRoll14LessEveryPhase = actor.items.find(
+                            (item) => item.name === "Requires A Roll 14- Every Use",
+                        );
+                        ebRequiresActivationRoll14Less = actor.items.find(
+                            (item) => item.name === "Requires A Roll 14-",
+                        );
+                        ebRequiresActivationRoll13LessEveryPhase = actor.items.find(
+                            (item) => item.name === "Requires A Roll 13- Every Use",
+                        );
+                        ebRequiresActivationRoll13Less = actor.items.find(
+                            (item) => item.name === "Requires A Roll 13-",
+                        );
+                        ebRequiresActivationRoll12LessEveryPhase = actor.items.find(
+                            (item) => item.name === "Requires A Roll 12- Every Use",
+                        );
+                        ebRequiresActivationRoll12Less = actor.items.find(
+                            (item) => item.name === "Requires A Roll 12-",
+                        );
+                        ebRequiresActivationRoll11LessEveryPhase = actor.items.find(
+                            (item) => item.name === "Requires A Roll 11- Every Use",
+                        );
+                        ebRequiresActivationRoll11Less = actor.items.find(
+                            (item) => item.name === "Requires A Roll 11-",
+                        );
+                        ebRequiresActivationRoll10LessEveryPhase = actor.items.find(
+                            (item) => item.name === "Requires A Roll 10- Every Use",
+                        );
+                        ebRequiresActivationRoll10Less = actor.items.find(
+                            (item) => item.name === "Requires A Roll 10-",
+                        );
+                        ebRequiresActivationRoll9LessEveryPhase = actor.items.find(
+                            (item) => item.name === "Requires A Roll 9- Every Use",
+                        );
+                        ebRequiresActivationRoll9Less = actor.items.find((item) => item.name === "Requires A Roll 9-");
+                        ebRequiresActivationRoll8LessEveryPhase = actor.items.find(
+                            (item) => item.name === "Requires A Roll 8- Every Use",
+                        );
+                        ebRequiresActivationRoll8Less = actor.items.find((item) => item.name === "Requires A Roll 8-");
+
+                        resistantProtectionWeirdSectionalDefense = actor.items.find(
+                            (item) => item.name === "Weird Coverage (locations   3,5 ,9- 10,12, 14 -15, and 17 - 18)",
+                        );
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    describe("RSR costs in all the various flavours", function () {
+                        describe("activation roll flavour", function () {
+                            it("should have the correct cost for 14- every phase", async function () {
+                                expect(ebRequiresActivationRoll14LessEveryPhase.realCost).to.equal(24);
+                            });
+                            it("should have the correct cost for 14-", async function () {
+                                expect(ebRequiresActivationRoll14Less.realCost).to.equal(24);
+                            });
+
+                            it("should have the correct cost for 13- every phase", async function () {
+                                expect(ebRequiresActivationRoll13LessEveryPhase.realCost).to.equal(20);
+                            });
+                            it("should have the correct cost for 13-", async function () {
+                                expect(ebRequiresActivationRoll13Less.realCost).to.equal(24);
+                            });
+
+                            it("should have the correct cost for 12- every phase", async function () {
+                                expect(ebRequiresActivationRoll12LessEveryPhase.realCost).to.equal(17);
+                            });
+                            it("should have the correct cost for 12-", async function () {
+                                expect(ebRequiresActivationRoll12Less.realCost).to.equal(24);
+                            });
+
+                            it("should have the correct cost for 11- every phase", async function () {
+                                expect(ebRequiresActivationRoll11LessEveryPhase.realCost).to.equal(15);
+                            });
+                            it("should have the correct cost for 11-", async function () {
+                                expect(ebRequiresActivationRoll11Less.realCost).to.equal(20);
+                            });
+
+                            it("should have the correct cost for 10- every phase", async function () {
+                                expect(ebRequiresActivationRoll10LessEveryPhase.realCost).to.equal(13);
+                            });
+                            it("should have the correct cost for 10-", async function () {
+                                expect(ebRequiresActivationRoll10Less.realCost).to.equal(17);
+                            });
+
+                            it("should have the correct cost for 9- every phase", async function () {
+                                expect(ebRequiresActivationRoll9LessEveryPhase.realCost).to.equal(12);
+                            });
+                            it("should have the correct cost for 9-", async function () {
+                                expect(ebRequiresActivationRoll9Less.realCost).to.equal(15);
+                            });
+
+                            it("should have the correct cost for 8- every phase", async function () {
+                                expect(ebRequiresActivationRoll8LessEveryPhase.realCost).to.equal(11);
+                            });
+                            it("should have the correct cost for 8-", async function () {
+                                expect(ebRequiresActivationRoll8Less.realCost).to.equal(13);
+                            });
                         });
 
-                        after(async function () {
-                            await deleteQuenchActor(actor);
+                        describe.skip("requires skill roll flavour", function () {});
+                    });
+
+                    describe("activation rolls", function () {
+                        describe("basic activation roll", function () {
+                            describe("8- activates correctly", function () {
+                                it("should not activate 8- with a roll of a 9", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            ebRequiresActivationRoll8Less,
+                                            resetDiceClass(Roll9On3Dice),
+                                            {},
+                                        ),
+                                    ).to.equal(false);
+                                });
+
+                                it("should activate 8- with a roll of a 8", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            ebRequiresActivationRoll8Less,
+                                            resetDiceClass(Roll8On3Dice),
+                                            {},
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate 8- with a roll of a 7", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            ebRequiresActivationRoll8Less,
+                                            resetDiceClass(Roll7On3Dice),
+                                            {},
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate 8- with a roll of a 3", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            ebRequiresActivationRoll8Less,
+                                            resetDiceClass(Roll3On3Dice),
+                                            {},
+                                        ),
+                                    ).to.equal(true);
+                                });
+                            });
+
+                            describe("12- activates correctly", function () {
+                                it("should not activate 12- with a roll of a 13", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            ebRequiresActivationRoll12Less,
+                                            resetDiceClass(Roll13On3Dice),
+                                            {},
+                                        ),
+                                    ).to.equal(false);
+                                });
+
+                                it("should activate 12- with a roll of a 12", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            ebRequiresActivationRoll12Less,
+                                            resetDiceClass(Roll12On3Dice),
+                                            {},
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate 8- with a roll of a 3", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            ebRequiresActivationRoll12Less,
+                                            resetDiceClass(Roll3On3Dice),
+                                            {},
+                                        ),
+                                    ).to.equal(true);
+                                });
+                            });
+                        });
+
+                        describe("multi range sectional activation roll(3,5 ,9- 10,12, 14 -15, and 17 - 18) (equivalent of >= 15-)", function () {
+                            let defaultHitLocationsEnabled;
+
+                            before(async function () {
+                                defaultHitLocationsEnabled = await getAndSetGameSetting("hit locations", true);
+                            });
+
+                            after(async function () {
+                                await getAndSetGameSetting("hit locations", defaultHitLocationsEnabled);
+                            });
+
+                            describe("first range 3", function () {
+                                it("should not activate with a hit location of 2", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 2,
+                                            },
+                                        ),
+                                    ).to.equal(false);
+                                });
+
+                                it("should activate with a hit location of 3", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 3,
+                                            },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 4", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 4,
+                                            },
+                                        ),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("second range 5", function () {
+                                it("should activate with a hit location of 5", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 5,
+                                            },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 6", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 6,
+                                            },
+                                        ),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("third range 9-10", function () {
+                                it("should not activate with a hit location of 8", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 8,
+                                            },
+                                        ),
+                                    ).to.equal(false);
+                                });
+
+                                it("should activate with a hit location of 9", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 9,
+                                            },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 10", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 10,
+                                            },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 11", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 11,
+                                            },
+                                        ),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("fourth range 12", function () {
+                                it("should activate with a hit location of 12", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 12,
+                                            },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 13", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 13,
+                                            },
+                                        ),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("fifth range 14 -15", function () {
+                                it("should activate with a hit location of 14", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 14,
+                                            },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 15", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 15,
+                                            },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should not activate with a hit location of 16", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 16,
+                                            },
+                                        ),
+                                    ).to.equal(false);
+                                });
+                            });
+
+                            describe("sixth range 17 - 18", function () {
+                                it("should activate with a hit location of 17", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 17,
+                                            },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 18", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 18,
+                                            },
+                                        ),
+                                    ).to.equal(true);
+                                });
+
+                                it("should activate with a hit location of 19", async function () {
+                                    expect(
+                                        await isActivatedForThisUse_TestingOnly(
+                                            resistantProtectionWeirdSectionalDefense,
+                                            HeroRoll,
+                                            {
+                                                hitLocationNum: 19,
+                                            },
+                                        ),
+                                    ).to.equal(true);
+                                });
+                            });
                         });
                     });
                 });
