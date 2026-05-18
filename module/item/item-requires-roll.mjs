@@ -643,3 +643,104 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
         return accum && result;
     });
 }
+
+// Probability in % of that number on 3d6
+const HIT_LOCATION_PROBABILITY = Object.freeze({
+    3: 0.46,
+    4: 1.38,
+    5: 2.77,
+    6: 4.62,
+    7: 6.94,
+    8: 9.72,
+    9: 11.57,
+    10: 12.5,
+    11: 12.5,
+    12: 11.57,
+    13: 9.72,
+    14: 6.94,
+    15: 4.62,
+    16: 2.77,
+    17: 1.38,
+    18: 0.46,
+});
+
+// Probability in % of that number or less on 3d6
+const DICE_CUMULATIVE_PROBABILITY = Object.freeze({
+    3: 0.46,
+    4: 1.85,
+    5: 4.62,
+    6: 9.25,
+    7: 16.2,
+    8: 25.92,
+    9: 37.5,
+    10: 50.0,
+    11: 62.5,
+    12: 74.07,
+    13: 83.79,
+    14: 90.74,
+    15: 95.37,
+    16: 98.14,
+    17: 99.53,
+    18: 100,
+});
+
+export function activationRollHeroValidation(modifier, item) {
+    const validations = [];
+
+    // Since sectional defenses are optional we can only check a subset of errors
+    const sectionalDefenseRanges = validateSectionalComments(item, modifier.COMMENTS);
+    if (!sectionalDefenseRanges.valid) {
+        if (sectionalDefenseRanges.reason === VALIDATE_SECTION_DEFENSE_ERROR_REASON.INVALID_RANGE) {
+            validations.push({
+                property: "COMMENTS",
+                message: sectionalDefenseRanges.reason,
+                example: "locations 4-6, 8, and 10-12",
+                severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                modifierID: modifier.ID,
+            });
+        }
+    } else {
+        // A sectional defense only makes sense for a defense
+        if (!item.baseInfo?.type.includes("defense")) {
+            validations.push({
+                property: undefined,
+                message: `${item.detailedName()} should not have a sectional defense declaration as it is not a defensive power`,
+                example: "Armor could be a sectional defense with locations 4-6, 8, and 10-12",
+                severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                modifierID: modifier.ID,
+            });
+        }
+
+        // Check that the sectional defense description roughly matches the expected probability based on the limitation taken
+        const activationRollLimitation = modifier.OPTIONID;
+        const activationRollCumulativeProbability = DICE_CUMULATIVE_PROBABILITY[activationRollLimitation];
+        let hitLocationCumulativeProbability = 0;
+        for (const hitLocation of sectionalDefenseRanges.sectionalDefenseLocationsSet.values()) {
+            hitLocationCumulativeProbability += HIT_LOCATION_PROBABILITY[hitLocation];
+        }
+
+        // If cumulative probability of hit locations is larger than the probability at the activation roll (with a 1% fuzz)
+        // then this is "cheating" and the limitation should probably be bought down.
+        if (hitLocationCumulativeProbability > activationRollCumulativeProbability + 1) {
+            // What is a more reasonable activation roll number?
+            let shouldBeLessThanValue = 18;
+            for (let cumulativeValue = shouldBeLessThanValue - 1; cumulativeValue >= 3; --cumulativeValue) {
+                if (DICE_CUMULATIVE_PROBABILITY[cumulativeValue] < hitLocationCumulativeProbability) {
+                    break;
+                }
+
+                shouldBeLessThanValue = cumulativeValue;
+            }
+
+            validations.push({
+                property: undefined,
+                message: `${item.detailedName()}'s sectional defense declaration cumulative probability is ${hitLocationCumulativeProbability}% vs the matching limitation value's cumulative probability value of ${activationRollCumulativeProbability}%. This limitation should most likely be bought to ${shouldBeLessThanValue}-`,
+                example: "A 14- activation roll should reflect a section defense declaration like: 3-5, 7-14, 16-18",
+                severity: CONFIG.HERO.VALIDATION_SEVERITY.WARNING,
+                modifierID: modifier.ID,
+            });
+        }
+    }
+
+    return validations;
+}

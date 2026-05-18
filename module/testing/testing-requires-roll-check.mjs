@@ -2738,6 +2738,42 @@ export function registerRequiresRollCheckTests(quench) {
                                     </ADDER>
                                 </MODIFIER>
                                 </POWER>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1779050226817" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="20" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <LIST XMLID="GENERIC_OBJECT" ID="1779124636297" BASECOST="0.0" LEVELS="0" ALIAS="Invalid Sectional Defense Declarations" POSITION="21" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <NOTES />
+                                </LIST>
+                                <POWER XMLID="FORCEFIELD" ID="1779124636323" BASECOST="0.0" LEVELS="4" ALIAS="Force Field" POSITION="22" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779124636297" NAME="Sectional Defense with Invalid Declaration Words" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1" MDLEVELS="1" POWDLEVELS="1">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779125322596" BASECOST="-1.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locationss 8-12, invalid, 18" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="FORCEFIELD" ID="1779124636349" BASECOST="0.0" LEVELS="4" ALIAS="Force Field" POSITION="23" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779124636297" NAME="Sectional Defense with Invalid Declaration Words 2" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1" MDLEVELS="1" POWDLEVELS="1">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779125296828" BASECOST="-1.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locations 8-12, invalid, 18" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="FORCEFIELD" ID="1779124636375" BASECOST="0.0" LEVELS="4" ALIAS="Force Field" POSITION="24" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779124636297" NAME="Sectional Defense with Invalid Declaration Invalid Hit Locations" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1" MDLEVELS="1" POWDLEVELS="1">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779125344718" BASECOST="-1.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="8" OPTIONID="8" OPTION_ALIAS="8- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locations 19-34" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="FLASH" ID="1779124636394" BASECOST="0.0" LEVELS="1" ALIAS="Flash" POSITION="25" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779124636297" NAME="Sectional Declaration For Non Defense" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779125380611" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="11" OPTIONID="11" OPTION_ALIAS="11- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locations 8-12" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="FORCEFIELD" ID="1779124636420" BASECOST="0.0" LEVELS="4" ALIAS="Force Field" POSITION="26" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779124636297" NAME="Sectional Defense with Incorrect Probability" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="1" EDLEVELS="1" MDLEVELS="1" POWDLEVELS="1">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779125418323" BASECOST="-1.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="9" OPTIONID="9" OPTION_ALIAS="9- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="locations 8-12, 14-16, 18" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                </MODIFIER>
+                                </POWER>
                                 <LIST XMLID="GENERIC_OBJECT" ID="1779050226817" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                                 <NOTES />
                                 </LIST>
@@ -2933,6 +2969,12 @@ export function registerRequiresRollCheckTests(quench) {
 
                     let resistantProtectionWeirdSectionalDefense;
 
+                    let sectionalArmorInvalidDeclarationWords;
+                    let sectionalArmorInvalidDeclarationWordsTwo;
+                    let sectionalArmorInvalidDeclarationInvalidHitLocations;
+                    let sectionalDeclarationInFlash;
+                    let sectionalArmorInvalidDeclarationInvalidProbability;
+
                     let ebRequiresBreakfallEachUseWith1Per5ApPenaltly;
                     let ebRequiresBreakfallEachUseWith1Per10ApPenaltly;
                     let ebRequiresBreakfallEachUseWith1Per20ApPenaltly;
@@ -2995,6 +3037,22 @@ export function registerRequiresRollCheckTests(quench) {
 
                         resistantProtectionWeirdSectionalDefense = actor.items.find(
                             (item) => item.name === "Weird Coverage (locations   3,5 ,9- 10,12, 14 -15, and 17 - 18)",
+                        );
+
+                        sectionalArmorInvalidDeclarationWords = actor.items.find(
+                            (item) => item.name === "Sectional Defense with Invalid Declaration Words",
+                        );
+                        sectionalArmorInvalidDeclarationWordsTwo = actor.items.find(
+                            (item) => item.name === "Sectional Defense with Invalid Declaration Words 2",
+                        );
+                        sectionalArmorInvalidDeclarationInvalidHitLocations = actor.items.find(
+                            (item) => item.name === "Sectional Defense with Invalid Declaration Invalid Hit Locations",
+                        );
+                        sectionalDeclarationInFlash = actor.items.find(
+                            (item) => item.name === "Sectional Declaration For Non Defense",
+                        );
+                        sectionalArmorInvalidDeclarationInvalidProbability = actor.items.find(
+                            (item) => item.name === "Sectional Defense with Incorrect Probability",
                         );
 
                         ebRequiresBreakfallEachUseWith1Per5ApPenaltly = actor.items.find(
@@ -3158,6 +3216,49 @@ export function registerRequiresRollCheckTests(quench) {
                     });
 
                     describe("RSRs have hero validations", function () {
+                        describe("Activation rolls with sectional defenses have hero validations", function () {
+                            it("should recognize a valid section defense declaration", function () {
+                                expect(resistantProtectionWeirdSectionalDefense.heroValidation).to.have.deep.members(
+                                    [],
+                                );
+                            });
+
+                            // We can't distinguish between an invalid sectional defense location and a regular comment
+                            it("should recognize an invalid section defense declaration (words - locationss)", function () {
+                                expect(sectionalArmorInvalidDeclarationWords.heroValidation).to.have.deep.members([]);
+                            });
+
+                            it("should recognize an invalid section defense declaration (words - invalid)", function () {
+                                const heroValidation = sectionalArmorInvalidDeclarationWordsTwo.heroValidation;
+                                expect(heroValidation.length).to.equal(1);
+                                expect(heroValidation[0]).to.have.property("severity");
+                                expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                            });
+
+                            it("should recognize an invalid section defense declaration (invalid hit locations)", function () {
+                                const heroValidation =
+                                    sectionalArmorInvalidDeclarationInvalidHitLocations.heroValidation;
+                                expect(heroValidation.length).to.equal(1);
+                                expect(heroValidation[0]).to.have.property("severity");
+                                expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                            });
+
+                            it("should recognize an invalid section defense declaration (for non defense power)", function () {
+                                const heroValidation = sectionalDeclarationInFlash.heroValidation;
+                                expect(heroValidation.length).to.equal(1);
+                                expect(heroValidation[0]).to.have.property("severity");
+                                expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                            });
+
+                            it("should recognize an valid section defense declaration with incorrect probability calculation", function () {
+                                const heroValidation =
+                                    sectionalArmorInvalidDeclarationInvalidProbability.heroValidation;
+                                expect(heroValidation.length).to.equal(1);
+                                expect(heroValidation[0]).to.have.property("severity");
+                                expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.WARNING);
+                            });
+                        });
+
                         it("should have no heroValidation concerns as the character does have listed inante skill (success)", function () {
                             const heroValidation = ebRequiresBreakfallEachUseWith1Per5ApPenaltly.heroValidation;
                             expect(heroValidation).to.have.deep.members([]);
