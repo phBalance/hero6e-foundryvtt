@@ -16,6 +16,7 @@ import {
     getSystemDisplayUnits,
     gridUnitsToMeters,
 } from "../../utility/units.mjs";
+import { HeroSystem6eRegion } from "../../heroRegion.mjs";
 
 /**
  * 5e HEX type and NORMAL are converted to RADIUS
@@ -652,6 +653,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                     itemId: effectiveAttackItemOriginalItemId,
                     actorUuid: actor.uuid,
                     effectiveItemJson: item.effectiveAttackItem.toJSON(),
+                    userId: game.user.id,
                     //item,
                     //actor,
                     //aoeType,
@@ -661,16 +663,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                     //is5e: item.effectiveAttackItem.is5e,
                 },
             },
-            behaviors: [
-                {
-                    name: "Token Automatic Targeting",
-                    type: "executeScript",
-                    system: {
-                        events: ["tokenEnter", "tokenExit"],
-                        source: `const token = event.data.token;\nif (token) {\n!!token.object.setTarget(!!region.tokens.find(t=> t.id === token.id),\n{releaseOthers: false });\n}`,
-                    },
-                },
-            ],
+
             // AARON WAS HERE 4/4/2026: Foundry bug?  Can't create with restriction
             // restriction: {
             //     enabled: true,
@@ -727,7 +720,38 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         canvas.tokens.ownedTokens?.[0].setTarget(false, { releaseOthers: true });
 
         // Create the region
-        await canvas.scene.createEmbeddedDocuments("Region", [regionData]);
+        const newDocumentsCreated = await canvas.scene.createEmbeddedDocuments("Region", [regionData]);
+        const newRegion = newDocumentsCreated[0];
+        if (!newRegion) {
+            console.error("Failed to create region for area of effect");
+            return;
+        }
+
+        // Apply the TokenAutomaticTargeting behavior to the region
+        // so that it will target tokens that enter it and remove targets that leave it.
+        // GM permissions are required to add behaviors, so if the user isn't a GM
+        // we need to send a socket message to the GM to have them add the behavior for us.
+        if (game.user.isGM) {
+            await HeroSystem6eRegion.applyBehaviorTokenAutomaticTargeting(newRegion.uuid);
+        } else {
+            game.socket.emit(`system.${game.system.id}`, {
+                operation: "applyBehaviorTokenAutomaticTargeting",
+                userId: game.user.id,
+                regionUuid: newRegion.uuid,
+            });
+        }
+
+        // DELAY PAUSE: Wait for Foundry's quadtree/spatial map to update the region.tokens cache
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        // FORCED TRIGGER: Handle tokens that are already standing inside right now
+        // region.tokens holds a collection of all TokenDocuments currently within the region boundaries
+        for (let tokenDoc of newRegion.tokens) {
+            if (tokenDoc.object) {
+                // Set target to true, don't clear target strings of other players
+                tokenDoc.object.setTarget(true, { releaseOthers: false });
+            }
+        }
 
         // canvas.templates.activate({ tool: templateType });
         // canvas.templates.selectObjects({
