@@ -1,3 +1,5 @@
+import { HeroSystem6eRegion } from "./heroRegion.mjs";
+
 export class HeroSocketHandler {
     static Initialize() {
         HeroSocketHandler.registerSocketHandlers();
@@ -9,11 +11,12 @@ export class HeroSocketHandler {
         //     userId: game.user.id,
         //     token:
         //     actor:
+        //     regionUuid
         // });
 
         game.socket.on(`system.${game.system.id}`, async (data) => {
             const user = User.get(data.userId);
-            console.log(`HeroSocketHandler ${data.operation} for ${user.name}`, data);
+            console.log(`HeroSocketHandler operation=${data.operation}, user=${user?.name || data.userId}`, data);
             switch (data.operation) {
                 case "nextHeroCombatantSingle":
                     if (game.user !== game.users.activeGM) return;
@@ -44,6 +47,16 @@ export class HeroSocketHandler {
                         return;
                     }
                     await message.update({ content: data.content });
+                    break;
+                }
+
+                case "applyBehaviorTokenAutomaticTargeting": {
+                    if (game.user !== game.users.activeGM) return;
+                    if (!data.regionUuid) {
+                        console.error(`Region UUID not found.`);
+                        return;
+                    }
+                    await HeroSystem6eRegion.applyBehaviorTokenAutomaticTargeting(data.regionUuid);
                     break;
                 }
 

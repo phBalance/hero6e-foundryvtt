@@ -38,10 +38,19 @@ export function calculateDistanceBetween(origin, target) {
         };
     }
 
+    // V14 origin is likely a region, which can have several shapes.
+    // We are going to use the x/y of the first shape.
+
     const path = [];
     try {
-        path.push({ x: origin.x, y: origin.y });
-        path.push({ x: target.x, y: target.y });
+        path.push({
+            x: origin.getCenterPoint?.().x ?? origin.shapes?.[0]?.x ?? origin.x,
+            y: origin.getCenterPoint?.().y ?? origin.shapes?.[0]?.y ?? origin.y,
+        });
+        path.push({
+            x: target.getCenterPoint?.().x ?? target.shapes?.[0]?.x ?? target.x,
+            y: target.getCenterPoint?.().y ?? target.shapes?.[0]?.y ?? target.y,
+        });
     } catch (e) {
         console.error(e, origin, target);
     }
@@ -55,7 +64,10 @@ export function calculateDistanceBetween(origin, target) {
     // return the original distance
     const templateInvolved =
         origin._object instanceof HeroSystem6eMeasuredTemplate ||
-        target._object instanceof HeroSystem6eMeasuredTemplate;
+        target._object instanceof HeroSystem6eMeasuredTemplate ||
+        // V14 uses regions for AOE templates.
+        origin.documentName === "Region" ||
+        target.documentName === "Region";
     if (templateInvolved) {
         return {
             distance: originalMeasureDistanceMeters,
