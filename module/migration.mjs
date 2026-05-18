@@ -342,7 +342,31 @@ export async function migrateWorld() {
         "background: #1111FF; color: #FFFFFF",
     );
 
+    // Placeholder for notifying GM of items missing XMLID
+    // await migrateToVersion(
+    //     game.system.version,
+    //     lastMigration,
+    //     [getAllActorsInGame()],
+    //     "items missing XMLID",
+    //     async (allActors) => await XMLIDcheck(allActors),
+    // );
+
     await ui.notifications.info(`Migration complete to ${game.system.version}`);
+
+    // async function XMLIDcheck(allActors) {
+    //     // loop over all actors and report back
+
+    //     const itemsMissingXMLID = [];
+    //     for (const actor of allActors) {
+    //         for (const item of actor.items) {
+    //             // Check if item is missing XMLID
+    //         }
+    //     }
+
+    //     // create Messsage dialog
+    //     // await response, if user selects DELETE, delete all items missing XMLID
+    //     return;
+    // }
 
     // Invalid sidebar Items
     try {
