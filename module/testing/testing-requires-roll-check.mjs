@@ -3114,6 +3114,10 @@ export function registerRequiresRollCheckTests(quench) {
                             it("should have the correct cost for 8-", async function () {
                                 expect(ebRequiresActivationRoll8Less.realCost).to.equal(13);
                             });
+
+                            // TODO: Add jammed and burnout throughout
+                            it.skip("should have the correct cost for activation roll with burnout", function () {});
+                            it.skip("should have the correct cost for activation roll with jammed", function () {});
                         });
 
                         describe("requires skill roll flavour", function () {
