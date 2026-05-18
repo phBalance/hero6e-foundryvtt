@@ -1,16 +1,15 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 
-import { overrideCanAct } from "../settings/settings-helpers.mjs";
-
 import { HeroRoll, HeroRoller } from "../heroRoller/dice.mjs";
+import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { calculateDicePartsForItem } from "../utility/damage.mjs";
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 
 const backgroundSkillKeys = Object.freeze({
     KS: "KNOWLEDGE_SKILL",
-    SS: "SCIENCE_SKILL",
     PS: "PROFESSIONAL_SKILL",
+    SS: "SCIENCE_SKILL",
 });
 
 const backgroundSkillXmlids = Object.freeze({
@@ -194,8 +193,6 @@ export function findRollDivisor(rar) {
             return 20;
         }
 
-        // PH: FIXME: Where is no penalty per level?
-
         // activation rolls have no minuses due to active points
         if (!isNaN(parseInt(rar.OPTIONID, 10))) {
             return NaN;
@@ -267,17 +264,18 @@ function getRequiredCharacteristicKey(item, rar) {
 
 export const RSR_ROLL_TYPE = Object.freeze({
     ACTIVATION_ROLL: "activation roll",
+    ATTACK_ROLL: "attack roll",
     CHARACTERISTIC_ROLL: "characteristic roll",
     LUCK_ROLL: "luck roll",
     ITEM_ROLL: "item roll", // Skill, background skill, power
-    ATTACK_ROLL: "attack roll",
 });
 
 const RSR_ROLL_CATEGORY = Object.freeze({
-    SKILL: "skill category",
+    ATTACK: "attack category",
     BACKGROUNDSKILL: "background category",
     CHAR: "characteristic category",
     PER: "perception category",
+    SKILL: "skill category",
 });
 
 const TYPE_TO_ROLL_TYPE = Object.freeze({
@@ -295,10 +293,14 @@ function normalizeTypeAndRollTarget(type, skillOrCharacteristic) {
 }
 
 /**
- * Given a rar, extract out all the bits and pieces required to make 1 or more activation rolls.
+ * Given a rar, extract out all the bits and pieces required to make 1 or more activation rolls. This transforms
+ * 5e ACTIVATIONROLL and REQUIRESASKILLROLL XMLIDs and 6e REQUIRESASKILLROLL into an intermediate format that
+ * avoids HDC's completely different approach to expressing the modifier.
  *
- * @param {*} params
- * @returns
+ * @param {HeroSystem6eItem} item
+ * @param {HeroModifierModel} rar
+ *
+ * @returns {Object[]}
  */
 export function getRollsForRar(item, rar) {
     const rollsToGenerate = [];
@@ -374,7 +376,13 @@ export function getRollsForRar(item, rar) {
             rar.OPTIONID === "SS1PER5" ||
             rar.OPTIONID === "SS1PER20"
         ) {
-            rollsToGenerate.push({ type: RSR_ROLL_CATEGORY.BACKGROUNDSKILL, target: rar.COMMENTS });
+            const backgroundSkillSubtype = backgroundSkillKeys[rar.OPTIONID.substring(0, 2)];
+
+            rollsToGenerate.push({
+                type: RSR_ROLL_CATEGORY.BACKGROUNDSKILL,
+                subType: backgroundSkillSubtype,
+                target: rar.COMMENTS,
+            });
         }
 
         // 6e Characteristics
@@ -387,10 +395,16 @@ export function getRollsForRar(item, rar) {
             rollsToGenerate.push({ type: RSR_ROLL_CATEGORY.PER, target: null });
         }
 
+        // 6e attack roll
+        else if (rar.OPTIONID === "ATTACK" || rar.OPTIONID === "ATTACK1PER5" || rar.OPTIONID === "ATTACK1PER20") {
+            rollsToGenerate.push({ type: RSR_ROLL_CATEGORY.ATTACK, target: null });
+        }
+
         // 6e unknown OPTIONID
         else {
-            // PH: FIXME: OPTIONID= attack roll?
             // PH: FIXME: 6e. Don't know how to deal with it yet
+            console.error(`Unknown 6e RSR ${rar.OPTIONID}`);
+
             debugger;
             // rollsToGenerate.push({ type: rar.OPTIONID, target: rar.ROLLALIAS || rar.CHARACTERISTIC });
         }
@@ -398,6 +412,32 @@ export function getRollsForRar(item, rar) {
 
     return rollsToGenerate.map((rollToGenerate) => {
         switch (rollToGenerate.type) {
+            case RSR_ROLL_CATEGORY.ATTACK: {
+                // PH: FIXME: Nothing required?
+                return {
+                    type: RSR_ROLL_TYPE.ATTACK_ROLL,
+                };
+            }
+
+            case RSR_ROLL_CATEGORY.BACKGROUNDSKILL:
+            case RSR_ROLL_CATEGORY.SKILL: {
+                const skill = FIXMEfindSkillRoll(item.actor, rollToGenerate.target);
+
+                // Make sure background skill type matches the proclaimed background skill type (i.e. they asked for a PS but specified KS: xxx)
+                const skillItemsOfCorrectSubType = skill
+                    ? [skill].filter(
+                          (skill) => !rollToGenerate.subType || skill.system.XMLID === rollToGenerate.subType,
+                      )
+                    : [];
+
+                return {
+                    type: RSR_ROLL_TYPE.ITEM_ROLL,
+                    name: rollToGenerate.target,
+                    activeItems: skillItemsOfCorrectSubType.filter((skill) => skill.isActive),
+                    items: skillItemsOfCorrectSubType,
+                };
+            }
+
             case RSR_ROLL_CATEGORY.CHAR:
                 // const charKey = getRequiredCharacteristicKey(item, rar); // PH: FIXME: Is this not required as we have it already?
 
@@ -405,18 +445,6 @@ export function getRollsForRar(item, rar) {
                     type: RSR_ROLL_TYPE.CHARACTERISTIC_ROLL,
                     characteristicKey: rollToGenerate.target,
                 };
-
-            case RSR_ROLL_CATEGORY.SKILL:
-            case RSR_ROLL_CATEGORY.BACKGROUNDSKILL: {
-                const skill = FIXMEfindSkillRoll(item.actor, rollToGenerate.target); // PH: FIXME: Is toUpperCase required?
-
-                return {
-                    type: RSR_ROLL_TYPE.ITEM_ROLL,
-                    name: rollToGenerate.target,
-                    activeItems: skill ? [skill].filter((skill) => skill.isActive) : [],
-                    items: skill ? [skill] : [],
-                };
-            }
 
             case RSR_ROLL_CATEGORY.PER: {
                 return {
@@ -610,11 +638,10 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
         }
     }
 
-    // PH: FIXME: Need to pay the cost of this skill/etc
+    // PH: FIXME: Need to pay the resource cost of this skill/etc
 
     // Perform the rolls. Because a roll might consume resources we must perform all rolls (i.e. invoke all skills etc)
     // and then evaluate if there was success.
-    // PH: FIXME: Need to use the resources from the skills/powers etc
     const actor = item.actor;
     const token = options.token ?? tokenEducatedGuess({ actor });
     const speaker = ChatMessage.getSpeaker({ actor, token });

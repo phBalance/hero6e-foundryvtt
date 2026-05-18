@@ -2072,20 +2072,6 @@ export function registerRequiresRollCheckTests(quench) {
                             const heroValidation = aidRequiresStrWith1Per20ApPenalty.heroValidation;
                             expect(heroValidation).to.have.deep.members([]);
                         });
-
-                        // TODO: the character does not have listed characteristic (vehicle for instance?) (error)
-                        it.skip("should have a heroValidation error as the character does not have EGO");
-
-                        // TODO: the character does not have listed perception (vehicle for instance?) (error)
-                        it.skip("should have a heroValidation error as the character does not have perception");
-
-                        // TODO: the character does have luck for a luck skill (success)
-                        it.skip("should have a heroValidation error as the character does not have listed luck power (error)", function () {
-                            const heroValidation = aidRequires2Luck.heroValidation;
-                            expect(heroValidation.length).to.equal(1);
-                            expect(heroValidation[0]).to.have.property("severity");
-                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
-                        });
                     });
 
                     describe("works with skill that actor has", function () {
@@ -2857,17 +2843,68 @@ export function registerRequiresRollCheckTests(quench) {
                                     </ADDER>
                                 </MODIFIER>
                                 </POWER>
-                                <LIST XMLID="GENERIC_OBJECT" ID="1777427222004" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <LIST XMLID="GENERIC_OBJECT" ID="1777427222004" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="35" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                                 <NOTES />
                                 </LIST>
-                                <LIST XMLID="GENERIC_OBJECT" ID="1777427224302" BASECOST="0.0" LEVELS="0" ALIAS="Invalid Requires" POSITION="31" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                                <LIST XMLID="GENERIC_OBJECT" ID="1777427224302" BASECOST="0.0" LEVELS="0" ALIAS="Invalid Requires" POSITION="36" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                                 <NOTES />
                                 </LIST>
-                                <POWER XMLID="ENERGYBLAST" ID="1777427181306" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="32" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777427224302" NAME="Requires A PS Roll Every Use With -1 Per 5 AP Invalid As Has A KS Defined" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <POWER XMLID="DARKNESS" ID="1779115361089" BASECOST="0.0" LEVELS="16" ALIAS="Darkness" POSITION="37" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777427224302" NAME="Requires A KS: sardines With -1 Per 20 AP But Specified As A PS RSR" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777427237341" BASECOST="-0.75" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PS1PER5" OPTIONID="PS1PER5" OPTION_ALIAS="PS roll, -1 per 5 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="KS: sardines" PRIVATE="No" FORCEALLOW="No">
+                                <ADDER XMLID="HEARINGGROUP" ID="1779116235805" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
                                     <NOTES />
-                                    <ADDER XMLID="EVERYPHASE" ID="1777427237306" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                </ADDER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779116235841" BASECOST="0.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PS1PER20" OPTIONID="PS1PER20" OPTION_ALIAS="PS roll, -1 per 20 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="KS: sardines" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779116235806" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="DARKNESS" ID="1779116182241" BASECOST="0.0" LEVELS="16" ALIAS="Darkness" POSITION="38" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777427224302" NAME="Requires A KS: froot loops Every Phase With -1 Per 20 AP But Specified Doesn't Have Background Skill" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <ADDER XMLID="HEARINGGROUP" ID="1779116477305" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779116477341" BASECOST="0.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="KS1PER20" OPTIONID="KS1PER20" OPTION_ALIAS="KS roll, -1 per 20 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="KS: froot loops" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779116477306" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="DARKNESS" ID="1779116502368" BASECOST="0.0" LEVELS="16" ALIAS="Darkness" POSITION="39" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777427224302" NAME="Requires A PS: fungus demonstrator Every Phase With -1 Per 20 AP But Specified Doesn't Have Background Skill" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <ADDER XMLID="HEARINGGROUP" ID="1779116512045" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779116512081" BASECOST="0.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="PS1PER20" OPTIONID="PS1PER20" OPTION_ALIAS="PS roll, -1 per 20 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="PS: fungus demonstrator" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779116551844" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="DARKNESS" ID="1779116461139" BASECOST="0.0" LEVELS="16" ALIAS="Darkness" POSITION="40" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777427224302" NAME="Requires A Science Skill: batteries Every Phase With -1 Per 20 AP But Specified Doesn't Have Background Skill" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <ADDER XMLID="HEARINGGROUP" ID="1779116592949" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779116592985" BASECOST="0.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SS1PER20" OPTIONID="SS1PER20" OPTION_ALIAS="SS roll, -1 per 20 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Science Skill: batteries" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779116620680" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="DARKNESS" ID="1779116712532" BASECOST="0.0" LEVELS="16" ALIAS="Darkness" POSITION="41" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777427224302" NAME="Requires An Interrogation Every Phase With -1 Per 20 AP But Specified Doesn't Have Skill" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <ADDER XMLID="HEARINGGROUP" ID="1779116719400" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                    <NOTES />
+                                </ADDER>
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779116719436" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL1PER20" OPTIONID="SKILL1PER20" OPTION_ALIAS="Skill roll, -1 per 20 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Interrogation" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1779116743463" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
                                     <NOTES />
                                     </ADDER>
                                 </MODIFIER>
@@ -2907,6 +2944,12 @@ export function registerRequiresRollCheckTests(quench) {
                     let ebRequiresSsXenobotanyEachUseWith1Per20ApPenalty;
                     let ebRequiresSsXenobotanyEachUseWith1Per10ApPenalty;
                     let ebRequiresSsXenobotanyEachUseWith1Per5ApPenalty;
+
+                    let darknessRequiresPsEachUseWith1Per20ApPenaltyButGivenKsBackgroundSkill;
+                    let darknessRequiresKsFrootLoopsButDoesNotHaveKsBackgroundSkill;
+                    let darknessRequiresPsFungusDemonstratorButDoesNotHavePsBackgroundSkill;
+                    let darknessRequiresSsBatteriesButDoesNotHaveSsBackgroundSkill;
+                    let darknessRequiresInterrogationButDoesNotHaveInterogationSkill;
 
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: false });
@@ -2989,6 +3032,31 @@ export function registerRequiresRollCheckTests(quench) {
                         ebRequiresSsXenobotanyEachUseWith1Per5ApPenalty = actor.items.find(
                             (item) =>
                                 item.name === "Requires A Science Skill: xenobotany Roll Every Use With -1 Per 5 AP",
+                        );
+
+                        darknessRequiresPsEachUseWith1Per20ApPenaltyButGivenKsBackgroundSkill = actor.items.find(
+                            (item) =>
+                                item.name === "Requires A KS: sardines With -1 Per 20 AP But Specified As A PS RSR",
+                        );
+                        darknessRequiresKsFrootLoopsButDoesNotHaveKsBackgroundSkill = actor.items.find(
+                            (item) =>
+                                item.name ===
+                                "Requires A KS: froot loops Every Phase With -1 Per 20 AP But Specified Doesn't Have Background Skill",
+                        );
+                        darknessRequiresPsFungusDemonstratorButDoesNotHavePsBackgroundSkill = actor.items.find(
+                            (item) =>
+                                item.name ===
+                                "Requires A PS: fungus demonstrator Every Phase With -1 Per 20 AP But Specified Doesn't Have Background Skill",
+                        );
+                        darknessRequiresSsBatteriesButDoesNotHaveSsBackgroundSkill = actor.items.find(
+                            (item) =>
+                                item.name ===
+                                "Requires A Science Skill: batteries Every Phase With -1 Per 20 AP But Specified Doesn't Have Background Skill",
+                        );
+                        darknessRequiresInterrogationButDoesNotHaveInterogationSkill = actor.items.find(
+                            (item) =>
+                                item.name ===
+                                "Requires An Interrogation Every Phase With -1 Per 20 AP But Specified Doesn't Have Skill",
                         );
                     });
 
@@ -3083,6 +3151,72 @@ export function registerRequiresRollCheckTests(quench) {
                                 expect(ebRequiresSsXenobotanyEachUseWith1Per5ApPenalty.realCost).to.equal(13);
                             });
                         });
+                    });
+
+                    describe("RSRs have hero validations", function () {
+                        it("should have no heroValidation concerns as the character does have listed inante skill (success)", function () {
+                            const heroValidation = ebRequiresBreakfallEachUseWith1Per5ApPenaltly.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should have no heroValidation concerns as the character does have listed background skills (success)", function () {
+                            const heroValidation = ebRequiresKsSardinesEachUseWith1Per10ApPenalty.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should have no heroValidation concerns as the character can make attack rolls (success)", function () {
+                            const heroValidation = ebRequiresAttackRollEachUseWith1Per20ApPenalty.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should have a heroValidation error as the character does have listed KS background skill but user requested a PS (error)", function () {
+                            const heroValidation =
+                                darknessRequiresPsEachUseWith1Per20ApPenaltyButGivenKsBackgroundSkill.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have a heroValidation error as the character does not have listed KS background skill (error)", function () {
+                            const heroValidation =
+                                darknessRequiresKsFrootLoopsButDoesNotHaveKsBackgroundSkill.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have a heroValidation error as the character does not have listed PS background skill (error)", function () {
+                            const heroValidation =
+                                darknessRequiresPsFungusDemonstratorButDoesNotHavePsBackgroundSkill.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have a heroValidation error as the character does not have listed SS background skill (error)", function () {
+                            const heroValidation =
+                                darknessRequiresSsBatteriesButDoesNotHaveSsBackgroundSkill.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have a heroValidation error as the character does not have listed Interrogation skill (error)", function () {
+                            const heroValidation =
+                                darknessRequiresInterrogationButDoesNotHaveInterogationSkill.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have no heroValidation error as the character has STR (success)", function () {
+                            const heroValidation = ebRequiresStrRollEachUseWith1Per10ApPenalty.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it.skip("should have a heroValidation error as the character does not have the listed characteristic", function () {});
+                        it.skip("should have a heroValidation error as the character does not have perception", function () {});
+                        it.skip("should have a heroValidation error as the character cannot make attack rolls (error)", function () {});
                     });
 
                     describe("activation rolls", function () {
@@ -3391,7 +3525,7 @@ export function registerRequiresRollCheckTests(quench) {
                         });
                     });
 
-                    describe.only("skill rolls", function () {
+                    describe("skill rolls", function () {
                         describe("RSR with skill roll and a -1 per 5 AP penalty", function () {
                             it("should activate with a roll of 3 (against 11- with -6 AP penalty) for activation", async function () {
                                 expect(
