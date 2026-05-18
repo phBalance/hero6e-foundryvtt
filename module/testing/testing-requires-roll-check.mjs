@@ -11,6 +11,8 @@ import {
     Roll1LuckOn3Dice,
     Roll3LuckOn3Dice,
     Roll3On3Dice,
+    Roll4On3Dice,
+    Roll5On3Dice,
     Roll6On3Dice,
     Roll7On3Dice,
     Roll8On3Dice,
@@ -2810,11 +2812,11 @@ export function registerRequiresRollCheckTests(quench) {
                                     </ADDER>
                                 </MODIFIER>
                                 </POWER>
-                                <POWER XMLID="ENERGYBLAST" ID="1777426968437" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="25" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A KS: sardines Roll Every Use With No AP Penalty" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <POWER XMLID="ENERGYBLAST" ID="1777426968437" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="30" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A KS: sardines Roll Every Use With -1 per 10 AP Penalty" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777427067486" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="KS" OPTIONID="KS" OPTION_ALIAS="KS roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="KS: sardines" PRIVATE="No" FORCEALLOW="No">
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779073274659" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="KS" OPTIONID="KS" OPTION_ALIAS="KS roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="KS: sardines" PRIVATE="No" FORCEALLOW="No">
                                     <NOTES />
-                                    <ADDER XMLID="EVERYPHASE" ID="1777427067451" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <ADDER XMLID="EVERYPHASE" ID="1779073274624" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
                                     <NOTES />
                                     </ADDER>
                                 </MODIFIER>
@@ -2828,29 +2830,29 @@ export function registerRequiresRollCheckTests(quench) {
                                     </ADDER>
                                 </MODIFIER>
                                 </POWER>
-                                <POWER XMLID="ENERGYBLAST" ID="1777427325848" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="27" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A SS: xenobotany Roll Every Use With -1 Per 20 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <POWER XMLID="ENERGYBLAST" ID="1777427325848" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="32" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A Science Skill: xenobotany Roll Every Use With -1 Per 20 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777427328904" BASECOST="0.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SS1PER20" OPTIONID="SS1PER20" OPTION_ALIAS="SS roll, -1 per 20 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="SS: xenobotany" PRIVATE="No" FORCEALLOW="No">
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779074999221" BASECOST="0.0" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SS1PER20" OPTIONID="SS1PER20" OPTION_ALIAS="SS roll, -1 per 20 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Science Skill: xenobotany" PRIVATE="No" FORCEALLOW="No">
                                     <NOTES />
-                                    <ADDER XMLID="EVERYPHASE" ID="1777427331233" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <ADDER XMLID="EVERYPHASE" ID="1779075007035" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
                                     <NOTES />
                                     </ADDER>
                                 </MODIFIER>
                                 </POWER>
-                                <POWER XMLID="ENERGYBLAST" ID="1777427372891" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="28" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A SS: xenobotany Roll Every Use With -1 Per 10 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <POWER XMLID="ENERGYBLAST" ID="1777427372891" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="33" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A Science Skill: xenobotany Roll Every Use With -1 Per 10 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050065160" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SS" OPTIONID="SS" OPTION_ALIAS="SS roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="SS: xenobotany" PRIVATE="No" FORCEALLOW="No">
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779075018680" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SS" OPTIONID="SS" OPTION_ALIAS="SS roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Science Skill: xenobotany" PRIVATE="No" FORCEALLOW="No">
                                     <NOTES />
-                                    <ADDER XMLID="EVERYPHASE" ID="1779050067349" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <ADDER XMLID="EVERYPHASE" ID="1779075023366" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
                                     <NOTES />
                                     </ADDER>
                                 </MODIFIER>
                                 </POWER>
-                                <POWER XMLID="ENERGYBLAST" ID="1779050088900" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="29" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A SS: xenobotany Roll Every Use With -1 Per 5 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <POWER XMLID="ENERGYBLAST" ID="1779050088900" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="34" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A Science Skill: xenobotany Roll Every Use With -1 Per 5 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
-                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779050092095" BASECOST="-0.75" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SS1PER5" OPTIONID="SS1PER5" OPTION_ALIAS="SS roll, -1 per 5 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="SS: xenobotany" PRIVATE="No" FORCEALLOW="No">
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1779075034701" BASECOST="-0.75" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SS1PER5" OPTIONID="SS1PER5" OPTION_ALIAS="SS roll, -1 per 5 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Science Skill: xenobotany" PRIVATE="No" FORCEALLOW="No">
                                     <NOTES />
-                                    <ADDER XMLID="EVERYPHASE" ID="1779050099206" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <ADDER XMLID="EVERYPHASE" ID="1779075046706" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
                                     <NOTES />
                                     </ADDER>
                                 </MODIFIER>
@@ -2893,6 +2895,18 @@ export function registerRequiresRollCheckTests(quench) {
                     let ebRequiresActivationRoll8Less;
 
                     let resistantProtectionWeirdSectionalDefense;
+
+                    let ebRequiresBreakfallEachUseWith1Per5ApPenaltly;
+                    let ebRequiresBreakfallEachUseWith1Per10ApPenaltly;
+                    let ebRequiresBreakfallEachUseWith1Per20ApPenaltly;
+                    let ebRequiresStrRollEachUseWith1Per10ApPenalty;
+                    let ebRequiresPerceptionRollEachUseWith1Per5ApPenalty;
+                    let ebRequiresAttackRollEachUseWith1Per20ApPenalty;
+                    let ebRequiresKsSardinesEachUseWith1Per10ApPenalty;
+                    let ebRequiresPsFisherEachUseWith1Per5ApPenalty;
+                    let ebRequiresSsXenobotanyEachUseWith1Per20ApPenalty;
+                    let ebRequiresSsXenobotanyEachUseWith1Per10ApPenalty;
+                    let ebRequiresSsXenobotanyEachUseWith1Per5ApPenalty;
 
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: false });
@@ -2938,6 +2952,43 @@ export function registerRequiresRollCheckTests(quench) {
 
                         resistantProtectionWeirdSectionalDefense = actor.items.find(
                             (item) => item.name === "Weird Coverage (locations   3,5 ,9- 10,12, 14 -15, and 17 - 18)",
+                        );
+
+                        ebRequiresBreakfallEachUseWith1Per5ApPenaltly = actor.items.find(
+                            (item) => item.name === "Requires A Breakfall Roll Every Use With -1 Per 5 AP",
+                        );
+                        ebRequiresBreakfallEachUseWith1Per10ApPenaltly = actor.items.find(
+                            (item) => item.name === "Requires A Breakfall Roll Every Use With -1 Per 10 AP",
+                        );
+                        ebRequiresBreakfallEachUseWith1Per20ApPenaltly = actor.items.find(
+                            (item) => item.name === "Requires A Breakfall Roll Every Use With -1 Per 20 AP",
+                        );
+                        ebRequiresStrRollEachUseWith1Per10ApPenalty = actor.items.find(
+                            (item) => item.name === "Requires A STR Roll Every Use",
+                        );
+                        ebRequiresPerceptionRollEachUseWith1Per5ApPenalty = actor.items.find(
+                            (item) => item.name === "Requires A Perception Roll Every Use With a -1 per 5 AP",
+                        );
+                        ebRequiresAttackRollEachUseWith1Per20ApPenalty = actor.items.find(
+                            (item) => item.name === "Requires An Attack Roll Every Use With a -1 per 20 AP",
+                        );
+                        ebRequiresKsSardinesEachUseWith1Per10ApPenalty = actor.items.find(
+                            (item) => item.name === "Requires A KS: sardines Roll Every Use With -1 per 10 AP Penalty",
+                        );
+                        ebRequiresPsFisherEachUseWith1Per5ApPenalty = actor.items.find(
+                            (item) => item.name === "Requires A PS: fisher Roll Every Use With -1 Per 5 AP",
+                        );
+                        ebRequiresSsXenobotanyEachUseWith1Per20ApPenalty = actor.items.find(
+                            (item) =>
+                                item.name === "Requires A Science Skill: xenobotany Roll Every Use With -1 Per 20 AP",
+                        );
+                        ebRequiresSsXenobotanyEachUseWith1Per10ApPenalty = actor.items.find(
+                            (item) =>
+                                item.name === "Requires A Science Skill: xenobotany Roll Every Use With -1 Per 10 AP",
+                        );
+                        ebRequiresSsXenobotanyEachUseWith1Per5ApPenalty = actor.items.find(
+                            (item) =>
+                                item.name === "Requires A Science Skill: xenobotany Roll Every Use With -1 Per 5 AP",
                         );
                     });
 
@@ -2997,7 +3048,41 @@ export function registerRequiresRollCheckTests(quench) {
                             });
                         });
 
-                        describe.skip("requires skill roll flavour", function () {});
+                        describe("requires skill roll flavour", function () {
+                            it("should have the correct cost for breakfall every phase with -1 per 5 AP", async function () {
+                                expect(ebRequiresBreakfallEachUseWith1Per5ApPenaltly.realCost).to.equal(12);
+                            });
+                            it("should have the correct cost for breakfall every phase with -1 per 10 AP", async function () {
+                                expect(ebRequiresBreakfallEachUseWith1Per10ApPenaltly.realCost).to.equal(15);
+                            });
+                            it("should have the correct cost for breakfall every phase with -1 per 20 AP", async function () {
+                                expect(ebRequiresBreakfallEachUseWith1Per20ApPenaltly.realCost).to.equal(17);
+                            });
+                            it("should have the correct cost for STR every phase with -1 per 10 AP", async function () {
+                                expect(ebRequiresStrRollEachUseWith1Per10ApPenalty.realCost).to.equal(15);
+                            });
+                            it("should have the correct cost for perception every phase with -1 per 5 AP", async function () {
+                                expect(ebRequiresPerceptionRollEachUseWith1Per5ApPenalty.realCost).to.equal(12);
+                            });
+                            it("should have the correct cost for attack roll every phase with -1 per 20 AP", async function () {
+                                expect(ebRequiresAttackRollEachUseWith1Per20ApPenalty.realCost).to.equal(17);
+                            });
+                            it("should have the correct cost for KS: sardines roll every phase with no AP penalty", async function () {
+                                expect(ebRequiresKsSardinesEachUseWith1Per10ApPenalty.realCost).to.equal(17);
+                            });
+                            it("should have the correct cost for PS: fisher roll every phase with-1 per 5 AP", async function () {
+                                expect(ebRequiresPsFisherEachUseWith1Per5ApPenalty.realCost).to.equal(13);
+                            });
+                            it("should have the correct cost for SS: xenobotany roll every phase with -1 per 20 AP", async function () {
+                                expect(ebRequiresSsXenobotanyEachUseWith1Per20ApPenalty.realCost).to.equal(20);
+                            });
+                            it("should have the correct cost for SS: xenobotany roll every phase with -1 per 10 AP", async function () {
+                                expect(ebRequiresSsXenobotanyEachUseWith1Per10ApPenalty.realCost).to.equal(17);
+                            });
+                            it("should have the correct cost for SS: xenobotany roll every phase with -1 per 5 AP", async function () {
+                                expect(ebRequiresSsXenobotanyEachUseWith1Per5ApPenalty.realCost).to.equal(13);
+                            });
+                        });
                     });
 
                     describe("activation rolls", function () {
@@ -3302,6 +3387,250 @@ export function registerRequiresRollCheckTests(quench) {
                                         ),
                                     ).to.equal(true);
                                 });
+                            });
+                        });
+                    });
+
+                    describe.only("skill rolls", function () {
+                        describe("RSR with skill roll and a -1 per 5 AP penalty", function () {
+                            it("should activate with a roll of 3 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresBreakfallEachUseWith1Per5ApPenaltly,
+                                        resetDiceClass(Roll3On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should activate with a roll of 5 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresBreakfallEachUseWith1Per5ApPenaltly,
+                                        resetDiceClass(Roll5On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should fail to activate with a roll of 6 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresBreakfallEachUseWith1Per5ApPenaltly,
+                                        resetDiceClass(Roll6On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe("RSR with skill roll and a -1 per 10 AP penalty", function () {
+                            it("should activate with a roll of 3 (against 11- with -3 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresBreakfallEachUseWith1Per10ApPenaltly,
+                                        resetDiceClass(Roll3On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should activate with a roll of 8 (against 11- with -3 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresBreakfallEachUseWith1Per10ApPenaltly,
+                                        resetDiceClass(Roll8On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should fail to activate with a roll of 9 (against 11- with -3 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresBreakfallEachUseWith1Per10ApPenaltly,
+                                        resetDiceClass(Roll9On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe("RSR with skill roll and a -1 per 20 AP penalty", function () {
+                            it("should activate with a roll of 9 (against 11- with -1 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresBreakfallEachUseWith1Per20ApPenaltly,
+                                        resetDiceClass(Roll9On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should activate with a roll of 9 (against 11- with -1 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresBreakfallEachUseWith1Per20ApPenaltly,
+                                        resetDiceClass(Roll10On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should fail to activate with a roll of 10 (against 11- with -1 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresBreakfallEachUseWith1Per20ApPenaltly,
+                                        resetDiceClass(Roll11On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe("RSR with STR roll and a -1 per 20 AP penalty", function () {
+                            it("should activate with a roll of 7 (against 11- with -3 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresStrRollEachUseWith1Per10ApPenalty,
+                                        resetDiceClass(Roll7On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should activate with a roll of 8 (against 11- with -3 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresStrRollEachUseWith1Per10ApPenalty,
+                                        resetDiceClass(Roll8On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should fail to activate with a roll of 9 (against 11- with -3 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresStrRollEachUseWith1Per10ApPenalty,
+                                        resetDiceClass(Roll9On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe("RSR with perception roll and a -1 per 5 AP penalty", function () {
+                            it("should activate with a roll of 4 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresPerceptionRollEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll4On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should activate with a roll of 8 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresPerceptionRollEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll5On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should fail to activate with a roll of 6 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresPerceptionRollEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll6On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe.skip("RSR with attack roll and a -1 per 5 AP penalty", function () {});
+
+                        describe("RSR with KS: sardines roll and a -1 per 10 AP penalty", function () {
+                            it("should activate with a roll of 7 (against 11- with -3 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresKsSardinesEachUseWith1Per10ApPenalty,
+                                        resetDiceClass(Roll7On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should activate with a roll of 8 (against 11- with -3 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresKsSardinesEachUseWith1Per10ApPenalty,
+                                        resetDiceClass(Roll8On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should fail to activate with a roll of 9 (against 11- with -3 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresKsSardinesEachUseWith1Per10ApPenalty,
+                                        resetDiceClass(Roll9On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe("RSR with PS: fisher roll and a -1 per 5 AP penalty", function () {
+                            it("should activate with a roll of 4 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresPsFisherEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll4On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should activate with a roll of 5 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresPsFisherEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll5On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should fail to activate with a roll of 6 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresPsFisherEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll6On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe("RSR with SS: xenobotany roll and a -1 per 5 AP penalty", function () {
+                            it("should activate with a roll of 4 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresSsXenobotanyEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll4On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should activate with a roll of 5 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresSsXenobotanyEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll5On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(true);
+                            });
+                            it("should fail to activate with a roll of 6 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresSsXenobotanyEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll6On3Dice),
+                                        {},
+                                    ),
+                                ).to.equal(false);
                             });
                         });
                     });

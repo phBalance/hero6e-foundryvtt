@@ -4,6 +4,7 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
 import { HeroRoll, HeroRoller } from "../heroRoller/dice.mjs";
 import { calculateDicePartsForItem } from "../utility/damage.mjs";
+import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 
 const backgroundSkillKeys = Object.freeze({
@@ -31,7 +32,7 @@ function filterOutNonSkillRollItems(item) {
     );
 }
 
-function matchRequiredSkillRoll(o, rar, rarOptionIsBackground) {
+function matchRequiredSkillRoll(item, rar, rarOptionIsBackground) {
     const rarAliasDisplay = rar.ALIAS?.toUpperCase() || ""; // From the "Display" field. ex: "Requires A Magic Roll"
     // OPTION_ALIAS is different in 5e: it is entered in the Type field
     const rarOptionsAlias = rar.OPTION_ALIAS?.toUpperCase() || ""; // From the "Options" field. ex: "Magic Roll, -1 per 5 Active Points modifier"
@@ -46,17 +47,17 @@ function matchRequiredSkillRoll(o, rar, rarOptionIsBackground) {
     // TODO
     // it might be worthwhile to also try with underscores in the XMLID '_' replaced with spaces ' ' to match better
     // or vice versa, put underscores in the stable RaR strings and search with underscores present
-    // this is IN ADDITION to what's here now; dont replace this
+    // this is IN ADDITION to what's here now; don't replace this
     const xmlIdMatch =
-        rarAliasDisplay.includes(o.system.XMLID) ||
-        rarOptionsAlias.includes(o.system.XMLID) ||
-        rarRollAlias.includes(o.system.XMLID) ||
-        rarComments.includes(o.system.XMLID);
+        rarAliasDisplay.includes(item.system.XMLID) ||
+        rarOptionsAlias.includes(item.system.XMLID) ||
+        rarRollAlias.includes(item.system.XMLID) ||
+        rarComments.includes(item.system.XMLID);
     if (xmlIdMatch) {
         return true;
     }
 
-    const nameUpper = o.name?.toUpperCase() ?? "";
+    const nameUpper = item.name?.toUpperCase() ?? "";
     const nameMatch =
         nameUpper &&
         rarOptionIsBackground !== nameUpper &&
@@ -68,7 +69,7 @@ function matchRequiredSkillRoll(o, rar, rarOptionIsBackground) {
         return true;
     }
 
-    const aliasUpper = o.system.ALIAS?.toUpperCase() ?? "";
+    const aliasUpper = item.system.ALIAS?.toUpperCase() ?? "";
     const aliasMatch =
         aliasUpper &&
         rarOptionIsBackground !== aliasUpper &&
@@ -83,11 +84,11 @@ function matchRequiredSkillRoll(o, rar, rarOptionIsBackground) {
     // Some skills have an underscore in them; the user might not have the name matched exactly
     // so if there is an underscore (as in SLEIGHT_OF_HAND), we check for that here
     const xml_Id_Match =
-        /_/.test(o.system.XMLID) &&
-        (rar_AliasDisplay.includes(o.system.XMLID) ||
-            rar_OptionsAlias.includes(o.system.XMLID) ||
-            rar_RollAlias.includes(o.system.XMLID) ||
-            rar_Comments.includes(o.system.XMLID));
+        /_/.test(item.system.XMLID) &&
+        (rar_AliasDisplay.includes(item.system.XMLID) ||
+            rar_OptionsAlias.includes(item.system.XMLID) ||
+            rar_RollAlias.includes(item.system.XMLID) ||
+            rar_Comments.includes(item.system.XMLID));
     if (xml_Id_Match) {
         return true;
     }
@@ -171,8 +172,8 @@ function FIXMEfindSkillRoll(actor, rollAlias) {
 export function findRollDivisor(rar) {
     // modifiers are different based on 5e or 6e
     if (rar.parent.is5e) {
-        const divisorOption = rar.ADDER.find((o) => {
-            return o.XMLID === "MINUS1PER20" || o.XMLID === "MINUS1PER5" || o.XMLID === "NOAPPENALTY";
+        const divisorOption = rar.adders.find((adder) => {
+            return adder.XMLID === "MINUS1PER20" || adder.XMLID === "MINUS1PER5" || adder.XMLID === "NOAPPENALTY";
         });
 
         if (divisorOption?.XMLID === "MINUS1PER20") {
@@ -210,7 +211,7 @@ function calculateRollMinus(item, rar) {
         return 0;
     }
 
-    return Math.floor(item.activePoints / divisor);
+    return roundFavorPlayerTowardsZero(item.activePoints / divisor);
 }
 
 function getRequiredCharacteristicKey(item, rar) {
@@ -272,11 +273,18 @@ export const RSR_ROLL_TYPE = Object.freeze({
     ATTACK_ROLL: "attack roll",
 });
 
+const RSR_ROLL_CATEGORY = Object.freeze({
+    SKILL: "skill category",
+    BACKGROUNDSKILL: "background category",
+    CHAR: "characteristic category",
+    PER: "perception category",
+});
+
 const TYPE_TO_ROLL_TYPE = Object.freeze({
-    0: "SKILLROLL",
-    1: "BACKGROUNDSKILL",
-    2: "CHAR",
-    3: "PER",
+    0: RSR_ROLL_CATEGORY.SKILL,
+    1: RSR_ROLL_CATEGORY.BACKGROUNDSKILL,
+    2: RSR_ROLL_CATEGORY.CHAR,
+    3: RSR_ROLL_CATEGORY.PER,
 });
 
 function normalizeTypeAndRollTarget(type, skillOrCharacteristic) {
@@ -293,49 +301,104 @@ function normalizeTypeAndRollTarget(type, skillOrCharacteristic) {
  * @returns
  */
 export function getRollsForRar(item, rar) {
-    // 5e ACTIVATIONROLL or flat number 6e REQUIRESASKILLROLL?
-    const isOnlyDigits = /^\d+$/.test(rar.OPTIONID);
-    if (rar.XMLID === "ACTIVATIONROLL" || isOnlyDigits) {
-        return [
-            {
-                type: RSR_ROLL_TYPE.ACTIVATION_ROLL,
-                rollValue: parseInt(rar.OPTIONID),
-            },
-        ];
-    }
-    // Luck roll?
-    else if (rar.OPTIONID === "ONELUCK" || rar.OPTIONID === "TWOLUCK" || rar.OPTIONID === "THREELUCK") {
-        const numSuccessesRequired = rar.OPTIONID === "ONELUCK" ? 1 : rar.OPTIONID === "TWOLUCK" ? 2 : 3;
-        return [
-            {
-                type: RSR_ROLL_TYPE.LUCK_ROLL,
-                successesRequired: numSuccessesRequired,
-                activeItems: item.actor.items.filter((item) => item.system.XMLID === "LUCK" && item.isActive),
-                items: item.actor.items.filter((item) => item.system.XMLID === "LUCK"),
-            },
-        ];
-    }
-
-    // Figure out what we're supposed to be looking at
     const rollsToGenerate = [];
-    if (rar.OPTIONID === "TWOROLLS") {
-        // PH: FIXME: This does not handle variable roll where the user gets to decide between 2 provided rolls. See rar.adder.XMLID === "VARIABLERSR".
-        rollsToGenerate.push(normalizeTypeAndRollTarget(rar.TYPE, rar.ROLLALIAS || rar.CHARACTERISTIC));
-        rollsToGenerate.push(normalizeTypeAndRollTarget(rar.TYPE2, rar.ROLLALIAS2 || rar.CHARACTERISTIC2));
-    } else if (rar.OPTIONID === "BASICRSR") {
-        // PH: FIXME: This does not handle variable roll where the user gets to decide between 2 provided rolls. See rar.adder.XMLID === "VARIABLERSR".
-        rollsToGenerate.push(normalizeTypeAndRollTarget(rar.TYPE, rar.ROLLALIAS || rar.CHARACTERISTIC));
-    } else {
+
+    if (item.is5e) {
+        // 5e ACTIVATIONROLL or flat number 6e REQUIRESASKILLROLL?
+        if (rar.XMLID === "ACTIVATIONROLL") {
+            return [
+                {
+                    type: RSR_ROLL_TYPE.ACTIVATION_ROLL,
+                    rollValue: parseInt(rar.OPTIONID),
+                },
+            ];
+        }
+        // 5e Luck roll?
+        else if (rar.OPTIONID === "ONELUCK" || rar.OPTIONID === "TWOLUCK" || rar.OPTIONID === "THREELUCK") {
+            const numSuccessesRequired = rar.OPTIONID === "ONELUCK" ? 1 : rar.OPTIONID === "TWOLUCK" ? 2 : 3;
+            return [
+                {
+                    type: RSR_ROLL_TYPE.LUCK_ROLL,
+                    successesRequired: numSuccessesRequired,
+                    activeItems: item.actor.items.filter((item) => item.system.XMLID === "LUCK" && item.isActive),
+                    items: item.actor.items.filter((item) => item.system.XMLID === "LUCK"),
+                },
+            ];
+        }
+
+        // 5e 2 rolls
+        else if (rar.OPTIONID === "TWOROLLS") {
+            // PH: FIXME: This does not handle variable roll where the user gets to decide between 2 provided rolls. See rar.adder.XMLID === "VARIABLERSR".
+            rollsToGenerate.push(normalizeTypeAndRollTarget(rar.TYPE, rar.ROLLALIAS || rar.CHARACTERISTIC));
+            rollsToGenerate.push(normalizeTypeAndRollTarget(rar.TYPE2, rar.ROLLALIAS2 || rar.CHARACTERISTIC2));
+        }
+
+        // 5e 1 roll
+        else if (rar.OPTIONID === "BASICRSR") {
+            // PH: FIXME: This does not handle variable roll where the user gets to decide between 2 provided rolls. See rar.adder.XMLID === "VARIABLERSR".
+            rollsToGenerate.push(normalizeTypeAndRollTarget(rar.TYPE, rar.ROLLALIAS || rar.CHARACTERISTIC));
+        }
+
         // PH: FIXME: OPTIONID= attack roll?
 
-        // PH: FIXME: 6e. Don't know how to deal with it yet
-        debugger;
-        rollsToGenerate.push({ type: rar.OPTIONID, target: rar.ROLLALIAS || rar.CHARACTERISTIC });
+        // 5e Unknown OPTIONID
+        else {
+            console.error(`Unknown 5e RSR ${rar.OPTIONID}`);
+        }
+    }
+
+    // 6e
+    else {
+        // 6e activation roll
+        const isOnlyDigits = /^\d+$/.test(rar.OPTIONID);
+        if (isOnlyDigits) {
+            return [
+                {
+                    type: RSR_ROLL_TYPE.ACTIVATION_ROLL,
+                    rollValue: parseInt(rar.OPTIONID),
+                },
+            ];
+        }
+
+        // 6e Skills and background skills
+        else if (rar.OPTIONID === "SKILL" || rar.OPTIONID === "SKILL1PER5" || rar.OPTIONID === "SKILL1PER20") {
+            rollsToGenerate.push({ type: RSR_ROLL_CATEGORY.SKILL, target: rar.COMMENTS });
+        } else if (
+            rar.OPTIONID === "KS" ||
+            rar.OPTIONID === "KS1PER5" ||
+            rar.OPTIONID === "KS1PER20" ||
+            rar.OPTIONID === "PS" ||
+            rar.OPTIONID === "PS1PER5" ||
+            rar.OPTIONID === "PS1PER20" ||
+            rar.OPTIONID === "SS" ||
+            rar.OPTIONID === "SS1PER5" ||
+            rar.OPTIONID === "SS1PER20"
+        ) {
+            rollsToGenerate.push({ type: RSR_ROLL_CATEGORY.BACKGROUNDSKILL, target: rar.COMMENTS });
+        }
+
+        // 6e Characteristics
+        else if (rar.OPTIONID === "CHAR") {
+            rollsToGenerate.push({ type: RSR_ROLL_CATEGORY.CHAR, target: rar.COMMENTS });
+        }
+
+        // 6e perception
+        else if (rar.OPTIONID === "PER" || rar.OPTIONID === "PER1PER5" || rar.OPTIONID === "PER1PER20") {
+            rollsToGenerate.push({ type: RSR_ROLL_CATEGORY.PER, target: null });
+        }
+
+        // 6e unknown OPTIONID
+        else {
+            // PH: FIXME: OPTIONID= attack roll?
+            // PH: FIXME: 6e. Don't know how to deal with it yet
+            debugger;
+            // rollsToGenerate.push({ type: rar.OPTIONID, target: rar.ROLLALIAS || rar.CHARACTERISTIC });
+        }
     }
 
     return rollsToGenerate.map((rollToGenerate) => {
         switch (rollToGenerate.type) {
-            case "CHAR":
+            case RSR_ROLL_CATEGORY.CHAR:
                 // const charKey = getRequiredCharacteristicKey(item, rar); // PH: FIXME: Is this not required as we have it already?
 
                 return {
@@ -343,8 +406,8 @@ export function getRollsForRar(item, rar) {
                     characteristicKey: rollToGenerate.target,
                 };
 
-            case "SKILLROLL":
-            case "BACKGROUNDSKILL": {
+            case RSR_ROLL_CATEGORY.SKILL:
+            case RSR_ROLL_CATEGORY.BACKGROUNDSKILL: {
                 const skill = FIXMEfindSkillRoll(item.actor, rollToGenerate.target); // PH: FIXME: Is toUpperCase required?
 
                 return {
@@ -355,7 +418,7 @@ export function getRollsForRar(item, rar) {
                 };
             }
 
-            case "PER": {
+            case RSR_ROLL_CATEGORY.PER: {
                 return {
                     type: RSR_ROLL_TYPE.ITEM_ROLL,
                     name: "PERCEPTION",
@@ -522,10 +585,6 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
         return true;
     }
 
-    const actor = item.actor;
-    const token = options.token ?? tokenEducatedGuess({ actor });
-    const speaker = ChatMessage.getSpeaker({ actor, token });
-
     // An item with an activation roll/requires a skill roll/requires a roll can take up to 2 consecutive rolls. Figure
     // out what we're actually rolling for.
     const activationRolls = getRollsForRar(item, rar);
@@ -549,13 +608,17 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             // PH: FIXME: This needs appropriate message
             return false;
         }
-
-        // PH: FIXME: Need to pay the cost of this skill/etc
     }
+
+    // PH: FIXME: Need to pay the cost of this skill/etc
 
     // Perform the rolls. Because a roll might consume resources we must perform all rolls (i.e. invoke all skills etc)
     // and then evaluate if there was success.
     // PH: FIXME: Need to use the resources from the skills/powers etc
+    const actor = item.actor;
+    const token = options.token ?? tokenEducatedGuess({ actor });
+    const speaker = ChatMessage.getSpeaker({ actor, token });
+
     const rollPromises = activationRolls.map(async (activationRoll) => {
         const roller = new HeroRoller({}, rollClass);
         let succeeded = false;
@@ -614,7 +677,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             const { diceParts } = calculateDicePartsForItem(luckPower, {});
 
             roller
-                .modifyTo5e(item.actor.system.is5e)
+                .modifyTo5e(actor.system.is5e)
                 .makeLuckRoll()
                 .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0);
 
@@ -636,7 +699,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             flavor = `${item.name} (rolled ${luckTotal} points) activation ${succeeded ? "succeeded" : "failed"} `;
         } else if (activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL) {
             const charKey = activationRoll.characteristicKey.toLowerCase();
-            const characteristics = item.actor.system.characteristics[charKey];
+            const characteristics = actor.system.characteristics[charKey];
             const value = characteristics.roll;
             const apMinus = calculateRollMinus(item, rar);
             const successValue = value - apMinus;
@@ -697,7 +760,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
         // FORCE success
         if (!succeeded && overrideCanAct) {
             const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
-            ui.notifications.info(`${item.actor.name} succeeded roll because override key.`);
+            ui.notifications.info(`${actor.name} succeeded roll because override key.`);
             succeeded = true;
             cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
         }
