@@ -1,4 +1,4 @@
-import { generateChatMessage, createTemporaryItemAttackActionForApplyingDamage } from "./chat-output.mjs";
+import { createTemporaryItemAttackActionForApplyingDamage, generateChatMessage } from "./chat-output.mjs";
 import { HeroRoller } from "./dice.mjs";
 
 import { HEROSYS } from "../herosystem6e.mjs";
@@ -115,6 +115,7 @@ export class GenericRoller {
                     NORMAL_MD: "Normal MD",
                     KILLING_PD: "Killing PD",
                     KILLING_ED: "Killing ED",
+                    KILLING_MD: "Killing MD",
 
                     // TODO: These probably need default items and a different interface
                     // ADJUSTMENT: "Adjustment",
@@ -164,7 +165,6 @@ export class GenericRoller {
             return;
         }
 
-        const damageTypeString = userSelection.damageType.replace("_", " ");
         const damageMatch = userSelection.damageType.match(/(.*?)_?([EMP]D)?$/);
         const damageType = damageMatch[1];
         const defenseType = damageMatch[2];
@@ -230,9 +230,8 @@ export class GenericRoller {
 
         await heroRoller.roll();
 
-        const chatCardFlavour = `Roll Generic ${damageTypeString} Damage`;
         const action = createTemporaryItemAttackActionForApplyingDamage(heroRoller, defenseType);
 
-        return generateChatMessage(heroRoller, chatCardFlavour, action);
+        return generateChatMessage(heroRoller, defenseType, action);
     }
 }
