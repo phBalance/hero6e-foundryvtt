@@ -267,7 +267,7 @@ export class HeroSystem6eToken extends FoundryVttToken {
 
     async _drawEffects() {
         if (isGameV14OrLater()) {
-            return super._drawEffects();
+            return this._drawEffects14();
         }
 
         this.effects.renderable = false;
@@ -303,6 +303,56 @@ export class HeroSystem6eToken extends FoundryVttToken {
                               : effect.tint,
                       )
                     : this._drawEffect(effect.img, effect.tint);
+            promises.push(
+                promise.then((e) => {
+                    if (e) e.zIndex = i;
+                }),
+            );
+        }
+        await Promise.allSettled(promises);
+
+        this.effects.sortChildren();
+        this.effects.renderable = true;
+        this.renderFlags.set({ refreshEffects: true });
+    }
+
+    async _drawEffects14() {
+        this.effects.renderable = false;
+
+        // Clear Effects Container
+        this.effects.removeChildren().forEach((c) => c.destroy());
+        this.effects.bg = this.effects.addChild(new PIXI.Graphics());
+        this.effects.bg.zIndex = -1;
+        this.effects.overlay = null;
+
+        // Categorize effects
+        const SHOW_ICON = CONST.ACTIVE_EFFECT_SHOW_ICON;
+        let activeEffects =
+            this.actor?.appliedEffects.filter(
+                (e) => e.showIcon === SHOW_ICON.ALWAYS || (e.showIcon === SHOW_ICON.CONDITIONAL && e.isTemporary),
+            ) ?? [];
+        const overlayEffect = activeEffects.findLast((e) => e.flags.core?.overlay);
+
+        // If dead or knockedOut of combat only show overlayEffect
+        if (this.actor?.statuses.has("dead") || this.actor?.knockedOutOfCombat) {
+            activeEffects = [overlayEffect];
+        }
+
+        // Draw effects
+        const promises = [];
+        for (const [i, effect] of activeEffects.entries()) {
+            // If Knocked out we want to override tint to match token tint (red = defeated)
+            const promise =
+                effect === overlayEffect
+                    ? this._drawOverlay(
+                          effect.img,
+                          (overlayEffect.statuses.has("knockedOut") && this.actor?.knockedOutOfCombat) ||
+                              overlayEffect.statuses.has("dead")
+                              ? "ff5555"
+                              : effect.tint,
+                      )
+                    : this._drawEffect(effect.img, effect.tint);
+
             promises.push(
                 promise.then((e) => {
                     if (e) e.zIndex = i;
