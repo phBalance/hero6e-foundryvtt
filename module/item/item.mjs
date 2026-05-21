@@ -923,19 +923,19 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 if (this.isSkillEnhancer) {
                     validationFailureMessages.push({
                         itemId: this.id,
-                        message: `${this.detailedName()} is not valid because ${actor.name} is an AI and cannot use skill enhancers.`,
+                        message: `${this.detailedName()} is not valid because ${actor.name} is a COMPUTER and cannot use skill enhancers.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                     });
                 } else if (this.isMovement) {
                     validationFailureMessages.push({
                         itemId: this.id,
-                        message: `${this.detailedName()} is not valid because ${actor.name} is an AI and cannot have movement powers.`,
+                        message: `${this.detailedName()} is not valid because ${actor.name} is a COMPUTER  and cannot have movement powers.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                     });
                 } else if (this.isCharacteristic && !actor.hasCharacteristic(this.system.XMLID)) {
                     validationFailureMessages.push({
                         itemId: this.id,
-                        message: `${this.detailedName()} is not valid because ${actor.name} is an AI and cannot have the ${this.system.XMLID} characteristic.`,
+                        message: `${this.detailedName()} is not valid because ${actor.name} is a COMPUTER  and cannot have the ${this.system.XMLID} characteristic.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                     });
                 }
@@ -957,13 +957,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 if (this.isMovement) {
                     validationFailureMessages.push({
                         itemId: this.id,
-                        message: `${this.detailedName()} is not valid because ${actor.name} is a base and cannot have movement powers.`,
+                        message: `${this.detailedName()} is not valid because ${actor.name} is a BASE and cannot have movement powers.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                     });
                 } else if (this.isCharacteristic && !actor.hasCharacteristic(this.system.XMLID)) {
                     validationFailureMessages.push({
                         itemId: this.id,
-                        message: `${this.detailedName()} is not valid because ${actor.name} is a base and cannot have the ${this.system.XMLID} characteristic.`,
+                        message: `${this.detailedName()} is not valid because ${actor.name} is a BASE and cannot have the ${this.system.XMLID} characteristic.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                     });
                 }
