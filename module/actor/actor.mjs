@@ -1677,32 +1677,32 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
 
         // Remove temporary effects
-        start = Date.now();
-        for (const ae of this.temporaryEffects) {
-            if (
-                ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) ||
-                ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id)
-            )
-                continue;
+        // start = Date.now();
+        // for (const ae of this.temporaryEffects) {
+        //     if (
+        //         ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) ||
+        //         ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id)
+        //     )
+        //         continue;
 
-            await ae.delete();
-        }
-        end = Date.now();
-        if (end - start > tDelta) {
-            console.warn("fullHealth performance concern: Remove temporary effects", end - start);
-        }
+        //     await ae.delete();
+        // }
+        // end = Date.now();
+        // if (end - start > tDelta) {
+        //     console.warn("fullHealth performance concern: Remove temporary effects", end - start);
+        // }
 
         // Remove Maneuver/Martial effects
-        start = Date.now();
-        for (const ae of this.appliedEffects.filter(
-            (ae) => ae.flags[game.system.id]?.type === "maneuverNextPhaseEffect",
-        )) {
-            await ae.delete();
-        }
-        end = Date.now();
-        if (end - start > tDelta) {
-            console.warn("fullHealth performance concern: Remove Maneuver/Martial effects", end - start);
-        }
+        // start = Date.now();
+        // for (const ae of this.appliedEffects.filter(
+        //     (ae) => ae.flags[game.system.id]?.type === "maneuverNextPhaseEffect",
+        // )) {
+        //     await ae.delete();
+        // }
+        // end = Date.now();
+        // if (end - start > tDelta) {
+        //     console.warn("fullHealth performance concern: Remove Maneuver/Martial effects", end - start);
+        // }
 
         // Set Characteristics MAX to CORE (or 5e calculated value)
         start = Date.now();
