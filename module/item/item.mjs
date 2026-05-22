@@ -361,6 +361,41 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 return;
             }
 
+            // Generic activeEffect (preferred)
+            if (this.baseInfo?.activeEffect) {
+                const effectData = this.baseInfo?.activeEffect(this);
+                if (effectData) {
+                    // Ensure v14 is using system.changes
+                    if (isGameV14OrLater()) {
+                        console.warn(`${effectData.name} v14 changes moved to system.changes`);
+                        effectData.system.changes ??= effectData.changes;
+                        delete effectData.changes;
+
+                        // V14 appears to use "type" instead of "mode"
+                        for (const change of effectData.system.changes) {
+                            change.type ??= change.mode;
+                        }
+                    }
+                    const currentAE =
+                        this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
+                        this.effects.find((ae) => !ae.system.XMLID);
+                    1;
+                    if (currentAE?.update) {
+                        await currentAE.update(effectData);
+                        console.log(currentAE);
+                    } else {
+                        const newAE = await ActiveEffect.implementation.create(effectData, {
+                            parent: this,
+                        });
+                        console.log(newAE);
+                    }
+
+                    return;
+                } else {
+                    console.error(`missing AE`);
+                }
+            }
+
             // ACTIVE EFFECTS
             if (this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
                 try {
@@ -529,29 +564,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     });
                 } else {
                     await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-                }
-            }
-
-            // Generic activeEffect (preferred; so far just GROWTH, 5e COMBAT_LEVELS)
-            if (this.baseInfo?.activeEffect) {
-                const activeEffect = this.baseInfo?.activeEffect(this);
-                if (activeEffect) {
-                    const currentAE =
-                        this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
-                        this.effects.find((ae) => !ae.system.XMLID) ??
-                        {};
-                    if (currentAE) {
-                        if (currentAE.update) {
-                            await currentAE.update({
-                                name: activeEffect.name,
-                                [isGameV14OrLater() ? `system.changes` : `changes`]:
-                                    activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
-                                statuses: activeEffect.statuses, // Invisibility and such
-                            });
-                        } else {
-                            await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-                        }
-                    }
                 }
             }
 
@@ -763,6 +775,69 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             console.error(e, this);
             throw e;
         }
+    }
+
+    createVisionActiveEffect(visionDetectMode, canSeeMap) {
+        // Maximum distance we can see is based on perception.  This is typically 125m+ so rarely impacts scene.
+        // Only 5e INT/PERCEPTION can go below 9.  6e INT cannot go below 0.  5e INT can go below 0.
+        // THE RANGE OF SENSES
+        // The Range Modifier (page 144) applies to all PER Rolls with Ranged
+        // Senses; this effectively restricts their Range significantly. The rules
+        // don’t establish any absolute outer limit or boundary for a Ranged
+        // Sense; the GM should establish the limit based on common sense
+        // and the situation. As a guideline, when the Range Modifier exceeds
+        // the point where it reduces a character’s PER Roll to 0 or below,
+        // things become too blurry, indistinct, or obscured for the character
+        // to perceive, even if he rolls a 3.
+        let maxRange = 8;
+        // TODO: Fix PERCEPTION.system.roll so we don't have to poke into INT
+        //const PERCEPTION = this.actor?.items.find((i) => i.system.XMLID === "PERCEPTION");
+        if (this.actor && this.actor.system.characteristics.int) {
+            //9 + (INT/5)
+            const perRoll = 9 + roundFavorPlayerAwayFromZero(parseInt(this.actor.system.characteristics.int.value) / 5);
+            const pwr = perRoll / 2 + 2;
+            maxRange = Math.floor(Math.max(maxRange, Math.pow(2, pwr)));
+        }
+
+        const ae = {
+            name: this.name,
+            img: this.img,
+            transfer: true,
+            system: {
+                changes: [],
+            },
+        };
+
+        //TODO: range should be dynamic based on PERCEPTION
+
+        // Can we see the map?
+        if (canSeeMap) {
+            ae.system.changes.push({
+                key: "token.sight.range",
+                value: maxRange,
+                mode: "upgrade", // "upgrade" has a V14 bug, so not using it, but would prefer to
+            });
+        }
+
+        // Detection of tokens
+        ae.system.changes.push({
+            key: `token.detectionModes.basicSight.range`,
+            value: maxRange,
+            mode: "upgrade",
+        });
+        ae.system.changes.push({
+            key: `token.detectionModes.${visionDetectMode}.range`,
+            value: maxRange,
+            mode: "upgrade",
+        });
+        ae.system.changes.push({
+            key: `token.detectionModes.${visionDetectMode}.enabled`,
+            value: true,
+            mode: "override",
+        });
+
+        ae.system.XMLID = this.system.XMLID;
+        return ae;
     }
 
     get heroValidation() {

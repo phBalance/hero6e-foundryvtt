@@ -188,7 +188,7 @@ Hooks.once("init", async function () {
     }
     CONFIG.Canvas.rulerClass = HeroRuler; // END Use & calculateVelocityInSystemUnits
 
-    CONFIG.Canvas.visionSourceClass = HeroPointVisionSource;
+    //CONFIG.Canvas.visionSourceClass = HeroPointVisionSource;
 
     Object.assign(CONFIG.ActiveEffect.dataModels, {
         // REF: https://foundryvtt.wiki/en/development/api/DataModel
