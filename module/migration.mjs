@@ -394,16 +394,13 @@ export async function migrateWorld() {
  */
 async function commitActorAndItemMigrateDataChangesByActor(actor) {
     const promises = [];
-
-    const actorUpdates = [];
     const itemUpdates = [];
 
     if (actor.flags[game.system.id]?.[needToPersistToDb]) {
         const { _id, system, flags, type } = actor.toObject();
         delete flags[game.system.id][needToPersistToDb];
-        actorUpdates.push({ _id, "==system": system, "==flags": flags, type: type });
+        await actor.update({ _id, "==system": system, "==flags": flags, type: type });
     }
-    promises.push(Actor.implementation.updateDocuments(actorUpdates));
 
     for (const item of actor.items) {
         if (item.flags[game.system.id]?.[needToPersistToDb]) {
@@ -413,7 +410,9 @@ async function commitActorAndItemMigrateDataChangesByActor(actor) {
         }
     }
 
-    promises.push(Item.implementation.updateDocuments(itemUpdates, { parent: actor }));
+    if (itemUpdates.length > 0) {
+        promises.push(Item.implementation.updateDocuments(itemUpdates, { parent: actor }));
+    }
 
     return Promise.all(promises);
 }

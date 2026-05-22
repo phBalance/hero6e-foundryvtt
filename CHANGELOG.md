@@ -1,5 +1,10 @@
 # Releases
 
+### Version 4.3.8 So far [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Initial FoundryVTT V14 support. We have a few known issues (no HeroVision) and likely several unknown issues for the community to bring to our attention.
+-
+
 ### Version 4.3.7 20260517 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - /heroroll now supports applying normal or killing damage to selected tokens like the generic roller. See the [README.md](https://github.com/dmdorman/hero6e-foundryvtt/blob/main/README.md#manual-rolling) for more details. [#4146](https://github.com/dmdorman/hero6e-foundryvtt/issues/4146)

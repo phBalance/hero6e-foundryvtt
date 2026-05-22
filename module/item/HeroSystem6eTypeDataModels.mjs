@@ -1539,7 +1539,7 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
 
     get baseInfo() {
         // cache getPowerInfo
-        this.#baseInfo ??= getPowerInfo({ item: this, xmlTag: this.xmlTag });
+        this.#baseInfo ??= getPowerInfo({ item: this, xmlTag: this.xmlTag ?? this.XMLID });
         // if (!this.#baseInfo) {
         //     debugger;
         // }
