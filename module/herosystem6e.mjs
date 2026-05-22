@@ -61,6 +61,7 @@ import "./heroRoller/chat-dice.mjs";
 import { HeroRoll } from "./heroRoller/dice.mjs";
 import "./utility/adjustment.mjs";
 import { expireEffects } from "./utility/util.mjs";
+import { isGameV14OrLater } from "./utility/compatibility.mjs";
 
 // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttActors = foundry.documents?.collections?.Actors || Actors;
@@ -188,7 +189,9 @@ Hooks.once("init", async function () {
     }
     CONFIG.Canvas.rulerClass = HeroRuler; // END Use & calculateVelocityInSystemUnits
 
-    CONFIG.Canvas.visionSourceClass = HeroPointVisionSource;
+    if (!isGameV14OrLater) {
+        CONFIG.Canvas.visionSourceClass = HeroPointVisionSource;
+    }
 
     Object.assign(CONFIG.ActiveEffect.dataModels, {
         // REF: https://foundryvtt.wiki/en/development/api/DataModel

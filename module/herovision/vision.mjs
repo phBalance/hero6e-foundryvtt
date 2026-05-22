@@ -1,3 +1,4 @@
+import { isGameV14OrLater } from "../utility/compatibility.mjs";
 import { calculateDistanceBetween } from "../utility/range.mjs";
 import { HeroVisionModeInfraredPerception } from "./vision-modes/infrared-perception2.mjs";
 
@@ -78,8 +79,12 @@ export function setPerceptionModes() {
             });
         }
     }
-    CONFIG.Canvas.visionModes.heroVision = new HeroVisionMode();
-    CONFIG.Canvas.visionModes.infraredPerception = new HeroVisionModeInfraredPerception();
+
+    // v14 has HeroVision issues
+    if (!isGameV14OrLater()) {
+        CONFIG.Canvas.visionModes.heroVision = new HeroVisionMode();
+        CONFIG.Canvas.visionModes.infraredPerception = new HeroVisionModeInfraredPerception();
+    }
 
     /**
      * Hero Generic Sense
@@ -211,108 +216,9 @@ export function setPerceptionModes() {
         }
     }
 
-    CONFIG.Canvas.detectionModes.heroDetectSight = new HeroDetectionSightMode(); //new DeCONFIG.Canvas.detectionModes.feelTremor.clone();
-    // CONFIG.Canvas.detectionModes.heroDetectSight.id = "heroDetectSight";
-    CONFIG.Canvas.detectionModes.heroDetectSight.label = "Hero Detect Sight";
-    // CONFIG.Canvas.detectionModes.heroDetectSight.type = DetectionMode.DETECTION_TYPES.SIGHT;
-    // CONFIG.Canvas.detectionModes.heroDetectSight.walls = true;
-    // CONFIG.Canvas.detectionModes.heroDetectSight._canDetect(visionSource, target) {
-    //     super._canDetect(visionSource, target);
-    //     console.log("canDetect");
-    //}
-
-    // new DetectionMode({
-    //     id: "heroSense",
-    //     label: "Hero Sense",
-    //     type: DetectionMode.DETECTION_TYPES.SIGHT,
-    // });
-    // NIGHTVISION
-    // Allows a character to see in total darkness as if it were normal
-    // daylight. Therefore, this effect does not penetrate the Power
-    // Darkness, but it does offset some forms of Change Environment
-    // that obscure vision.
-    // CONFIG.Canvas.detectionModes.heroNightVision = new DetectionMode({
-    //     id: "nightvision",
-    //     label: "VISION.NightVision",
-    //     type: DetectionMode.DETECTION_TYPES.SIGHT,
-    // });
-    //}
-
-    // class ThoughtsDetectionMode extends DetectionMode {
-    //     constructor() {
-    //         super({
-    //             id: "thoughtsense",
-    //             label: "PF2E.Actor.Creature.Sense.Type.Thoughts",
-    //             walls: false,
-    //             angle: false,
-    //             type: DetectionMode.DETECTION_TYPES.OTHER,
-    //         });
-    //     }
-    //     static getDetectionFilter() {
-    //         const filter2 = (this._detectionFilter ??= OutlineOverlayFilter.create({
-    //             wave: true,
-    //             knockout: false,
-    //         }));
-    //         return (filter2.thickness = 1), filter2;
-    //     }
-    //     _canDetect(visionSource, target) {
-    //         return (
-    //             target instanceof CONFIG.Token.objectClass /*TokenPF2e*/ &&
-    //             !target.document.hidden &&
-    //             !target.actor?.isOfType("loot") &&
-    //             !target.actor?.system.traits.value.includes("mindless") &&
-    //             super._canDetect(visionSource, target)
-    //         );
-    //     }
+    // Problems with v14 HeroDetect
+    if (!isGameV14OrLater()) {
+        CONFIG.Canvas.detectionModes.heroDetectSight = new HeroDetectionSightMode(); //new DeCONFIG.Canvas.detectionModes.feelTremor.clone();
+        CONFIG.Canvas.detectionModes.heroDetectSight.label = "Hero Detect Sight";
+    }
 }
-
-// Turn on Special Vision
-// export async function activateSpecialVision(item, token) {
-//     if (!token) return;
-
-//     // token might be a PrototypeToken token
-//     const tokenDocument = token.document || token;
-
-//     // Lantern or Torch
-//     if (item.system.XMLID === "CUSTOMPOWER" && item.system.ALIAS.match(/light/i)) {
-//         await tokenDocument.update({ "light.bright": parseInt(item.system.QUANTITY) });
-//     }
-
-//     if (!item.baseInfo?.sight) return;
-
-//     const detectionModes = tokenDocument.detectionModes;
-//     const basicSight = detectionModes.find((o) => o.id === "basicSight");
-//     if (basicSight) {
-//         basicSight.range = null; // Cannot see things in the dark without special visions
-//     }
-
-//     await tokenDocument.update({
-//         sight: item.baseInfo.sight,
-//         detectionModes,
-//     });
-// }
-
-// Remove Special Visions
-// export async function removeSpecialVisions(token) {
-//     if (!token) return;
-
-//     // token might be a PrototypeToken token
-//     const tokenDocument = token.document || token;
-
-//     // Lantern or Torch
-//     if (token.actor.items.find((o) => o.system.XMLID === "CUSTOMPOWER" && o.system.ALIAS.match(/light/i))) {
-//         await tokenDocument.update({ "light.dim": 0, "light.bright": 0 });
-//     }
-
-//     const detectionModes = tokenDocument.detectionModes;
-//     const basicSight = detectionModes.find((o) => o.id === "basicSight");
-//     if (basicSight) {
-//         basicSight.range = 0; // Cannot see things in the dark without special visions
-//     }
-//     if (token) {
-//         await tokenDocument.update({
-//             sight: { visionMode: "basic", range: 0, color: undefined },
-//             detectionModes,
-//         });
-//     }
-// }
