@@ -33,22 +33,21 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
     }
 
     _prepareDetectionModes() {
-        if (isGameV14OrLater()) {
-            return super._prepareDetectionModes();
-        }
-
-        if (!this.sight.enabled) return;
-
-        if (!this.isOwner) return;
-
-        if (!this.id) return;
-
         if (this.sight.visionMode !== "heroVision") {
             super._prepareDetectionModes();
             return;
         }
 
-        // TO see the map you must have DETECT + SENSE
+        // The rest is for our custom HEROVISION
+        if (!this.sight.enabled) return;
+        if (!this.isOwner) return;
+        if (!this.id) return;
+
+        if (isGameV14OrLater()) {
+            return this._prepareDetectionModes14();
+        }
+
+        // To see the map you must have DETECT + SENSE
         // Anything with 'detect limited class of physical objects'
 
         // By default you must have a light source to see the map
@@ -141,6 +140,10 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
         } catch (e) {
             console.error(e);
         }
+    }
+
+    _prepareDetectionModes14() {
+        return;
     }
 
     static async createCombatants(tokens, { combat } = {}) {
