@@ -860,12 +860,17 @@ export async function performAdjustment(
     } else if (activeEffect.flags[game.system.id]?.adjustmentActivePoints !== 0) {
         // Were likely adding a second change row
         updateEffectName(activeEffect);
-        await activeEffect.update({
+        const updates = {
             name: activeEffect.name,
-            [isGameV14OrLater() ? `system.changes` : `changes`]:
-                activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
             flags: activeEffect.flags,
-        });
+        };
+        if (isGameV14OrLater) {
+            updates.system ??= {};
+            updates.system.changes = activeEffect.system.changes ?? activeEffect.changes;
+        } else {
+            updates.changes = activeEffect.changes;
+        }
+        await activeEffect.update(updates);
     } else {
         console.error(`ActiveEffect ${activeEffect.name} not created because adjustmentActivePoints=0`);
     }

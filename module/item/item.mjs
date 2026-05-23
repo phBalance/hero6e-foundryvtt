@@ -374,20 +374,52 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         // V14 appears to use "type" instead of "mode"
                         for (const change of effectData.system.changes) {
                             change.type ??= change.mode;
+
+                            // V14 no longer uses numeric change.type instead it uses a string
+                            if (Number.isNumeric(change.type)) {
+                                switch (change.type) {
+                                    case 1:
+                                        change.type = "multiply"; //CONST.ACTIVE_EFFECT_MODES.MULTIPLY
+                                        break;
+
+                                    case 2:
+                                        change.type = "add"; //CONST.ACTIVE_EFFECT_MODES.ADD
+                                        break;
+
+                                    case 3:
+                                        change.type = "downgrade"; //CONST.ACTIVE_EFFECT_MODES.DOWNGRADE
+                                        break;
+
+                                    case 4:
+                                        change.type = "upgrade"; //CONST.ACTIVE_EFFECT_MODES.UPGRADE
+                                        break;
+
+                                    case 5:
+                                        change.type = "override"; //CONST.ACTIVE_EFFECT_MODES.OVERRIDE
+                                        break;
+
+                                    default:
+                                        // Assume V14 change.type is correct
+                                        break;
+                                }
+                            }
                         }
                     }
                     const currentAE =
                         this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                         this.effects.find((ae) => !ae.system.XMLID);
-                    1;
+
                     if (currentAE?.update) {
                         // TODO: Should we check if an update is really needed, potentially improving performance
                         await currentAE.update(effectData);
                     } else {
-                        const newAE = await ActiveEffect.implementation.create(effectData, {
+                        const ae = await ActiveEffect.implementation.create(effectData, {
                             parent: this,
                         });
-                        console.log(newAE);
+
+                        if (!ae) {
+                            console.error(`Failed to setActiveEffects on ${this.name}`, this);
+                        }
                     }
 
                     //TODO: Update characteristic VALUE when changes includes a MAX?  DENSITYINCREASE for example.
@@ -403,7 +435,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             // Generic MOVEMENT activeEffect
             if (this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
                 try {
-                    console.log(`setActiveEffects movement`);
                     let activeEffect =
                         this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                         this.effects.find((ae) => !ae.system.XMLID) ??
@@ -693,7 +724,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 }
             }
         } catch (e) {
-            console.error(e, this);
+            console.error(`Failed to setActiveEffects on ${this.name}`, e, this);
             throw e;
         }
     }
