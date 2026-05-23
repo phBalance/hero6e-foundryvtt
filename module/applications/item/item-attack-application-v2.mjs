@@ -24,7 +24,7 @@ import { HeroSystem6eRegion } from "../../heroRegion.mjs";
 const heroAoeTypeToFoundryAoeTypeConversions = Object.freeze({
     any: "rect",
     cone: "cone",
-    line: "ray",
+    line: "line",
     radius: "circle",
     surface: "rect",
 });
@@ -603,7 +603,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         if (!areaOfEffect) return;
 
         const aoeType = areaOfEffect.type;
-        const aoeValue = areaOfEffect.value;
+        //const aoeValue = areaOfEffect.value;
 
         const actor = item.actor;
         const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
@@ -618,18 +618,25 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             }
         }
 
+        function metersToPixels(meters) {
+            const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor.is5e);
+            const distanceInMeters = meters * sizeConversionToMeters;
+            const distanceInGridUnits = distanceInMeters / gridUnitsToMeters();
+            return distanceInGridUnits * canvas.grid.size;
+        }
+
         const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
 
-        const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor.is5e);
+        //const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor.is5e);
 
-        const hexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
-        const hexGrid = currentSceneUsesHexGrid();
+        //const hexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
+        //const hexGrid = currentSceneUsesHexGrid();
 
         // NOTE: If we're using hex templates (i.e. 5e), the target hex is in should count as a distance of 1". This means that to convert to what FoundryVTT expects
         //       for distance we need to subtract 0.5"/1m from the radius.
         // NOTE: MeasuredTemplates assume that the distance is in grid units.
-        const distanceInMeters = aoeValue * sizeConversionToMeters - (hexTemplates && hexGrid ? 1 : 0);
-        const distanceInGridUnits = distanceInMeters / gridUnitsToMeters();
+        //const distanceInMeters = aoeValue * sizeConversionToMeters - (hexTemplates && hexGrid ? 1 : 0);
+        //const distanceInGridUnits = distanceInMeters / gridUnitsToMeters();
 
         const effectiveAttackItemOriginalItemId = item.effectiveAttackItem.getEffectiveItemOriginalItemId;
         const regionData = {
@@ -641,7 +648,6 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                     x: token.center.x,
                     y: token.center.y,
                     rotation: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
-                    radius: (distanceInGridUnits * canvas.grid.size) / 2,
                 },
             ],
             displayMeasurements: true,
@@ -672,6 +678,9 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
         switch (templateType) {
             case "circle":
+                {
+                    regionData.shapes[0].radius = metersToPixels(areaOfEffect.value) / 2;
+                }
                 break;
 
             case "cone":
@@ -685,14 +694,14 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
                 break;
 
-            // case "ray":
-            //     {
-            //         regionData[game.system.id] = {};
-            //         regionData.width = sizeConversionToMeters * areaOfEffect.width;
-            //         regionData.flags[game.system.id].width = areaOfEffect.width;
-            //         regionData.flags[game.system.id].height = areaOfEffect.height;
-            //     }
-            //     break;
+            case "line":
+                {
+                    // width & length are in pixels
+                    // AARON: Not sure why we are dividing by 2 here.
+                    regionData.shapes[0].width = metersToPixels(areaOfEffect.width) / 2;
+                    regionData.shapes[0].length = metersToPixels(areaOfEffect.value) / 2;
+                }
+                break;
 
             // case "rect": {
             //     // if (areaOfEffect.type === "surface" && item.findModsByXmlid("CONTINUOUS")) {
