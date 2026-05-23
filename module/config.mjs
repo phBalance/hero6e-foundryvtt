@@ -6964,6 +6964,50 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 return `${item.system.ALIAS} (${details})`;
             },
+            activeEffect: function (item) {
+                const noStrIncrease = item.modifiers.find((mod) => mod.XMLID === "NOSTRINCREASE");
+                const noDefIncrease = item.modifiers.find((mod) => mod.XMLID === "NODEFINCREASE");
+                // NODEFINCREASE allows for ED, PD, or EDPD as option.
+                const noDefIncreasePd = noDefIncrease?.OPTIONID.includes("PD");
+                const noDefIncreaseEd = noDefIncrease?.OPTIONID.includes("ED");
+
+                const strAdd = noStrIncrease ? 0 : item.system.LEVELS * 5;
+                const pdAdd = noDefIncreasePd ? 0 : item.system.LEVELS;
+                const edAdd = noDefIncreaseEd ? 0 : item.system.LEVELS;
+
+                const ae = {
+                    transfer: true,
+                };
+                if (item.name.replace(" ").toUpperCase().includes(item.system.XMLID)) {
+                    ae.name = `${item.name} [${item.system.LEVELS}]`;
+                } else {
+                    ae.name = `${item.name} [${item.system.XMLID} ${item.system.LEVELS}]`;
+                }
+                ae.img = item.img;
+                ae.system ??= {};
+                ae.changes = [
+                    {
+                        key: "system.characteristics.str.max",
+                        value: strAdd,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                    },
+                    {
+                        key: "system.characteristics.pd.max",
+                        value: pdAdd,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                    },
+                    {
+                        key: "system.characteristics.ed.max",
+                        value: edAdd,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                    },
+                ];
+                ae.system.XMLID = item.system.XMLID;
+                return ae;
+            },
             xml: `<POWER XMLID="DENSITYINCREASE" ID="1709333874268" BASECOST="0.0" LEVELS="1" ALIAS="Density Increase" POSITION="31" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {
@@ -8300,6 +8344,33 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
+            activeEffect: function (item) {
+                // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
+                // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
+
+                const dcvAdd = Math.floor(this.system.LEVELS) * 2;
+
+                const ae = {
+                    transfer: true,
+                };
+                if (item.name.replace(" ").toUpperCase().includes(item.system.XMLID)) {
+                    ae.name = `${item.name} [${item.system.LEVELS}]`;
+                } else {
+                    ae.name = `${item.name} [${item.system.XMLID} ${item.system.LEVELS}]`;
+                }
+                ae.img = item.img;
+                ae.system ??= {};
+                ae.changes = [
+                    {
+                        key: "system.characteristics.dcv.max",
+                        value: dcvAdd,
+                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
+                    },
+                ];
+                ae.system.XMLID = item.system.XMLID;
+                return ae;
+            },
             xml: `<POWER XMLID="SHRINKING" ID="1709334010424" BASECOST="0.0" LEVELS="1" ALIAS="Shrinking" POSITION="74" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         { costPerLevel: fixedValueFunction(10) },
