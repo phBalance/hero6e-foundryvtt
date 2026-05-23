@@ -10,12 +10,7 @@ import {
     isManeuverThatDoesNormalDamage,
     isRangedCombatManeuver,
 } from "../../utility/damage.mjs";
-import {
-    convertSystemUnitsToMetres,
-    currentSceneUsesHexGrid,
-    getSystemDisplayUnits,
-    gridUnitsToMeters,
-} from "../../utility/units.mjs";
+import { convertSystemUnitsToMetres, getSystemDisplayUnits, gridUnitsToMeters } from "../../utility/units.mjs";
 import { HeroSystem6eRegion } from "../../heroRegion.mjs";
 
 /**

@@ -2888,7 +2888,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     await this.updateEmbeddedDocuments("Item", vppChanges);
                 }
             }
-            uploadProgressBar.advance(`${this.name}: VPP Slots auto selection complete`, 1);
+            uploadProgressBar.advance(`${this.name}: VPP iSlots auto selection complete`, 1);
 
             // Make sure any powers with characteristic properties
             // reflect in current VALUE.
