@@ -729,8 +729,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         canvas.tokens.ownedTokens?.[0].setTarget(false, { releaseOthers: true });
 
         // Create the region
-        //const newDocumentsCreated = await canvas.scene.createEmbeddedDocuments("Region", [regionData]);
-        const newRegion = await canvas.regions.placeRegion(regionData);
+        const newRegion = await this.placeRegionWithHiddenUI(regionData); //await canvas.regions.placeRegion(regionData);
         if (newRegion?.documentName !== "Region") {
             throw new Error("Failed to create region for area of effect");
         }
@@ -769,6 +768,50 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         //     control: true,
         //     toggle: false,
         // });
+    }
+
+    async placeRegionWithHiddenUI(regionData) {
+        let newRegion;
+        const hiddenElements = [];
+
+        // Identify all V1 open Application Windows (actor sheets, journals, items, etc.)
+        const openWindowsV1 = Object.values(ui.windows);
+
+        // Hide all open windows by altering their visibility
+        openWindowsV1.forEach((app) => {
+            // Safe check to ensure the application window is rendered
+            if (app._element && app._element.length) {
+                hiddenElements.push({ element: app._element[0], visibility: app._element[0].style.visibility });
+                app._element[0].style.visibility = "hidden";
+            }
+        });
+
+        // Identify all V2 open Application Windows (actor sheets, journals, items, etc.)
+        const openWindowsV2 = foundry.applications.instances.values();
+        // Hide all open windows by altering their visibility
+        openWindowsV2.forEach((app) => {
+            // Safe check to ensure the application window is rendered, visible, etc
+            if (app.element && app.window.content && app.element.style.visibility !== "hidden") {
+                hiddenElements.push({ element: app.element, visibility: app.element.style.visibility });
+                app.element.style.visibility = "hidden";
+            }
+        });
+
+        try {
+            ui.notifications.info(
+                `Placing <b>${regionData.name}</b>. SHIFT/CTRL+MouseWheel to rotate. Left click to place. Right click to cancel.`,
+            );
+            newRegion = await canvas.regions.placeRegion(regionData);
+        } catch (e) {
+            console.error(e);
+        }
+
+        // Restore visibility to all hiddenElements when finished
+        hiddenElements.forEach((el) => {
+            el.element.style.visibility = el.visibility;
+        });
+
+        return newRegion;
     }
 
     /**
