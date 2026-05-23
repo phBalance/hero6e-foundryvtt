@@ -1657,7 +1657,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
     }
 
-    async fullHealth() {
+    async fullHealth(options = {}) {
         const tDelta = 500;
         let start = Date.now();
         await this.statuses.clear();
@@ -1677,32 +1677,34 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
 
         // Remove temporary effects
-        // start = Date.now();
-        // for (const ae of this.temporaryEffects) {
-        //     if (
-        //         ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) ||
-        //         ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id)
-        //     )
-        //         continue;
+        if (!options.keepTemporaryEffects) {
+            start = Date.now();
+            for (const ae of this.temporaryEffects) {
+                if (
+                    ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) ||
+                    ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id)
+                )
+                    continue;
 
-        //     await ae.delete();
-        // }
-        // end = Date.now();
-        // if (end - start > tDelta) {
-        //     console.warn("fullHealth performance concern: Remove temporary effects", end - start);
-        // }
+                await ae.delete();
+            }
+            end = Date.now();
+            if (end - start > tDelta) {
+                console.warn("fullHealth performance concern: Remove temporary effects", end - start);
+            }
 
-        // Remove Maneuver/Martial effects
-        // start = Date.now();
-        // for (const ae of this.appliedEffects.filter(
-        //     (ae) => ae.flags[game.system.id]?.type === "maneuverNextPhaseEffect",
-        // )) {
-        //     await ae.delete();
-        // }
-        // end = Date.now();
-        // if (end - start > tDelta) {
-        //     console.warn("fullHealth performance concern: Remove Maneuver/Martial effects", end - start);
-        // }
+            //Remove Maneuver/Martial effects
+            start = Date.now();
+            for (const ae of this.appliedEffects.filter(
+                (ae) => ae.flags[game.system.id]?.type === "maneuverNextPhaseEffect",
+            )) {
+                await ae.delete();
+            }
+            end = Date.now();
+            if (end - start > tDelta) {
+                console.warn("fullHealth performance concern: Remove Maneuver/Martial effects", end - start);
+            }
+        }
 
         // Set Characteristics MAX to CORE (or 5e calculated value)
         start = Date.now();
@@ -2889,9 +2891,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             uploadProgressBar.advance(`${this.name}: VPP Slots auto selection complete`, 1);
 
             // Make sure any powers with characteristic properties
-            // reflect in current VALUE
+            // reflect in current VALUE.
+            // But we want to keep temporary effects (drains, aids, etc)
+            // so players can upload new HDC files without wiping out mid session AE's.
+            // Similar to retained data, were retaining (by not deleting) the temporary effects.
             uploadProgressBar.advance(`${this.name}: Full Health`, 0);
-            await this.fullHealth();
+            await this.fullHealth({ keepTemporaryEffects: true });
+
             // Kluge to ensure characteristic values match max
             try {
                 if (this.id) {
