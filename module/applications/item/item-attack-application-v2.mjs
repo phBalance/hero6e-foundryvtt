@@ -729,11 +729,10 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         canvas.tokens.ownedTokens?.[0].setTarget(false, { releaseOthers: true });
 
         // Create the region
-        const newDocumentsCreated = await canvas.scene.createEmbeddedDocuments("Region", [regionData]);
-        const newRegion = newDocumentsCreated[0];
-        if (!newRegion) {
-            console.error("Failed to create region for area of effect");
-            return;
+        //const newDocumentsCreated = await canvas.scene.createEmbeddedDocuments("Region", [regionData]);
+        const newRegion = await canvas.regions.placeRegion(regionData);
+        if (newRegion?.documentName !== "Region") {
+            throw new Error("Failed to create region for area of effect");
         }
 
         // Apply the TokenAutomaticTargeting behavior to the region
