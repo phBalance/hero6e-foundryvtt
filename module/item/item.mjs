@@ -485,11 +485,16 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
                 if (activeEffect.update) {
                     const oldMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max;
-                    await activeEffect.update({
+                    const updates = {
                         name: activeEffect.name,
-                        [isGameV14OrLater() ? `system.changes` : `changes`]:
-                            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
-                    });
+                    };
+                    if (isGameV14OrLater) {
+                        updates.system ??= {};
+                        updates.system.changes = activeEffect.system.changes ?? activeEffect.changes;
+                    } else {
+                        updates.changes = activeEffect.changes;
+                    }
+                    await activeEffect.update(updates);
                     const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
                     const newValue =
                         this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax;
