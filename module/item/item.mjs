@@ -7971,6 +7971,19 @@ export function cloneToEffectiveAttackItem({
     let effectiveItem;
     const effectiveItemData = originalItem.toObject(false);
     effectiveItemData._id = null;
+
+    // v14 throws error if effect.duration.value is not an integer.
+    // Value = Infinity fails SchemaField validation.
+    // We can replace Infinity with null and get this to work.
+    // Appears to be a FoundryVTT V14 build 362 bug.
+    if (isGameV14OrLater()) {
+        for (const effect of effectiveItemData.effects) {
+            if (effect.duration.value === Infinity) {
+                effect.duration.value = null;
+            }
+        }
+    }
+
     effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
 
     // Item-attack-V2 uses originalItemUuid.
