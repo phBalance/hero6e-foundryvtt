@@ -8348,7 +8348,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
                 // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
 
-                const dcvAdd = Math.floor(this.system.LEVELS) * 2;
+                const dcvAdd = Math.floor(item.system.LEVELS) * 2;
 
                 const ae = {
                     transfer: true,

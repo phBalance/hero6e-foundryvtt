@@ -826,7 +826,7 @@ export class HeroSystem6eCombat extends Combat {
                 startContent += `Has the following statuses: ${Array.from(combatant.actor.statuses).join(", ")}<br>`;
             }
 
-            for (const ae of combatant.actor.temporaryEffects.filter((ae) => ae._prepareDuration().duration)) {
+            for (const ae of combatant.actor.temporaryEffects) {
                 const remaining = ae._prepareDuration().remaining;
                 const remainingText = remaining > 0 ? `in ${toHHMMSS(remaining)}` : "0s";
                 tempContent += `<li>${ae.name} fades ${remainingText} ${ae.flags[game.system.id]?.expiresOn ?? ""}</li>`;
@@ -1700,8 +1700,12 @@ export class HeroSystem6eCombat extends Combat {
             await this.onSegmentChange();
         }
 
-        const updateData = { [`flags.${game.system.id}.segment`]: this.turns[0].flags[game.system.id].segment };
-        await this.update(updateData);
+        if (this.turns.length === 0) {
+            ui.notifications.error(`There are no combatants`);
+        } else {
+            const updateData = { [`flags.${game.system.id}.segment`]: this.turns[0]?.flags[game.system.id].segment };
+            await this.update(updateData);
+        }
 
         return _nextRound;
     }
