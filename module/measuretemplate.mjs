@@ -15,7 +15,7 @@ export default class HeroSystem6eMeasuredTemplate extends foundry.canvas.placeab
     async _onClickLeft(event) {
         await super._onClickLeft(event);
 
-        await this.selectObjects({ checkPositions: true, templateData: this });
+        await this.selectObjects();
         await game.user.broadcastActivity({
             targets: Array.from(game.user.targets.map((o) => o.id)),
         });
@@ -119,47 +119,42 @@ export default class HeroSystem6eMeasuredTemplate extends foundry.canvas.placeab
     }
 
     // Tokens within template
-    getTokensInTemplate(options) {
-        // PERSONALIMMUNITY
+    getTokensInTemplate() {
+        // PERSONALIMMUNITY - We are going to exclude the actor that created the template if they are immune
         const PERSONALIMMUNITY = (this.document.flags?.[game.system.id]?.item?.system?.MODIFIER || []).find(
             (modifier) => modifier.XMLID === "PERSONALIMMUNITY",
         );
 
-        const tokens = [];
-        for (const token of this.scene.tokens) {
-            // For some reason the only the base ITEM and ACTOR props pass into this class, so we aren't using the typical functions like actor.id instead use actor._id.
-            if (this.isTokenInside(token, options)) {
-                if (!PERSONALIMMUNITY || token.actor?.id !== this.document.flags?.[game.system.id]?.actor?._id) {
-                    tokens.push(token);
-                }
-            }
-        }
-        return tokens;
-    }
+        const _start = Date.now();
 
-    isTokenInside(token, options) {
-        options = { checkShape: true, checkPositions: true, ...options };
-        // Use Shape (but there are rounding issues; specifically if token and MeasuredTemplate have same hex origin)
-        if (options.checkShape) {
-            const actorToken = token?.object;
-            const _x = actorToken.center.x - (options?.templateData?.x || this.x);
-            const _y = actorToken.center.y - (options?.templateData?.y || this.y);
-            if (this.shape.contains(_x, _y)) return true;
+        const tokensInside = canvas.tokens.placeables.filter((token) => {
+            // Translate the token's absolute canvas center into the template's local coordinate system
+            const localX = token.center.x - this.document.x;
+            const localY = token.center.y - this.document.y;
+
+            return this.shape.contains(localX, localY);
+        });
+
+        const _end = Date.now();
+        if (_end - _start > 100) {
+            console.warn(`getTokenInTemplate took ${_end - _start}ms`);
         }
 
-        // Use positions (but some tokens may not be exactly centered on a 1 hex)
-        if (options.checkPositions) {
-            if (this._getGridHighlightPositions().find((o) => o.x === token.x && o.y === token.y)) return true;
+        if (PERSONALIMMUNITY) {
+            const tokensInsideWithoutPersonalImmunity = tokensInside.filter(
+                (t) => t.actor?.id !== this.document.flags?.[game.system.id]?.actor?._id,
+            );
+            return tokensInsideWithoutPersonalImmunity;
         }
 
-        return false;
+        return tokensInside;
     }
 
     // Update user.targets based on which tokens are in the template
-    async selectObjects(options) {
+    async selectObjects() {
         const targets = [];
 
-        for (const token of this.getTokensInTemplate(options)) {
+        for (const token of this.getTokensInTemplate()) {
             if (!token?.hidden) {
                 targets.push(token.id);
             }
