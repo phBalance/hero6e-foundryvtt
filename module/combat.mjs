@@ -1700,8 +1700,12 @@ export class HeroSystem6eCombat extends Combat {
             await this.onSegmentChange();
         }
 
-        const updateData = { [`flags.${game.system.id}.segment`]: this.turns[0].flags[game.system.id].segment };
-        await this.update(updateData);
+        if (this.turns.length === 0) {
+            ui.notifications.error(`There are no combatants`);
+        } else {
+            const updateData = { [`flags.${game.system.id}.segment`]: this.turns[0]?.flags[game.system.id].segment };
+            await this.update(updateData);
+        }
 
         return _nextRound;
     }
