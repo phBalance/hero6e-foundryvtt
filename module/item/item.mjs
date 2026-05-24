@@ -376,6 +376,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                             change.type ??= change.mode;
 
                             // V14 no longer uses numeric change.type instead it uses a string
+                            // TODO: Rework change.type into HERO.CONFIG constants and perhaps a "fix" function
                             if (Number.isNumeric(change.type)) {
                                 switch (change.type) {
                                     case 1:
@@ -422,11 +423,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         }
                     }
 
-                    //TODO: Update characteristic VALUE when changes includes a MAX?  DENSITYINCREASE for example.
-                    //Perhaps could be incorporated into the AE create/change/delete?
+                    // TODO: Update characteristic VALUE when changes includes a MAX?  DENSITYINCREASE for example.
+                    // Perhaps could be incorporated into the AE create/change/delete?
 
                     // We can't simply return as this item could be a BUKLY FOCUS, requiring another AE (below).
-                    // Perhaps an opportunity to combine into a single AE.
+                    // TODO: Perhaps an opportunity to combine into a single AE.
                 } else {
                     console.error(`missing AE`);
                 }
@@ -729,11 +730,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
     }
 
-    createVisionActiveEffect(visionDetectMode, canSeeMap) {
+    createVisionActiveEffect(visionDetectMode, isTargetingSense) {
+        // While we create these AE's in V13 and V14, only V14 knows what to do with them.
+
         // Maximum distance we can see is based on perception.  This is typically 125m+ so rarely impacts scene.
         // Only 5e INT/PERCEPTION can go below 9.  6e INT cannot go below 0.  5e INT can go below 0.
         // THE RANGE OF SENSES
-        // The Range Modifier (page 144) applies to all PER Rolls with Ranged
+        // The Range Modifier (6e, vol 2, page 7) applies to all PER Rolls with Ranged
         // Senses; this effectively restricts their Range significantly. The rules
         // don’t establish any absolute outer limit or boundary for a Ranged
         // Sense; the GM should establish the limit based on common sense
@@ -741,14 +744,15 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // the point where it reduces a character’s PER Roll to 0 or below,
         // things become too blurry, indistinct, or obscured for the character
         // to perceive, even if he rolls a 3.
-        let maxRange = 8;
+        let maxRangeInMeters = 8;
         // TODO: Fix PERCEPTION.system.roll so we don't have to poke into INT
         //const PERCEPTION = this.actor?.items.find((i) => i.system.XMLID === "PERCEPTION");
+        // TODO: This only handles the generic rules, should include telescopic vision, etc.
         if (this.actor && this.actor.system.characteristics.int) {
             //9 + (INT/5)
             const perRoll = 9 + roundFavorPlayerAwayFromZero(parseInt(this.actor.system.characteristics.int.value) / 5);
             const pwr = perRoll / 2 + 2;
-            maxRange = Math.floor(Math.max(maxRange, Math.pow(2, pwr)));
+            maxRangeInMeters = Math.max(maxRangeInMeters, Math.pow(2, pwr));
         }
 
         const ae = {
@@ -761,12 +765,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         };
 
         //TODO: range should be dynamic based on PERCEPTION
+        //TODO: Add the default priority V14 values, because we will take another pass at this when we implement darkness regions.
 
-        // Can we see the map?
-        if (canSeeMap) {
+        // If this is a TARGETING SENSE, then we can can we sense (see/hear/taste/smell) the map
+        if (isTargetingSense) {
             ae.system.changes.push({
                 key: "token.sight.range",
-                value: maxRange,
+                value: maxRangeInMeters, // Should be Infinity? Or blur when range exceeded?
                 mode: "upgrade", // "upgrade" has a V14 bug, so not using it, but would prefer to
             });
         }
@@ -774,12 +779,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // Detection of tokens
         ae.system.changes.push({
             key: `token.detectionModes.basicSight.range`,
-            value: maxRange,
+            value: maxRangeInMeters,
             mode: "upgrade",
         });
         ae.system.changes.push({
             key: `token.detectionModes.${visionDetectMode}.range`,
-            value: maxRange,
+            value: maxRangeInMeters,
             mode: "upgrade",
         });
         ae.system.changes.push({
@@ -926,19 +931,19 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 if (this.isPerk) {
                     validationFailureMessages.push({
                         itemId: this.id,
-                        message: `${this.detailedName()} is not valid because ${actor.name} is an Automaton and should not have perks.`,
+                        message: `${this.detailedName()} is not valid because ${actor.name} is an ${actor.type.toUpperCase()} and should not have perks.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
                     });
                 } else if (this.isSkill && this.system.EVERYMAN) {
                     validationFailureMessages.push({
                         itemId: this.id,
-                        message: `${this.detailedName()} is not valid because ${actor.name} is an Automaton and does not get Everyman Skills. They must buy all skills.`,
+                        message: `${this.detailedName()} is not valid because ${actor.name} is an ${actor.type.toUpperCase()} and does not get Everyman Skills. They must buy all skills.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                     });
                 } else if (this.isCharacteristic && !actor.hasCharacteristic(this.system.XMLID)) {
                     validationFailureMessages.push({
                         itemId: this.id,
-                        message: `${this.detailedName()} is not valid because ${actor.name} is an Automaton and cannot have the ${this.system.XMLID} characteristic.`,
+                        message: `${this.detailedName()} is not valid because ${actor.name} is an ${actor.type.toUpperCase()} and cannot have the ${this.system.XMLID} characteristic.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                     });
                 }
@@ -950,19 +955,19 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 if (this.isSkillEnhancer) {
                     validationFailureMessages.push({
                         itemId: this.id,
-                        message: `${this.detailedName()} is not valid because ${actor.name} is a COMPUTER and cannot use skill enhancers.`,
+                        message: `${this.detailedName()} is not valid because ${actor.name} is a ${actor.type.toUpperCase()} and cannot use skill enhancers.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                     });
                 } else if (this.isMovement) {
                     validationFailureMessages.push({
                         itemId: this.id,
-                        message: `${this.detailedName()} is not valid because ${actor.name} is a COMPUTER  and cannot have movement powers.`,
+                        message: `${this.detailedName()} is not valid because ${actor.name} is a ${actor.type.toUpperCase()} and cannot have movement powers.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                     });
                 } else if (this.isCharacteristic && !actor.hasCharacteristic(this.system.XMLID)) {
                     validationFailureMessages.push({
                         itemId: this.id,
-                        message: `${this.detailedName()} is not valid because ${actor.name} is a COMPUTER  and cannot have the ${this.system.XMLID} characteristic.`,
+                        message: `${this.detailedName()} is not valid because ${actor.name} is a ${actor.type.toUpperCase()} and cannot have the ${this.system.XMLID} characteristic.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                     });
                 }
@@ -973,7 +978,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 if (this.isCharacteristic && !actor.hasCharacteristic(this.system.XMLID)) {
                     validationFailureMessages.push({
                         itemId: this.id,
-                        message: `${this.detailedName()} is not valid because ${actor.name} is a vehicle and cannot have the ${this.system.XMLID} characteristic.`,
+                        message: `${this.detailedName()} is not valid because ${actor.name} is a ${actor.type.toUpperCase()} and cannot have the ${this.system.XMLID} characteristic.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                     });
                 }
