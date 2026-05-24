@@ -720,14 +720,14 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             await existingTemplate.delete();
         }
 
-        // Remove all targets
-        canvas.tokens.ownedTokens?.[0].setTarget(false, { releaseOthers: true });
-
         // Create the region
         const newRegion = await this.placeRegionWithHiddenUI(regionData); //await canvas.regions.placeRegion(regionData);
         if (newRegion?.documentName !== "Region") {
             throw new Error("Failed to create region for area of effect");
         }
+
+        // Remove all targets
+        canvas.tokens.ownedTokens?.[0].setTarget(false, { releaseOthers: true });
 
         // Apply the TokenAutomaticTargeting behavior to the region
         // so that it will target tokens that enter it and remove targets that leave it.
@@ -748,26 +748,17 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
         // FORCED TRIGGER: Handle tokens that are already standing inside right now
         // region.tokens holds a collection of all TokenDocuments currently within the region boundaries
-        for (let tokenDoc of newRegion.tokens) {
+        for (const tokenDoc of newRegion.tokens) {
             if (tokenDoc.object) {
                 // Set target to true, don't clear target strings of other players
                 tokenDoc.object.setTarget(true, { releaseOthers: false });
             }
         }
-
-        // canvas.templates.activate({ tool: templateType });
-        // canvas.templates.selectObjects({
-        //     x: regionData.x,
-        //     y: regionData.y,
-        //     releaseOthers: true,
-        //     control: true,
-        //     toggle: false,
-        // });
     }
 
     async placeRegionWithHiddenUI(regionData) {
         let newRegion;
-        const hiddenElements = [];
+        const hiddenElementsData = [];
 
         // Identify all V1 open Application Windows (actor sheets, journals, items, etc.)
         const openWindowsV1 = Object.values(ui.windows);
@@ -776,7 +767,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         openWindowsV1.forEach((app) => {
             // Safe check to ensure the application window is rendered
             if (app._element && app._element.length) {
-                hiddenElements.push({ element: app._element[0], visibility: app._element[0].style.visibility });
+                hiddenElementsData.push({ element: app._element[0], visibility: app._element[0].style.visibility });
                 app._element[0].style.visibility = "hidden";
             }
         });
@@ -787,7 +778,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         openWindowsV2.forEach((app) => {
             // Safe check to ensure the application window is rendered, visible, etc
             if (app.element && app.window.content && app.element.style.visibility !== "hidden") {
-                hiddenElements.push({ element: app.element, visibility: app.element.style.visibility });
+                hiddenElementsData.push({ element: app.element, visibility: app.element.style.visibility });
                 app.element.style.visibility = "hidden";
             }
         });
@@ -802,8 +793,8 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         }
 
         // Restore visibility to all hiddenElements when finished
-        hiddenElements.forEach((el) => {
-            el.element.style.visibility = el.visibility;
+        hiddenElementsData.forEach((hiddenElementData) => {
+            hiddenElementData.element.style.visibility = hiddenElementData.visibility;
         });
 
         return newRegion;

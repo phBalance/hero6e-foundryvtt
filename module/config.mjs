@@ -8711,6 +8711,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
+            activeEffect: function (item) {
+                return item?.createVisionActiveEffect("darkvision", true);
+            },
             xml: `<POWER XMLID="ACTIVESONAR" ID="1763830302787" BASECOST="15.0" LEVELS="0" ALIAS="Active Sonar" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" GROUP="HEARINGGROUP"></POWER>`,
         },
         {

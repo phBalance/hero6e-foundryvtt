@@ -393,12 +393,12 @@ export async function migrateWorld() {
  * REF: https://discord.com/channels/170995199584108546/811676497965613117/1437162678224162836
  */
 async function commitActorAndItemMigrateDataChangesByActor(actor) {
-    const promises = [];
     const itemUpdates = [];
 
     if (actor.flags[game.system.id]?.[needToPersistToDb]) {
         const { _id, system, flags, type } = actor.toObject();
         delete flags[game.system.id][needToPersistToDb];
+        //TODO: what about items that we removed (like the STR placeholder?), not working as intended.
         await actor.update({ _id, "==system": system, "==flags": flags, type: type });
     }
 
@@ -411,10 +411,8 @@ async function commitActorAndItemMigrateDataChangesByActor(actor) {
     }
 
     if (itemUpdates.length > 0) {
-        promises.push(Item.implementation.updateDocuments(itemUpdates, { parent: actor }));
+        await Item.implementation.updateDocuments(itemUpdates, { parent: actor });
     }
-
-    return Promise.all(promises);
 }
 
 /**

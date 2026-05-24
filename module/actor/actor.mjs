@@ -4529,6 +4529,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     static migrateData_4_1_13(source) {
         // We no longer need __InternalManeuverPlaceholderWeapon as we now have effective attack items. Delete
         // it from all actors.
+        // TODO: Persisting is not working as intended (see commitActorAndItemMigrateDataChangesByActor).  Make a standard migration?
         const _removePlaceholderWeaponItem = source?.items?.find(
             (item) => item.name === "__InternalManeuverPlaceholderWeapon",
         );
