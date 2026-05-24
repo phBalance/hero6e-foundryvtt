@@ -17075,6 +17075,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            // INVISIBILITY related
+            key: "BRIGHTFRINGE",
+            behaviors: ["modifier"],
+            type: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="BRIGHTFRINGE" ID="1779635869015" BASECOST="-0.25" LEVELS="0" ALIAS="Bright Fringe" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
 
     addPower(
         {
@@ -17153,6 +17165,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="CANNOTPASSTHROUGHSOLID" ID="1708756543951" BASECOST="-0.5" LEVELS="0" ALIAS="Cannot Pass Through Solid Objects" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // INVISIBILITY related
+            key: "CHAMELEON",
+            behaviors: ["modifier"],
+            type: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="CHAMELEON" ID="1779635862771" BASECOST="-0.5" LEVELS="0" ALIAS="Chameleon" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {},
     );
