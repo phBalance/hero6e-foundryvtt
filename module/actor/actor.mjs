@@ -1388,11 +1388,16 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             });
 
             if (activeEffect.id) {
-                await activeEffect.update({
+                const updates = {
                     name: activeEffect.name,
-                    [isGameV14OrLater() ? `system.changes` : `changes`]:
-                        activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
-                });
+                };
+                if (isGameV14OrLater) {
+                    updates.system ??= {};
+                    updates.system.changes = activeEffect.system.changes ?? activeEffect.changes;
+                } else {
+                    updates.changes = activeEffect.changes;
+                }
+                await activeEffect.update(updates);
             } else {
                 await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
             }

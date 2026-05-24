@@ -361,7 +361,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 return;
             }
 
-            // Generic activeEffect (preferred)
+            // Generic activeEffect from CONFIG.MJS (preferred)
             if (this.baseInfo?.activeEffect) {
                 const effectData = this.baseInfo?.activeEffect(this);
                 if (effectData) {
@@ -374,32 +374,67 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         // V14 appears to use "type" instead of "mode"
                         for (const change of effectData.system.changes) {
                             change.type ??= change.mode;
+
+                            // V14 no longer uses numeric change.type instead it uses a string
+                            if (Number.isNumeric(change.type)) {
+                                switch (change.type) {
+                                    case 1:
+                                        change.type = "multiply"; //CONST.ACTIVE_EFFECT_MODES.MULTIPLY
+                                        break;
+
+                                    case 2:
+                                        change.type = "add"; //CONST.ACTIVE_EFFECT_MODES.ADD
+                                        break;
+
+                                    case 3:
+                                        change.type = "downgrade"; //CONST.ACTIVE_EFFECT_MODES.DOWNGRADE
+                                        break;
+
+                                    case 4:
+                                        change.type = "upgrade"; //CONST.ACTIVE_EFFECT_MODES.UPGRADE
+                                        break;
+
+                                    case 5:
+                                        change.type = "override"; //CONST.ACTIVE_EFFECT_MODES.OVERRIDE
+                                        break;
+
+                                    default:
+                                        // Assume V14 change.type is correct
+                                        break;
+                                }
+                            }
                         }
                     }
                     const currentAE =
                         this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                         this.effects.find((ae) => !ae.system.XMLID);
-                    1;
+
                     if (currentAE?.update) {
+                        // TODO: Should we check if an update is really needed, potentially improving performance
                         await currentAE.update(effectData);
-                        console.log(currentAE);
                     } else {
-                        const newAE = await ActiveEffect.implementation.create(effectData, {
+                        const ae = await ActiveEffect.implementation.create(effectData, {
                             parent: this,
                         });
-                        console.log(newAE);
+
+                        if (!ae) {
+                            console.error(`Failed to setActiveEffects on ${this.name}`, this);
+                        }
                     }
 
-                    return;
+                    //TODO: Update characteristic VALUE when changes includes a MAX?  DENSITYINCREASE for example.
+                    //Perhaps could be incorporated into the AE create/change/delete?
+
+                    // We can't simply return as this item could be a BUKLY FOCUS, requiring another AE (below).
+                    // Perhaps an opportunity to combine into a single AE.
                 } else {
                     console.error(`missing AE`);
                 }
             }
 
-            // ACTIVE EFFECTS
+            // Generic MOVEMENT activeEffect
             if (this.id && this.baseInfo && this.baseInfo.type?.includes("movement")) {
                 try {
-                    console.log(`setActiveEffects movement`);
                     let activeEffect =
                         this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                         this.effects.find((ae) => !ae.system.XMLID) ??
@@ -458,6 +493,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 }
             }
 
+            // Generic CHARACTERISTIC activeEffect
             if (this.id && this.type !== "characteristic" && this.baseInfo?.type?.includes("characteristic")) {
                 let activeEffect =
                     this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
@@ -508,109 +544,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 }
             }
 
-            if (this.id && this.system.XMLID === "DENSITYINCREASE") {
-                const noStrIncrease = this.modifiers.find((mod) => mod.XMLID === "NOSTRINCREASE");
-                const noDefIncrease = this.modifiers.find((mod) => mod.XMLID === "NODEFINCREASE");
-                // NODEFINCREASE allows for ED, PD, or EDPD as option.
-                const noDefIncreasePd = noDefIncrease?.OPTIONID.includes("PD");
-                const noDefIncreaseEd = noDefIncrease?.OPTIONID.includes("ED");
-
-                const strAdd = noStrIncrease ? 0 : this.system.LEVELS * 5;
-                const pdAdd = noDefIncreasePd ? 0 : this.system.LEVELS;
-                const edAdd = noDefIncreaseEd ? 0 : this.system.LEVELS;
-
-                let activeEffect =
-                    this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
-                    this.effects.find((ae) => !ae.system.XMLID) ??
-                    {};
-                activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.LEVELS}`;
-                activeEffect.img = "icons/svg/upgrade.svg";
-                const changes = [
-                    {
-                        key: "system.characteristics.str.max",
-                        value: strAdd,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                    {
-                        key: "system.characteristics.pd.max",
-                        value: pdAdd,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                    {
-                        key: "system.characteristics.ed.max",
-                        value: edAdd,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                ];
-                activeEffect = foundry.utils.mergeObject(activeEffect, {
-                    [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
-                });
-                activeEffect.transfer = true;
-                activeEffect.disabled ??= !this.system.active;
-                activeEffect.system ??= { XMLID: this.system.XMLID };
-
-                if (activeEffect.update) {
-                    await activeEffect.update({
-                        name: activeEffect.name,
-                        [isGameV14OrLater() ? `system.changes` : `changes`]:
-                            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
-                    });
-                    await this.actor.update({
-                        [`system.characteristics.str.value`]: this.actor.system.characteristics.str.max,
-                    });
-                    await this.actor.update({
-                        [`system.characteristics.pd.value`]: this.actor.system.characteristics.pd.max,
-                    });
-                    await this.actor.update({
-                        [`system.characteristics.ed.value`]: this.actor.system.characteristics.ed.max,
-                    });
-                } else {
-                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-                }
-            }
-
-            // 6e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV, takes +6m KB)
-            // 5e Shrinking (1 m tall, 12.5 kg mass, -2 PER Rolls to perceive character, +2 DCV)
-            if (this.id && this.system.XMLID === "SHRINKING") {
-                const dcvAdd = Math.floor(this.system.LEVELS) * 2;
-
-                let activeEffect =
-                    this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
-                    this.effects.find((ae) => !ae.system.XMLID) ??
-                    {};
-                activeEffect.name = (this.name ? `${this.name}: ` : "") + `${this.system.XMLID} ${this.system.value}`;
-                activeEffect.img = "icons/svg/upgrade.svg";
-                const changes = [
-                    {
-                        key: "system.characteristics.dcv.max",
-                        value: dcvAdd,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                        priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
-                    },
-                ];
-                activeEffect = foundry.utils.mergeObject(activeEffect, {
-                    [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
-                });
-                activeEffect.transfer = true;
-                activeEffect.system ??= { XMLID: this.system.XMLID };
-
-                if (activeEffect.update) {
-                    await activeEffect.update({
-                        name: activeEffect.name,
-                        [isGameV14OrLater() ? `system.changes` : `changes`]:
-                            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
-                    });
-                    await this.actor.update({
-                        [`system.characteristics.dcv.value`]: this.actor.system.characteristics.dcv.max,
-                    });
-                } else {
-                    await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-                }
-            }
-
+            // Generic MOBILITY (BULKY & IMMOBILE) activeEffect (for all items that might have these XMLIDs)
+            // Aaron believes this only applies to FOCI, but with findModsByXmlid we don't really care.
             const hasDCV = this.actor.hasCharacteristic("DCV");
             const MOBILITY = this.findModsByXmlid("MOBILITY");
             if (this.id && MOBILITY && hasDCV) {
@@ -644,11 +579,16 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     };
 
                     if (activeEffect.update) {
-                        await activeEffect.update({
+                        const updates = {
                             name: activeEffect.name,
-                            [isGameV14OrLater() ? `system.changes` : `changes`]:
-                                activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
-                        });
+                        };
+                        if (isGameV14OrLater) {
+                            updates.system ??= {};
+                            updates.system.changes = activeEffect.system.changes ?? activeEffect.changes;
+                        } else {
+                            updates.changes = activeEffect.changes;
+                        }
+                        await activeEffect.update(updates);
                     } else {
                         await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                     }
@@ -666,6 +606,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             }
 
             // CUSTOMPOWER LIGHT
+            // TODO: V14 has built in token.* change keys to support vision/light, and we should use it
             if (this.id && this.system.XMLID === "CUSTOMPOWER" && this.system.description.match(/light/i)) {
                 if (!game.modules.get("ATL")?.active) {
                     ui.notifications.warn(
@@ -745,26 +686,32 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 activeEffect.disabled ??= true;
 
                 if (activeEffect.update) {
-                    await activeEffect.update({
+                    const updates = {
                         name: activeEffect.name,
-                        [isGameV14OrLater() ? `system.changes` : `changes`]:
-                            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
-                    });
+                    };
+                    if (isGameV14OrLater) {
+                        updates.system ??= {};
+                        updates.system.changes = activeEffect.system.changes ?? activeEffect.changes;
+                    } else {
+                        updates.changes = activeEffect.changes;
+                    }
+                    await activeEffect.update(updates);
                 } else {
                     await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
                 }
             }
 
             // Generic default toggle to on (if it doesn't use charges or END or part of multipower)
-            if (
-                this.isActivatable() &&
-                this.system.active === undefined &&
-                this.system.chargesMax > 0 &&
-                !this.end &&
-                this.parentItem?.system.XMLID === "MULTIPOWER"
-            ) {
-                this.system.active ??= true;
-            }
+            // AARON 5/23/2026: This just looks wrong, were not even saving to the DB.  Likely covered else where.
+            // if (
+            //     this.isActivatable() &&
+            //     this.system.active === undefined &&
+            //     this.system.chargesMax > 0 &&
+            //     !this.end &&
+            //     this.parentItem?.system.XMLID === "MULTIPOWER"
+            // ) {
+            //     this.system.active ??= true;
+            // }
 
             // Sanity check for duplicate effects
             for (const ae1 of this.effects) {
@@ -777,7 +724,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 }
             }
         } catch (e) {
-            console.error(e, this);
+            console.error(`Failed to setActiveEffects on ${this.name}`, e, this);
             throw e;
         }
     }
@@ -8024,6 +7971,19 @@ export function cloneToEffectiveAttackItem({
     let effectiveItem;
     const effectiveItemData = originalItem.toObject(false);
     effectiveItemData._id = null;
+
+    // v14 throws error if effect.duration.value is not an integer.
+    // Value = Infinity fails SchemaField validation.
+    // We can replace Infinity with null and get this to work.
+    // Appears to be a FoundryVTT V14 build 362 bug.
+    if (isGameV14OrLater()) {
+        for (const effect of effectiveItemData.effects) {
+            if (effect.duration.value === Infinity) {
+                effect.duration.value = null;
+            }
+        }
+    }
+
     effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
 
     // Item-attack-V2 uses originalItemUuid.

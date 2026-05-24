@@ -2,7 +2,7 @@
 
 ### Version 4.3.8 So far [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Initial FoundryVTT V14 support. We have a few known issues (no HeroVision) and likely several unknown issues for the community to bring to our attention.
+- Initial FoundryVTT V14 support. We don't recommend running a game with FoundryVTT V14 yet. There are some [known issues](https://github.com/dmdorman/hero6e-foundryvtt/issues?q=is%3Aissue%20state%3Aopen%20label%3Av14compatibility) (HeroVision, MartialArts) and we need to do more testing. Feel free to play around with it and bring any issues to our attention.
 -
 
 ### Version 4.3.7 20260517 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)

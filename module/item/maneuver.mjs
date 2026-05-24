@@ -294,6 +294,7 @@ export async function activateManeuver(item) {
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect.name];
+        activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     }
 
     // Block effect
@@ -308,6 +309,7 @@ export async function activateManeuver(item) {
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect.name];
+        activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     }
 
     // Other maneuvers with effects
@@ -324,6 +326,7 @@ export async function activateManeuver(item) {
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect.name];
+        activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     } else if (item.system.XMLID === "HAYMAKER") {
         activeEffect.name = HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.name;
         activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.img;
@@ -335,6 +338,7 @@ export async function activateManeuver(item) {
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.name];
+        activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     } else if (item.system.XMLID === "CLUBWEAPON") {
         activeEffect.name = HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.name;
         activeEffect.img = HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.img;
@@ -342,6 +346,7 @@ export async function activateManeuver(item) {
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.name];
+        activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     } else if (
         item.system.XMLID === "COVER" ||
         item.system.XMLID === "HIPSHOT" ||
@@ -363,9 +368,13 @@ export async function activateManeuver(item) {
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect.name];
+        activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     }
 
-    if (activeEffect.name && activeEffect.changes.length > 0) {
+    // Handy reference to current V13/V14 AE changes
+    const _changes = foundry.utils.getProperty(activeEffect, isGameV14OrLater() ? `system.changes` : `changes`) ?? [];
+
+    if (activeEffect.name && _changes.length > 0) {
         if (activeEffect.update) {
             await activeEffect.update({ ...activeEffect, _id: undefined });
         } else {
