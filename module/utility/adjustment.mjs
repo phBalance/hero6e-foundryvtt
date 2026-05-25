@@ -399,6 +399,22 @@ function _createNewAdjustmentEffect(options) {
         }
     }
 
+    // V14: Need changes getter
+    if (isGameV14OrLater()) {
+        // TODO: return a HeroSystem6eActorActiveEffect here instead of patching ActiveEffect.
+        // This may cause issues as we may need to use updateSource for modifying values and toObject in the update.
+        Object.defineProperty(activeEffect, "changes", {
+            get: function () {
+                console.warn("V14: Accessing changes via defineProperty of object.");
+                return this.system?.changes ?? [];
+            },
+            set: function (value) {
+                console.error("Directly setting changes is not allowed in V14, use system.changes instead.");
+                this.system.changes = value;
+            },
+        });
+    }
+
     return activeEffect;
 }
 
@@ -595,6 +611,15 @@ export async function performAdjustment(
         // Subtract pervious AP as repeated healing is only effective if you exceed previous AP
         const _adjustmentActivePoints = Math.max(0, thisAttackActivePointsEffect - _previousActivePointsForThisXmlid);
         thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing -= _adjustmentActivePoints;
+
+        // Sanity check for missing changes
+        // Must be an object if changes is missing
+        // Unclear how changes is missing #4211
+        // But fix it show we don't crash
+        if (!activeEffect.changes) {
+            console.error(`${activeEffect.name} has no changes`, activeEffect);
+            activeEffect.changes = [];
+        }
 
         const prevChange = activeEffect.changes.find((c) => c.key == changeTemp.key);
         const prevValue = parseInt(prevChange?.value) || 0;
