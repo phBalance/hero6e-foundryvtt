@@ -733,27 +733,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     createVisionActiveEffect(visionDetectMode, isTargetingSense) {
         // While we create these AE's in V13 and V14, only V14 knows what to do with them.
 
-        // Maximum distance we can see is based on perception.  This is typically 125m+ so rarely impacts scene.
-        // Only 5e INT/PERCEPTION can go below 9.  6e INT cannot go below 0.  5e INT can go below 0.
-        // THE RANGE OF SENSES
-        // The Range Modifier (6e, vol 2, page 7) applies to all PER Rolls with Ranged
-        // Senses; this effectively restricts their Range significantly. The rules
-        // don’t establish any absolute outer limit or boundary for a Ranged
-        // Sense; the GM should establish the limit based on common sense
-        // and the situation. As a guideline, when the Range Modifier exceeds
-        // the point where it reduces a character’s PER Roll to 0 or below,
-        // things become too blurry, indistinct, or obscured for the character
-        // to perceive, even if he rolls a 3.
-        let maxRangeInMeters = 8;
-        // TODO: Fix PERCEPTION.system.roll so we don't have to poke into INT
-        //const PERCEPTION = this.actor?.items.find((i) => i.system.XMLID === "PERCEPTION");
-        // TODO: This only handles the generic rules, should include telescopic vision, etc.
-        if (this.actor && this.actor.system.characteristics.int) {
-            //9 + (INT/5)
-            const perRoll = 9 + roundFavorPlayerAwayFromZero(parseInt(this.actor.system.characteristics.int.value) / 5);
-            const pwr = perRoll / 2 + 2;
-            maxRangeInMeters = Math.max(maxRangeInMeters, Math.pow(2, pwr));
+        if (!this.actor) {
+            console.warn(`Cannot create vision active effect for ${this.name} because it has no actor`, this);
+            return null;
         }
+
+        const visionMaximumDistanceInMeters = this.actor.visionMaximumDistanceInMeters();
 
         const ae = {
             name: this.name,
@@ -771,7 +756,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         if (isTargetingSense) {
             ae.system.changes.push({
                 key: "token.sight.range",
-                value: maxRangeInMeters, // Should be Infinity? Or blur when range exceeded?
+                value: visionMaximumDistanceInMeters, // Should be Infinity? Or blur when range exceeded?
                 mode: "upgrade", // "upgrade" has a V14 bug, so not using it, but would prefer to
             });
         }
@@ -779,12 +764,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // Detection of tokens
         ae.system.changes.push({
             key: `token.detectionModes.basicSight.range`,
-            value: maxRangeInMeters,
+            value: visionMaximumDistanceInMeters,
             mode: "upgrade",
         });
         ae.system.changes.push({
             key: `token.detectionModes.${visionDetectMode}.range`,
-            value: maxRangeInMeters,
+            value: visionMaximumDistanceInMeters,
             mode: "upgrade",
         });
         ae.system.changes.push({
