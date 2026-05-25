@@ -1842,4 +1842,17 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     // get dragDrop() {
     //     return this.#dragDrop;
     // }
+
+    async _renderFrame(options) {
+        const frame = await super._renderFrame(options);
+
+        // Add game.system.version to header
+        const versionElement = document.createElement("div");
+        versionElement.classList.add("game-system-version");
+        versionElement.innerText = game.system.version;
+        versionElement.setAttribute("data-tooltip", `Hero System version ${game.system.version}`);
+        frame.querySelector("HEADER button")?.before(versionElement);
+
+        return frame;
+    }
 }

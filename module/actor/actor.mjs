@@ -73,6 +73,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 actorChanges.prototypeToken.displayName = CONST.TOKEN_DISPLAY_MODES.HOVER;
             }
 
+            // Enable vision
+            actorChanges.prototypeToken.sight = {
+                enabled: true,
+            };
+
             const is5e =
                 options.is5e != undefined
                     ? options.is5e
@@ -3565,6 +3570,31 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 this.items.set(item.system.XMLID, item);
             });
         }
+    }
+
+    get visionMaximumDistanceInMeters() {
+        // Maximum distance we can see is based on perception.  This is typically 125m+ so rarely impacts scene.
+        // Only 5e INT/PERCEPTION can go below 9.  6e INT cannot go below 0.  5e INT can go below 0.
+        // THE RANGE OF SENSES
+        // The Range Modifier (6e, vol 2, page 7) applies to all PER Rolls with Ranged
+        // Senses; this effectively restricts their Range significantly. The rules
+        // don’t establish any absolute outer limit or boundary for a Ranged
+        // Sense; the GM should establish the limit based on common sense
+        // and the situation. As a guideline, when the Range Modifier exceeds
+        // the point where it reduces a character’s PER Roll to 0 or below,
+        // things become too blurry, indistinct, or obscured for the character
+        // to perceive, even if he rolls a 3.
+        let visionMaximumDistanceInMeters = 8;
+        // TODO: Fix PERCEPTION.system.roll so we don't have to poke into INT
+        //const PERCEPTION = this.actor?.items.find((i) => i.system.XMLID === "PERCEPTION");
+        // TODO: This only handles the generic rules, should include telescopic vision, etc.
+        if (this && this.system.characteristics.int) {
+            //9 + (INT/5)
+            const perRoll = 9 + roundFavorPlayerAwayFromZero(parseInt(this.system.characteristics.int.value) / 5);
+            const pwr = perRoll / 2 + 2;
+            visionMaximumDistanceInMeters = Math.floor(Math.max(visionMaximumDistanceInMeters, Math.pow(2, pwr)));
+        }
+        return visionMaximumDistanceInMeters;
     }
 
     static _xmlToJsonNode(json, children) {
