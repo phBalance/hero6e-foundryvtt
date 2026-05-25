@@ -375,6 +375,16 @@ export async function activateManeuver(item) {
     const _changes = foundry.utils.getProperty(activeEffect, isGameV14OrLater() ? `system.changes` : `changes`) ?? [];
 
     if (activeEffect.name && _changes.length > 0) {
+        // v14 throws error if effect.duration.value is not an integer.
+        // Value = Infinity fails SchemaField validation.
+        // We can replace Infinity with null and get this to work.
+        // Appears to be a FoundryVTT V14 build 363 bug.
+        if (isGameV14OrLater()) {
+            if (activeEffect.duration?.value === Infinity) {
+                activeEffect.duration.value = null;
+            }
+        }
+
         if (activeEffect.update) {
             await activeEffect.update({ ...activeEffect, _id: undefined });
         } else {
