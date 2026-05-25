@@ -7561,7 +7561,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     !this.isDisadvantage &&
                     !this.isList &&
                     !this.isSeparator &&
-                    !this.isIsCompoundPower &&
+                    !this.isCompoundPower &&
                     !this.isPowerFramework
                 ) {
                     validationFailureMessages.push({
