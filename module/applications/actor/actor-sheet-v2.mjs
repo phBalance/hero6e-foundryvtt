@@ -134,7 +134,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         const resetRebuildDisabled = this.actor.token || !this.actor.system._hdcXml;
         const contentFullHealth = `
             <p>
-                <b>FULL HEALTH</b>: Set everything to original HDC values and remove all conditions and effects. It will not remove items.
+                <b>FULL HEALTH</b>: Set everything to original HDC values and remove all conditions and effects.
+                BODY, END, STUN, charges, and other values are not retained.
+                It will not remove items.
                 This is intended for use when healing an actor after combat or when resetting an NPC between encounters.
             </p>`;
 
