@@ -738,7 +738,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return null;
         }
 
-        const visionMaximumDistanceInMeters = this.actor.visionMaximumDistanceInMeters();
+        const visionMaximumDistanceInMeters = this.actor?.visionMaximumDistanceInMeters ?? 8;
 
         const ae = {
             name: this.name,
