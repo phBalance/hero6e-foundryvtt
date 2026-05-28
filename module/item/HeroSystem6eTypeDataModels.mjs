@@ -1868,7 +1868,7 @@ export class HeroActorCharacterInfoModel extends foundry.abstract.DataModel {
             GENRE: new StringField(),
             GM: new StringField(),
             HAIR_COLOR: new StringField(),
-            HEIGHT: new HeroNumberField(),
+            HEIGHT: new HeroNumberField({ initial: 78.74015748031496 }), // internally as inches
             NOTES1: new StringField(),
             NOTES2: new StringField(),
             NOTES3: new StringField(),
@@ -1878,7 +1878,7 @@ export class HeroActorCharacterInfoModel extends foundry.abstract.DataModel {
             PLAYER_NAME: new StringField(),
             QUOTE: new StringField(),
             TACTICS: new StringField(),
-            WEIGHT: new HeroNumberField({ initial: "100" }),
+            WEIGHT: new HeroNumberField({ initial: 220.46224760379584 }), // internally as lbs
             RULES: new ObjectField(),
             xmlTag: new StringField(),
             _hdcXml: new StringField(),
