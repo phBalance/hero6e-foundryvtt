@@ -1878,7 +1878,7 @@ export class HeroActorCharacterInfoModel extends foundry.abstract.DataModel {
             PLAYER_NAME: new StringField(),
             QUOTE: new StringField(),
             TACTICS: new StringField(),
-            WEIGHT: new HeroNumberField(),
+            WEIGHT: new HeroNumberField({ initial: "100" }),
             RULES: new ObjectField(),
             xmlTag: new StringField(),
             _hdcXml: new StringField(),
