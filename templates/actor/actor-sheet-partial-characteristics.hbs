@@ -18,7 +18,7 @@
                     class="{{#if characteristic.valueTitle}}characteristic-locked{{/if}}">
                     <input name="system.characteristics.{{characteristic.key}}.value" type="number"
                         value="{{characteristic.value}}" data-dtype="Number"
-                        class="{{#if (gt characteristic.value characteristic.max)}}over-max{{/if}}{{#if (lt characteristic.value characteristic.max)}} under-max{{/if}}"
+                        class="{{#if (gt characteristic.value characteristic.max)}}over-max{{/if}} {{#if (lt characteristic.value characteristic.max)}}under-max{{/if}}"
                         {{#if characteristic.valueTitle}}disabled{{/if}}
                     >
                 </td>
@@ -27,7 +27,7 @@
                 <td data-tooltip="{{{characteristic.maxTitle}}}"
                     class="{{#if characteristic.maxTitle}}characteristic-locked{{/if}}">
                     <input name="system.characteristics.{{characteristic.key}}.max" type="number"
-                        class="{{#if (gt characteristic.max characteristic.basePlusLevels)}}over-max{{/if}}{{#if (lt characteristic.max characteristic.baseInt)}}under-max{{/if}}"
+                        class="{{#if (gt characteristic.max characteristic.basePlusLevels)}}over-max{{/if}}{{#if (lt characteristic.max characteristic.basePlusLevels)}}under-max{{/if}}"
                         value="{{characteristic.max}}" data-dtype="Number" {{#if
                         characteristic.maxTitle}}disabled{{/if}}>
                 </td>
