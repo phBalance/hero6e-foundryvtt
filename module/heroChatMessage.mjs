@@ -1,20 +1,9 @@
 import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
+import { isGameV14OrLater } from "./utility/compatibility.mjs";
 
 export class HeroSystem6eChatMessage extends ChatMessage {
     // REF: https://github.com/foundryvtt/pf2e/blob/acf49e6130dc43e80c9b1f63fcb58a1ab611b4ce/src/module/chat-message/document.ts#L23
 
-    // V12
-    async getHTML() {
-        let html = await super.getHTML();
-
-        this.heroHeader(html?.[0]);
-        HeroSystem6eCardHelpers.onMessageRendered($(html));
-        HeroSystem6eCardHelpers.chatListeners($(html));
-
-        return html;
-    }
-
-    // V13
     async renderHTML(options) {
         const html = await super.renderHTML(options);
 
@@ -23,17 +12,6 @@ export class HeroSystem6eChatMessage extends ChatMessage {
         HeroSystem6eCardHelpers.chatListeners($(html));
 
         return html;
-    }
-
-    get speakerActor() {
-        // V13
-        if (super.speakerActor) {
-            // return this.constructor.getSpeakerActor(this.speaker) ?? this.author?.character ?? null;
-            return super.speakerActor;
-        }
-
-        // V12
-        return ChatMessage?.getSpeakerActor?.(this.speaker);
     }
 
     get speakerToken() {
@@ -107,6 +85,11 @@ export class HeroSystem6eChatMessage extends ChatMessage {
                             authorElement.classList.add("user");
                             authorElement.append(this.author.name);
                             messageSender.append(authorElement);
+                        }
+
+                        if (isGameV14OrLater() && this.speakerToken) {
+                            // overwrite
+                            messageSender.innerHTML = `${this.speakerToken.name}<span class="user">${this.author.name}</span>`;
                         }
                     }
                 }

@@ -12,7 +12,7 @@
             data-tooltip="{{{this.maxTitle}}}"
         >
             <input name="system.characteristics.{{this.key}}.max" type="number"
-                class="{{#if (gt this.max this.basePlusLevels)}}over-max{{/if}}{{#if (lt this.max this.baseInt)}}under-max{{/if}}"
+                class="{{#if (gt this.max this.basePlusLevels)}}over-max{{/if}} {{#if (lt this.max this.basePlusLevels)}}under-max{{/if}}"
                 value="{{this.max}}" data-dtype="Number" {{#if
                 this.maxTitle}}disabled{{/if}}
             >
