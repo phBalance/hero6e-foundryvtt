@@ -125,6 +125,17 @@ Hooks.once("init", async function () {
     // Custom HeroSystem VisionMode
     setPerceptionModes();
 
+    // if (isGameV14OrLater()) {
+    //     // Custom Expiry Events. Map custom string to a translation path or static text block
+    //     CONFIG.ActiveEffect.expiryEvents = CONFIG.ActiveEffect.expiryEvents || {};
+
+    //     // Registering the label makes it selectable and visible in configuration menus
+    //     for (const [key, value] of Object.entries(HERO.ACTIVE_EFFECT_EXPIRY_EVENTS)) {
+    //         CONFIG.ActiveEffect.expiryEvents[key] = value.label;
+    //     }
+    // }
+
+    // Compendiums
     game.CreateHeroCompendiums = CreateHeroCompendiums;
     HEROSYS.module = game.system.id;
     game.herosystem6e = {
