@@ -1,7 +1,7 @@
 // REF: https://foundryvtt.wiki/en/development/api/applicationv2
 import { HEROSYS } from "../../herosystem6e.mjs";
 import { filterIgnoreCompoundAndFrameworkItems } from "../../config.mjs";
-import { calculateRequiredResourcesToUse, processActionToHit } from "../../item/item-attack.mjs";
+import { calculateRequiredResourcesToUse, dehydrateAttackItem, processActionToHit } from "../../item/item-attack.mjs";
 import { buildEffectiveObject } from "../../item/item.mjs";
 import { Attack } from "../../utility/attack.mjs";
 import {
@@ -653,7 +653,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                     purpose: "AoE",
                     itemId: effectiveAttackItemOriginalItemId,
                     actorUuid: actor.uuid,
-                    effectiveItemJson: item.effectiveAttackItem.toJSON(),
+                    effectiveItemJson: dehydrateAttackItem(item), // item.effectiveAttackItem.toJSON(),
                     userId: game.user.id,
                     //item,
                     //actor,
