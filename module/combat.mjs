@@ -1,5 +1,5 @@
 import { HEROSYS } from "./herosystem6e.mjs";
-import { clamp, isGameV13OrLater } from "./utility/compatibility.mjs";
+import { clamp, isGameV13OrLater, isGameV14OrLater } from "./utility/compatibility.mjs";
 import { whisperUserTargetsForActor, expireEffects, toHHMMSS, gmActive } from "./utility/util.mjs";
 import { rehydrateAttackItem, userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-attack.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
@@ -1002,6 +1002,10 @@ export class HeroSystem6eCombat extends Combat {
         //     ui.notifications.info(`Skipping <b>${this.combatant.name}</b> because they are Knocked Out.`);
         //     return this.nextTurn();
         // }
+
+        if (game.user.isActiveGM) {
+            await this.promptToDeleteAoeInstantRegions();
+        }
     }
 
     /**
@@ -1768,6 +1772,35 @@ export class HeroSystem6eCombat extends Combat {
 
     async onSegmentChange() {
         console.log("onSegmentChange");
+    }
+
+    async promptToDeleteAoeInstantRegions() {
+        // This only works for V14. canvas.regions.viewedDocuments is an invalid V14 function.
+        if (!isGameV14OrLater) return;
+
+        // We only care about AoEs
+        const regionsToPrompt = Array.from(canvas.regions.viewedDocuments()).filter(
+            (template) => template.flags[game.system.id]?.purpose === "AoE",
+        );
+        for (const region of regionsToPrompt) {
+            // Make sure item the region is associated with an INSTANT effectiveItem
+            const effectiveItem = rehydrateAttackItem(region.flags[game.system.id].effectiveItemJson).item;
+            const duration = effectiveItem.system.duration;
+            if (duration === CONFIG.HERO.DURATION_TYPES.INSTANT) {
+                const proceed = await foundry.applications.api.DialogV2.confirm({
+                    window: {
+                        title: `Delete region ${region.name}?`,
+                    },
+                    content: `<p>The region <b>${region.name}</b> is likely no longer needed. Would you like to delete it?</p>`,
+                    rejectClose: false,
+                    modal: true,
+                });
+
+                if (proceed) {
+                    await region.delete();
+                }
+            }
+        }
     }
 
     async previousRound() {
