@@ -7976,6 +7976,15 @@ export function cloneToEffectiveAttackItem({
 
     effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
 
+    // Sanity check
+    if (effectiveItem.activePoints < 2) {
+        console.error(
+            `${effectiveItem.name} has activePoints=${effectiveItem.activePoints}, which is likely an internal error.`,
+            originalItem,
+            effectiveItem,
+        );
+    }
+
     // Item-attack-V2 uses originalItemUuid.
     // Be careful as updateSource wipe anything not set with updateSource so do all
     // the updateSources first.
