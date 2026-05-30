@@ -5258,6 +5258,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return false;
         }
 
+        // Equipment that isn't carried
+        if (this.type === "equipment" && !this.system.CARRIED) {
+            return false;
+        }
+
         // Favor disable status of associated ActiveEffect
         if (this.effects.size > 0) {
             const _disabled = this.effects.contents[0].disabled;
