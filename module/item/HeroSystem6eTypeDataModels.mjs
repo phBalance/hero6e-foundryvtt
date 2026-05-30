@@ -1618,16 +1618,11 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         return this.actor.system[this.KEY]?.LEVELS || 0;
     }
 
-    get baseInt() {
-        // Only expected to be used for 5e SPD as we need the integer version
-        return Math.floor(this.base);
-    }
-
     /**
      * base is the starting points you get for free
      */
     get base() {
-        // Some 5e characteristics are calcuated or figured
+        // Some 5e characteristics are calculated or figured
         if (this.actor.is5e) {
             if (this.baseInfo?.behaviors.includes("calculated")) {
                 if (this.#baseInfo.calculated5eCharacteristic) {
