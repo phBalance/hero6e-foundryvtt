@@ -732,13 +732,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
     createVisionActiveEffect(visionDetectMode, isTargetingSense) {
         // While we create these AE's in V13 and V14, only V14 knows what to do with them.
+        // We assume a valid actor.
 
-        if (!this.actor) {
-            console.warn(`Cannot create vision active effect for ${this.name} because it has no actor`, this);
-            return null;
-        }
-
-        const visionMaximumDistanceInMeters = this.actor?.visionMaximumDistanceInMeters ?? 8;
+        const visionMaximumDistanceInMeters = this.actor?.visionMaximumDistanceInMeters;
 
         const ae = {
             name: this.name,
