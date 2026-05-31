@@ -1310,37 +1310,53 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     #onSearch(ev) {
         const filter = ev.target.value;
         const regex = new RegExp(RegExp.escape(filter), "i");
-        const itemList = ev.target.closest(".tab")?.querySelector(".item-list");
-        if (!itemList) {
+
+        // Effects tab, which has multiple item-list elements
+        const itemLists = ev.target.closest(".tab")?.querySelectorAll(".item-list");
+        if (itemLists.length === 0) {
             console.error(`unable to find itemList`);
             return;
         }
-        const applicationPart = itemList.closest("[data-application-part]")?.dataset.applicationPart;
-        if (applicationPart) {
-            this.searchValues[applicationPart] = filter;
-        } else {
-            console.error(`unable to find applicationPart`);
-        }
-
-        for (const li of itemList.children) {
-            const item = this._getEmbeddedDocument(li);
-            if (!item) {
-                console.error(`onSearch: Unable to locate item}`, li);
-                continue;
+        for (const itemList of itemLists) {
+            const applicationPart = itemList.closest("[data-application-part]")?.dataset.applicationPart;
+            if (applicationPart) {
+                this.searchValues[applicationPart] = filter;
+            } else {
+                console.error(`unable to find applicationPart`);
             }
-            try {
-                if (
-                    item.name.match(regex) ||
-                    item.system.XMLID.match(regex) ||
-                    item.system.description.match(regex) ||
-                    item.parentItem?.system.description.match(regex)
-                ) {
-                    li.classList.remove("hidden");
-                } else {
-                    li.classList.add("hidden");
+
+            for (const li of itemList.children) {
+                const item = this._getEmbeddedDocument(li);
+                if (!item) {
+                    console.error(`onSearch: Unable to locate item}`, li);
+                    continue;
                 }
-            } catch (e) {
-                console.error(e);
+
+                try {
+                    if (item.documentName === "Item") {
+                        if (
+                            item.name.match(regex) ||
+                            item.system.XMLID.match(regex) ||
+                            item.system.description.match(regex) ||
+                            item.parentItem?.system.description.match(regex)
+                        ) {
+                            li.classList.remove("hidden");
+                        } else {
+                            li.classList.add("hidden");
+                        }
+                    } else if (item.documentName === "ActiveEffect") {
+                        const activeEffect = item; // makes code a bit easier to read.
+                        if (activeEffect.nameExtended.match(regex) || activeEffect.XMLID?.match(regex)) {
+                            li.classList.remove("hidden");
+                        } else {
+                            li.classList.add("hidden");
+                        }
+                    } else {
+                        console.error(`Unknown documentName=${item.documentName}`);
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
             }
         }
     }
