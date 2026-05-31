@@ -44,6 +44,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             configureActorType: HeroSystemActorSheetV2.#onConfigureActorType,
             configureToken: HeroSystemActorSheetV2.#onConfigureToken,
             createActiveEffect: HeroSystemActorSheetV2.#onCreateActiveEffect,
+            deleteAllActiveEffects: HeroSystemActorSheetV2.#onDeleteAllActiveEffects,
+            deleteAllTemporaryEffects: HeroSystemActorSheetV2.#onDeleteAllTemporaryEffects,
             fullHealth: HeroSystemActorSheetV2.#onFullHealth,
             presenceAttack: HeroSystemActorSheetV2.#onPresenceAttack,
             recovery: HeroSystemActorSheetV2.#onRecovery,
@@ -251,6 +253,38 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             img: "icons/svg/aura.svg",
         };
         this.actor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+    }
+
+    static async #onDeleteAllTemporaryEffects() {
+        const confirm = await Dialog.confirm({
+            title: "Delete all Temporary Effects",
+            content:
+                `<h4>Are you sure?</h4><p>This will permanently delete all ${this.actor.temporaryEffects.length} ` +
+                `temporary effects.</p>`,
+        });
+
+        if (confirm) {
+            await this.actor.deleteEmbeddedDocuments(
+                "ActiveEffect",
+                this.actor.temporaryEffects.map((ae) => ae.id),
+            );
+        }
+    }
+
+    static async #onDeleteAllActiveEffects() {
+        const confirm = await Dialog.confirm({
+            title: "Delete all activeEffects",
+            content:
+                `<h4>Are you sure?</h4><p>This will permanently delete all ${Array.from(this.actor.allApplicableEffects()).length} ` +
+                `active effects.  This may break some powers, requiring a re-upload of HDC or FullHealth+Rebuild to fix.</p>`,
+        });
+
+        if (confirm) {
+            await this.actor.deleteEmbeddedDocuments(
+                "ActiveEffect",
+                Array.from(this.actor.allApplicableEffects()).map((ae) => ae.id),
+            );
+        }
     }
 
     /*
