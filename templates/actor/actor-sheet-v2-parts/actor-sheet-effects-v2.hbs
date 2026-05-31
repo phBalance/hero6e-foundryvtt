@@ -14,6 +14,8 @@
         </button>
     </p>
 
+    {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-search-partial-v2.hbs') this }}
+
     <div>
         {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-effects-partial-item-v2.hbs') 
             effects=this.allTemporaryEffects headerName="ActorSheet.ActiveEffectTemporary" css="temporary-effects" 
