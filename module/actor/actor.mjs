@@ -2004,6 +2004,18 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return results;
     }
 
+    /*
+        This isn't the same as actor.temporaryEffects (which does not include suppressed effects).
+        It is subtle and identified as an issue with V14 where effect is suppressed instead of disabled/deleted
+        when duration expires.
+        This may require a CONFIG.ActiveEffect.expiryAction = "delete" fix at some point.
+    */
+    getTemporaryEffects() {
+        return Array.from(this.allApplicableEffects())
+            .filter((ae) => ae.isTemporary)
+            .sort((a, b) => a.name.localeCompare(b.name));
+    }
+
     getConstantEffects() {
         return Array.from(this.allApplicableEffects())
             .filter((ae) => !ae.isTemporary && ae.parent.system.duration === CONFIG.HERO.DURATION_TYPES.CONSTANT)
