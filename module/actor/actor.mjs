@@ -2006,25 +2006,33 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
     getConstantEffects() {
         return Array.from(this.allApplicableEffects())
-            .filter((ae) => !ae.isTemporary && ae.parent.duration === CONFIG.HERO.DURATION_TYPES.CONSTANT)
+            .filter((ae) => !ae.isTemporary && ae.parent.system.duration === CONFIG.HERO.DURATION_TYPES.CONSTANT)
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
     getPersistentEffects() {
         return Array.from(this.allApplicableEffects())
-            .filter((ae) => !ae.isTemporary && ae.parent.duration === CONFIG.HERO.DURATION_TYPES.PERSISTENT)
+            .filter((ae) => !ae.isTemporary && ae.parent.system.duration === CONFIG.HERO.DURATION_TYPES.PERSISTENT)
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
     getInherentEffects() {
         return Array.from(this.allApplicableEffects())
-            .filter((ae) => !ae.isTemporary && ae.parent.duration === CONFIG.HERO.DURATION_TYPES.INHERENT)
+            .filter((ae) => !ae.isTemporary && ae.parent.system.duration === CONFIG.HERO.DURATION_TYPES.INHERENT)
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
     getMiscEffects() {
         return Array.from(this.allApplicableEffects())
-            .filter((ae) => !ae.isTemporary)
+            .filter(
+                (ae) =>
+                    !ae.isTemporary &&
+                    ![
+                        CONFIG.HERO.DURATION_TYPES.CONSTANT,
+                        CONFIG.HERO.DURATION_TYPES.PERSISTENT,
+                        CONFIG.HERO.DURATION_TYPES.INHERENT,
+                    ].includes(ae.parent.system.duration),
+            )
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
