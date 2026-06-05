@@ -642,7 +642,12 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                     type: templateType,
                     x: token.center.x,
                     y: token.center.y,
-                    rotation: -token.document?.rotation || 0 + 90, // Top down tokens typically face south
+                    rotation: -token.document?.rotation || 0 + 90,
+
+                    // CORRECT V14 STABLE SHAPE DATABASE KEYS
+                    // isRestricted: true,
+                    // restrictionType: "sight", // "sight" uses vision walls; "move" uses movement walls
+                    // restrictionPriority: 0,
                 },
             ],
             displayMeasurements: true,
@@ -653,22 +658,19 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                     purpose: "AoE",
                     itemId: effectiveAttackItemOriginalItemId,
                     actorUuid: actor.uuid,
-                    effectiveItemJson: dehydrateAttackItem(item), // item.effectiveAttackItem.toJSON(),
+                    effectiveItemJson: dehydrateAttackItem(item),
                     userId: game.user.id,
-                    //item,
-                    //actor,
-                    //aoeType,
-                    //aoeValue,
-                    //sizeConversionToMeters,
-                    //usesHexTemplate: hexTemplates && hexGrid,
-                    //is5e: item.effectiveAttackItem.is5e,
                 },
             },
 
-            // AARON WAS HERE 4/4/2026: Foundry bug?  Can't create with restriction
-            // restriction: {
-            //     enabled: true,
-            // },
+            levels:
+                canvas.scene.levels.find((level) => {
+                    const elevation = token.document.elevation ?? 0;
+                    return elevation >= level.bottom && elevation <= level.top;
+                })?.id ?? "defaultLevel0000",
+            "restriction.enabled": true,
+            "restriction.type": "sight",
+            "restriction.priority": 0,
         };
 
         switch (templateType) {
