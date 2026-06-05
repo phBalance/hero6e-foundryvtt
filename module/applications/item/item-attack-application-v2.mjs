@@ -11,7 +11,7 @@ import {
     isRangedCombatManeuver,
 } from "../../utility/damage.mjs";
 import { convertSystemUnitsToMetres, getSystemDisplayUnits, gridUnitsToMeters } from "../../utility/units.mjs";
-import { HeroSystem6eRegion } from "../../heroRegion.mjs";
+import { HeroSystem6eRegionDocument } from "../../heroRegion.mjs";
 
 /**
  * 5e HEX type and NORMAL are converted to RADIUS
@@ -643,16 +643,12 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                     x: token.center.x,
                     y: token.center.y,
                     rotation: -token.document?.rotation || 0 + 90,
-
-                    // CORRECT V14 STABLE SHAPE DATABASE KEYS
-                    // isRestricted: true,
-                    // restrictionType: "sight", // "sight" uses vision walls; "move" uses movement walls
-                    // restrictionPriority: 0,
                 },
             ],
             displayMeasurements: true,
             highlightMode: "coverage",
             visibility: CONST.REGION_VISIBILITY.ALWAYS,
+            label: `${item.name}\n(Stun Gas Area)`,
             flags: {
                 [game.system.id]: {
                     purpose: "AoE",
@@ -738,7 +734,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         // GM permissions are required to add behaviors, so if the user isn't a GM
         // we need to send a socket message to the GM to have them add the behavior for us.
         if (game.user.isGM) {
-            await HeroSystem6eRegion.applyBehaviorTokenAutomaticTargeting(newRegion.uuid);
+            await HeroSystem6eRegionDocument.applyBehaviorTokenAutomaticTargeting(newRegion.uuid);
         } else {
             // Check if GM is online
             const isGmOnline = game.users.some((u) => u.isGM && u.active);
