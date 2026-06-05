@@ -727,7 +727,9 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         }
 
         // Remove all targets
-        canvas.tokens.ownedTokens?.[0].setTarget(false, { releaseOthers: true });
+        for (const target of game.user.targets) {
+            target.setTarget(false, { releaseOthers: false });
+        }
 
         // Apply the TokenAutomaticTargeting behavior to the region
         // so that it will target tokens that enter it and remove targets that leave it.
@@ -736,24 +738,40 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         if (game.user.isGM) {
             await HeroSystem6eRegion.applyBehaviorTokenAutomaticTargeting(newRegion.uuid);
         } else {
-            game.socket.emit(`system.${game.system.id}`, {
-                operation: "applyBehaviorTokenAutomaticTargeting",
-                userId: game.user.id,
-                regionUuid: newRegion.uuid,
-            });
-        }
-
-        // DELAY PAUSE: Wait for Foundry's quadtree/spatial map to update the region.tokens cache
-        await new Promise((resolve) => setTimeout(resolve, 50));
-
-        // FORCED TRIGGER: Handle tokens that are already standing inside right now
-        // region.tokens holds a collection of all TokenDocuments currently within the region boundaries
-        for (const tokenDoc of newRegion.tokens) {
-            if (tokenDoc.object) {
-                // Set target to true, don't clear target strings of other players
-                tokenDoc.object.setTarget(true, { releaseOthers: false });
+            // Check if GM is online
+            const isGmOnline = game.users.some((u) => u.isGM && u.active);
+            if (isGmOnline) {
+                game.socket.emit(`system.${game.system.id}`, {
+                    operation: "applyBehaviorTokenAutomaticTargeting",
+                    userId: game.user.id,
+                    regionUuid: newRegion.uuid,
+                });
+            } else {
+                ui.notifications.warn(
+                    "A GM must be online to create the AoE automatic targeting behavior to the region.",
+                );
             }
         }
+
+        // DELAYED TRIGGER: Target tokens that are inside the region.
+        // We listen to every update until we find OUR region's update, then unregister.
+        const hookId = Hooks.on("updateRegion", (document) => {
+            // Check if the region being updated matches our newly created region
+            if (document.id === newRegion.id) {
+                // Immediately turn off this listener so it doesn't loop
+                Hooks.off("updateRegion", hookId);
+
+                // Safely grab the tokens from the updated document cache
+                const tokensInRegion = document.tokens ?? [];
+
+                // Target all the tokens that are inside the region
+                for (const tokenDoc of tokensInRegion) {
+                    if (tokenDoc.object) {
+                        tokenDoc.object.setTarget(true, { releaseOthers: false });
+                    }
+                }
+            }
+        });
     }
 
     async placeRegionWithHiddenUI(regionData) {
