@@ -7,7 +7,8 @@
   - Use game.system.id instead of hard coded system names.
   - My github repo is https://github.com/aeauseth/hero6efoundryvttv2
   - use const instead of let when possible
-  - use caution when storing in memory data instead of using the database, specifically because there may be multiple GM/user clients.
+  - avoid storing data in memory (with variables or via updateSource) instead of using the database, specifically because there may be multiple GM/user clients.
+  - avoid using "item" as a variable name unless it is referring to an FoundryVTT item that might be embedded in an Actor.
 
   We are developing a hybrid Foundry VTT V13/V14 custom Hero System 6e system using ApplicationV2 architecture. Use game.system.id dynamically. We have successfully completed our custom `HeroCompatibility` layer for handling canonical V14 collection arrays vs V13 flat paths, and our `HeroSystem6eCombatTrackerSingle` visual sidebar overrides (including current segment headers and client-side DOM highlight injectors).
 

@@ -113,12 +113,13 @@ export class HEROSYS {
             console.trace(this.ID, "|", ...args);
         }
     }
-}
 
-function isSingleCombatantTrackerEnabled() {
-    return (
-        game.settings.get(game.system.id, "alphaTesting") && game.settings.get(game.system.id, "singleCombatantTracker")
-    );
+    static get isSingleCombatantTrackerEnabled() {
+        return (
+            game.settings.get(game.system.id, "alphaTesting") &&
+            game.settings.get(game.system.id, "singleCombatantTracker")
+        );
+    }
 }
 
 Hooks.once("init", async function () {
@@ -169,7 +170,7 @@ Hooks.once("init", async function () {
     // Compendiums
     game.CreateHeroCompendiums = CreateHeroCompendiums;
 
-    if (isSingleCombatantTrackerEnabled()) {
+    if (HEROSYS.isSingleCombatantTrackerEnabled) {
         CONFIG.Combat.documentClass = HeroSystem6eCombatSingle;
         CONFIG.Combatant.documentClass = HeroSystem6eCombatantSingle;
         CONFIG.ui.combat = HeroSystem6eCombatTrackerSingle;
@@ -457,7 +458,7 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
 
 // When actor SPD is changed we need to setupTurns again
 Hooks.on("updateActor", async (document, change /*, _options, _userId */) => {
-    if (!this.isSingleCombatantTrackerEnabled) {
+    if (!HEROSYS.isSingleCombatantTrackerEnabled) {
         if (
             change?.system?.characteristics?.spd?.value ||
             change?.system?.characteristics?.dex?.value ||
@@ -494,7 +495,7 @@ Hooks.on("closeTokenConfig", async (tokenConfig) => {
 });
 
 Hooks.on("changeSidebarTab", async (app) => {
-    if (!isSingleCombatantTrackerEnabled()) {
+    if (!HEROSYS.isSingleCombatantTrackerEnabled) {
         // Make sure active token is centered in combat tracker when changing Sidebar
         if (app.tabName === "combat" && game.combat?.active && app.scrollToTurn) {
             app.scrollToTurn();

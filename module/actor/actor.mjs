@@ -110,14 +110,16 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 },
             };
 
-            // Characteristic defaults
+            // Characteristic defaults (if undefined)
             for (const charBaseInfo of getCharacteristicInfoArrayForActor(this)) {
                 const base = this.system.characteristics[charBaseInfo.key.toLowerCase()]?.base || 0;
                 actorChanges.system.characteristics ??= {};
-                actorChanges.system.characteristics[charBaseInfo.key.toLowerCase()] = {
-                    value: base,
-                    max: base,
-                };
+                if (data.system?.characteristics[charBaseInfo.key.toLowerCase()]?.value == undefined) {
+                    actorChanges.system.characteristics[charBaseInfo.key.toLowerCase()] = {
+                        value: base,
+                        max: base,
+                    };
+                }
             }
 
             this.updateSource(actorChanges);

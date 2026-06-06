@@ -14,6 +14,63 @@ export class HeroCompatibility {
     }
 
     /**
+     * Translates unlinked combatant initialization overrides to match generation-specific schemas.
+     * Prevents database property sanitization rejections across V13 and V14 environments.
+     *
+     * @param {string} actorId - Root database actor record document target ID string
+     * @param {number} dex - True rules priority characteristic integer score configuration
+     * @param {number} spd - True speed chart phase capacity footprint integer value configuration
+     * @returns {object} The version-compliant combatant initialization dictionary payload
+     */
+    static getCombatantCreationPayload(actorId, dex, spd) {
+        const basePayload = {
+            actorId: actorId,
+            tokenId: null,
+            hidden: false,
+        };
+
+        if (this.isV14) {
+            // ✅ V14 CANONICAL SCHEMA: Maps under system configurations map paths natively
+            basePayload["actorData.system.characteristics.dex.value"] = dex;
+            basePayload["actorData.system.characteristics.dex.max"] = dex;
+            basePayload["actorData.system.characteristics.spd.value"] = spd;
+            basePayload["actorData.system.characteristics.spd.max"] = spd;
+
+            basePayload.actorData = {
+                system: {
+                    characteristics: {
+                        dex: { value: dex, max: dex },
+                        spd: { value: spd, max: spd },
+                    },
+                },
+            };
+        } else {
+            // ✅ V13 LEGACY SCHEMATICS DEEP CORRECTION:
+            // Maps characteristics values directly under the old legacy '.data' directory maps structure path segments,
+            // completely flat-assigning them to safeguard properties from database sanitization rejections.
+            basePayload["actorData.data.characteristics.dex.value"] = dex;
+            basePayload["actorData.data.characteristics.dex.max"] = dex;
+            basePayload["actorData.data.characteristics.spd.value"] = spd;
+            basePayload["actorData.data.characteristics.spd.max"] = spd;
+
+            // Duplicate flattened string paths under the old system structures to satisfy strict underlying data model validations
+            basePayload["actorData.data.characteristics.dex"] = { value: dex, max: dex };
+            basePayload["actorData.data.characteristics.spd"] = { value: spd, max: spd };
+
+            basePayload.actorData = {
+                data: {
+                    characteristics: {
+                        dex: { value: dex, max: dex },
+                        spd: { value: spd, max: spd },
+                    },
+                },
+            };
+        }
+
+        return basePayload;
+    }
+
+    /**
      * Safely updates an array of embedded documents inside a parent document.
      * Enforces V14 array assignment, falling back to flattened path keys in V13.
      *
