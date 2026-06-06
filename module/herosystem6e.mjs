@@ -115,6 +115,12 @@ export class HEROSYS {
     }
 }
 
+function isSingleCombatantTrackerEnabled() {
+    return (
+        game.settings.get(game.system.id, "alphaTesting") && game.settings.get(game.system.id, "singleCombatantTracker")
+    );
+}
+
 Hooks.once("init", async function () {
     // Compatibility warnings for initial release of v13
     // In chrome use -/Deprecated since Version 13/ as a console log filter
@@ -163,10 +169,7 @@ Hooks.once("init", async function () {
     // Compendiums
     game.CreateHeroCompendiums = CreateHeroCompendiums;
 
-    if (
-        game.settings.get(game.system.id, "alphaTesting") &&
-        game.settings.get(game.system.id, "singleCombatantTracker")
-    ) {
+    if (isSingleCombatantTrackerEnabled()) {
         CONFIG.Combat.documentClass = HeroSystem6eCombatSingle;
         CONFIG.Combatant.documentClass = HeroSystem6eCombatantSingle;
         CONFIG.ui.combat = HeroSystem6eCombatTrackerSingle;
@@ -489,9 +492,11 @@ Hooks.on("closeTokenConfig", async (tokenConfig) => {
 });
 
 Hooks.on("changeSidebarTab", async (app) => {
-    // Make sure active token is centered in combat tracker when changing Sidebar
-    if (app.tabName === "combat" && game.combat?.active && app.scrollToTurn) {
-        app.scrollToTurn();
+    if (!isSingleCombatantTrackerEnabled()) {
+        // Make sure active token is centered in combat tracker when changing Sidebar
+        if (app.tabName === "combat" && game.combat?.active && app.scrollToTurn) {
+            app.scrollToTurn();
+        }
     }
 });
 
