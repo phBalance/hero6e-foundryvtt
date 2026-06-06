@@ -3,6 +3,11 @@ import * as chat from "./chat.mjs";
 import { HeroSystem6eCombat } from "./combat.mjs";
 import { HeroSystem6eCombatTracker } from "./combatTracker.mjs";
 import { HeroSystem6eCombatant } from "./combatant.mjs";
+
+import { HeroSystem6eCombatSingle } from "./combat-single.mjs";
+import { HeroSystem6eCombatTrackerSingle } from "./combatTracker-single.mjs";
+import { HeroSystem6eCombatantSingle } from "./combatant-single.mjs";
+
 import { HeroSystem6eCompendium } from "./compendium.mjs";
 import { HeroSystem6eCompendiumDirectory } from "./compendiumDirectory.mjs";
 import { HERO } from "./config.mjs";
@@ -126,18 +131,7 @@ Hooks.once("init", async function () {
     // Custom HeroSystem VisionMode
     setPerceptionModes();
 
-    // if (isGameV14OrLater()) {
-    //     // Custom Expiry Events. Map custom string to a translation path or static text block
-    //     CONFIG.ActiveEffect.expiryEvents = CONFIG.ActiveEffect.expiryEvents || {};
-
-    //     // Registering the label makes it selectable and visible in configuration menus
-    //     for (const [key, value] of Object.entries(HERO.ACTIVE_EFFECT_EXPIRY_EVENTS)) {
-    //         CONFIG.ActiveEffect.expiryEvents[key] = value.label;
-    //     }
-    // }
-
-    // Compendiums
-    game.CreateHeroCompendiums = CreateHeroCompendiums;
+    // HEROSYS
     HEROSYS.module = game.system.id;
     game.herosystem6e = {
         applications: {
@@ -152,11 +146,37 @@ Hooks.once("init", async function () {
         rollItemMacro: rollItemMacro,
         config: HERO,
     };
-
     CONFIG.HERO = { ...CONFIG.HERO, ...HERO };
 
-    CONFIG.Combat.documentClass = HeroSystem6eCombat;
-    CONFIG.Combatant.documentClass = HeroSystem6eCombatant;
+    SettingsHelpers.initLevelSettings();
+
+    // if (isGameV14OrLater()) {
+    //     // Custom Expiry Events. Map custom string to a translation path or static text block
+    //     CONFIG.ActiveEffect.expiryEvents = CONFIG.ActiveEffect.expiryEvents || {};
+
+    //     // Registering the label makes it selectable and visible in configuration menus
+    //     for (const [key, value] of Object.entries(HERO.ACTIVE_EFFECT_EXPIRY_EVENTS)) {
+    //         CONFIG.ActiveEffect.expiryEvents[key] = value.label;
+    //     }
+    // }
+
+    // Compendiums
+    game.CreateHeroCompendiums = CreateHeroCompendiums;
+
+    if (
+        game.settings.get(game.system.id, "alphaTesting") &&
+        game.settings.get(game.system.id, "singleCombatantTracker")
+    ) {
+        CONFIG.Combat.documentClass = HeroSystem6eCombatSingle;
+        CONFIG.Combatant.documentClass = HeroSystem6eCombatantSingle;
+        CONFIG.ui.combat = HeroSystem6eCombatTrackerSingle;
+    } else {
+        CONFIG.Combat.documentClass = HeroSystem6eCombat;
+        CONFIG.Combatant.documentClass = HeroSystem6eCombatant;
+        HeroSystem6eCombatTracker.initializeTemplate();
+        CONFIG.ui.combat = HeroSystem6eCombatTracker;
+    }
+
     CONFIG.Combat.defeatedStatusId = "dead";
     CONFIG.ChatMessage.documentClass = HeroSystem6eChatMessage;
 
@@ -177,11 +197,6 @@ Hooks.once("init", async function () {
         formula: "@characteristics.dex.value + (@characteristics.spd.value / 100)",
         decimals: 2,
     };
-
-    // debug
-    // CONFIG.debug.hooks = true;
-    // CONFIG.debug.combat = true;
-    // CONFIG.debug.time = true;
 
     // Define custom Entity classes
     CONFIG.Actor.documentClass = HeroSystem6eActor;
@@ -236,8 +251,6 @@ Hooks.once("init", async function () {
     });
 
     HeroRuler.initialize();
-
-    SettingsHelpers.initLevelSettings();
 
     initializeHandlebarsHelpers();
     initializeItemHandlebarsHelpers();
@@ -358,8 +371,6 @@ Hooks.once("init", async function () {
     // Assign the Sidebar subclasses
     CONFIG.ui.items = HeroSystem6eItemDirectory;
     CONFIG.ui.compendium = HeroSystem6eCompendiumDirectory;
-    HeroSystem6eCombatTracker.initializeTemplate();
-    CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
     GenericRoller.Initialize();
     HeroSocketHandler.Initialize();
