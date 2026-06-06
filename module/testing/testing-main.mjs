@@ -11,6 +11,7 @@ import { registerManeuverTests } from "./testing-maneuvers.mjs";
 import { registerRequiresRollCheckTests } from "./testing-requires-roll-check.mjs";
 import { registerUploadTests } from "./testing-upload.mjs";
 import { registerVehicleTests } from "./testing-vehicles.mjs";
+import { registerCombatTests } from "./combat-tests.mjs";
 import { registerGlobalSetup, registerGlobalTeardown } from "./quench-helper.mjs";
 
 Hooks.once("ready", async function () {
@@ -44,6 +45,7 @@ Hooks.on("quenchReady", async (quench) => {
     registerRequiresRollCheckTests(quench);
     registerUploadTests(quench);
     registerVehicleTests(quench);
+    registerCombatTests(quench);
 
     registerGlobalTeardown(quench);
 });

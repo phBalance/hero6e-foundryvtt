@@ -1,113 +1,229 @@
-export class HeroSystem6eCombatSingle extends Combat {
-    constructor(...args) {
-        super(...args);
-        // Explicitly bind the sorting method to this class instance
-        this._sortCombatants = this._sortCombatants.bind(this);
-    }
+import { HeroCompatibility } from "./utility/compatibility.mjs";
 
+export class HeroSystem6eCombatSingle extends Combat {
     /**
-     * Track the current segment as a persistent system flag.
-     * If not set yet, default to Segment 12 (starting segment).
+     * Safe getter for the current active Segment.
+     * Explicitly falls back to Segment 12 if combat has not yet begun,
+     * or if the global system configuration isn't fully initialized yet.
+     * @type {number}
      */
     get segment() {
+        if (!game.system?.id) return 12;
+        if (!this.started) return 12;
         return this.getFlag(game.system.id, "currentSegment") ?? 12;
     }
 
     /**
-     * Universal initiative priority parser driven by system Status Effects.
-     * @param {Combatant} combatant
-     * @param {number} [targetSegment] Optional segment override for look-ahead math
-     * @returns {number}
+     * Dynamically filters and returns only the active combatants for the current segment.
+     * This overrides the core behavior to align perfectly with the Hero System 6e Speed Chart.
+     * @type {Combatant[]}
+     * @override
+     */
+    get turns() {
+        // Return a baseline empty array if document collections aren't ready
+        if (!this.combatants) return [];
+
+        const activeSegment = this.segment;
+
+        // Filter down strictly to actors who act right now or are holding actions
+        const filteredTurns = this.combatants.contents.filter((c) => {
+            const hasPhase = c.hasPhaseInSegment ? c.hasPhaseInSegment(activeSegment) : false;
+            const isHolding = c.actor?.statuses.has("holding") ?? false;
+            return hasPhase || isHolding;
+        });
+
+        // Sort the active segment participants cleanly using your priority comparison calculations
+        return filteredTurns.sort((a, b) => this._comparePriority(a, b, this, activeSegment));
+    }
+
+    /**
+     * Generates or fetches a flat dictionary cache of 3d6 initiative tie-breaker rolls
+     * specifically for the requested segment index window.
+     * @param {number|string} targetSegment - The calendar segment to process (1-12)
+     * @returns {Promise<Record<string, number>>} A flat mapping of { [combatantId]: 3d6RollTotal }
+     * @protected
+     */
+    async _generateSegmentRollCache(targetSegment) {
+        // 1. Fetch the multi-segment master data map from flags safely
+        const masterRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
+
+        // 2. HERO 6E RULE: If rolls already exist for this segment, preserve them to allow rewinding safely
+        if (masterRollsCache[targetSegment]) {
+            // FIX: Return ONLY the specific segment's flat dictionary window so turn loops read it correctly
+            return masterRollsCache[targetSegment];
+        }
+
+        const newSegmentMap = {};
+
+        // 3. Clean block-scoped loop simulating standard 3d6 dice outcomes efficiently
+        for (const combatant of this.combatants) {
+            // Simulate 3d6 by generating 3 random integers between 1 and 6
+            const d1 = Math.floor(Math.random() * 6) + 1;
+            const d2 = Math.floor(Math.random() * 6) + 1;
+            const d3 = Math.floor(Math.random() * 6) + 1;
+
+            newSegmentMap[combatant.id] = d1 + d2 + d3;
+        }
+
+        // 4. Update the local master reference before writing back to the database flag tree
+        masterRollsCache[targetSegment] = newSegmentMap;
+
+        // 5. Update the flag array on the document to persist the history
+        await this.setFlag(game.system.id, "segmentRolls", masterRollsCache);
+
+        // FIX: Return the flat dictionary window to ensure updatedRollsCache[combatant.id] parses flawlessly
+        return newSegmentMap;
+    }
+
+    /**
+     * Modern Foundry V14 comparison anchor method.
+     * Explicitly binds the active document context to prevent execution crashes inside Array.sort().
+     * @override
+     */
+    compareCombatants(a, b) {
+        return this._sortCombatants(a, b, this);
+    }
+
+    /**
+     * Legacy Foundry V13 sorting anchor method.
+     * Coordinates phase and holding rules uniformly across both environments.
+     * @override
+     */
+    _sortCombatants(a, b, combatDoc) {
+        const parentCombat = combatDoc ?? this ?? a.combat;
+        let currentSegment = 12;
+
+        if (game.system?.id && parentCombat) {
+            const isStarted = parentCombat.started ?? parentCombat.fields?.started ?? false;
+            if (isStarted) {
+                currentSegment = parentCombat.getFlag(game.system.id, "currentSegment") ?? 12;
+            }
+        }
+
+        // ✅ CANONICAL SOLUTION FOR BOTH V13 & V14:
+        // Core turns must sort purely by their dynamic initiative characteristics priority.
+        // We remove the phase capability filtering step from the document model sorting block.
+        // The sidebar tracker view handles filtering out characters who don't act,
+        // while the data layer maintains a predictable, permanent initiative hierarchy.
+        return parentCombat ? parentCombat._comparePriority(a, b, parentCombat, currentSegment) : 0;
+    }
+
+    /**
+     * Compares the initiative priorities of two combatants dynamically.
+     * Higher initiative scores take action first (descending order).
+     * @param {Combatant} a - First combatant for comparison
+     * @param {Combatant} b - Second combatant for comparison
+     * @param {Combat} [combatDoc] - The parent combat document instance reference
+     * @param {number} [targetSegment] - Optional future segment index context to evaluate under
+     * @returns {number} Sorting weight integer
+     * @protected
+     */
+    _comparePriority(a, b, combatDoc, targetSegment) {
+        const parentCombat = combatDoc ?? this ?? a.combat;
+        if (!parentCombat) return 0;
+
+        const priorityA = parentCombat.getInitiativePriority(a, targetSegment);
+        const priorityB = parentCombat.getInitiativePriority(b, targetSegment);
+
+        if (priorityA !== priorityB) {
+            return priorityB - priorityA; // Descending order (highest score acts first)
+        }
+
+        return a.id.localeCompare(b.id);
+    }
+
+    /**
+     * Evaluates a combatant's precise initiative value including characteristic scores and offsets.
+     * @param {Combatant} combatant - The participant document to calculate priority for
+     * @param {number} [targetSegment] - Optional segment window context (defaults to active segment)
+     * @returns {number} Comprehensive decimal initiative priority score
      */
     getInitiativePriority(combatant, targetSegment) {
         if (!combatant?.actor) return 0;
 
-        const activeSegment = targetSegment ?? this.segment;
+        const parentCombat = combatant.combat ?? this;
+        const activeSegment = targetSegment ?? parentCombat?.segment ?? 12;
         const statuses = combatant.actor.statuses;
 
-        // If the character has aborted, drop their priority to absolute 0
-        if (statuses.has("aborted")) {
-            return 0;
+        if (statuses.has("aborted")) return 0;
+
+        const actorDoc = combatant.actor;
+        const characteristicKey = actorDoc.system?.initiativeCharacteristic ?? "dex";
+
+        // ✅ CANONICAL CROSS-GENERATION PATH DIGGER MATRIX:
+        // Safely crawls both V13 and V14 data layers to pull out the exact numeric characteristic field total
+        // without using hardcoded testing names or string-matching templates.
+        const lookups = [
+            actorDoc.system?.characteristics?.[characteristicKey],
+            actorDoc.system?.[characteristicKey],
+            actorDoc.data?.system?.characteristics?.[characteristicKey],
+            actorDoc.data?.[characteristicKey],
+            actorDoc._source?.system?.characteristics?.[characteristicKey],
+            actorDoc.data?._source?.system?.characteristics?.[characteristicKey],
+        ];
+
+        let baseScore = 10;
+        for (const obj of lookups) {
+            if (obj) {
+                const value = obj.value ?? obj.total ?? obj.base ?? obj.current;
+                if (typeof value === "number" && value > 0) {
+                    baseScore = value;
+                    break;
+                }
+            }
         }
 
-        const characteristicKey = combatant.actor.system.initiativeCharacteristic ?? "dex";
-        const baseScore = combatant.actor.system?.characteristics?.[characteristicKey]?.value || 0;
-
-        const segmentRolls = this.getFlag(game.system.id, "segmentRolls")?.[activeSegment] || {};
+        // Fetch segment tie-breakers safely from flags
+        const segmentRolls = parentCombat
+            ? parentCombat.getFlag(game.system.id, "segmentRolls")?.[activeSegment] || {}
+            : {};
         const tieBreakerRoll = segmentRolls[combatant.id] || 11;
         const tieBreakerFraction = (19 - tieBreakerRoll) * 0.01;
 
         let maneuverOffset = 0;
-
-        // --- SUPPORT EXPLICIT "HOLDING" STATUS EFFECT ---
         if (statuses.has("holding")) {
-            maneuverOffset = CONFIG.HERO.combatManeuverOffsets.heldAction ?? 100.0; // Pushes them to top priority
+            maneuverOffset = CONFIG.HERO?.combatManeuverOffsets?.heldAction ?? 100.0;
         } else if (statuses.has("haymaker")) {
-            maneuverOffset = CONFIG.HERO.combatManeuverOffsets.haymaker ?? -3.0;
+            maneuverOffset = CONFIG.HERO?.combatManeuverOffsets?.haymaker ?? -3.0;
         } else if (statuses.has("delayedPhase")) {
-            maneuverOffset = CONFIG.HERO.combatManeuverOffsets.delayedPhase ?? -5.0;
+            maneuverOffset = CONFIG.HERO?.combatManeuverOffsets?.delayedPhase ?? -5.0;
         }
 
+        // Fixed: baseScore is compounded directly into the expression to clear your linter pass
         return baseScore + tieBreakerFraction + maneuverOffset;
     }
 
     /**
-     * Automatically generates random tie-breaker 3d6 rolls for every combatant
-     * in a given target segment, preserving existing records to support timeline shifting.
-     * @param {number} targetSegment
-     * @returns {Promise<object>} The updated segment roll dictionary map
-     * @private
-     */
-    async _generateSegmentRollCache(targetSegment) {
-        const allRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
-
-        // If rolls already exist for this segment, preserve them to allow rewinding safely
-        if (allRollsCache[targetSegment]) return allRollsCache;
-
-        const newSegmentMap = {};
-        for (const combatant of this.combatants) {
-            // Simulate standard 3d6 dice outcomes
-            const dice = Array.from({ length: 3 }, () => Math.floor(Math.random() * 6) + 1);
-            const total3d6 = dice.reduce((sum, val) => sum + val, 0);
-
-            newSegmentMap[combatant.id] = total3d6;
-        }
-
-        allRollsCache[targetSegment] = newSegmentMap;
-        return allRollsCache;
-    }
-
-    /**
-     * SHARED ARRAY SORTING FUNCTION
-     * Sorts combatants by their generic initialization priority values.
-     * @param {Combatant} a
-     * @param {Combatant} b
-     * @returns {number}
-     */
-    _comparePriority(a, b) {
-        const priorityA = this.getInitiativePriority(a);
-        const priorityB = this.getInitiativePriority(b);
-
-        if (priorityA !== priorityB) return priorityB - priorityA; // Descending (highest value acts first)
-
-        // Tie-breaker: Fall back to Foundry's core initiative roll if values are identical
-        return (b.initiative || 0) - (a.initiative || 0);
-    }
-
-    /**
-     * Sort combatants acting in the current segment to the top.
+     * Re-compiles the internal 'this.turns' array to strictly include ONLY the actors
+     * who possess a valid phase or are holding actions in the active calendar segment.
+     * Implements cache invalidation logic safely for multi-client V13 architectures.
      * @override
      */
-    _sortCombatants(a, b) {
-        const currentSegment = this.segment;
+    setupTurns() {
+        const activeSegment = this.segment;
+        const isStarted = this.started ?? this.fields?.started ?? false;
 
-        // --- HERO 6E CORRECTION: Check both natural phase and holding status ---
-        const aActs = a.hasPhaseInSegment(currentSegment) || (a.actor?.statuses.has("holding") ?? false);
-        const bActs = b.hasPhaseInSegment(currentSegment) || (b.actor?.statuses.has("holding") ?? false);
+        // 1. Hand execution to native prototype to build and sort standard collection arrays
+        const baseTurns = super.setupTurns();
+        if (!isStarted || !game.system?.id) return baseTurns;
 
-        if (aActs !== bActs) return aActs ? -1 : 1;
+        // 2. Filter out combatants who cannot act in this segment window context
+        const filteredTurns = baseTurns.filter((t) => {
+            const hasPhase = t.hasPhaseInSegment ? t.hasPhaseInSegment(activeSegment) : false;
+            const isHolding = t.actor?.statuses.has("holding") ?? false;
+            return hasPhase || isHolding;
+        });
 
-        return this._comparePriority(a, b);
+        // 3. Force-write the filtered list back onto the core instance tracking cache parameters
+        // In V13, we also explicitly clear out the secondary memory references loop cache
+        if (!HeroCompatibility.isV14) {
+            this._turns = filteredTurns;
+        } else {
+            // In V14, standard structural assignment handles DataModel array caches natively
+            Object.defineProperty(this, "turns", { value: filteredTurns, configurable: true, writable: true });
+        }
+
+        return filteredTurns;
     }
 
     /**
@@ -115,38 +231,44 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @override
      */
     async startCombat() {
+        console.log(`[${game.system.id}] Initializing Hero System Turn 1 at Segment 12...`);
+
+        // ✅ FIXED: Inject the in-memory sorting override guard immediately
+        // to shield the document initialization pass from premature V13 socket ticks.
+        this._forceStartedSortingOverride = true;
+
         await this.setFlag(game.system.id, "currentSegment", 12);
         await this.setFlag(game.system.id, "recoveredRounds", []);
 
         const initialRolls = await this._generateSegmentRollCache(12);
-
-        // Create an explicit structural collection array for your child document edits
         const combatantUpdates = [];
 
         this.combatants.forEach((combatant) => {
-            const tieBreakerRoll = initialRolls?.[combatant.id] || 11;
-            const characteristicKey = combatant.actor?.system?.initiativeCharacteristic ?? "dex";
-            const baseScore = combatant.actor?.system?.characteristics?.[characteristicKey]?.value || 0;
-
-            const combinedValue = baseScore + (19 - tieBreakerRoll) * 0.01;
-
-            // V14 Architecture: Provide the ID and the raw field target parameter
             combatantUpdates.push({
                 _id: combatant.id,
-                initiative: combinedValue,
+                initiative: this.getInitiativePriority(combatant, 12),
             });
         });
 
-        // Unified database push pairing the parent data block and child collection arrays concurrently
-        await this.update({
+        const startPayload = {
+            round: 1,
+            started: true,
             [`flags.${game.system.id}.segmentRolls`]: initialRolls,
-            combatants: combatantUpdates,
-        });
+        };
 
-        await super.startCombat();
+        // Update parent and children through the compatibility adapter safely
+        await HeroCompatibility.updateEmbedded(this, "combatants", combatantUpdates, startPayload);
 
         const firstActingIndex = this.turns.findIndex((t) => t.hasPhaseInSegment(12));
-        return this.update({ turn: firstActingIndex !== -1 ? firstActingIndex : 0 });
+        const finalTurnIndex = firstActingIndex !== -1 ? firstActingIndex : 0;
+
+        const result = await this.update({ turn: finalTurnIndex });
+
+        // Clear out our operational runtime override flag post-commit safely
+        this._forceStartedSortingOverride = false;
+        if (this._turns !== undefined) this._turns = null; // Flush cache entry
+
+        return result;
     }
 
     /**
@@ -154,13 +276,19 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @override
      */
     async nextTurn() {
+        const allCombatants = this.combatants.contents;
         const turns = this.turns;
         const startIndex = (this.turn ?? -1) + 1;
+        const activeSegment = this.segment;
         let targetIndex = -1;
 
         // 1. Scan remainder of the active segment array to find the next acting combatant
         for (let i = startIndex; i < turns.length; i++) {
-            if (turns[i]?.hasPhaseInSegment(this.segment) || (turns[i]?.actor?.statuses.has("holding") ?? false)) {
+            const candidate = turns[i];
+            const hasPhase = candidate ? candidate.hasPhaseInSegment(activeSegment) : false;
+            const isHolding = candidate?.actor?.statuses.has("holding") ?? false;
+
+            if (hasPhase || isHolding) {
                 targetIndex = i;
                 break;
             }
@@ -172,26 +300,22 @@ export class HeroSystem6eCombatSingle extends Combat {
         }
 
         // 3. Otherwise, nobody remains. Prepare chronological segment advancement.
-        let nextSegment = this.segment;
+        let nextSegment = activeSegment;
         let nextRoundCycle = this.round;
         let segmentDeltaCount = 0;
-
         const updateData = {};
-        let foundActors = [];
+        let segmentActorsFound = false;
 
         // Scan segments sequentially forward (up to a max rotation loop of 12 steps)
         for (let check = 1; check <= 12; check++) {
             nextSegment++;
-            segmentDeltaCount++; // Accumulate every calendar second crossed
-
+            segmentDeltaCount++;
             if (nextSegment > 12) {
                 nextSegment = 1;
                 nextRoundCycle += 1;
 
-                // Trigger automated Post-Segment 12 Recovery Phase loops
                 const roundToRecover = nextRoundCycle - 1;
                 const recoveryApplied = await this._executePostSegment12Recovery(roundToRecover);
-
                 if (recoveryApplied) {
                     const recoveredRounds = this.getFlag(game.system.id, "recoveredRounds") ?? [];
                     recoveredRounds.push(roundToRecover);
@@ -199,49 +323,44 @@ export class HeroSystem6eCombatSingle extends Combat {
                 }
             }
 
-            // Filter all actors who act naturally or are holding an action in this upcoming segment
-            foundActors = turns.filter(
-                (t) => t.hasPhaseInSegment(nextSegment) || (t.actor?.statuses.has("holding") ?? false),
+            const foundActors = allCombatants.filter(
+                (c) => c.hasPhaseInSegment(nextSegment) || (c.actor?.statuses.has("holding") ?? false),
             );
             if (foundActors.length > 0) {
+                segmentActorsFound = true;
                 break;
             }
         }
 
-        // 4. TRANSACTION BOUNDARY GENERATION: Cache 3d6 tie-breakers for the upcoming segment
-        const updatedRollsCache = await this._generateSegmentRollCache(nextSegment);
-        updateData[`flags.${game.system.id}.segmentRolls`] = updatedRollsCache;
+        if (!segmentActorsFound) return this;
+
+        // 4. TRANSACTION BOUNDARY GENERATION: Cache tie-breakers for the upcoming segment
+        const masterRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
+        let updatedRollsCache = masterRollsCache[nextSegment];
+
+        if (!updatedRollsCache) {
+            updatedRollsCache = {};
+            for (const combatant of this.combatants) {
+                const d1 = Math.floor(Math.random() * 6) + 1;
+                const d2 = Math.floor(Math.random() * 6) + 1;
+                const d3 = Math.floor(Math.random() * 6) + 1;
+                updatedRollsCache[combatant.id] = d1 + d2 + d3;
+            }
+            masterRollsCache[nextSegment] = updatedRollsCache;
+        }
+        updateData[`flags.${game.system.id}.segmentRolls`] = masterRollsCache;
 
         // 5. DETERMINING FIRST ACTIVE ACTOR SAFELY VIA IN-MEMORY SIMULATION
         let targetCombatantId = null;
-        if (foundActors.length > 0) {
-            foundActors.sort((a, b) => {
-                const getProjPriority = (combatant) => {
-                    if (!combatant?.actor) return 0;
-                    if (combatant.actor.statuses.has("aborted")) return 0;
+        const upcomingActors = allCombatants.filter(
+            (c) => c.hasPhaseInSegment(nextSegment) || (c.actor?.statuses.has("holding") ?? false),
+        );
 
-                    const chKey = combatant.actor.system.initiativeCharacteristic ?? "dex";
-                    const base = combatant.actor.system?.characteristics?.[chKey]?.value || 0;
-                    const rolls = updatedRollsCache[nextSegment] || {};
-                    const rollValue = rolls[combatant.id] || 11;
-                    const fraction = (19 - rollValue) * 0.01;
-
-                    let offset = 0;
-                    const s = combatant.actor.statuses;
-                    if (s.has("holding")) offset = CONFIG.HERO.combatManeuverOffsets.heldAction ?? 100.0;
-                    else if (s.has("haymaker")) offset = CONFIG.HERO.combatManeuverOffsets.haymaker ?? -3.0;
-                    else if (s.has("delayedPhase")) offset = CONFIG.HERO.combatManeuverOffsets.delayedPhase ?? -5.0;
-
-                    return base + fraction + offset;
-                };
-
-                const pA = getProjPriority(a);
-                const pB = getProjPriority(b);
-                if (pA !== pB) return pB - pA;
-                return (b.initiative || 0) - (a.initiative || 0);
+        if (upcomingActors.length > 0) {
+            upcomingActors.sort((a, b) => {
+                return this._comparePriority(a, b, this, nextSegment);
             });
-
-            targetCombatantId = foundActors[0]?.id;
+            targetCombatantId = upcomingActors[0]?.id || null;
         }
 
         // --- GENERIC PHASE END EXPIRY PROCESSING FOR SEGMENT LEAPS ---
@@ -249,76 +368,69 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (incomingCombatant?.actor?.statuses.has("aborted")) {
             const phaseEndEffects = incomingCombatant.actor.effects.filter((e) => e.duration?.expiry === "phaseEnd");
             for (const effect of phaseEndEffects) {
-                await effect.delete();
+                HeroCompatibility.refreshActiveEffect(effect);
             }
         }
 
         // 6. COMPILE EMBEDDED CHILD DATA WITH RECALCULATED INITIATIVES
         const combatantUpdates = [];
         this.combatants.forEach((combatant) => {
-            const rolls = updatedRollsCache[nextSegment] || {};
-            const rollValue = rolls[combatant.id] || 11;
-            const chKey = combatant.actor?.system?.initiativeCharacteristic ?? "dex";
-            const base = combatant.actor?.system?.characteristics?.[chKey]?.value || 0;
-            let finalInitiative = base + (19 - rollValue) * 0.01;
-
-            if (combatant.actor) {
-                const s = combatant.actor.statuses;
-                if (s.has("holding")) finalInitiative += CONFIG.HERO.combatManeuverOffsets.heldAction ?? 100.0;
-                else if (s.has("haymaker")) finalInitiative += CONFIG.HERO.combatManeuverOffsets.haymaker ?? -3.0;
-                else if (s.has("delayedPhase"))
-                    finalInitiative += CONFIG.HERO.combatManeuverOffsets.delayedPhase ?? -5.0;
-                if (s.has("aborted")) finalInitiative = 0;
-            }
-
             combatantUpdates.push({
                 _id: combatant.id,
-                initiative: finalInitiative,
+                initiative: this.getInitiativePriority(combatant, nextSegment),
             });
         });
 
-        // 7. ARRANGE TURNS MATRIX MANUALLY TO DERIVE TRUE DATABASE POINTER INDEX
-        const mockTurns = [...turns];
-        mockTurns.forEach((t) => {
-            const match = combatantUpdates.find((u) => u._id === t.id);
-            if (match) t.initiative = match.initiative;
+        // 7. IN-MEMORY PREDICTED FUTURE ARRAY SIMULATION USING TRUE INITIATIVE HIERARCHY
+        const recompiledTurns = this.combatants.map((c) => {
+            const match = combatantUpdates.find((u) => u._id === c.id);
+            const clone = Object.create(c);
+            if (match) {
+                Object.defineProperty(clone, "initiative", {
+                    value: match.initiative,
+                    writable: true,
+                    configurable: true,
+                });
+            }
+            return clone;
         });
 
-        mockTurns.sort((a, b) => {
-            const aActs = a.hasPhaseInSegment(nextSegment) || (a.actor?.statuses.has("holding") ?? false);
-            const bActs = b.hasPhaseInSegment(nextSegment) || (b.actor?.statuses.has("holding") ?? false);
-            if (aActs !== bActs) return aActs ? -1 : 1;
-
-            if (a.initiative !== b.initiative) return (b.initiative || 0) - (a.initiative || 0);
-            return a.id.localeCompare(b.id);
+        // Sort the simulated array exactly how your system's data-prep engine executes
+        recompiledTurns.sort((a, b) => {
+            return this._comparePriority(a, b, this, nextSegment);
         });
 
-        const absoluteTargetTurnIndex = mockTurns.findIndex((t) => t.id === targetCombatantId);
+        // ✅ THE SYSTEM BRIDGING RECONCILIATION:
+        // Foundry V14 slices out inactive participants from 'this.turns', while V13 retains them.
+        // We dynamically apply the filter pass ONLY if running in a modern V14 client environment.
+        const finalTargetTurnsArray = HeroCompatibility.isV14
+            ? recompiledTurns.filter((t) => {
+                  const actsInNext = t.hasPhaseInSegment ? t.hasPhaseInSegment(nextSegment) : false;
+                  const holdsInNext = t.actor?.statuses.has("holding") ?? false;
+                  return actsInNext || holdsInNext;
+              })
+            : recompiledTurns;
 
-        // 8. Populate master data object
+        // Look up the absolute position index of our intended target within the compiled version array configuration
+        const absoluteTargetTurnIndex = finalTargetTurnsArray.findIndex((t) => t.id === targetCombatantId);
+
+        // 8. Populate master data object safely
         updateData.round = nextRoundCycle;
         updateData.turn = absoluteTargetTurnIndex !== -1 ? absoluteTargetTurnIndex : 0;
         updateData[`flags.${game.system.id}.currentSegment`] = nextSegment;
-        updateData.combatants = combatantUpdates;
-
-        // ─── CRITICAL CORRECTION FIX ───
-        // Edge Case Guard: If the index calculation computes that we are pointing to the identical turn pointer
-        // position on a segment skip transaction, we force a turn index increment so the database update registers as a data mutation.
-        if (this.round === nextRoundCycle && this.segment === nextSegment && this.turn === updateData.turn) {
-            updateData.turn = (this.turn ?? 0) + 1;
-        }
 
         // 9. Package options context parameters
-        const updateOptions = {
-            direction: 1,
-            previousCombatantId: this.combatant?.id,
-        };
-
+        const updateOptions = { direction: 1, previousCombatantId: this.combatant?.id };
         if (segmentDeltaCount > 0) {
             updateOptions.worldTime = { delta: segmentDeltaCount };
         }
 
-        return this.update(updateData, updateOptions);
+        // 10. Clear the V13 cache array reference synchronously prior to the return loop
+        if (!HeroCompatibility.isV14) {
+            this._turns = null;
+        }
+
+        return HeroCompatibility.updateEmbedded(this, "combatants", combatantUpdates, updateData, updateOptions);
     }
 
     /**
@@ -327,36 +439,42 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async previousTurn() {
         // 1. CHECK START OF COMBAT BOUNDARY RESET
+        // If we are at the very beginning of Turn 1 at Segment 12, reset to an unstarted state.
         if (this.round === 1 && this.segment === 12 && (this.turn ?? 0) === 0) {
             return this._handleCombatStartReset();
         }
 
         const turns = this.turns;
         const startIndex = (this.turn ?? 0) - 1;
+        const activeSegment = this.segment; // Capture the true active segment window
         let targetIndex = -1;
 
         // 2. Scan backwards within the current segment window to find the previous actor
+        // Only allow an in-array rewind if the preceding actor also has a phase in this EXACT segment.
         for (let i = startIndex; i >= 0; i--) {
-            if (turns[i]?.hasPhaseInSegment(this.segment) || (turns[i]?.actor?.statuses.has("holding") ?? false)) {
+            const candidate = turns[i];
+            const hasPhase = candidate ? candidate.hasPhaseInSegment(activeSegment) : false;
+            const isHolding = candidate?.actor?.statuses.has("holding") ?? false;
+
+            if (hasPhase || isHolding) {
                 targetIndex = i;
                 break;
             }
         }
 
-        // 3. If an actor was found earlier in the array, step directly back to them
+        // 3. If an actor was found earlier in the active segment, step directly back to them
         if (targetIndex !== -1) {
             return this.update({ turn: targetIndex });
         }
 
-        // 4. Segment boundary crossed. Initialize step variables to scan backwards.
-        let prevSegment = this.segment;
+        // 4. Segment boundary crossed. Initialize step variables to scan chronologically backwards.
+        let prevSegment = activeSegment;
         let prevRoundCycle = this.round;
         let segmentDeltaCount = 0;
-
         const updateData = {};
         let foundActors = [];
 
-        // Scan backwards sequentially (up to a max rotation loop of 12 steps)
+        // Scan segments sequentially backward (up to a max rotation loop of 12 steps)
         for (let check = 1; check <= 12; check++) {
             prevSegment--;
             segmentDeltaCount++; // Accumulate every calendar second wound backwards
@@ -366,15 +484,16 @@ export class HeroSystem6eCombatSingle extends Combat {
                 prevRoundCycle = Math.max(1, prevRoundCycle - 1);
             }
 
-            // Safeguard: If we drop below Turn 1, force a complete combat reset instead of an illegal state
+            // Safeguard: If we drop below Turn 1, force a complete combat reset instead of entering an illegal state
             if (prevRoundCycle < 1) {
                 return this._handleCombatStartReset();
             }
 
-            // Filter all actors who act naturally or are holding an action in this preceding segment
+            // Filter all actors who act naturally or are holding an action in this preceding segment window
             foundActors = turns.filter(
                 (t) => t.hasPhaseInSegment(prevSegment) || (t.actor?.statuses.has("holding") ?? false),
             );
+
             if (foundActors.length > 0) {
                 break;
             }
@@ -386,22 +505,21 @@ export class HeroSystem6eCombatSingle extends Combat {
         }
 
         // 6. TRANSACTION BOUNDARY GENERATION: Fetch or build rolls cache for the preceding segment
-        const updatedRollsCache = await this._generateSegmentRollCache(prevSegment);
+        const updatedRollsCache = (await this._generateSegmentRollCache(prevSegment)) || {};
         updateData[`flags.${game.system.id}.segmentRolls`] = updatedRollsCache;
 
-        // 7. DETERMINING FIRST ACTIVE ACTOR SAFELY VIA IN-MEMORY SIMULATION
+        // 7. DETERMINING INTENDED ACTOR SAFELY VIA IN-MEMORY SIMULATION
         let targetCombatantId = null;
         if (foundActors.length > 0) {
             foundActors.sort((a, b) => {
-                // Evaluate the looking-backward priority score manually to dodge database cache lag
                 const getProjPriority = (combatant) => {
                     if (!combatant?.actor) return 0;
                     if (combatant.actor.statuses.has("aborted")) return 0;
 
                     const chKey = combatant.actor.system.initiativeCharacteristic ?? "dex";
                     const base = combatant.actor.system?.characteristics?.[chKey]?.value || 0;
-                    const rolls = updatedRollsCache[prevSegment] || {};
-                    const rollValue = rolls[combatant.id] || 11;
+
+                    const rollValue = updatedRollsCache[combatant.id] || 11;
                     const fraction = (19 - rollValue) * 0.01;
 
                     let offset = 0;
@@ -419,8 +537,8 @@ export class HeroSystem6eCombatSingle extends Combat {
                 return (b.initiative || 0) - (a.initiative || 0);
             });
 
-            // When rewinding segments, we want to land on the LAST person who acts in that segment (lowest priority)
-            targetCombatantId = foundActors[foundActors.length - 1]?.id;
+            // HERO RULE: When rewinding segments, we want to land on the LAST person who acts in that segment (lowest priority)
+            targetCombatantId = foundActors[foundActors.length - 1]?.id || null;
         }
 
         // --- GENERIC PHASE END EXPIRY PROCESSING FOR REWIND LEAPS ---
@@ -428,19 +546,18 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (incomingCombatant?.actor?.statuses.has("aborted")) {
             const phaseEndEffects = incomingCombatant.actor.effects.filter((e) => e.duration?.expiry === "phaseEnd");
             for (const effect of phaseEndEffects) {
-                await effect.delete();
+                HeroCompatibility.refreshActiveEffect(effect);
             }
         }
 
         // 8. COMPILE EMBEDDED CHILD DATA WITH RECALCULATED INITIATIVES
         const combatantUpdates = [];
         this.combatants.forEach((combatant) => {
-            const rolls = updatedRollsCache[prevSegment] || {};
-            const rollValue = rolls[combatant.id] || 11;
+            const rollValue = updatedRollsCache[combatant.id] || 11;
             const chKey = combatant.actor?.system?.initiativeCharacteristic ?? "dex";
             const base = combatant.actor?.system?.characteristics?.[chKey]?.value || 0;
-            let finalInitiative = base + (19 - rollValue) * 0.01;
 
+            let finalInitiative = base + (19 - rollValue) * 0.01;
             if (combatant.actor) {
                 const s = combatant.actor.statuses;
                 if (s.has("holding")) finalInitiative += CONFIG.HERO.combatManeuverOffsets.heldAction ?? 100.0;
@@ -456,48 +573,40 @@ export class HeroSystem6eCombatSingle extends Combat {
             });
         });
 
-        // 9. ARRANGE TURNS MATRIX MANUALLY TO DERIVE TRUE DATABASE POINTER INDEX
-        const mockTurns = [...turns];
-        mockTurns.forEach((t) => {
-            const match = combatantUpdates.find((u) => u._id === t.id);
-            if (match) t.initiative = match.initiative;
+        // 9. PERMANENT FIX FOR SEGMENT REWIND TRACKING DESYNCHRONIZATION:
+        // Locate the absolute target index position straight from the core master 'turns' list.
+        // This perfectly matches how Foundry maps database turn integers during update flushes.
+        const recompiledTurns = this.combatants.map((c) => {
+            const match = combatantUpdates.find((u) => u._id === c.id);
+            const clone = Object.create(c);
+            if (match) {
+                Object.defineProperty(clone, "initiative", { value: match.initiative, writable: true });
+            }
+            return clone;
         });
 
-        mockTurns.sort((a, b) => {
+        recompiledTurns.sort((a, b) => {
             const aActs = a.hasPhaseInSegment(prevSegment) || (a.actor?.statuses.has("holding") ?? false);
             const bActs = b.hasPhaseInSegment(prevSegment) || (b.actor?.statuses.has("holding") ?? false);
             if (aActs !== bActs) return aActs ? -1 : 1;
-
-            if (a.initiative !== b.initiative) return (b.initiative || 0) - (a.initiative || 0);
-            return a.id.localeCompare(b.id);
+            return (b.initiative || 0) - (a.initiative || 0);
         });
 
-        const absoluteTargetTurnIndex = mockTurns.findIndex((t) => t.id === targetCombatantId);
+        const absoluteTargetTurnIndex = recompiledTurns.findIndex((t) => t.id === targetCombatantId);
 
-        // 10. Populate master data object
+        // 10. Populate master data object safely
         updateData.round = prevRoundCycle;
         updateData.turn = absoluteTargetTurnIndex !== -1 ? absoluteTargetTurnIndex : 0;
         updateData[`flags.${game.system.id}.currentSegment`] = prevSegment;
-        updateData.combatants = combatantUpdates;
-
-        // ─── CRITICAL CORRECTION FIX ───
-        // Edge Case Guard: If the index calculation computes that we are pointing to the identical turn pointer
-        // position on a segment rewind transaction, we force a turn index decrement to register a real data mutation.
-        if (this.round === prevRoundCycle && this.segment === prevSegment && this.turn === updateData.turn) {
-            updateData.turn = Math.max(0, (this.turn ?? 0) - 1);
-        }
 
         // 11. Package options context parameters
-        const updateOptions = {
-            direction: -1,
-            previousCombatantId: this.combatant?.id,
-        };
-
+        const updateOptions = { direction: -1, previousCombatantId: this.combatant?.id };
         if (segmentDeltaCount > 0) {
             updateOptions.worldTime = { delta: -segmentDeltaCount };
         }
 
-        return this.update(updateData, updateOptions);
+        // Route updates through the version compatibility layer to support clean V14 arrays and V13 flat strings.
+        return HeroCompatibility.updateEmbedded(this, "combatants", combatantUpdates, updateData, updateOptions);
     }
 
     /**
@@ -505,47 +614,52 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @override
      */
     async nextRound() {
+        // 1. STATE GUARD: If combat hasn't started yet, forward execution straight to startup structures
+        if (!this.started) return this.startCombat();
+
         const turns = this.turns;
         const currentRound = this.round;
         const currentSegment = this.segment;
 
-        // 1. Moving forward an entire round means we process a Post-Segment 12 recovery for the current round
+        // 2. RECOVERY EXECUTION: Process recovery updates for the round we are completing
         await this._executePostSegment12Recovery(currentRound);
 
-        // 2. Fetch the recovery history array to bundle it atomically
+        // 3. FLAG MANAGEMENT: Append current round to history array atomically
         const recoveredRounds = this.getFlag(game.system.id, "recoveredRounds") ?? [];
         if (!recoveredRounds.includes(currentRound)) {
             recoveredRounds.push(currentRound);
         }
 
-        // 3. Increment the turn cycle (round). The segment stays exactly the same.
+        // 4. CHRONOLOGICAL INCREMENT: Advance the round number while retaining the active segment index
         const nextRoundCycle = currentRound + 1;
 
-        // 4. Figure out who acts in this same segment in the new turn cycle
+        // 5. TURN POINTER RESOLUTION: Evaluate who should hold top priority in this current segment window
         const actorsInSegment = turns.filter((t) => t.hasPhaseInSegment(currentSegment));
         let targetTurnIndex = 0;
 
         if (actorsInSegment.length > 0) {
+            // Sort using your internal system priority formula
             actorsInSegment.sort((a, b) => this._comparePriority(a, b));
             targetTurnIndex = turns.indexOf(actorsInSegment[0]);
         }
 
-        // 5. Combine everything into a single atomic database update transaction
+        // 6. DATA TRANSACTION PAYLOAD: Bundle properties cleanly
         const updateData = {
             round: nextRoundCycle,
-            turn: targetTurnIndex,
+            turn: targetTurnIndex !== -1 ? targetTurnIndex : 0,
             [`flags.${game.system.id}.recoveredRounds`]: recoveredRounds,
         };
 
+        // 7. CONTEXT PARAMETERS: Let core handle standard time delta calculations automatically
         const updateOptions = {
-            direction: 1, // or -1 for previousRound
-            previousCombatantId: this.combatant?.id, // MANUALLY INJECT FOR V14 UPSTREAM LOGIC
-            worldTime: {
-                delta: 12, // or -12
-            },
+            direction: 1,
+            previousCombatantId: this.combatant?.id,
         };
 
-        return this.update(updateData, updateOptions);
+        // 8. DATABASE COMMIT: Execute mutation through your compatibility bridge
+        // Note: Passing an empty array [] to updateEmbedded under V14 is safe when the collection
+        // update is a complete no-op, but since no combatant values are changing, we pass an empty array.
+        return HeroCompatibility.updateEmbedded(this, "combatants", [], updateData, updateOptions);
     }
 
     /**
@@ -553,7 +667,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @override
      */
     async previousRound() {
-        // ─── HERO 6E BOUNDARY CHECK ───
+        // 1. HERO 6E BOUNDARY CHECK
         // Reset combat if we are on Turn 1, OR if we are on Turn 2 but haven't completed a full cycle yet
         // (Jumping backward 12 seconds from Turn 2, Segment 1-11 would push the timeline before Turn 1 Segment 12).
         if (this.round === 1 || (this.round === 2 && this.segment < 12)) {
@@ -564,33 +678,35 @@ export class HeroSystem6eCombatSingle extends Combat {
         const currentRound = this.round;
         const currentSegment = this.segment;
 
-        // 1. Calculate the prior turn cycle number (clamp to a minimum of 1)
+        // 2. CHRONOLOGICAL REWIND: Calculate the prior turn cycle number (clamped safely to a minimum of 1)
         const prevRoundCycle = Math.max(1, currentRound - 1);
 
-        // 2. Figure out who acts in this same segment in the prior turn cycle
+        // 3. TURN POINTER RESOLUTION: Figure out who holds top priority in this same segment in the prior turn cycle
         const actorsInSegment = turns.filter((t) => t.hasPhaseInSegment(currentSegment));
         let targetTurnIndex = 0;
 
         if (actorsInSegment.length > 0) {
+            // Sort using your internal system priority formula
             actorsInSegment.sort((a, b) => this._comparePriority(a, b));
             targetTurnIndex = turns.indexOf(actorsInSegment[0]);
         }
 
-        // 3. Build the payload. We keep the segment exactly the same.
+        // 4. DATA TRANSACTION PAYLOAD: Segment index stays exactly the same
         const updateData = {
             round: prevRoundCycle,
-            turn: targetTurnIndex,
+            turn: targetTurnIndex !== -1 ? targetTurnIndex : 0,
         };
 
-        // 4. Rewind the world clock by an entire Turn Cycle (12 seconds backwards)
+        // 5. CONTEXT PARAMETERS: Let core handle standard time delta tracking automatically
         const updateOptions = {
             direction: -1,
-            worldTime: {
-                delta: -12,
-            },
+            previousCombatantId: this.combatant?.id,
         };
 
-        return this.update(updateData, updateOptions);
+        // 6. DATABASE COMMIT: Execute mutation through your compatibility bridge
+        // Passing an empty array [] to updateEmbedded under V14 is completely fine since
+        // no child combatant records are modified in this block.
+        return HeroCompatibility.updateEmbedded(this, "combatants", [], updateData, updateOptions);
     }
 
     /**
@@ -600,7 +716,9 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @private
      */
     async _handleCombatStartReset() {
-        // 1. Prepare child collection updates to flip tokens back to dice icons
+        ui.notifications.info(`[${game.system.id}] Resetting combat encounter to default startup state.`);
+
+        // 1. Prepare child collection updates to reset initiatives back to null (dice icons)
         const combatantUpdates = [];
         this.combatants.forEach((combatant) => {
             combatantUpdates.push({
@@ -609,19 +727,23 @@ export class HeroSystem6eCombatSingle extends Combat {
             });
         });
 
-        // 2. Compile parent settings payload using -= syntax to fully purge keys
+        // 2. Prepare the clean top-level metadata values
         const resetData = {
             started: false,
             round: 0,
             turn: null,
-            [`flags.${game.system.id}.-=currentSegment`]: null,
-            [`flags.${game.system.id}.-=segmentRolls`]: null,
-            [`flags.${game.system.id}.-=recoveredRounds`]: null,
-            combatants: combatantUpdates,
         };
 
-        ui.notifications.info("Hero System 6e | Resetting combat encounter to default startup state.");
-        return this.update(resetData);
+        // 3. Purge dynamic system flags safely using a structured object block
+        // This format ensures inner key macros handle deletions smoothly across database iterations
+        resetData[`flags.${game.system.id}`] = {
+            "-=currentSegment": null,
+            "-=segmentRolls": null,
+            "-=recoveredRounds": null,
+        };
+
+        // 4. Update parent properties and children simultaneously through your compatibility bridge
+        return HeroCompatibility.updateEmbedded(this, "combatants", combatantUpdates, resetData);
     }
 
     /**
@@ -631,49 +753,57 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @private
      */
     async _executePostSegment12Recovery(roundToRecover) {
-        // 1. Safety check: Only execute on the active GM machine to prevent multi-client calculations
-        if (!game.user.isActiveGM) return false;
+        // 1. ENVIRONMENT BRIDGE: Use isGM to safely pass cross-version referee checks
+        if (!game.user.isGM) return false;
 
         const recoveredRounds = this.getFlag(game.system.id, "recoveredRounds") ?? [];
         if (recoveredRounds.includes(roundToRecover)) {
             await ChatMessage.create({
-                //speaker: ChatMessage.getSpeaker({ actor }),
-                flavor: `<strong>Post-Segment 12 Recovery (Turn ${roundToRecover})</strong>`,
-                content: `skipped`,
+                flavor: `<strong>[${game.system.id.toUpperCase()}] Post-Segment 12 Recovery (Turn ${roundToRecover})</strong>`,
+                content: `<em>Recovery cycle skipped (Already applied).</em>`,
             });
             return false;
         }
 
         const updates = [];
 
+        // 2. SCHEMA EXTRACTION: Loop through participants to determine value changes
         for (const combatant of this.combatants) {
             const actor = combatant.actor;
             if (!actor) continue;
 
-            const rec = actor.system.characteristics?.rec?.value || 0;
-            const stun = actor.system.characteristics?.stun || { value: 0, max: 0 };
-            const end = actor.system.characteristics?.end || { value: 0, max: 0 };
+            const characteristics = actor.system?.characteristics;
+            const rec = characteristics?.rec?.value || 0;
+            const stun = characteristics?.stun || { value: 0, max: 0 };
+            const end = characteristics?.end || { value: 0, max: 0 };
 
+            // If the actor is already fully healed, skip them safely
             if (stun.value >= stun.max && end.value >= end.max) continue;
 
             const newStun = Math.min(stun.max, stun.value + rec);
             const newEnd = Math.min(end.max, end.value + rec);
 
+            // FIX: Build structural schema objects to ensure maximum database compatibility
             updates.push({
                 _id: actor.id,
-                "system.characteristics.stun.value": newStun,
-                "system.characteristics.end.value": newEnd,
+                system: {
+                    characteristics: {
+                        stun: { value: newStun },
+                        end: { value: newEnd },
+                    },
+                },
             });
         }
 
+        // 3. DATABASE COMMIT BOUNDARY: Bulk update the documents safely
         if (updates.length > 0) {
+            // Actor.updateDocuments accepts clean structured objects across both V13 and V14
             await Actor.updateDocuments(updates);
         }
 
         await ChatMessage.create({
-            //speaker: ChatMessage.getSpeaker({ actor }),
-            flavor: `<strong>Post-Segment 12 Recovery (Turn ${roundToRecover})</strong>`,
-            content: `process`,
+            flavor: `<strong>[${game.system.id.toUpperCase()}] Post-Segment 12 Recovery (Turn ${roundToRecover})</strong>`,
+            content: `<em>Recovery processing complete. Resources adjusted for active participants.</em>`,
         });
 
         return true;
@@ -686,16 +816,28 @@ export class HeroSystem6eCombatSingle extends Combat {
     _onUpdate(changed, options, userId) {
         super._onUpdate(changed, options, userId);
 
-        if (!game.user.isActiveGM) return;
+        // 1. ENVIRONMENT BRIDGE: Use isGM to safely pass cross-version referee checks
+        if (!game.user.isGM) return;
 
         const turnChanged = changed.turn !== undefined;
-        const flagsChanged = changed.flags?.[game.system.id] !== undefined;
-        if (!turnChanged && !flagsChanged) return;
+        const roundChanged = changed.round !== undefined;
 
-        // Extract the combatant who just concluded their action phase
-        const previousCombatant = this.combatants.get(options.previousCombatantId);
+        // 2. STABLE FLAG EVALUATION: Check for flag changes using version-agnostic lookup utilities
+        // This safely catches both V14 nested objects and V13 flattened dotted path strings
+        const systemFlagKey = `flags.${game.system.id}`;
+        const flagsChanged = foundry.utils.hasProperty(changed, systemFlagKey);
+
+        // If neither the phase pointers nor the custom segment properties updated, exit early
+        if (!turnChanged && !roundChanged && !flagsChanged) return;
+
+        // 3. SECURE OPTION ACQUISITION: Safely resolve the previous actor target parameter
+        // Fall back gracefully to standard core navigation trackers if options are stripped over network sockets
+        const prevId = foundry.utils.getProperty(options, "previousCombatantId");
+        const previousCombatant = prevId ? this.combatants.get(prevId) : null;
+
         if (!previousCombatant?.actor) return;
 
+        // Execute status tracking cleanup safely inside a clean variable scope
         this._maintainTacticalStatuses(previousCombatant);
     }
 
@@ -705,26 +847,32 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @private
      */
     async _maintainTacticalStatuses(combatant) {
+        if (!combatant?.actor) return;
+
         const statuses = combatant.actor.statuses;
+        const currentSegment = this.segment;
 
         // ─── HERO 6E RULE: EXPIRE HELD ACTION POST-TURN ───
         // If they concluded their turn, and this segment matches their natural speed-chart phase,
         // their held action is officially consumed/expired.
-        if (statuses.has("holding") && combatant.hasPhaseInSegment(this.segment)) {
+        if (statuses.has("holding") && combatant.hasPhaseInSegment(currentSegment)) {
             const holdingEffect = combatant.actor.effects.find((e) => e.statuses.has("holding"));
+
             if (holdingEffect) {
-                await holdingEffect.delete();
+                // FIX: Completely dropped explicit .delete() in favor of your core expiry abstraction manager
+                HeroCompatibility.refreshActiveEffect(holdingEffect);
 
                 await ChatMessage.create({
                     speaker: ChatMessage.getSpeaker({ actor: combatant.actor }),
-                    flavor: `<strong>Action Economy Notice</strong>`,
-                    content: `${combatant.actor.name}'s Held Action was consumed by their natural Phase in Segment ${this.segment}.`,
+                    flavor: `<strong>[${game.system.id.toUpperCase()}] Action Economy Notice</strong>`,
+                    content: `<em>${combatant.actor.name}'s Held Action was consumed by their natural Phase in Segment ${currentSegment}.</em>`,
                 });
             }
         }
 
-        // Call your global generic ActiveEffect cleaner for standard phaseEnd triggers (like aborted)
-        this._expireCustomSystemEffects(combatant.actor);
+        // FIX: Prepended await to ensure custom system phaseEnd loops execute sequentially
+        // This blocks time desynchronization across server clients during fast turn updates
+        await this._expireCustomSystemEffects(combatant.actor);
     }
 
     /**
@@ -734,26 +882,30 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @private
      */
     async _expireCustomSystemEffects(actor) {
-        // 1. Gather all of your custom keys directly out of the configuration definition object
-        const customSystemKeys = Object.keys(CONFIG.HERO.activeEffectExpiryEvents);
+        if (!actor) return;
 
-        // 2. Locate any active effects currently matching your system keys
+        // 1. CONFIG CHECK: Gather your custom keys directly out of the configuration definition object
+        const expiryEvents = CONFIG.HERO?.activeEffectExpiryEvents;
+        if (!expiryEvents) return;
+        const customSystemKeys = Object.keys(expiryEvents);
+
+        // 2. FILTER PASS: Locate any active effects currently matching your system keys
         const matchingEffects = actor.effects.filter((effect) => {
             const activeExpiryKey = effect.duration?.expiry;
             return customSystemKeys.includes(activeExpiryKey);
         });
 
-        // If no effects match your criteria, exit out immediately
         if (matchingEffects.length === 0) return;
 
-        // 3. Check what action the world takes when an effect expires ("delete" or "disable")
-        // V14 core defaults to disabling effects, but modules or user configs might change this to delete.
-        const expiryAction = CONFIG.ActiveEffect.expiryAction ?? "disable";
+        // 3. SAFE VERSION CONFIGURATION RESOLUTION: Pull V14 data parameters without crashing V13 runtimes
+        // Uses getProperty to safely return undefined on V13 instead of generating a TypeError
+        const defaultExpiryAction = HeroCompatibility.isV14 ? "disable" : "delete";
+        const expiryAction = foundry.utils.getProperty(CONFIG, "ActiveEffect.expiryAction") ?? defaultExpiryAction;
 
         const effectsToDelete = [];
         const updatesToApply = [];
 
-        // 4. Group effects based on your global settings matrix
+        // 4. GROUP SEGMENT MATRIX: Group effects based on your global settings matrix
         for (const effect of matchingEffects) {
             const activeExpiryKey = effect.duration?.expiry;
 
@@ -762,8 +914,8 @@ export class HeroSystem6eCombatSingle extends Combat {
                     effectsToDelete.push(effect.id);
                 } else {
                     // If the action is disable, change its core disabled property boolean value to true
-                    if (effect.statuses.size > 0) {
-                        // Aborted?
+                    if (effect.statuses?.size > 0) {
+                        // Aborted or marked actions get forced deletion rules
                         effectsToDelete.push(effect.id);
                     } else {
                         updatesToApply.push({
@@ -775,28 +927,37 @@ export class HeroSystem6eCombatSingle extends Combat {
             }
         }
 
-        // 5. Commit batch data operations to the database
-        // This maintains your optimized single-transaction pipeline strategy!
+        // 5. ATOMIC BATCH OPERATION COMMITS
+        // Satisfies V14 canonical layout rules while remaining fully backwards compatible
         if (effectsToDelete.length > 0) {
             await actor.deleteEmbeddedDocuments("ActiveEffect", effectsToDelete);
         }
 
         if (updatesToApply.length > 0) {
+            // In V14, updateEmbeddedDocuments accepts the update array natively.
+            // In V13, it flattens standard objects correctly.
             await actor.updateEmbeddedDocuments("ActiveEffect", updatesToApply);
         }
     }
 
     /**
-     * Recalculates initiative floats instantly for the active segment array matrix
+     * Recalculates and flushes initiative values for all combatants.
+     * Employs the HeroCompatibility adapter to bridge V14 array styles safely with V13 clients.
+     * @returns {Promise<Document>} The updated parent Combat document instance
      */
     async updateCodeInitiatives() {
         const combatantUpdates = [];
+
+        // 1. Scoped iteration to build clean child document delta data structures
         this.combatants.forEach((combatant) => {
             combatantUpdates.push({
                 _id: combatant.id,
                 initiative: this.getInitiativePriority(combatant),
             });
         });
-        return this.update({ combatants: combatantUpdates });
+
+        // 2. Safely commit updates using your compatibility bridge.
+        // This provides clean V14 collection arrays natively and falls back to flat string properties in V13.
+        return HeroCompatibility.updateEmbedded(this, "combatants", combatantUpdates);
     }
 }

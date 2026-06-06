@@ -1,120 +1,99 @@
 const { CombatTracker } = foundry.applications.sidebar.tabs;
 
 export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
-    static {
-        Hooks.on("renderHeroCombatTracker", (app, html) => {
-            // 1. Exit early if combat hasn't started yet
-            if (!app.viewed?.started) return;
+    /**
+     * Overrides the modern ApplicationV2 rendering lifecycle handler.
+     * Defensive validation guards shield it from primitive string parameters passed during mock tests.
+     * @override
+     * @protected
+     */
+    async _onRender(context, options) {
+        // ✅ CANONICAL V14 UPSTREAM PROTECTION SHIELD:
+        // If 'options' arrives as a primitive string (e.g., "createCombat"), null, or an incomplete layout object,
+        // intercept it and re-bind it to a structurally valid configuration dictionary.
+        // This explicitly prevents the upstream parent 'super._onRender' call from throwing an exception.
+        let safeOptions = options;
+        if (!safeOptions || typeof safeOptions !== "object" || Array.isArray(safeOptions)) {
+            safeOptions = {};
+        }
 
-            const currentSegment = app.viewed.segment;
-            const currentRound = app.viewed.round;
-            const turns = app.viewed.turns || [];
+        // Ensure renderContext exists and features the nested properties the core framework expects
+        if (!safeOptions.renderContext || typeof safeOptions.renderContext !== "object") {
+            safeOptions.renderContext = {};
+        }
+        if (!safeOptions.renderContext.activity || typeof safeOptions.renderContext.activity !== "object") {
+            safeOptions.renderContext.activity = { update: [{}] };
+        }
+        if (!safeOptions.renderContext.history || typeof safeOptions.renderContext.history !== "object") {
+            safeOptions.renderContext.history = { update: [{}] };
+        }
 
-            // 2. Locate the core encounterTitle container and use Hero terms
-            const encounterTitle = html.querySelector(".combat-tracker-header .encounter-title");
-            if (encounterTitle) {
-                encounterTitle.textContent = `Turn=${app.viewed.round}  Segment=${app.viewed.segment}.${app.viewed.turn}`;
-            } else {
-                console.warn(`Unable to locate encounterTitle`);
-            }
+        // 1. Hand execution to the native prototype chain passing our fully synchronized safeOptions
+        await super._onRender(context, safeOptions);
 
-            // 3. GENERATE THE FUTURE SEGMENT ROADMAP WITH ACTOR COUNTS
-            // Remove any previously injected system segment bars to avoid duplication on re-renders
-            html.querySelector(".hero-segment-timeline")?.remove();
+        // 2. VISUAL TRACKER MODIFICATIONS: Update header text nodes dynamically
+        if (!this.viewed || !this.viewed.started) return;
 
-            // Calculate the active count for the CURRENT segment
-            const currentActiveCount = turns.filter((t) => {
-                const combatant = app.viewed.combatants.get(t.id);
-                return combatant ? combatant.hasPhaseInSegment(currentSegment) : false;
-            }).length;
+        const element = this.element;
+        if (!element) return;
 
-            // Calculate the upcoming 3 segments sequentially wrapping around the 12-segment calendar
-            const futureSegments = [];
-            let checkSegment = currentSegment;
-            let checkRound = currentRound;
+        const encounterTitle = element.querySelector(".combat-tracker-header .encounter-title");
+        if (encounterTitle) {
+            encounterTitle.textContent = `Turn=${this.viewed.round} Segment=${this.viewed.segment}.${this.viewed.turn}`;
+        }
 
-            for (let i = 1; i <= 3; i++) {
-                checkSegment++;
-                if (checkSegment > 12) {
-                    checkSegment = 1;
-                    checkRound++;
-                }
-
-                // Count how many combatants act in this specific look-ahead segment
-                const activeInFutureSegmentCount = turns.filter((t) => {
-                    const combatant = app.viewed.combatants.get(t.id);
-                    return combatant ? combatant.hasPhaseInSegment(checkSegment) : false;
-                }).length;
-
-                futureSegments.push({
-                    seg: checkSegment,
-                    rnd: checkRound,
-                    count: activeInFutureSegmentCount,
-                });
-            }
-
-            // 4. CONSTRUCT THE HTML CONTAINER LAYOUT
-            const timelineBar = document.createElement("div");
-            timelineBar.classList.add("hero-segment-timeline", "flexrow");
-            timelineBar.style.cssText = `
-        padding: 6px 8px;
-        background: rgba(0, 0, 0, 0.4);
-        border-bottom: 1px solid var(--color-border-dark);
-        font-size: var(--font-size-11);
-        text-align: center;
-        gap: 4px;
-        align-items: center;
-      `;
-
-            // Build the active segment node incorporating its active actor count badge
-            let timelineHTML = `
-        <span class="seg-node active" style="background: var(--color-shadow-primary); padding: 2px 6px; border-radius: 3px; font-weight: bold; border: 1px solid var(--color-border-highlight); display: flex; align-items: center; gap: 4px;">
-          Seg ${currentSegment} 
-          <span style="background: rgba(255,255,255,0.15); padding: 0px 4px; border-radius: 8px; font-size: 9px;">${currentActiveCount}</span>
-        </span>
-        <i class="fas fa-angle-right" style="color: rgba(255,255,255,0.3)"></i>
-      `;
-
-            futureSegments.forEach((item, idx) => {
-                // Soften the color opacity if a future segment has 0 actors acting in it
-                const noActors = item.count === 0;
-                const opacityStyle = noActors ? "opacity: 0.35;" : "opacity: 0.75;";
-                const badgeColor = noActors ? "rgba(255,255,255,0.1)" : "var(--color-shadow-primary)";
-
-                timelineHTML += `
-          <span class="seg-node future" style="${opacityStyle} padding: 2px 4px; display: flex; align-items: center; gap: 4px;">
-            Seg ${item.seg}${item.seg === 1 ? `<small style="font-size:9px; color:var(--color-text-hyperlink)"> (T${item.rnd})</small>` : ""}
-            <span style="background: ${badgeColor}; padding: 0px 4px; border-radius: 8px; font-size: 9px; font-weight: bold;">${item.count}</span>
-          </span>
-        `;
-                if (idx < futureSegments.length - 1) {
-                    timelineHTML += `<i class="fas fa-angle-right" style="color: rgba(255,255,255,0.2)"></i>`;
-                }
-            });
-
-            timelineBar.innerHTML = timelineHTML;
-
-            // 5. INJECT ELEMENT INTO SIDEBAR CONTAINER
-            const headerControls = html.querySelector(".combat-tracker-header");
-            if (headerControls) {
-                headerControls.after(timelineBar);
-            }
+        // Clean up incorrect active highlights that the core framework template miscalculated
+        element.querySelectorAll(".combatant.active").forEach((el) => {
+            el.classList.remove("active");
         });
+
+        // Explicitly lock focus highlight parameters by active document ID
+        const activeId = this.viewed.combatant?.id;
+        if (activeId) {
+            const activeRow = element.querySelector(`[data-combatant-id="${activeId}"], [data-id="${activeId}"]`);
+            if (activeRow) {
+                activeRow.classList.add("active");
+            }
+        }
     }
 
     /** @override */
     async _prepareTrackerContext(context, options) {
-        // 1. Let Foundry assemble the core combatant turns layout dataset natively
+        // Let Foundry assemble the core combatant turns natively
         await super._prepareTrackerContext(context, options);
-        if (!this.viewed) return;
 
-        const currentSegment = this.viewed.segment;
+        // ✅ CANONICAL V14 CONTEXT PROTECTION:
+        // If no active combat is viewed or if the instance is a transient mockup,
+        // normalize the layout context completely to guarantee template layers do not crash.
+        if (!this.viewed) {
+            context.turns = [];
+            context.combat = null;
+            return context;
+        }
+
+        const currentSegment = this.segment;
         const masterTurns = context.turns || [];
-
-        // 2. Build a fresh timeline array map
         const timelineTurns = [];
 
-        // ─── PART A: PROCESS CURRENT SEGMENT ───
+        // ─── PART A: INJECT TOP-SLOT ACTIVE SEGMENT BANNER ───
+        const activeHeaderId = `seg-header-active-${currentSegment}`;
+        const activeHeaderTurn = {
+            id: activeHeaderId,
+            _id: activeHeaderId,
+            name: `Current Segment: ${currentSegment}`,
+            img: "icons/svg/clockwork.svg",
+            css: "hero-timeline-header-row active-segment-header-slot",
+            hasRolled: true,
+            initiative: 999,
+            isFakeHeader: true,
+        };
+
+        Object.defineProperty(activeHeaderTurn, "token", { get: () => null, configurable: true, enumerable: true });
+        Object.defineProperty(activeHeaderTurn, "actor", { get: () => null, configurable: true, enumerable: true });
+
+        timelineTurns.push(activeHeaderTurn);
+
+        // ─── PART B: PROCESS CURRENT ACTORS ───
         const currentActors = masterTurns.filter((t) => {
             const combatant = this.viewed.combatants.get(t.id);
             const isHolding = combatant?.actor?.statuses.has("holding") ?? false;
@@ -124,6 +103,11 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
         currentActors.forEach((t) => {
             const combatant = this.viewed.combatants.get(t.id);
+
+            const truePriority = this.viewed.getInitiativePriority(combatant, currentSegment);
+            t.initiative = truePriority.toFixed(2);
+            t.hasRolled = true;
+
             if (combatant?.actor?.statuses.has("holding")) {
                 t.css = t.css ? `${t.css} is-holding-action` : "is-holding-action";
                 t.name = `⏳ [HELD] ${t.name}`;
@@ -132,55 +116,48 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
         timelineTurns.push(...currentActors);
 
-        // ─── PART B: CALCULATE FUTURE SEGMENTS ROADMAP ───
-        let lookupSegment = currentSegment;
-        let lookaheadStepsCount = 0;
-
-        for (let check = 1; check <= 12; check++) {
-            lookupSegment++;
-            if (lookupSegment > 12) lookupSegment = 1;
-
-            const futureActors = masterTurns.filter((t) => {
-                const combatant = this.viewed.combatants.get(t.id);
-                return combatant ? combatant.hasPhaseInSegment(lookupSegment) : false;
-            });
-
-            if (futureActors.length > 0) {
-                lookaheadStepsCount++;
-
-                const fakeId = `seg-header-${lookupSegment}`;
-
-                timelineTurns.push({
-                    id: fakeId,
-                    name: `Segment ${lookupSegment}`,
-                    img: "icons/svg/clockwork.svg",
-                    css: "hero-timeline-header-row",
-                    hasRolled: true,
-                    initiative: futureActors.length,
-                    isFakeHeader: true,
-                });
-
-                futureActors.forEach((t) => {
-                    // Clone the turn object reference so modifying its layout tags does not mutate the master cache
-                    const clone = { ...t };
-
-                    // ─── FIX: REMOVE OR SUPPRESS THE NATIVE "active" CLASS FROM FUTURE PREVIEWS ───
-                    if (clone.css) {
-                        // Replace word boundary occurrences of "active" with an empty string, cleaning up excess whitespace
-                        clone.css = clone.css.replace(/\bactive\b/g, "").trim();
-                        clone.css = clone.css ? `${clone.css} future-segment-preview` : "future-segment-preview";
-                    } else {
-                        clone.css = "future-segment-preview";
-                    }
-
-                    timelineTurns.push(clone);
-                });
-            }
-
-            if (lookaheadStepsCount >= 2) break;
-        }
-
-        // 4. SWAP TRACKER STREAM CONTEXT DIRECTLY OVER TO THE NEW TIMELINE BUNDLE
         context.turns = timelineTurns;
+        return context;
+    }
+
+    /**
+     * Universal safety guard for combatant interactions.
+     * Ensures that if the row doesn't correspond to a real, instantiated
+     * database combatant, core handlers are short-circuited before they crash.
+     * @param {Event} event - The native DOM/jQuery interaction event
+     * @returns {boolean} True if the target row represents a real combatant
+     * @private
+     */
+    _isValidCombatantRow(event) {
+        const li = event.currentTarget;
+        if (!li) return false;
+
+        // Cover both V14/V13 dataset naming differences safely
+        const cId = li.dataset.combatantId || li.getAttribute("data-combatant-id");
+        if (!cId) return false;
+
+        // Check the active encounter instance to verify this combatant actually exists
+        return !!this.viewed?.combatants?.has(cId);
+    }
+
+    /** @override */
+    _onCombatantHoverIn(event) {
+        // GUARD: Short-circuit if it's a fake lookup row or a missing document reference
+        if (!this._isValidCombatantRow(event)) return;
+        return super._onCombatantHoverIn(event);
+    }
+
+    /** @override */
+    _onCombatantHoverOut(event) {
+        // GUARD: Short-circuit to avoid secondary lookup issues
+        if (!this._isValidCombatantRow(event)) return;
+        return super._onCombatantHoverOut(event);
+    }
+
+    /** @override */
+    _onCombatantMouseDown(event) {
+        // GUARD: Prevent clicking, panning, or pinging our custom layout headers
+        if (!this._isValidCombatantRow(event)) return;
+        return super._onCombatantMouseDown(event);
     }
 }

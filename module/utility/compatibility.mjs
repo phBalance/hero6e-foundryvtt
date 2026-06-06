@@ -23,34 +23,34 @@ export class HeroCompatibility {
      * @param {object} [topLevelUpdates={}] - Additional top-level document adjustments (e.g., flag updates).
      * @returns {Promise<Document>} The updated parent document.
      */
-    static async updateEmbedded(parentDoc, embeddedKey, embeddedUpdates, topLevelUpdates = {}) {
+    static async updateEmbedded(parentDoc, embeddedKey, embeddedUpdates, topLevelUpdates = {}, options = {}) {
         if (!parentDoc || typeof parentDoc.update !== "function") {
-            throw new Error(`[${game.system.id}] Invalid parent document provided for embedded mutation.`);
+            throw new Error(`Invalid parent document provided for embedded mutation.`);
         }
 
-        // 1. Process for Modern Foundry V14 Environments
         if (this.isV14) {
+            // Rule: Strict adherence to V14 canonical collection array format
             const mergedV14Payload = {
                 ...topLevelUpdates,
                 [embeddedKey]: embeddedUpdates,
             };
-            return parentDoc.update(mergedV14Payload);
+            return parentDoc.update(mergedV14Payload, options);
         }
 
-        // 2. Process for Legacy Foundry V13 Environments
+        // V13 Fallback: Safely restructure properties into flat path keys for legacy core database handlers
         const flattenedV13Payload = { ...topLevelUpdates };
 
         for (const updateData of embeddedUpdates) {
             const { _id, ...fields } = updateData;
-            if (!_id) continue; // Skip malformed inputs safely
+            if (!_id) continue;
 
             for (const [property, value] of Object.entries(fields)) {
-                // Flat path construction happens strictly here, keeping your features clean
+                // Flat path construction happens strictly here, keeping feature implementations clean
                 flattenedV13Payload[`${embeddedKey}.${_id}.${property}`] = value;
             }
         }
 
-        return parentDoc.update(flattenedV13Payload);
+        return parentDoc.update(flattenedV13Payload, options);
     }
 
     /**
