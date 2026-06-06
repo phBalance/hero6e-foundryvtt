@@ -2,7 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { getPowerInfo, hdcTimeOptionIdToSeconds, tokenEducatedGuess } from "./util.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { calculateDicePartsForItem } from "./damage.mjs";
-import { isGameV14OrLater } from "../utility/compatibility.mjs";
+import { HeroCompatibility } from "../utility/compatibility.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -365,10 +365,10 @@ function _createNewAdjustmentEffect(options) {
     };
 
     activeEffect = foundry.utils.mergeObject(activeEffect, {
-        [`isGameV14OrLater() ? "system.changes" : "changes"`]: [],
+        [`HeroCompatibility.isV14 ? "system.changes" : "changes"`]: [],
     });
 
-    if (isGameV14OrLater()) {
+    if (HeroCompatibility.isV14) {
         activeEffect.start ??= ActiveEffect.getEffectStart();
     }
 
@@ -377,22 +377,22 @@ function _createNewAdjustmentEffect(options) {
     // as figured characteristics aren't adjusted.
     if (targetActor.is5e) {
         if (potentialCharacteristic === "dex") {
-            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`].push(
+            activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`].push(
                 _createAEChangeBlock("ocv", targetSystem),
             );
             activeEffect.flags[game.system.id].target.push("ocv");
 
-            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`].push(
+            activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`].push(
                 _createAEChangeBlock("dcv", targetSystem),
             );
             activeEffect.flags[game.system.id].target.push("dcv");
         } else if (potentialCharacteristic === "ego") {
-            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`].push(
+            activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`].push(
                 _createAEChangeBlock("omcv", targetSystem),
             );
             activeEffect.flags[game.system.id].target.push("omcv");
 
-            activeEffect[isGameV14OrLater() ? `system.changes` : `changes`].push(
+            activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`].push(
                 _createAEChangeBlock("dmcv", targetSystem),
             );
             activeEffect.flags[game.system.id].target.push("dmcv");
@@ -400,7 +400,7 @@ function _createNewAdjustmentEffect(options) {
     }
 
     // V14: Need changes getter
-    if (isGameV14OrLater()) {
+    if (HeroCompatibility.isV14) {
         // TODO: return a HeroSystem6eActorActiveEffect here instead of patching ActiveEffect.
         // This may cause issues as we may need to use updateSource for modifying values and toObject in the update.
         Object.defineProperty(activeEffect, "changes", {
@@ -667,10 +667,10 @@ export async function performAdjustment(
             if (prevChange) {
                 prevChange.value = parseInt(prevChange.value) + value;
                 const _idx = activeEffect.changes.findIndex((c) => c.key === prevChange.key);
-                activeEffect[isGameV14OrLater() ? `system.changes` : `changes`][_idx] = prevChange;
+                activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`][_idx] = prevChange;
             } else {
                 changeTemp.value = value;
-                activeEffect[isGameV14OrLater() ? `system.changes` : `changes`].push(changeTemp);
+                activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`].push(changeTemp);
             }
 
             activeEffect.flags[game.system.id] ??= {};
@@ -746,8 +746,8 @@ export async function performAdjustment(
             updateEffectName(existingEffect);
             await existingEffect.update({
                 name: existingEffect.name,
-                [isGameV14OrLater() ? `system.changes` : `changes`]:
-                    activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
+                [HeroCompatibility.isV14 ? `system.changes` : `changes`]:
+                    activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`],
                 flags: existingEffect.flags,
                 "duration.startTime": existingEffect.duration.startTime + existingEffect.duration.seconds,
             });
@@ -819,14 +819,16 @@ export async function performAdjustment(
             change.value = targetValue - previousPointsForThisChangeKey;
 
             // Make sure changes exist
-            if (isGameV14OrLater()) {
+            if (HeroCompatibility.isV14) {
                 activeEffect.system ??= {};
                 activeEffect.system.changes ??= [];
             } else {
                 activeEffect.changes ??= [];
             }
 
-            foundry.utils.getProperty(activeEffect, isGameV14OrLater() ? `system.changes` : `changes`).push(change);
+            foundry.utils
+                .getProperty(activeEffect, HeroCompatibility.isV14 ? `system.changes` : `changes`)
+                .push(change);
 
             thisAttackActivePointAdjustmentNotAppliedDueToMax =
                 thisAttackActivePointsEffect - activeEffect.flags[game.system.id].adjustmentActivePoints;
@@ -850,13 +852,15 @@ export async function performAdjustment(
                 (previousActivePointsForThisXmlid % costPerActivePoint);
             const targetValue = costPerActivePoint ? Math.trunc(finalAp / costPerActivePoint) : 0;
             change.value = targetValue;
-            if (isGameV14OrLater()) {
+            if (HeroCompatibility.isV14) {
                 activeEffect.system ??= {};
                 activeEffect.system.changes ??= [];
             } else {
                 activeEffect.changes ??= [];
             }
-            foundry.utils.getProperty(activeEffect, isGameV14OrLater() ? `system.changes` : `changes`).push(change);
+            foundry.utils
+                .getProperty(activeEffect, HeroCompatibility.isV14 ? `system.changes` : `changes`)
+                .push(change);
 
             thisAttackActivePointAdjustmentNotAppliedDueToMax = 0;
             adjustmentDamageThisApplication = change.value; //activeEffect.changes[0].value;
@@ -889,7 +893,7 @@ export async function performAdjustment(
             name: activeEffect.name,
             flags: activeEffect.flags,
         };
-        if (isGameV14OrLater) {
+        if (HeroCompatibility.isV14) {
             updates.system ??= {};
             updates.system.changes = activeEffect.system.changes ?? activeEffect.changes;
         } else {

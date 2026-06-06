@@ -67,7 +67,7 @@ import "./heroRoller/chat-dice.mjs";
 import { HeroRoll } from "./heroRoller/dice.mjs";
 import "./utility/adjustment.mjs";
 import { expireEffects } from "./utility/util.mjs";
-import { isGameV14OrLater } from "./utility/compatibility.mjs";
+import { HeroCompatibility } from "./utility/compatibility.mjs";
 
 // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttActors = foundry.documents?.collections?.Actors || Actors;
@@ -156,7 +156,7 @@ Hooks.once("init", async function () {
 
     SettingsHelpers.initLevelSettings();
 
-    // if (isGameV14OrLater()) {
+    // if (HeroCompatibility.isV14 ) {
     //     // Custom Expiry Events. Map custom string to a translation path or static text block
     //     CONFIG.ActiveEffect.expiryEvents = CONFIG.ActiveEffect.expiryEvents || {};
 
@@ -221,7 +221,7 @@ Hooks.once("init", async function () {
     }
     CONFIG.Canvas.rulerClass = HeroRuler; // END Use & calculateVelocityInSystemUnits
 
-    if (!isGameV14OrLater) {
+    if (!HeroCompatibility.isV14) {
         CONFIG.Canvas.visionSourceClass = HeroPointVisionSource;
     }
 

@@ -8,7 +8,7 @@ import { tagObjectForPersistence } from "../migration.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { Attack, actionToJSON } from "../utility/attack.mjs";
 import { HeroObjectCacheMixin } from "../utility/cache.mjs";
-import { clamp, isGameV14OrLater } from "../utility/compatibility.mjs";
+import { HeroCompatibility } from "../utility/compatibility.mjs";
 import { characteristicValueToDiceParts } from "../utility/damage.mjs";
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "../utility/round.mjs";
@@ -132,7 +132,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             // so we merge in the entire system
             // Also need to use force replace ==items for this to work in v13
             const items = this.items.map((i) => ({ ...i.toObject(), system: i.system }));
-            if (isGameV14OrLater()) {
+            if (HeroCompatibility.isV14) {
                 this.updateSource({
                     items: foundry.data.operators.ForcedReplacement.create(items),
                 });
@@ -427,7 +427,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // Determine the updates to make to the actor data
         let updates;
         if (isBar) {
-            if (isDelta) value = clamp(-99, Number(current.value) + value, current.max); // a negative bar is typically acceptable
+            if (isDelta) value = HeroCompatibility.clamp(-99, Number(current.value) + value, current.max); // a negative bar is typically acceptable
             updates = { [`system.${attribute}.value`]: value };
         } else {
             if (isDelta) value = Number(current) + value;
@@ -1173,7 +1173,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         canvas.interface.createScrollingText(token.center, change.signedString(), {
             anchor: change < 0 ? CONST.TEXT_ANCHOR_POINTS.BOTTOM : CONST.TEXT_ANCHOR_POINTS.TOP,
             direction: change < 0 ? 1 : 2,
-            fontSize: clamp(fontSize, 50, 100),
+            fontSize: HeroCompatibility.clamp(fontSize, 50, 100),
             fill: options?.fill || "0xFFFFFF",
             stroke: options?.stroke || 0x00000000,
             strokeThickness: 4,
@@ -1389,14 +1389,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
             activeEffect = foundry.utils.mergeObject(activeEffect, {
-                [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+                [HeroCompatibility.isV14 ? `system.changes` : `changes`]: changes,
             });
 
             if (activeEffect.id) {
                 const updates = {
                     name: activeEffect.name,
                 };
-                if (isGameV14OrLater) {
+                if (HeroCompatibility.isV14) {
                     updates.system ??= {};
                     updates.system.changes = activeEffect.system.changes ?? activeEffect.changes;
                 } else {
@@ -1544,15 +1544,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 },
             ];
             activeEffect = foundry.utils.mergeObject(activeEffect, {
-                [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+                [HeroCompatibility.isV14 ? `system.changes` : `changes`]: changes,
             });
 
             if (prevActiveEffect) {
                 //await prevActiveEffect.delete();
                 await prevActiveEffect.update({
                     name: name,
-                    [isGameV14OrLater() ? `system.changes` : `changes`]:
-                        activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
+                    [HeroCompatibility.isV14 ? `system.changes` : `changes`]:
+                        activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`],
                     origin: activeEffect.origin,
                     flags: activeEffect.flags,
                 });
@@ -2515,7 +2515,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
                 if (targetType && this.type.replace("npc", "pc") !== targetType) {
                     if (Object.keys(game.system.documentTypes.Actor).includes(targetType)) {
-                        if (isGameV14OrLater()) {
+                        if (HeroCompatibility.isV14) {
                             // REF: https://github.com/foundryvtt/foundryvtt/issues/13090
                             // AARON WAS HERE on 4/4/2026: Update fails, likely a foundry bug.
                             // Error: The type of a Document may only be changed if the system field
@@ -4222,7 +4222,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
     // V13 and V14 have different ways of applying active effects
     applyActiveEffects(phase) {
-        if (isGameV14OrLater()) {
+        if (HeroCompatibility.isV14) {
             return this.applyActiveEffects14(phase);
         }
         return this.applyActiveEffects13();

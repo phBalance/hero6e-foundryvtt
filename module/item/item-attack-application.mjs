@@ -4,7 +4,6 @@ import { filterIgnoreCompoundAndFrameworkItems } from "../config.mjs";
 import { calculateRequiredResourcesToUse, processActionToHit } from "../item/item-attack.mjs";
 import { buildEffectiveObject } from "../item/item.mjs";
 import { Attack } from "../utility/attack.mjs";
-import { foundryVttParseUuid } from "../utility/compatibility.mjs";
 import {
     calculateReduceOrPushRealCost,
     combatSkillLevelsForAttack,
@@ -909,7 +908,7 @@ function getEffectiveItemOriginalItemId(item) {
 
     // Is the effective attack item an temporary effective item?
     if (effectiveAttackItemUuid) {
-        return foundryVttParseUuid(effectiveAttackItemUuid).id;
+        return foundry.utils.parseUuid(effectiveAttackItemUuid)?.id;
     }
 
     // Is the effective attack item an actual original item?

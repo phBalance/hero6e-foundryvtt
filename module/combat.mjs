@@ -1,5 +1,5 @@
 import { HEROSYS } from "./herosystem6e.mjs";
-import { clamp, isGameV13OrLater, isGameV14OrLater } from "./utility/compatibility.mjs";
+import { HeroCompatibility } from "./utility/compatibility.mjs";
 import { whisperUserTargetsForActor, expireEffects, toHHMMSS, gmActive } from "./utility/util.mjs";
 import { rehydrateAttackItem, userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-attack.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
@@ -327,7 +327,11 @@ export class HeroSystem6eCombat extends Combat {
             const updates = [];
             for (let c = 0; c < tokenCombatantCount; c++) {
                 const _combatant = tokenCombatants[c];
-                const spd = clamp(parseInt(_combatant.actor?.system.characteristics.spd?.value || 0), 1, 12);
+                const spd = HeroCompatibility.clamp(
+                    parseInt(_combatant.actor?.system.characteristics.spd?.value || 0),
+                    1,
+                    12,
+                );
                 if (spd) {
                     const segment = HeroSystem6eCombat.getSegment(spd, Math.floor(c * (lightningReflexes ? 0.5 : 1)));
                     let update = {
@@ -405,7 +409,8 @@ export class HeroSystem6eCombat extends Combat {
                         o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
                 );
                 const targetCombatantCount =
-                    clamp(parseInt(actor.system.characteristics.spd?.value || 0), 1, 12) * (lightningReflexes ? 2 : 1);
+                    HeroCompatibility.clamp(parseInt(actor.system.characteristics.spd?.value || 0), 1, 12) *
+                    (lightningReflexes ? 2 : 1);
                 const tokenCombatants = this.combatants.filter((o) => o.tokenId === _tokenId);
                 const tokenCombatantCount = tokenCombatants.length;
 
@@ -471,7 +476,7 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     static hasPhase(spd, segment) {
-        switch (clamp(parseInt(spd), 0, 12)) {
+        switch (HeroCompatibility.clamp(parseInt(spd), 0, 12)) {
             case 0:
                 // At SPD 0, a character is frozen in place, unable to move or take any other Actions. He can only take Post-Segment 12 Recoveries,
                 return [12].includes(segment);
@@ -1305,15 +1310,7 @@ export class HeroSystem6eCombat extends Combat {
         await this.update(updateData, updateOptions);
     }
 
-    _onUpdate(changed, options, userId) {
-        if (isGameV13OrLater()) {
-            this._onUpdateV13(changed, options, userId);
-            return;
-        }
-        super._onUpdate(changed, options, userId);
-    }
-
-    _onUpdateV13(changed, options) {
+    _onUpdate(changed, options) {
         //super._onUpdate(changed, options, userId);
         const priorState = foundry.utils.deepClone(this.current);
         if (!this.previous) this.previous = priorState; // Just in case
@@ -1493,7 +1490,7 @@ export class HeroSystem6eCombat extends Combat {
 
     async promptToDeleteAoeInstantRegions() {
         // This only works for V14. canvas.regions.viewedDocuments is an invalid V14 function.
-        if (!isGameV14OrLater) return;
+        if (!HeroCompatibility.isV14) return;
 
         // We only care about AoEs
         const regionsToPrompt = Array.from(canvas.regions.viewedDocuments()).filter(
@@ -1642,11 +1639,6 @@ export class HeroSystem6eCombat extends Combat {
 
     async _manageTurnEvents() {
         if (!this.started) return;
-
-        if (!isGameV13OrLater()) {
-            return super._manageTurnEvents();
-        }
-
         return super._manageTurnEvents();
     }
 
