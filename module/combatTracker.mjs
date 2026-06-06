@@ -3,10 +3,7 @@ import { overrideCanAct } from "./settings/settings-helpers.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 import { isGameV13OrLater } from "./utility/compatibility.mjs";
 
-// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
-const FoundryVttCombatTracker = foundry.applications?.sidebar?.tabs?.CombatTracker || CombatTracker;
-
-export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
+export class HeroSystem6eCombatTracker extends foundry.applications.sidebar.tabs.CombatTracker {
     // V12 static get defaultOptions is replaced by V13 static DEFAULT_OPTIONS = {}
     // However I'm currently using static PARTS = {} in V13
     static get defaultOptions() {
