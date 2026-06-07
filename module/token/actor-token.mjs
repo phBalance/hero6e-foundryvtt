@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { isGameV14OrLater } from "../utility/compatibility.mjs";
+import { HeroCompatibility } from "../utility/compatibility.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 
 // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
@@ -43,7 +43,7 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
         if (!this.isOwner) return;
         if (!this.id) return;
 
-        if (isGameV14OrLater()) {
+        if (HeroCompatibility.isV14) {
             return this._prepareDetectionModes14();
         }
 
@@ -305,7 +305,7 @@ export class HeroSystem6eToken extends FoundryVttToken {
     }
 
     async _drawEffects() {
-        if (isGameV14OrLater()) {
+        if (HeroCompatibility.isV14) {
             return this._drawEffects14();
         }
 

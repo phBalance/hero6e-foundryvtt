@@ -1,12 +1,8 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 import { overrideCanAct } from "./settings/settings-helpers.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
-import { isGameV13OrLater } from "./utility/compatibility.mjs";
 
-// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
-const FoundryVttCombatTracker = foundry.applications?.sidebar?.tabs?.CombatTracker || CombatTracker;
-
-export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
+export class HeroSystem6eCombatTracker extends foundry.applications.sidebar.tabs.CombatTracker {
     // V12 static get defaultOptions is replaced by V13 static DEFAULT_OPTIONS = {}
     // However I'm currently using static PARTS = {} in V13
     static get defaultOptions() {
@@ -336,9 +332,7 @@ export class HeroSystem6eCombatTracker extends FoundryVttCombatTracker {
     _getEntryContextOptions() {
         const options = super._getEntryContextOptions();
         const getCombatant = (li) => this.viewed.combatants.get(li.dataset?.combatantId || li.data?.("combatant-id"));
-        const style =
-            `width:15px;height:auto;display:inline-block;margin-right:8px;` +
-            `box-sizing:border-box;vertical-align:bottom;${isGameV13OrLater() ? "" : "margin-bottom:10px;"}`;
+        const style = `width:15px;height:auto;display:inline-block;margin-right:8px;`;
 
         options.push({
             name: "Toggle Hold",

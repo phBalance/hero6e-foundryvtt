@@ -1608,8 +1608,8 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
 export class HeroActorCharacteristic extends foundry.abstract.DataModel {
     static defineSchema() {
         return {
-            max: new HeroNumberField({ integer: true, initial: 0 }),
-            value: new HeroNumberField({ integer: true, initial: 0 }),
+            max: new HeroNumberField({ required: true, integer: true, initial: 0 }),
+            value: new HeroNumberField({ required: true, integer: true, initial: 0 }),
             characteristicMax: new HeroNumberField({ integer: true, nullable: true }),
         };
     }

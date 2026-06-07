@@ -1,6 +1,6 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
-import { isGameV14OrLater } from "../utility/compatibility.mjs";
+import { HeroCompatibility } from "../utility/compatibility.mjs";
 
 // Compatibility V14
 const _ActiveEffectTypeDataModel = foundry.data?.ActiveEffectTypeDataModel ?? foundry.abstract.TypeDataModel;
@@ -556,7 +556,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         const duration = super._prepareDuration();
 
         // V14 is fine, so are non-temporary effects
-        if (isGameV14OrLater() || !this.isTemporary) {
+        if (HeroCompatibility.isV14 || !this.isTemporary) {
             return duration;
         }
 

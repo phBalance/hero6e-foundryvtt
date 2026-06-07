@@ -1,5 +1,5 @@
 import { HeroSystem6eCardHelpers } from "./card/card-helpers.mjs";
-import { isGameV14OrLater } from "./utility/compatibility.mjs";
+import { HeroCompatibility } from "./utility/compatibility.mjs";
 
 export class HeroSystem6eChatMessage extends ChatMessage {
     // REF: https://github.com/foundryvtt/pf2e/blob/acf49e6130dc43e80c9b1f63fcb58a1ab611b4ce/src/module/chat-message/document.ts#L23
@@ -87,7 +87,7 @@ export class HeroSystem6eChatMessage extends ChatMessage {
                             messageSender.append(authorElement);
                         }
 
-                        if (isGameV14OrLater() && this.speakerToken) {
+                        if (HeroCompatibility.isV14 && this.speakerToken) {
                             // overwrite
                             messageSender.innerHTML = `${this.speakerToken.name}<span class="user">${this.author.name}</span>`;
                         }

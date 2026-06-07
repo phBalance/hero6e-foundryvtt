@@ -336,28 +336,28 @@ export class HeroRuler extends FoundryVttRuler {
             return;
         });
 
-        Hooks.on("updateActor", function (actor, args) {
-            const sceneControls = ui.controls;
-            if (sceneControls.activeControl !== "token") {
-                return;
-            }
-            if (sceneControls.activeTool !== "select") {
-                return;
-            }
+        // Hooks.on("updateActor", function (actor, args) {
+        //     const sceneControls = ui.controls;
+        //     if (sceneControls.activeControl !== "token") {
+        //         return;
+        //     }
+        //     if (sceneControls.activeTool !== "select") {
+        //         return;
+        //     }
 
-            if (!args?.system?.characteristics && !args?.flags?.activeMovement) {
-                return;
-            }
+        //     if (!args?.system?.characteristics && !args?.flags?.activeMovement) {
+        //         return;
+        //     }
 
-            // Kludge to update actor right away so the render has proper data.
-            // There is likely a better way to deal with this, possibly in the refreshToken hook.
-            if (args?.flags?.[game.system.id]?.activeMovement) {
-                actor.flags[game.system.id] = {};
-                actor.flags[game.system.id].activeMovement = args.flags[game.system.id]?.activeMovement;
-            }
+        //     // Kludge to update actor right away so the render has proper data.
+        //     // There is likely a better way to deal with this, possibly in the refreshToken hook.
+        //     if (args?.flags?.[game.system.id]?.activeMovement) {
+        //         actor.flags[game.system.id] = {};
+        //         actor.flags[game.system.id].activeMovement = args.flags[game.system.id]?.activeMovement;
+        //     }
 
-            that._movementRadioSelectRender();
-        });
+        //     that._movementRadioSelectRender();
+        // });
 
         Hooks.on("hdcUpload", function () {
             const sceneControls = ui.controls;

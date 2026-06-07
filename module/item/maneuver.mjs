@@ -2,7 +2,7 @@ import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mj
 import { dehydrateAttackItem } from "./item-attack.mjs";
 import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
-import { isGameV14OrLater } from "../utility/compatibility.mjs";
+import { HeroCompatibility } from "../utility/compatibility.mjs";
 
 /**
  * Maneuvers have some rules of their own that should be considered.
@@ -289,7 +289,7 @@ export async function activateManeuver(item) {
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
         const changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
         activeEffect = foundry.utils.mergeObject(activeEffect, {
-            [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+            [HeroCompatibility.isV14 ? `system.changes` : `changes`]: changes,
         });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
@@ -304,7 +304,7 @@ export async function activateManeuver(item) {
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
         const changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
         activeEffect = foundry.utils.mergeObject(activeEffect, {
-            [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+            [HeroCompatibility.isV14 ? `system.changes` : `changes`]: changes,
         });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
@@ -321,7 +321,7 @@ export async function activateManeuver(item) {
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
         const changes = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect.changes);
         activeEffect = foundry.utils.mergeObject(activeEffect, {
-            [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+            [HeroCompatibility.isV14 ? `system.changes` : `changes`]: changes,
         });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
@@ -333,7 +333,7 @@ export async function activateManeuver(item) {
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
         const changes = foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.changes);
         activeEffect = foundry.utils.mergeObject(activeEffect, {
-            [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+            [HeroCompatibility.isV14 ? `system.changes` : `changes`]: changes,
         });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
@@ -363,7 +363,7 @@ export async function activateManeuver(item) {
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
         const changes = [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
         activeEffect = foundry.utils.mergeObject(activeEffect, {
-            [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+            [HeroCompatibility.isV14 ? `system.changes` : `changes`]: changes,
         });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
@@ -372,14 +372,15 @@ export async function activateManeuver(item) {
     }
 
     // Handy reference to current V13/V14 AE changes
-    const _changes = foundry.utils.getProperty(activeEffect, isGameV14OrLater() ? `system.changes` : `changes`) ?? [];
+    const _changes =
+        foundry.utils.getProperty(activeEffect, HeroCompatibility.isV14 ? `system.changes` : `changes`) ?? [];
 
     if (activeEffect.name && _changes.length > 0) {
         // v14 throws error if effect.duration.value is not an integer.
         // Value = Infinity fails SchemaField validation.
         // We can replace Infinity with null and get this to work.
         // Appears to be a FoundryVTT V14 build 363 bug.
-        if (isGameV14OrLater()) {
+        if (HeroCompatibility.isV14) {
             if (activeEffect.duration?.value === Infinity) {
                 activeEffect.duration.value = null;
             }

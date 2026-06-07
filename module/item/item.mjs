@@ -19,7 +19,6 @@ import {
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
 import { HeroObjectCacheMixin } from "../utility/cache.mjs";
-import { foundryVttParseUuid } from "../utility/compatibility.mjs";
 import {
     buildStrengthItem,
     calculateCpPerDieForItem,
@@ -46,7 +45,7 @@ import {
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
-import { isGameV14OrLater } from "../utility/compatibility.mjs";
+import { HeroCompatibility } from "../utility/compatibility.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -366,7 +365,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 const effectData = this.baseInfo?.activeEffect(this);
                 if (effectData) {
                     // Ensure v14 is using system.changes
-                    if (isGameV14OrLater()) {
+                    if (HeroCompatibility.isV14()) {
                         console.warn(`${effectData.name} v14 changes moved to system.changes`);
                         effectData.system.changes ??= effectData.changes;
                         delete effectData.changes;
@@ -480,7 +479,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     activeEffect.disabled ??= !this.system.active;
                     activeEffect.system ??= { XMLID: this.system.XMLID };
                     activeEffect = foundry.utils.mergeObject(activeEffect, {
-                        [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+                        [HeroCompatibility.isV14 ? `system.changes` : `changes`]: changes,
                     });
 
                     if (activeEffect.update) {
@@ -513,7 +512,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     },
                 ];
                 activeEffect = foundry.utils.mergeObject(activeEffect, {
-                    [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+                    [HeroCompatibility.isV14 ? `system.changes` : `changes`]: changes,
                 });
                 activeEffect.disabled ??= !this.system.active;
                 activeEffect = foundry.utils.mergeObject(activeEffect, {
@@ -525,7 +524,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     const updates = {
                         name: activeEffect.name,
                     };
-                    if (isGameV14OrLater) {
+                    if (HeroCompatibility.isV14) {
                         updates.system ??= {};
                         updates.system.changes = activeEffect.system.changes ?? activeEffect.changes;
                     } else {
@@ -570,7 +569,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         },
                     ];
                     activeEffect = foundry.utils.mergeObject(activeEffect, {
-                        [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+                        [HeroCompatibility.isV14 ? `system.changes` : `changes`]: changes,
                     });
 
                     activeEffect.transfer = true;
@@ -583,7 +582,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         const updates = {
                             name: activeEffect.name,
                         };
-                        if (isGameV14OrLater) {
+                        if (HeroCompatibility.isV14) {
                             updates.system ??= {};
                             updates.system.changes = activeEffect.system.changes ?? activeEffect.changes;
                         } else {
@@ -681,7 +680,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     },
                 ];
                 activeEffect = foundry.utils.mergeObject(activeEffect, {
-                    [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+                    [HeroCompatibility.isV14 ? `system.changes` : `changes`]: changes,
                 });
                 activeEffect.system ??= { XMLID: this.system.XMLID };
                 activeEffect.disabled ??= true;
@@ -690,7 +689,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     const updates = {
                         name: activeEffect.name,
                     };
-                    if (isGameV14OrLater) {
+                    if (HeroCompatibility.isV14) {
                         updates.system ??= {};
                         updates.system.changes = activeEffect.system.changes ?? activeEffect.changes;
                     } else {
@@ -6452,7 +6451,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
      * @returns boolean
      */
     isAttackItemInCustomLinkAddersAllowList(attackItem) {
-        const lookingForId = attackItem.id ?? foundryVttParseUuid(attackItem.system._active?.__originalUuid)?.id;
+        const lookingForId = attackItem.id ?? foundry.utils.parseUuid(attackItem.system._active?.__originalUuid)?.id;
         const attackMatchesCustomAdder = !!this.customLinkAddersToExpandedItems.find(
             (item) => item.id === lookingForId,
         );
@@ -7462,7 +7461,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // Is the effective attack item an temporary effective item?
         if (effectiveAttackItemUuid) {
-            return foundryVttParseUuid(effectiveAttackItemUuid).id;
+            return foundry.utils.parseUuid(effectiveAttackItemUuid)?.id;
         }
 
         // Is the effective attack item an actual original item?
@@ -7967,7 +7966,7 @@ export function cloneToEffectiveAttackItem({
     // Value = Infinity fails SchemaField validation.
     // We can replace Infinity with null and get this to work.
     // Appears to be a FoundryVTT V14 build 362 bug.
-    if (isGameV14OrLater()) {
+    if (HeroCompatibility.isV14) {
         for (const effect of effectiveItemData.effects) {
             if (effect.duration.value === Infinity) {
                 effect.duration.value = null;

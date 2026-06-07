@@ -1,45 +1,156 @@
 /**
- * A temporary method to be used during the transition to make it easy to find bits of code
- * that are dependent on v12 or v13 checks.
- *
- * @returns boolean
+ * System compatibility and database translation layer for Hero System 6e.
+ * Adapts modern V14 paradigms to V13 environments safely.
  */
-export function isGameV13OrLater() {
-    return foundry.utils.isNewerVersion(game.version, "12.343");
-}
-
-export function isGameV14OrLater() {
-    return foundry.utils.isNewerVersion(game.version, "14.0");
-}
-
-/**
- * FoundryVTT overloads Math to add the clamped or clamp method depending on the version.
- * Just provide a straight implementation.
- *
- * If max < min then min = max
- *
- * @param {number} num - The number to clamp
- * @param {number} min - The lower bound to clamp num to
- * @param {number} max - The upper bound to clamp num to
- *
- * @returns number
- */
-export function clamp(num, min, max) {
-    if (max < min) {
-        max = min;
+export class HeroCompatibility {
+    /**
+     * True if the host environment is running Foundry VTT V14 or later.
+     * @type {boolean}
+     */
+    static get isV14() {
+        // Falls back gracefully if game.release isn't ready during ultra-early initialization
+        const generation = game.release?.generation ?? 13;
+        return generation >= 14;
     }
 
-    return Math.min(Math.max(num, min), max);
-}
+    /**
+     * Translates unlinked combatant initialization overrides to match generation-specific schemas.
+     * Prevents database property sanitization rejections across V13 and V14 environments.
+     *
+     * @param {string} actorId - Root database actor record document target ID string
+     * @param {number} dex - True rules priority characteristic integer score configuration
+     * @param {number} spd - True speed chart phase capacity footprint integer value configuration
+     * @returns {object} The version-compliant combatant initialization dictionary payload
+     */
+    static getCombatantCreationPayload(actorId, dex, spd) {
+        const basePayload = {
+            actorId: actorId,
+            tokenId: null,
+            hidden: false,
+        };
 
-/**
- * V12 foundry.utils.parseUuid does not allow string to be falsy. V13 does.
- * Provide V13 functionality for V12
- */
-export function foundryVttParseUuid(uuid) {
-    if (!uuid) {
-        return null;
+        if (this.isV14) {
+            // ✅ V14 CANONICAL SCHEMA: Maps under system configurations map paths natively
+            basePayload["actorData.system.characteristics.dex.value"] = dex;
+            basePayload["actorData.system.characteristics.dex.max"] = dex;
+            basePayload["actorData.system.characteristics.spd.value"] = spd;
+            basePayload["actorData.system.characteristics.spd.max"] = spd;
+
+            basePayload.actorData = {
+                system: {
+                    characteristics: {
+                        dex: { value: dex, max: dex },
+                        spd: { value: spd, max: spd },
+                    },
+                },
+            };
+        } else {
+            // ✅ V13 LEGACY SCHEMATICS DEEP CORRECTION:
+            // Maps characteristics values directly under the old legacy '.data' directory maps structure path segments,
+            // completely flat-assigning them to safeguard properties from database sanitization rejections.
+            basePayload["actorData.data.characteristics.dex.value"] = dex;
+            basePayload["actorData.data.characteristics.dex.max"] = dex;
+            basePayload["actorData.data.characteristics.spd.value"] = spd;
+            basePayload["actorData.data.characteristics.spd.max"] = spd;
+
+            // Duplicate flattened string paths under the old system structures to satisfy strict underlying data model validations
+            basePayload["actorData.data.characteristics.dex"] = { value: dex, max: dex };
+            basePayload["actorData.data.characteristics.spd"] = { value: spd, max: spd };
+
+            basePayload.actorData = {
+                data: {
+                    characteristics: {
+                        dex: { value: dex, max: dex },
+                        spd: { value: spd, max: spd },
+                    },
+                },
+            };
+        }
+
+        return basePayload;
     }
 
-    return foundry.utils.parseUuid(uuid);
+    /**
+     * Safely updates an array of embedded documents inside a parent document.
+     * Enforces V14 array assignment, falling back to flattened path keys in V13.
+     *
+     * @param {Document} parentDoc - The parent document (e.g., a Combat or Actor instance).
+     * @param {string} embeddedKey - The key of the embedded collection (e.g., "combatants", "effects").
+     * @param {Array<object>} embeddedUpdates - Array of update objects, each containing a mandatory `_id`.
+     * @param {object} [topLevelUpdates={}] - Additional top-level document adjustments (e.g., flag updates).
+     * @returns {Promise<Document>} The updated parent document.
+     */
+    static async updateEmbedded(parentDoc, embeddedKey, embeddedUpdates, topLevelUpdates = {}, options = {}) {
+        if (!parentDoc || typeof parentDoc.update !== "function") {
+            throw new Error(`Invalid parent document provided for embedded mutation.`);
+        }
+
+        if (this.isV14) {
+            // Rule: Strict adherence to V14 canonical collection array format
+            const mergedV14Payload = {
+                ...topLevelUpdates,
+                [embeddedKey]: embeddedUpdates,
+            };
+            return parentDoc.update(mergedV14Payload, options);
+        }
+
+        // V13 Fallback: Safely restructure properties into flat path keys for legacy core database handlers
+        const flattenedV13Payload = { ...topLevelUpdates };
+
+        for (const updateData of embeddedUpdates) {
+            const { _id, ...fields } = updateData;
+            if (!_id) continue;
+
+            for (const [property, value] of Object.entries(fields)) {
+                // Flat path construction happens strictly here, keeping feature implementations clean
+                flattenedV13Payload[`${embeddedKey}.${_id}.${property}`] = value;
+            }
+        }
+
+        return parentDoc.update(flattenedV13Payload, options);
+    }
+
+    /**
+     * Version-agnostic wrapper for refreshing active effect expiry lifecycles.
+     * Avoids fake custom timers or hallucinated core hooks.
+     *
+     * @param {ActiveEffect} effect - Target ActiveEffect instance.
+     */
+    static refreshActiveEffect(effect) {
+        if (!effect) return;
+
+        if (this.isV14) {
+            // Native V14 core architecture handler
+            if (ActiveEffect.expiry?.refresh) {
+                ActiveEffect.expiry.refresh();
+            }
+        } else {
+            // V13 Fallback evaluation: Explicitly delete expired documents
+            const remaining = effect.duration?.remaining;
+            if (remaining === 0) {
+                // Scoped standard CRUD execution
+                effect.delete();
+            }
+        }
+    }
+
+    /**
+     * FoundryVTT overloads Math to add the clamped or clamp method depending on the version.
+     * Just provide a straight implementation.
+     *
+     * If max < min then min = max
+     *
+     * @param {number} num - The number to clamp
+     * @param {number} min - The lower bound to clamp num to
+     * @param {number} max - The upper bound to clamp num to
+     *
+     * @returns number
+     */
+    static clamp(num, min, max) {
+        if (max < min) {
+            max = min;
+        }
+
+        return Math.min(Math.max(num, min), max);
+    }
 }

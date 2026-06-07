@@ -1,7 +1,6 @@
 import { getActorDefensesVsAttack } from "../../utility/defense.mjs";
 import { HeroSystem6eActor } from "../../actor/actor.mjs";
 import { HeroSystem6eItem } from "../../item/item.mjs";
-import { foundryVttParseUuid } from "../../utility/compatibility.mjs";
 import {
     getPowerInfo,
     getCharacteristicInfoArrayForActor,
@@ -1466,7 +1465,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         const documentUuid = target.closest("[data-document-uuid]").dataset.documentUuid;
 
         // fromUuidSync doesn't allow  retrieving embedded compendium documents, so manually retrieving each child document from the base document.
-        const { collection, embedded, documentId } = foundryVttParseUuid(documentUuid);
+        const { collection, embedded, documentId } = foundry.utils.parseUuid(documentUuid);
         let document = collection.get(documentId);
         while (document && embedded.length > 1) {
             const [embeddedName, embeddedId] = embedded.splice(0, 2);

@@ -3,6 +3,11 @@ import * as chat from "./chat.mjs";
 import { HeroSystem6eCombat } from "./combat.mjs";
 import { HeroSystem6eCombatTracker } from "./combatTracker.mjs";
 import { HeroSystem6eCombatant } from "./combatant.mjs";
+
+import { HeroSystem6eCombatSingle } from "./combat-single.mjs";
+import { HeroSystem6eCombatTrackerSingle } from "./combatTracker-single.mjs";
+import { HeroSystem6eCombatantSingle } from "./combatant-single.mjs";
+
 import { HeroSystem6eCompendium } from "./compendium.mjs";
 import { HeroSystem6eCompendiumDirectory } from "./compendiumDirectory.mjs";
 import { HERO } from "./config.mjs";
@@ -62,7 +67,7 @@ import "./heroRoller/chat-dice.mjs";
 import { HeroRoll } from "./heroRoller/dice.mjs";
 import "./utility/adjustment.mjs";
 import { expireEffects } from "./utility/util.mjs";
-import { isGameV14OrLater } from "./utility/compatibility.mjs";
+import { HeroCompatibility } from "./utility/compatibility.mjs";
 
 // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttActors = foundry.documents?.collections?.Actors || Actors;
@@ -108,6 +113,13 @@ export class HEROSYS {
             console.trace(this.ID, "|", ...args);
         }
     }
+
+    static get isSingleCombatantTrackerEnabled() {
+        return (
+            game.settings.get(game.system.id, "alphaTesting") &&
+            game.settings.get(game.system.id, "singleCombatantTracker")
+        );
+    }
 }
 
 Hooks.once("init", async function () {
@@ -126,18 +138,7 @@ Hooks.once("init", async function () {
     // Custom HeroSystem VisionMode
     setPerceptionModes();
 
-    // if (isGameV14OrLater()) {
-    //     // Custom Expiry Events. Map custom string to a translation path or static text block
-    //     CONFIG.ActiveEffect.expiryEvents = CONFIG.ActiveEffect.expiryEvents || {};
-
-    //     // Registering the label makes it selectable and visible in configuration menus
-    //     for (const [key, value] of Object.entries(HERO.ACTIVE_EFFECT_EXPIRY_EVENTS)) {
-    //         CONFIG.ActiveEffect.expiryEvents[key] = value.label;
-    //     }
-    // }
-
-    // Compendiums
-    game.CreateHeroCompendiums = CreateHeroCompendiums;
+    // HEROSYS
     HEROSYS.module = game.system.id;
     game.herosystem6e = {
         applications: {
@@ -152,11 +153,34 @@ Hooks.once("init", async function () {
         rollItemMacro: rollItemMacro,
         config: HERO,
     };
-
     CONFIG.HERO = { ...CONFIG.HERO, ...HERO };
 
-    CONFIG.Combat.documentClass = HeroSystem6eCombat;
-    CONFIG.Combatant.documentClass = HeroSystem6eCombatant;
+    SettingsHelpers.initLevelSettings();
+
+    // if (HeroCompatibility.isV14 ) {
+    //     // Custom Expiry Events. Map custom string to a translation path or static text block
+    //     CONFIG.ActiveEffect.expiryEvents = CONFIG.ActiveEffect.expiryEvents || {};
+
+    //     // Registering the label makes it selectable and visible in configuration menus
+    //     for (const [key, value] of Object.entries(HERO.ACTIVE_EFFECT_EXPIRY_EVENTS)) {
+    //         CONFIG.ActiveEffect.expiryEvents[key] = value.label;
+    //     }
+    // }
+
+    // Compendiums
+    game.CreateHeroCompendiums = CreateHeroCompendiums;
+
+    if (HEROSYS.isSingleCombatantTrackerEnabled) {
+        CONFIG.Combat.documentClass = HeroSystem6eCombatSingle;
+        CONFIG.Combatant.documentClass = HeroSystem6eCombatantSingle;
+        CONFIG.ui.combat = HeroSystem6eCombatTrackerSingle;
+    } else {
+        CONFIG.Combat.documentClass = HeroSystem6eCombat;
+        CONFIG.Combatant.documentClass = HeroSystem6eCombatant;
+        HeroSystem6eCombatTracker.initializeTemplate();
+        CONFIG.ui.combat = HeroSystem6eCombatTracker;
+    }
+
     CONFIG.Combat.defeatedStatusId = "dead";
     CONFIG.ChatMessage.documentClass = HeroSystem6eChatMessage;
 
@@ -178,11 +202,6 @@ Hooks.once("init", async function () {
         decimals: 2,
     };
 
-    // debug
-    // CONFIG.debug.hooks = true;
-    // CONFIG.debug.combat = true;
-    // CONFIG.debug.time = true;
-
     // Define custom Entity classes
     CONFIG.Actor.documentClass = HeroSystem6eActor;
     CONFIG.Item.documentClass = HeroSystem6eItem;
@@ -203,7 +222,7 @@ Hooks.once("init", async function () {
     }
     CONFIG.Canvas.rulerClass = HeroRuler; // END Use & calculateVelocityInSystemUnits
 
-    if (!isGameV14OrLater) {
+    if (!HeroCompatibility.isV14) {
         CONFIG.Canvas.visionSourceClass = HeroPointVisionSource;
     }
 
@@ -236,8 +255,6 @@ Hooks.once("init", async function () {
     });
 
     HeroRuler.initialize();
-
-    SettingsHelpers.initLevelSettings();
 
     initializeHandlebarsHelpers();
     initializeItemHandlebarsHelpers();
@@ -358,8 +375,6 @@ Hooks.once("init", async function () {
     // Assign the Sidebar subclasses
     CONFIG.ui.items = HeroSystem6eItemDirectory;
     CONFIG.ui.compendium = HeroSystem6eCompendiumDirectory;
-    HeroSystem6eCombatTracker.initializeTemplate();
-    CONFIG.ui.combat = HeroSystem6eCombatTracker;
 
     GenericRoller.Initialize();
     HeroSocketHandler.Initialize();
@@ -443,25 +458,27 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
 
 // When actor SPD is changed we need to setupTurns again
 Hooks.on("updateActor", async (document, change /*, _options, _userId */) => {
-    if (
-        change?.system?.characteristics?.spd?.value ||
-        change?.system?.characteristics?.dex?.value ||
-        change?.system?.characteristics?.ego?.value ||
-        change?.system?.characteristics?.int?.value ||
-        change?.system?.initiativeCharacteristic
-    ) {
-        for (const combat of game.combats) {
-            if (combat.active) {
-                const _combatants = combat.combatants.filter((o) => o.actorId === document.id);
-                if (_combatants) {
-                    // Reroll Initiative (based on new spd/dex/ego/int changes)
-                    //await combat.rollAll();
-                    await combat.rollInitiative(_combatants.map((o) => o.id));
-                    await combat.extraCombatants();
+    if (!HEROSYS.isSingleCombatantTrackerEnabled) {
+        if (
+            change?.system?.characteristics?.spd?.value ||
+            change?.system?.characteristics?.dex?.value ||
+            change?.system?.characteristics?.ego?.value ||
+            change?.system?.characteristics?.int?.value ||
+            change?.system?.initiativeCharacteristic
+        ) {
+            for (const combat of game.combats) {
+                if (combat.active) {
+                    const _combatants = combat.combatants.filter((o) => o.actorId === document.id);
+                    if (_combatants) {
+                        // Reroll Initiative (based on new spd/dex/ego/int changes)
+                        //await combat.rollAll();
+                        await combat.rollInitiative(_combatants.map((o) => o.id));
+                        await combat.extraCombatants();
 
-                    // Setup Turns in combat tracker based on new spd/dex/ego/int changes)
-                    // Should no longer be needed now that SPD is part of initiative (handled via rollAll/combat:rollInitiative)
-                    //await combat.setupTurns();
+                        // Setup Turns in combat tracker based on new spd/dex/ego/int changes)
+                        // Should no longer be needed now that SPD is part of initiative (handled via rollAll/combat:rollInitiative)
+                        //await combat.setupTurns();
+                    }
                 }
             }
         }
@@ -478,9 +495,11 @@ Hooks.on("closeTokenConfig", async (tokenConfig) => {
 });
 
 Hooks.on("changeSidebarTab", async (app) => {
-    // Make sure active token is centered in combat tracker when changing Sidebar
-    if (app.tabName === "combat" && game.combat?.active && app.scrollToTurn) {
-        app.scrollToTurn();
+    if (!HEROSYS.isSingleCombatantTrackerEnabled) {
+        // Make sure active token is centered in combat tracker when changing Sidebar
+        if (app.tabName === "combat" && game.combat?.active && app.scrollToTurn) {
+            app.scrollToTurn();
+        }
     }
 });
 

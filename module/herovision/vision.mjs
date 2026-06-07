@@ -1,4 +1,4 @@
-import { isGameV14OrLater } from "../utility/compatibility.mjs";
+import { HeroCompatibility } from "../utility/compatibility.mjs";
 import { calculateDistanceBetween } from "../utility/range.mjs";
 import { HeroVisionModeInfraredPerception } from "./vision-modes/infrared-perception2.mjs";
 
@@ -81,7 +81,7 @@ export function setPerceptionModes() {
     }
 
     // v14 has HeroVision issues
-    if (!isGameV14OrLater()) {
+    if (!HeroCompatibility.isV14) {
         CONFIG.Canvas.visionModes.heroVision = new HeroVisionMode();
         CONFIG.Canvas.visionModes.infraredPerception = new HeroVisionModeInfraredPerception();
     }
@@ -217,7 +217,7 @@ export function setPerceptionModes() {
     }
 
     // Problems with v14 HeroDetect
-    if (!isGameV14OrLater()) {
+    if (!HeroCompatibility.isV14) {
         CONFIG.Canvas.detectionModes.heroDetectSight = new HeroDetectionSightMode(); //new DeCONFIG.Canvas.detectionModes.feelTremor.clone();
         CONFIG.Canvas.detectionModes.heroDetectSight.label = "Hero Detect Sight";
     }

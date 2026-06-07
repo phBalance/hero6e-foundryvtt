@@ -9,7 +9,7 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 
 import { ItemAttackFormApplicationV2 } from "../applications/item/item-attack-application-v2.mjs";
 import { ItemAttackFormApplication } from "../item/item-attack-application.mjs";
-import { isGameV14OrLater } from "../utility/compatibility.mjs";
+import { HeroCompatibility } from "../utility/compatibility.mjs";
 
 import { ItemAttackClubWeaponApplicationV2 } from "../applications/item/item-attack-application-club-weapon.mjs";
 
@@ -21,7 +21,6 @@ import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../heroRoller/dice.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import { Attack, actionFromJSON, actionToJSON } from "../utility/attack.mjs";
-import { clamp, foundryVttParseUuid } from "../utility/compatibility.mjs";
 import {
     calculateDicePartsForItem,
     calculateStrengthMinimumForItem,
@@ -271,7 +270,9 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
         data.velocitySystemUnits = getSystemDisplayUnits(item.is5e);
     }
 
-    const HeroItemAttackFormApplication = isGameV14OrLater() ? ItemAttackFormApplicationV2 : ItemAttackFormApplication;
+    const HeroItemAttackFormApplication = HeroCompatibility.isV14
+        ? ItemAttackFormApplicationV2
+        : ItemAttackFormApplication;
     if (options.allInOne) {
         if (item.system.XMLID === "CLUBWEAPON") {
             data.previousApplication = [];
@@ -1208,7 +1209,7 @@ async function doSingleTargetActionToHit(action, options) {
 
         item,
         itemJsonStr: dehydrateAttackItem(item), // PH: FIXME: Can remove some things like item etc because they're in the actionData.
-        originalUuid: item.id || foundryVttParseUuid(item.system._active?.__originalUuid)?.id,
+        originalUuid: item.id || foundry.utils.parseUuid(item.system._active?.__originalUuid)?.id,
 
         adjustment,
         senseAffecting,
@@ -3372,7 +3373,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     } else {
         const changes = [{ key: "body", value: body, mode: 5 }];
         activeEffect = foundry.utils.mergeObject(activeEffect, {
-            [isGameV14OrLater() ? `system.changes` : `changes`]: changes,
+            [HeroCompatibility.isV14 ? `system.changes` : `changes`]: changes,
         });
     }
 
@@ -3380,8 +3381,8 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         prevEntangle.update({
             name: activeEffect.name,
             flags: activeEffect.flags,
-            [isGameV14OrLater() ? `system.changes` : `changes`]:
-                activeEffect[isGameV14OrLater() ? `system.changes` : `changes`],
+            [HeroCompatibility.isV14 ? `system.changes` : `changes`]:
+                activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`],
             origin: activeEffect.origin,
         });
     } else {
@@ -3499,10 +3500,10 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
             const newBody = body - bodyDamage;
             const name = `${entangleAE.flags[game.system.id]?.XMLID} ${newBody} BODY ${entangleAE.flags[game.system.id]?.entangleDefense.string}`;
             entangleAE.update({ name });
-            entangleAE[isGameV14OrLater() ? `system.changes` : `changes`][bodyChangeIdx].value = newBody;
+            entangleAE[HeroCompatibility.isV14 ? `system.changes` : `changes`][bodyChangeIdx].value = newBody;
             entangleAE.update({
-                [isGameV14OrLater() ? `system.changes` : `changes`]:
-                    entangleAE[isGameV14OrLater() ? `system.changes` : `changes`],
+                [HeroCompatibility.isV14 ? `system.changes` : `changes`]:
+                    entangleAE[HeroCompatibility.isV14 ? `system.changes` : `changes`],
             });
             effectsFinal = `Entangle has ${newBody} BODY remaining.`;
         } else {
@@ -4639,7 +4640,11 @@ function calculateRequiredCharges(item, boostableChargesToUse) {
     // Does this item use charges?
     if (maximumCharges > 0) {
         // Maximum of 4
-        const boostableChargesUsed = clamp(boostableChargesToUse, 0, Math.min(startingCharges - 1, 4));
+        const boostableChargesUsed = HeroCompatibility.clamp(
+            boostableChargesToUse,
+            0,
+            Math.min(startingCharges - 1, 4),
+        );
         chargesToUse = 1 + boostableChargesUsed;
     }
 
