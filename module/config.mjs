@@ -19146,7 +19146,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         }
 
                         // Should not have AP penalty on RSR against Luck (warn: just doesn't make sense and behaviour would be GM fiat)
-                        const luckRollHasApPenalty = !isNaN(findRollDivisor(modifier));
+                        const luckRollHasApPenalty = findRollDivisor(modifier) !== 0;
                         if (activationRoll.items.length > 0 && luckRollHasApPenalty) {
                             validations.push({
                                 message: `RSR that are based on luck should not have a penalty based on Active Points.`,

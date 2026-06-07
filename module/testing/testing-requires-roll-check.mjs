@@ -2047,14 +2047,19 @@ export function registerRequiresRollCheckTests(quench) {
                             expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
-                        it("should have a heroValidation error as the character does not have one of the 2 listed skills (error)", function () {
+                        it.skip("should not have a heroValidation error as the character does have one of the 2 required listed skills (has breakfall -> success)", function () {
+                            const heroValidation = aidRequiresBreakfallOrAcrobaticsWith1Per10ApPenalty.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should have a heroValidation error as the character does not have one of the 2 required listed skills (error)", function () {
                             const heroValidation = invalidDrainMissingOneSkillFromTwoRequiredSkills.heroValidation;
                             expect(heroValidation.length).to.equal(1);
                             expect(heroValidation[0]).to.have.property("severity");
                             expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
-                        it("should have a heroValidation error as the character does not have either of the 2 listed skills (error)", function () {
+                        it("should have a heroValidation error as the character does not have either of the 2 required listed skills (error)", function () {
                             const heroValidation = invalidDrainMissingBothSkillsFromTwoRequiredSkills.heroValidation;
                             expect(heroValidation.length).to.equal(2);
                             expect(heroValidation[0]).to.have.property("severity");
@@ -2070,6 +2075,11 @@ export function registerRequiresRollCheckTests(quench) {
 
                         it("should have no heroValidation error as the character has STR (success)", function () {
                             const heroValidation = aidRequiresStrWith1Per20ApPenalty.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should have no heroValidation error as the character has luck (success)", function () {
+                            const heroValidation = aidRequires1Luck.heroValidation;
                             expect(heroValidation).to.have.deep.members([]);
                         });
                     });
