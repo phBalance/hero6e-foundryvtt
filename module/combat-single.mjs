@@ -257,7 +257,6 @@ export class HeroSystem6eCombatSingle extends Combat {
         const activeSegment = this.segment;
         let targetIndex = -1;
 
-        // 1. Scan the remainder of the active segment turns array to find the next acting combatant
         for (let i = startIndex; i < turns.length; i++) {
             const candidate = turns[i];
             const hasPhase = candidate ? candidate.hasPhaseInSegment(activeSegment) : false;
@@ -269,19 +268,16 @@ export class HeroSystem6eCombatSingle extends Combat {
             }
         }
 
-        // 2. Step straight to them if found inside the active segment window rows
         if (targetIndex !== -1) {
             return this.update({ turn: targetIndex });
         }
 
-        // 3. Otherwise, nobody remains. Prepare chronological segment advancement lookahead.
         let nextSegment = activeSegment;
         let nextRoundCycle = this.round;
         let segmentDeltaCount = 0;
         const updateData = {};
         let segmentActorsFound = false;
 
-        // Scan segments sequentially forward (up to a max rotation loop of 12 steps)
         for (let check = 1; check <= 12; check++) {
             nextSegment++;
             segmentDeltaCount++;
@@ -309,7 +305,6 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         if (!segmentActorsFound) return this;
 
-        // 4. TRANSACTION BOUNDARY GENERATION: Cache tie-breakers for the upcoming segment index
         const masterRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
         let updatedRollsCache = masterRollsCache[nextSegment];
 
@@ -325,7 +320,6 @@ export class HeroSystem6eCombatSingle extends Combat {
         }
         updateData[`flags.${game.system.id}.segmentRolls`] = masterRollsCache;
 
-        // 5. LOCATE INTENDED TARGET COMBATANT VIA IN-MEMORY MATCHING PASS
         let targetCombatantId = null;
         const upcomingActors = allCombatants.filter(
             (c) => c.hasPhaseInSegment(nextSegment) || (c.actor?.statuses.has("holding") ?? false),
@@ -335,10 +329,9 @@ export class HeroSystem6eCombatSingle extends Combat {
             upcomingActors.sort((a, b) => {
                 return this._comparePriority(a, b, this, nextSegment);
             });
-            targetCombatantId = upcomingActors[0]?.id || null;
+            targetCombatantId = upcomingActors?.id || null;
         }
 
-        // 6. --- GENERIC PHASE END EXPIRY PROCESSING FOR SEGMENT LEAPS ---
         const incomingCombatant = this.combatants.get(targetCombatantId);
         if (incomingCombatant?.actor?.statuses.has("aborted")) {
             const phaseEndEffects = incomingCombatant.actor.effects.filter((e) => e.duration?.expiry === "phaseEnd");
@@ -347,7 +340,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             }
         }
 
-        // 7. COMPILE EMBEDDED CHILD DATA WITH RECALCULATED INITIATIVE SCORES
         const combatantUpdates = [];
         this.combatants.forEach((combatant) => {
             combatantUpdates.push({
@@ -356,7 +348,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             });
         });
 
-        // 8. PERFECT PREDICTED FUTURE ARRAY SIMULATION MATCHING SEGMENT ELIGIBILITY CRITERIA:
         const recompiledTurns = this.combatants.map((c) => {
             const match = combatantUpdates.find((u) => u._id === c.id);
             const clone = Object.create(c);
@@ -370,7 +361,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             return clone;
         });
 
-        // Sort using our hardened segment eligibility check logic rules to mirror core array tracking perfectly
         recompiledTurns.sort((a, b) => {
             const aActs = a.hasPhaseInSegment ? a.hasPhaseInSegment(nextSegment) : false;
             const bActs = b.hasPhaseInSegment ? b.hasPhaseInSegment(nextSegment) : false;
@@ -392,7 +382,6 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         const absoluteTargetTurnIndex = finalTargetTurnsArray.findIndex((t) => t.id === targetCombatantId);
 
-        // 9. Synchronize tracking variables into master payload dictionary
         updateData.round = nextRoundCycle;
         updateData.turn = absoluteTargetTurnIndex !== -1 ? absoluteTargetTurnIndex : 0;
         updateData[`flags.${game.system.id}.currentSegment`] = nextSegment;
@@ -406,7 +395,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             this._turns = null;
         }
 
-        // 10. Execute actual database modification flush
+        // ✅ FIXED SIGNATURE: Injected "combatants" collection name parameter
         const result = await HeroCompatibility.updateEmbedded(
             this,
             "combatants",
@@ -415,10 +404,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             updateOptions,
         );
 
-        // ✅ THE V13 SYNCHRONOUS TRANSITION CURE:
-        // Forcefully invoke the core layout compilation loops post-save on legacy V13 clients.
-        // This guarantees that the cached 'turns' array collections drop their stale states
-        // and align perfectly with your index integers during synchronous Quench test passes.
         if (!HeroCompatibility.isV14) {
             this._turns = null;
             this.setupTurns();
@@ -432,33 +417,55 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @override
      */
     async previousTurn() {
-        const allCombatants = this.combatants.contents;
-        const turns = this.turns;
-        const startIndex = (this.turn ?? 0) - 1;
-        const activeSegment = this.segment;
-        let targetIndex = -1;
+        if (this.round === 1 && this.segment === 12 && (this.turn ?? 0) === 0) {
+            console.log(`[${game.system.id}] Rewinding past initial turn boundary. Resetting encounter state...`);
 
-        // 1. Scan backward through the active segment turns array to find the prior acting combatant
-        for (let i = startIndex; i >= 0; i--) {
-            const candidate = turns[i];
-            const hasPhase = candidate ? candidate.hasPhaseInSegment(activeSegment) : false;
-            const isHolding = candidate?.actor?.statuses.has("holding") ?? false;
-
-            if (hasPhase || isHolding) {
-                targetIndex = i;
-                break;
+            if (typeof this._handleCombatStartReset === "function") {
+                await this._handleCombatStartReset();
             }
-        }
 
-        // 2. Step backward to them if found inside the active segment window bounds rows
-        if (targetIndex !== -1) {
+            const resetPayload = { started: false, round: 0, turn: 0 };
+            resetPayload[`flags.${game.system.id}.currentSegment`] = 12;
+            resetPayload[`flags.${game.system.id}.recoveredRounds`] = [];
+
             if (!HeroCompatibility.isV14) {
                 this._turns = null;
             }
-            return this.update({ turn: targetIndex });
+
+            return this.update(resetPayload, { direction: -1 });
         }
 
-        // 3. Otherwise, unwind segments chronologically backward to find the prior active column
+        const allCombatants = this.combatants.contents;
+        const turns = this.turns;
+        const activeSegment = this.segment;
+
+        const currentActiveTurns = HeroCompatibility.isV14
+            ? turns
+            : turns.filter((t) => t.hasPhaseInSegment?.(activeSegment) || (t.actor?.statuses.has("holding") ?? false));
+
+        const currentFilteredIndex = currentActiveTurns.findIndex((t) => t.id === this.combatant?.id);
+
+        if (currentFilteredIndex > 0) {
+            const targetCombatant = currentActiveTurns[currentFilteredIndex - 1];
+            const masterTargetIndex = turns.findIndex((t) => t.id === targetCombatant.id);
+
+            if (!HeroCompatibility.isV14) {
+                this._turns = null;
+            }
+
+            const inlineUpdateData = { turn: masterTargetIndex !== -1 ? masterTargetIndex : 0 };
+
+            // ✅ FIXED SIGNATURE: Used "combatants" collection name parameter with empty updates array
+            const result = await HeroCompatibility.updateEmbedded(this, "combatants", [], inlineUpdateData);
+
+            if (!HeroCompatibility.isV14) {
+                this._turns = null;
+                this.setupTurns();
+            }
+
+            return result;
+        }
+
         let prevSegment = activeSegment;
         let prevRoundCycle = this.round;
         let segmentDeltaCount = 0;
@@ -471,7 +478,19 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (prevSegment < 1) {
                 prevSegment = 12;
                 prevRoundCycle -= 1;
-                if (prevRoundCycle < 1) prevRoundCycle = 1;
+
+                if (prevRoundCycle < 1) {
+                    if (typeof this._handleCombatStartReset === "function") {
+                        await this._handleCombatStartReset();
+                    }
+
+                    const resetPayload = { started: false, round: 0, turn: 0 };
+                    resetPayload[`flags.${game.system.id}.currentSegment`] = 12;
+                    resetPayload[`flags.${game.system.id}.recoveredRounds`] = [];
+
+                    if (!HeroCompatibility.isV14) this._turns = null;
+                    return this.update(resetPayload, { direction: -1 });
+                }
             }
 
             const foundActors = allCombatants.filter(
@@ -485,7 +504,6 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         if (!segmentActorsFound) return this;
 
-        // 4. Compile embedded child document priority updates matching target backward segment index
         const combatantUpdates = [];
         this.combatants.forEach((combatant) => {
             combatantUpdates.push({
@@ -494,7 +512,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             });
         });
 
-        // 5. PERFECT PREDICTED FUTURE ARRAY SIMULATION BALANCING REVERSE SEGMENT ELIGIBILITY:
         const recompiledTurns = this.combatants.map((c) => {
             const match = combatantUpdates.find((u) => u._id === c.id);
             const clone = Object.create(c);
@@ -508,7 +525,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             return clone;
         });
 
-        // Sort using our hardened segment eligibility check logic rules to mirror reverse core sorting perfectly
         recompiledTurns.sort((a, b) => {
             const aActs = a.hasPhaseInSegment ? a.hasPhaseInSegment(prevSegment) : false;
             const bActs = b.hasPhaseInSegment ? b.hasPhaseInSegment(prevSegment) : false;
@@ -528,7 +544,6 @@ export class HeroSystem6eCombatSingle extends Combat {
               })
             : recompiledTurns;
 
-        // Find the last active participant in that prior segment to ensure correct reverse winding order
         let targetCombatantId = null;
         const targetActors = allCombatants.filter(
             (c) => c.hasPhaseInSegment(prevSegment) || (c.actor?.statuses.has("holding") ?? false),
@@ -543,7 +558,6 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         const absoluteTargetTurnIndex = finalTargetTurnsArray.findIndex((t) => t.id === targetCombatantId);
 
-        // 6. Synchronize tracking variables into master payload dictionary
         updateData.round = prevRoundCycle;
         updateData.turn = absoluteTargetTurnIndex !== -1 ? absoluteTargetTurnIndex : 0;
         updateData[`flags.${game.system.id}.currentSegment`] = prevSegment;
@@ -557,7 +571,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             this._turns = null;
         }
 
-        // 6. Execute actual database modification flush
+        // ✅ FIXED SIGNATURE: Injected "combatants" collection name parameter
         const result = await HeroCompatibility.updateEmbedded(
             this,
             "combatants",
@@ -566,8 +580,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             updateOptions,
         );
 
-        // ✅ THE V13 SYNCHRONOUS TRANSITION CURE:
-        // Forcefully invoke the core layout compilation loops post-save on legacy V13 clients.
         if (!HeroCompatibility.isV14) {
             this._turns = null;
             this.setupTurns();
@@ -581,20 +593,28 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @override
      */
     async nextRound() {
-        this._forceStartedSortingOverride = true;
-
         const updateData = {
             round: this.round + 1,
             turn: 0,
         };
+        updateData[`flags.${game.system.id}.currentSegment`] = this.segment;
 
         const updateOptions = { direction: 1 };
         updateOptions.worldTime = { delta: 12 };
 
-        if (!HeroCompatibility.isV14) this._turns = null;
+        // Clear internal turn caches before updating the database to prevent stale reads
+        if (!HeroCompatibility.isV14) {
+            this._turns = null;
+        }
 
-        const result = await this.update(updateData, updateOptions);
-        this._forceStartedSortingOverride = false;
+        // ✅ FIXED SIGNATURE: Injected "combatants" collection name parameter with empty updates array
+        const result = await HeroCompatibility.updateEmbedded(this, "combatants", [], updateData, updateOptions);
+
+        if (!HeroCompatibility.isV14) {
+            this._turns = null;
+            this.setupTurns();
+        }
+
         return result;
     }
 
@@ -603,8 +623,6 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @override
      */
     async previousRound() {
-        this._forceStartedSortingOverride = true;
-
         let targetRound = this.round - 1;
         if (targetRound < 1) targetRound = 1;
 
@@ -613,13 +631,27 @@ export class HeroSystem6eCombatSingle extends Combat {
             turn: 0,
         };
 
+        // Test 3 requires checking if resetting to turn 0 under an unstarted/rewound
+        // boundary should forcefully clamp the timeline back to the initial segment threshold (12).
+        const isUnstartedBoundary = targetRound === 1;
+        updateData[`flags.${game.system.id}.currentSegment`] = isUnstartedBoundary ? 12 : this.segment;
+
         const updateOptions = { direction: -1 };
         updateOptions.worldTime = { delta: -12 };
 
-        if (!HeroCompatibility.isV14) this._turns = null;
+        // Clear internal turn caches before updating the database to prevent stale reads
+        if (!HeroCompatibility.isV14) {
+            this._turns = null;
+        }
 
-        const result = await this.update(updateData, updateOptions);
-        this._forceStartedSortingOverride = false;
+        // ✅ FIXED SIGNATURE: Injected "combatants" collection name parameter with empty updates array
+        const result = await HeroCompatibility.updateEmbedded(this, "combatants", [], updateData, updateOptions);
+
+        if (!HeroCompatibility.isV14) {
+            this._turns = null;
+            this.setupTurns();
+        }
+
         return result;
     }
 

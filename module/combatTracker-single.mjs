@@ -58,9 +58,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     }
 
     /** @override */
-    async _prepareTrackerContext(context, options) {
-        // Let Foundry assemble the core combatant turns natively
-        await super._prepareTrackerContext(context, options);
+    _prepareTrackerContext(context) {
+        // 1. Let Foundry assemble the core combatant turns natively (Synchronous in V14/V15 ApplicationV2)
+        super._prepareTrackerContext(context);
 
         // ✅ CANONICAL V14 CONTEXT PROTECTION:
         // If no active combat is viewed or if the instance is a transient mockup,
@@ -90,7 +90,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
         Object.defineProperty(activeHeaderTurn, "token", { get: () => null, configurable: true, enumerable: true });
         Object.defineProperty(activeHeaderTurn, "actor", { get: () => null, configurable: true, enumerable: true });
-
         timelineTurns.push(activeHeaderTurn);
 
         // ─── PART B: PROCESS CURRENT ACTORS ───
@@ -103,7 +102,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
         currentActors.forEach((t) => {
             const combatant = this.viewed.combatants.get(t.id);
-
             const truePriority = this.viewed.getInitiativePriority(combatant, currentSegment);
             t.initiative = truePriority.toFixed(2);
             t.hasRolled = true;
@@ -115,8 +113,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         });
 
         timelineTurns.push(...currentActors);
-
         context.turns = timelineTurns;
+
+        // ✅ CRITICAL REPAIR: Must return the context back to ApplicationV2 template processors
         return context;
     }
 

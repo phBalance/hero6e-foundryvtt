@@ -369,6 +369,84 @@ export function registerCombatTests(quench) {
                     // 🔓 TIMELINE RESTORATION
                     game.time.advance = originalAdvance;
                 });
+
+                it("Should execute backward rollbacks via previousRound and previousTurn to verify unstarted reset thresholds", async function () {
+                    const { HeroCompatibility } = await import("../utility/compatibility.mjs");
+
+                    const testCombatDocument = await Combat.create({
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
+                    combatDocuments.push(testCombatDocument);
+
+                    // Streamline the collection map for a fast reset execution sweep
+                    const resetRoster = actorDocuments.filter(
+                        (a) => a.name.includes("Guard") || a.name.includes("Behemoth"),
+                    );
+                    const combatantData = resetRoster.map((actor) => {
+                        let targetDex = 10;
+                        let targetSpd = 2;
+                        if (actor.name.includes("Guard")) {
+                            targetDex = 18;
+                            targetSpd = 3;
+                        } else if (actor.name.includes("Behemoth")) {
+                            targetDex = 8;
+                            targetSpd = 4;
+                        }
+                        return HeroCompatibility.getCombatantCreationPayload(actor.id, targetDex, targetSpd);
+                    });
+
+                    await testCombatDocument.createEmbeddedDocuments("Combatant", combatantData);
+
+                    testCombatDocument.combatants.forEach((c) => {
+                        c.actor?.prepareData();
+                        c.prepareData();
+                    });
+
+                    // 🏁 INITIALIZATION: Combat transitions out of unstarted state into Round 1 Segment 12
+                    await testCombatDocument.startCombat();
+                    expect(testCombatDocument.started).to.be.true;
+                    expect(testCombatDocument.round).to.equal(1);
+                    expect(testCombatDocument.segment).to.equal(12);
+
+                    // Advance forward several phases across segments to build historical round stack time context
+                    await testCombatDocument.nextTurn(); // Guard acts in Seg 12
+                    await testCombatDocument.nextTurn(); // Behemoth acts in Seg 12
+                    await testCombatDocument.nextTurn(); // Rolls into Round 2, Segment 3 (Behemoth acts next)
+
+                    expect(testCombatDocument.round).to.equal(2);
+                    expect(testCombatDocument.started).to.be.true;
+
+                    // ─── STEP 1: VERIFY MACRO PREVIOUS ROUND UNSTARTED THRESHOLD ───
+                    // Winding a full round back from Round 2 must drop the encounter level back into Round 1
+                    await testCombatDocument.previousRound();
+                    expect(testCombatDocument.round).to.equal(1);
+                    expect(testCombatDocument.started).to.be.true; // Round 1 is still active, started must remain true
+
+                    // Force round state counter explicitly down into Round 1, Segment 12, Turn Index 1 (Behemoth)
+                    await testCombatDocument.nextTurn();
+                    expect(testCombatDocument.segment).to.equal(12);
+                    expect(testCombatDocument.combatant.name).to.include("Behemoth");
+
+                    // ─── STEP 2: STEP-BY-STEP PREVIOUS TURN REWIND THRESHOLD ───
+                    // Step backward Turn Index 1 (Behemoth) -> Turn Index 0 (Guard) within Segment 12
+                    await testCombatDocument.previousTurn();
+                    expect(testCombatDocument.segment).to.equal(12);
+                    expect(testCombatDocument.round).to.equal(1);
+                    expect(testCombatDocument.started).to.be.true;
+                    expect(testCombatDocument.combatant.name).to.include("Guard");
+
+                    // 🚨 CRITICAL RESET BOUNDARY LEAP:
+                    // We sit at Round 1, Segment 12, Turn Index 0.
+                    // Executing one more previousTurn() must drop the tracker out of started combat entirely.
+                    await testCombatDocument.previousTurn();
+
+                    // Assert that the persistent database state machine reset cleanly to unstarted baselines
+                    expect(testCombatDocument.started).to.be.false;
+                    expect(testCombatDocument.round).to.equal(0);
+                    expect(testCombatDocument.turn).to.equal(0);
+                    expect(testCombatDocument.segment).to.equal(12);
+                });
             });
         },
         { displayName: "HERO SYSTEM 6E: Speed Chart Combat Validation" },
