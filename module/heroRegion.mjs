@@ -1,4 +1,4 @@
-export class HeroSystem6eRegionDocument extends RegionDocument {
+export class HeroSystem6eRegionDocument extends foundry.documents.RegionDocument {
     static async applyBehaviorTokenAutomaticTargeting(regionUuid) {
         const region = await fromUuid(regionUuid);
         if (!region) {
