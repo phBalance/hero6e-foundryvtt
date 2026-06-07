@@ -10,7 +10,10 @@ export class HeroCompatibility {
     static get isV14() {
         // Falls back gracefully if game.release isn't ready during ultra-early initialization
         const generation = game.release?.generation ?? 13;
-        return generation >= 14;
+        if (generation > 14) {
+            console.error(`Hero System 6e Compatibility Layer: Unrecognized Foundry generation ${generation}.`);
+        }
+        return generation === 14;
     }
 
     /**

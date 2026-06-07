@@ -648,7 +648,6 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             displayMeasurements: true,
             highlightMode: "coverage",
             visibility: CONST.REGION_VISIBILITY.ALWAYS,
-            label: `${item.name}\n(Stun Gas Area)`,
             flags: {
                 [game.system.id]: {
                     purpose: "AoE",
