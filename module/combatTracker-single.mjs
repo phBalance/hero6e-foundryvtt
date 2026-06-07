@@ -1,5 +1,4 @@
 const { CombatTracker } = foundry.applications.sidebar.tabs;
-const { HeroCompatibility } = await import("./utility/compatibility.mjs");
 
 export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     static {
