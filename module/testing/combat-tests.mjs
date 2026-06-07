@@ -7,6 +7,7 @@ export function registerCombatTests(quench) {
             const foundryVersion = game.release?.version ?? "Unknown V13/Prior";
             const generationLabel = game.release?.generation ?? 13;
 
+            // This has to be the top level so isSingleCombatTracker can be changed
             describe.only(`Hero System 6e Speed Chart Turn Progression Matrix (Foundry Gen: ${generationLabel})`, function () {
                 const actorDocuments = [];
                 const combatDocuments = [];
@@ -16,6 +17,10 @@ export function registerCombatTests(quench) {
                         `[hero6efoundryvttv2] QUENCH | Platform Version: ${foundryVersion} (Gen ${generationLabel})`,
                     );
                     console.log(`[hero6efoundryvttv2] QUENCH | Spawning tactical speed chart test entities...`);
+
+                    // const isSingleCombatantTracker = game.settings.get(game.system.id, "singleCombatantTracker");
+                    // game.settings.set(game.system.id, "singleCombatantTracker", true);
+                    // getAndSetGameSetting
 
                     const roster = [
                         { name: "Test Guard (SPD 3)", dex: 18, spd: 3 },
