@@ -19162,6 +19162,16 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                                 modifierID: modifier.ID,
                             });
                         }
+                    } else if (activationRoll.type === RSR_ROLL_TYPE.ATTACK_ROLL) {
+                        // Should check if this actor type is capable of attack
+                        const actor = item.actor;
+                        if (actor?.type === "base2") {
+                            validations.push({
+                                message: `Bases do not make attack rolls.`,
+                                severity: HERO.VALIDATION_SEVERITY.ERROR,
+                                modifierID: modifier.ID,
+                            });
+                        }
                     } else if (activationRoll.type === RSR_ROLL_TYPE.ACTIVATION_ROLL) {
                         validations.push(...activationRollHeroValidation(modifier, item));
                     } else {
