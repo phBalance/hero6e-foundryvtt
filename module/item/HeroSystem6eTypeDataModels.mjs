@@ -635,16 +635,16 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
             if (this._hdcXml) {
                 for (const attribute of this.hdcHTMLCollection.firstChild.attributes) {
                     if (this.schema.fields[attribute.name] === undefined) {
-                        const e = `${this.parent.type}/${this.XMLID}/${this.item?.system?.ALIAS} HeroSystem6eItemTypeDataModelGetters is missing ${attribute.name} property.`;
+                        const msg = `${this.parent.type}/${this.XMLID}/${this.item?.system?.ALIAS} HeroSystem6eItemTypeDataModelGetters is missing ${attribute.name} property.`;
                         // Equipment converted to a Power may have extra attributes in the XML that we aren't modeling, so just log for those.
                         // FUTURE: Consider making equipment a dedicated schema, looping thru those to determine which attributes we don't need to alert on.
                         //         Alternatively, we could add equipment schema to the item schema.
                         if (["PRICE", "WEIGHT"].includes(attribute.name)) {
-                            console.debug(e);
-                            return e;
+                            console.debug(msg);
+                            return; // Do not return msg as these props aren't always expected
                         }
-                        console.error(e);
-                        return e;
+                        console.error(msg);
+                        return msg;
                     }
 
                     if (this.ADDER) {
