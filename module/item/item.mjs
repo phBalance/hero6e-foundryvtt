@@ -365,7 +365,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 const effectData = this.baseInfo?.activeEffect(this);
                 if (effectData) {
                     // Ensure v14 is using system.changes
-                    if (HeroCompatibility.isV14()) {
+                    if (HeroCompatibility.isV14) {
                         console.warn(`${effectData.name} v14 changes moved to system.changes`);
                         effectData.system.changes ??= effectData.changes;
                         delete effectData.changes;
