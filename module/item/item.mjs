@@ -4961,14 +4961,18 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return baseAttackItem.baseInfo.attackDefenseVs(baseAttackItem);
         }
 
+        // NND and AVAD type defenses are irregular
         const avad = this.findModsByXmlid("AVAD");
-        if (avad) {
-            const input = avad.INPUT.trim().toUpperCase();
-            if (input.match(/SELF-CONTAINED BREATHING/)) {
+        const nnd5e = this.findModsByXmlid("NND");
+        if (avad || nnd5e) {
+            const nndLikeDefense = avad?.INPUT ?? nnd5e.COMMENTS;
+            const input = nndLikeDefense.trim().toUpperCase();
+            if (input.match(/SELF[-\s]CONTAINED BREATHING/)) {
                 return "SELFCONTAINEDBREATHING";
             } else if (input.match(/LIFE SUPPORT/)) {
                 return "LIFESUPPORT";
             }
+
             return input;
         }
 
@@ -7989,7 +7993,6 @@ export function getItem(id) {
 }
 
 export async function requiresACharacteristicRollCheck(actor, characteristic, reasonText) {
-    console.log(characteristic, this);
     const successValue = parseInt(actor?.system.characteristics[characteristic.toLowerCase()].roll) || 8;
     const activationRoller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
     await activationRoller.roll();
