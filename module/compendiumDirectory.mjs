@@ -239,7 +239,11 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                             // Check if a child
                             else if (system.PARENTID) {
                                 const parentFolder = pack.contents.find((o) => o.system.ID === system.PARENTID)?.folder;
-                                itemData.folder = parentFolder.id;
+                                if (parentFolder) {
+                                    itemData.folder = parentFolder.id;
+                                } else {
+                                    console.warn(`${system.ALIAS} ID=${system.ID} has an invalid PARENTID reference`);
+                                }
                             }
 
                             const item = await HeroSystem6eItem.create(itemData, {
