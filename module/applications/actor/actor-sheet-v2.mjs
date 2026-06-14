@@ -1064,7 +1064,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
         // See if we dropped onto a specific ActorSheet tab
         const target = event.currentTarget ?? event.target;
-        const droppedOnTab = target?.closest("[data-tab]")?.dataset?.tab.replace(/s$/, "");
+        const droppedOnTab = target?.closest?.("[data-tab]")?.dataset?.tab.replace(/s$/, "");
         const targetType = droppedOnTab ?? this.tabGroups.primary.replace(/s$/, "").replace("martial", "martialart");
 
         const parentData = containerItems[0].toObject();
