@@ -4070,8 +4070,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         const height = item.aoeAttackParameters.height;
 
                         result += `Long, ${height}${getSystemDisplayUnits(
-                            item.actor.is5e,
-                        )} Tall, ${width}${getSystemDisplayUnits(item.actor.is5e)} Wide Line; `;
+                            item.is5e,
+                        )} Tall, ${width}${getSystemDisplayUnits(item.is5e)} Wide Line; `;
                     } else {
                         result += `${modifier.OPTION_ALIAS}; `;
                     }

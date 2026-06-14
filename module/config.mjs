@@ -9063,6 +9063,20 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(
         {
+            // Part of FORGERY
+            key: "IDS",
+            type: ["adder"],
+            behaviors: ["adder"],
+            duration: HERO.DURATION_TYPES.PERSISTENT,
+            costPerLevel: fixedValueFunction(0),
+            target: "self only",
+            rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
+            xml: `<ADDER XMLID="IDS" ID="1772216137021" BASECOST="1.0" LEVELS="0" ALIAS="Identity Cards" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
+        },
+        {},
+    );
+    addPower(
+        {
             key: "INFRAREDPERCEPTION",
             type: ["adder", "sense"],
             behaviors: ["adder"],

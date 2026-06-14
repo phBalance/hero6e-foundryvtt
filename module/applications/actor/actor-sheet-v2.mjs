@@ -1034,9 +1034,114 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 await this._onDropItem(event, data);
                 break;
 
+            case "Folder":
+                await this.onDropFolder(await fromUuid(data.uuid), null);
+                break;
+
             default:
                 console.warn(`Unhandled _onDrop type=${data?.type}`);
                 break;
+        }
+    }
+
+    /*
+     * Dropping a FOLDER from a compendium or the Item sidebar requires special handling.
+     * The FOLDER is how we group together parent items and child items.
+     */
+    async onDropFolder(folder, parentId) {
+        let itemsToAdd = folder.contents;
+
+        // Compendiums only have the index entry, so need to get the whole item
+        if (folder.pack || !itemsToAdd?.[0].id) {
+            itemsToAdd = await game.packs.get(folder.pack).getDocuments({ folder: folder.id });
+        }
+
+        // We are expecting a single container
+        const containerItems = itemsToAdd.filter((i) => i.isContainer);
+        if (containerItems.length !== 1) {
+            throw new Error("Expecting exactly one continer");
+        }
+
+        // See if we dropped onto a specific ActorSheet tab
+        const target = event.currentTarget ?? event.target;
+        const droppedOnTab = target?.closest("[data-tab]")?.dataset?.tab.replace(/s$/, "");
+        const targetType = droppedOnTab ?? this.tabGroups.primary.replace(/s$/, "").replace("martial", "martialart");
+
+        const parentData = containerItems[0].toObject();
+
+        // Validation hack
+        const tempParentItem = new HeroSystem6eItem(parentData);
+
+        if (tempParentItem.isValidTypeConversion(targetType, this.actor)) {
+            parentData.type = targetType;
+        } else {
+            const conversionFailures = tempParentItem.validationTypeConversionFailures(targetType, this.actor);
+
+            // Show only one validation failure to UI
+            console.error(conversionFailures);
+            return ui.notifications.error(conversionFailures[0].message);
+        }
+
+        // Create the PARENT
+        await this._createFolderItem(
+            parentData,
+            parentId,
+            itemsToAdd.filter((item) => item.system.ID !== parentData.system.ID),
+        );
+
+        // Create the children
+        // const childItems = itemsToAdd.filter((i) => !i.isContainer);
+        // for (const childData of childItems) {
+        //     await this._createFolderItem(
+        //         childData,
+        //         parentData.system.ID,
+        //         itemsToAdd.filter((o) => o.id != parentData?.id),
+        //     );
+        // }
+
+        // Child Folders
+        // if (folder.children) {
+        //     for (const childFolder of folder.children) {
+        //         await this.onDropFolder(childFolder.folder, null);
+        //     }
+        // }
+
+        console.log(parentData);
+    }
+
+    async _createFolderItem(itemData, parentId, children) {
+        // Make sure we have a clean object (no freezing)
+        itemData = foundry.utils.deepClone(itemData);
+
+        // Make sure we get new IDs and clean up a few things to make them generic
+        delete itemData._id;
+        itemData.system.ID = new Date().getTime();
+        delete itemData.system.PARENTID;
+        if (parentId) {
+            itemData.system.PARENTID = parentId;
+        }
+        delete itemData.ownership;
+        delete itemData.flags;
+        delete itemData.folder;
+
+        // Not an activeItem
+        itemData.system.active = false;
+
+        // Remove any effects (we will create them later if necessary)
+        delete itemData.effects;
+
+        // TODO: Stackable equipment (like potions)
+
+        // Create the item
+        const createdItems = await this.actor.createEmbeddedDocuments("Item", [itemData]);
+        console.log(createdItems);
+
+        // Children
+        for (const child of children || []) {
+            // TODO: what about children of children
+            const childData = child.toObject();
+            childData.type = itemData.type;
+            this._createFolderItem(childData, itemData.system.ID);
         }
     }
 
