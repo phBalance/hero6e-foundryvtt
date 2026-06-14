@@ -490,33 +490,28 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
         //     formData.name = newName;
         // }
 
-        const previousOPTIONID = this.item.system.OPTIONID;
-
-        // Do all the standard things like updating item properies that match the name of input boxes
-        await super._updateObject(event, formData);
+        //const previousOPTIONID = this.item.system.OPTIONID;
 
         // Were there editOptions and did any of those system values change? If so, update the selected option
         const choices = this.data.item.baseInfo?.editOptions?.choices;
         if (choices) {
-            // Deal with OPTION which might have changed
+            // Deal with OPTION, OPTION_ALIAS, etc which we might need to update based on selection.
+            // Notice we do this by updating formData, not by making another item.update.
             const choice = choices.find((choice) => choice.OPTION === expandedData.system.OPTION);
             // Only overwrite OPTION_ALIAS, etc if the OPTIONID has changed
-            if (previousOPTIONID !== choice.OPTIONID) {
-                for (const key of Object.keys(choice)) {
-                    if (this.data.system[key] !== choice[key]) {
-                        // Update everything and we're done with the loop.
-                        await this.item.update(
-                            Object.keys(choice).reduce((accum, key) => {
-                                accum[`system.${key}`] = choice[key];
-                                return accum;
-                            }, {}),
-                        );
-
-                        break;
-                    }
-                }
+            if (this.item.system.OPTIONID !== choice.OPTIONID) {
+                // Update everything at once
+                const changes = Object.keys(choice).reduce((accum, key) => {
+                    accum[`system.${key}`] = choice[key];
+                    return accum;
+                }, {});
+                formData = { ...formData, ...changes };
+                //await this.item.update(changes);
             }
         }
+
+        // Do all the standard things like updating item properies that match the name of input boxes
+        await super._updateObject(event, formData);
 
         // Endurance Reserve
         if (expandedData.rec) {
