@@ -732,6 +732,13 @@ export class HeroRoller {
         throw new Error(`asking for basic from type ${this._type} doesn't make sense`);
     }
 
+    getSuccessValue() {
+        if (this._type === HeroRoller.ROLL_TYPE.SUCCESS) {
+            return this._successValue;
+        }
+
+        throw new Error(`asking for success from type ${this._type} doesn't make sense`);
+    }
     getSuccessTerms() {
         if (this._type === HeroRoller.ROLL_TYPE.SUCCESS) {
             return this.getBaseTerms();

@@ -1,9 +1,9 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 
 import { HeroRoll, HeroRoller } from "../heroRoller/dice.mjs";
-import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { calculateDicePartsForItem } from "../utility/damage.mjs";
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
+import { doSuccessRoll, generateSuccessChatCard } from "../utility/success-card.mjs";
 import { tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 
 const backgroundSkillKeys = Object.freeze({
@@ -96,16 +96,17 @@ export function findRollDivisor(rar) {
 
         // activation rolls have no minuses due to active points
         if (!isNaN(parseInt(rar.OPTIONID, 10))) {
-            return NaN;
+            return 0;
         }
 
+        // No AP penalty option means -1 per 10 AP
         return 10;
     }
 }
 
-function calculateRollMinus(item, rar) {
+function calculateRollApPenalty(item, rar) {
     const divisor = findRollDivisor(rar);
-    if (divisor === 0 || isNaN(divisor)) {
+    if (divisor === 0) {
         return 0;
     }
 
@@ -463,12 +464,12 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
 
     // PH: FIXME: Need to pay the resource cost of this skill/etc
 
-    // Perform the rolls. Because a roll might consume resources we must perform all rolls (i.e. invoke all skills etc)
-    // and then evaluate if there was success.
     const actor = item.actor;
     const token = options.token ?? tokenEducatedGuess({ actor });
     const speaker = ChatMessage.getSpeaker({ actor, token });
 
+    // Perform the rolls. Because a roll might consume resources we must perform all rolls (i.e. invoke all skills etc)
+    // and then evaluate if there was success.
     const rollPromises = activationRolls.map(async (activationRoll) => {
         const roller = new HeroRoller({}, rollClass);
         let succeeded = false;
@@ -506,22 +507,15 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
                 }
             }
 
-            // Regular random activation roll
-            const successValue = activationRoll.rollValue;
+            // Regular plain activation roll
+            roller.makeSuccessRoll(true, activationRoll.rollValue).addDice(3);
 
-            roller.makeSuccessRoll(true, successValue).addDice(3);
-
-            await roller.roll();
-
-            // PH: FIXME: Any way of combining the success checks?
-            succeeded = roller.getSuccess();
-            const autoSuccess = roller.getAutoSuccess();
-            const total = roller.getSuccessTotal();
-            const margin = successValue - total;
-
-            flavor = `${item.name} (${successValue}-) activation ${
-                succeeded ? "succeeded" : "failed"
-            } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
+            const { succeeded: succeed, flavor: updatedFlavor } = await doSuccessRoll(
+                roller,
+                `${item.name} activation`,
+            );
+            succeeded = succeed;
+            flavor = updatedFlavor;
         } else if (activationRoll.type === RSR_ROLL_TYPE.LUCK_ROLL) {
             const luckPower = activationRoll.activeItems[0]; // PH: FIXME: Kludge
             const { diceParts } = calculateDicePartsForItem(luckPower, {});
@@ -549,89 +543,85 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             flavor = `${item.name} (rolled ${luckTotal} points) activation ${succeeded ? "succeeded" : "failed"} `;
         } else if (activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL) {
             const charKey = activationRoll.characteristicKey.toLowerCase();
-            const characteristics = actor.system.characteristics[charKey];
-            const value = characteristics.roll;
-            const apMinus = calculateRollMinus(item, rar);
-            const successValue = value - apMinus;
+            const characteristic = actor.system.characteristics[charKey];
+            const baseResult = characteristic.roll;
+            const apPenalty = -calculateRollApPenalty(item, rar);
+            const divisor = findRollDivisor(rar);
 
             // PH: FIXME: what about additional skill levels used to influence the activation roll?
             // PH: FIXME: not including penalties in an obvious way ... should also include the tags for them
-            roller.makeSuccessRoll(true, successValue).addDice(3);
+            roller
+                .makeSuccessRoll(true, baseResult - apPenalty) // PH: FIXME: Hmm. Add tags to this?
+                .addNumber(baseResult, `${charKey}`)
+                .addNumber(-apPenalty, `AP penalty`, `${item.activePoints} AP / ${divisor} -> ${-apPenalty}`)
+                .addDice(3);
 
-            await roller.roll();
-
-            // PH: FIXME: Any way of combining the success checks?
-            succeeded = roller.getSuccess();
-            const autoSuccess = roller.getAutoSuccess();
-            const total = roller.getSuccessTotal();
-            const margin = successValue - total;
-
-            const targetRoll = `${rar.OPTION_ALIAS}:${successValue}-`;
-            const divisor = findRollDivisor(rar);
-            const penalty = isNaN(divisor) ? "" : `, -1 per ${divisor} active points`;
-
-            const penaltyString = penalty ? `${penalty}: -${apMinus}` : "";
-
-            flavor = `${item.name} (${targetRoll}${penaltyString}) activation ${
-                succeeded ? "succeeded" : "failed"
-            } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
+            const { succeeded: succeed, flavor: updatedFlavor } = await doSuccessRoll(
+                roller,
+                `${item.name} activation`,
+            );
+            succeeded = succeed;
+            flavor = updatedFlavor;
         } else if (activationRoll.type === RSR_ROLL_TYPE.ITEM_ROLL) {
             const skill = activationRoll.activeItems[0]; // PH: FIXME: Kludge
             const value = parseInt(skill.system.roll);
-
-            const apMinus = calculateRollMinus(item, rar);
-            const successValue = value - apMinus;
+            const minusDueToAp = -calculateRollApPenalty(item, rar);
+            const divisor = findRollDivisor(rar);
 
             // PH: FIXME: what about additional skill levels used to influence the activation roll? Can they apply to this?
-            roller.makeSuccessRoll(true, successValue).addDice(3);
+            roller
+                .makeSuccessRoll(true, value)
+                .addDice(3)
+                .addNumber(minusDueToAp, `AP Penalty`, `-1 per ${divisor} active points. ${item.activePoints}`);
 
-            await roller.roll();
-
-            succeeded = roller.getSuccess();
-            const autoSuccess = roller.getAutoSuccess();
-            const total = roller.getSuccessTotal();
-            const margin = successValue - total;
-
-            const targetRoll = skill.system.roll;
-            const divisor = findRollDivisor(rar);
-            const penalty = isNaN(divisor) ? "" : `, -1 per ${divisor} active points`;
-
-            const penaltyString = penalty ? `${penalty}: -${apMinus}` : "";
-
-            flavor = `${item.name} (${targetRoll}${penaltyString}) activation ${
-                succeeded ? "succeeded" : "failed"
-            } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
+            const { succeeded: succeed, flavor: updatedFlavor } = await doSuccessRoll(
+                roller,
+                `${item.name} activation`,
+            );
+            succeeded = succeed;
+            flavor = updatedFlavor;
         } else {
             console.error(`${item.detailedName()} has unknown type ${activationRoll.type} for requires roll modifier`);
         }
 
-        let cardHtml = await roller.render(flavor);
+        // PH: FIXME: Bunch of functionality ripped out of this function. See below to get it into the flavor.
+        // PH: FIXME: resource usage string should be built in here as this is what's consuming. Create functions so it can be done in a fixed way.
+        await generateSuccessChatCard(
+            actor,
+            token,
+            speaker,
+            item,
+            roller,
+            flavor,
+            `Spent ${options.resourcesUsedDescription}`,
+        );
 
-        // FORCE success
-        if (!succeeded && overrideCanAct) {
-            const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
-            ui.notifications.info(`${actor.name} succeeded roll because override key.`);
-            succeeded = true;
-            cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
-        }
+        // PH: FIXME: Get rid of options fields where possible. These decisions should be part of the flavor text and not burried in generating a chat card.
+        // // FORCE success
+        // if (!succeeded && overrideCanAct) {
+        //     const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
+        //     ui.notifications.info(`${actor.name} succeeded roll because override key.`);
+        //     succeeded = true;
+        //     cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
+        // }
 
-        if (!succeeded && options.resourcesUsedDescription) {
-            cardHtml += `Spent ${options.resourcesUsedDescription}.`;
-        }
+        // if (!succeeded && options.resourcesUsedDescription) {
+        //     cardHtml += `Spent ${options.resourcesUsedDescription}.`;
+        // }
 
-        const chatData = {
-            style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-            rolls: roller.rawRolls(),
-            author: game.user._id,
-            content: cardHtml,
-            speaker: speaker,
-        };
+        // const chatData = {
+        //     style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
+        //     rolls: roller.rawRolls(),
+        //     author: game.user._id,
+        //     content: cardHtml,
+        //     speaker: speaker,
+        // };
 
-        await ChatMessage.create(chatData);
+        // await ChatMessage.create(chatData);
 
-        if (!succeeded && options.showUi) {
-            ui.notifications.warn(cardHtml);
-        }
+        // if (!succeeded && options.showUi) {
+        //     ui.notifications.warn(cardHtml);
+        // }
 
         return succeeded;
     });
@@ -644,7 +634,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
     });
 }
 
-// Probability in % of that number on 3d6
+// Probability, in %, of that number on 3d6
 const HIT_LOCATION_PROBABILITY = Object.freeze({
     3: 0.46,
     4: 1.38,
@@ -664,7 +654,7 @@ const HIT_LOCATION_PROBABILITY = Object.freeze({
     18: 0.46,
 });
 
-// Probability in % of that number or less on 3d6
+// Probability, in %, of that number or less on 3d6
 const DICE_CUMULATIVE_PROBABILITY = Object.freeze({
     3: 0.46,
     4: 1.85,
