@@ -6599,6 +6599,26 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             perceivability: "inobvious",
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
+            editOptions: {
+                editableOption_ALIAS: true,
+                choices: [
+                    {
+                        OPTIONID: "CANNOTBESTUNNED",
+                        OPTION: "CANNOTBESTUNNED",
+                        OPTION_ALIAS: "Cannot Be Stunned",
+                    },
+                    {
+                        OPTIONID: "NOSTUN1",
+                        OPTION: "NOSTUN1",
+                        OPTION_ALIAS: "Takes No STUN (loses abilities when takes BODY)",
+                    },
+                    {
+                        OPTIONID: "NOSTUN2",
+                        OPTION: "NOSTUN2",
+                        OPTION_ALIAS: "Takes No STUN",
+                    },
+                ],
+            },
             costEnd: false,
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="AUTOMATON" ID="1709333784244" BASECOST="15.0" LEVELS="0" ALIAS="Automaton" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CANNOTBESTUNNED" OPTIONID="CANNOTBESTUNNED" OPTION_ALIAS="Cannot Be Stunned" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,

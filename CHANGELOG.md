@@ -3,6 +3,8 @@
 ### Version 4.3.10 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix Mind Scan effect roll chat card results. [#4271](https://github.com/dmdorman/hero6e-foundryvtt/issues/4271)
+- Partial fix for dragging COMPOUND powers from item sidebar to actor. [#4277](https://github.com/dmdorman/hero6e-foundryvtt/issues/4277)
+- Improved in game editing of AUTOMATION cannot be stunned/takes no stun. [#4299](https://github.com/dmdorman/hero6e-foundryvtt/issues/4299)
 
 ### Version 4.3.9 20260531
 
