@@ -34,7 +34,7 @@ export class HeroSystem6eChatMessage extends ChatMessage {
                         // const hasTokenImage = tokenImage && fh.media.ImageHelper.hasImageExtension(tokenImage);
                         // if (!hasTokenImage) {
                         // || isDefaultTokenImage(token)) {
-                        return [actor?.img || token.texture.src, 1];
+                        return [actor?.img.replace("icons/svg/mystery-man.svg", "") || token.texture.src, 1];
                         //}
 
                         // Calculate the correction factor for dynamic tokens.

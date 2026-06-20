@@ -472,7 +472,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 case "tabs":
                     for (const tabName of HeroSystemActorSheetV2.TABS.primary.tabs.map((m) => m.id)) {
                         context.tabs[tabName].cssClass = context.tabs[tabName].cssClass?.split(" ") ?? [];
-                        if (this.actor.flags[game.system.id].uploading) {
+                        if (this.actor.flags[game.system.id]?.uploading) {
                             context.tabs[tabName].cssClass.push("uploading-blur");
                         }
 
