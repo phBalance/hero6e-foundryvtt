@@ -215,6 +215,7 @@ export class HeroRoller {
         this._formulaTerms = [];
 
         this._type = HeroRoller.ROLL_TYPE.BASIC;
+        this._typeTag = undefined;
         this._is5eRoll = false;
 
         this._termsCluster = [];
@@ -270,10 +271,18 @@ export class HeroRoller {
         return this;
     }
 
-    makeSuccessRoll(apply = true, successValue) {
+    makeSuccessRoll(apply = true, successValue, description, tooltip) {
         if (apply) {
             this._type = HeroRoller.ROLL_TYPE.SUCCESS;
             this._successValue = successValue;
+
+            this._typeTag = description
+                ? {
+                      name: description,
+                      value: successValue,
+                      title: tooltip,
+                  }
+                : null;
         }
         return this;
     }
@@ -684,9 +693,6 @@ export class HeroRoller {
             .filter(Boolean);
     }
 
-    // TODO: May wish to consider our own custom chat template for this.
-    // TODO: May wish to consider no flavour, but rather have it be the type of roll?
-    // TODO: borderColor: margin >= 0 ? 0x00ff00 : 0xff0000, based on success/failure?
     async render(flavor, isPrivate = false) {
         // PH: FIXME: isPrivate should be provided everywhere explicitly
         const template = this._buildRollClass.CHAT_TEMPLATE;
@@ -704,13 +710,18 @@ export class HeroRoller {
     }
 
     tags() {
-        const tags = this._formulaTerms
-            .map((term) => {
+        const tags = [
+            this.#rollTypeTag(),
+            ...this._formulaTerms.map((term) => {
                 return term.options._hrTag;
-            })
-            .filter(Boolean);
+            }),
+        ].filter(Boolean);
 
         return tags;
+    }
+
+    #rollTypeTag() {
+        return this._typeTag;
     }
 
     getFormula() {
@@ -760,7 +771,7 @@ export class HeroRoller {
             if (autoSuccess !== undefined) {
                 return autoSuccess;
             } else {
-                return this.getSuccessTotal() <= this._successValue; // TODO: Is this right? Does it work for attack?
+                return this.getSuccessTotal() <= this._successValue;
             }
         }
 

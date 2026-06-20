@@ -544,17 +544,20 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
         } else if (activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL) {
             const charKey = activationRoll.characteristicKey.toLowerCase();
             const characteristic = actor.system.characteristics[charKey];
-            const baseResult = characteristic.roll;
-            const apPenalty = -calculateRollApPenalty(item, rar);
+            const baseRequiredRoll = characteristic.roll;
+            const apPenalty = calculateRollApPenalty(item, rar);
             const divisor = findRollDivisor(rar);
 
             // PH: FIXME: what about additional skill levels used to influence the activation roll?
             // PH: FIXME: not including penalties in an obvious way ... should also include the tags for them
             roller
-                .makeSuccessRoll(true, baseResult - apPenalty) // PH: FIXME: Hmm. Add tags to this?
-                .addNumber(baseResult, `${charKey}`)
-                .addNumber(-apPenalty, `AP penalty`, `${item.activePoints} AP / ${divisor} -> ${-apPenalty}`)
-                .addDice(3);
+                .makeSuccessRoll(true, baseRequiredRoll, `Base ${charKey} roll`)
+                .addDice(3)
+                .addNumber(
+                    apPenalty,
+                    `AP penalty`,
+                    `${item.activePoints} AP / ${divisor} -> ${apPenalty.signedString()}`,
+                );
 
             const { succeeded: succeed, flavor: updatedFlavor } = await doSuccessRoll(
                 roller,
@@ -564,15 +567,19 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             flavor = updatedFlavor;
         } else if (activationRoll.type === RSR_ROLL_TYPE.ITEM_ROLL) {
             const skill = activationRoll.activeItems[0]; // PH: FIXME: Kludge
-            const value = parseInt(skill.system.roll);
-            const minusDueToAp = -calculateRollApPenalty(item, rar);
+            const baseRequiredRoll = parseInt(skill.system.roll);
+            const apPenalty = calculateRollApPenalty(item, rar);
             const divisor = findRollDivisor(rar);
 
             // PH: FIXME: what about additional skill levels used to influence the activation roll? Can they apply to this?
             roller
-                .makeSuccessRoll(true, value)
+                .makeSuccessRoll(true, baseRequiredRoll, `Base ${skill.name} roll`)
                 .addDice(3)
-                .addNumber(minusDueToAp, `AP Penalty`, `-1 per ${divisor} active points. ${item.activePoints}`);
+                .addNumber(
+                    apPenalty,
+                    `AP Penalty`,
+                    `${item.activePoints} AP / ${divisor} -> ${apPenalty.signedString()}`,
+                );
 
             const { succeeded: succeed, flavor: updatedFlavor } = await doSuccessRoll(
                 roller,
