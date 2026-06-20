@@ -111,7 +111,7 @@ export class ItemAttackFormApplication extends FormApplication {
             // Likely rework to resource usage and checking for "spread" thru several functions.
             // this.data.spread ??= parseInt(this.data.spread) || 0;
 
-            // PH: FIXME: Is this right? What should we be showing for something like stike with weapon or fist?
+            // PH: FIXME: Is this right? What should we be showing for something like strike with weapon or fist?
             this.data.effectiveRealCost ??= this.data.originalItem._realCost;
             this.data.pushedRealPoints ??= 0;
 

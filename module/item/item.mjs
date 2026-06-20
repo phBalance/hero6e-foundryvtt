@@ -8116,7 +8116,7 @@ export function buildEffectiveObject(effectiveObjectParameters) {
 
             return true;
         })
-        .map(([uuid]) => fromUuidSync(uuid))
+        .map(([key, value]) => fromUuidSync(value.uuid ?? key)) // ItemAttackApplication uses value.uuid
         .forEach((hthAttack) => {
             // 5e only: Can use the HA with STR if HA's unmodified active points don't exceed the STR used. Get the advantages for free on STR if can use the HA.
             // 6e only: The HA becomes the base attack item.
@@ -8154,8 +8154,8 @@ export function buildEffectiveObject(effectiveObjectParameters) {
     // PH: FIXME: Need to implement endurance usage. A REDUCE END NA will reduce the base attack's END use but otherwise the NA endurance usage is paid separately.
     let nakedAdvantagesDisabledDueToActivePoints = false;
     Object.entries(effectiveObjectParameters.nakedAdvantagesItems)
-        .map(([uuid], index, array) => {
-            const naItem = fromUuidSync(uuid);
+        .map(([key, value], index, array) => {
+            const naItem = fromUuidSync(value.uuid ?? key);
 
             // Item the NA is being applied to must not exceed the AP of the NA was designed against.
             // TODO: This implies that one cannot push with a NA. Is this correct?
@@ -8188,7 +8188,7 @@ export function buildEffectiveObject(effectiveObjectParameters) {
             effectiveItem.system._active.linkedEnd ??= [];
             effectiveItem.system._active.linkedEnd.push({
                 item: naItem,
-                uuid: uuid, // PH: FIXME: Do we want UUID? Much easier if actually an item.
+                uuid: key, // PH: FIXME: Do we want UUID? Much easier if actually an item.
             });
 
             strengthItem?.copyItemAdvantages(naItem, []);
