@@ -2052,6 +2052,8 @@ export function registerRequiresRollCheckTests(quench) {
                             expect(heroValidation).to.have.deep.members([]);
                         });
 
+                        it.skip("should have an warning that allowing 2 required skills requires GM permission");
+
                         it("should have a heroValidation error as the character does not have one of the 2 required listed skills (error)", function () {
                             const heroValidation = invalidDrainMissingOneSkillFromTwoRequiredSkills.heroValidation;
                             expect(heroValidation.length).to.equal(1);
