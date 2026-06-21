@@ -7645,7 +7645,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // Look for a PARENTID with this ID which is likely to cause issues.
         // We don't currently have any examples of this, just thinking ahead.
-        const duplicateParentItem = itemsToCreate.find((item) => item.system.PARENTID == itemData.system.ID);
+        const duplicateParentItem = itemsToCreate.find((item) => item.system.PARENTID === itemData.system.ID);
         if (duplicateParentItem) {
             console.error(
                 `Duplicate ID ${itemData.system.ID} associated with ${itemData.name} has a PARENTID refernce to ${duplicateParentItem.name} and is likely to cause issues.`,

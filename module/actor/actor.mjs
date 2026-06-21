@@ -1672,7 +1672,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     async fullHealth(options = {}) {
         const tDelta = 500;
         let start = Date.now();
-        await this.statuses.clear();
+        //await this.statuses.clear();
         let end = Date.now();
         if (end - start > tDelta) {
             console.warn("fullHealth performance concern: this.statuses.clear", end - start);
@@ -1698,8 +1698,20 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 )
                     continue;
 
-                await ae.delete();
+                for (const status of ae.statuses) {
+                    await this.toggleStatusEffect(status, { active: false });
+                }
+
+                if (this.temporaryEffects.find((t) => t.id === ae.id)) {
+                    await ae.delete();
+                }
             }
+
+            // v14 check of simple statuses (which are no longer considered temporaryEffects)
+            for (const status of this.statuses) {
+                await this.toggleStatusEffect(status, { active: false });
+            }
+
             end = Date.now();
             if (end - start > tDelta) {
                 console.warn("fullHealth performance concern: Remove temporary effects", end - start);
