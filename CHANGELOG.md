@@ -1,10 +1,14 @@
 # Releases
 
-### Version 4.3.11 20260621 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.11 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Improved compendium prefab support. Improved and drag/drop support of items.
+
+### Version 4.3.11 20260621
 
 - Removed apply damage to missed tokens as DAMAGE ALL button is not working as intended.
 
-### Version 4.3.10 20260621 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.10 20260621
 
 - Fix Mind Scan effect roll chat card results. [#4271](https://github.com/dmdorman/hero6e-foundryvtt/issues/4271)
 - Fix for dragging COMPOUND powers from item sidebar to actor. [#4277](https://github.com/dmdorman/hero6e-foundryvtt/issues/4277)

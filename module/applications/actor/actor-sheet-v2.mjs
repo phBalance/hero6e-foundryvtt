@@ -1069,54 +1069,85 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
      */
     async onDropFolder(folder, parentId) {
         let itemsToDrop = folder.contents;
+        const pack = game.packs.get(folder.pack);
 
-        // Compendiums only have the index entry, so need to get the whole item
-        if (folder.pack || !itemsToDrop?.[0].id) {
-            itemsToDrop = await game.packs.get(folder.pack).getDocuments({ folder: folder.id });
-        }
-
-        // We are expecting a single container
-        const containerItems = itemsToDrop.filter((i) => i.isContainer);
-        if (containerItems.length !== 1) {
-            throw new Error("Expecting exactly one continer");
-        }
-
-        // See if we dropped onto a specific ActorSheet tab
+        // See if we dropped onto a specific ActorSheet tab.
+        // Need to check event values early on as it appears the compendium.getDocuments changes event.
         const target = event.target ?? event.currentTarget;
         const droppedOnTab = target?.closest?.("[data-tab]")?.dataset?.tab.replace(/(?<!analysi)s$/, "");
         const targetType = droppedOnTab ?? this.tabGroups.primary.replace(/s$/, "").replace("martial", "martialart");
 
-        const parentData = containerItems[0].toObject();
-
-        // Validation hack
-        const tempParentItem = new HeroSystem6eItem(parentData);
-
-        if (tempParentItem.isValidTypeConversion(targetType, this.actor)) {
-            parentData.type = targetType;
-        } else {
-            const conversionFailures = tempParentItem.validationTypeConversionFailures(targetType, this.actor);
-
-            // Show only one validation failure to UI
-            console.error(conversionFailures);
-            return ui.notifications.error(conversionFailures[0].message);
+        // Compendiums only have the index entry, so need to get the whole item
+        if (folder.pack || !itemsToDrop?.[0].id) {
+            function getFolderIds(folder) {
+                let ids = [folder.id];
+                const subfolders = pack.folders.filter((f) => f.folder?.id === folder.id);
+                for (const sub of subfolders) {
+                    ids = ids.concat(getFolderIds(sub));
+                }
+                return ids;
+            }
+            const allFolderIds = getFolderIds(folder);
+            itemsToDrop = await pack.getDocuments({ folder__in: allFolderIds });
         }
+
+        // We are expecting at least 1 container
+        //const containerItems = itemsToDrop.filter((i) => i.isContainer);
+        const topItems = itemsToDrop.filter((i) => !i.system.PARENTID);
+        if (!topItems.length) {
+            throw new Error("Expecting at least one item");
+        }
+
+        // Validation check to make sure we can drop/convert these items into the desired type
+        for (const topItem of topItems) {
+            const parentData = topItem.toObject();
+            const tempParentItem = new HeroSystem6eItem(topItem);
+            if (tempParentItem.isValidTypeConversion(targetType, this.actor)) {
+                parentData.type = targetType;
+            } else {
+                const conversionFailures = tempParentItem.validationTypeConversionFailures(targetType, this.actor);
+
+                // Show only one validation failure to UI
+                console.error(conversionFailures);
+                return ui.notifications.error(conversionFailures[0].message);
+            }
+        }
+
         const itemsToCreate = [];
 
-        // Create the PARENT
-        this._createFolderItem(
-            parentData,
-            parentId,
-            itemsToDrop.filter((item) => item.system.ID !== parentData.system.ID),
-            itemsToCreate,
-        );
+        // Create the top items
+        for (const topItem of topItems) {
+            const itemData = topItem.toObject();
+            this._createFolderItem({
+                itemData,
+                parentId,
+                //itemsToDrop.filter((item) => item.system.ID !== parentData.system.ID),
+                itemsToDrop,
+                itemsToCreate,
+            });
+        }
+
+        const chatData = {
+            author: game.user._id,
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+            content: `These <b>${targetType}</b> items were added to <b>${this.actor.name}</b> from the ${topItems[0].uuid.startsWith("Item.") ? "<b>Item Sidebar</b>" : `<b>${pack.metadata.label ?? pack.metadata.name}</b> compendium`}: <ul>${topItems.map((item) => `<li>${item.name}</li>`).join("")}</ul>`,
+            whisper: whisperUserTargetsForActor(this.actor),
+            speaker: ChatMessage.getSpeaker({
+                actor: this.actor,
+                token: this.token,
+            }),
+        };
+        ChatMessage.create(chatData);
 
         // Create all the folder items in one database call
         await this.actor.createEmbeddedDocuments("Item", itemsToCreate);
     }
 
-    _createFolderItem(itemData, parentId, children, itemsToCreate) {
+    _createFolderItem({ itemData, parentId, itemsToDrop, itemsToCreate }) {
         // Make sure we have a clean object (no freezing)
         itemData = foundry.utils.deepClone(itemData);
+
+        const children = itemsToDrop.filter((item) => item.system.PARENTID === itemData.system.ID);
 
         // Make sure we get new IDs and clean up a few things to make them generic
         delete itemData._id;
@@ -1142,14 +1173,13 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         // Create the item
         itemsToCreate.push(itemData);
 
-        // const createdItems = await this.actor.createEmbeddedDocuments("Item", [itemData]);
-
         // Children
+
         for (const child of children || []) {
             // TODO: what about children of children
             const childData = child.toObject();
             childData.type = itemData.type;
-            this._createFolderItem(childData, itemData.system.ID, null, itemsToCreate);
+            this._createFolderItem({ itemData: childData, parentId: itemData.system.ID, itemsToDrop, itemsToCreate });
         }
     }
 
@@ -1353,10 +1383,19 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             item.actor?.name ||
             item.compendium?.name ||
             (item.uuid.startsWith("Item.") ? "ItemSidebar" : null);
+
         const chatData = {
             author: game.user._id,
-            whisper: [...whisperUserTargetsForActor(actor), ...whisperUserTargetsForActor(item.actor)],
+            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+            whisper: [...whisperUserTargetsForActor(this.actor), ...whisperUserTargetsForActor(item.actor)],
+            speaker: ChatMessage.getSpeaker({
+                actor: this.actor,
+                token: this.token,
+            }),
         };
+
+        // Remove duplicate user whispers
+        chatData.whisper = Array.from(new Map(chatData.whisper.map((user) => [user.id, user])).values());
 
         // Delete original if equipment and it belonged to an actor (as opposed to item sidebar or compendium)?
         if (item.type === "equipment" && item.actor) {
