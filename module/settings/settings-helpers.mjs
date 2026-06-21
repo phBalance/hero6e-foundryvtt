@@ -255,7 +255,7 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: false,
-            onChange: (newValue) => {
+            onChange: () => {
                 // Loop through all active ApplicationV2 windows globally
                 for (const app of foundry.applications.instances.values()) {
                     // Check if the application is an ActorSheet instance or a custom subclass of it
