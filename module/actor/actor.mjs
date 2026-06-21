@@ -2339,15 +2339,17 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 power.key === "__STRENGTHDAMAGE"; // Weapon placeholder (this is a dirty hack to count it so we can filter on it later)
             const freeStuffCount = powerListTentative.filter(freeStuffFilter).length;
 
+            const root = heroJson.CHARACTER ?? heroJson.PREFAB; // Support loading a HDP as a HDC
+
             const xmlItemsToProcess =
                 1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
-                (heroJson.CHARACTER.DISADVANTAGES?.length || 0) +
-                (heroJson.CHARACTER.EQUIPMENT?.length || 0) +
-                (heroJson.CHARACTER.MARTIALARTS?.length || 0) +
-                (heroJson.CHARACTER.PERKS?.length || 0) +
-                (heroJson.CHARACTER.POWERS?.length || 0) +
-                (heroJson.CHARACTER.SKILLS?.length || 0) +
-                (heroJson.CHARACTER.TALENTS?.length || 0) +
+                (root.DISADVANTAGES?.length || 0) +
+                (root.EQUIPMENT?.length || 0) +
+                (root.MARTIALARTS?.length || 0) +
+                (root.PERKS?.length || 0) +
+                (root.POWERS?.length || 0) +
+                (root.SKILLS?.length || 0) +
+                (root.TALENTS?.length || 0) +
                 (this.type === "pc" || this.type === "npc" || this.type === "automaton" ? freeStuffCount : 0) + // Free stuff
                 1 + // Validating adjustment and powers
                 1 + // fullHealth
@@ -2380,9 +2382,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
             const characterName =
-                heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME ||
-                options?.file?.name?.replace(/\.hdc$/i, "") ||
-                this.name;
+                root.CHARACTER_INFO.CHARACTER_NAME || options?.file?.name?.replace(/\.hdc$/i, "") || this.name;
             uploadPerformance.removeEffects = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
             this.name = characterName;
@@ -2405,7 +2405,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             // Need to get the base64 image before we delete IMAGE, deepClone doesn't work as expected.
             uploadProgressBar.advance(`${this.name}: Preprocess image`, 0);
-            const filename = heroJson.CHARACTER.IMAGE?.FileName;
+            const filename = root.IMAGE?.FileName;
             const extension = filename?.split(".").pop();
             const base64 = "data:image/" + extension + ";base64," + xml.getElementsByTagName("IMAGE")?.[0]?.textContent;
 
@@ -2463,9 +2463,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             if (this.id) {
                 // Delete maneuvers (or any other existing items) that don't
                 // match template prior to possibly changing is5e
-                if (this.is5ePreview(heroJson.CHARACTER.TEMPLATE) !== this.system.is5e) {
+                if (this.is5ePreview(root.TEMPLATE) !== this.system.is5e) {
                     const itemsToDeleteIs5e = this.items
-                        .filter((i) => i.system.is5e !== this.is5ePreview(heroJson.CHARACTER.TEMPLATE))
+                        .filter((i) => i.system.is5e !== this.is5ePreview(root.TEMPLATE))
                         .map((m) => m.id);
                     if (itemsToDeleteIs5e.length > 0) {
                         console.warn(`Deleting ${itemsToDeleteIs5e.length} is5e mismatches`);
@@ -2480,11 +2480,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 await this.update(
                     {
                         ...changes,
-                        "system.is5e": this.is5ePreview(heroJson.CHARACTER.TEMPLATE),
-                        "system.CHARACTER.BASIC_CONFIGURATION": heroJson.CHARACTER.BASIC_CONFIGURATION,
-                        "system.CHARACTER.CHARACTER_INFO": heroJson.CHARACTER.CHARACTER_INFO,
-                        "system.CHARACTER.TEMPLATE": heroJson.CHARACTER.TEMPLATE,
-                        "system.CHARACTER.version": heroJson.CHARACTER.version,
+                        "system.is5e": this.is5ePreview(root.TEMPLATE),
+                        "system.CHARACTER.BASIC_CONFIGURATION": root.BASIC_CONFIGURATION,
+                        "system.CHARACTER.CHARACTER_INFO": root.CHARACTER_INFO,
+                        "system.CHARACTER.TEMPLATE": root.TEMPLATE,
+                        "system.CHARACTER.version": root.version,
                     },
                     {
                         render: true, // Need render to make sure the actor sidebar actor.name gets updated #4010
@@ -2545,13 +2545,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             }
 
             // CHARACTERISTICS
-            if (heroJson.CHARACTER?.CHARACTERISTICS) {
+            if (root?.CHARACTERISTICS) {
                 const changesNormal = {};
                 const changesFiguredOrCalculated = {};
                 uploadProgressBar.advance(`${this.name}: CHARACTERISTICS`, 0);
 
                 // Legacy (well current)
-                for (const [key, value] of Object.entries(heroJson.CHARACTER.CHARACTERISTICS)) {
+                for (const [key, value] of Object.entries(root.CHARACTERISTICS)) {
                     const _baseInfo = getPowerInfo({ XMLID: key, actor: this, xmlTag: key });
 
                     this.system[key] = new HeroItemCharacteristic(value, { parent: this });
@@ -2562,7 +2562,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         changesNormal[`system.${key}`] = this.system[key];
                     }
                 }
-                delete heroJson.CHARACTER.CHARACTERISTICS;
+                delete root.CHARACTERISTICS;
 
                 if (this.id) {
                     // Update normal values first
@@ -2824,7 +2824,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 await ui.notifications.warn(
                     `Skipping image upload, because this token (${this.name}) appears to be using tokenizer.`,
                 );
-            } else if (heroJson.CHARACTER.IMAGE) {
+            } else if (root.IMAGE) {
                 //const filename = heroJson.CHARACTER.IMAGE?.FileName;
                 const path = "worlds/" + game.world.id + "/tokens";
                 let relativePathName = path + "/" + filename;
@@ -2870,7 +2870,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     );
                 }
 
-                delete heroJson.CHARACTER.IMAGE;
+                delete root.IMAGE;
             } else {
                 // No image provided. Make sure we're using the default token.
                 // Note we are overwriting any image that may have been there previously.
@@ -2916,10 +2916,10 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             uploadProgressBar.advance(`${this.name}: Uploaded image`);
             uploadProgressBar.advance(`${this.name}: Saving core changes`, 0);
 
-            // Non ITEMS stuff in CHARACTER
+            // Non ITEMS stuff in CHARACTER (with data model this becomes less important)
             changes = {
                 ...changes,
-                "system.CHARACTER": heroJson.CHARACTER,
+                "system.CHARACTER": root,
                 "system.versionHeroSystem6eUpload": game.system.version,
             };
 

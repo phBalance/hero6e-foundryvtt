@@ -7683,7 +7683,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     static parseItemsFromHeroJsonToItemDataArray(heroJson, actor) {
         const itemsToCreate = [];
         let sortBase = 0;
-        const root = heroJson.CHARACTER;
+        const root = heroJson.CHARACTER ?? heroJson.PREFAB;
 
         if (!root) {
             throw new Error("Unable to find root");
