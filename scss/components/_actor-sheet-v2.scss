@@ -237,6 +237,11 @@ input.over-max {
         background: var(--content-link-text-color);
         color: var(--content-link-background);
     }
+
+    a.dragHover {
+        background-color: blue;
+        color: white;
+    }
 }
 
 /************************************************************************

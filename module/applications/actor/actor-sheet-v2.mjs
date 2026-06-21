@@ -110,6 +110,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 dragstart: this._onDragStart.bind(this),
                 dragover: this._onDragOver.bind(this),
                 drop: this._onDrop.bind(this),
+                dragenter: this._onDragEnter.bind(this),
+                dragleave: this._onDragLeave.bind(this),
             };
             return new FoundryVttDragDrop(dragDropHandler);
         });
@@ -1020,13 +1022,30 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     //     console.log(event);
     // }
 
+    _onDragEnter(event) {
+        event.preventDefault();
+        const target = event.currentTarget.closest("nav a");
+        if (target) target.classList.add("dragHover");
+    }
+
+    _onDragLeave(event) {
+        event.preventDefault();
+        const target = event.currentTarget.closest("nav a");
+        if (target) target.classList.remove("dragHover");
+    }
+
     /**
      * Callback actions which occur when a dragged element is dropped on a target.
      * @param {DragEvent} event       The originating DragEvent
      * @protected
      */
     async _onDrop(event) {
-        console.log(event);
+        event.stopPropagation();
+        event.preventDefault();
+
+        const target = event.currentTarget.closest("nav a");
+        if (target) target.classList.remove("dragHover");
+
         const data = foundry.applications.ux.TextEditor.getDragEventData(event);
         // Handle different data types
         switch (data?.type) {
@@ -1049,22 +1068,22 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
      * The FOLDER is how we group together parent items and child items.
      */
     async onDropFolder(folder, parentId) {
-        let itemsToAdd = folder.contents;
+        let itemsToDrop = folder.contents;
 
         // Compendiums only have the index entry, so need to get the whole item
-        if (folder.pack || !itemsToAdd?.[0].id) {
-            itemsToAdd = await game.packs.get(folder.pack).getDocuments({ folder: folder.id });
+        if (folder.pack || !itemsToDrop?.[0].id) {
+            itemsToDrop = await game.packs.get(folder.pack).getDocuments({ folder: folder.id });
         }
 
         // We are expecting a single container
-        const containerItems = itemsToAdd.filter((i) => i.isContainer);
+        const containerItems = itemsToDrop.filter((i) => i.isContainer);
         if (containerItems.length !== 1) {
             throw new Error("Expecting exactly one continer");
         }
 
         // See if we dropped onto a specific ActorSheet tab
-        const target = event.currentTarget ?? event.target;
-        const droppedOnTab = target?.closest?.("[data-tab]")?.dataset?.tab.replace(/s$/, "");
+        const target = event.target ?? event.currentTarget;
+        const droppedOnTab = target?.closest?.("[data-tab]")?.dataset?.tab.replace(/(?<!analysi)s$/, "");
         const targetType = droppedOnTab ?? this.tabGroups.primary.replace(/s$/, "").replace("martial", "martialart");
 
         const parentData = containerItems[0].toObject();
@@ -1081,35 +1100,21 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             console.error(conversionFailures);
             return ui.notifications.error(conversionFailures[0].message);
         }
+        const itemsToCreate = [];
 
         // Create the PARENT
-        await this._createFolderItem(
+        this._createFolderItem(
             parentData,
             parentId,
-            itemsToAdd.filter((item) => item.system.ID !== parentData.system.ID),
+            itemsToDrop.filter((item) => item.system.ID !== parentData.system.ID),
+            itemsToCreate,
         );
 
-        // Create the children
-        // const childItems = itemsToAdd.filter((i) => !i.isContainer);
-        // for (const childData of childItems) {
-        //     await this._createFolderItem(
-        //         childData,
-        //         parentData.system.ID,
-        //         itemsToAdd.filter((o) => o.id != parentData?.id),
-        //     );
-        // }
-
-        // Child Folders
-        // if (folder.children) {
-        //     for (const childFolder of folder.children) {
-        //         await this.onDropFolder(childFolder.folder, null);
-        //     }
-        // }
-
-        console.log(parentData);
+        // Create all the folder items in one database call
+        await this.actor.createEmbeddedDocuments("Item", itemsToCreate);
     }
 
-    async _createFolderItem(itemData, parentId, children) {
+    _createFolderItem(itemData, parentId, children, itemsToCreate) {
         // Make sure we have a clean object (no freezing)
         itemData = foundry.utils.deepClone(itemData);
 
@@ -1124,6 +1129,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         delete itemData.flags;
         delete itemData.folder;
 
+        // We are likely to create several items in quick succession
+        // and Date().getTime() will likely be the same.
+        HeroSystem6eItem.guaranteeUniqueItemSystemId(itemData, itemsToCreate);
+
         // Not an activeItem
         itemData.system.active = false;
 
@@ -1133,15 +1142,16 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         // TODO: Stackable equipment (like potions)
 
         // Create the item
-        const createdItems = await this.actor.createEmbeddedDocuments("Item", [itemData]);
-        console.log(createdItems);
+        itemsToCreate.push(itemData);
+
+        // const createdItems = await this.actor.createEmbeddedDocuments("Item", [itemData]);
 
         // Children
         for (const child of children || []) {
             // TODO: what about children of children
             const childData = child.toObject();
             childData.type = itemData.type;
-            this._createFolderItem(childData, itemData.system.ID);
+            this._createFolderItem(childData, itemData.system.ID, null, itemsToCreate);
         }
     }
 

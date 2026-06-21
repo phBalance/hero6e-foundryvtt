@@ -7590,7 +7590,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             default:
                 validationFailureMessages.push({
                     itemId: this.id,
-                    message: `${this.detailedName()} for ${targetActor?.name} cannot be converted to unhandled type ${targetType}.`,
+                    message: `${this.detailedName()} for ${targetActor?.name} cannot be converted from ${this.type} to ${targetType}.`,
                     severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                 });
                 break;
@@ -7623,6 +7623,57 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // Update child items
         for (const child of this.childItems) {
             await child.convertToType(targetType);
+        }
+    }
+
+    /*
+     * HDC has a bug where subitems of COMPOUNDPOWER can have duplicate IDs.
+     * This bug may exist in other places as well.
+     * We use the unique system.ID values to link the subitems to the parent item.
+     * KLUGE: Increment the ID until we find a unique one.
+     * Also need this for drag and drop as folders/children will be created in quick succession.
+     */
+    static guaranteeUniqueItemSystemId(itemData, itemsToCreate) {
+        // Careful ID may be a string
+        // TODO: When we implement LINKED or other ways to link items together we may need to review
+        //       to ensure we update the linking logic as we are changing the HDC ID.
+
+        let duplicateItem = itemsToCreate.find((item) => item.system.ID == itemData.system.ID);
+        if (!duplicateItem) return;
+
+        const initialDuplicateItem = duplicateItem;
+
+        // Look for a PARENTID with this ID which is likely to cause issues.
+        // We don't currently have any examples of this, just thinking ahead.
+        const duplicateParentItem = itemsToCreate.find((item) => item.system.PARENTID == itemData.system.ID);
+        if (duplicateParentItem) {
+            console.error(
+                `Duplicate ID ${itemData.system.ID} associated with ${itemData.name} has a PARENTID refernce to ${duplicateParentItem.name} and is likely to cause issues.`,
+            );
+        }
+
+        // Generate new ID based on timestamp, which is unlikely to be in the HDC file.
+        // We will increment from this value if needed as date precision is in milliseconds
+        // and it may be possible (typically in COMPOUNDPOWER subitems) to have enough duplicates
+        // in a 1ms time frame.
+        let newID = Date.now();
+        for (let loop = 0; loop < 99; loop++) {
+            if (!duplicateItem) {
+                break;
+            }
+            itemData.system.errors ??= [];
+            itemData.system.errors.push(`Duplicate ID ${itemData.system.ID}`);
+            itemData.system.ID = newID + loop;
+            duplicateItem = itemsToCreate.find((item) => item.system.ID == itemData.system.ID);
+        }
+        if (duplicateItem) {
+            console.error(
+                `Unable to resolve duplicate ID after 99 attempts. ${initialDuplicateItem.system.ID} associated with ${itemData.name} conflicts with ${initialDuplicateItem.name}, generated new ID ${itemData.system.ID} which is still NOT UNIQUE.`,
+            );
+        } else {
+            console.log(
+                `Duplicate ID ${initialDuplicateItem.system.ID} associated with ${itemData.name} conflicts with ${initialDuplicateItem.name}, generated new ID ${itemData.system.ID} to ensure uniqueness`,
+            );
         }
     }
 }
