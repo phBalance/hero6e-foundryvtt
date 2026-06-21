@@ -30,13 +30,5 @@
 
     .dice-flavor {
         font-size: 15px;
-
-        .dice-succeeded {
-            color: #006400; // TODO: Investigating setting var(--color-level-success);
-        }
-
-        .dice-failed {
-            color: var(--color-level-error);
-        }
     }
 }

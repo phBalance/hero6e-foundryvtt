@@ -1,7 +1,12 @@
 import { getOffHandDefenseDcv } from "./actor/actor-utils.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 import * as heroDice from "./heroRoller/dice.mjs";
-import { VALIDATE_SECTION_DEFENSE_ERROR_REASON, validateSectionalComments } from "./item/item-requires-roll.mjs";
+import {
+    activationRollHeroValidation,
+    findRollDivisor,
+    getRollsForRar,
+    RSR_ROLL_TYPE,
+} from "./item/item-requires-roll.mjs";
 import { HeroSystem6eItem } from "./item/item.mjs";
 import {
     maneuverHasBindTrait,
@@ -333,46 +338,6 @@ HERO.hitLocations = Object.freeze({
         constant: 12,
         isSpecialHl: true,
     },
-});
-
-// Probability in % of that number on 3d6
-HERO.hitLocationsProbability = Object.freeze({
-    3: 0.46,
-    4: 1.38,
-    5: 2.77,
-    6: 4.62,
-    7: 6.94,
-    8: 9.72,
-    9: 11.57,
-    10: 12.5,
-    11: 12.5,
-    12: 11.57,
-    13: 9.72,
-    14: 6.94,
-    15: 4.62,
-    16: 2.77,
-    17: 1.38,
-    18: 0.46,
-});
-
-// Probability in % of that number or less on 3d6
-HERO.diceCumulativeProbability = Object.freeze({
-    3: 0.46,
-    4: 1.85,
-    5: 4.62,
-    6: 9.25,
-    7: 16.2,
-    8: 25.92,
-    9: 37.5,
-    10: 50.0,
-    11: 62.5,
-    12: 74.07,
-    13: 83.79,
-    14: 90.74,
-    15: 95.37,
-    16: 98.14,
-    17: 99.53,
-    18: 100,
 });
 
 HERO.VALIDATION_SEVERITY = {
@@ -16679,62 +16644,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         costPerLevel: fixedValueFunction(0),
         dcAffecting: fixedValueFunction(false),
         heroValidation: function (modifier, item) {
-            const validations = [];
-
-            // Since sectional defenses are optional we can only check a subset of errors
-            const sectionalDefenseRanges = validateSectionalComments(item, modifier.COMMENTS);
-            if (!sectionalDefenseRanges.valid) {
-                if (sectionalDefenseRanges.reason === VALIDATE_SECTION_DEFENSE_ERROR_REASON.INVALID_RANGE) {
-                    validations.push({
-                        property: "COMMENTS",
-                        message: sectionalDefenseRanges.reason,
-                        example: "locations 4-6, 8, and 10-12",
-                        severity: HERO.VALIDATION_SEVERITY.ERROR,
-                    });
-                }
-            } else {
-                // A sectional defense only makes sense for a defense
-                if (!item.baseInfo?.type.includes("defense")) {
-                    validations.push({
-                        property: undefined,
-                        message: `${item.detailedName()} should not have a sectional defense declaration as it is not a defensive power`,
-                        example: "Armor could be a sectional defense with locations 4-6, 8, and 10-12",
-                        severity: HERO.VALIDATION_SEVERITY.ERROR,
-                    });
-                }
-
-                // Check that the sectional defense description roughly matches the expected probability based on the limitation taken
-                const activationRollLimitation = modifier.OPTIONID;
-                const activationRollCumulativeProbability = HERO.diceCumulativeProbability[activationRollLimitation];
-                let hitLocationCumulativeProbability = 0;
-                for (const hitLocation of sectionalDefenseRanges.sectionalDefenseLocationsSet.values()) {
-                    hitLocationCumulativeProbability += HERO.hitLocationsProbability[hitLocation];
-                }
-
-                // If cumulative probability of hit locations is larger than the probability at the activation roll (with a 1% fuzz)
-                // then this is "cheating" and the limitation should probably be bought down.
-                if (hitLocationCumulativeProbability > activationRollCumulativeProbability + 1) {
-                    // What is a more reasonable activation roll number?
-                    let shouldBeLessThanValue = 18;
-                    for (let cumulativeValue = shouldBeLessThanValue - 1; cumulativeValue >= 3; --cumulativeValue) {
-                        if (HERO.diceCumulativeProbability[cumulativeValue] < hitLocationCumulativeProbability) {
-                            break;
-                        }
-
-                        shouldBeLessThanValue = cumulativeValue;
-                    }
-
-                    validations.push({
-                        property: undefined,
-                        message: `${item.detailedName()}'s sectional defense declaration cumulative probability is ${hitLocationCumulativeProbability}% vs the matching limitation value's cumulative probability value of ${activationRollCumulativeProbability}. This limitation should most likely be bought to ${shouldBeLessThanValue}-`,
-                        example:
-                            "A 14- activation roll should reflect a section defense declaration like: 3-5, 7-14, 16-18",
-                        severity: HERO.VALIDATION_SEVERITY.WARNING,
-                    });
-                }
-            }
-
-            return validations;
+            return activationRollHeroValidation(modifier, item);
         },
         xml: `<MODIFIER XMLID="ACTIVATIONROLL" ID="1707283846531" BASECOST="-0.25" LEVELS="0" ALIAS="Activation Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="15" OPTIONID="15" OPTION_ALIAS="15-" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
     });
@@ -19207,6 +19117,70 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             minimumLimitation: -0.25,
+            heroValidation: function (modifier, item) {
+                const validations = [];
+                const activationRolls = getRollsForRar(item, modifier);
+
+                // Does the actor have the required powers/skills for the roll?
+                for (const activationRoll of activationRolls) {
+                    // Only naked success rolls can be without a skill
+                    if (activationRoll.type === RSR_ROLL_TYPE.ITEM_ROLL) {
+                        // Do we have items that match?
+                        if (activationRoll.items.length === 0) {
+                            validations.push({
+                                message: `Actor does not have ${activationRoll.name} skill to make the activation roll.`,
+                                severity: HERO.VALIDATION_SEVERITY.ERROR,
+                                modifierID: modifier.ID,
+                            });
+                        }
+
+                        // PH: FIXME: Check that they don't have skills as background skills (warn: cheaper than supposed to be)
+                        // PH: FIXME: Check that they don't have background skills as skills (warn: more expensive than supposed to be)
+                    } else if (activationRoll.type === RSR_ROLL_TYPE.LUCK_ROLL) {
+                        if (activationRoll.items.length === 0) {
+                            validations.push({
+                                message: `Actor does not have any luck powers to make the activation roll.`,
+                                severity: HERO.VALIDATION_SEVERITY.ERROR,
+                                modifierID: modifier.ID,
+                            });
+                        }
+
+                        // Should not have AP penalty on RSR against Luck (warn: just doesn't make sense and behaviour would be GM fiat)
+                        const luckRollHasApPenalty = findRollDivisor(modifier) !== 0;
+                        if (activationRoll.items.length > 0 && luckRollHasApPenalty) {
+                            validations.push({
+                                message: `RSR that are based on luck should not have a penalty based on Active Points.`,
+                                severity: HERO.VALIDATION_SEVERITY.WARNING,
+                                modifierID: modifier.ID,
+                            });
+                        }
+                    } else if (activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL) {
+                        if (!item.actor.hasCharacteristic(activationRoll.characteristicKey)) {
+                            validations.push({
+                                message: `Actor does not have the characteristic ${activationRoll.characteristicKey} to make the activation roll.`,
+                                severity: HERO.VALIDATION_SEVERITY.ERROR,
+                                modifierID: modifier.ID,
+                            });
+                        }
+                    } else if (activationRoll.type === RSR_ROLL_TYPE.ATTACK_ROLL) {
+                        // Should check if this actor type is capable of attack
+                        const actor = item.actor;
+                        if (actor?.type === "base2") {
+                            validations.push({
+                                message: `Bases do not make attack rolls.`,
+                                severity: HERO.VALIDATION_SEVERITY.ERROR,
+                                modifierID: modifier.ID,
+                            });
+                        }
+                    } else if (activationRoll.type === RSR_ROLL_TYPE.ACTIVATION_ROLL) {
+                        validations.push(...activationRollHeroValidation(modifier, item));
+                    } else {
+                        console.error(`Unknown activation roll type ${activationRoll.type} for heroValidation`);
+                    }
+                }
+
+                return validations;
+            },
             xml: `<MODIFIER XMLID="REQUIRESASKILLROLL" ID="1596334078849" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
         },
         {
