@@ -11,9 +11,10 @@ import { registerManeuverTests } from "./testing-maneuvers.mjs";
 import { registerRequiresRollCheckTests } from "./testing-requires-roll-check.mjs";
 import { registerUploadTests } from "./testing-upload.mjs";
 import { registerVehicleTests } from "./testing-vehicles.mjs";
-import { registerCombatTests } from "./combat-tests.mjs";
+import { registerCombatTests } from "./testing-combat-tracker.mjs";
 import { registerGlobalSetup, registerGlobalTeardown } from "./quench-helper.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
+import { registerCombatWorkflowTests } from "./testing-combat-workflow.mjs";
 
 Hooks.once("ready", async function () {
     if (!game.modules.get("_dev-mode")?.active) {
@@ -46,6 +47,7 @@ Hooks.on("quenchReady", async (quench) => {
     registerRequiresRollCheckTests(quench);
     registerUploadTests(quench);
     registerVehicleTests(quench);
+    registerCombatWorkflowTests(quench);
 
     // Combat test are only for single combatant tracker, which is configured onload.
     // So can't dynamically toggle on/off for testing.
