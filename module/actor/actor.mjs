@@ -12,6 +12,7 @@ import { HeroCompatibility } from "../utility/compatibility.mjs";
 import { characteristicValueToDiceParts } from "../utility/damage.mjs";
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "../utility/round.mjs";
+import { doSuccessRoll, generateSuccessChatCard } from "../utility/success-card.mjs";
 import {
     getCharacteristicInfoArrayForActor,
     getPowerInfo,
@@ -2098,35 +2099,19 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     async onCharacteristicSuccessRoll({ label, token }) {
-        const heroRoller = new HeroRoller().makeSuccessRoll().addDice(3);
-        await heroRoller.roll();
-
         const charRoll = this.system.characteristics[label.toLowerCase()].roll;
-        const margin = charRoll - heroRoller.getSuccessTotal();
-        const autoSuccess = heroRoller.getAutoSuccess();
-        const useAutoSuccess = autoSuccess !== undefined;
-        const success = useAutoSuccess ? autoSuccess : margin >= 0;
 
-        const flavor = `${label.toUpperCase()} (${charRoll}-) characteristic roll 
-        <b class="dice-${success ? "succeeded" : "failed"}">
-            ${
-                success ? "succeeded" : "failed"
-            } ${useAutoSuccess ? `due to automatic ${autoSuccess ? "success" : "failure"}` : `by ${Math.abs(margin)}`}
-        </b>`;
+        const heroRoller = new HeroRoller().makeSuccessRoll(true, charRoll, `Base ${label} roll`).addDice(3);
 
-        const cardHtml = await heroRoller.render(flavor);
+        const { flavor } = await doSuccessRoll(
+            this,
+            heroRoller,
+            `${label.toUpperCase()} (${charRoll}-) characteristic roll`,
+        );
 
+        // PH: FIXME: Function doesn't consume resources
         const speaker = ChatMessage.getSpeaker({ actor: this, token });
-
-        const chatData = {
-            style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-            rolls: heroRoller.rawRolls(),
-            author: game.user._id,
-            content: cardHtml,
-            speaker: speaker,
-        };
-
-        return ChatMessage.create(chatData);
+        return generateSuccessChatCard(this, speaker, heroRoller, flavor, "");
     }
 
     async onCharacteristicFullRoll({ label, token }) {
@@ -3833,6 +3818,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 const priorityB = priorityCsl(b);
                 return priorityA - priorityB;
             };
+
             return this.items
                 .filter(
                     (item) =>
