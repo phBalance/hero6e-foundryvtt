@@ -57,6 +57,10 @@ HERO.folderColors = {
     Skills: "#00aa00",
     Talents: "#00aaaa",
 
+    // For Compendiums
+    Equipment: "#aa00aa",
+    Disadvantages: "#aaaa00",
+
     // Sub Categories of POWER
     "Powers.Characteristics": "#ff6666",
     "Powers.Perks": "#ff6666",

@@ -2062,19 +2062,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             .sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    itemDataDefaults(itemData) {
-        // Most items default to active unless they have charges or use END
-        itemData.system.active = true;
-        if (itemData.system.MODIFIER?.find((m) => m.XMLID === "CHARGES")) {
-            itemData.system.active = false;
-        }
-
-        // Kluge for TK as we are trying to avoid getInfo overhead
-        if (["TELEKINESIS", "NAKEDMODIFIER"].includes(itemData.system.XMLID)) {
-            itemData.system.active = false;
-        }
-    }
-
     async actorDescriptionToChat({ token }) {
         token ??= tokenEducatedGuess({ actor: this, token });
         let content = `${this.system.CHARACTER?.CHARACTER_INFO?.APPEARANCE || ""}`;
@@ -2352,15 +2339,17 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 power.key === "__STRENGTHDAMAGE"; // Weapon placeholder (this is a dirty hack to count it so we can filter on it later)
             const freeStuffCount = powerListTentative.filter(freeStuffFilter).length;
 
+            const root = heroJson.CHARACTER ?? heroJson.PREFAB; // Support loading a HDP as a HDC
+
             const xmlItemsToProcess =
                 1 + // we process heroJson.CHARACTER.CHARACTERISTICS all at once so just track as 1 item.
-                (heroJson.CHARACTER.DISADVANTAGES?.length || 0) +
-                (heroJson.CHARACTER.EQUIPMENT?.length || 0) +
-                (heroJson.CHARACTER.MARTIALARTS?.length || 0) +
-                (heroJson.CHARACTER.PERKS?.length || 0) +
-                (heroJson.CHARACTER.POWERS?.length || 0) +
-                (heroJson.CHARACTER.SKILLS?.length || 0) +
-                (heroJson.CHARACTER.TALENTS?.length || 0) +
+                (root.DISADVANTAGES?.length || 0) +
+                (root.EQUIPMENT?.length || 0) +
+                (root.MARTIALARTS?.length || 0) +
+                (root.PERKS?.length || 0) +
+                (root.POWERS?.length || 0) +
+                (root.SKILLS?.length || 0) +
+                (root.TALENTS?.length || 0) +
                 (this.type === "pc" || this.type === "npc" || this.type === "automaton" ? freeStuffCount : 0) + // Free stuff
                 1 + // Validating adjustment and powers
                 1 + // fullHealth
@@ -2393,9 +2382,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
             const characterName =
-                heroJson.CHARACTER.CHARACTER_INFO.CHARACTER_NAME ||
-                options?.file?.name?.replace(/\.hdc$/i, "") ||
-                this.name;
+                root.CHARACTER_INFO.CHARACTER_NAME || options?.file?.name?.replace(/\.hdc$/i, "") || this.name;
             uploadPerformance.removeEffects = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
             this.name = characterName;
@@ -2418,7 +2405,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             // Need to get the base64 image before we delete IMAGE, deepClone doesn't work as expected.
             uploadProgressBar.advance(`${this.name}: Preprocess image`, 0);
-            const filename = heroJson.CHARACTER.IMAGE?.FileName;
+            const filename = root.IMAGE?.FileName;
             const extension = filename?.split(".").pop();
             const base64 = "data:image/" + extension + ";base64," + xml.getElementsByTagName("IMAGE")?.[0]?.textContent;
 
@@ -2476,9 +2463,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             if (this.id) {
                 // Delete maneuvers (or any other existing items) that don't
                 // match template prior to possibly changing is5e
-                if (this.is5ePreview(heroJson.CHARACTER.TEMPLATE) !== this.system.is5e) {
+                if (this.is5ePreview(root.TEMPLATE) !== this.system.is5e) {
                     const itemsToDeleteIs5e = this.items
-                        .filter((i) => i.system.is5e !== this.is5ePreview(heroJson.CHARACTER.TEMPLATE))
+                        .filter((i) => i.system.is5e !== this.is5ePreview(root.TEMPLATE))
                         .map((m) => m.id);
                     if (itemsToDeleteIs5e.length > 0) {
                         console.warn(`Deleting ${itemsToDeleteIs5e.length} is5e mismatches`);
@@ -2493,11 +2480,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 await this.update(
                     {
                         ...changes,
-                        "system.is5e": this.is5ePreview(heroJson.CHARACTER.TEMPLATE),
-                        "system.CHARACTER.BASIC_CONFIGURATION": heroJson.CHARACTER.BASIC_CONFIGURATION,
-                        "system.CHARACTER.CHARACTER_INFO": heroJson.CHARACTER.CHARACTER_INFO,
-                        "system.CHARACTER.TEMPLATE": heroJson.CHARACTER.TEMPLATE,
-                        "system.CHARACTER.version": heroJson.CHARACTER.version,
+                        "system.is5e": this.is5ePreview(root.TEMPLATE),
+                        "system.CHARACTER.BASIC_CONFIGURATION": root.BASIC_CONFIGURATION,
+                        "system.CHARACTER.CHARACTER_INFO": root.CHARACTER_INFO,
+                        "system.CHARACTER.TEMPLATE": root.TEMPLATE,
+                        "system.CHARACTER.version": root.version,
                     },
                     {
                         render: true, // Need render to make sure the actor sidebar actor.name gets updated #4010
@@ -2558,13 +2545,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             }
 
             // CHARACTERISTICS
-            if (heroJson.CHARACTER?.CHARACTERISTICS) {
+            if (root?.CHARACTERISTICS) {
                 const changesNormal = {};
                 const changesFiguredOrCalculated = {};
                 uploadProgressBar.advance(`${this.name}: CHARACTERISTICS`, 0);
 
                 // Legacy (well current)
-                for (const [key, value] of Object.entries(heroJson.CHARACTER.CHARACTERISTICS)) {
+                for (const [key, value] of Object.entries(root.CHARACTERISTICS)) {
                     const _baseInfo = getPowerInfo({ XMLID: key, actor: this, xmlTag: key });
 
                     this.system[key] = new HeroItemCharacteristic(value, { parent: this });
@@ -2575,7 +2562,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         changesNormal[`system.${key}`] = this.system[key];
                     }
                 }
-                delete heroJson.CHARACTER.CHARACTERISTICS;
+                delete root.CHARACTERISTICS;
 
                 if (this.id) {
                     // Update normal values first
@@ -2618,175 +2605,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             // ITEMS
             uploadProgressBar.advance(`${this.name}: Evaluating items`, 0);
 
-            let itemsToCreate = [];
-            let sortBase = 0;
-            for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
-                sortBase += 1000;
-                if (heroJson.CHARACTER[itemTag]) {
-                    for (const system of heroJson.CHARACTER[itemTag]) {
-                        try {
-                            // Precheck to make sure we have a supported XMLID
-                            const baseInfo = getPowerInfo({
-                                xmlid: system.XMLID,
-                                xmlTag: system.xmlTag,
-                                actor: this,
-                            });
-                            if (!baseInfo) {
-                                ui.notifications.error(
-                                    `${system.NAME || system.ALIAS} [${system.XMLID}] is an unsupported ${this.is5e ? "5e" : "6e"} power and was excluded from the upload. Please report.`,
-                                    { permanent: true },
-                                );
-                                continue;
-                            }
-
-                            system.is5e = this.is5e;
-                            if (system.XMLID === "COMPOUNDPOWER") {
-                                for (const _modifier of system.MODIFIER || []) {
-                                    console.warn(
-                                        `${this.name}/${system.ALIAS}/${system.XMLID}/${_modifier.XMLID}/${_modifier.ID} was excluded from upload because MODIFIERs are not supported on a COMPOUNDPOWER. It is likely on the parentItem and thus should flow down to the children.`,
-                                    );
-                                }
-                                delete system.MODIFIER;
-
-                                for (const _adder of system.ADDER || []) {
-                                    ui.notifications.warn(
-                                        `${this.name}/${system.ALIAS}/${system.XMLID}/${_adder.XMLID}/${_adder.ID} was excluded from upload because MODIFIERs are not supported on a COMPOUNDPOWER. It is likely on the parentItem and thus should flow down to the children.`,
-                                    );
-                                }
-                                delete system.ADDER;
-                            }
-
-                            const itemData = {
-                                name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
-                                type: itemTag.toLowerCase().replace(/s$/, ""),
-                                system,
-                                sort: sortBase + parseInt(system.POSITION || 0),
-                            };
-
-                            // Guess for some default values to reduce need for DB updates later
-                            this.itemDataDefaults(itemData);
-
-                            // Duplicate ID? (ID may be a string)
-                            // Increment ID until we no longer have a duplciate ID
-                            // Possibility of duplicate ID on PARENT, which may not be handled properly
-                            let dupItem = itemsToCreate.find((item) => item.system.ID == itemData.system.ID);
-                            for (let loop = 1; loop < 99; loop++) {
-                                if (!dupItem) {
-                                    break;
-                                }
-                                console.warn(`Duplicate ID ${itemData.system.ID}`, itemData);
-                                itemData.system.errors ??= [];
-                                itemData.system.errors.push(`Duplicate ID ${itemData.system.ID}`);
-                                itemData.system.ID = parseInt(itemData.system.ID) + 1;
-                                dupItem = itemsToCreate.find((item) => item.system.ID == itemData.system.ID);
-                            }
-
-                            // Note that we create COMPOUNDPOWER subitems before creating the parent
-                            // so that we can remove the subitems from the parent COMPOUNDPOWER attributes
-
-                            // COMPOUNDPOWER is similar to a MULTIPOWER.
-                            // MULTIPOWER uses PARENTID references.
-                            // COMPOUNDPOWER is structured as children.  Which we add PARENTID to, so it looks like a MULTIPOWER.
-                            if (system.XMLID === "COMPOUNDPOWER") {
-                                const compoundItems = [];
-                                for (const [key, value] of Object.entries(system)) {
-                                    // We only care about arrays and objects (array of 1)
-                                    // These are expected to be POWERS, SKILLS, etc that make up the COMPOUNDPOWER
-                                    // Instead of COMPOUNDPOWER attributes, they should be separate items, with PARENT/CHILD
-                                    if (value && typeof value === "object") {
-                                        if (value.constructor !== Array && value.constructor !== Object) {
-                                            console.error(
-                                                `${this.name}/${system.name}/${key} is not an Array or Object`,
-                                                value,
-                                            );
-                                            continue;
-                                        }
-                                        const values = value.length ? value : [value];
-                                        for (const system2 of values) {
-                                            if (system2.XMLID) {
-                                                const power = getPowerInfo({
-                                                    xmlid: system2.XMLID,
-                                                    xmlTag: key,
-                                                    actor: this,
-                                                });
-                                                if (!power) {
-                                                    ui.notifications.error(
-                                                        `${system.NAME}/${system2.NAME}/${system2.XMLID} is an unsupported ${this.is5e ? "5e" : "6e"} power and was excluded from the upload. Please report.`,
-                                                        {
-                                                            permanent: true,
-                                                        },
-                                                    );
-                                                    continue;
-                                                }
-                                                compoundItems.push(system2);
-                                            }
-                                        }
-                                        // Remove attribute/property since we just created items for it
-                                        // Now that we do item.update in some cases, we need to specifically keep an emptyr array for POWER[]
-                                        system[key] = [];
-                                    }
-                                }
-                                compoundItems.sort((a, b) => parseInt(a.POSITION) - parseInt(b.POSITION));
-                                for (const system2 of compoundItems) {
-                                    const power = getPowerInfo({
-                                        xmlid: system2.XMLID,
-                                        actor: this,
-                                        xmlTag: system2.xmlTag,
-                                    });
-                                    const itemData2 = {
-                                        name: system2.NAME || system2.ALIAS || system2.XMLID,
-                                        type: power.type.includes("skill") ? "skill" : "power",
-                                        sort: itemData.sort + 100 + parseInt(system2.POSITION),
-                                        system: {
-                                            ...system2,
-                                            PARENTID: system.ID,
-                                            POSITION: parseInt(system2.POSITION),
-                                            errors: [
-                                                ...(system2.errors || []),
-                                                "Added PARENTID for COMPOUNDPOWER child",
-                                            ],
-                                            is5e: this.is5e,
-                                        },
-                                    };
-
-                                    // Guess for some default values to reduce need for DB updates later
-                                    this.itemDataDefaults(itemData2);
-
-                                    HeroSystem6eItem.guaranteeUniqueItemSystemId(itemData2, itemsToCreate);
-
-                                    if (this.id) {
-                                        itemsToCreate.push(itemData2);
-                                    } else {
-                                        const item = new HeroSystem6eItem(itemData2, {
-                                            parent: this,
-                                        });
-                                        this.items.set(item.system.XMLID + item.system.POSITION, item);
-                                    }
-                                }
-                            }
-
-                            HeroSystem6eItem.guaranteeUniqueItemSystemId(itemData, itemsToCreate);
-
-                            if (this.id) {
-                                itemsToCreate.push(itemData);
-                            } else {
-                                const item = new HeroSystem6eItem(itemData, {
-                                    parent: this,
-                                });
-                                this.items.set(item.system.XMLID + item.system.POSITION, item);
-                            }
-
-                            uploadPerformance.items ??= [];
-                            uploadPerformance.items.push({ name: itemData.name, d: Date.now() - uploadPerformance._d });
-                            uploadPerformance._d = new Date().getTime();
-                        } catch (e) {
-                            console.error(e);
-                            ui.notifications.error(`${this.name} failed to upload ${system.ALIAS}/${system.XMLID}`);
-                        }
-                    }
-                    delete heroJson.CHARACTER[itemTag];
-                }
-            }
+            let itemsToCreate = HeroSystem6eItem.parseItemsFromHeroJsonToItemDataArray(heroJson, this);
 
             uploadProgressBar.advance(`${this.name}: Evaluated Items`, 0);
 
@@ -3005,7 +2824,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 await ui.notifications.warn(
                     `Skipping image upload, because this token (${this.name}) appears to be using tokenizer.`,
                 );
-            } else if (heroJson.CHARACTER.IMAGE) {
+            } else if (root.IMAGE) {
                 //const filename = heroJson.CHARACTER.IMAGE?.FileName;
                 const path = "worlds/" + game.world.id + "/tokens";
                 let relativePathName = path + "/" + filename;
@@ -3051,7 +2870,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     );
                 }
 
-                delete heroJson.CHARACTER.IMAGE;
+                delete root.IMAGE;
             } else {
                 // No image provided. Make sure we're using the default token.
                 // Note we are overwriting any image that may have been there previously.
@@ -3097,10 +2916,10 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             uploadProgressBar.advance(`${this.name}: Uploaded image`);
             uploadProgressBar.advance(`${this.name}: Saving core changes`, 0);
 
-            // Non ITEMS stuff in CHARACTER
+            // Non ITEMS stuff in CHARACTER (with data model this becomes less important)
             changes = {
                 ...changes,
-                "system.CHARACTER": heroJson.CHARACTER,
+                "system.CHARACTER": root,
                 "system.versionHeroSystem6eUpload": game.system.version,
             };
 

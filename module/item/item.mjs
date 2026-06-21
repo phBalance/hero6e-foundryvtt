@@ -7634,9 +7634,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
      * Also need this for drag and drop as folders/children will be created in quick succession.
      */
     static guaranteeUniqueItemSystemId(itemData, itemsToCreate) {
-        // Careful ID may be a string
+        // Careful ID may be a string, so coercing them to integers
         // TODO: When we implement LINKED or other ways to link items together we may need to review
         //       to ensure we update the linking logic as we are changing the HDC ID.
+
+        itemData.system.ID = parseInt(itemData.system.ID);
+        itemData.system.PARENTID = parseInt(itemData.system.PARENTID) || undefined;
 
         let duplicateItem = itemsToCreate.find((item) => item.system.ID == itemData.system.ID);
         if (!duplicateItem) return;
@@ -7675,6 +7678,161 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 `Duplicate ID ${initialDuplicateItem.system.ID} associated with ${itemData.name} conflicts with ${initialDuplicateItem.name}, generated new ID ${itemData.system.ID} to ensure uniqueness`,
             );
         }
+    }
+
+    static parseItemsFromHeroJsonToItemDataArray(heroJson, actor) {
+        const itemsToCreate = [];
+        let sortBase = 0;
+        const root = heroJson.CHARACTER ?? heroJson.PREFAB;
+
+        if (!root) {
+            throw new Error("Unable to find root");
+        }
+
+        const template = root.TEMPLATE;
+        const is5e = actor?.is5e ?? !template?.includes("6");
+
+        function itemDataDefaults(itemData) {
+            // Most items default to active unless they have charges or use END
+            itemData.system.active = true;
+            if (itemData.system.MODIFIER?.find((m) => m.XMLID === "CHARGES")) {
+                itemData.system.active = false;
+            }
+
+            // Kluge for TK as we are trying to avoid getInfo overhead
+            if (["TELEKINESIS", "NAKEDMODIFIER"].includes(itemData.system.XMLID)) {
+                itemData.system.active = false;
+            }
+        }
+
+        for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
+            sortBase += 1000;
+            for (const system of root[itemTag]) {
+                try {
+                    // Precheck to make sure we have a supported XMLID
+                    const powerInfo = getPowerInfo({
+                        xmlid: system.XMLID,
+                        xmlTag: system.xmlTag,
+                        actor,
+                        is5e,
+                    });
+                    if (!powerInfo) {
+                        ui.notifications.error(
+                            `${system.NAME || system.ALIAS} [${system.XMLID}] is an unsupported ${this.is5e ? "5e" : "6e"} power and was excluded from the upload. Please report.`,
+                            { permanent: true },
+                        );
+                        continue;
+                    }
+
+                    system.is5e = is5e;
+                    if (system.XMLID === "COMPOUNDPOWER") {
+                        for (const _modifier of system.MODIFIER || []) {
+                            console.warn(
+                                `${this.name}/${system.ALIAS}/${system.XMLID}/${_modifier.XMLID}/${_modifier.ID} was excluded from upload because MODIFIERs are not supported on a COMPOUNDPOWER. It is likely on the parentItem and thus should flow down to the children.`,
+                            );
+                        }
+                        delete system.MODIFIER;
+
+                        for (const _adder of system.ADDER || []) {
+                            ui.notifications.warn(
+                                `${this.name}/${system.ALIAS}/${system.XMLID}/${_adder.XMLID}/${_adder.ID} was excluded from upload because MODIFIERs are not supported on a COMPOUNDPOWER. It is likely on the parentItem and thus should flow down to the children.`,
+                            );
+                        }
+                        delete system.ADDER;
+                    }
+
+                    const itemData = {
+                        name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
+                        type: itemTag.toLowerCase().replace(/s$/, ""),
+                        system,
+                        sort: sortBase + parseInt(system.POSITION || 0),
+                    };
+
+                    // Guess for some default values to reduce need for DB updates later
+                    itemDataDefaults(itemData);
+
+                    // Make sure system.ID is unique
+                    HeroSystem6eItem.guaranteeUniqueItemSystemId(itemData, itemsToCreate);
+
+                    // Add to array of items to create
+                    itemsToCreate.push(itemData);
+
+                    // Note that we create COMPOUNDPOWER subitems before creating the parent
+                    // so that we can remove the subitems from the parent COMPOUNDPOWER attributes
+
+                    // COMPOUNDPOWER is similar to a MULTIPOWER.
+                    // MULTIPOWER uses PARENTID references.
+                    // COMPOUNDPOWER is structured as children.  Which we add PARENTID to, so it looks like a MULTIPOWER.
+                    if (system.XMLID === "COMPOUNDPOWER") {
+                        const compoundItems = [];
+                        for (const [key, value] of Object.entries(system)) {
+                            // We only care about arrays and objects (array of 1)
+                            // These are expected to be POWERS, SKILLS, etc that make up the COMPOUNDPOWER
+                            // Instead of COMPOUNDPOWER attributes, they should be separate items, with PARENT/CHILD
+                            if (value && typeof value === "object") {
+                                if (value.constructor !== Array && value.constructor !== Object) {
+                                    console.error(
+                                        `${this.name}/${system.name}/${key} is not an Array or Object`,
+                                        value,
+                                    );
+                                    continue;
+                                }
+                                const values = value.length ? value : [value];
+                                for (const system2 of values) {
+                                    if (system2.XMLID) {
+                                        const powerInfo2 = getPowerInfo({
+                                            xmlid: system2.XMLID,
+                                            xmlTag: key,
+                                            actor,
+                                            is5e,
+                                        });
+                                        if (!powerInfo2) {
+                                            ui.notifications.error(
+                                                `${system.NAME}/${system2.NAME}/${system2.XMLID} is an unsupported ${this.is5e ? "5e" : "6e"} power and was excluded from the upload. Please report.`,
+                                                {
+                                                    permanent: true,
+                                                },
+                                            );
+                                            continue;
+                                        }
+                                        compoundItems.push(system2);
+                                    }
+                                }
+                                // Remove attribute/property since we just created items for it
+                                system[key] = [];
+                            }
+                        }
+                        compoundItems.sort((a, b) => parseInt(a.POSITION) - parseInt(b.POSITION));
+                        for (const system2 of compoundItems) {
+                            const itemData2 = {
+                                name: system2.NAME || system2.ALIAS || system2.XMLID,
+                                type: itemData.type, // Always the type of the parent COMPOUND item
+                                sort: itemData.sort + 100 + parseInt(system2.POSITION),
+                                system: {
+                                    ...system2,
+                                    PARENTID: parseInt(system.ID),
+                                    POSITION: parseInt(system2.POSITION),
+                                    errors: [...(system2.errors || []), "Added PARENTID for COMPOUNDPOWER child"],
+                                    is5e,
+                                },
+                            };
+
+                            // Set some default values to reduce need for DB updates later
+                            itemDataDefaults(itemData2);
+
+                            HeroSystem6eItem.guaranteeUniqueItemSystemId(itemData2, itemsToCreate);
+                            itemsToCreate.push(itemData2);
+                        }
+                    }
+                } catch (e) {
+                    console.error(e);
+                    ui.notifications.error(`${this.name} failed to upload ${system.ALIAS}/${system.XMLID}`);
+                }
+            }
+            delete root[itemTag];
+        }
+
+        return itemsToCreate;
     }
 }
 

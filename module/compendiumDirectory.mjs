@@ -166,21 +166,50 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
         const heroJson = {};
         HeroSystem6eActor._xmlToJsonNode(heroJson, xml.children);
 
-        // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
-        const characterName = heroJson.PREFAB?.CHARACTER_INFO.CHARACTER_NAME.trim();
+        // Properly build prefabs use PREFAB, but if an HDC file was simply renamed it may use CHARACTER as the root.
+        const PREFAB = heroJson.PREFAB ?? heroJson.CHARACTER;
 
-        if (!characterName || characterName.length === 0) {
+        // Character name is what's in the sheet or, if missing, what is already in the actor sheet.
+        const compendiumName = PREFAB?.CHARACTER_INFO.CHARACTER_NAME.trim();
+
+        if (!compendiumName || compendiumName.length === 0) {
             console.error("Missing CHARACTER_NAME ", xml);
             return;
         }
 
         const metadata = {
-            label: characterName,
+            label: compendiumName,
             type: "Item",
             flags: {
                 [`${game.system.id}.versionHeroSystem6eCreated`]: game.system.version,
             },
         };
+
+        // Lets make sure the file has usable items before creating the compendium
+        let itemsToCreate = HeroSystem6eItem.parseItemsFromHeroJsonToItemDataArray(heroJson);
+
+        function isContainer(itemData) {
+            // getPowerInfo can be expensive so a few shortcuts
+            if (["LIST", "COMPOUNDPOWER"].includes(itemData.system.XMLID)) {
+                return true;
+            }
+
+            // May not be needed, but included for now
+            const powerInfo = getPowerInfo({
+                xmlid: itemData.system.XMLID,
+                is5e: itemData.system.is5e,
+            });
+            return powerInfo.type.includes("framework") || powerInfo.type.includes("compound");
+        }
+
+        // Remove any containers without children (likely a LIST or SEParator)
+        itemsToCreate = itemsToCreate.filter(
+            (i) => !isContainer(i) || itemsToCreate.find((i2) => i2.system.PARENTID === i.system.ID),
+        );
+
+        if (itemsToCreate.length === 0) {
+            return ui.notifications.error(`${compendiumName} has no items from which to create a compendium from.`);
+        }
 
         // Create Compendium
         const pack = await CompendiumCollection.createCompendium(metadata);
@@ -192,131 +221,164 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
         const folders = [];
 
         try {
-            const template = heroJson.PREFAB?.TEMPLATE;
-            const is5e = !template?.includes("6");
-
-            let errorCount = 0;
-            for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
-                if (heroJson.PREFAB?.[itemTag]) {
-                    for (const system of heroJson.PREFAB[itemTag]) {
-                        try {
-                            // Create new folder
-                            if (!folders[itemTag]) {
-                                const name = itemTag.titleCase();
-                                folders[itemTag] = await Folder.create(
-                                    {
-                                        type: "Item",
-                                        name: name,
-                                        color: CONFIG.HERO.folderColors[name],
-                                    },
-                                    { pack: pack.metadata.id },
-                                );
-                            }
-
-                            const itemData = {
-                                name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
-                                type: itemTag.toLowerCase().replace(/s$/, ""),
-                                system: { ...system, is5e, template },
-                                folder: folders[itemTag].id,
-                            };
-
-                            const power = getPowerInfo({
-                                xmlid: system.XMLID,
-                                is5e: itemData.system.is5e,
-                            });
-
-                            // If a framework then make a new subfolder for it, in the proper folder structure
-                            if (power.type.includes("framework") || power.type.includes("compound")) {
-                                const parentFolder =
-                                    pack.contents.find((o) => o.system.ID === system.PARENTID)?.folder ||
-                                    folders[itemTag];
-                                const subFolder = await Folder.create(
-                                    { type: "Item", name: itemData.name, folder: parentFolder },
-                                    { pack: pack.metadata.id },
-                                );
-                                itemData.folder = subFolder.id;
-                            }
-                            // Check if a child
-                            else if (system.PARENTID) {
-                                const parentFolder = pack.contents.find((o) => o.system.ID === system.PARENTID)?.folder;
-                                if (parentFolder) {
-                                    itemData.folder = parentFolder.id;
-                                } else {
-                                    console.warn(`${system.ALIAS} ID=${system.ID} has an invalid PARENTID reference`);
-                                }
-                            }
-
-                            const item = await HeroSystem6eItem.create(itemData, {
-                                pack: pack.metadata.id,
-                            });
-
-                            // COMPOUNDPOWER is similar to a MULTIPOWER.
-                            // MULTIPOWER uses PARENTID references.
-                            // COMPOUNDPOWER is structured as children.  Which we add PARENTID to, so it looks like a MULTIPOWER.
-                            if (system.XMLID === "COMPOUNDPOWER") {
-                                const compoundItems = [];
-                                for (const value of Object.values(system)) {
-                                    // We only care about arrays and objects (array of 1)
-                                    if (typeof value === "object") {
-                                        const values = value.length ? value : [value];
-                                        for (const system2 of values) {
-                                            if (system2.XMLID) {
-                                                const power = getPowerInfo({
-                                                    xmlid: system2.XMLID,
-                                                    is5e,
-                                                });
-                                                if (!power) {
-                                                    await ui.notifications.error(
-                                                        `${this.name}/${item.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
-                                                        {
-                                                            console: true,
-                                                            permanent: true,
-                                                        },
-                                                    );
-                                                    continue;
-                                                }
-                                                system2.is5e = is5e;
-                                                system2.template = template;
-                                                compoundItems.push(system2);
-                                            }
-                                        }
-                                    }
-                                }
-                                compoundItems.sort((a, b) => parseInt(a.POSITION) - parseInt(b.POSITION));
-                                for (const system2 of compoundItems) {
-                                    const power = getPowerInfo({
-                                        xmlid: system2.XMLID,
-                                        is5e,
-                                    });
-                                    let itemData2 = {
-                                        name: system2.NAME || system2.ALIAS || system2.XMLID,
-                                        type: power.type.includes("skill") ? "skill" : "power",
-                                        system: {
-                                            ...system2,
-                                            PARENTID: system.ID,
-                                            POSITION: parseInt(system2.POSITION),
-                                        },
-                                    };
-
-                                    // Put in proper folder
-                                    const parentFolder = pack.contents.find((o) => o.system.ID === system.ID)?.folder;
-                                    itemData2.folder = parentFolder?.id;
-
-                                    await HeroSystem6eItem.create(itemData2, { pack: pack.metadata.id });
-                                }
-                            }
-                        } catch (e) {
-                            console.error(e);
-                            if (errorCount === 0) {
-                                ui.notifications.error(
-                                    `One or more items in compendium <b>${pack.metadata.label}</b> failed to upload. See error log for details.`,
-                                );
-                            }
-                            errorCount++;
-                        }
-                    }
+            for (const itemData of itemsToCreate) {
+                // Create new root folder if needed
+                const folderName = itemData.type.toUpperCase();
+                if (!folders[folderName]) {
+                    const name = `${folderName}S`.replace("EQUIPMENTS", "EQUIPMENT").titleCase();
+                    folders[folderName] = await Folder.create(
+                        {
+                            type: "Item",
+                            name: name,
+                            color: CONFIG.HERO.folderColors[name],
+                        },
+                        { pack: pack.metadata.id },
+                    );
                 }
+
+                // If a container then make a new subfolder for it, in the proper folder structure
+                if (isContainer(itemData)) {
+                    const parentFolder =
+                        pack.contents.find((o) => o.system.ID === itemData.system.PARENTID)?.folder ||
+                        folders[folderName];
+                    const subFolder = await Folder.create(
+                        { type: "Item", name: itemData.name, folder: parentFolder },
+                        { pack: pack.metadata.id },
+                    );
+                    itemData.folder = subFolder.id;
+                }
+                // Check if a child
+                else if (itemData.system.PARENTID) {
+                    const parentFolder = pack.contents.find((o) => o.system.ID === itemData.system.PARENTID)?.folder;
+                    if (parentFolder) {
+                        itemData.folder = parentFolder.id;
+                    } else {
+                        console.warn(
+                            `${itemData.system.ALIAS} ID=${itemData.system.ID} has an invalid PARENTID reference`,
+                        );
+                    }
+                } else {
+                    const parentFolder =
+                        pack.contents.find((o) => o.system.ID === itemData.system.PARENTID)?.folder ||
+                        folders[folderName];
+                    itemData.folder = parentFolder.id;
+                }
+
+                await HeroSystem6eItem.create(itemData, { pack: pack.metadata.id });
             }
+
+            // let errorCount = 0;
+            // for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
+            //     if (PREFAB?.[itemTag]) {
+            //         for (const system of PREFAB[itemTag]) {
+            //             try {
+            //                 const itemData = {
+            //                     name: system.NAME || system?.ALIAS || system?.XMLID || itemTag,
+            //                     type: itemTag.toLowerCase().replace(/s$/, ""),
+            //                     system: { ...system, is5e, template },
+            //                     folder: folders[itemTag].id,
+            //                 };
+
+            //                 const powerInfo = getPowerInfo({
+            //                     xmlid: system.XMLID,
+            //                     is5e: itemData.system.is5e,
+            //                 });
+
+            //                 const isContainer =
+            //                     powerInfo.type.includes("framework") || powerInfo.type.includes("compound");
+
+            //                 // If a framework then make a new subfolder for it, in the proper folder structure
+            //                 if (isContainer) {
+            //                     const parentFolder =
+            //                         pack.contents.find((o) => o.system.ID === system.PARENTID)?.folder ||
+            //                         folders[itemTag];
+            //                     const subFolder = await Folder.create(
+            //                         { type: "Item", name: itemData.name, folder: parentFolder },
+            //                         { pack: pack.metadata.id },
+            //                     );
+            //                     itemData.folder = subFolder.id;
+            //                 }
+            //                 // Check if a child
+            //                 else if (system.PARENTID) {
+            //                     const parentFolder = pack.contents.find((o) => o.system.ID === system.PARENTID)?.folder;
+            //                     if (parentFolder) {
+            //                         itemData.folder = parentFolder.id;
+            //                     } else {
+            //                         console.warn(`${system.ALIAS} ID=${system.ID} has an invalid PARENTID reference`);
+            //                     }
+            //                 }
+
+            //                 const item = await HeroSystem6eItem.create(itemData, {
+            //                     pack: pack.metadata.id,
+            //                 });
+
+            //                 // COMPOUNDPOWER is similar to a MULTIPOWER.
+            //                 // MULTIPOWER uses PARENTID references.
+            //                 // COMPOUNDPOWER is structured as children.  Which we add PARENTID to, so it looks like a MULTIPOWER.
+            //                 if (system.XMLID === "COMPOUNDPOWER") {
+            //                     const compoundItems = [];
+            //                     for (const value of Object.values(system)) {
+            //                         // We only care about arrays and objects (array of 1)
+            //                         if (typeof value === "object") {
+            //                             const values = value.length ? value : [value];
+            //                             for (const system2 of values) {
+            //                                 if (system2.XMLID) {
+            //                                     const power = getPowerInfo({
+            //                                         xmlid: system2.XMLID,
+            //                                         is5e,
+            //                                     });
+            //                                     if (!power) {
+            //                                         await ui.notifications.error(
+            //                                             `${this.name}/${item.name}/${system2.XMLID} failed to parse. It will not be available to this actor.  Please report.`,
+            //                                             {
+            //                                                 console: true,
+            //                                                 permanent: true,
+            //                                             },
+            //                                         );
+            //                                         continue;
+            //                                     }
+            //                                     system2.is5e = is5e;
+            //                                     system2.template = template;
+            //                                     compoundItems.push(system2);
+            //                                 }
+            //                             }
+            //                         }
+            //                     }
+            //                     compoundItems.sort((a, b) => parseInt(a.POSITION) - parseInt(b.POSITION));
+            //                     for (const system2 of compoundItems) {
+            //                         const power = getPowerInfo({
+            //                             xmlid: system2.XMLID,
+            //                             is5e,
+            //                         });
+            //                         let itemData2 = {
+            //                             name: system2.NAME || system2.ALIAS || system2.XMLID,
+            //                             type: power.type.includes("skill") ? "skill" : "power",
+            //                             system: {
+            //                                 ...system2,
+            //                                 PARENTID: system.ID,
+            //                                 POSITION: parseInt(system2.POSITION),
+            //                             },
+            //                         };
+
+            //                         // Put in proper folder
+            //                         const parentFolder = pack.contents.find((o) => o.system.ID === system.ID)?.folder;
+            //                         itemData2.folder = parentFolder?.id;
+
+            //                         await HeroSystem6eItem.create(itemData2, { pack: pack.metadata.id });
+            //                     }
+            //                 }
+            //             } catch (e) {
+            //                 console.error(e);
+            //                 if (errorCount === 0) {
+            //                     ui.notifications.error(
+            //                         `One or more items in compendium <b>${pack.metadata.label}</b> failed to upload. See error log for details.`,
+            //                     );
+            //                 }
+            //                 errorCount++;
+            //             }
+            //         }
+            //     }
+            // }
 
             ui.notifications.info(`Compendium ${pack.metadata.label} finished upload.`);
             pack.render(true);
