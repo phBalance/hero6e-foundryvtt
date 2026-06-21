@@ -1,6 +1,6 @@
 # Releases
 
-### Version 4.3.10 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.10 20260621 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix Mind Scan effect roll chat card results. [#4271](https://github.com/dmdorman/hero6e-foundryvtt/issues/4271)
 - Fix for dragging COMPOUND powers from item sidebar to actor. [#4277](https://github.com/dmdorman/hero6e-foundryvtt/issues/4277)
