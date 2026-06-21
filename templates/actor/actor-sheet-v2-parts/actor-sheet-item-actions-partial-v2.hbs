@@ -18,10 +18,17 @@
 
 
         {{#if (itemHasActionBehavior this "activatable")}}
-            <input class="Xitem-toggle" type="checkbox"
-                Xname="this.isActive" {{checked this.isActive}} data-action="toggle" data-dtype="Boolean"
-                title="Activation toggle" {{#if this.vppUnSlotted}}disabled{{/if}} 
-            />
+            {{#if this.restrictEquipmentActiveToggle}}
+                <input class="Xitem-toggle" type="checkbox"
+                    Xname="this.isActive" {{checked this.system.active}} data-action="toggle" data-dtype="Boolean"
+                    title="Activation toggle" disabled 
+                />
+            {{else}}
+                <input class="Xitem-toggle" type="checkbox"
+                    Xname="this.isActive" {{checked this.isActive}} data-action="toggle" data-dtype="Boolean"
+                    title="Activation toggle" {{#if this.vppUnSlotted}}disabled{{/if}} 
+                />
+            {{/if}}
         {{/if}}
 
         {{#if (itemHasActionBehavior this "showClipsReload")}}
