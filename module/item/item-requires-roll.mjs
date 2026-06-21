@@ -444,8 +444,9 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
     // Make sure all skill items require for the activation roll(s) exist on this character and are active before attempting
     // any rolls.
     for (const activationRoll of activationRolls) {
-        // Only ACTIVATION_ROLL and CHARACTERISTIC_ROLL can be without active skills
         // PH: FIXME: ATTACK_ROLL needs to be considered
+
+        // Only ACTIVATION_ROLL and CHARACTERISTIC_ROLL can be without active skills
         if (
             activationRoll.type !== RSR_ROLL_TYPE.ACTIVATION_ROLL &&
             activationRoll.type !== RSR_ROLL_TYPE.CHARACTERISTIC_ROLL &&
@@ -527,20 +528,21 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
 
             const luckTotal = roller.getLuckTotal();
             const luckOption = rar.OPTIONID;
+            let requiredLuck = 0;
             if (luckOption === "ONELUCK") {
-                succeeded = luckTotal >= 1;
+                requiredLuck = 1;
             } else if (luckOption === "TWOLUCK") {
-                succeeded = luckTotal >= 2;
+                requiredLuck = 2;
             } else if (luckOption === "THREELUCK") {
-                succeeded = luckTotal >= 3;
+                requiredLuck = 3;
             } else {
+                requiredLuck = 99999999;
                 console.error(`${item.detailedName()} has unknown luck option ${luckOption}`);
-                succeeded = false;
             }
 
-            flavor = `${item.name} (rolled ${luckTotal} points) activation ${succeeded ? "succeeded" : "failed"} `;
+            succeeded = luckTotal >= requiredLuck;
 
-            // PH: FIXME: Need to produce chat card for it. It's not a success roll.
+            flavor = `${item.name} activation <span class="${succeeded ? "announce-success" : "announce-failure"}">${succeeded ? "succeeded" : "failed"} by ${Math.abs(luckTotal - requiredLuck)} levels of luck.</span>`;
         } else if (activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL) {
             const charKey = activationRoll.characteristicKey.toLowerCase();
             const characteristic = actor.system.characteristics[charKey];
@@ -596,33 +598,6 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
         // PH: FIXME: Bunch of functionality ripped out of this function. See below to get it into the flavor.
         // PH: FIXME: resource usage string should be built in here as this is what's consuming. Create functions so it can be done in a fixed way.
         await generateSuccessChatCard(actor, speaker, roller, flavor, `Spent ${options.resourcesUsedDescription}`);
-
-        // PH: FIXME: Get rid of options fields where possible. These decisions should be part of the flavor text and not burried in generating a chat card.
-        // // FORCE success
-        // if (!succeeded && overrideCanAct) {
-        //     const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
-        //     ui.notifications.info(`${actor.name} succeeded roll because override key.`);
-        //     succeeded = true;
-        //     cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
-        // }
-
-        // if (!succeeded && options.resourcesUsedDescription) {
-        //     cardHtml += `Spent ${options.resourcesUsedDescription}.`;
-        // }
-
-        // const chatData = {
-        //     style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-        //     rolls: roller.rawRolls(),
-        //     author: game.user._id,
-        //     content: cardHtml,
-        //     speaker: speaker,
-        // };
-
-        // await ChatMessage.create(chatData);
-
-        // if (!succeeded && options.showUi) {
-        //     ui.notifications.warn(cardHtml);
-        // }
 
         return succeeded;
     });
