@@ -110,6 +110,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 dragstart: this._onDragStart.bind(this),
                 dragover: this._onDragOver.bind(this),
                 drop: this._onDrop.bind(this),
+                dragenter: this._onDragEnter.bind(this),
+                dragleave: this._onDragLeave.bind(this),
             };
             return new FoundryVttDragDrop(dragDropHandler);
         });
@@ -1019,6 +1021,18 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     // _onDragOver(event) {
     //     console.log(event);
     // }
+
+    _onDragEnter(event) {
+        event.preventDefault();
+        const target = event.currentTarget.closest("nav a");
+        if (target) target.classList.add("dragHover");
+    }
+
+    _onDragLeave(event) {
+        event.preventDefault();
+        const target = event.currentTarget.closest("nav a");
+        if (target) target.classList.remove("dragHover");
+    }
 
     /**
      * Callback actions which occur when a dragged element is dropped on a target.
