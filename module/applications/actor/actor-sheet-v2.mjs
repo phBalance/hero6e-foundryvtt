@@ -1129,8 +1129,6 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         delete itemData.flags;
         delete itemData.folder;
 
-        // We are likely to create several items in quick succession
-        // and Date().getTime() will likely be the same.
         HeroSystem6eItem.guaranteeUniqueItemSystemId(itemData, itemsToCreate);
 
         // Not an activeItem
