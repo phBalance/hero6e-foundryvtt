@@ -7707,7 +7707,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
             sortBase += 1000;
-            for (const system of root[itemTag]) {
+            for (const system of root[itemTag] ?? []) {
                 try {
                     // Precheck to make sure we have a supported XMLID
                     const powerInfo = getPowerInfo({
