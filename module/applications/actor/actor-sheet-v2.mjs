@@ -1120,7 +1120,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
         // Make sure we get new IDs and clean up a few things to make them generic
         delete itemData._id;
-        itemData.system.ID = new Date().getTime();
+        itemData.system.ID = new Date().getTime() + itemsToCreate.length;
         delete itemData.system.PARENTID;
         if (parentId) {
             itemData.system.PARENTID = parentId;
