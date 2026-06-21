@@ -1,5 +1,9 @@
 # Releases
 
+### Version 4.3.11 20260621 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Removed apply damage to missed tokens as DAMAGE ALL button is not working as intended.
+
 ### Version 4.3.10 20260621 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Fix Mind Scan effect roll chat card results. [#4271](https://github.com/dmdorman/hero6e-foundryvtt/issues/4271)

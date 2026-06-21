@@ -2130,28 +2130,28 @@ export async function _onRollDamage(event) {
     }
 
     // tokens we missed, still show them (blurred, perhaps future HAP)
-    for (const target of action.current.attacks?.[0]?.targets ?? []) {
-        if (!targetTokens.find((t) => t.id === target.targetId)) {
-            const tokenDocument = canvas.scene.tokens.get(target.targetId);
-            if (tokenDocument) {
-                const entangleAE = tokenDocument.actor?.temporaryEffects?.find(
-                    (o) => o.flags[game.system.id]?.XMLID === "ENTANGLE",
-                );
-                const missedToken = {
-                    tokenId: tokenDocument.id,
-                    tokenUuid: tokenDocument.uuid,
-                    name: tokenDocument.name,
-                    subTarget:
-                        toHitData.targetEntangle && entangleAE
-                            ? `${tokenDocument.name} [${entangleAE.flags[game.system.id]?.XMLID}]`
-                            : null,
-                    targetEntangle: !!toHitData.targetEntangle,
-                    missed: true,
-                };
-                targetTokens.push(missedToken);
-            }
-        }
-    }
+    // for (const target of action.current.attacks?.[0]?.targets ?? []) {
+    //     if (!targetTokens.find((t) => t.tokenId === target.targetId)) {
+    //         const tokenDocument = canvas.scene.tokens.get(target.targetId);
+    //         if (tokenDocument) {
+    //             const entangleAE = tokenDocument.actor?.temporaryEffects?.find(
+    //                 (o) => o.flags[game.system.id]?.XMLID === "ENTANGLE",
+    //             );
+    //             const missedToken = {
+    //                 tokenId: tokenDocument.id,
+    //                 tokenUuid: tokenDocument.uuid,
+    //                 name: tokenDocument.name,
+    //                 subTarget:
+    //                     toHitData.targetEntangle && entangleAE
+    //                         ? `${tokenDocument.name} [${entangleAE.flags[game.system.id]?.XMLID}]`
+    //                         : null,
+    //                 targetEntangle: !!toHitData.targetEntangle,
+    //                 missed: true,
+    //             };
+    //             targetTokens.push(missedToken);
+    //         }
+    //     }
+    // }
 
     // Kludge for SIMPLIFIED HEALING
     const isSimpleHealing =
