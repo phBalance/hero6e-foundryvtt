@@ -7590,7 +7590,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             default:
                 validationFailureMessages.push({
                     itemId: this.id,
-                    message: `${this.detailedName()} for ${targetActor?.name} cannot be converted to unhandled type ${targetType}.`,
+                    message: `${this.detailedName()} for ${targetActor?.name} cannot be converted from ${this.type} to ${targetType}.`,
                     severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                 });
                 break;

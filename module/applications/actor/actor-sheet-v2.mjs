@@ -1040,7 +1040,12 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
      * @protected
      */
     async _onDrop(event) {
-        console.log(event);
+        event.stopPropagation();
+        event.preventDefault();
+
+        const target = event.currentTarget.closest("nav a");
+        if (target) target.classList.remove("dragHover");
+
         const data = foundry.applications.ux.TextEditor.getDragEventData(event);
         // Handle different data types
         switch (data?.type) {
@@ -1077,8 +1082,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         }
 
         // See if we dropped onto a specific ActorSheet tab
-        const target = event.currentTarget ?? event.target;
-        const droppedOnTab = target?.closest?.("[data-tab]")?.dataset?.tab.replace(/s$/, "");
+        const target = event.target ?? event.currentTarget;
+        const droppedOnTab = target?.closest?.("[data-tab]")?.dataset?.tab.replace(/(?<!analysi)s$/, "");
         const targetType = droppedOnTab ?? this.tabGroups.primary.replace(/s$/, "").replace("martial", "martialart");
 
         const parentData = containerItems[0].toObject();
