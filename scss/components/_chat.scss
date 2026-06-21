@@ -90,6 +90,16 @@
         }
     }
 
+    .announce-failure {
+        color: var(--herosystem-color-announce-failure);
+        font-weight: bold;
+    }
+
+    .announce-success {
+        color: var(--herosystem-color-announce-success);
+        font-weight: bold;
+    }
+
     .card-buttons {
         margin: 5px 0;
 

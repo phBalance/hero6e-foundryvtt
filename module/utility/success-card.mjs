@@ -17,8 +17,7 @@ export async function doSuccessRoll(roller, flavor) {
     const total = roller.getSuccessTotal();
     const margin = roller.getSuccessValue() - total;
 
-    // PH: FIXME: Need to fix this. Removed bold as it shouldn't be used - move it to CSS.
-    flavor += ` <span class="dice-flavor.dice-${succeeded ? "succeeded" : "failed"}">
+    flavor += ` <span class="${succeeded ? "announce-success" : "announce-failure"}">
             ${
                 succeeded ? "succeeded" : "failed"
             } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}

@@ -32,11 +32,11 @@
         font-size: 15px;
 
         .dice-succeeded {
-            color: #006400; // TODO: Investigating setting var(--color-level-success);
+            color: var(--herosystem-color-announce-success);
         }
 
         .dice-failed {
-            color: var(--color-level-error);
+            color: var(--herosystem-color-announce-failure);
         }
     }
 }
