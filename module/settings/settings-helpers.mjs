@@ -255,7 +255,16 @@ export default class SettingsHelpers {
             config: true,
             type: Boolean,
             default: false,
-            onChange: (value) => HEROSYS.log(false, value),
+            onChange: () => {
+                // Loop through all active ApplicationV2 windows globally
+                for (const app of foundry.applications.instances.values()) {
+                    // Check if the application is an ActorSheet instance or a custom subclass of it
+                    if (app instanceof foundry.applications.sheets.ActorSheetV2) {
+                        // ApplicationV2 uses a render options configuration object rather than a boolean
+                        app.render({ force: true });
+                    }
+                }
+            },
         });
 
         game.settings.register(module, "equipmentWeightPercentage", {

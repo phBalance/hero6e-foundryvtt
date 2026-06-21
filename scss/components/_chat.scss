@@ -262,3 +262,7 @@
         width: fit-content;
     }
 }
+
+.chat-message button.apply-damage[data-missed="true"] {
+    text-decoration: line-through;
+}
