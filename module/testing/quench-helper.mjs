@@ -133,6 +133,18 @@ export function registerGlobalTeardown(quench) {
 export async function waitForElementInChat(elementSelector, timeoutMs = 1000) {
     let messageHookId;
 
+    // During quench test the chat message queue might get long.
+    // Let is clear before starting.
+    const isQueueActive = () => {
+        const queueLength = ui.chat._renderQueue?.length || ui.chat._pending?.length || ui.chat._batch?.length || 0;
+        return queueLength > 0;
+    };
+
+    let counter = 500; // 500 * 10 = 5 seconds
+    while (isQueueActive() && counter-- > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
     // 1. Monitored DOM paint tracking
     const renderChatHookPromise = new Promise((resolve) => {
         messageHookId = Hooks.on("renderChatMessageHTML", (chatMessage, cardHtmlElement) => {

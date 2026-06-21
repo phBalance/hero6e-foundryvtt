@@ -5254,9 +5254,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return false;
         }
 
-        // Equipment that isn't carried
-        if (this.type === "equipment" && !this.system.CARRIED) {
-            return false;
+        // Equipment that isn't carried is not active
+        if (this.type === "equipment") {
+            if (!this.isCarried) return false;
         }
 
         // Favor disable status of associated ActiveEffect
@@ -5277,6 +5277,30 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         return this.system.active;
+    }
+
+    get isCarried() {
+        if (!this.isEquipment) {
+            console.error(`isCarried check for ${this.name} is invalid since it is a ${this.type} and not equipment.`);
+            return true;
+        }
+
+        if (this.isCarriedLockedToParent) {
+            return !!this.parentItem.system.CARRIED;
+        }
+        return !!this.system.CARRIED;
+    }
+
+    // Some items "carried" determination is locked to parent
+    get isCarriedLockedToParent() {
+        if (!this.parentItem) return false;
+        if (this.parentItem.isList) return false;
+        return true;
+    }
+
+    // Used in actor-sheet-item-actions-partial-v2.hbs
+    get restrictEquipmentActiveToggle() {
+        return this.isEquipment && this.isCarriedLockedToParent;
     }
 
     get compoundCostForDisplay() {
@@ -7708,7 +7732,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         for (const itemTag of HeroSystem6eItem.ItemXmlTags) {
             sortBase += 1000;
-            for (const system of root[itemTag]) {
+            for (const system of root[itemTag] ?? []) {
                 try {
                     // Precheck to make sure we have a supported XMLID
                     const powerInfo = getPowerInfo({

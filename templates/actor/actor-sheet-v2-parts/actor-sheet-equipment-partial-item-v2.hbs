@@ -46,8 +46,8 @@
         </div>
         
         <div class="item-column item-carried">
-            <input class="item-update" type="checkbox"  {{checked
-                    this.system.CARRIED}} data-action="carried" data-dtype="Boolean" />
+            <input class="item-update" type="checkbox" {{checked
+                    this.isCarried}} data-action="carried" data-dtype="Boolean" {{#if this.isCarriedLockedToParent}}disabled{{/if}} />
         </div>
 
         {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-item-actions-partial-v2.hbs') this }}
