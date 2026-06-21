@@ -16,8 +16,6 @@ export function registerCombatWorkflowTests(quench) {
                 let activeScene = null;
 
                 before(async function () {
-                    console.log("[HERO 6E TEST] Starting database setup block...");
-
                     activeScene = game.scenes.active ?? game.scenes.contents?.[0];
                     if (!activeScene) {
                         activeScene = await Scene.create({ name: "Test Arena", grid: { distance: 1, units: "m" } });
@@ -48,18 +46,14 @@ export function registerCombatWorkflowTests(quench) {
                 });
 
                 after(async function () {
-                    console.log("[HERO 6E TEST] Executing database cleanup hook...");
                     game.user.targets.clear();
                     if (attackerTokenDoc) await attackerTokenDoc.delete();
                     if (defenderTokenDoc) await defenderTokenDoc.delete();
                     if (attackerActor) await attackerActor.delete();
                     if (defenderActor) await defenderActor.delete();
-                    console.log("[HERO 6E TEST] Cleanup complete.");
                 });
 
                 it("Strike", async function () {
-                    console.log("[HERO 6E TEST] Starting main action test script verification...");
-
                     const attackStrike = attackerActor.items.find(
                         (doc) => doc.type === "maneuver" && doc.system?.XMLID === "STRIKE",
                     );
@@ -69,21 +63,17 @@ export function registerCombatWorkflowTests(quench) {
                     assert.ok(attackStrike, "Pre-seeded STRIKE maneuver was successfully located on the actor.");
 
                     // Simulate Targeting
-                    console.log("[HERO 6E TEST] Registering targeting state onto token...");
                     game.user.targets.clear();
                     const targetTokenObject = defenderTokenDoc.object || canvas.tokens?.get(defenderTokenDoc.id);
 
                     if (targetTokenObject) {
                         game.user.targets.add(targetTokenObject);
                     } else {
-                        console.warn(
-                            "[HERO 6E TEST] Token object not found on active canvas, pushing fallback reference.",
-                        );
+                        console.warn("Token object not found on active canvas, pushing fallback reference.");
                         game.user.targets.add({ actor: defenderActor, id: defenderTokenDoc.id });
                     }
 
                     // Render the Attacker Sheet (ApplicationV2 architecture)
-                    console.log("[HERO 6E TEST] Rendering the attacker character application sheet...");
                     const attackerSheet = attackerActor.sheet;
                     await attackerSheet.render(true); // Directly await render for AppV2
                     const $sheetHtml = $(attackerSheet.element);
@@ -106,11 +96,7 @@ export function registerCombatWorkflowTests(quench) {
                         $attackBtn = $sheetHtml.find(fallbackSelector).first();
                     }
 
-                    console.log(`[HERO 6E TEST] Targeted single strike button element instance:`, $attackBtn[0]); // Log the native DOM element
                     assert.ok($attackBtn.length, "Attack trigger element located on the sheet.");
-
-                    // *** INTERCEPTION POINT: Use Hooks.once to await the opening of ItemAttackApplicationV2 ***
-                    console.log("[HERO 6E TEST] Setting up Hooks.once for renderItemAttackApplicationV2...");
 
                     const attackAppPromise = new Promise((resolve) => {
                         let hookV14Id;
@@ -125,7 +111,6 @@ export function registerCombatWorkflowTests(quench) {
 
                         // V14 Path: Native ApplicationV2 hook
                         hookV14Id = Hooks.on("renderItemAttackFormApplicationV2", (app) => {
-                            console.log("[HERO 6E TEST] Rendered via V14 ItemAttackFormApplicationV2 hook.", app);
                             cleanupAndResolve(app);
                         });
 
@@ -133,7 +118,6 @@ export function registerCombatWorkflowTests(quench) {
                         hookV13Id = Hooks.on("renderApplication", (app) => {
                             // Filter out unrelated applications (like sidebars, chat logs, or character sheets)
                             if (app.constructor.name === "ItemAttackFormApplication" || app.id?.includes("attack")) {
-                                console.log("[HERO 6E TEST] Rendered via V13 renderApplication fallback hook.", app);
                                 cleanupAndResolve(app);
                             }
                         });
@@ -168,26 +152,17 @@ export function registerCombatWorkflowTests(quench) {
                         });
                     }
 
-                    console.log(
-                        `[HERO 6E TEST] 'Roll to Hit' buttons found inside custom app panel: ${$rollToHitBtn.length}`,
-                    );
                     assert.ok(
                         $rollToHitBtn.length,
                         "Found the 'Roll to Hit' actionable element inside the configuration window.",
                     );
                     $rollToHitBtn.click();
 
-                    // Allow the chat message layout pipeline to catch up and handle rolls
-                    console.log(
-                        "[HERO 6E TEST] Attack action committed from dialog window. Awaiting chat generation...",
-                    );
-
                     const { foundElement: rollDamageButton } = await waitForElementInChat(`button.roll-damage`);
                     assert.ok(rollDamageButton, "Roll Damage button found within chat card.");
 
                     // Track baseline health metrics directly from database state
                     const baselineStun = defenderActor.system.characteristics?.stun?.value;
-                    console.log(`[HERO 6E TEST] Target Baseline Health Tracker [STUN]: ${baselineStun}`);
 
                     // Apply damage via the programmatic UI interaction simulation
                     rollDamageButton.click();
@@ -205,9 +180,6 @@ export function registerCombatWorkflowTests(quench) {
                     // Fetch fresh document references from the DB to avoid working with stale data
                     const updatedDefender = game.actors.get(defenderActor.id);
                     const finalStun = updatedDefender.system.characteristics?.stun?.value;
-                    console.log(
-                        `[HERO 6E TEST] Target (${updatedDefender.name}) Post-Damage Health Tracker [STUN]: ${finalStun}`,
-                    );
 
                     // Verification: Confirm state change matches automation calculations
                     const stunRawDamage = damageSpan.innerHTML.match(/(\d+) STUN/)[1];
@@ -225,6 +197,6 @@ export function registerCombatWorkflowTests(quench) {
                 });
             });
         },
-        { displayName: "HERO 6E: End-to-End Combat Execution" },
+        { displayName: "End-to-End Combat Execution" },
     );
 }
