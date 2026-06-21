@@ -19,6 +19,7 @@ import {
     determineMaxAdjustment,
 } from "../utility/adjustment.mjs";
 import { HeroObjectCacheMixin } from "../utility/cache.mjs";
+import { HeroCompatibility } from "../utility/compatibility.mjs";
 import {
     buildStrengthItem,
     calculateCpPerDieForItem,
@@ -33,6 +34,7 @@ import {
 } from "../utility/damage.mjs";
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "../utility/round.mjs";
+import { doSuccessRoll, generateSuccessChatCard } from "../utility/success-card.mjs";
 import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
 import {
     foundryVttDeleteProperty,
@@ -45,7 +47,6 @@ import {
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
-import { HeroCompatibility } from "../utility/compatibility.mjs";
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -1266,12 +1267,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     hasSuccessRoll() {
-        const powerInfo = getPowerInfo({
-            item: this,
-            xmlTag: this.system.xmlTag,
-        });
         return (
-            powerInfo?.behaviors.includes("success") ||
+            this.baseInfo?.behaviors.includes("success") ||
             (this.system.XMLID === "CUSTOMSKILL" && parseInt(this.system.ROLL) > 0)
         );
     }
@@ -4965,14 +4962,18 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return baseAttackItem.baseInfo.attackDefenseVs(baseAttackItem);
         }
 
+        // NND and AVAD type defenses are irregular
         const avad = this.findModsByXmlid("AVAD");
-        if (avad) {
-            const input = avad.INPUT.trim().toUpperCase();
-            if (input.match(/SELF-CONTAINED BREATHING/)) {
+        const nnd5e = this.findModsByXmlid("NND");
+        if (avad || nnd5e) {
+            const nndLikeDefense = avad?.INPUT ?? nnd5e.COMMENTS;
+            const input = nndLikeDefense.trim().toUpperCase();
+            if (input.match(/SELF[-\s]CONTAINED BREATHING/)) {
                 return "SELFCONTAINEDBREATHING";
             } else if (input.match(/LIFE SUPPORT/)) {
                 return "LIFESUPPORT";
             }
+
             return input;
         }
 
@@ -7992,45 +7993,23 @@ export function getItem(id) {
     return null;
 }
 
-export async function requiresACharacteristicRollCheck(actor, characteristic, reasonText) {
-    console.log(characteristic, this);
-    const successValue = parseInt(actor?.system.characteristics[characteristic.toLowerCase()].roll) || 8;
-    const activationRoller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
-    await activationRoller.roll();
-    let succeeded = activationRoller.getSuccess();
-    const autoSuccess = activationRoller.getAutoSuccess();
-    const total = activationRoller.getSuccessTotal();
-    const margin = successValue - total;
+export async function doCharacteristicRollCheck(actor, characteristic, reasonText) {
+    const charKey = characteristic.toLowerCase();
+    const successValue = parseInt(actor?.system.characteristics[charKey].roll) || 8;
+    const activationRoller = new HeroRoller().makeSuccessRoll(true, successValue, `Base ${charKey} roll`).addDice(3);
 
-    const flavor = `${reasonText ? `${reasonText}. ` : ``}${characteristic.toUpperCase()} roll ${successValue}-
-        <b class="dice-${succeeded ? "succeeded" : "failed"}">
-            ${
-                succeeded ? "succeeded" : "failed"
-            } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}
-        </b>`;
-    let cardHtml = await activationRoller.render(flavor);
-
-    // FORCE success
-    if (!succeeded && overrideCanAct) {
-        const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
-        ui.notifications.info(`${actor.name} succeeded roll because override key.`);
-        succeeded = true;
-        cardHtml += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
-    }
+    let { succeeded, flavor } = await doSuccessRoll(
+        actor,
+        activationRoller,
+        `${reasonText ? `${reasonText}. ` : ``}${characteristic.toUpperCase()} roll ${successValue}-`,
+    );
 
     const token = actor.token;
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
     speaker.alias = actor.name;
 
-    const chatData = {
-        style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-        rolls: activationRoller.rawRolls(),
-        author: game.user._id,
-        content: cardHtml,
-        speaker: speaker,
-    };
-
-    await ChatMessage.create(chatData);
+    // PH: FIXME: This function doesn't consume resources but should.
+    await generateSuccessChatCard(actor, speaker, activationRoller, flavor, "");
 
     return succeeded;
 }
@@ -8041,52 +8020,56 @@ export async function rollAblativeActivationCheck(item) {
         return true;
     }
 
-    // Must be ablative
-    let cardHtml;
-    let rawRolls;
+    const actor = item.actor;
+    const token = actor.token;
+    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
+
+    // This is an ablative item. Does it work against this attack?
     let succeeded;
     const thresholdExceeded = item.system.ablative;
     if (thresholdExceeded > 0 && thresholdExceeded < 9) {
         const successValue = 16 - thresholdExceeded;
 
-        //TODO what about additional skill levels used to influence the activation roll?
-        const ablativeActivationRoller = new HeroRoller().makeSuccessRoll(true, successValue).addDice(3);
+        const ablativeActivationRoller = new HeroRoller()
+            .makeSuccessRoll(
+                true,
+                successValue,
+                `Ablative activation`,
+                `Ablative defense has been exceeded ${thresholdExceeded} times -> ${successValue}-`,
+            )
+            .addDice(3);
 
-        await ablativeActivationRoller.roll();
-        rawRolls = ablativeActivationRoller.rawRolls();
+        const { succeeded: success, flavor } = await doSuccessRoll(
+            actor,
+            ablativeActivationRoller,
+            `Ablative ${item.name} activation`,
+        );
+        succeeded = success;
 
-        succeeded = ablativeActivationRoller.getSuccess();
-        const autoSuccess = ablativeActivationRoller.getAutoSuccess();
-        const total = ablativeActivationRoller.getSuccessTotal();
-        const margin = successValue - total;
-
-        const flavor = `Ablative ${item.name} activation ${
-            succeeded ? "succeeded" : "failed"
-        } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`;
-
-        cardHtml = await ablativeActivationRoller.render(flavor);
-    } else if (thresholdExceeded === 0) {
-        // Defense has not yet been ablated so it always works.
-        cardHtml = `Unablated ${item.name} guaranteed activation`;
-        succeeded = true;
+        // PH: FIXME: function doesn't consume resources
+        await generateSuccessChatCard(actor, speaker, ablativeActivationRoller, flavor, "");
     } else {
-        // Defense has been fully ablated so it never works.
-        cardHtml = `Fully ablated ${item.name} never activates`;
-        succeeded = false;
+        let cardHtml;
+
+        if (thresholdExceeded === 0) {
+            // Defense has not yet been ablated so it always works.
+            cardHtml = `<span class="announce-success">Unablated ${item.name} guaranteed activation.</span>`;
+            succeeded = true;
+        } else {
+            // Defense has been fully ablated so it never works.
+            cardHtml = `<span class="announce-failure">Fully ablated ${item.name} never activates.</span>`;
+            succeeded = false;
+        }
+
+        const chatData = {
+            style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
+            author: game.user._id,
+            content: cardHtml,
+            speaker: speaker,
+        };
+
+        await ChatMessage.create(chatData);
     }
-
-    const actor = item.actor;
-    const token = actor.token;
-    const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-    const chatData = {
-        style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-        rolls: rawRolls,
-        author: game.user._id,
-        content: cardHtml,
-        speaker: speaker,
-    };
-
-    await ChatMessage.create(chatData);
 
     return succeeded;
 }

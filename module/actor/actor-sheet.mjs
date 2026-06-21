@@ -809,39 +809,6 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
     async _onCharacteristicSuccessRoll(event) {
         const label = event.currentTarget.closest("[data-label]").dataset.label;
         await this.actor.onCharacteristicSuccessRoll({ event, label, token: this.token });
-        // event.preventDefault();
-        // const element = event.currentTarget.closest("button");
-        // const dataset = element.dataset;
-        // const charRoll = parseInt(element.textContent.slice(0, -1));
-
-        // const heroRoller = new HeroRoller().makeSuccessRoll().addDice(3);
-        // await heroRoller.roll();
-
-        // const margin = charRoll - heroRoller.getSuccessTotal();
-        // const autoSuccess = heroRoller.getAutoSuccess();
-        // const useAutoSuccess = autoSuccess !== undefined;
-        // const success = useAutoSuccess ? autoSuccess : margin >= 0;
-
-        // const flavor = `${dataset.label.toUpperCase()} (${charRoll}-) characteristic roll ${
-        //     success ? "succeeded" : "failed"
-        // } ${useAutoSuccess ? `due to automatic ${autoSuccess ? "success" : "failure"}` : `by ${Math.abs(margin)}`}`;
-
-        // const cardHtml = await heroRoller.render(flavor);
-
-        // const actor = this.actor;
-        // const token = actor.token;
-        // const speaker = ChatMessage.getSpeaker({ actor: actor, token });
-        // speaker.alias = actor.name;
-
-        // const chatData = {
-        //     style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-        //     rolls: heroRoller.rawRolls(),
-        //     author: game.user._id,
-        //     content: cardHtml,
-        //     speaker: speaker,
-        // };
-
-        // return ChatMessage.create(chatData);
     }
 
     async _onPrimaryCharacteristicRoll(event, characteristicValue, flavor) {
