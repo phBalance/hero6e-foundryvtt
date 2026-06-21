@@ -319,6 +319,9 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 );
                 this.data.hthAttackItems ??= hthAttacks.reduce((attacksObj, hthAttack) => {
                     // If already exists we're updating so no need to recreate.
+                    // ItemAttackFormApplication uses uuid as key, which confuses foundry.expandObject because
+                    // the key contains periods. Instead of fixup code we are simplifying by using just the id,
+                    // which is unique.
                     if (attacksObj[hthAttack.id]) {
                         return attacksObj;
                     }
@@ -384,7 +387,10 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             );
             this.data.nakedAdvantagesItems ??= nakedAdvantagesItems.reduce((naObj, naItem) => {
                 // If already exists we're updating so no need to recreate.
-                if (naObj[naItem.uuid]) {
+                // ItemAttackFormApplication uses uuid as key, which confuses foundry.expandObject because
+                // the key contains periods. Instead of fixup code we are simplifying by using just the id,
+                // which is unique.
+                if (naObj[naItem.id]) {
                     return naObj;
                 }
 
@@ -920,7 +926,8 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         const extendedFormData = foundry.utils.expandObject(formData.object);
 
         // PH: FIXME: There has to be a better way than this?
-        delete extendedFormData.effectiveRealCost;
+        // AA: Why are we deleting effectiveRealCost?
+        // delete extendedFormData.effectiveRealCost;
 
         // CSL & PSL format is non-standard, need to deal with those
         const updates = [];

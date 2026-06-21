@@ -8,7 +8,7 @@ export function registerCombatTests(quench) {
             const generationLabel = game.release?.generation ?? 13;
 
             // This has to be the top level so isSingleCombatTracker can be changed
-            describe.only(`Hero System 6e Speed Chart Turn Progression Matrix (Foundry Gen: ${generationLabel})`, function () {
+            describe(`Hero System 6e Speed Chart Turn Progression Matrix (Foundry Gen: ${generationLabel})`, function () {
                 const actorDocuments = [];
                 const combatDocuments = [];
 

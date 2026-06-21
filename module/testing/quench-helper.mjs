@@ -107,6 +107,16 @@ export function registerGlobalTeardown(quench) {
 
             describe("Global Teardown", function () {
                 it("Delete '_Quench' actors", async () => {
+                    // The end-to-end tests create tokens, make sure they get deleted
+                    const activeScene = game.scenes.active ?? game.scenes.contents?.[0];
+                    if (activeScene) {
+                        await activeScene.deleteEmbeddedDocuments(
+                            "Token",
+                            activeScene.tokens.filter((t) => t.name.startsWith("_Quench")).map((o) => o.id),
+                        );
+                    }
+
+                    // Various tests create actors, make sure they get deleted
                     await Actor.deleteDocuments(
                         game.actors.filter((a) => a.name.startsWith("_Quench")).map((o) => o.id),
                     );
@@ -118,6 +128,44 @@ export function registerGlobalTeardown(quench) {
             displayName: "Global Teardown",
         },
     );
+}
+
+export async function waitForElementInChat(elementSelector, timeoutMs = 1000) {
+    let messageHookId;
+
+    // 1. Monitored DOM paint tracking
+    const renderChatHookPromise = new Promise((resolve) => {
+        messageHookId = Hooks.on("renderChatMessageHTML", (chatMessage, cardHtmlElement) => {
+            const foundElement = cardHtmlElement.querySelector(elementSelector);
+
+            // Fix: querySelector returns a single node, not an array. Check for existence, not length.
+            if (foundElement) {
+                Hooks.off("renderChatMessageHTML", messageHookId);
+
+                // Frame 1: Yield the current execution thread
+                requestAnimationFrame(() => {
+                    // Frame 2: Execute right before the next screen repaint
+                    requestAnimationFrame(() => {
+                        resolve({
+                            chatMessage,
+                            foundElement,
+                        });
+                    });
+                });
+            }
+        });
+    });
+
+    // 2. Fallback execution safety net
+    const executionTimeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+            Hooks.off("renderChatMessageHTML", messageHookId);
+            reject(new Error(`Timeout: Target element "${elementSelector}" did not render within ${timeoutMs}ms.`));
+        }, timeoutMs);
+    });
+
+    // 3. Race conditions
+    return Promise.race([renderChatHookPromise, executionTimeoutPromise]);
 }
 
 /**
