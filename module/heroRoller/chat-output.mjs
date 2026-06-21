@@ -89,7 +89,6 @@ export async function generateChatMessage(heroRoller, defenseType, attackAction)
         `;
     }
 
-    // PH: FIXME: should we merge the roller output flavour text between generic and /heroroll?
     const cardHtml = (await heroRoller.render(chatCardFlavour)) + extraHtml;
 
     const speaker = ChatMessage.getSpeaker();

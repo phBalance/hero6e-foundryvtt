@@ -511,6 +511,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             roller.makeSuccessRoll(true, activationRoll.rollValue).addDice(3);
 
             const { succeeded: succeed, flavor: updatedFlavor } = await doSuccessRoll(
+                actor,
                 roller,
                 `${item.name} activation`,
             );
@@ -520,10 +521,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             const luckPower = activationRoll.activeItems[0]; // PH: FIXME: Kludge
             const { diceParts } = calculateDicePartsForItem(luckPower, {});
 
-            roller
-                .modifyTo5e(actor.system.is5e)
-                .makeLuckRoll()
-                .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0);
+            roller.makeLuckRoll().addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0);
 
             await roller.roll();
 
@@ -541,6 +539,8 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             }
 
             flavor = `${item.name} (rolled ${luckTotal} points) activation ${succeeded ? "succeeded" : "failed"} `;
+
+            // PH: FIXME: Need to produce chat card for it. It's not a success roll.
         } else if (activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL) {
             const charKey = activationRoll.characteristicKey.toLowerCase();
             const characteristic = actor.system.characteristics[charKey];
@@ -560,6 +560,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
                 );
 
             const { succeeded: succeed, flavor: updatedFlavor } = await doSuccessRoll(
+                actor,
                 roller,
                 `${item.name} activation`,
             );
@@ -582,6 +583,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
                 );
 
             const { succeeded: succeed, flavor: updatedFlavor } = await doSuccessRoll(
+                actor,
                 roller,
                 `${item.name} activation`,
             );
@@ -593,15 +595,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
 
         // PH: FIXME: Bunch of functionality ripped out of this function. See below to get it into the flavor.
         // PH: FIXME: resource usage string should be built in here as this is what's consuming. Create functions so it can be done in a fixed way.
-        await generateSuccessChatCard(
-            actor,
-            token,
-            speaker,
-            item,
-            roller,
-            flavor,
-            `Spent ${options.resourcesUsedDescription}`,
-        );
+        await generateSuccessChatCard(actor, speaker, roller, flavor, `Spent ${options.resourcesUsedDescription}`);
 
         // PH: FIXME: Get rid of options fields where possible. These decisions should be part of the flavor text and not burried in generating a chat card.
         // // FORCE success

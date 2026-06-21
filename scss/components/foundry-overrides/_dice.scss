@@ -30,13 +30,5 @@
 
     .dice-flavor {
         font-size: 15px;
-
-        .dice-succeeded {
-            color: var(--herosystem-color-announce-success);
-        }
-
-        .dice-failed {
-            color: var(--herosystem-color-announce-failure);
-        }
     }
 }

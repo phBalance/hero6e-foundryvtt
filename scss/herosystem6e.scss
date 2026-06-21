@@ -7,6 +7,16 @@
 body {
     --herosystem-color-announce-failure: var(--color-level-error);
     --herosystem-color-announce-success: #006400;
+
+    .announce-failure {
+        color: var(--herosystem-color-announce-failure);
+        font-weight: bold;
+    }
+
+    .announce-success {
+        color: var(--herosystem-color-announce-success);
+        font-weight: bold;
+    }
 }
 
 /* Styles for dice which are direct overrides of FoundryVTT styling */

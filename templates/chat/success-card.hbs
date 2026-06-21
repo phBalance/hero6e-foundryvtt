@@ -1,6 +1,8 @@
-{{ log 'HEROSYS success-card' this }}
-<div class="hero chat-card success-card" data-actor-id="{{actor._id}}" data-item-id="{{item._id}}">
-    {{{flavor}}}
+{{!-- {{ log 'HEROSYS success-card' this }} --}}
+<div class="hero chat-card success-card" data-actor-id="{{actor._id}}">
+    <div class="card-section success-flavor">
+        {{{flavor}}}
+    </div>
 
     <div class="tags">
         {{#each tags as |tag id|}}
