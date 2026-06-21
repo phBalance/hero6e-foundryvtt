@@ -528,7 +528,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
 
             const luckTotal = roller.getLuckTotal();
             const luckOption = rar.OPTIONID;
-            let requiredLuck = 0;
+            let requiredLuck;
             if (luckOption === "ONELUCK") {
                 requiredLuck = 1;
             } else if (luckOption === "TWOLUCK") {
@@ -536,7 +536,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             } else if (luckOption === "THREELUCK") {
                 requiredLuck = 3;
             } else {
-                requiredLuck = 99999999;
+                requiredLuck = 100;
                 console.error(`${item.detailedName()} has unknown luck option ${luckOption}`);
             }
 
