@@ -1,24 +1,23 @@
-{{!-- {{ log 'HEROSYS success-card' this }} --}}
+{{ log 'HEROSYS success-card' this }}
 <div class="hero chat-card success-card" data-actor-id="{{actor._id}}">
-    <div class="card-section success-flavor">
-        {{{flavor}}}
-    </div>
 
-    <div class="tags">
-        {{#each tags as |tag id|}}
-            <span class="tag tag-transparent" title="{{tag.title}}">{{tag.name}} {{tag.value}}</span>
-        {{/each}}
-    </div>
+    {{#if (gt tags.length 0)}}
+        <div class="card-section tags">
+            {{#each tags as |tag id|}}
+                <span class="tag tag-transparent" title="{{tag.title}}">{{tag.name}} {{tag.value}}</span>
+            {{/each}}
+        </div>
+    {{/if}}
 
     {{#if resourceDescription }}
-        <hr>
-
         <div class="card-section">
             {{{resourceDescription}}}
         </div>
     {{/if}}
 
-    <hr>
-
-    <div class="dice-roll">{{{ renderedSuccessRoll }}}</div>
+    <div class="card-section success-flavor">
+        {{{flavor}}}
+    
+        <div class="dice-roll">{{{ renderedSuccessRoll }}}</div>
+    </div>
 </div>
