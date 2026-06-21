@@ -51,7 +51,7 @@
                 {{#if (or nonDmgEffect isSenseAffecting)}}
                     Apply {{item.system.XMLID}}
                 {{else}}
-                    Apply Damage
+                    Apply Damage to selected token(s)
                 {{/if}}
             </button>
 
@@ -59,7 +59,7 @@
             {{log target}}
 
                 <button class="apply-damage"
-                    title="{{#if this.missed}}MISSED: {{/if}}Apply damage to {{target.name}}"
+                    title="{{#if this.missed}}Original attack missed{{/if}}"
                     data-actor-uuid="{{../actor.uuid}}"
                     data-target-tokens="{{toJsonArray target}}"
                     data-highlight-token="{{target.tokenUuid}}"
