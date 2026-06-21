@@ -222,10 +222,10 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
 
         try {
             for (const itemData of itemsToCreate) {
-                // Create new folder if needed
+                // Create new root folder if needed
                 const folderName = itemData.type.toUpperCase();
                 if (!folders[folderName]) {
-                    const name = folderName.titleCase();
+                    const name = `${folderName}S`.replace("EQUIPMENTS", "EQUIPMENT").titleCase();
                     folders[folderName] = await Folder.create(
                         {
                             type: "Item",
@@ -257,6 +257,11 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                             `${itemData.system.ALIAS} ID=${itemData.system.ID} has an invalid PARENTID reference`,
                         );
                     }
+                } else {
+                    const parentFolder =
+                        pack.contents.find((o) => o.system.ID === itemData.system.PARENTID)?.folder ||
+                        folders[folderName];
+                    itemData.folder = parentFolder.id;
                 }
 
                 await HeroSystem6eItem.create(itemData, { pack: pack.metadata.id });
