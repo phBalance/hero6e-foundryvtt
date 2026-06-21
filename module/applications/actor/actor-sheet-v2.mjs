@@ -1025,13 +1025,13 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     _onDragEnter(event) {
         event.preventDefault();
         const target = event.currentTarget.closest("nav a");
-        if (target) target.classList.add("dragHover");
+        if (target) target.classList.add("drag-hover");
     }
 
     _onDragLeave(event) {
         event.preventDefault();
         const target = event.currentTarget.closest("nav a");
-        if (target) target.classList.remove("dragHover");
+        if (target) target.classList.remove("drag-hover");
     }
 
     /**
@@ -1044,7 +1044,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         event.preventDefault();
 
         const target = event.currentTarget.closest("nav a");
-        if (target) target.classList.remove("dragHover");
+        if (target) target.classList.remove("drag-hover");
 
         const data = foundry.applications.ux.TextEditor.getDragEventData(event);
         // Handle different data types
