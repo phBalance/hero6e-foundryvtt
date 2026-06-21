@@ -5,7 +5,7 @@
 - Fix Mind Scan effect roll chat card results. [#4271](https://github.com/dmdorman/hero6e-foundryvtt/issues/4271)
 - Fix for dragging COMPOUND powers from item sidebar to actor. [#4277](https://github.com/dmdorman/hero6e-foundryvtt/issues/4277)
 - Improved in game editing of AUTOMATION cannot be stunned/takes no stun. [#4299](https://github.com/dmdorman/hero6e-foundryvtt/issues/4299)
-- Added buttons to apply damage to tokens that were missed. [#2105](https://github.com/dmdorman/hero6e-foundryvtt/issues/2105)
+- Added buttons to apply damage to tokens that were missed. [#4231](https://github.com/dmdorman/hero6e-foundryvtt/issues/4231) [#2105](https://github.com/dmdorman/hero6e-foundryvtt/issues/2105)
 
 ### Version 4.3.9 20260531
 
