@@ -1226,10 +1226,16 @@ async function doSingleTargetActionToHit(action, options) {
     };
     options.rolledResult = targetData;
 
+    const allInOneToHitDamageApply =
+        game.settings.get(game.system.id, "alphaTesting") &&
+        game.settings.get(game.system.id, "allInOneToHitDamageApply");
+
     // render card
     const template = isBlockManeuver
         ? `systems/${HEROSYS.module}/templates/chat/item-toHit-block-card.hbs`
-        : `systems/${HEROSYS.module}/templates/chat/item-toHit-card.hbs`;
+        : allInOneToHitDamageApply
+          ? `systems/${HEROSYS.module}/templates/chat/item-all-in-one-tohit-apply-card.hbs`
+          : `systems/${HEROSYS.module}/templates/chat/item-toHit-card.hbs`;
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
 
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });

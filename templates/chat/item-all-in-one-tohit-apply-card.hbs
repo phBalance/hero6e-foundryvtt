@@ -1,0 +1,37 @@
+{{ log 'item-all-in-one-tohit-apply-card' this }}
+
+<div 
+    class="hero chat-card item-all-in-one-tohit-apply-card"
+    data-item-id="{{originalUuid}}"
+    data-item-uuid="{{originalUuid}}" 
+    data-actor-id="{{actor.id}}"
+    data-actor-uuid="{{actor.uuid}}"
+    data-token-id="{{token.id}}"
+    data-token-uuid="{{token.uuid}}">
+
+    <header class="card-header attack">
+        <!-- Attack item -->
+        <div class="attack-item flexrow">
+            <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
+            <h3 class="item-name">{{{itemName item}}}</h3>
+        </div>
+
+        <!-- Attack item tags -->
+        <div class="tags">
+            <span class="tag">{{item.attackDefenseVs}}</span>
+        </div>
+    </header>
+
+    <div class="to-hit">
+        to-hit
+    </div>
+
+    <div class="roll-damage">
+        roll-damage
+    </div>
+
+    <div class="apply-damage">
+        apply-damage
+    </div>
+
+</div>
