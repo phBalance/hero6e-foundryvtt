@@ -1078,7 +1078,7 @@ async function doSingleTargetActionToHit(action, options) {
                     : null
                 : targetHeroRoller,
             renderedRoll: await targetHeroRoller.render(),
-            img: target.document.texture.src,
+            img: target.document?.texture.src,
             tags: targetHeroRoller.tags(),
         });
 
@@ -1152,7 +1152,7 @@ async function doSingleTargetActionToHit(action, options) {
                     result: { hit: hit, by: by.toString() },
                     roller: shot ? undefined : firstShotRoller,
                     renderedRoll: firstShotRenderedRoll, // TODO: Should perhaps adjust and rerender?
-                    img: singleTarget.document.texture.src,
+                    img: singleTarget.document?.texture?.src,
                     tags: attackHeroRoller.tags(),
                 });
             }

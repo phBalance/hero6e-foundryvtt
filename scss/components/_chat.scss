@@ -270,3 +270,143 @@
 .success-card .success-flavor {
     font-size: 15px;
 }
+
+// Unlocks size evaluation tracking for modern keywords
+html,
+.herosystem6e {
+    interpolate-size: allow-keywords;
+}
+
+.hero6e-to-hit-details {
+    border: 1px solid var(--color-border-light, #ccc);
+    background: rgb(0 0 0 / 3%);
+    border-radius: 4px;
+    margin: 1px 0;
+    overflow: hidden;
+
+    // --- SUMMARY HEADER BAR STYLES ---
+    .hero6e-to-hit-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2px;
+        width: 100%;
+        padding: 0;
+        background: var(--color-bg-btn, #e0e0e0);
+        cursor: pointer;
+        font-weight: bold;
+        list-style: none;
+
+        &::-webkit-details-marker {
+            display: none;
+        } // Safely hide safari marker
+
+        // Row Data Organizer
+        .summary-data-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 12px;
+            flex: 1;
+        }
+
+        // Left Side: Image and Character Name Layout
+        // Find where your existing target-info block is inside your .hero6e-to-hit-details scope:
+        .target-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 7;
+            min-width: 0;
+
+            // NEW BLOCK: Enforces a strict 24px wide uniform bounding frame
+            .target-thumbnail-wrapper {
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0; // Ensures wide text lines never squeeze the frame boundaries
+            }
+
+            .target-thumbnail {
+                max-width: 100%; // Constrains image elements dynamically to the wrapper size
+                max-height: 100%;
+                width: auto;
+                height: auto;
+                object-fit: contain; // Centers non-square grids cleanly without stretching pixels
+            }
+
+            .target-name {
+                font-weight: bold;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        // Right Side: Hit/Miss Section
+        .result-info {
+            text-align: right;
+            font-weight: normal;
+            flex: 3;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        // Chevron icon tracking rules
+        .summary-icon {
+            font-size: 10px;
+            transition: transform 0.2s ease;
+            flex-shrink: 0;
+        }
+    }
+
+    // Active dropdown animation rules for summary components
+    &[open] .hero6e-to-hit-summary .summary-icon {
+        transform: rotate(180deg);
+    }
+
+    // --- EXPANDABLE BODY PANEL STYLES ---
+    &::details-content {
+        height: 0;
+        overflow: hidden;
+        background: var(--color-bg-light, #fff);
+        opacity: 0;
+        transition:
+            height 0.25s ease-out,
+            opacity 0.2s ease-out,
+            content-visibility 0.25s allow-discrete;
+    }
+
+    &[open]::details-content {
+        height: auto;
+        opacity: 1;
+        border-top: 1px solid var(--color-border-light, #ccc);
+    }
+
+    // Interior content inner cell structural rules
+    .collapsible-content {
+        padding: 8px;
+
+        // Shared spacing block rules for action buttons and select containers
+        .action-row {
+            margin-top: 6px;
+        }
+
+        // Dedicated GM Override Grid layout rules
+        .override-row {
+            align-items: center;
+            gap: 1px;
+
+            .override-label {
+                flex: 1;
+            }
+
+            .override-select {
+                flex: 2;
+            }
+        }
+    }
+}
