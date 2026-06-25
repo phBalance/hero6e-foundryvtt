@@ -50,7 +50,7 @@ import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuv
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
-    Handlebars.registerHelper("itemName", itemName);
+    Handlebars.registerHelper("itemNameHtml", _itemNameHtml);
     Handlebars.registerHelper("itemIsCombatManeuver", itemIsCombatManeuver);
     Handlebars.registerHelper("itemIsOptionalCombatManeuver", itemIsOptionalCombatManeuver);
     Handlebars.registerHelper("filterItem", filterItem);
@@ -102,7 +102,7 @@ function itemFullDescription(item) {
 }
 
 // Returns HTML so expects to not be escaped in handlebars (i.e. triple braces)
-function itemName(item) {
+function _itemNameHtml(item) {
     try {
         if (item.system.NAME) {
             return `<i>${item.system.NAME}</i>`;
@@ -224,7 +224,7 @@ function itemHasActionBehavior(item, actionBehavior) {
     }
 }
 
-function itemPostHitActionString(item) {
+export function itemPostHitActionString(item) {
     try {
         const isAdjustment = item.isAdjustment;
         const isSenseAffecting = item.isSenseAffecting;
@@ -8198,11 +8198,19 @@ export function cloneToEffectiveAttackItem({
 
     // Sanity check
     if (effectiveItem.activePoints < 2) {
-        console.error(
-            `${effectiveItem.name} has activePoints=${effectiveItem.activePoints}, which is likely an internal error.`,
-            originalItem,
-            effectiveItem,
-        );
+        if (effectiveItem.isCombatManeuver) {
+            console.warn(
+                `${effectiveItem.name} has activePoints=${effectiveItem.activePoints}, which is likely an internal error.`,
+                originalItem,
+                effectiveItem,
+            );
+        } else {
+            console.error(
+                `${effectiveItem.name} has activePoints=${effectiveItem.activePoints}, which is likely an internal error.`,
+                originalItem,
+                effectiveItem,
+            );
+        }
     }
 
     // Item-attack-V2 uses originalItemUuid.

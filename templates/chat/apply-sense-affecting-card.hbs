@@ -11,7 +11,7 @@
     Attacker: <span class="item-name">{{item.actor.name}}</span>
   </div>
   <div>
-    Attack: <span class="item-name">{{{itemName item}}}</span>
+    Attack: <span class="item-name">{{{itemNameHtml item}}}</span>
   </div>
 
   <div class="apply-damage-amount">
@@ -41,7 +41,7 @@
         {{/each}}
     </div>
 
-    {{{itemName item}}}: {{targetToken.actor.name}} for {{ damageData.bodyDamage }} segments.
+    {{{itemNameHtml item}}}: {{targetToken.actor.name}} for {{ damageData.bodyDamage }} segments.
     {{#each senseGroups}}
         {{this.XMLID}} for {{ this.bodyDamage }} segments.
     {{/each}}

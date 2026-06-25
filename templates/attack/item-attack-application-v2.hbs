@@ -3,11 +3,11 @@
   <div class="hero chat-card item-card attack-card">
     <header class="card-header flexrow">
       <img src="{{originalItem.img}}" title="{{action.system.currentItem.name}}" width="36" height="36" />
-      <h3 class="item-name">{{{itemName action.system.currentItem}}}</h3>
+      <h3 class="item-name">{{{itemNameHtml action.system.currentItem}}}</h3>
     </header>
 
     <div class="description">
-      <b>{{{itemName action.system.currentItem}}}
+      <b>{{{itemNameHtml action.system.currentItem}}}
           {{#if action.system.currentItem.system.SFX}} ({{action.system.currentItem.system.SFX}}){{/if}}
       </b>: {{action.system.currentItem.system.description}} {{action.current.step}}
 

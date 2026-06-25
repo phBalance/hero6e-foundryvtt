@@ -13,7 +13,12 @@ import { HeroCompatibility } from "../utility/compatibility.mjs";
 
 import { ItemAttackClubWeaponApplicationV2 } from "../applications/item/item-attack-application-club-weapon.mjs";
 
-import { HeroSystem6eItem, doCharacteristicRollCheck, rollAblativeActivationCheck } from "../item/item.mjs";
+import {
+    HeroSystem6eItem,
+    doCharacteristicRollCheck,
+    rollAblativeActivationCheck,
+    itemPostHitActionString,
+} from "../item/item.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
@@ -53,6 +58,7 @@ export async function chatListeners(_html) {
     html.on("click", "div.adjustment-summary", this._onAdjustmentToolipExpandCollapse.bind(this));
     html.on("click", "i.modal-damage-card, span.modal-damage-card", this._onModalDamageCard.bind(this));
     html.on("click", "button.roll-powerToRemove", this._onRollPowerToRemove.bind(this));
+    html.on("click", `button[data-action="spendHaps"]`, this._onSpendHaps.bind(this));
 }
 
 export async function onMessageRendered(html) {
@@ -1061,7 +1067,7 @@ async function doSingleTargetActionToHit(action, options) {
 
         targetData.push({
             id: target.id,
-            uuid: target.uuid,
+            uuid: target.document?.uuid,
             name: `${target.name || "No Target Selected"}${options.targetEntangle ? " [ENTANGLE]" : ""}`,
             aoeAlwaysHit: aoeAlwaysHit,
             explosion: explosion,
@@ -1141,7 +1147,7 @@ async function doSingleTargetActionToHit(action, options) {
 
                 targetData.push({
                     id: singleTarget.id,
-                    uuid: singleTarget.uuid,
+                    uuid: singleTarget.document?.uuid,
                     name: singleTarget.name,
                     aoeAlwaysHit: aoeAlwaysHit,
                     toHitChar: toHitChar,
@@ -1202,20 +1208,30 @@ async function doSingleTargetActionToHit(action, options) {
         velocity: options.velocity,
 
         // data for damage card
-        actor,
-        token,
+        attackerActorId: actor.id,
+        attackerActorUuid: actor.uuid,
+        actorId: actor.id,
+        actorUuid: actor.uuid,
+        attackerTokenId: token.id,
+        attackerTokenUuid: token.uuid,
+        tokenId: token.id,
+        tokenUuid: token.uuid,
+        //actor,
+        //token,
 
         actionData: actionToJSON(action),
 
-        item,
+        //item,
+        itemImg: item.img,
+        itemName: item.name,
         itemJsonStr: dehydrateAttackItem(item), // PH: FIXME: Can remove some things like item etc because they're in the actionData.
         originalUuid: item.id || foundry.utils.parseUuid(item.system._active?.__originalUuid)?.id,
 
         adjustment,
         senseAffecting,
         ...options,
-        targetData: targetData,
-        targetIds: targetIds,
+        targetData,
+        targetIds,
 
         // endurance
         useEnd: resourcesRequired.totalEnd,
@@ -1227,8 +1243,9 @@ async function doSingleTargetActionToHit(action, options) {
         maxMinds: CONFIG.HERO.mindScanChoices
             .find((o) => o.key === parseInt(options.mindScanMinds))
             ?.label.match(/[\d,]+/)?.[0],
-        action,
+        //action,
         inActiveCombat: token?.inCombat,
+        _itemPostHitActionString: itemPostHitActionString(item),
     };
     options.rolledResult = targetData;
 
@@ -1256,6 +1273,11 @@ async function doSingleTargetActionToHit(action, options) {
         author: game.user._id,
         content: cardHtml,
         speaker: speaker,
+        flags: {
+            [game.system.id]: {
+                ...cardData,
+            },
+        },
     };
 
     await ChatMessage.create(chatData);
@@ -1752,6 +1774,114 @@ export async function _onRollPowerToRemove(event) {
     }
 }
 
+export async function _onSpendHaps(event) {
+    event.preventDefault();
+    const button = event.currentTarget;
+    button.blur();
+
+    if (!game.settings.get(game.system.id, "HAP")) {
+        return ui.notifications.error("Heroic Action Points (HAP) are not enabled");
+    }
+
+    const targetContainer = button.closest(`[data-target-token-uuid]`);
+    const targetTokenUuid = targetContainer?.dataset.targetTokenUuid;
+    const targetToken = await fromUuid(targetTokenUuid);
+    const targetActor = targetToken.actor;
+    if (!targetActor) throw new Error("TargetActor not found.");
+
+    // Get message
+    const messageId = button.closest(`li[data-message-id]`).dataset.messageId;
+    const message = game.messages.get(messageId);
+    if (!message) throw new Error("Chat message context not found.");
+
+    const attackerTokenUuid = message.getFlag(game.system.id, "attackerTokenUuid");
+    const attackerToken = await fromUuid(attackerTokenUuid);
+    const attackerActor = attackerToken?.actor;
+
+    if (!attackerActor) throw new Error("Attacker actor not found.");
+
+    // 2. Validate HAP currency locally on the client
+    const hapsToSpend = parseInt(button.dataset.by || "1");
+    const currentHaps = attackerActor.system.hap.value ?? 0;
+
+    if (currentHaps < hapsToSpend) {
+        return ui.notifications.warn(`${attackerToken.name} does not have enough HAPs.`);
+    }
+
+    await attackerActor.update({
+        "system.hap.value": currentHaps - hapsToSpend,
+    });
+
+    // 7. Prepare the uniform payload packet
+    const socketPayload = {
+        operation: "spendHapUpdateCard",
+        userId: game.user.id,
+        messageId: messageId,
+        targetTokenUuid: targetTokenUuid,
+        hapsToSpend: hapsToSpend,
+        targetActorName: targetActor.name,
+    };
+
+    // 8. Execute or Emit based on permissions
+    if (game.user.isGM) {
+        // GM client runs the shared logic directly
+        await processHapCardUpdate(socketPayload);
+    } else {
+        // Player client fires the packet across the network to the GM
+        game.socket.emit(`system.${game.system.id}`, socketPayload);
+    }
+}
+
+export async function processHapCardUpdate({ messageId, targetTokenUuid, hapsToSpend, targetActorName }) {
+    const message = ChatMessage.get(messageId);
+    if (!message) {
+        console.error(`Message not found: ${messageId}`);
+        return;
+    }
+
+    // 1. Pull the data cleanly using v14 getFlag methods
+    const targetDataArray = message.getFlag(game.system.id, "targetData") || [];
+
+    // 2. Use map to safely modify the targeted element without corrupting the array structure
+    let targetFound = false;
+    const updatedTargetData = targetDataArray.map((target) => {
+        if (target.uuid === targetTokenUuid) {
+            targetFound = true;
+            return {
+                ...target,
+                result: { ...target.result, hit: "hit", by: 0 },
+                hitRollText: `HAP ${hapsToSpend}`,
+            };
+        }
+        return target;
+    });
+
+    if (!targetFound) {
+        console.error("Target missing from message flag tracking index.");
+        return;
+    }
+
+    // 3. Gather template data context
+    const templateData = {
+        ...message.flags.hero6efoundryvttv2,
+        targetData: updatedTargetData,
+    };
+
+    // 4. Re-render the HTML template block
+    const newContent = await renderTemplate(
+        `systems/${HEROSYS.module}/templates/chat/item-all-in-one-tohit-apply-card.hbs`,
+        templateData,
+    );
+
+    // 5. Securely update both the text interface and the persistent database flags
+    await message.update({
+        content: newContent,
+        "flags.hero6efoundryvttv2.targetData": updatedTargetData,
+    });
+
+    ui.notifications.info(`${targetActorName} spent ${hapsToSpend} HAP to convert a Miss into a Hit!`);
+}
+
 async function createTemporaryKnockbackItem(actor, knockbackDice) {
     const knockbackAttackXml = `
             <POWER XMLID="ENERGYBLAST" ID="1695402954902" BASECOST="0.0" LEVELS="${knockbackDice}" ALIAS="Knockback" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
@@ -2019,8 +2149,17 @@ export async function _onRollDamage(event) {
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
     const toHitData = { ...button.dataset };
 
+    const messageId = button.closest(`li[data-message-id]`).dataset.messageId;
+    const message = game.messages.get(messageId);
+    if (!message) throw new Error("Chat message context not found.");
+
+    toHitData.actionData ??= message.getFlag(game.system.id, "actionData");
+    toHitData.actorUuid ||= message.getFlag(game.system.id, "actorUuid");
+
     // PH: FIXME: This is now included in the action data and this can be cleaned up
-    const { actor, item } = rehydrateActorAndAttackItem(toHitData);
+    let { actor, item } = rehydrateActorAndAttackItem(toHitData);
+    item ??= rehydrateAttackItem(message.getFlag(game.system.id, "itemJsonStr"), actor).item;
+    actor ??= await fromUuid(message.getFlag(game.system.id, "attackerActorUuid"));
 
     if (!item || !actor) {
         return ui.notifications.error(`Attack details are no longer available.`);

@@ -1060,6 +1060,16 @@ export class HeroRoller {
         return newRoller;
     }
 
+    /**
+     * Converts the HeroRoller instance into a plain, validation-safe JavaScript object.
+     * This conforms to standard Foundry VTT API practices for document and flag serialization.
+     * @returns {Object} A plain data state object.
+     */
+    toObject() {
+        // Simply route to your existing data serialization logic
+        return this.toData();
+    }
+
     toData() {
         return {
             _buildRollClass: this._buildRollClass.name,
@@ -1107,7 +1117,7 @@ export class HeroRoller {
 
     static fromData(dataObj) {
         const rollClass = CONFIG.Dice.rolls.find((klass) => klass.name === dataObj._buildRollClass);
-        const heroRoller = new HeroRoller(dataObj.options, rollClass);
+        const heroRoller = new HeroRoller(dataObj._options, rollClass);
         heroRoller._rollObj = dataObj._rollObj ? HeroRoll.fromData(dataObj._rollObj) : undefined;
 
         heroRoller._formulaTerms = dataObj._formulaTerms.map((_term, index) =>
