@@ -567,6 +567,17 @@ export default class SettingsHelpers {
             default: false,
             requiresReload: true,
         });
+
+        // All-In-One: combined ToHit/Damage/ApplyDamage into a single chatcard
+        game.settings.register(module, "allInOneToHitDamageApply", {
+            name: "All In One",
+            hint: `Combine to-hit, damage roll, and apply damage into a single chat card.`,
+            scope: "world",
+            config: game.settings.get(game.system.id, "alphaTesting"),
+            type: Boolean,
+            default: false,
+            requiresReload: true,
+        });
     }
 }
 

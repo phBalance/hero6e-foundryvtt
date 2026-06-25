@@ -308,7 +308,7 @@ async function skillRoll(item, actor, target) {
     const flavor = `${(untrainedSkillName ?? item.name).toUpperCase()}
     ${item.system.INPUT && !item.name.match(new RegExp(item.system.INPUT, "i")) ? `: ${item.system.INPUT}` : ``} 
     (${successValue}-) skill roll 
-    <b class="dice-${succeeded ? "succeeded" : "failed"}">
+    <b class="${succeeded ? "announce-success" : "announce-failure"}">
     ${succeeded ? "succeeded" : "failed"} by ${
         autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`
     }</b>. ${disadFlavor}`;

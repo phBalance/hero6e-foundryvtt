@@ -1,0 +1,170 @@
+{{ log 'item-all-in-one-tohit-apply-card' this }}
+
+<div 
+    class="hero chat-card item-all-in-one-tohit-apply-card"
+    data-item-id="{{originalUuid}}"
+    data-item-uuid="{{originalUuid}}" 
+    data-actor-id="{{actor.id}}"
+    data-actor-uuid="{{actor.uuid}}"
+    data-token-id="{{token.id}}"
+    data-token-uuid="{{token.uuid}}">
+
+    <header class="card-header attack">
+        <!-- Attack item -->
+        <div class="attack-item flexrow">
+            <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
+            <h3 class="item-name">{{{itemName item}}}</h3>
+        </div>
+
+        <!-- Attack item tags -->
+        <div class="tags">
+            {{#each attackTags as |tag id|}}
+                <span class="tag" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
+            {{/each}}
+        </div>
+
+
+        <!-- Resource use -->
+        {{#if resourcesUsedDescription}}
+            <hr>
+            <div class="card-section">
+                {{!-- PH: FIXME: strikethrough shouldn't be calculated in CSS --}}
+                <div class="description-tiny {{#unless inActiveCombat}}strikethrough{{/unless}}" {{#unless inActiveCombat}}title="END and other resources are only consumed when in combat"{{/unless}}>Spent {{{ resourcesUsedDescription }}}</div>
+            </div>
+        {{/if}}
+
+        
+        
+    </header>
+
+    <!-- Show each target -->
+    {{#each targetData as |target|}}
+        <div class="targets" style="border:1px solid red">
+            {{#unless target.aoeAlwaysHit}}
+                {{#if (not ../maxMinds)}}
+                    {{!-- <div class="card-section">
+                        {{#if target.id}}
+                            <div class="description-tiny">Attack Roll<br>vs.<br>{{target.name}}</div>
+                        {{else}}
+                            <div class="description-tiny">This attack had no target so some details (like range penalties) are not considered. Target DCV is presumed to be an inanimate object. GM should review this roll carefully.</div>
+                        {{/if}}
+                        <div class="hit-roll">{{{ target.renderedRoll }}}</div>
+
+                        <div class="tags description-tiny">
+                            {{#each target.defensiveTags as |tag|}}
+                                <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
+                            {{/each}}
+                        </div>
+
+                        <div class="description-medium">
+                            {{{ target.hitRollText }}}
+                            <span data-visibility="gm">
+                                ({{target.toHitChar}} {{target.value}})
+                            </span>
+                        </div>
+                    </div> --}}
+                    {{log target.result}}
+                    <div class="flexrow">
+                        {{log target}}
+                        <div class="flexrow">
+                            <img src="{{target.img}}" 
+                                title="{{target.name}}" 
+                                style="max-width: 24px; max-height: 24px; object-fit: contain; width: auto; height: auto;" />
+
+                            {{target.name}}
+                        </div>
+                        
+                            {{#if (eq (toLowerCase target.result.hit) "hit")}}
+                                <button disabled><span class="{{toLowerCase target.result.hit}}">{{target.result.hit}}</span> by {{target.result.by}}</button>
+                            {{else}}
+                                <button><span class="{{toLowerCase target.result.hit}}">{{target.result.hit}}</span>. Spend {{target.result.by}} HAP.</button>
+                            {{/if}}
+                    </div>
+
+                    <!-- collapsible to-hit details-->
+                    <div>
+
+                        <!-- To Hit tags (per target; range penalty is likely the only difference-->
+                        <div class="tags">
+                            {{#each tags as |tag id|}}
+                                <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}"{{/if}}{{#if ../maxMinds}} data-visibility="gm"{{/if}}>{{tag.name}}
+                                    {{tag.value}}
+                                </span>
+                            {{/each}}
+                        </div>
+
+                        <div class="hit-roll">{{{ target.renderedRoll }}}</div>
+
+                        <div class="tags description-tiny">
+                            {{#each target.defensiveTags as |tag|}}
+                                <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}" {{/if}}>{{tag.name}}</span>
+                            {{/each}}
+                        </div>
+
+                        <div class="description-medium">
+                            {{{ target.hitRollText }}}
+                            <span data-visibility="gm">
+                                ({{target.toHitChar}} {{target.value}})
+                            </span>
+                        </div>
+                    </div>
+                {{else}}
+                    Mind Scan?
+                    {{!-- Mind Scan - we only want the 1st mind to show the roll info. Only show to GM. --}}
+                    {{!-- {{#if (eq @index 0)}}
+                        <div class="card-section" data-visibility="gm">
+                            <div class="description-tiny">{{../maxMinds}} mind(s)</div>
+                            <div class="hit-roll">{{{ target.renderedRoll }}}</div>
+                            <div class="description-medium">
+                                {{{ target.hitRollText }}}
+                                <span data-visibility="gm">
+                                    ({{target.toHitChar}} {{target.value}})
+                                </span>
+                            </div>
+                        </div>
+                    {{/if}} --}}
+                {{/if}}
+            {{/unless}}
+        </div>
+    {{/each}}
+
+    <!-- Roll damage button-->
+    {{#if maxMinds}}
+        maxMinds?
+        {{!-- <div>
+            <i>The Game Master is reviewing the target to confirm it is within the Mind Scan area and that your attack score exceeded the target's DMCV.</i>
+        </div>
+
+        <button data-visibility="gm" class="roll-mindscan" data-actor-uuid="{{actor.uuid}}" data-item-json-str="{{itemJsonStr}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
+            data-effectiveStr="{{effectiveStr}}" data-effective-levels="{{effectiveLevels}}" data-target-ids="{{targetIds}}" data-velocity="{{velocity}}" 
+            data-boostable-Charges="{{boostableChargesToUse}}" data-to-hit-roll-total="{{toHitRollTotal}}" data-target="" title="Will result in a MISS">
+            No Target or Miss
+        </button>
+
+        <button data-visibility="gm" class="roll-mindscan" data-actor-uuid="{{actor.uuid}}" data-item-json-str="{{itemJsonStr}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
+            data-effectiveStr="{{effectiveStr}}" data-effective-levels="{{effectiveLevels}}" data-target-ids="{{targetIds}}" data-velocity="{{velocity}}" 
+            data-boostable-Charges="{{boostableChargesToUse}}" data-to-hit-roll-total="{{toHitRollTotal}}" data-target="Selected" title="Select a token on the scene">
+            Selected Token
+        </button>
+
+        {{#each targetData as |target|}}
+            {{#if (eq target.result.hit "Hit")}}
+                <button data-visibility="gm" class="roll-mindscan" data-actor-uuid="{{../actor.uuid}}" data-item-json-str="{{../itemJsonStr}}" data-aim="{{../aim}}" data-aim-side="{{../aimSide}}"
+                    data-effectiveStr="{{../effectiveStr}}" data-effective-levels="{{../effectiveLevels}}" data-target-ids="{{../targetIds}}" data-velocity="{{../velocity}}" 
+                    data-boostable-charges="{{../boostableChargesToUse}}" data-target-entangle="{{targetEntangle}}" data-to-hit-roll-total="{{../toHitRollTotal}}" data-target="{{this.id}}">
+                    <b>{{this.name}}</b>
+                </button>
+            {{/if}}
+        {{/each}} --}}
+    {{else}}
+        <div data-visibility="{{actor.id}}">
+            <button class="roll-damage" data-actor-uuid="{{actor.uuid}}" data-item-json-str="{{itemJsonStr}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
+                data-action-data="{{actionData}}"
+                data-effectiveStr="{{effectiveStr}}" data-effective-levels="{{effectiveLevels}}" data-target-ids="{{targetIds}}" data-velocity="{{velocity}}" 
+                data-boostable-charges="{{boostableChargesToUse}}" data-target-entangle="{{targetEntangle}}">
+                {{itemPostHitActionString item}}
+            </button>
+        </div>
+    {{/if}}
+
+</div>
