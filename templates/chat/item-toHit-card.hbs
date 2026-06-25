@@ -4,8 +4,8 @@
     <span class="flavor-text">
         {{!-- Attack Name --}}
         <header class="card-header attack flexrow">
-            <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
-            <h3 class="item-name">{{{itemName item}}}</h3>
+            <img src="{{itemImg}}" title="{{itemName}}" width="36" height="36" />
+            <h3 class="item-name">{{{itemName}}}</h3>
         </header>
 
         {{!-- Show Target, if any --}}
@@ -152,7 +152,7 @@
                     data-action-data="{{actionData}}"
                     data-effectiveStr="{{effectiveStr}}" data-effective-levels="{{effectiveLevels}}" data-target-ids="{{targetIds}}" data-velocity="{{velocity}}" 
                     data-boostable-charges="{{boostableChargesToUse}}" data-target-entangle="{{targetEntangle}}">
-                    {{itemPostHitActionString item}}
+                    {{_itemPostHitActionString}}
                 </button>
             </div>
         {{/if}}

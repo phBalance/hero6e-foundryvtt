@@ -688,6 +688,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                     } else {
                         regionData.shapes[0].angle = 60;
                     }
+                    regionData.shapes[0].radius = metersToPixels(areaOfEffect.value) / 2;
                 }
 
                 break;

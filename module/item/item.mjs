@@ -50,7 +50,7 @@ import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuv
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
-    Handlebars.registerHelper("itemName", itemName);
+    Handlebars.registerHelper("itemNameHtml", _itemNameHtml);
     Handlebars.registerHelper("itemIsCombatManeuver", itemIsCombatManeuver);
     Handlebars.registerHelper("itemIsOptionalCombatManeuver", itemIsOptionalCombatManeuver);
     Handlebars.registerHelper("filterItem", filterItem);
@@ -102,7 +102,7 @@ function itemFullDescription(item) {
 }
 
 // Returns HTML so expects to not be escaped in handlebars (i.e. triple braces)
-function itemName(item) {
+function _itemNameHtml(item) {
     try {
         if (item.system.NAME) {
             return `<i>${item.system.NAME}</i>`;
@@ -224,7 +224,7 @@ function itemHasActionBehavior(item, actionBehavior) {
     }
 }
 
-function itemPostHitActionString(item) {
+export function itemPostHitActionString(item) {
     try {
         const isAdjustment = item.isAdjustment;
         const isSenseAffecting = item.isSenseAffecting;
@@ -8174,31 +8174,43 @@ export function cloneToEffectiveAttackItem({
     effectiveStr,
     effectiveStrPushedRealPoints,
 }) {
-    let effectiveItem;
-    const effectiveItemData = originalItem.toObject(false);
-    effectiveItemData._id = null;
+    const effectiveItem = originalItem.clone({}, { keepId: false });
 
     // v14 throws error if effect.duration.value is not an integer.
     // Value = Infinity fails SchemaField validation.
     // We can replace Infinity with null and get this to work.
     // Appears to be a FoundryVTT V14 build 362 bug.
     if (HeroCompatibility.isV14) {
-        for (const effect of effectiveItemData.effects) {
-            if (effect.duration.value === Infinity) {
-                effect.duration.value = null;
-            }
+        const updates = effectiveItem.effects
+            .map((effect) => {
+                if (effect.duration.value === Infinity) {
+                    return { _id: effect.id, "duration.value": null };
+                }
+                return null;
+            })
+            .filter(Boolean);
+
+        if (updates.length) {
+            // updateSource ensures schemas update without writing to the DB
+            effectiveItem.updateSource({ effects: updates });
         }
     }
 
-    effectiveItem = new HeroSystem6eItem(effectiveItemData, { parent: originalItem.actor });
-
     // Sanity check
     if (effectiveItem.activePoints < 2) {
-        console.error(
-            `${effectiveItem.name} has activePoints=${effectiveItem.activePoints}, which is likely an internal error.`,
-            originalItem,
-            effectiveItem,
-        );
+        if (effectiveItem.isCombatManeuver) {
+            console.warn(
+                `${effectiveItem.name} has activePoints=${effectiveItem.activePoints}, which is likely an internal error.`,
+                originalItem,
+                effectiveItem,
+            );
+        } else {
+            console.error(
+                `${effectiveItem.name} has activePoints=${effectiveItem.activePoints}, which is likely an internal error.`,
+                originalItem,
+                effectiveItem,
+            );
+        }
     }
 
     // Item-attack-V2 uses originalItemUuid.

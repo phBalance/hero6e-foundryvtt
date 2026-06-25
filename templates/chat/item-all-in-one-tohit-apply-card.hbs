@@ -4,16 +4,16 @@
     class="hero chat-card item-all-in-one-tohit-apply-card"
     data-item-id="{{originalUuid}}"
     data-item-uuid="{{originalUuid}}" 
-    data-actor-id="{{actor.id}}"
-    data-actor-uuid="{{actor.uuid}}"
-    data-token-id="{{token.id}}"
-    data-token-uuid="{{token.uuid}}">
+    data-attacker-actor-id="{{attackerActorId}}"
+    data-attacker-actor-uuid="{{attackerActorUuid}}"
+    data-attacker-token-id="{{attackerTokenId}}"
+    data-attacker-token-uuid="{{attackerTokenUuid}}">
 
     <header class="card-header attack">
         <!-- Attack item -->
         <div class="attack-item flexrow">
-            <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
-            <h3 class="item-name">{{{itemName item}}}</h3>
+            <img src="{{itemImg}}" title="{{itemName}}" width="36" height="36" />
+            <h3 class="item-name">{{{itemName}}}</h3>
         </div>
 
         <!-- Attack item tags -->
@@ -62,10 +62,13 @@
                     {{log target.result}}
                     
 
-                    <details class="hero6e-to-hit-details"> 
+                    <details class="hero6e-to-hit-details" 
+                        data-target-token-uuid="{{target.uuid}}" 
+                        data-target-token-id="{{target.id}}"
+                    > 
     
                         <!-- Summary Header bar with structural classes -->
-                        <summary class="hero6e-to-hit-summary" data-action="toggleHitDetails" target-uuid="{{target.uuid}}"> 
+                        <summary class="hero6e-to-hit-summary" data-action="toggleHitDetails" > 
                             
                             <!-- Main Data Row Wrapper --> 
                             <div class="summary-data-row"> 
@@ -210,12 +213,13 @@
         {{/each}} --}}
     {{else}}
         <div data-visibility="{{actor.id}}">
-            <button class="roll-damage" data-actor-uuid="{{actor.uuid}}" data-item-json-str="{{itemJsonStr}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
+            {{!-- <button class="roll-damage" data-actor-uuid="{{actor.uuid}}" data-item-json-str="{{itemJsonStr}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
                 data-action-data="{{actionData}}"
                 data-effectiveStr="{{effectiveStr}}" data-effective-levels="{{effectiveLevels}}" data-target-ids="{{targetIds}}" data-velocity="{{velocity}}" 
                 data-boostable-charges="{{boostableChargesToUse}}" data-target-entangle="{{targetEntangle}}">
-                {{itemPostHitActionString item}}
-            </button>
+                {{_itemPostHitActionString}}
+            </button> --}}
+            <button class="roll-damage">{{_itemPostHitActionString}}</button>
         </div>
     {{/if}}
 

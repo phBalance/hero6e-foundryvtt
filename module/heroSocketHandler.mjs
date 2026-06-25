@@ -1,4 +1,5 @@
 import { HeroSystem6eRegionDocument } from "./heroRegion.mjs";
+import { processHapCardUpdate } from "./item/item-attack.mjs";
 
 export class HeroSocketHandler {
     static Initialize() {
@@ -60,6 +61,19 @@ export class HeroSocketHandler {
                         return;
                     }
                     await HeroSystem6eRegionDocument.applyBehaviorTokenAutomaticTargeting(data.regionUuid);
+                    break;
+                }
+
+                case "spendHapUpdateCard": {
+                    // Ensure only the primary active GM runs the database operation
+                    if (game.user.id !== game.users.activeGM?.id) return;
+
+                    await processHapCardUpdate({
+                        messageId: data.messageId,
+                        targetTokenUuid: data.targetTokenUuid,
+                        hapsToSpend: data.hapsToSpend,
+                        targetActorName: data.targetActorName,
+                    });
                     break;
                 }
 
