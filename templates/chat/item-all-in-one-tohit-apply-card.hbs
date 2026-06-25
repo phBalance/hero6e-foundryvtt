@@ -64,25 +64,86 @@
                         </div>
                     </div> --}}
                     {{log target.result}}
-                    <div class="flexrow">
-                        {{log target}}
-                        <div class="flexrow">
-                            <img src="{{target.img}}" 
-                                title="{{target.name}}" 
-                                style="max-width: 24px; max-height: 24px; object-fit: contain; width: auto; height: auto;" />
+                    
 
-                            {{target.name}}
-                        </div>
-                        
-                            {{#if (eq (toLowerCase target.result.hit) "hit")}}
-                                <button disabled><span class="{{toLowerCase target.result.hit}}">{{target.result.hit}}</span> by {{target.result.by}}</button>
-                            {{else}}
-                                <button><span class="{{toLowerCase target.result.hit}}">{{target.result.hit}}</span>. Spend {{target.result.by}} HAP.</button>
+                    <details class="hero6e-to-hit-details">
+    
+                        <!-- The trigger header acting exactly like the dice-tooltip header button -->
+                        <summary class="hero6e-to-hit-summary" data-action="toggleHitDetails" target-uuid="{{target.uuid}}"
+                            style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;"
+                            >
+                            
+                            <!-- Main Data Wrapper (Takes up remaining horizontal space) -->
+                            <div class="flexrow" style="align-items: center; gap: 8px; flex: 1;">
+            
+                                <!-- Left Side: Target Image and Name -->
+                                <div class="flexrow" style="align-items: center; gap: 6px;">
+                                    <img src="{{target.img}}" title="{{target.name}}" style="max-width: 24px; max-height: 24px; object-fit: contain; width: auto; height: auto;" />
+                                    <span>{{target.name}}</span>
+                                </div>
+
+                                <!-- Right Side: Hit or Miss Conditional Result Layout -->
+                                <div style="text-align: right; font-weight: normal;">
+                                    {{#if (eq (toLowerCase target.result.hit) "hit")}} 
+                                        <div><span class="status-result announce-success">{{target.result.hit}}</span></div> 
+                                    {{else}} 
+                                        <div><span class="status-result announce-failure">{{target.result.hit}}</span></div> 
+                                    {{/if}}
+                                </div>
+
+                            </div>
+                            {{!-- <i class="fas fa-chevron-down summary-icon"></i> --}}
+                        </summary>
+
+                        <!-- The expanded container panel holding your targeted tags -->
+                        <div class="collapsible-content">
+                            <!-- To Hit tags per target -->
+                            <div class="tags"> 
+                                {{#each tags as |tag id|}} 
+                                    <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}"{{/if}}{{#if ../maxMinds}} data-visibility="gm"{{/if}}>
+                                        {{tag.name}} {{tag.value}} 
+                                    </span> 
+                                {{/each}} 
+                            </div>
+
+                            <div class="hit-roll">{{{ target.renderedRoll }}}</div>
+
+                            <div class="tags description-tiny"> 
+                                {{#each target.defensiveTags as |tag|}} 
+                                    <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}"{{/if}}>
+                                        {{tag.name}}
+                                    </span> 
+                                {{/each}} 
+                            </div>
+
+                            <div class="description-medium"> 
+                                {{{ target.hitRollText }}} 
+                                <span data-visibility="gm"> ({{target.toHitChar}} {{target.value}}) </span> 
+                            </div>
+
+                            <!-- todo: check if HAPs are enabled-->
+                            {{#if (eq (toLowerCase target.result.hit) "miss")}} 
+                                <div class="flexrow">
+                                    <button data-action"spendHaps" data-by="{{target.result.by}}">Spend {{target.result.by}} HAP</button>
+                            </div>
                             {{/if}}
-                    </div>
+
+                            <!-- Allow GM to override hit/miss-->
+                            <div data-visibility="gm" class="flexrow">
+                                <label>
+                                    GM Override
+                                </label>
+                                <select data-action="gmOverride">
+                                    <option value="use_roll">use roll</option>
+                                    <option value="force_hit">force hit</option>
+                                    <option value="force_miss">force miss</option>
+                                </select>
+                            </div>
+                        </div>
+                    </details>
 
                     <!-- collapsible to-hit details-->
-                    <div>
+                    {{!-- <div>
 
                         <!-- To Hit tags (per target; range penalty is likely the only difference-->
                         <div class="tags">
@@ -107,7 +168,7 @@
                                 ({{target.toHitChar}} {{target.value}})
                             </span>
                         </div>
-                    </div>
+                    </div> --}}
                 {{else}}
                     Mind Scan?
                     {{!-- Mind Scan - we only want the 1st mind to show the roll info. Only show to GM. --}}
