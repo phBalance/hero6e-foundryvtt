@@ -26,20 +26,16 @@
 
         <!-- Resource use -->
         {{#if resourcesUsedDescription}}
-            <hr>
             <div class="card-section">
                 {{!-- PH: FIXME: strikethrough shouldn't be calculated in CSS --}}
                 <div class="description-tiny {{#unless inActiveCombat}}strikethrough{{/unless}}" {{#unless inActiveCombat}}title="END and other resources are only consumed when in combat"{{/unless}}>Spent {{{ resourcesUsedDescription }}}</div>
             </div>
         {{/if}}
-
-        
-        
     </header>
 
     <!-- Show each target -->
     {{#each targetData as |target|}}
-        <div class="targets" style="border:1px solid red">
+        <div class="targets">
             {{#unless target.aoeAlwaysHit}}
                 {{#if (not ../maxMinds)}}
                     {{!-- <div class="card-section">
@@ -66,81 +62,76 @@
                     {{log target.result}}
                     
 
-                    <details class="hero6e-to-hit-details">
+                    <details class="hero6e-to-hit-details"> 
     
-                        <!-- The trigger header acting exactly like the dice-tooltip header button -->
-                        <summary class="hero6e-to-hit-summary" data-action="toggleHitDetails" target-uuid="{{target.uuid}}"
-                            style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;"
-                            >
+                        <!-- Summary Header bar with structural classes -->
+                        <summary class="hero6e-to-hit-summary" data-action="toggleHitDetails" target-uuid="{{target.uuid}}"> 
                             
-                            <!-- Main Data Wrapper (Takes up remaining horizontal space) -->
-                            <div class="flexrow" style="align-items: center; gap: 8px; flex: 1;">
-            
-                                <!-- Left Side: Target Image and Name -->
-                                <div class="flexrow" style="align-items: center; gap: 6px;">
-                                    <img src="{{target.img}}" title="{{target.name}}" style="max-width: 24px; max-height: 24px; object-fit: contain; width: auto; height: auto;" />
-                                    <span>{{target.name}}</span>
-                                </div>
-
-                                <!-- Right Side: Hit or Miss Conditional Result Layout -->
-                                <div style="text-align: right; font-weight: normal;">
-                                    {{#if (eq (toLowerCase target.result.hit) "hit")}} 
-                                        <div><span class="status-result announce-success">{{target.result.hit}}</span></div> 
-                                    {{else}} 
-                                        <div><span class="status-result announce-failure">{{target.result.hit}}</span></div> 
+                            <!-- Main Data Row Wrapper --> 
+                            <div class="summary-data-row"> 
+                                
+                                <!-- Left Side: Target Image Container and Truncated Name --> 
+                                <div class="target-info"> 
+                                    {{#if target.img}}
+                                        <div class="target-thumbnail-wrapper">
+                                            <img src="{{target.img}}" title="{{target.name}}" class="target-thumbnail" /> 
+                                        </div>
                                     {{/if}}
-                                </div>
+                                    <span class="target-name">{{target.name}}</span> 
+                                </div> 
 
-                            </div>
-                            {{!-- <i class="fas fa-chevron-down summary-icon"></i> --}}
-                        </summary>
+                                <!-- Right Side: Hit or Miss Status Badge Layout --> 
+                                <div class="result-info"> 
+                                    {{#if (eq (toLowerCase target.result.hit) "hit")}} 
+                                        <span class="status-result announce-success">{{target.hitRollText}}</span> 
+                                    {{else}} 
+                                        <span class="status-result announce-failure">{{target.hitRollText}}</span> 
+                                    {{/if}} 
+                                </div> 
+                            </div> 
 
-                        <!-- The expanded container panel holding your targeted tags -->
-                        <div class="collapsible-content">
-                            <!-- To Hit tags per target -->
+                            <!-- Dropdown chevron indicator -->
+                            <i class="fas fa-chevron-down summary-icon"></i> 
+                        </summary> 
+
+                        <!-- The expanded container panel holding your tags and actions --> 
+                        <div class="collapsible-content"> 
+                            <!-- ... (Rest of your collapsible inner tags, rolls, and GM actions remain completely unchanged) ... -->
                             <div class="tags"> 
                                 {{#each tags as |tag id|}} 
-                                    <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}"{{/if}}{{#if ../maxMinds}} data-visibility="gm"{{/if}}>
+                                    <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}"{{/if}}{{#if ../maxMinds}} data-visibility="gm"{{/if}}> 
                                         {{tag.name}} {{tag.value}} 
                                     </span> 
                                 {{/each}} 
-                            </div>
-
-                            <div class="hit-roll">{{{ target.renderedRoll }}}</div>
-
+                            </div> 
+                            <div class="hit-roll">{{{ target.renderedRoll }}}</div> 
                             <div class="tags description-tiny"> 
                                 {{#each target.defensiveTags as |tag|}} 
-                                    <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}"{{/if}}>
-                                        {{tag.name}}
-                                    </span> 
+                                    <span class="tag tag-transparent" {{#if tag.title}}title="{{tag.title}}"{{/if}}>{{tag.name}}</span> 
                                 {{/each}} 
-                            </div>
-
+                            </div> 
                             <div class="description-medium"> 
                                 {{{ target.hitRollText }}} 
                                 <span data-visibility="gm"> ({{target.toHitChar}} {{target.value}}) </span> 
-                            </div>
-
-                            <!-- todo: check if HAPs are enabled-->
+                            </div> 
                             {{#if (eq (toLowerCase target.result.hit) "miss")}} 
-                                <div class="flexrow">
-                                    <button data-action"spendHaps" data-by="{{target.result.by}}">Spend {{target.result.by}} HAP</button>
-                            </div>
-                            {{/if}}
-
-                            <!-- Allow GM to override hit/miss-->
-                            <div data-visibility="gm" class="flexrow">
-                                <label>
-                                    GM Override
-                                </label>
-                                <select data-action="gmOverride">
-                                    <option value="use_roll">use roll</option>
-                                    <option value="force_hit">force hit</option>
-                                    <option value="force_miss">force miss</option>
-                                </select>
-                            </div>
-                        </div>
+                                <div class="flexrow action-row"> 
+                                    <button data-action="spendHaps" data-by="{{target.result.by}}">Spend {{target.result.by}} HAP</button> 
+                                </div> 
+                            {{/if}} 
+                            <div class="data-visibility-gm flexrow action-row override-row" data-visibility="gm"> 
+                                <label class="override-label"> GM Override </label> 
+                                <select data-action="gmOverride" class="override-select"> 
+                                    <option value="use_roll">use roll</option> 
+                                    <option value="force_hit">force hit</option> 
+                                    <option value="force_miss">force miss</option> 
+                                </select> 
+                            </div> 
+                        </div> 
                     </details>
+
+
+
 
                     <!-- collapsible to-hit details-->
                     {{!-- <div>
