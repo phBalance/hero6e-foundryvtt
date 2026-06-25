@@ -1061,6 +1061,7 @@ async function doSingleTargetActionToHit(action, options) {
 
         targetData.push({
             id: target.id,
+            uuid: target.uuid,
             name: `${target.name || "No Target Selected"}${options.targetEntangle ? " [ENTANGLE]" : ""}`,
             aoeAlwaysHit: aoeAlwaysHit,
             explosion: explosion,
@@ -1140,6 +1141,7 @@ async function doSingleTargetActionToHit(action, options) {
 
                 targetData.push({
                     id: singleTarget.id,
+                    uuid: singleTarget.uuid,
                     name: singleTarget.name,
                     aoeAlwaysHit: aoeAlwaysHit,
                     toHitChar: toHitChar,
