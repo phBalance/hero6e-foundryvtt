@@ -659,7 +659,7 @@ export async function doAoeActionToHit(action, options) {
             Math.min(distance / 2, item.actor.system.is5e ? missBy : missBy * 2),
         );
 
-        hitRollText = `AoE origin <b class="dice-failed">MISSED by ${missBy}</b>. Move AoE origin ${
+        hitRollText = `AoE origin <b class="announce-failure">MISSED by ${missBy}</b>. Move AoE origin ${
             moveDistance + getSystemDisplayUnits(item.actor.is5e)
         } in the <b>${facingRollResult}</b> direction.`;
     }
@@ -933,14 +933,6 @@ async function doSingleTargetActionToHit(action, options) {
         return ui.notifications.error(`Attack AOE template was not found.`);
     }
 
-    // Pick the appropriate target based on the attack type. For AoE it's the base of the AoE template for
-    // a single target attack it's the actual target.
-    const target = isAoE ? aoeTemplate : targets[0];
-    const distance = token ? calculateDistanceBetween(token, target).distance : 0;
-
-    // Range modifiers
-    addRangeIntoToHitRoll(distance, item, actor, attackHeroRoller);
-
     // Combat Skill Levels
     await addAttackCslsIntoToHitRoll(action, attackHeroRoller);
 
@@ -1059,6 +1051,14 @@ async function doSingleTargetActionToHit(action, options) {
             }
         }
 
+        // Pick the appropriate target based on the attack type. For AoE it's the base of the AoE template for
+        // a single target attack it's the actual target.
+        const targetForDistance = isAoE ? aoeTemplate : target;
+        const distance = token ? calculateDistanceBetween(token, targetForDistance).distance : 0;
+
+        // Range modifiers
+        addRangeIntoToHitRoll(distance, item, actor, targetHeroRoller);
+
         targetData.push({
             id: target.id,
             name: `${target.name || "No Target Selected"}${options.targetEntangle ? " [ENTANGLE]" : ""}`,
@@ -1077,6 +1077,8 @@ async function doSingleTargetActionToHit(action, options) {
                     : null
                 : targetHeroRoller,
             renderedRoll: await targetHeroRoller.render(),
+            img: target.document.texture.src,
+            tags: targetHeroRoller.tags(),
         });
 
         // Keep track of which tokens were hit so we can apply damage later,
@@ -1148,6 +1150,8 @@ async function doSingleTargetActionToHit(action, options) {
                     result: { hit: hit, by: by.toString() },
                     roller: shot ? undefined : firstShotRoller,
                     renderedRoll: firstShotRenderedRoll, // TODO: Should perhaps adjust and rerender?
+                    img: singleTarget.document.texture.src,
+                    tags: attackHeroRoller.tags(),
                 });
             }
         }
@@ -2323,7 +2327,7 @@ export async function _onRollBreakfall(event) {
         const flavor = `${breakFallItem.name.toUpperCase()}
                         ${breakFallItem.system.INPUT && !breakFallItem.name.match(new RegExp(breakFallItem.system.INPUT, "i")) ? `: ${breakFallItem.system.INPUT}` : ``}
                         (${successValue}-) roll
-                        <b class="dice-${succeeded ? "succeeded" : "failed"}">
+                        <b class="${succeeded ? "announce-success" : "announce-failure"}">
                         ${succeeded ? "succeeded" : "failed"} by ${
                             autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`
                         }</b>. ${succeeded ? successFlavor : failFlavor}`;
