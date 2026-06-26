@@ -6,6 +6,7 @@ import {
     getManueverEffectWithPlaceholdersReplaced,
 } from "../utility/damage.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
+import { calculateVelocityInSystemUnits } from "../utility/units.mjs";
 import { getPowerInfo, hdcTextNumberToNumeric, squelch } from "../utility/util.mjs";
 import { HeroSystem6eItem } from "./item.mjs";
 import { maneuverHasBlockTrait, maneuverHasFlashEffectTrait } from "./maneuver.mjs";
