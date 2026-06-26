@@ -1841,6 +1841,7 @@ export async function processHapCardUpdate({ messageId, targetTokenUuid, hapsToS
 
     // 1. Pull the data cleanly using v14 getFlag methods
     const targetDataArray = message.getFlag(game.system.id, "targetData") || [];
+    const targetIds = message.getFlag(game.system.id, "targetIds") || [];
 
     // 2. Use map to safely modify the targeted element without corrupting the array structure
     let targetFound = false;
@@ -1861,7 +1862,8 @@ export async function processHapCardUpdate({ messageId, targetTokenUuid, hapsToS
         return;
     }
 
-    // 3. Gather template data context
+    const newTargetId = foundry.utils.parseUuid(targetTokenUuid)?.id;
+
     const templateData = {
         ...message.flags.hero6efoundryvttv2,
         targetData: updatedTargetData,
@@ -1877,6 +1879,7 @@ export async function processHapCardUpdate({ messageId, targetTokenUuid, hapsToS
     await message.update({
         content: newContent,
         "flags.hero6efoundryvttv2.targetData": updatedTargetData,
+        "flags.hero6efoundryvttv2.targetIds": [...targetIds, newTargetId],
     });
 
     ui.notifications.info(`${targetActorName} spent ${hapsToSpend} HAP to convert a Miss into a Hit!`);
