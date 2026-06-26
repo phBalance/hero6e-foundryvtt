@@ -19,6 +19,8 @@ import { HeroRuler } from "./heroRuler.mjs";
 import { HeroSocketHandler } from "./heroSocketHandler.mjs";
 import { HeroTokenRuler } from "./heroTokenRuler.mjs";
 import { HeroPointVisionSource, setPerceptionModes } from "./herovision/vision.mjs";
+import { initializeHeroVisionV14 } from "./herovision/hero-vision-14.mjs";
+
 import { HeroSystem6eItemDirectory } from "./itemDirectory.mjs";
 import HeroSystem6eMeasuredTemplate from "./measuretemplate.mjs";
 import { migrateWorld } from "./migration.mjs";
@@ -137,6 +139,7 @@ Hooks.once("init", async function () {
 
     // Custom HeroSystem VisionMode
     setPerceptionModes();
+    initializeHeroVisionV14();
 
     // HEROSYS
     HEROSYS.module = game.system.id;
