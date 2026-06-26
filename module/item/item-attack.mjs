@@ -2147,14 +2147,18 @@ export async function rollUnluck(item) {
 export async function _onRollDamage(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
-    const toHitData = { ...button.dataset };
 
     const messageId = button.closest(`li[data-message-id]`).dataset.messageId;
     const message = game.messages.get(messageId);
     if (!message) throw new Error("Chat message context not found.");
 
-    toHitData.actionData ??= message.getFlag(game.system.id, "actionData");
-    toHitData.actorUuid ||= message.getFlag(game.system.id, "actorUuid");
+    const toHitData = foundry.utils.mergeObject({ ...button.dataset }, message.flags[game.system.id]);
+
+    // toHitData.actionData ??= message.getFlag(game.system.id, "actionData");
+    // toHitData.actorUuid ||= message.getFlag(game.system.id, "actorUuid");
+    // toHitData.itemJsonStr ??= message.getFlag(game.system.id, "itemJsonStr");
+    // toHitData.targetEntangle ??= message.getFlag(game.system.id, "targetEntangle");
+    // toHitData.targetIds ??= message.getFlag(game.system.id, "targetIds");
 
     // PH: FIXME: This is now included in the action data and this can be cleaned up
     let { actor, item } = rehydrateActorAndAttackItem(toHitData);
@@ -2182,7 +2186,7 @@ export async function _onRollDamage(event) {
 
     // Coerce type to boolean
     toHitData.targetEntangle =
-        toHitData.targetEntangle === true || toHitData.targetEntangle.match(/true/i) ? true : false;
+        toHitData.targetEntangle === true || toHitData.targetEntangle?.match(/true/i) ? true : false;
 
     const isAdjustment = item.effectiveAttackItem.isAdjustment;
     const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting;
@@ -2253,7 +2257,9 @@ export async function _onRollDamage(event) {
 
     // Build list of who to target
     const targetTokens = [];
-    for (const id of toHitData.targetIds.split(",")) {
+    const targetIdsArray =
+        toHitData.targetIds.constructor.name === "Array" ? toHitData.targetIds : toHitData.targetIds.split(",");
+    for (const id of targetIdsArray) {
         const tokenDocument = canvas.scene.tokens.get(id);
         if (tokenDocument) {
             const entangleAE = tokenDocument.actor?.temporaryEffects?.find(
