@@ -1,8 +1,8 @@
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
-import { dehydrateAttackItem } from "./item-attack.mjs";
-import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
-import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { HeroCompatibility } from "../utility/compatibility.mjs";
+import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
+import { calculateVelocityInSystemUnits } from "../utility/units.mjs";
+import { dehydrateAttackItem } from "./item-attack.mjs";
 
 /**
  * Maneuvers have some rules of their own that should be considered.
@@ -257,7 +257,7 @@ export async function activateManeuver(item) {
     // Velocity calc?
     if (isNaN(ocvTrait) && item.system.OCV.includes("v/")) {
         const match = item.system.OCV.match(/([-+]*)v\/(\d+)/);
-        const v = calculateVelocityInSystemUnits(item.actor, null, null);
+        const v = calculateVelocityInSystemUnits(item.actor);
         const sign = match[1];
         const divisor = parseInt(match[2]);
         ocvTrait = roundFavorPlayerTowardsZero(v / divisor) * (sign === "-" ? -1 : 1);

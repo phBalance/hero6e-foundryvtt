@@ -129,10 +129,6 @@
     },
     "Warning": {
         "AreaOfEffectUnsupported": "Unsupported for this Area Of Effect type",
-        "DragRuler": {
-            "Install": "Drag Ruler module is recommended. Please install.",
-            "Active": "Drag Ruler module is not activated. Please activate."
-        },
         "Quench": {
             "Install": "Hey, HERO system developer, please install the Quench module.",
             "Active": "Hey, HERO system developer, please set the Quench module to active."
