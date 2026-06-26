@@ -1113,7 +1113,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             calculated5eCharacteristic: function (actor) {
-                return Math.max(0, roundFavorPlayerAwayFromZero(actor.system.characteristics.dex.value / 3));
+                return Math.max(0, roundFavorPlayerAwayFromZero(actor.getCharacteristic("dex").value / 3));
             },
             xml: `<OCV XMLID="OCV" ID="1712377400048" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></OCV>`,
         },
@@ -1176,7 +1176,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return notes.join(", ");
             },
             calculated5eCharacteristic: function (actor) {
-                return Math.max(0, roundFavorPlayerAwayFromZero(actor.system.characteristics.dex.value / 3));
+                return Math.max(0, roundFavorPlayerAwayFromZero(actor.getCharacteristic("dex").value / 3));
             },
             xml: `<DCV XMLID="DCV" ID="1712377402602" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DCV>`,
         },
@@ -1213,7 +1213,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             calculated5eCharacteristic: function (actor) {
-                return Math.max(0, roundFavorPlayerAwayFromZero(actor.system.characteristics.ego.value / 3));
+                return Math.max(0, roundFavorPlayerAwayFromZero(actor.getCharacteristic("ego").value / 3));
             },
             xml: `<OMCV XMLID="OMCV" ID="1712377404591" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></OMCV>`,
         },
@@ -1271,7 +1271,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return notes.join(", ");
             },
             calculated5eCharacteristic: function (actor) {
-                return Math.max(0, roundFavorPlayerAwayFromZero(actor.system.characteristics.ego.value / 3));
+                return Math.max(0, roundFavorPlayerAwayFromZero(actor.getCharacteristic("ego").value / 3));
             },
 
             xml: `<DMCV XMLID="DMCV" ID="1712377406823" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DMCV>`,
@@ -1299,7 +1299,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 const levels = spdCharacteristicOrItem.levels ?? spdCharacteristicOrItem.system.LEVELS;
                 const base =
-                    spdCharacteristicOrItem.base ?? spdCharacteristicOrItem.actor.system.characteristics.spd.base;
+                    spdCharacteristicOrItem.base ?? spdCharacteristicOrItem.actor.getCharacteristic("spd").base;
 
                 // 5e gets partial refund
                 const refund = levels > 0 ? +(base % 1).toFixed(1) * 10 : 0;
@@ -1328,11 +1328,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             figured5eCharacteristic: function (actor) {
                 return (
                     1 +
-                    Number((actor.system.characteristics.dex.basePlusLevels / 10).toFixed(1)) +
+                    Number((actor.getCharacteristic("dex").basePlusLevels / 10).toFixed(1)) +
                     Number(
-                        actor.system.characteristics.dex
-                            .baseSumFiguredCharacteristicsNoRoundingFromItems(10)
-                            .toFixed(1),
+                        actor.getCharacteristic("dex").baseSumFiguredCharacteristicsNoRoundingFromItems(10).toFixed(1),
                     )
                 );
             },
@@ -1379,8 +1377,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreForActor: staticIgnoreForActorFunction(["ai", "base2", "computer"]),
             figured5eCharacteristic: function (actor) {
                 return (
-                    roundFavorPlayerAwayFromZero(actor.system.characteristics.str.basePlusLevels / 5) +
-                    actor.system.characteristics.str.baseSumFiguredCharacteristicsFromItems(5)
+                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("str").basePlusLevels / 5) +
+                    actor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
         },
@@ -1426,8 +1424,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             ignoreForActor: staticIgnoreForActorFunction(["ai", "base2", "computer"]),
             figured5eCharacteristic: function (actor) {
                 return (
-                    roundFavorPlayerAwayFromZero(actor.system.characteristics.con.basePlusLevels / 5) +
-                    actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(5)
+                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("con").basePlusLevels / 5) +
+                    actor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
         },
@@ -1460,10 +1458,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["figured", "figuredSTR", "figuredCON"],
             figured5eCharacteristic: function (actor) {
                 return (
-                    roundFavorPlayerAwayFromZero(actor.system.characteristics.str.basePlusLevels / 5) +
-                    actor.system.characteristics.str.baseSumFiguredCharacteristicsFromItems(5) +
-                    roundFavorPlayerAwayFromZero(actor.system.characteristics.con.basePlusLevels / 5) +
-                    actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(5)
+                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("str").basePlusLevels / 5) +
+                    actor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(5) +
+                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("con").basePlusLevels / 5) +
+                    actor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
         },
@@ -1497,8 +1495,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             figured5eCharacteristic: function (actor) {
                 // 5e figured 2 x CON
                 return (
-                    roundFavorPlayerAwayFromZero(actor.system.characteristics.con.basePlusLevels * 2) +
-                    actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(0.5)
+                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("con").basePlusLevels * 2) +
+                    actor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(0.5)
                 );
             },
         },
@@ -1576,11 +1574,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["figured", "figuredSTR", "figuredCON"],
             figured5eCharacteristic: function (actor) {
                 return (
-                    actor.system.characteristics.body.basePlusLevels +
-                    roundFavorPlayerAwayFromZero(actor.system.characteristics.str.basePlusLevels / 2) +
-                    actor.system.characteristics.str.baseSumFiguredCharacteristicsFromItems(2) +
-                    roundFavorPlayerAwayFromZero(actor.system.characteristics.con.basePlusLevels / 2) +
-                    actor.system.characteristics.con.baseSumFiguredCharacteristicsFromItems(2)
+                    actor.getCharacteristic("body").basePlusLevels +
+                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("str").basePlusLevels / 2) +
+                    actor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(2) +
+                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("con").basePlusLevels / 2) +
+                    actor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(2)
                 );
             },
         },
@@ -2970,7 +2968,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (actor.type === "vehicle") {
                     return 0;
                 }
-                return Math.floor(actor.system.characteristics.str.value / 2.5) / 2;
+                return Math.floor(actor.getCharacteristic("str").value / 2.5) / 2;
             },
         },
     );
@@ -6805,12 +6803,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 switch (options.attackDefenseVs) {
                     case "PD":
                         value = parseInt(actorItemDefense.system.PDLEVELS) || 0;
-                        maxValue = parseInt(actorItemDefense.actor?.system.characteristics.pd.base) || 0;
+                        maxValue = parseInt(actorItemDefense.actor?.getCharacteristic("pd").base) || 0;
                         break;
 
                     case "ED":
                         value = parseInt(actorItemDefense.system.EDLEVELS) || 0;
-                        maxValue = parseInt(actorItemDefense.actor?.system.characteristics.ed.base) || 0;
+                        maxValue = parseInt(actorItemDefense.actor?.getCharacteristic("ed").base) || 0;
                         break;
 
                     case "MD":
@@ -7963,7 +7961,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     // 5e gets a bonus
                     if (actorItemDefense.actor?.is5e) {
                         const bonus = roundFavorPlayerAwayFromZero(
-                            parseInt(actorItemDefense.actor.system.characteristics.ego.value) / 5 || 0,
+                            parseInt(actorItemDefense.actor.getCharacteristic("ego").value) / 5 || 0,
                         );
                         value += bonus;
                     }

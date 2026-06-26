@@ -15,7 +15,6 @@ import { EffectsPanel } from "./effects-panel.mjs";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
 import { HeroSystem6eChatMessage } from "./heroChatMessage.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
-import { HeroRuler } from "./heroRuler.mjs";
 import { HeroSocketHandler } from "./heroSocketHandler.mjs";
 import { HeroTokenRuler } from "./heroTokenRuler.mjs";
 import { HeroPointVisionSource, setPerceptionModes } from "./herovision/vision.mjs";
@@ -68,8 +67,8 @@ import { HeroSystemTokenHud } from "./token/heroSystemTokenHud.mjs";
 import "./heroRoller/chat-dice.mjs";
 import { HeroRoll } from "./heroRoller/dice.mjs";
 import "./utility/adjustment.mjs";
-import { expireEffects } from "./utility/util.mjs";
 import { HeroCompatibility } from "./utility/compatibility.mjs";
+import { expireEffects } from "./utility/util.mjs";
 
 // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttActors = foundry.documents?.collections?.Actors || Actors;
@@ -220,10 +219,7 @@ Hooks.once("init", async function () {
     CONFIG.Token.objectClass = HeroSystem6eToken;
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
-    if (foundry.canvas.placeables) {
-        CONFIG.Token.rulerClass = HeroTokenRuler; //V13
-    }
-    CONFIG.Canvas.rulerClass = HeroRuler; // END Use & calculateVelocityInSystemUnits
+    CONFIG.Token.rulerClass = HeroTokenRuler; //V13
 
     if (!HeroCompatibility.isV14) {
         CONFIG.Canvas.visionSourceClass = HeroPointVisionSource;
@@ -256,8 +252,6 @@ Hooks.once("init", async function () {
         disadvantage: HeroSystem6eItemDisadvantage,
         characteristic: HeroItemCharacteristic,
     });
-
-    HeroRuler.initialize();
 
     initializeHandlebarsHelpers();
     initializeItemHandlebarsHelpers();
@@ -915,13 +909,13 @@ async function _outOfCombatRecovery(actor, multiplier) {
         (automation === "pcEndOnly" && actor.type === "pc")
     ) {
         recoveryDate = Date.now();
-        const rec = parseInt(actor.system.characteristics.rec.value) * multiplier;
+        const rec = parseInt(actor.getCharacteristic("rec").value) * multiplier;
         if (rec > 0) {
             const actorUpdates = {};
 
             if (
                 actor.hasCharacteristic("STUN") &&
-                actor.system.characteristics.stun.value < actor.system.characteristics.stun.max
+                actor.getCharacteristic("stun").value < actor.getCharacteristic("stun").max
             ) {
                 // If this is an NPC and their STUN <= 0 then leave them be.
                 // Typically, you should only use the Recovery Time Table for
@@ -935,10 +929,10 @@ async function _outOfCombatRecovery(actor, multiplier) {
                 // From -21 to -30 they get 1 recovery per minute
                 // From -31 they're completely out at the GM's discretion
 
-                if (actor.type === "pc" || parseInt(actor.system.characteristics.stun.value) > -10) {
+                if (actor.type === "pc" || parseInt(actor.getCharacteristic("stun").value) > -10) {
                     const stunValue = Math.min(
-                        parseInt(actor.system.characteristics.stun.max),
-                        parseInt(actor.system.characteristics.stun.value) + rec,
+                        parseInt(actor.getCharacteristic("stun").max),
+                        parseInt(actor.getCharacteristic("stun").value) + rec,
                     );
                     foundry.utils.setProperty(actorUpdates, "system.characteristics.stun.value", stunValue);
                 }
@@ -946,11 +940,11 @@ async function _outOfCombatRecovery(actor, multiplier) {
 
             if (
                 actor.hasCharacteristic("END") &&
-                actor.system.characteristics.end.value < actor.system.characteristics.end.max
+                actor.getCharacteristic("end").value < actor.getCharacteristic("end").max
             ) {
                 const endValue = Math.min(
-                    parseInt(actor.system.characteristics.end.max),
-                    parseInt(actor.system.characteristics.end.value) + rec,
+                    parseInt(actor.getCharacteristic("end").max),
+                    parseInt(actor.getCharacteristic("end").value) + rec,
                 );
                 foundry.utils.setProperty(actorUpdates, "system.characteristics.end.value", endValue);
             }

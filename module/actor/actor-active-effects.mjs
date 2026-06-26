@@ -530,7 +530,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
             if (key) {
                 if (actor?.system?.characteristics?.[key]) {
                     // KLUGE: Set VALUE to MAX for now. We need a better solution.
-                    actorChanges[`system.characteristics.${key}.value`] = actor.system.characteristics[key].max;
+                    actorChanges[`system.characteristics.${key}.value`] = actor.getCharacteristic(key).max;
 
                     // 5e figured characteristic
                     if (actor.is5e) {

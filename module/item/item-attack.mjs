@@ -1,6 +1,5 @@
 import { activateManeuver, doManeuverEffects, maneuverHasBlockTrait } from "./maneuver.mjs";
 
-import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
@@ -16,8 +15,8 @@ import { ItemAttackClubWeaponApplicationV2 } from "../applications/item/item-att
 import {
     HeroSystem6eItem,
     doCharacteristicRollCheck,
-    rollAblativeActivationCheck,
     itemPostHitActionString,
+    rollAblativeActivationCheck,
 } from "../item/item.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 
@@ -35,6 +34,7 @@ import { getActorDefensesVsAttack, getConditionalDefenses, getItemDefenseVsAttac
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import {
+    calculateVelocityInSystemUnits,
     currentSceneUsesHexGrid,
     getGridSizeInMeters,
     getRoundedDownDistanceInSystemUnits,
@@ -266,13 +266,8 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
     // Maneuvers and Martial attacks may include velocity
     // [NORMALDC] +v/5 Strike, FMove
     if ((item.system.effect || "").match(/v\/\d+/)) {
-        // TODO: We don't have any targetToken data
-        // Also calculateVelocityInSystemUnits is a v12 holdover and should be reworked
-        //  to leverage v13 native ruler.
-        const targetToken = undefined;
-
         data.showVelocity = true;
-        data.velocity = calculateVelocityInSystemUnits(item.actor, token, targetToken);
+        data.velocity = calculateVelocityInSystemUnits(item.actor);
         data.velocitySystemUnits = getSystemDisplayUnits(item.is5e);
     }
 

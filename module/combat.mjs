@@ -94,7 +94,7 @@ export class HeroSystem6eCombat extends Combat {
 
             // Produce an initiative roll for the Combatant
             const characteristic = combatant.actor?.system?.initiativeCharacteristic || "dex";
-            const initValue = combatant.actor?.system.characteristics[characteristic]?.value || 0;
+            const initValue = combatant.actor?.getCharacteristic(characteristic)?.value || 0;
             //+parseInt(combatant.flags.hero6efoundryvttv2?.lightningReflexes?.levels || 0);
             if (
                 combatant.flags[game.system.id]?.initiative != initValue ||
@@ -194,28 +194,28 @@ export class HeroSystem6eCombat extends Combat {
             // to act first.
 
             // Intelligence
-            const intA = Number.isNumeric(actorA?.system.characteristics.int?.value)
-                ? actorA.system.characteristics.int.value
+            const intA = Number.isNumeric(actorA?.getCharacteristic("int")?.value)
+                ? actorA.getCharacteristic("int").value
                 : -Infinity;
-            const intB = Number.isNumeric(actorB?.system.characteristics.int?.value)
-                ? actorB.system.characteristics.int.value
+            const intB = Number.isNumeric(actorB?.getCharacteristic("int")?.value)
+                ? actorB.getCharacteristic("int").value
                 : -Infinity;
 
             // Presence
-            const preA = Number.isNumeric(actorA?.system.characteristics.pre?.value)
-                ? actorA.system.characteristics.pre.value
+            const preA = Number.isNumeric(actorA?.getCharacteristic("pre")?.value)
+                ? actorA.getCharacteristic("pre").value
                 : -Infinity;
-            const preB = Number.isNumeric(actorB?.system.characteristics.pre?.value)
-                ? actorB.system.characteristics.pre.value
+            const preB = Number.isNumeric(actorB?.getCharacteristic("pre")?.value)
+                ? actorB.getCharacteristic("pre").value
                 : -Infinity;
 
             // Then by Speed
             // Rules don't specifically state to use SPD for ties, but seems like the right thing to do
-            const spdA = Number.isNumeric(actorA?.system.characteristics.spd?.value)
-                ? actorA.system.characteristics.spd.value
+            const spdA = Number.isNumeric(actorA?.getCharacteristic("spd")?.value)
+                ? actorA.getCharacteristic("spd").value
                 : -Infinity;
-            const spdB = Number.isNumeric(actorB?.system.characteristics.spd?.value)
-                ? actorB.system.characteristics.spd.value
+            const spdB = Number.isNumeric(actorB?.getCharacteristic("spd")?.value)
+                ? actorB.getCharacteristic("spd").value
                 : -Infinity;
 
             // Then by hasPlayerOwner
@@ -328,7 +328,7 @@ export class HeroSystem6eCombat extends Combat {
             for (let c = 0; c < tokenCombatantCount; c++) {
                 const _combatant = tokenCombatants[c];
                 const spd = HeroCompatibility.clamp(
-                    parseInt(_combatant.actor?.system.characteristics.spd?.value || 0),
+                    parseInt(_combatant.actor?.getCharacteristic("spd")?.value || 0),
                     1,
                     12,
                 );
@@ -409,7 +409,7 @@ export class HeroSystem6eCombat extends Combat {
                         o.system.XMLID === "LIGHTNING_REFLEXES_ALL" || o.system.XMLID === "LIGHTNING_REFLEXES_SINGLE",
                 );
                 const targetCombatantCount =
-                    HeroCompatibility.clamp(parseInt(actor.system.characteristics.spd?.value || 0), 1, 12) *
+                    HeroCompatibility.clamp(parseInt(actor.getCharacteristic("spd")?.value || 0), 1, 12) *
                     (lightningReflexes ? 2 : 1);
                 const tokenCombatants = this.combatants.filter((o) => o.tokenId === _tokenId);
                 const tokenCombatantCount = tokenCombatants.length;
@@ -421,7 +421,7 @@ export class HeroSystem6eCombat extends Combat {
                             _id: null,
                             flags: {
                                 [game.system.id]: {
-                                    segment: HeroSystem6eCombat.getSegment(actor.system.characteristics.spd.value, i),
+                                    segment: HeroSystem6eCombat.getSegment(actor.getCharacteristic("spd").value, i),
                                 },
                             },
                         });
@@ -643,9 +643,9 @@ export class HeroSystem6eCombat extends Combat {
             masterCombatant.flags[game.system.id].heroHistory ??= {};
             masterCombatant.flags[game.system.id].heroHistory[heroHistoryKey] ??= {};
             // heroHistoryThisCombatant = masterCombatant.flags[game.system.id].heroHistory[heroHistoryKey];
-            // heroHistoryThisCombatant.end = masterCombatant.actor.system.characteristics.end?.value;
-            // heroHistoryThisCombatant.stun = masterCombatant.actor.system.characteristics.stun?.value;
-            // heroHistoryThisCombatant.body = masterCombatant.actor.system.characteristics.body?.value;
+            // heroHistoryThisCombatant.end = masterCombatant.actor.getCharacteristic("end")?.value;
+            // heroHistoryThisCombatant.stun = masterCombatant.actor.getCharacteristic("stun")?.value;
+            // heroHistoryThisCombatant.body = masterCombatant.actor.getCharacteristic("body")?.value;
             await masterCombatant.setFlag(
                 game.system.id,
                 "heroHistory",
@@ -743,19 +743,6 @@ export class HeroSystem6eCombat extends Combat {
         }
 
         // PH: FIXME: stop abort under certain circumstances
-
-        // Reset movement history
-        if (window.dragRuler) {
-            if (masterCombatant) {
-                // If we are missing flags for dragRuler or the trackedRound !== null, resetMovementHistory
-                // Without this we sometimes get in a continuous loop (unclear as to why; related to #onModifyCombatants?)
-                if (!masterCombatant.flags.dragRuler || masterCombatant.flags.dragRuler.trackedRound !== null) {
-                    await dragRuler.resetMovementHistory(this, masterCombatant.id);
-                }
-            } else {
-                console.error("Unable to find masterCombatant for DragRuler");
-            }
-        }
 
         // STUNNING
         // The character remains Stunned and can take no
@@ -856,12 +843,10 @@ export class HeroSystem6eCombat extends Combat {
 
                         // TODO: There should be a better way of integrating this with userInteractiveVerifyOptionallyPromptThenSpendResources
                         // TODO: This is wrong as it does not use STUN when there is no END
-                        const value = parseInt(this.combatant.actor.system.characteristics.end.value);
+                        const value = parseInt(this.combatant.actor.getCharacteristic("end").value);
                         const newEnd = value - endCostPerTurn;
 
-                        await this.combatant.actor.update({
-                            "system.characteristics.end.value": newEnd,
-                        });
+                        await this.combatant.actor.updateCharacteristic("end", newEnd);
                     }
                 }
             }
@@ -1043,7 +1028,7 @@ export class HeroSystem6eCombat extends Combat {
 
                 await ChatMessage.create(chatData);
             } else if (combatant.actor.statuses.has("knockedOut")) {
-                if (combatant.actor.system.characteristics.stun?.value >= -10) {
+                if (combatant.actor.getCharacteristic("stun")?.value >= -10) {
                     await combatant.actor.TakeRecovery({ asAction: false, token: combatant.token });
                 }
             }
@@ -1151,7 +1136,7 @@ export class HeroSystem6eCombat extends Combat {
             // PCs. Once an NPC is Knocked Out below the -10 STUN level
             // they should normally remain unconscious until the fight ends.
             // ACTOR#ONUPDATE SHOULD MARK AS DEFEATED
-            // if (actor.type != "pc" && parseInt(actor.system.characteristics.stun.value) <= -10)
+            // if (actor.type != "pc" && parseInt(actor.getCharacteristic("stun").value) <= -10)
             // {
             //     //console.log("defeated", combatant)
             //     continue;
@@ -1164,7 +1149,7 @@ export class HeroSystem6eCombat extends Combat {
                 (automation === "pcEndOnly" && actor.type === "pc")
             ) {
                 // if (combatant.actor.statuses.has("knockedOut")) {
-                //     if (combatant.actor.system.characteristics.stun?.value < -20) {
+                //     if (combatant.actor.getCharacteristic("stun")?.value < -20) {
                 //         console.log(`${combatant.name} is knockedOut. Skipping PostSegment12 recovery.`);
                 //         continue;
                 //     }

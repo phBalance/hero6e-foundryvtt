@@ -232,3 +232,26 @@ export function currentSceneUsesHexGrid() {
         game.scenes.current?.grid.type === CONST.GRID_TYPES.SQUARE
     );
 }
+
+/**
+ * Calculate the velocity in system units (5e is " and 6e in m).
+ *
+ * @param {Object} actor
+ *
+ * @returns {Number}
+ */
+export function calculateVelocityInSystemUnits(actor) {
+    let velocity;
+
+    // Simplistic velocity calc using current movement
+    // TODO: This is likely wrong for Teleport and other movements with quirky velocity rules.
+    velocity = parseInt(actor.system.characteristics[actor.activeMovement]?.value || 0);
+
+    // Sanity check
+    if (velocity <= 0) {
+        console.warn(`Calculated velocity of ${velocity} is invalid, using simplistic calculation`);
+        velocity = Math.max(0, parseInt(actor.system.characteristics[actor.activeMovement]?.value || 0));
+    }
+
+    return velocity;
+}
