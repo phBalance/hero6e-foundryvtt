@@ -724,6 +724,11 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             await existingTemplate.delete();
         }
 
+        // Remove all targets
+        for (const target of game.user.targets) {
+            target.setTarget(false, { releaseOthers: false });
+        }
+
         // DELAYED TRIGGER: Target tokens that are inside the region.
         // We listen to every update until we find OUR region's update, then unregister.
         // We register the hook before the placement to make sure we don't miss the updateRegion.
@@ -752,11 +757,6 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         newRegion = await this.placeRegionWithHiddenUI(regionData); //await canvas.regions.placeRegion(regionData);
         if (newRegion?.documentName !== "Region") {
             throw new Error("Failed to create region for area of effect");
-        }
-
-        // Remove all targets
-        for (const target of game.user.targets) {
-            target.setTarget(false, { releaseOthers: false });
         }
 
         // Apply the TokenAutomaticTargeting behavior to the region
