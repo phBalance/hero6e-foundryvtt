@@ -724,8 +724,32 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             await existingTemplate.delete();
         }
 
+        // DELAYED TRIGGER: Target tokens that are inside the region.
+        // We listen to every update until we find OUR region's update, then unregister.
+        // We register the hook before the placement to make sure we don't miss the updateRegion.
+        let newRegion;
+        const hookId = Hooks.on("updateRegion", (document) => {
+            // Check if the region being updated matches our newly created region
+            if (document.id === newRegion.id) {
+                // Immediately turn off this listener so it doesn't loop
+                Hooks.off("updateRegion", hookId);
+
+                // Safely grab the tokens from the updated document cache
+                const tokensInRegion = document.tokens ?? [];
+
+                // Target all the tokens that are inside the region
+                for (const tokenDoc of tokensInRegion) {
+                    if (tokenDoc.object) {
+                        tokenDoc.object.setTarget(true, { releaseOthers: false });
+                    }
+                }
+            } else {
+                console.warn(`Unexpected region id`);
+            }
+        });
+
         // Create the region
-        const newRegion = await this.placeRegionWithHiddenUI(regionData); //await canvas.regions.placeRegion(regionData);
+        newRegion = await this.placeRegionWithHiddenUI(regionData); //await canvas.regions.placeRegion(regionData);
         if (newRegion?.documentName !== "Region") {
             throw new Error("Failed to create region for area of effect");
         }
@@ -756,26 +780,6 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 );
             }
         }
-
-        // DELAYED TRIGGER: Target tokens that are inside the region.
-        // We listen to every update until we find OUR region's update, then unregister.
-        const hookId = Hooks.on("updateRegion", (document) => {
-            // Check if the region being updated matches our newly created region
-            if (document.id === newRegion.id) {
-                // Immediately turn off this listener so it doesn't loop
-                Hooks.off("updateRegion", hookId);
-
-                // Safely grab the tokens from the updated document cache
-                const tokensInRegion = document.tokens ?? [];
-
-                // Target all the tokens that are inside the region
-                for (const tokenDoc of tokensInRegion) {
-                    if (tokenDoc.object) {
-                        tokenDoc.object.setTarget(true, { releaseOthers: false });
-                    }
-                }
-            }
-        });
     }
 
     async placeRegionWithHiddenUI(regionData) {
