@@ -8033,7 +8033,7 @@ export async function doCharacteristicRollCheck(actor, characteristic, reasonTex
     speaker.alias = actor.name;
 
     // PH: FIXME: This function doesn't consume resources but should.
-    await generateSuccessChatCard(actor, speaker, activationRoller, flavor, "");
+    await generateSuccessChatCard(actor, speaker, flavor, activationRoller, "");
 
     return succeeded;
 }
@@ -8071,7 +8071,7 @@ export async function rollAblativeActivationCheck(item) {
         succeeded = success;
 
         // PH: FIXME: function doesn't consume resources
-        await generateSuccessChatCard(actor, speaker, ablativeActivationRoller, flavor, "");
+        await generateSuccessChatCard(actor, speaker, flavor, ablativeActivationRoller, "");
     } else {
         let cardHtml;
 

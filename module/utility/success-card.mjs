@@ -8,7 +8,7 @@ const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplat
  *
  * @param {HeroSystem6eActor} actor
  * @param {HeroRoller} roller
- * @param {string} flavor
+ * @param {String} flavor
  *
  * @returns
  */
@@ -20,11 +20,7 @@ export async function doSuccessRoll(actor, roller, flavor) {
     const total = roller.getSuccessTotal();
     const margin = roller.getSuccessValue() - total;
 
-    flavor += ` <span class="${succeeded ? "announce-success" : "announce-failure"}">
-            ${
-                succeeded ? "succeeded" : "failed"
-            } by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}.
-        </span>`;
+    flavor = `${flavor} ${emphasizeSuccessFailureFlavour(succeeded, `by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`)}`;
 
     // Forced success with the override key
     let successThroughOverride = false;
@@ -33,23 +29,36 @@ export async function doSuccessRoll(actor, roller, flavor) {
         ui.notifications.info(`${actor.name} succeeded roll because override key.`);
         succeeded = true;
         successThroughOverride = true;
-        flavor += `<p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
+        flavor += ` <p>Succeeded roll because ${game.user.name} used <b>${overrideKeyText}</b> key to override.</p>`;
     }
 
     return { succeeded, successThroughOverride, flavor };
 }
 
 /**
- * Generate a generic chat card related to a success roll.
+ *
+ * @param {Boolean} succeeded
+ * @param {String} flavor
+ *
+ * @returns {String}
+ */
+export function emphasizeSuccessFailureFlavour(succeeded, flavor) {
+    return `<span class="${succeeded ? "announce-success" : "announce-failure"}">
+                ${succeeded ? "succeeded" : "failed"} ${flavor}.
+            </span>`;
+}
+
+/**
+ * Generate a chat card related to a success roll.
  *
  * @param {HeroSystem6eActor} actor
- * @param {*} speaker
- * @param {HeroRoller} roller
- * @param {string} flavor
- * @param {string} resourceDescription
+ * @param {String} speaker
+ * @param {String} flavor
+ * @param {HeroRoller | falsy} roller
+ * @param {String | falsy} resourceDescription
  */
-export async function generateSuccessChatCard(actor, speaker, roller, flavor, resourceDescription) {
-    const renderedSuccessRoll = await roller.render();
+export async function generateSuccessChatCard(actor, speaker, flavor, roller, resourceDescription) {
+    const renderedSuccessRoll = roller ? await roller.render() : null;
     const template = `systems/${game.system.id}/templates/chat/success-card.hbs`;
     const cardData = {
         actor: actor,
@@ -59,13 +68,13 @@ export async function generateSuccessChatCard(actor, speaker, roller, flavor, re
         renderedSuccessRoll: renderedSuccessRoll,
         resourceDescription: resourceDescription,
 
-        tags: roller.tags(),
+        tags: roller?.tags(),
     };
     const cardHtml = await foundryVttRenderTemplate(template, cardData);
 
     const chatData = {
         style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-        rolls: roller.rawRolls(),
+        rolls: roller?.rawRolls(),
         author: game.user._id,
         content: cardHtml,
         speaker: speaker,
