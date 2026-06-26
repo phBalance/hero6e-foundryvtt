@@ -20,7 +20,7 @@ export async function doSuccessRoll(actor, roller, flavor) {
     const total = roller.getSuccessTotal();
     const margin = roller.getSuccessValue() - total;
 
-    flavor = `${flavor} ${emphasizeSuccessFailureFlavour(succeeded, `by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}`)}`;
+    flavor = `${flavor} ${emphasizeSuccessFailureFlavour(succeeded, `${succeeded ? "succeeded" : "failed"} by ${autoSuccess === undefined ? `${Math.abs(margin)}` : `rolling ${total}`}.`)}`;
 
     // Forced success with the override key
     let successThroughOverride = false;
@@ -36,6 +36,7 @@ export async function doSuccessRoll(actor, roller, flavor) {
 }
 
 /**
+ * Appropriately wrap flavor based on the success status.
  *
  * @param {Boolean} succeeded
  * @param {String} flavor
@@ -43,9 +44,7 @@ export async function doSuccessRoll(actor, roller, flavor) {
  * @returns {String}
  */
 export function emphasizeSuccessFailureFlavour(succeeded, flavor) {
-    return `<span class="${succeeded ? "announce-success" : "announce-failure"}">
-                ${succeeded ? "succeeded" : "failed"} ${flavor}.
-            </span>`;
+    return `<span class="${succeeded ? "announce-success" : "announce-failure"}">${flavor}</span>`;
 }
 
 /**

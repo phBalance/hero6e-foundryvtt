@@ -4,7 +4,7 @@ import { HeroRoll, HeroRoller } from "../heroRoller/dice.mjs";
 import { calculateDicePartsForItem } from "../utility/damage.mjs";
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { doSuccessRoll, emphasizeSuccessFailureFlavour, generateSuccessChatCard } from "../utility/success-card.mjs";
-import { tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
+import { tokenEducatedGuess } from "../utility/util.mjs";
 
 const backgroundSkillKeys = Object.freeze({
     KS: "KNOWLEDGE_SKILL",
@@ -418,7 +418,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             activationRoll.type !== RSR_ROLL_TYPE.CHARACTERISTIC_ROLL &&
             activationRoll.activeItems.length === 0
         ) {
-            const flavor = `${item.name} activation ${emphasizeSuccessFailureFlavour(false, `as there is no matching active item for the ${activationRoll.type}`)}`;
+            const flavor = `${item.name} activation ${emphasizeSuccessFailureFlavour(false, `failed as there is no matching active item for the ${activationRoll.type}.`)}`;
             await generateSuccessChatCard(actor, speaker, flavor, null, null);
 
             return false;
@@ -426,7 +426,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL &&
             !item.actor.hasCharacteristic(activationRoll.characteristicKey)
         ) {
-            const flavor = `${item.name} activation ${emphasizeSuccessFailureFlavour(false, `as ${actor.name} does not have the ${activationRoll.characteristicKey} characteristic`)}`;
+            const flavor = `${item.name} activation ${emphasizeSuccessFailureFlavour(false, `failed as ${actor.name} does not have the ${activationRoll.characteristicKey} characteristic.`)}`;
             await generateSuccessChatCard(actor, speaker, flavor, null, null);
 
             return false;
@@ -459,16 +459,8 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
                         options.hitLocationNum,
                     );
 
-                    // PH: FIXME: The chat message should not be burried down in here.
-                    // Success or failure message
-                    const chatData = {
-                        style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-                        author: game.user._id,
-                        content: `The sectional defense from <b>${item.name}</b> ${sectionalDefenseApply ? "successfully applied" : "failed to apply"}`,
-                        speaker: speaker,
-                        whisper: whisperUserTargetsForActor(actor),
-                    };
-                    await ChatMessage.create(chatData);
+                    const flavor = `The sectional defense from ${item.name} ${emphasizeSuccessFailureFlavour(sectionalDefenseApply, `${sectionalDefenseApply ? "applied" : "does not apply"} to hit location ${options.hitLocationNum}.`)}`;
+                    await generateSuccessChatCard(actor, speaker, flavor, null, null);
 
                     return sectionalDefenseApply;
                 }
