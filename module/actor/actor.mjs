@@ -208,6 +208,39 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         this._lazy = {};
     }
 
+    /**
+     * WARNING: This is a method reflecting the old way of doing things. It is being created to funnel all characteristics access away from
+     *          direct property access. This will be turned into a more expensive function. As well, the concepts of value, max, etc may well go away
+     *          when characteristics are items.
+     *
+     * Get the characteristic structure.
+     *
+     * @param {String} characteristicName
+     *
+     * @returns
+     */
+    getCharacteristic(characteristicName) {
+        return this.system.characteristics[characteristicName];
+    }
+
+    /**
+     * WARNING: This is a method reflecting the old way of doing things. It is being created to funnel all characteristics access away from
+     *          direct property access. This will be turned into a more expensive function. As well, the concepts of value, max, etc may well go away
+     *          when characteristics are items.
+     *
+     * Update the characteristic structure.
+     *
+     * @param {String} characteristicName
+     * @param {Number} newValue
+     *
+     * @returns
+     */
+    async updateCharacteristic(characteristicName, newValue) {
+        return this.update({
+            [`system.characteristics.${characteristicName}.value`]: newValue,
+        });
+    }
+
     /// Override and should probably be used instead of add/remove ActiveEffect
     async toggleStatusEffect(statusId, { active, overlay = false } = {}) {
         const overlayEffects = [
