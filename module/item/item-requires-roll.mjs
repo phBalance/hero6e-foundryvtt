@@ -710,3 +710,68 @@ export function activationRollHeroValidation(modifier, item) {
 
     return validations;
 }
+
+export function requiresRollHeroValidation(modifier, item) {
+    const validations = [];
+    const activationRolls = getRollsForRar(item, modifier);
+
+    // Does the actor have the required powers/skills for the roll?
+    for (const activationRoll of activationRolls) {
+        // Only naked success rolls can be without a skill
+        if (activationRoll.type === RSR_ROLL_TYPE.ITEM_ROLL) {
+            // Do we have items that match?
+            if (activationRoll.items.length === 0) {
+                validations.push({
+                    message: `Actor does not have ${activationRoll.name} skill to make the activation roll.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                    modifierID: modifier.ID,
+                });
+            }
+
+            // PH: FIXME: Check that they don't have skills as background skills (warn: cheaper than supposed to be)
+            // PH: FIXME: Check that they don't have background skills as skills (warn: more expensive than supposed to be)
+        } else if (activationRoll.type === RSR_ROLL_TYPE.LUCK_ROLL) {
+            if (activationRoll.items.length === 0) {
+                validations.push({
+                    message: `Actor does not have any luck powers to make the activation roll.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                    modifierID: modifier.ID,
+                });
+            }
+
+            // Should not have AP penalty on RSR against Luck (warn: just doesn't make sense and behaviour would be GM fiat)
+            const luckRollHasApPenalty = findRollDivisor(modifier) !== 0;
+            if (activationRoll.items.length > 0 && luckRollHasApPenalty) {
+                validations.push({
+                    message: `RSR that are based on luck should not have a penalty based on Active Points.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.WARNING,
+                    modifierID: modifier.ID,
+                });
+            }
+        } else if (activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL) {
+            if (!item.actor.hasCharacteristic(activationRoll.characteristicKey)) {
+                validations.push({
+                    message: `Actor does not have the characteristic ${activationRoll.characteristicKey} to make the activation roll.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                    modifierID: modifier.ID,
+                });
+            }
+        } else if (activationRoll.type === RSR_ROLL_TYPE.ATTACK_ROLL) {
+            // Should check if this actor type is capable of attack
+            const actor = item.actor;
+            if (actor?.type === "base2") {
+                validations.push({
+                    message: `Bases do not make attack rolls.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                    modifierID: modifier.ID,
+                });
+            }
+        } else if (activationRoll.type === RSR_ROLL_TYPE.ACTIVATION_ROLL) {
+            validations.push(...activationRollHeroValidation(modifier, item));
+        } else {
+            console.error(`Unknown activation roll type ${activationRoll.type} for heroValidation`);
+        }
+    }
+
+    return validations;
+}
