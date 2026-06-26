@@ -174,25 +174,32 @@ export function getCharacteristicInfoArrayForActor(actor) {
 }
 
 /**
+ * Returns a list of user ids associated with ownership of actor.
  *
  * @param {HeroSystem6eActor} actor
+ *
  * @returns User[]
  */
 export function whisperUserTargetsForActor(actor) {
-    if (!actor) return [];
+    if (!actor) {
+        return [];
+    }
+
     const ownerIds = [];
     for (const [key, value] of Object.entries(actor?.ownership)) {
         if (value === CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER) {
             ownerIds.push(key);
         }
     }
+
     const whisperUserTargets = [];
     for (const user of game.users) {
         if (ownerIds.includes(user.id)) {
             whisperUserTargets.push(user);
         }
     }
-    return whisperUserTargets; // a list of User Ids
+
+    return whisperUserTargets;
 }
 
 export async function getTemporaryEffectsOwnedByActorInCombat(actor) {

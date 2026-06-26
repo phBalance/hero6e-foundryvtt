@@ -2111,7 +2111,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         // PH: FIXME: Function doesn't consume resources
         const speaker = ChatMessage.getSpeaker({ actor: this, token });
-        return generateSuccessChatCard(this, speaker, heroRoller, flavor, "");
+        return generateSuccessChatCard(this, speaker, flavor, heroRoller, "");
     }
 
     async onCharacteristicFullRoll({ label, token }) {

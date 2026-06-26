@@ -3,8 +3,8 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroRoll, HeroRoller } from "../heroRoller/dice.mjs";
 import { calculateDicePartsForItem } from "../utility/damage.mjs";
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
-import { doSuccessRoll, generateSuccessChatCard } from "../utility/success-card.mjs";
-import { tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
+import { doSuccessRoll, emphasizeSuccessFailureFlavour, generateSuccessChatCard } from "../utility/success-card.mjs";
+import { tokenEducatedGuess } from "../utility/util.mjs";
 
 const backgroundSkillKeys = Object.freeze({
     KS: "KNOWLEDGE_SKILL",
@@ -123,7 +123,7 @@ function normalizeTypeAndRollTarget(type, skillOrCharacteristic) {
 /**
  * Given a rar, extract out all the bits and pieces required to make 1 or more activation rolls. This transforms
  * 5e ACTIVATIONROLL and REQUIRESASKILLROLL XMLIDs and 6e REQUIRESASKILLROLL into an intermediate format that
- * avoids HDC's completely different approach to expressing the modifier.
+ * avoids HDC's completely different approach to expressing the modifier between 5e and 6e.
  *
  * @param {HeroSystem6eItem} item
  * @param {HeroModifierModel} rar
@@ -263,8 +263,6 @@ export function getRollsForRar(item, rar) {
             }
 
             case RSR_ROLL_CATEGORY.CHAR:
-                // const charKey = getRequiredCharacteristicKey(item, rar); // PH: FIXME: Is this not required as we have it already?
-
                 return {
                     type: RSR_ROLL_TYPE.CHARACTERISTIC_ROLL,
                     characteristicKey: rollToGenerate.target,
@@ -383,40 +381,8 @@ function doSectionalDefensesApply(sectionalDefenseLocationsSet, hitLocationNum) 
  *
  * @param {HeroSystem6eItem} item
  * @param {Object} options
+ *
  * @returns {Boolean} - success
- *
- * The RaR is the Requires A Roll including Activation roll from 5e.
- * If the Activation roll is a simple throw then it is quite easily done.
- * If it is connected to a Skill or Characteristic then the correct roll must be discovered.
- * There are several places a player might put information to tie the RaR to an existing skill/characteristic.
- *
- * 1) ALIAS/Display: RaR has a Display in HD which is ALIAS here: an editable field which users are likely to change to indicate their selected roll, as it shows naturally on the sheet.
- * 2) OPTION/Options: the Options field in RaR that can also be edited.
- * 2--a ) OPTIONID/Options: the same drop-down gives and uneditable flag that indicates things like
- *    - Activation roll
- *    - Skill roll
- *    - Characteristic roll
- *    - PER roll
- *    - KS, PS, SS roll (Background skills)
- *    - and the difficulty -1/10 (default), -1/5 (hard), -1/20 (easy)
- * 3) COMMENTS/Comments: is an editable field that users might use to indicate the roll required.
- * 4) ROLLALIAS: is a 5e only editable field that users might use to indicate the roll required.
- *
- * the Skills to be matched will be generally be referenced as 'o' as they are considered in anonymous find functions.
- * ex: filterOutNonSkillRollItems which filters out skill items from skill enhancers and skill level bonuses.
- * Skills that are to be matched will be 'rollable' skills.
- * Most skills are only taken once, the user is warned if they purchase multiple copies of the same skill.
- * One exception is the POWERSKILL which is expected to be customized per power and purchased multiple times.
- * Likewise with the Background skills (KS, PS, SS) are a special case as they can be purchased multiple times with different INPUTs.
- * The Background skills are only matched when the RaR is looking for one of those specifically.
- * The RaR will have an OPTIONID of KS, PS, or SS which must match the skill's XMLID.
- *
- * 1) o.name/Name
- * 2) o.system.ALIAS/Display
- * 3) o.system.XMLID/XMLID
- * 4) o.system.INPUT/(Science/Knowledge/ (Background skills only)
- *
- *
  */
 export async function isActivatedForThisUse(item, options) {
     // PH: FIXME: options to be removed.
@@ -428,14 +394,14 @@ export async function isActivatedForThisUse_TestingOnly(item, rollClass, options
 }
 
 async function isActivatedForThisUseInternal(item, rollClass, options) {
-    // if(!item.isActive) {
-    //     return false;
-    // }
-
     const rar = item.modifiers.find((o) => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL");
     if (!rar) {
         return true;
     }
+
+    const actor = item.actor;
+    const token = options.token ?? tokenEducatedGuess({ actor });
+    const speaker = ChatMessage.getSpeaker({ actor, token });
 
     // An item with an activation roll/requires a skill roll/requires a roll can take up to 2 consecutive rolls. Figure
     // out what we're actually rolling for.
@@ -452,22 +418,22 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             activationRoll.type !== RSR_ROLL_TYPE.CHARACTERISTIC_ROLL &&
             activationRoll.activeItems.length === 0
         ) {
-            // PH: FIXME: This needs appropriate message
+            const flavor = `${item.name} activation ${emphasizeSuccessFailureFlavour(false, `failed as there is no matching active item for the ${activationRoll.type}.`)}`;
+            await generateSuccessChatCard(actor, speaker, flavor, null, null);
+
             return false;
         } else if (
             activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL &&
             !item.actor.hasCharacteristic(activationRoll.characteristicKey)
         ) {
-            // PH: FIXME: This needs appropriate message
+            const flavor = `${item.name} activation ${emphasizeSuccessFailureFlavour(false, `failed as ${actor.name} does not have the ${activationRoll.characteristicKey} characteristic.`)}`;
+            await generateSuccessChatCard(actor, speaker, flavor, null, null);
+
             return false;
         }
     }
 
     // PH: FIXME: Need to pay the resource cost of this skill/etc
-
-    const actor = item.actor;
-    const token = options.token ?? tokenEducatedGuess({ actor });
-    const speaker = ChatMessage.getSpeaker({ actor, token });
 
     // Perform the rolls. Because a roll might consume resources we must perform all rolls (i.e. invoke all skills etc)
     // and then evaluate if there was success.
@@ -493,16 +459,8 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
                         options.hitLocationNum,
                     );
 
-                    // PH: FIXME: The chat message should not be burried down in here.
-                    // Success or failure message
-                    const chatData = {
-                        style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
-                        author: game.user._id,
-                        content: `The sectional defense from <b>${item.name}</b> ${sectionalDefenseApply ? "successfully applied" : "failed to apply"}`,
-                        speaker: speaker,
-                        whisper: whisperUserTargetsForActor(actor),
-                    };
-                    await ChatMessage.create(chatData);
+                    const flavor = `The sectional defense from ${item.name} ${emphasizeSuccessFailureFlavour(sectionalDefenseApply, `${sectionalDefenseApply ? "applied" : "does not apply"} to hit location ${options.hitLocationNum}.`)}`;
+                    await generateSuccessChatCard(actor, speaker, flavor, null, null);
 
                     return sectionalDefenseApply;
                 }
@@ -595,9 +553,8 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             console.error(`${item.detailedName()} has unknown type ${activationRoll.type} for requires roll modifier`);
         }
 
-        // PH: FIXME: Bunch of functionality ripped out of this function. See below to get it into the flavor.
         // PH: FIXME: resource usage string should be built in here as this is what's consuming. Create functions so it can be done in a fixed way.
-        await generateSuccessChatCard(actor, speaker, roller, flavor, `Spent ${options.resourcesUsedDescription}`);
+        await generateSuccessChatCard(actor, speaker, flavor, roller, `Spent ${options.resourcesUsedDescription}`);
 
         return succeeded;
     });
@@ -700,11 +657,76 @@ export function activationRollHeroValidation(modifier, item) {
 
             validations.push({
                 property: undefined,
-                message: `${item.detailedName()}'s sectional defense declaration cumulative probability is ${hitLocationCumulativeProbability}% vs the matching limitation value's cumulative probability value of ${activationRollCumulativeProbability}%. This limitation should most likely be bought to ${shouldBeLessThanValue}-`,
+                message: `${item.detailedName()}'s sectional defense declaration cumulative probability is ${hitLocationCumulativeProbability.toFixed(2)}% vs the matching limitation value's cumulative probability value of ${activationRollCumulativeProbability}%. This limitation should most likely be bought to ${shouldBeLessThanValue}-`,
                 example: "A 14- activation roll should reflect a section defense declaration like: 3-5, 7-14, 16-18",
                 severity: CONFIG.HERO.VALIDATION_SEVERITY.WARNING,
                 modifierID: modifier.ID,
             });
+        }
+    }
+
+    return validations;
+}
+
+export function requiresRollHeroValidation(modifier, item) {
+    const validations = [];
+    const activationRolls = getRollsForRar(item, modifier);
+
+    // Does the actor have the required powers/skills for the roll?
+    for (const activationRoll of activationRolls) {
+        // Only naked success rolls can be without a skill
+        if (activationRoll.type === RSR_ROLL_TYPE.ITEM_ROLL) {
+            // Do we have items that match?
+            if (activationRoll.items.length === 0) {
+                validations.push({
+                    message: `Actor does not have ${activationRoll.name} skill to make the activation roll.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                    modifierID: modifier.ID,
+                });
+            }
+
+            // PH: FIXME: Check that they don't have skills as background skills (warn: cheaper than supposed to be)
+            // PH: FIXME: Check that they don't have background skills as skills (warn: more expensive than supposed to be)
+        } else if (activationRoll.type === RSR_ROLL_TYPE.LUCK_ROLL) {
+            if (activationRoll.items.length === 0) {
+                validations.push({
+                    message: `Actor does not have any luck powers to make the activation roll.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                    modifierID: modifier.ID,
+                });
+            }
+
+            // Should not have AP penalty on RSR against Luck (warn: just doesn't make sense and behaviour would be GM fiat)
+            const luckRollHasApPenalty = findRollDivisor(modifier) !== 0;
+            if (activationRoll.items.length > 0 && luckRollHasApPenalty) {
+                validations.push({
+                    message: `RSR that are based on luck should not have a penalty based on Active Points.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.WARNING,
+                    modifierID: modifier.ID,
+                });
+            }
+        } else if (activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL) {
+            if (!item.actor.hasCharacteristic(activationRoll.characteristicKey)) {
+                validations.push({
+                    message: `Actor does not have the characteristic ${activationRoll.characteristicKey} to make the activation roll.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                    modifierID: modifier.ID,
+                });
+            }
+        } else if (activationRoll.type === RSR_ROLL_TYPE.ATTACK_ROLL) {
+            // Should check if this actor type is capable of attack
+            const actor = item.actor;
+            if (actor?.type === "base2") {
+                validations.push({
+                    message: `Bases do not make attack rolls.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                    modifierID: modifier.ID,
+                });
+            }
+        } else if (activationRoll.type === RSR_ROLL_TYPE.ACTIVATION_ROLL) {
+            validations.push(...activationRollHeroValidation(modifier, item));
+        } else {
+            console.error(`Unknown activation roll type ${activationRoll.type} for heroValidation`);
         }
     }
 

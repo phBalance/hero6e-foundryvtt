@@ -1,12 +1,7 @@
 import { getOffHandDefenseDcv } from "./actor/actor-utils.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 import * as heroDice from "./heroRoller/dice.mjs";
-import {
-    activationRollHeroValidation,
-    findRollDivisor,
-    getRollsForRar,
-    RSR_ROLL_TYPE,
-} from "./item/item-requires-roll.mjs";
+import { activationRollHeroValidation, requiresRollHeroValidation } from "./item/item-requires-roll.mjs";
 import { HeroSystem6eItem } from "./item/item.mjs";
 import {
     maneuverHasBindTrait,
@@ -19118,67 +19113,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             dcAffecting: fixedValueFunction(false),
             minimumLimitation: -0.25,
             heroValidation: function (modifier, item) {
-                const validations = [];
-                const activationRolls = getRollsForRar(item, modifier);
-
-                // Does the actor have the required powers/skills for the roll?
-                for (const activationRoll of activationRolls) {
-                    // Only naked success rolls can be without a skill
-                    if (activationRoll.type === RSR_ROLL_TYPE.ITEM_ROLL) {
-                        // Do we have items that match?
-                        if (activationRoll.items.length === 0) {
-                            validations.push({
-                                message: `Actor does not have ${activationRoll.name} skill to make the activation roll.`,
-                                severity: HERO.VALIDATION_SEVERITY.ERROR,
-                                modifierID: modifier.ID,
-                            });
-                        }
-
-                        // PH: FIXME: Check that they don't have skills as background skills (warn: cheaper than supposed to be)
-                        // PH: FIXME: Check that they don't have background skills as skills (warn: more expensive than supposed to be)
-                    } else if (activationRoll.type === RSR_ROLL_TYPE.LUCK_ROLL) {
-                        if (activationRoll.items.length === 0) {
-                            validations.push({
-                                message: `Actor does not have any luck powers to make the activation roll.`,
-                                severity: HERO.VALIDATION_SEVERITY.ERROR,
-                                modifierID: modifier.ID,
-                            });
-                        }
-
-                        // Should not have AP penalty on RSR against Luck (warn: just doesn't make sense and behaviour would be GM fiat)
-                        const luckRollHasApPenalty = findRollDivisor(modifier) !== 0;
-                        if (activationRoll.items.length > 0 && luckRollHasApPenalty) {
-                            validations.push({
-                                message: `RSR that are based on luck should not have a penalty based on Active Points.`,
-                                severity: HERO.VALIDATION_SEVERITY.WARNING,
-                                modifierID: modifier.ID,
-                            });
-                        }
-                    } else if (activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL) {
-                        if (!item.actor.hasCharacteristic(activationRoll.characteristicKey)) {
-                            validations.push({
-                                message: `Actor does not have the characteristic ${activationRoll.characteristicKey} to make the activation roll.`,
-                                severity: HERO.VALIDATION_SEVERITY.ERROR,
-                                modifierID: modifier.ID,
-                            });
-                        }
-                    } else if (activationRoll.type === RSR_ROLL_TYPE.ATTACK_ROLL) {
-                        // Should check if this actor type is capable of attack
-                        const actor = item.actor;
-                        if (actor?.type === "base2") {
-                            validations.push({
-                                message: `Bases do not make attack rolls.`,
-                                severity: HERO.VALIDATION_SEVERITY.ERROR,
-                                modifierID: modifier.ID,
-                            });
-                        }
-                    } else if (activationRoll.type === RSR_ROLL_TYPE.ACTIVATION_ROLL) {
-                        validations.push(...activationRollHeroValidation(modifier, item));
-                    } else {
-                        console.error(`Unknown activation roll type ${activationRoll.type} for heroValidation`);
-                    }
-                }
-
+                const validations = requiresRollHeroValidation(modifier, item);
                 return validations;
             },
             xml: `<MODIFIER XMLID="REQUIRESASKILLROLL" ID="1596334078849" BASECOST="0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="14" OPTIONID="14" OPTION_ALIAS="14- roll" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
