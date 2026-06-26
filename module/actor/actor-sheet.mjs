@@ -148,8 +148,8 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             }
 
             // Characteristics
-            data.characteristics = getCharacteristicInfoArrayForActor(this.actor).map(
-                (o) => this.actor.system.characteristics[o.key.toLowerCase()],
+            data.characteristics = getCharacteristicInfoArrayForActor(this.actor).map((o) =>
+                this.actor.getCharacteristic(o.key.toLowerCase()),
             );
 
             // Defense (create fake attacks and get defense results)
@@ -341,11 +341,12 @@ export class HeroSystemActorSheet extends FoundryVttActorSheet {
             // Active Point Summary
             data.activePointSummary = [];
             for (const powerInfo of getCharacteristicInfoArrayForActor(this.actor)) {
-                const char = this.actor.system.characteristics[powerInfo.key.toLowerCase()];
+                const char = this.actor.getCharacteristic(powerInfo.key.toLowerCase());
                 if (!char) {
-                    console.error(`${powerInfo.key} not found in actor.system.characteristics`);
+                    console.error(`${powerInfo.key} not found in actor`);
                     continue;
                 }
+
                 let valueTop = Math.max(char.value, char.max);
                 let activePoints = valueTop * (powerInfo?.cost || 0);
                 if (activePoints > 0) {
