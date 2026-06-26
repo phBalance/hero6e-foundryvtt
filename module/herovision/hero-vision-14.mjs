@@ -2,36 +2,36 @@
 // 1. THE UNIFIED DETECTOR (V14 RESTRICTED)
 // ==========================================
 
-class HeroUnifiedDetectionModeV14 extends DetectionMode {
-    // static get TYPE() {
-    //     return DetectionMode.DETECTION_TYPES.SIGHT;
-    // }
-    // _canDetect(visionSourceToken, target) {
-    //     const basicCheck = super._canDetect(visionSourceToken, target);
-    //     const targetToken = target.object;
-    //     if (!(targetToken instanceof Token) || !targetToken.actor) return basicCheck;
-    //     const sourceActor = visionSourceToken.object?.actor;
-    //     if (!sourceActor) return basicCheck;
-    //     // HERO Rules Evaluation via Active Effect flags
-    //     const hasRadar = !!sourceActor.getFlag("hero6efoundryvttv2", "hasRadarSense");
-    //     const isInvisibleToSight =
-    //         targetToken.document.statusEffects.includes("invisible") ||
-    //         !!targetToken.actor.getFlag("hero6efoundryvttv2", "isInvisibleToSight");
-    //     const p1 = { x: visionSourceToken.center.x, y: visionSourceToken.center.y };
-    //     const p2 = { x: targetToken.center.x, y: targetToken.center.y };
-    //     const distance = canvas.grid.getDistance(p1, p2);
-    //     if (hasRadar) {
-    //         if (distance <= 60) return true; // Radar range parameters
-    //     }
-    //     if (isInvisibleToSight) {
-    //         return distance <= 14; // Fringe visibility boundary
-    //     }
-    //     return basicCheck;
-    // }
-    // _testStatus(visionSourceToken, target) {
-    //     return true;
-    // }
-}
+// class HeroUnifiedDetectionModeV14 extends DetectionMode {
+//     // static get TYPE() {
+//     //     return DetectionMode.DETECTION_TYPES.SIGHT;
+//     // }
+//     // _canDetect(visionSourceToken, target) {
+//     //     const basicCheck = super._canDetect(visionSourceToken, target);
+//     //     const targetToken = target.object;
+//     //     if (!(targetToken instanceof Token) || !targetToken.actor) return basicCheck;
+//     //     const sourceActor = visionSourceToken.object?.actor;
+//     //     if (!sourceActor) return basicCheck;
+//     //     // HERO Rules Evaluation via Active Effect flags
+//     //     const hasRadar = !!sourceActor.getFlag("hero6efoundryvttv2", "hasRadarSense");
+//     //     const isInvisibleToSight =
+//     //         targetToken.document.statusEffects.includes("invisible") ||
+//     //         !!targetToken.actor.getFlag("hero6efoundryvttv2", "isInvisibleToSight");
+//     //     const p1 = { x: visionSourceToken.center.x, y: visionSourceToken.center.y };
+//     //     const p2 = { x: targetToken.center.x, y: targetToken.center.y };
+//     //     const distance = canvas.grid.getDistance(p1, p2);
+//     //     if (hasRadar) {
+//     //         if (distance <= 60) return true; // Radar range parameters
+//     //     }
+//     //     if (isInvisibleToSight) {
+//     //         return distance <= 14; // Fringe visibility boundary
+//     //     }
+//     //     return basicCheck;
+//     // }
+//     // _testStatus(visionSourceToken, target) {
+//     //     return true;
+//     // }
+// }
 
 // ==========================================
 // 2. V14 SPECIFIC REGISTRATION & INJECTION
