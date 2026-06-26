@@ -70,6 +70,7 @@ async function willNotMigrate(lastMigration) {
  */
 async function migrateToVersion(migratesToVersion, lastMigration, queue, queueType, asyncFn) {
     if (!lastMigration || foundry.utils.isNewerVersion(migratesToVersion, lastMigration)) {
+        const _start = Date.now();
         const originalTotal = queue.length;
         const migrationProgressBar = new HeroProgressBar(
             `Migrating ${originalTotal} ${queueType} to ${migratesToVersion}`,
@@ -95,6 +96,11 @@ async function migrateToVersion(migratesToVersion, lastMigration, queue, queueTy
         }
 
         migrationProgressBar.close(`Done migrating ${originalTotal} ${queueType} to ${migratesToVersion}`);
+
+        console.log(
+            `%c Took ${Date.now() - _start}ms to migrate to version ${migratesToVersion} ${queueType}`,
+            "background: #1111FF; color: #FFFFFF",
+        );
     }
 }
 
@@ -185,7 +191,6 @@ export async function migrateWorld() {
     );
 
     // Migrate maneuvers for all things that have strength (PC, NPC) but ignore Vehicles and automatons since we don't give them free stuff at this point.
-    let _start = Date.now();
     await migrateToVersion(
         "4.0.14",
         lastMigration,
@@ -193,7 +198,6 @@ export async function migrateWorld() {
         "rebuilding all built in maneuvers for PC and NPCs",
         async (actor) => await replaceActorsBuiltInManeuvers(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.0.14`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.0.15",
@@ -202,7 +206,6 @@ export async function migrateWorld() {
         "adding freebees for Automatons",
         async (actor) => await addManeuversForAutomaton(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.0.15`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.0.16",
@@ -213,7 +216,6 @@ export async function migrateWorld() {
         "adding other attacks for 5e automaton, pc, and npc",
         async (actor) => await addOtherAttacksManeuversForAutomatonPcNpc(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.0.16`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.0.26",
@@ -222,7 +224,6 @@ export async function migrateWorld() {
         "removing STR placeholder",
         async (actor) => await removeStrengthPlaceholderAndCreateActivePropertyAndRemoveHeroicProperty(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.0.26`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.1.0",
@@ -231,7 +232,6 @@ export async function migrateWorld() {
         "flag scopes",
         async (actor) => await flagScopes(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.1.0`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.1.13",
@@ -240,7 +240,6 @@ export async function migrateWorld() {
         "remove placeholder weapon item",
         async (actor) => await removePlaceholderWeaponItem(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.1.13`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.2.0",
@@ -249,7 +248,6 @@ export async function migrateWorld() {
         "coerce is5e===undefined to boolean value",
         async (actor) => await migrateTo4_2_0(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.0`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.2.5",
@@ -258,7 +256,6 @@ export async function migrateWorld() {
         "edition migration and Overall SKILL LEVELS",
         async (actor) => await migrateTo4_2_5(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.5`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.2.9",
@@ -267,7 +264,6 @@ export async function migrateWorld() {
         "Combat Skill Levels",
         async (actor) => await migrateTo4_2_9(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.9`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.2.12",
@@ -276,7 +272,6 @@ export async function migrateWorld() {
         "Weapon Master",
         async (actor) => await migrateTo4_2_12(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.12`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.2.14",
@@ -285,7 +280,6 @@ export async function migrateWorld() {
         "Combat Skill Levels",
         async (actor) => await migrateTo4_2_14(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.14`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.2.17",
@@ -294,7 +288,6 @@ export async function migrateWorld() {
         "Penalty Skill Levels",
         async (actor) => await migrateTo4_2_17(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.17`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.2.18",
@@ -317,7 +310,6 @@ export async function migrateWorld() {
         "Maneuvers",
         async (actor) => await migrateActorManeuvers4_2_18(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.2.18`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.3.5",
@@ -326,7 +318,6 @@ export async function migrateWorld() {
         "Untrained Skill",
         async (actor) => await migrateTo4_3_5(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.3.5`, "background: #1111FF; color: #FFFFFF");
 
     await migrateToVersion(
         "4.3.7",
@@ -335,11 +326,21 @@ export async function migrateWorld() {
         "preBuildName",
         async (actor) => await migrateTo4_3_7(actor),
     );
-    console.log(`%c Took ${Date.now() - _start}ms to migrate to version 4.3.7`, "background: #1111FF; color: #FFFFFF");
 
-    console.log(
-        `%c Took ${Date.now() - _start}ms to finalize object migration to version ${game.system.version}`,
-        "background: #1111FF; color: #FFFFFF",
+    await migrateToVersion(
+        "4.3.11", // This is a second pass at 4.0.26
+        lastMigration,
+        getAllActorsInGame(),
+        "removing STR placeholder",
+        async (actor) => await removeStrengthPlaceholderAndCreateActivePropertyAndRemoveHeroicProperty(actor),
+    );
+
+    await migrateToVersion(
+        "4.3.11", // This is a second pass at 4.1.13
+        lastMigration,
+        getAllActorsInGame(),
+        "remove placeholder weapon item",
+        async (actor) => await removePlaceholderWeaponItem(actor),
     );
 
     // Placeholder for notifying GM of items missing XMLID
@@ -969,7 +970,14 @@ async function coerceIs5eToBoolean(actor) {
 // We no longer need __InternalManeuverPlaceholderWeapon as we now have effective attack items. Delete
 // it from all actors.
 async function removePlaceholderWeaponItem(actor) {
-    return actor?.items.find((item) => item.name === "__InternalManeuverPlaceholderWeapon")?.delete();
+    try {
+        const itemIdsToDelete = actor.items
+            .filter((item) => item.name === "__InternalManeuverPlaceholderWeapon")
+            .map((item) => item.id);
+        await actor.deleteEmbeddedDocuments("Item", itemIdsToDelete);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 // V13 requires scopes on all flags. Scoped flags work just fine in V12.
@@ -1024,7 +1032,10 @@ async function removeStrengthPlaceholderAndCreateActivePropertyAndRemoveHeroicPr
         await actor.update({ "system.-=isHeroic": null });
 
         // Delete strength placeholder as we need many of them so will be creating them on the fly.
-        await actor.items.find((item) => item.system.ALIAS === "__InternalStrengthPlaceholder")?.delete();
+        const itemIdsToDelete = actor.items
+            .filter((item) => item.name === "__InternalStrengthPlaceholder")
+            .map((item) => item.id);
+        await actor.deleteEmbeddedDocuments("Item", itemIdsToDelete);
 
         // Create the _active object for all items
         const updates = actor.items
