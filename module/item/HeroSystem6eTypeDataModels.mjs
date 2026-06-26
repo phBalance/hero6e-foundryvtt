@@ -1,15 +1,15 @@
 import { HeroSystem6eActor } from "../actor/actor.mjs";
-import { getPowerInfo, squelch, hdcTextNumberToNumeric } from "../utility/util.mjs";
-import { HeroSystem6eItem } from "./item.mjs";
-import { calculateVelocityInSystemUnits } from "../heroRuler.mjs";
 import { HeroObjectCacheMixin } from "../utility/cache.mjs";
 import {
-    getManueverEffectWithPlaceholdersReplaced,
-    getFullyQualifiedEffectFormulaFromItem,
     combatSkillLevelsForAttack,
+    getFullyQualifiedEffectFormulaFromItem,
+    getManueverEffectWithPlaceholdersReplaced,
 } from "../utility/damage.mjs";
-import { maneuverHasBlockTrait, maneuverHasFlashEffectTrait } from "./maneuver.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
+import { calculateVelocityInSystemUnits } from "../utility/units.mjs";
+import { getPowerInfo, hdcTextNumberToNumeric, squelch } from "../utility/util.mjs";
+import { HeroSystem6eItem } from "./item.mjs";
+import { maneuverHasBlockTrait, maneuverHasFlashEffectTrait } from "./maneuver.mjs";
 
 const { StringField, ObjectField, BooleanField, ArrayField, EmbeddedDataField, SchemaField } = foundry.data.fields;
 
@@ -846,11 +846,7 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
 
         // Unclear when this would get used (maneuver?)
         if (this[propLower] === "-v/10") {
-            // Educated guess for token
-            const token =
-                this.actor?.getActiveTokens().find((t) => canvas.tokens.controlled.find((c) => c.id === t.id)) ||
-                this.actor?.getActiveTokens()[0];
-            const velocity = calculateVelocityInSystemUnits(this.actor, token);
+            const velocity = calculateVelocityInSystemUnits(this.actor);
             if (velocity !== 0) {
                 _details.tags.push({ name: "Velocity", value: -parseInt(velocity / 10) });
             }

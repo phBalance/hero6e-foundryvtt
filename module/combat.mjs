@@ -744,19 +744,6 @@ export class HeroSystem6eCombat extends Combat {
 
         // PH: FIXME: stop abort under certain circumstances
 
-        // Reset movement history
-        if (window.dragRuler) {
-            if (masterCombatant) {
-                // If we are missing flags for dragRuler or the trackedRound !== null, resetMovementHistory
-                // Without this we sometimes get in a continuous loop (unclear as to why; related to #onModifyCombatants?)
-                if (!masterCombatant.flags.dragRuler || masterCombatant.flags.dragRuler.trackedRound !== null) {
-                    await dragRuler.resetMovementHistory(this, masterCombatant.id);
-                }
-            } else {
-                console.error("Unable to find masterCombatant for DragRuler");
-            }
-        }
-
         // STUNNING
         // The character remains Stunned and can take no
         // Actions (not even Aborting to a defensive action) until their next

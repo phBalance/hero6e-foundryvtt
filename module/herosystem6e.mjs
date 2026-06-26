@@ -15,7 +15,6 @@ import { EffectsPanel } from "./effects-panel.mjs";
 import { initializeHandlebarsHelpers } from "./handlebars-helpers.mjs";
 import { HeroSystem6eChatMessage } from "./heroChatMessage.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
-import { HeroRuler } from "./heroRuler.mjs";
 import { HeroSocketHandler } from "./heroSocketHandler.mjs";
 import { HeroTokenRuler } from "./heroTokenRuler.mjs";
 import { HeroPointVisionSource, setPerceptionModes } from "./herovision/vision.mjs";
@@ -66,8 +65,8 @@ import { HeroSystemTokenHud } from "./token/heroSystemTokenHud.mjs";
 import "./heroRoller/chat-dice.mjs";
 import { HeroRoll } from "./heroRoller/dice.mjs";
 import "./utility/adjustment.mjs";
-import { expireEffects } from "./utility/util.mjs";
 import { HeroCompatibility } from "./utility/compatibility.mjs";
+import { expireEffects } from "./utility/util.mjs";
 
 // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttActors = foundry.documents?.collections?.Actors || Actors;
@@ -217,10 +216,7 @@ Hooks.once("init", async function () {
     CONFIG.Token.objectClass = HeroSystem6eToken;
     CONFIG.MeasuredTemplate.objectClass = HeroSystem6eMeasuredTemplate;
     CONFIG.ActiveEffect.documentClass = HeroSystem6eActorActiveEffects;
-    if (foundry.canvas.placeables) {
-        CONFIG.Token.rulerClass = HeroTokenRuler; //V13
-    }
-    CONFIG.Canvas.rulerClass = HeroRuler; // END Use & calculateVelocityInSystemUnits
+    CONFIG.Token.rulerClass = HeroTokenRuler; //V13
 
     if (!HeroCompatibility.isV14) {
         CONFIG.Canvas.visionSourceClass = HeroPointVisionSource;
@@ -253,8 +249,6 @@ Hooks.once("init", async function () {
         disadvantage: HeroSystem6eItemDisadvantage,
         characteristic: HeroItemCharacteristic,
     });
-
-    HeroRuler.initialize();
 
     initializeHandlebarsHelpers();
     initializeItemHandlebarsHelpers();
