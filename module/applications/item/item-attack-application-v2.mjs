@@ -641,6 +641,8 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
         const templateType = heroAoeTypeToFoundryAoeTypeConversions[aoeType];
 
+        const isFreeform = aoeType === "any" || aoeType === "surface";
+
         //const sizeConversionToMeters = convertSystemUnitsToMetres(1, actor.is5e);
 
         //const hexTemplates = game.settings.get(HEROSYS.module, "HexTemplates");
@@ -687,48 +689,82 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             "restriction.priority": 0,
         };
 
-        switch (templateType) {
-            case "circle":
-                {
-                    regionData.shapes[0].radius = metersToPixels(areaOfEffect.value) / 2;
-                }
-                break;
-
-            case "cone":
-                {
-                    if ((areaOfEffect.ADDER || []).find((adder) => adder.XMLID === "THINCONE")) {
-                        regionData.shapes[0].angle = 30;
-                    } else {
-                        regionData.shapes[0].angle = 60;
+        if (isFreeform) {
+            // Build shapes directly: the conversion map's "rect" is not a real Region shape type, and
+            // placeRegion lets the player place each shape in turn (right-click to stop early).
+            const grid = canvas.grid;
+            const areaCount = Math.max(1, areaOfEffect.value || 1);
+            let makeAreaShape;
+            if (!actor.is5e) {
+                const oneAreaRadius = metersToPixels(2) / 2;
+                makeAreaShape = () => ({
+                    type: "circle",
+                    x: token.center.x,
+                    y: token.center.y,
+                    radius: oneAreaRadius,
+                });
+            } else if (grid.isGridless) {
+                // Gridless can't snap to a cell, so approximate each area as a circle.
+                const oneAreaRadius = metersToPixels(1) / 2;
+                makeAreaShape = () => ({
+                    type: "circle",
+                    x: token.center.x,
+                    y: token.center.y,
+                    radius: oneAreaRadius,
+                });
+            } else {
+                // A 1x1 token-base emanation snaps to a single grid cell.
+                const tokenShape = grid.isHexagonal ? CONST.TOKEN_SHAPES.ELLIPSE_1 : CONST.TOKEN_SHAPES.RECTANGLE_1;
+                makeAreaShape = () => ({
+                    type: "emanation",
+                    radius: 0,
+                    base: {
+                        type: "token",
+                        x: token.document.x,
+                        y: token.document.y,
+                        width: 1,
+                        height: 1,
+                        shape: tokenShape,
+                    },
+                });
+            }
+            regionData.shapes = Array.from({ length: areaCount }, makeAreaShape);
+            ui.notifications.info(
+                `Place up to ${areaCount} ${actor.is5e ? "hex(es)" : "2m area(s)"}: left-click to place each, right-click to stop early.`,
+            );
+        } else {
+            switch (templateType) {
+                case "circle":
+                    {
+                        regionData.shapes[0].radius = metersToPixels(areaOfEffect.value) / 2;
                     }
-                    regionData.shapes[0].radius = metersToPixels(areaOfEffect.value) / 2;
-                }
+                    break;
 
-                break;
+                case "cone":
+                    {
+                        if ((areaOfEffect.ADDER || []).find((adder) => adder.XMLID === "THINCONE")) {
+                            regionData.shapes[0].angle = 30;
+                        } else {
+                            regionData.shapes[0].angle = 60;
+                        }
+                        regionData.shapes[0].radius = metersToPixels(areaOfEffect.value) / 2;
+                    }
 
-            case "line":
-                {
-                    // width & length are in pixels
-                    // AARON: Not sure why we are dividing by 2 here.
-                    regionData.shapes[0].width = metersToPixels(areaOfEffect.width) / 2;
-                    regionData.shapes[0].length = metersToPixels(areaOfEffect.value) / 2;
-                }
-                break;
+                    break;
 
-            // case "rect": {
-            //     // if (areaOfEffect.type === "surface" && item.findModsByXmlid("CONTINUOUS")) {
-            //     //     // This is likely a damage shield
-            //     // }
+                case "line":
+                    {
+                        // width & length are in pixels
+                        // AARON: Not sure why we are dividing by 2 here.
+                        regionData.shapes[0].width = metersToPixels(areaOfEffect.width) / 2;
+                        regionData.shapes[0].length = metersToPixels(areaOfEffect.value) / 2;
+                    }
+                    break;
 
-            //     // rectangle templates are defined as a distance/hypotenuse and an angle
-            //     regionData.direction = areaOfEffect.direction;
-            //     regionData.distance = sizeConversionToMeters * areaOfEffect.distance;
-            //     break;
-            // }
-
-            default:
-                console.error(`unsupported template type ${templateType}`);
-                break;
+                default:
+                    console.error(`unsupported template type ${templateType}`);
+                    break;
+            }
         }
 
         const existingTemplate = this.getAoeTemplate();
