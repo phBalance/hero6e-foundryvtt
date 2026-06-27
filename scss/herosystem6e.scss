@@ -22,7 +22,6 @@ body {
 /* Styles for dice which are direct overrides of FoundryVTT styling */
 @include meta.load-css("components/foundry-overrides/dice");
 
-
 /* FIXME: This should not be using the class as a guard. These rules should all use the hero guard and be more tightly scoped (e.g. remove body as they're not global overrides). */
 .herosystem6e,
 .herosystem6e.theme-hc {
@@ -88,6 +87,8 @@ form.herosystem6e.theme-hc {
         margin-bottom: 2px;
     }
 }
+
+/* END FIXME: This should not be using the class as a guard. These rules should all use the hero guard and be more tightly scoped (e.g. remove body as they're not global overrides). */
 
 /* Styles limited to hero sheets */
 .hero {
