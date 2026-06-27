@@ -431,6 +431,20 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 { ...this.data.formData, token: this.data.token }, // use formData to include player options from the form
             );
 
+            const manueverItem = this.data.effectiveItem;
+            this.data.multiAttackItems ??= this.data.action.maneuver.isMultipleAttackManeuver
+                ? this.data.originalItem.actor.items.filter(filterIgnoreCompoundAndFrameworkItems).filter((item) => {
+                      return (
+                          (item.baseInfo.type.includes("attack") ||
+                              (item.baseInfo.type.includes("maneuver") && item.rollsToHit())) && // Is an attack, or an offensive (to-hit) maneuver?
+                          (manueverItem.system.XMLID === "MULTIPLEATTACK" || // 6e Multipleattack allows both HTH and Ranged
+                              (manueverItem.system.XMLID === "SWEEP" && item.isHth) || // 5e Sweep is HTH only
+                              (manueverItem.system.XMLID === "RAPIDFIRE" && item.isRanged)) && // 5e Rapid Fire is Ranged only
+                          !item.system.XMLID.startsWith("__") // No internal placeholder powers/items
+                      );
+                  })
+                : [];
+
             // the title seems to be fixed when the form is initialized,
             // and doesn't change afterwards even if we come through here again
             // todo: figure out how to adjust the title when we want it to
