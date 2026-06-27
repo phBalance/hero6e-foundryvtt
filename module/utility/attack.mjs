@@ -396,8 +396,7 @@ export class Attack {
             const attackKey = `attack-${execute}`;
             const attackKeys = maneuver[attackKey];
             const maneuverItem =
-                options.effectiveSubItems?.[attackKey] ??
-                system.attackerToken.actor.items.get(attackKeys.itemKey);
+                options.effectiveSubItems?.[attackKey] ?? system.attackerToken.actor.items.get(attackKeys.itemKey);
             const maneuverTarget = system.targetedTokens.find((token) => token.id === attackKeys.targetKey);
             const current = this.buildManeuverInfo(maneuverItem, [maneuverTarget], options, system);
             current.execute = execute;
