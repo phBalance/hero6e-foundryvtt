@@ -1,7 +1,12 @@
 // REF: https://foundryvtt.wiki/en/development/api/applicationv2
 import { HEROSYS } from "../../herosystem6e.mjs";
 import { filterIgnoreCompoundAndFrameworkItems } from "../../config.mjs";
-import { calculateRequiredResourcesToUse, dehydrateAttackItem, processActionToHit } from "../../item/item-attack.mjs";
+import {
+    calculateRequiredResourcesToUse,
+    dehydrateAttackItem,
+    processActionToHit,
+    userInteractiveVerifyOptionallyPromptThenSpendResources,
+} from "../../item/item-attack.mjs";
 import { buildEffectiveObject } from "../../item/item.mjs";
 import { Attack } from "../../utility/attack.mjs";
 import {
@@ -56,15 +61,28 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
     data;
 
+    #hookIds = {};
+
     constructor(data) {
         super();
         this.data = data;
 
-        Hooks.on("targetToken", ItemAttackFormApplicationV2.#targetTokenHandler.bind(this));
-        Hooks.on("controlToken", ItemAttackFormApplicationV2.#controlTokenHandler.bind(this));
+        this.#hookIds.targetToken = Hooks.on("targetToken", ItemAttackFormApplicationV2.#targetTokenHandler.bind(this));
+        this.#hookIds.controlToken = Hooks.on(
+            "controlToken",
+            ItemAttackFormApplicationV2.#controlTokenHandler.bind(this),
+        );
 
         // If  CSLs change on the Actor we need to know
-        Hooks.on("updateItem", ItemAttackFormApplicationV2.#updateItemHandler.bind(this));
+        this.#hookIds.updateItem = Hooks.on("updateItem", ItemAttackFormApplicationV2.#updateItemHandler.bind(this));
+    }
+
+    _onClose(options) {
+        super._onClose(options);
+
+        Hooks.off("targetToken", this.#hookIds.targetToken);
+        Hooks.off("controlToken", this.#hookIds.controlToken);
+        Hooks.off("updateItem", this.#hookIds.updateItem);
     }
 
     static async #targetTokenHandler() {
@@ -96,6 +114,10 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         form: {
             handler: ItemAttackFormApplicationV2.#onSubmit,
             closeOnSubmit: false,
+        },
+        actions: {
+            addMultiattack: ItemAttackFormApplicationV2.#onAddAttackToMultipleAttackManeuver,
+            removeMultiattack: ItemAttackFormApplicationV2.#onRemoveAttackFromMultipleAttackManeuver,
         },
         window: {
             icon: "fas fa-swords",
@@ -431,6 +453,20 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 { ...this.data.formData, token: this.data.token }, // use formData to include player options from the form
             );
 
+            const manueverItem = this.data.effectiveItem;
+            this.data.multiAttackItems ??= this.data.action.maneuver.isMultipleAttackManeuver
+                ? this.data.originalItem.actor.items.filter(filterIgnoreCompoundAndFrameworkItems).filter((item) => {
+                      return (
+                          (item.baseInfo.type.includes("attack") ||
+                              (item.baseInfo.type.includes("maneuver") && item.rollsToHit())) && // Is an attack, or an offensive (to-hit) maneuver?
+                          (manueverItem.system.XMLID === "MULTIPLEATTACK" || // 6e Multipleattack allows both HTH and Ranged
+                              (manueverItem.system.XMLID === "SWEEP" && item.isHth) || // 5e Sweep is HTH only
+                              (manueverItem.system.XMLID === "RAPIDFIRE" && item.isRanged)) && // 5e Rapid Fire is Ranged only
+                          !item.system.XMLID.startsWith("__") // No internal placeholder powers/items
+                      );
+                  })
+                : [];
+
             // the title seems to be fixed when the form is initialized,
             // and doesn't change afterwards even if we come through here again
             // todo: figure out how to adjust the title when we want it to
@@ -546,8 +582,9 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             }
 
             case "continueMultiattack":
+                this.data.formData ??= {};
                 this.data.formData.continueMultiattack = true;
-                break;
+                return this.render();
 
             case "executeMultiattack":
                 {
@@ -572,14 +609,14 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                         canvas.tokens.activate();
                         await this.close();
                     } else {
-                        return await new ItemAttackFormApplicationV2(this.data).render(true);
+                        return this.render();
                     }
                 }
 
                 break;
 
             case "missedMultiattack":
-                // TODO: charge user the end cost for the remaining attacks
+                await this.#forfeitRemainingMultiattackEndurance();
                 canvas.tokens.activate();
                 await this.close();
                 return;
@@ -1131,5 +1168,60 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 return this._onChange.call(this, ev, new FormDataExtended(this.element));
             });
         });
+    }
+
+    static async #onAddAttackToMultipleAttackManeuver() {
+        if (Attack.addMultipleAttack(this.data)) {
+            this.render();
+        }
+    }
+
+    static async #onRemoveAttackFromMultipleAttackManeuver(event, target) {
+        const multipleAttackKey = target.dataset.multiattack;
+        if (Attack.removeMultipleAttack(this.data, multipleAttackKey)) {
+            this.render();
+        }
+    }
+
+    async #forfeitRemainingMultiattackEndurance() {
+        const attackKeys = this.data.action?.maneuver?.attackKeys;
+        const remainingStart = this.data.formData?.execute;
+        const actor = this.data.actor;
+        if (!attackKeys?.length || remainingStart === undefined || !actor) {
+            return;
+        }
+
+        const descriptions = [];
+        for (let i = remainingStart; i < attackKeys.length; i++) {
+            const attackItem = actor.items.get(attackKeys[i].itemKey);
+            if (!attackItem) {
+                continue;
+            }
+
+            const { error, warning, resourcesUsedDescription } =
+                await userInteractiveVerifyOptionallyPromptThenSpendResources(attackItem, {
+                    ...this.data.formData,
+                    token: this.data.token,
+                });
+
+            if (error) {
+                ui.notifications.error(`${attackItem.name} ${error}`);
+            } else if (warning) {
+                ui.notifications.warn(`${attackItem.name} ${warning}`);
+            } else if (resourcesUsedDescription) {
+                descriptions.push(`${attackItem.name}: ${resourcesUsedDescription}`);
+            }
+        }
+
+        if (descriptions.length) {
+            await ChatMessage.create({
+                author: game.user.id,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                speaker: ChatMessage.getSpeaker({ actor, token: this.data.token }),
+                content: `<b>${actor.name}</b> forfeits END for the remaining attacks of a missed multiple attack:<ul><li>${descriptions.join(
+                    "</li><li>",
+                )}</li></ul>`,
+            });
+        }
     }
 }
