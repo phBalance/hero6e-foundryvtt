@@ -3009,6 +3009,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
         // Massive Kludge: MANEUVERS don't have INPUT but some of the rest of the code includes check for that
         item.system.INPUT = "PD";
+        avad.INPUT = "PD";
     }
 
     // Try to make sure we have a PD/ED/MD type for AVAD

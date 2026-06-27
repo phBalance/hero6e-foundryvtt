@@ -3,6 +3,7 @@
 ### Version 4.3.11 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Improved compendium prefab support. Improved and drag/drop support of items.
+- Fix crashes with NND maneuvers. [#4326](https://github.com/dmdorman/hero6e-foundryvtt/issues/4326)
 
 ### Version 4.3.11 20260621
 
