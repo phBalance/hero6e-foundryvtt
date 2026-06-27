@@ -160,17 +160,24 @@ export const parsecInLightYears = 3.26156;
 export const parsecInMetres = parsecInLightYears * lightYearInMetres;
 
 /**
- *  Get a multiplier that tries to translates from grid units, which are freeform text, to meters
+ * Converts scene grid units to meters with spam-safe parameters for loop paths.
+ * @param {object} [options={}] - Configuration flags
+ * @param {boolean} [options.silent=false] - If true, squelches UI toast alerts
+ * @param {Scene} [options.scene=null] - Explicit target scene to look up
+ * @returns {number} Distance multiplier float value
  */
-export function gridUnitsToMeters() {
-    const units = game.canvas.grid.units;
-    let distanceMultiplier;
+export function gridUnitsToMeters(options = {}) {
+    const silent = options.silent ?? false;
 
+    // V14 MULTI-SCENE GUARD: Fallback to active canvas scene ONLY if no explicit scene context is provided
+    const targetScene = options.scene ?? game.scenes?.current ?? game.canvas?.scene;
+    const units = targetScene?.grid?.units ?? "m";
+
+    let distanceMultiplier;
     if (units === "m") {
         distanceMultiplier = 1;
     } else if (units === '"') {
-        // Hero system hexes (5e)
-        distanceMultiplier = 2;
+        distanceMultiplier = 2; // Hero system hexes (5e)
     } else if (units === "km") {
         distanceMultiplier = 1000;
     } else if (units === "ft") {
@@ -180,21 +187,18 @@ export function gridUnitsToMeters() {
     } else if (units === "au") {
         distanceMultiplier = astronomicalUnitsInMetres;
     } else if (units === "ly") {
-        // Light years
         distanceMultiplier = lightYearInMetres;
     } else if (units === "pc") {
-        // Parsecs
         distanceMultiplier = parsecInMetres;
     } else {
-        // Not sure what the units might be. Guess meters.
-        if (!squelch(game.scenes?.current?.name || "scene")) {
+        // Only compile error toast messages if silent parameter is explicitly false
+        if (!silent && !squelch(targetScene?.name || "scene")) {
             ui.notifications.error(
-                `Scene "${game.scenes?.current?.name}" has unknown grid units (${units}). Fix your scene grid to be m, ", ft, km, miles, au (astronomical units), ly (light years), or pc (parsecs).`,
+                `Scene "${targetScene?.name}" has unknown grid units (${units}). Fix your scene grid.`,
             );
         }
         distanceMultiplier = 1;
     }
-
     return distanceMultiplier;
 }
 
