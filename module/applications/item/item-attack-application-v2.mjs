@@ -1246,12 +1246,12 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
         const descriptions = [];
         for (let i = remainingStart; i < attackKeys.length; i++) {
-            const rawItem = actor.items.get(attackKeys[i].itemKey);
-            if (!rawItem) {
+            const originalItem = actor.items.get(attackKeys[i].itemKey);
+            if (!originalItem) {
                 continue;
             }
 
-            const attackItem = await this.#buildEffectiveObjectForSubItem(rawItem);
+            const attackItem = await this.#buildEffectiveObjectForSubItem(originalItem);
             const { error, warning, resourcesUsedDescription } =
                 await userInteractiveVerifyOptionallyPromptThenSpendResources(attackItem, {
                     ...this.data.formData,
@@ -1259,11 +1259,11 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 });
 
             if (error) {
-                ui.notifications.error(`${rawItem.name} ${error}`);
+                ui.notifications.error(`${originalItem.name} ${error}`);
             } else if (warning) {
-                ui.notifications.warn(`${rawItem.name} ${warning}`);
+                ui.notifications.warn(`${originalItem.name} ${warning}`);
             } else if (resourcesUsedDescription) {
-                descriptions.push(`${rawItem.name}: ${resourcesUsedDescription}`);
+                descriptions.push(`${originalItem.name}: ${resourcesUsedDescription}`);
             }
         }
 
