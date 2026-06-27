@@ -1,7 +1,12 @@
 // REF: https://foundryvtt.wiki/en/development/api/applicationv2
 import { HEROSYS } from "../../herosystem6e.mjs";
 import { filterIgnoreCompoundAndFrameworkItems } from "../../config.mjs";
-import { calculateRequiredResourcesToUse, dehydrateAttackItem, processActionToHit } from "../../item/item-attack.mjs";
+import {
+    calculateRequiredResourcesToUse,
+    dehydrateAttackItem,
+    processActionToHit,
+    userInteractiveVerifyOptionallyPromptThenSpendResources,
+} from "../../item/item-attack.mjs";
 import { buildEffectiveObject } from "../../item/item.mjs";
 import { Attack } from "../../utility/attack.mjs";
 import {
@@ -611,7 +616,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 break;
 
             case "missedMultiattack":
-                // TODO: charge user the end cost for the remaining attacks
+                await this.#forfeitRemainingMultiattackEndurance();
                 canvas.tokens.activate();
                 await this.close();
                 return;
@@ -1175,6 +1180,48 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         const multipleAttackKey = target.dataset.multiattack;
         if (Attack.removeMultipleAttack(this.data, multipleAttackKey)) {
             this.render();
+        }
+    }
+
+    async #forfeitRemainingMultiattackEndurance() {
+        const attackKeys = this.data.action?.maneuver?.attackKeys;
+        const remainingStart = this.data.formData?.execute;
+        const actor = this.data.actor;
+        if (!attackKeys?.length || remainingStart === undefined || !actor) {
+            return;
+        }
+
+        const descriptions = [];
+        for (let i = remainingStart; i < attackKeys.length; i++) {
+            const attackItem = actor.items.get(attackKeys[i].itemKey);
+            if (!attackItem) {
+                continue;
+            }
+
+            const { error, warning, resourcesUsedDescription } =
+                await userInteractiveVerifyOptionallyPromptThenSpendResources(attackItem, {
+                    ...this.data.formData,
+                    token: this.data.token,
+                });
+
+            if (error) {
+                ui.notifications.error(`${attackItem.name} ${error}`);
+            } else if (warning) {
+                ui.notifications.warn(`${attackItem.name} ${warning}`);
+            } else if (resourcesUsedDescription) {
+                descriptions.push(`${attackItem.name}: ${resourcesUsedDescription}`);
+            }
+        }
+
+        if (descriptions.length) {
+            await ChatMessage.create({
+                author: game.user.id,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                speaker: ChatMessage.getSpeaker({ actor, token: this.data.token }),
+                content: `<b>${actor.name}</b> forfeits END for the remaining attacks of a missed multiple attack:<ul><li>${descriptions.join(
+                    "</li><li>",
+                )}</li></ul>`,
+            });
         }
     }
 }
