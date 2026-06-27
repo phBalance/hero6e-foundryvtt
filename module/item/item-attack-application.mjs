@@ -29,6 +29,8 @@ const heroAoeTypeToFoundryAoeTypeConversions = Object.freeze({
 });
 
 export class ItemAttackFormApplication extends FormApplication {
+    #hookIds = {};
+
     constructor(data) {
         super();
         this.data = data;
@@ -39,14 +41,14 @@ export class ItemAttackFormApplication extends FormApplication {
             // to properly wait for promises to resolve before refreshing the UI.
             window.setTimeout(() => this.refresh(), 1);
         };
-        Hooks.on("targetToken", _targetToken.bind(this));
+        this.#hookIds.targetToken = Hooks.on("targetToken", _targetToken.bind(this));
 
         const _controlToken = async function () {
             // Necessary for situations where it is not possible
             // to properly wait for promises to resolve before refreshing the UI.
             window.setTimeout(() => this.refresh(), 1);
         };
-        Hooks.on("controlToken", _controlToken.bind(this));
+        this.#hookIds.controlToken = Hooks.on("controlToken", _controlToken.bind(this));
 
         // If  CSLs change on the Actor we need to know
         const _updateItem = async function (item) {
@@ -55,7 +57,15 @@ export class ItemAttackFormApplication extends FormApplication {
                 this.refresh();
             }
         };
-        Hooks.on("updateItem", _updateItem.bind(this));
+        this.#hookIds.updateItem = Hooks.on("updateItem", _updateItem.bind(this));
+    }
+
+    async close(options) {
+        Hooks.off("targetToken", this.#hookIds.targetToken);
+        Hooks.off("controlToken", this.#hookIds.controlToken);
+        Hooks.off("updateItem", this.#hookIds.updateItem);
+
+        return super.close(options);
     }
 
     refresh() {
@@ -701,7 +711,7 @@ export class ItemAttackFormApplication extends FormApplication {
                 canvas.tokens.activate();
                 await this.close();
             } else {
-                return await new ItemAttackFormApplication(this.data).render(true);
+                return this.render();
             }
         } else if (event.submitter?.name === "missedMultiattack") {
             // TODO: charge user the end cost for the remaining attacks

@@ -1274,6 +1274,7 @@ async function doSingleTargetActionToHit(action, options) {
         flags: {
             [game.system.id]: {
                 ...cardData,
+                token: cardData.token.document.toObject(),
             },
         },
     };

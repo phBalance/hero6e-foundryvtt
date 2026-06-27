@@ -1,7 +1,12 @@
 // REF: https://foundryvtt.wiki/en/development/api/applicationv2
 import { HEROSYS } from "../../herosystem6e.mjs";
 import { filterIgnoreCompoundAndFrameworkItems } from "../../config.mjs";
-import { calculateRequiredResourcesToUse, dehydrateAttackItem, processActionToHit } from "../../item/item-attack.mjs";
+import {
+    calculateRequiredResourcesToUse,
+    dehydrateAttackItem,
+    processActionToHit,
+    userInteractiveVerifyOptionallyPromptThenSpendResources,
+} from "../../item/item-attack.mjs";
 import { buildEffectiveObject } from "../../item/item.mjs";
 import { Attack } from "../../utility/attack.mjs";
 import {
@@ -56,15 +61,28 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
     data;
 
+    #hookIds = {};
+
     constructor(data) {
         super();
         this.data = data;
 
-        Hooks.on("targetToken", ItemAttackFormApplicationV2.#targetTokenHandler.bind(this));
-        Hooks.on("controlToken", ItemAttackFormApplicationV2.#controlTokenHandler.bind(this));
+        this.#hookIds.targetToken = Hooks.on("targetToken", ItemAttackFormApplicationV2.#targetTokenHandler.bind(this));
+        this.#hookIds.controlToken = Hooks.on(
+            "controlToken",
+            ItemAttackFormApplicationV2.#controlTokenHandler.bind(this),
+        );
 
         // If  CSLs change on the Actor we need to know
-        Hooks.on("updateItem", ItemAttackFormApplicationV2.#updateItemHandler.bind(this));
+        this.#hookIds.updateItem = Hooks.on("updateItem", ItemAttackFormApplicationV2.#updateItemHandler.bind(this));
+    }
+
+    _onClose(options) {
+        super._onClose(options);
+
+        Hooks.off("targetToken", this.#hookIds.targetToken);
+        Hooks.off("controlToken", this.#hookIds.controlToken);
+        Hooks.off("updateItem", this.#hookIds.updateItem);
     }
 
     static async #targetTokenHandler() {
@@ -96,6 +114,10 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         form: {
             handler: ItemAttackFormApplicationV2.#onSubmit,
             closeOnSubmit: false,
+        },
+        actions: {
+            addMultiattack: ItemAttackFormApplicationV2.#onAddAttackToMultipleAttackManeuver,
+            removeMultiattack: ItemAttackFormApplicationV2.#onRemoveAttackFromMultipleAttackManeuver,
         },
         window: {
             icon: "fas fa-swords",
@@ -312,31 +334,46 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 this.data.originalItem.system.conditionalAttacks[DEADLYBLOW.id].system.checked ??= true;
             }
 
+            // During the execute phase of a multiple attack, the per-step sub-attack (e.g. a Strike)
+            // drives the strength and hand-to-hand options, not the orchestrating maneuver.
+            const multiAttackExecute = this.data.formData?.execute;
+            const isMultipleAttackManeuver = ["MULTIPLEATTACK", "SWEEP", "RAPIDFIRE"].includes(
+                this.data.originalItem.system.XMLID,
+            );
+            this.data.multiAttackSubItem =
+                isMultipleAttackManeuver && multiAttackExecute !== undefined
+                    ? (this.data.originalItem.actor.items.get(this.data.formData[`attack-${multiAttackExecute}`]) ??
+                      null)
+                    : null;
+            const hthBaseItem = this.data.multiAttackSubItem ?? this.data.originalItem;
+
             // Hand-to-hand attacks only apply to things that are strength damage based
-            if (isManeuverThatDoesNormalDamage(this.data.originalItem)) {
-                const hthAttacks = this.data.originalItem.actor.items.filter(
+            if (isManeuverThatDoesNormalDamage(hthBaseItem)) {
+                const hthAttacks = hthBaseItem.actor.items.filter(
                     (item) => item.system.XMLID === "HANDTOHANDATTACK" && !(item.system.CARRIED && !item.system.active),
                 );
-                this.data.hthAttackItems ??= hthAttacks.reduce((attacksObj, hthAttack) => {
-                    // If already exists we're updating so no need to recreate.
-                    // ItemAttackFormApplication uses uuid as key, which confuses foundry.expandObject because
-                    // the key contains periods. Instead of fixup code we are simplifying by using just the id,
-                    // which is unique.
-                    if (attacksObj[hthAttack.id]) {
-                        return attacksObj;
-                    }
 
-                    attacksObj[hthAttack.id] = {
-                        _canUseForAttack: false,
-                        reasonForCantUse: "",
-                        description: hthAttack.system.description,
-                        name: hthAttack.name,
-                        uuid: hthAttack.uuid,
-                    };
-                    return attacksObj;
-                }, {});
+                // Rebuild when the base item changes (e.g. advancing to a different sub-attack); otherwise
+                // keep the existing entries so the user's selections persist across renders.
+                if (this.data._hthAttackItemsForItemId !== hthBaseItem.id) {
+                    this.data._hthAttackItemsForItemId = hthBaseItem.id;
+                    this.data.hthAttackItems = hthAttacks.reduce((attacksObj, hthAttack) => {
+                        // ItemAttackFormApplication uses uuid as key, which confuses foundry.expandObject because
+                        // the key contains periods. Instead of fixup code we are simplifying by using just the id,
+                        // which is unique.
+                        attacksObj[hthAttack.id] = {
+                            _canUseForAttack: false,
+                            reasonForCantUse: "",
+                            description: hthAttack.system.description,
+                            name: hthAttack.name,
+                            uuid: hthAttack.uuid,
+                        };
+                        return attacksObj;
+                    }, {});
+                }
             } else {
                 this.data.hthAttackItems = {};
+                this.data._hthAttackItemsForItemId = null;
             }
 
             // Weapons can be used with HTH or ranged martial maneuvers. The user needs to have Weapon Element.
@@ -425,11 +462,34 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
             this.#setAoeAndHitLocationDataForEffectiveItem();
 
+            this.data.effectiveSubItems = {};
+            this.data.multiAttackCurrentItem = null;
+            if (this.data.multiAttackSubItem) {
+                const effectiveSubItem = await this.#buildEffectiveObjectForSubItem(this.data.multiAttackSubItem);
+                this.data.effectiveSubItems[`attack-${multiAttackExecute}`] = effectiveSubItem;
+                this.data.multiAttackCurrentItem = effectiveSubItem;
+            }
+
             this.data.action = Attack.buildActionInfo(
                 this.data.effectiveItem,
                 this.data.targets,
-                { ...this.data.formData, token: this.data.token }, // use formData to include player options from the form
+                // use formData to include player options from the form
+                { ...this.data.formData, token: this.data.token, effectiveSubItems: this.data.effectiveSubItems },
             );
+
+            const manueverItem = this.data.effectiveItem;
+            this.data.multiAttackItems ??= this.data.action.maneuver.isMultipleAttackManeuver
+                ? this.data.originalItem.actor.items.filter(filterIgnoreCompoundAndFrameworkItems).filter((item) => {
+                      return (
+                          (item.baseInfo.type.includes("attack") ||
+                              (item.baseInfo.type.includes("maneuver") && item.rollsToHit())) && // Is an attack, or an offensive (to-hit) maneuver?
+                          (manueverItem.system.XMLID === "MULTIPLEATTACK" || // 6e Multipleattack allows both HTH and Ranged
+                              (manueverItem.system.XMLID === "SWEEP" && item.isHth) || // 5e Sweep is HTH only
+                              (manueverItem.system.XMLID === "RAPIDFIRE" && item.isRanged)) && // 5e Rapid Fire is Ranged only
+                          !item.system.XMLID.startsWith("__") // No internal placeholder powers/items
+                      );
+                  })
+                : [];
 
             // the title seems to be fixed when the form is initialized,
             // and doesn't change afterwards even if we come through here again
@@ -546,8 +606,9 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             }
 
             case "continueMultiattack":
+                this.data.formData ??= {};
                 this.data.formData.continueMultiattack = true;
-                break;
+                return this.render();
 
             case "executeMultiattack":
                 {
@@ -561,7 +622,9 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                         // TODO: if any roll misses, the multiattack ends, and the end cost for the remainding attacks are forfeit
 
                         // this is the roll:
-                        await processActionToHit(this.data.effectiveItem, this.data.formData);
+                        await processActionToHit(this.data.effectiveItem, this.data.formData, {
+                            effectiveSubItems: this.data.effectiveSubItems,
+                        });
 
                         this.data.formData.execute = this.data.action.current.execute + 1;
                     }
@@ -572,14 +635,14 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                         canvas.tokens.activate();
                         await this.close();
                     } else {
-                        return await new ItemAttackFormApplicationV2(this.data).render(true);
+                        return this.render();
                     }
                 }
 
                 break;
 
             case "missedMultiattack":
-                // TODO: charge user the end cost for the remaining attacks
+                await this.#forfeitRemainingMultiattackEndurance();
                 canvas.tokens.activate();
                 await this.close();
                 return;
@@ -893,6 +956,12 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
     // Create a new effectiveItem
     async #buildEffectiveObjectFromOriginalAndData() {
+        // Hand-to-hand attacks belong to the per-step sub-attack, not the orchestrating multiple
+        // attack maneuver (which doesn't use STR), so don't apply them to the maneuver's own build.
+        const isMultipleAttackManeuver = ["MULTIPLEATTACK", "SWEEP", "RAPIDFIRE"].includes(
+            this.data.originalItem.system.XMLID,
+        );
+
         const effectiveObjectParameters = {
             originalItem: this.data.originalItem,
             effectiveRealCost: this.data.effectiveRealCost,
@@ -901,7 +970,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             effectiveStrPushedRealPoints: this.data.effectiveStrPushedRealPoints,
 
             maWeaponId: this.data.maSelectedWeaponId,
-            hthAttackItems: this.data.hthAttackItems,
+            hthAttackItems: isMultipleAttackManeuver ? {} : this.data.hthAttackItems,
             nakedAdvantagesItems: this.data.nakedAdvantagesItems,
 
             autofire: {
@@ -911,6 +980,27 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         };
 
         return buildEffectiveObject(effectiveObjectParameters);
+    }
+
+    // Build an effective item for one sub-attack of a multiple attack, applying the shared strength
+    // and hand-to-hand selections so to-hit, damage, and END reflect them.
+    async #buildEffectiveObjectForSubItem(subItem) {
+        return buildEffectiveObject({
+            originalItem: subItem,
+            effectiveRealCost: subItem._realCost,
+            pushedRealPoints: 0,
+            effectiveStr: this.data.effectiveStr,
+            effectiveStrPushedRealPoints: this.data.effectiveStrPushedRealPoints,
+
+            maWeaponId: null,
+            hthAttackItems: this.data.hthAttackItems,
+            nakedAdvantagesItems: {},
+
+            autofire: {
+                shots: 1,
+                maxShots: 1,
+            },
+        });
     }
 
     // PH: FIXME: Effective item is not STR for maneuvers with empty fist or the weapon for weapon maneuvers
@@ -1131,5 +1221,61 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 return this._onChange.call(this, ev, new FormDataExtended(this.element));
             });
         });
+    }
+
+    static async #onAddAttackToMultipleAttackManeuver() {
+        if (Attack.addMultipleAttack(this.data)) {
+            this.render();
+        }
+    }
+
+    static async #onRemoveAttackFromMultipleAttackManeuver(event, target) {
+        const multipleAttackKey = target.dataset.multiattack;
+        if (Attack.removeMultipleAttack(this.data, multipleAttackKey)) {
+            this.render();
+        }
+    }
+
+    async #forfeitRemainingMultiattackEndurance() {
+        const attackKeys = this.data.action?.maneuver?.attackKeys;
+        const remainingStart = this.data.formData?.execute;
+        const actor = this.data.actor;
+        if (!attackKeys?.length || remainingStart === undefined || !actor) {
+            return;
+        }
+
+        const descriptions = [];
+        for (let i = remainingStart; i < attackKeys.length; i++) {
+            const originalItem = actor.items.get(attackKeys[i].itemKey);
+            if (!originalItem) {
+                continue;
+            }
+
+            const attackItem = await this.#buildEffectiveObjectForSubItem(originalItem);
+            const { error, warning, resourcesUsedDescription } =
+                await userInteractiveVerifyOptionallyPromptThenSpendResources(attackItem, {
+                    ...this.data.formData,
+                    token: this.data.token,
+                });
+
+            if (error) {
+                ui.notifications.error(`${originalItem.name} ${error}`);
+            } else if (warning) {
+                ui.notifications.warn(`${originalItem.name} ${warning}`);
+            } else if (resourcesUsedDescription) {
+                descriptions.push(`${originalItem.name}: ${resourcesUsedDescription}`);
+            }
+        }
+
+        if (descriptions.length) {
+            await ChatMessage.create({
+                author: game.user.id,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                speaker: ChatMessage.getSpeaker({ actor, token: this.data.token }),
+                content: `<b>${actor.name}</b> forfeits END for the remaining attacks of a missed multiple attack:<ul><li>${descriptions.join(
+                    "</li><li>",
+                )}</li></ul>`,
+            });
+        }
     }
 }
