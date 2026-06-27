@@ -782,6 +782,14 @@ export class ItemAttackFormApplication extends FormApplication {
         const aoeType = areaOfEffect.type;
         const aoeValue = areaOfEffect.value;
 
+        // TODO: Remove when V13 support is dropped. Freeform shapes need drawable Regions (V14+); the V13
+        // MeasuredTemplate path can't represent them, so refuse cleanly rather than throwing.
+        if (aoeType === "any" || aoeType === "surface") {
+            return ui.notifications.warn(
+                `Placing a template for a "${aoeType}" Area Of Effect is not supported in this version of Foundry. Use "Use manual token targeting (skip template)" instead.`,
+            );
+        }
+
         const actor = item.actor;
         const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
         if (!token) {
