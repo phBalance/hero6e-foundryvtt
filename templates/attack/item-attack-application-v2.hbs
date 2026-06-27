@@ -208,7 +208,7 @@
         </div>
       {{/if}}
 
-      {{#if (or effectiveItem.system.usesStrength effectiveItem.system.usesTk)}}
+      {{#if (or effectiveItem.system.usesStrength effectiveItem.system.usesTk multiAttackCurrentItem.system.usesStrength multiAttackCurrentItem.system.usesTk)}}
         <div class="form-group">
           <label>Effective Strength</label>
           <div class="noflexwrap">
