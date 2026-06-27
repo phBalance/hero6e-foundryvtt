@@ -97,6 +97,10 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             handler: ItemAttackFormApplicationV2.#onSubmit,
             closeOnSubmit: false,
         },
+        actions: {
+            addMultiattack: ItemAttackFormApplicationV2.#onAddAttackToMultipleAttackManeuver,
+            removeMultiattack: ItemAttackFormApplicationV2.#onRemoveAttackFromMultipleAttackManeuver,
+        },
         window: {
             icon: "fas fa-swords",
         },
@@ -1145,5 +1149,18 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 return this._onChange.call(this, ev, new FormDataExtended(this.element));
             });
         });
+    }
+
+    static async #onAddAttackToMultipleAttackManeuver() {
+        if (Attack.addMultipleAttack(this.data)) {
+            this.render();
+        }
+    }
+
+    static async #onRemoveAttackFromMultipleAttackManeuver(event, target) {
+        const multipleAttackKey = target.dataset.multiattack;
+        if (Attack.removeMultipleAttack(this.data, multipleAttackKey)) {
+            this.render();
+        }
     }
 }

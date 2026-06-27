@@ -55,9 +55,9 @@
               </select>
               <label>
                 {{#if (eq index 0)}}
-                  <span class="fas fa-plus {{#unless @root/action.current.missed}}add-multiattack{{/unless}}" > </span>
+                  <span class="fas fa-plus {{#unless @root/action.current.missed}}add-multiattack{{/unless}}" {{#unless @root/action.current.missed}}data-action="addMultiattack"{{/unless}} > </span>
                 {{else}}
-                  <span class="fas fa-trash {{#unless @root/action.current.missed}}remove-multiattack{{/unless}}" data-multiattack="{{multiAttack.attackKey}}" ></span>
+                  <span class="fas fa-trash {{#unless @root/action.current.missed}}remove-multiattack{{/unless}}" {{#unless @root/action.current.missed}}data-action="removeMultiattack"{{/unless}} data-multiattack="{{multiAttack.attackKey}}" ></span>
                 {{/if}}
               </label>
             </div>

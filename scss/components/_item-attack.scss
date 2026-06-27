@@ -31,4 +31,28 @@
         background: var(--input-background-color);
         color: var(--input-text-color);
     }
+
+    .multi-attack-options.target-container {
+        display: grid;
+        grid-template-columns: 8fr 8fr 1fr;
+        align-items: center;
+        width: 100%;
+        text-align: center;
+    }
+
+    .target-info-header,
+    .target-info-row {
+        display: contents;
+    }
+
+    .target-info-row .target-name {
+        text-align: left;
+        width: 100%;
+    }
+
+    .target-info-row label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 }
