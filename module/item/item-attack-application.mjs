@@ -495,6 +495,13 @@ export class ItemAttackFormApplication extends FormApplication {
                 this.data.aoeText += ` (${levels}${getSystemDisplayUnits(this.data.effectiveItem.actor.is5e)})`;
             }
 
+            this.data.aoeFreeform = aoe.type === "any" || aoe.type === "surface";
+            if (this.data.aoeFreeform) {
+                this.data.aoeAllowedCount = this.data.effectiveItem.actor.is5e
+                    ? `${levels} hex(es)`
+                    : `${levels} 2m area(s)`;
+            }
+
             if (this.getAoeTemplate() || game.user.targets.size > 0) {
                 this.data.noTargets = false;
             } else {
@@ -654,6 +661,14 @@ export class ItemAttackFormApplication extends FormApplication {
         this.#setAoeAndHitLocationDataForEffectiveItem();
 
         if (event.submitter?.name === "roll") {
+            canvas.tokens.activate();
+            await this.close();
+
+            return processActionToHit(this.data.effectiveItem, formData, { token: this.data.token });
+        }
+
+        if (event.submitter?.name === "rollManualTarget") {
+            formData.aoeManualTargeting = true;
             canvas.tokens.activate();
             await this.close();
 

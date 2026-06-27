@@ -502,6 +502,13 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 this.data.aoeText += ` (${levels}${getSystemDisplayUnits(this.data.effectiveItem.actor.is5e)})`;
             }
 
+            this.data.aoeFreeform = aoe.type === "any" || aoe.type === "surface";
+            if (this.data.aoeFreeform) {
+                this.data.aoeAllowedCount = this.data.effectiveItem.actor.is5e
+                    ? `${levels} hex(es)`
+                    : `${levels} 2m area(s)`;
+            }
+
             // if (this.getAoeTemplate() || game.user.targets.size > 0) {
             //     this.data.noTargets = false;
             // } else {
@@ -528,6 +535,12 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                         `No area of effect template found for this attack. Please place the template before rolling the attack.`,
                     );
                 }
+                await this.close();
+                return processActionToHit(this.data.effectiveItem, extendedFormData, { token: this.data.token });
+            }
+
+            case "rollManualTarget": {
+                extendedFormData.aoeManualTargeting = true;
                 await this.close();
                 return processActionToHit(this.data.effectiveItem, extendedFormData, { token: this.data.token });
             }
