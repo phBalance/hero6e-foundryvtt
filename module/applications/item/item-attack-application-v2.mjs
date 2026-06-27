@@ -564,8 +564,9 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             }
 
             case "continueMultiattack":
+                this.data.formData ??= {};
                 this.data.formData.continueMultiattack = true;
-                break;
+                return this.render();
 
             case "executeMultiattack":
                 {
