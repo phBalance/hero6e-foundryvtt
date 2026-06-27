@@ -1,85 +1,151 @@
-// ==========================================
-// 1. THE UNIFIED DETECTOR (V14 RESTRICTED)
-// ==========================================
+class HeroUnifiedDetectionModeV14 extends foundry.canvas.perception.DetectionMode {
+    static get TYPE() {
+        return foundry.canvas.perception.DetectionMode.DETECTION_TYPES.SIGHT;
+    }
 
-// class HeroUnifiedDetectionModeV14 extends DetectionMode {
-//     // static get TYPE() {
-//     //     return DetectionMode.DETECTION_TYPES.SIGHT;
-//     // }
-//     // _canDetect(visionSourceToken, target) {
-//     //     const basicCheck = super._canDetect(visionSourceToken, target);
-//     //     const targetToken = target.object;
-//     //     if (!(targetToken instanceof Token) || !targetToken.actor) return basicCheck;
-//     //     const sourceActor = visionSourceToken.object?.actor;
-//     //     if (!sourceActor) return basicCheck;
-//     //     // HERO Rules Evaluation via Active Effect flags
-//     //     const hasRadar = !!sourceActor.getFlag("hero6efoundryvttv2", "hasRadarSense");
-//     //     const isInvisibleToSight =
-//     //         targetToken.document.statusEffects.includes("invisible") ||
-//     //         !!targetToken.actor.getFlag("hero6efoundryvttv2", "isInvisibleToSight");
-//     //     const p1 = { x: visionSourceToken.center.x, y: visionSourceToken.center.y };
-//     //     const p2 = { x: targetToken.center.x, y: targetToken.center.y };
-//     //     const distance = canvas.grid.getDistance(p1, p2);
-//     //     if (hasRadar) {
-//     //         if (distance <= 60) return true; // Radar range parameters
-//     //     }
-//     //     if (isInvisibleToSight) {
-//     //         return distance <= 14; // Fringe visibility boundary
-//     //     }
-//     //     return basicCheck;
-//     // }
-//     // _testStatus(visionSourceToken, target) {
-//     //     return true;
-//     // }
-// }
+    /**
+     * Evaluates sense groups vs invisibility and flash conditions.
+     * @override
+     */
+    _canDetect(visionSource, target, level) {
+        const basicCheck = super._canDetect(visionSource, target, level);
+
+        // 1. Validate documents
+        const targetToken = target.document?.documentName === "Token" ? target : null;
+        const targetActor = targetToken?.actor;
+        if (!targetActor) return basicCheck;
+
+        const sourceToken = visionSource.object?.document?.documentName === "Token" ? visionSource.object : null;
+        const sourceActor = sourceToken?.actor;
+        if (!sourceActor) return basicCheck;
+
+        // 2. Gather state data using sub-functions
+        const senses = this._getObserverSenses(sourceToken, sourceActor);
+        const targetingGroups = this._getObserverTargetingGroups(sourceActor);
+        const targetInvisibility = this._getTargetInvisibility(targetToken, targetActor);
+
+        // 3. Compute V14 Path Measurements
+        const waypoints = [
+            { x: sourceToken.center.x, y: sourceToken.center.y },
+            { x: targetToken.center.x, y: targetToken.center.y },
+        ];
+        const pathMeasurement = canvas.grid.measurePath(waypoints);
+        const distanceInMeters = pathMeasurement?.distance ?? 0;
+
+        // 4. Resolve sensory processing matrix
+        return this._resolveSensoryMatrix(senses, targetingGroups, targetInvisibility, distanceInMeters, basicCheck);
+    }
+
+    /**
+     * Evaluates if the observer's sense groups are active or disabled by flashes.
+     * @protected
+     */
+    _getObserverSenses(sourceToken, sourceActor) {
+        return {
+            SIGHT:
+                !sourceToken.document.hasStatusEffect("blind") &&
+                !sourceActor.getFlag("hero6efoundryvttv2", "sightSenseDisabledEffect"),
+            HEARING: !sourceActor.getFlag("hero6efoundryvttv2", "hearingSenseDisabledEffect"),
+            RADIO: !sourceActor.getFlag("hero6efoundryvttv2", "radioSenseDisabledEffect"),
+            SMELL: !sourceActor.getFlag("hero6efoundryvttv2", "smellSenseDisabledEffect"),
+            MENTAL: !sourceActor.getFlag("hero6efoundryvttv2", "mentalSenseDisabled"),
+            TOUCH: !sourceActor.getFlag("hero6efoundryvttv2", "touchSenseDisabledEffect"),
+        };
+    }
+
+    /**
+     * Checks items to see which sense groups have active targeting capabilities.
+     * @protected
+     */
+    _getObserverTargetingGroups(sourceActor) {
+        const checkTargetingItem = (optionIds) =>
+            sourceActor.items.some(
+                (item) =>
+                    item.system.XMLID === "TARGETINGSENSE" && optionIds.includes(item.system.OPTIONID) && item.isActive,
+            );
+
+        return {
+            RADIO: sourceActor.items.some((item) => item.system.XMLID === "RADAR" && item.isActive),
+            HEARING: checkTargetingItem(["NORMALHEARING", "HEARINGGROUP"]),
+            SMELL: checkTargetingItem(["NORMALSMELL", "SMELLGROUP"]),
+            TOUCH: checkTargetingItem(["NORMALTOUCH", "TOUCHGROUP"]),
+            MENTAL: false, // TODO: Mental Awareness
+        };
+    }
+
+    /**
+     * Gathers active invisibility powers and their modifiers from the target.
+     * @protected
+     */
+    _getTargetInvisibility(targetToken, targetActor) {
+        const item = targetActor.items.find((i) => i.system.XMLID === "INVISIBILITY" && i.isActive);
+
+        return {
+            SIGHT:
+                targetToken.document.hasStatusEffect("invisible") ||
+                (item && !item.findModsByXmlid("SIGHTGROUP_EXEMPT")),
+            HEARING: !!item?.findModsByXmlid("HEARINGGROUP"),
+            RADIO: !!item?.findModsByXmlid("RADIOGROUP"),
+            SMELL: !!item?.findModsByXmlid("SMELLGROUP"),
+            MENTAL: !!item?.findModsByXmlid("MENTALGROUP"),
+            TOUCH: !!item?.findModsByXmlid("TOUCHGROUP"),
+            NO_FRINGE: !!item?.findModsByXmlid("NOFRINGE"),
+            BRIGHT_FRINGE: !!item?.findModsByXmlid("BRIGHTFRINGE"),
+        };
+    }
+
+    /**
+     * Loops through sense groups sequentially to resolve detection status.
+     * @protected
+     */
+    _resolveSensoryMatrix(senses, targeting, inv, distance, basicCheck) {
+        // A. Radio Group Sensing
+        if (senses.RADIO && targeting.RADIO && !inv.RADIO && distance <= 100) return true;
+
+        // B. Hearing Group Sensing
+        if (senses.HEARING && targeting.HEARING && !inv.HEARING && distance <= 40) return true;
+
+        // C. Mental Group Sensing
+        if (senses.MENTAL && targeting.MENTAL && !inv.MENTAL && distance <= 80) return true;
+
+        // D. Smell Group Sensing
+        if (senses.SMELL && targeting.SMELL && !inv.SMELL && distance <= 20) return true;
+
+        // E. Touch Group Sensing (Requires physical contact / adjacent hex spacing)
+        if (senses.TOUCH && targeting.TOUCH && !inv.TOUCH && distance <= 1) return true;
+
+        // F. Sight Group Base & Fringe Processing
+        if (senses.SIGHT) {
+            if (inv.SIGHT) {
+                if (inv.NO_FRINGE) return false;
+                const maxFringeRange = inv.BRIGHT_FRINGE ? 16 : 2;
+                return distance <= maxFringeRange;
+            }
+            return basicCheck;
+        }
+
+        return false;
+    }
+}
 
 // ==========================================
-// 2. V14 SPECIFIC REGISTRATION & INJECTION
+// 3. REGISTRATION INITIALIZATION
 // ==========================================
-
 export function initializeHeroVisionV14() {
-    // const isV14 = game.release ? game.release.generation >= 14 : false;
-    // if (!isV14) return;
-    // console.log("HeroSystem6e | Initializing Master V14 Dynamic Vision Engine.");
-    // // A. Register Detection Mode logic
-    // CONFIG.Canvas.detectionModes["heroUnifiedV14"] = new HeroUnifiedDetectionModeV14({
-    //     id: "heroUnifiedV14",
-    //     label: "HERO: Sensory Processor (v14)",
-    //     type: DetectionMode.DETECTION_TYPES.SIGHT,
-    // });
-    // // B. Register standard Vision Mode dropdown configuration
-    // CONFIG.Canvas.visionModes["heroUnifiedV14"] = new VisionMode({
-    //     id: "heroUnifiedV14",
-    //     label: "HERO: Dynamic System Vision",
-    //     tokenConfig: true,
-    //     detectionMode: "heroUnifiedV14",
-    //     canvas: {},
-    // });
-    // // ====================================================================
-    // // THE COMPLIANT V14 INJECTION PIPELINE: Intercepting PointVisionSource
-    // // Bypasses both database schemas and layer loop conflicts safely!
-    // // ====================================================================
-    // // Intercept the native initialization step of PointVisionSource in V14
-    // const originalInitialize = foundry.canvas.sources.PointVisionSource.prototype._initialize;
-    // foundry.canvas.sources.PointVisionSource.prototype._initialize = function (data) {
-    //     // 1. Allow the core V14 engine to structure standard source parameters
-    //     originalInitialize.call(this, data);
-    //     // 2. Fetch the corresponding Token document configuration
-    //     const tokenDoc = this.object?.document;
-    //     // 3. Inspect if the token is using our custom vision system dropdown option
-    //     if (tokenDoc?.sight?.visionMode === "heroUnifiedV14") {
-    //         // Ensure the runtime collection exists as a valid array
-    //         this.detectionModes = this.detectionModes || [];
-    //         // Avoid duplication if the engine performs multiple quick recalcs
-    //         const hasProcessor = this.detectionModes.some((m) => m.id === "heroUnifiedV14");
-    //         if (!hasProcessor) {
-    //             // Push a runtime definition straight into the WebGL vision source profile
-    //             this.detectionModes.push({
-    //                 id: "heroUnifiedV14",
-    //                 range: tokenDoc.sight.range || 100, // Seamless slider matching
-    //                 enabled: true,
-    //             });
-    //         }
-    //     }
-    // };
+    const isV14 = game.release ? game.release.generation >= 14 : false;
+    if (!isV14) return;
+
+    CONFIG.Canvas.detectionModes["heroUnifiedDetectionV14"] = new HeroUnifiedDetectionModeV14({
+        id: "heroUnifiedDetectionV14",
+        label: "HERO: Sensory Processor (v14)",
+        type: foundry.canvas.perception.DetectionMode.DETECTION_TYPES.SIGHT,
+    });
+
+    CONFIG.Canvas.visionModes["heroUnifiedVisionV14"] = new foundry.canvas.perception.VisionMode({
+        id: "heroUnifiedVisionV14",
+        label: "HERO: Dynamic System Vision",
+        tokenConfig: true,
+        detectionMode: "heroUnifiedDetectionV14",
+        canvas: {},
+    });
 }

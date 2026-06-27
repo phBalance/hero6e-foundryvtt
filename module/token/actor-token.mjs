@@ -33,6 +33,14 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
     }
 
     _prepareDetectionModes() {
+        // V14 FRAMEWORK GUARD: If V14, do not run legacy document-level setup
+        if (HeroCompatibility.isV14) {
+            super._prepareDetectionModes();
+            this._prepareDetectionModesV14();
+
+            return;
+        }
+
         if (this.sight.visionMode !== "heroVision") {
             super._prepareDetectionModes();
             return;
@@ -42,10 +50,6 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
         if (!this.sight.enabled) return;
         if (!this.isOwner) return;
         if (!this.id) return;
-
-        if (HeroCompatibility.isV14) {
-            return this._prepareDetectionModes14();
-        }
 
         // To see the map you must have DETECT + SENSE
         // Anything with 'detect limited class of physical objects'
@@ -142,44 +146,9 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
         }
     }
 
-    _prepareDetectionModes14() {
-        return;
-        // Maximum distance we can see is based on perception.  This is typically 125m+ so rarely impacts scene.
-        // Only 5e INT/PERCEPTION can go below 9.  6e INT cannot go below 0.  5e INT can go below 0.
-        // THE RANGE OF SENSES
-        // The Range Modifier (page 144) applies to all PER Rolls with Ranged
-        // Senses; this effectively restricts their Range significantly. The rules
-        // don’t establish any absolute outer limit or boundary for a Ranged
-        // Sense; the GM should establish the limit based on common sense
-        // and the situation. As a guideline, when the Range Modifier exceeds
-        // the point where it reduces a character’s PER Roll to 0 or below,
-        // things become too blurry, indistinct, or obscured for the character
-        // to perceive, even if he rolls a 3.
-
-        // TODO: When PERception is modified, update basicSight max range
-        // async function limitAllWorldTokens() {
-        //     let counter = 0;
-
-        //     // Loop through every scene stored in the world directory
-        //     for (let scene of game.scenes) {
-        //         // Generate an update payload array for the scene's tokens
-        //         const updates = scene.tokens.map((token) => {
-        //             counter++;
-        //             return {
-        //                 _id: token.id,
-        //                 "detectionModes.basic.range": 30,
-        //                 "detectionModes.basic.enabled": true,
-        //             };
-        //         });
-
-        //         // Fire a batch update to avoid canvas lag spikes
-        //         if (updates.length > 0) {
-        //             await scene.updateEmbeddedDocuments("Token", updates);
-        //         }
-        //     }
-
-        //     ui.notifications.info(`Successfully set basic sight to 30ft on ${counter} tokens across all scenes.`);
-        // }
+    _prepareDetectionModesV14() {
+        if (!this.sight.enabled) return;
+        this.detectionModes.heroUnifiedDetectionV14 ??= { enabled: true, range: Infinity };
     }
 
     static async createCombatants(tokens, { combat } = {}) {
