@@ -495,6 +495,13 @@ export class ItemAttackFormApplication extends FormApplication {
                 this.data.aoeText += ` (${levels}${getSystemDisplayUnits(this.data.effectiveItem.actor.is5e)})`;
             }
 
+            this.data.aoeFreeform = aoe.type === "any" || aoe.type === "surface";
+            if (this.data.aoeFreeform) {
+                this.data.aoeAllowedCount = this.data.effectiveItem.actor.is5e
+                    ? `${levels} hex(es)`
+                    : `${levels} 2m area(s)`;
+            }
+
             if (this.getAoeTemplate() || game.user.targets.size > 0) {
                 this.data.noTargets = false;
             } else {
@@ -660,6 +667,14 @@ export class ItemAttackFormApplication extends FormApplication {
             return processActionToHit(this.data.effectiveItem, formData, { token: this.data.token });
         }
 
+        if (event.submitter?.name === "rollManualTarget") {
+            formData.aoeManualTargeting = true;
+            canvas.tokens.activate();
+            await this.close();
+
+            return processActionToHit(this.data.effectiveItem, formData, { token: this.data.token });
+        }
+
         this.data.formData ??= {};
 
         if (event.submitter?.name === "continueMultiattack") {
@@ -766,6 +781,14 @@ export class ItemAttackFormApplication extends FormApplication {
 
         const aoeType = areaOfEffect.type;
         const aoeValue = areaOfEffect.value;
+
+        // TODO: Remove when V13 support is dropped. Freeform shapes need drawable Regions (V14+); the V13
+        // MeasuredTemplate path can't represent them, so refuse cleanly rather than throwing.
+        if (aoeType === "any" || aoeType === "surface") {
+            return ui.notifications.warn(
+                `Placing a template for a "${aoeType}" Area Of Effect is not supported in this version of Foundry. Use "Use manual token targeting (skip template)" instead.`,
+            );
+        }
 
         const actor = item.actor;
         const token = actor.getActiveTokens()[0] || canvas.tokens.controlled[0];
