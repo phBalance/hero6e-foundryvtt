@@ -56,15 +56,28 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
     data;
 
+    #hookIds = {};
+
     constructor(data) {
         super();
         this.data = data;
 
-        Hooks.on("targetToken", ItemAttackFormApplicationV2.#targetTokenHandler.bind(this));
-        Hooks.on("controlToken", ItemAttackFormApplicationV2.#controlTokenHandler.bind(this));
+        this.#hookIds.targetToken = Hooks.on("targetToken", ItemAttackFormApplicationV2.#targetTokenHandler.bind(this));
+        this.#hookIds.controlToken = Hooks.on(
+            "controlToken",
+            ItemAttackFormApplicationV2.#controlTokenHandler.bind(this),
+        );
 
         // If  CSLs change on the Actor we need to know
-        Hooks.on("updateItem", ItemAttackFormApplicationV2.#updateItemHandler.bind(this));
+        this.#hookIds.updateItem = Hooks.on("updateItem", ItemAttackFormApplicationV2.#updateItemHandler.bind(this));
+    }
+
+    _onClose(options) {
+        super._onClose(options);
+
+        Hooks.off("targetToken", this.#hookIds.targetToken);
+        Hooks.off("controlToken", this.#hookIds.controlToken);
+        Hooks.off("updateItem", this.#hookIds.updateItem);
     }
 
     static async #targetTokenHandler() {
@@ -591,7 +604,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                         canvas.tokens.activate();
                         await this.close();
                     } else {
-                        return await new ItemAttackFormApplicationV2(this.data).render(true);
+                        return this.render();
                     }
                 }
 
