@@ -54,5 +54,25 @@
         display: flex;
         align-items: center;
         justify-content: center;
+
+        .fas {
+            cursor: pointer;
+
+            &.disabled {
+                cursor: default;
+                opacity: 0.3;
+                pointer-events: none;
+            }
+        }
+    }
+
+    .add-attack-row {
+        .add-attack-spacer {
+            visibility: hidden;
+        }
+
+        label {
+            grid-column: 3;
+        }
     }
 }
