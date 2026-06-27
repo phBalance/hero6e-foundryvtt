@@ -3,8 +3,15 @@
 ### Version 4.3.11 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Improved compendium prefab support. Improved and drag/drop support of items.
+<<<<<<< HEAD
 - Fix crashes with NND maneuvers. [#4326](https://github.com/dmdorman/hero6e-foundryvtt/issues/4326)
 - Added support for overriding AOE templates with manual targeting [#4358](https://github.com/dmdorman/hero6e-foundryvtt/issues/4358)
+=======
+- Fixed dangling hooks in multiple attack dialog (V1 and V2) [#3785](https://github.com/dmdorman/hero6e-foundryvtt/issues/3785)
+- Fixed attacks not appearing in V2 Multiple Attack Dialog [#4318](https://github.com/dmdorman/hero6e-foundryvtt/issues/4318)
+- Fixed endurance for remaining attacks not being consumed (V2 Only) [#3785](https://github.com/dmdorman/hero6e-foundryvtt/issues/3785)
+- Introduces a clarity improvement for the V2 multiple attack dialog's buttons.
+>>>>>>> 36aa065c (changelog)
 
 ### Version 4.3.11 20260621
 
