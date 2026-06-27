@@ -865,8 +865,23 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             }
         });
 
-        // Create the region
-        newRegion = await this.placeRegionWithHiddenUI(regionData); //await canvas.regions.placeRegion(regionData);
+        // Create the region. For multi-area freeform shapes, a right-click finishes the chain early
+        // (keeping the areas already placed) rather than skipping the remaining areas one at a time.
+        const placementOptions = isFreeform
+            ? {
+                  preSkip: ({ shapeIndex }) => {
+                      // This uses an internal, undocumented variable. In the event this changes, this reverts to the original behavior.
+                      const ctx = canvas.regions._placementContext;
+                      if (ctx) {
+                          ctx.shapes.length = shapeIndex + 1;
+                      } else {
+                          console.warn("canvas.regions._placeContext may not exist", ctx);
+                      }
+                      return true;
+                  },
+              }
+            : {};
+        newRegion = await this.placeRegionWithHiddenUI(regionData, placementOptions); //await canvas.regions.placeRegion(regionData);
         if (newRegion?.documentName !== "Region") {
             throw new Error("Failed to create region for area of effect");
         }
@@ -894,7 +909,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         }
     }
 
-    async placeRegionWithHiddenUI(regionData) {
+    async placeRegionWithHiddenUI(regionData, options = {}) {
         let newRegion;
         const hiddenElementsData = [];
 
@@ -925,7 +940,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             ui.notifications.info(
                 `Placing <b>${regionData.name}</b>. SHIFT/CTRL+MouseWheel to rotate. Left click to place. Right click to cancel.`,
             );
-            newRegion = await canvas.regions.placeRegion(regionData);
+            newRegion = await canvas.regions.placeRegion(regionData, options);
         } catch (e) {
             console.error(e);
         }
