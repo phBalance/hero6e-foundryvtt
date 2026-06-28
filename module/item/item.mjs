@@ -1,4 +1,3 @@
-import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
 import { HeroRoller } from "../heroRoller/dice.mjs";
