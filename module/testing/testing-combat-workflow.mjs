@@ -30,6 +30,11 @@ export function registerCombatWorkflowTests(quench) {
                     attackerActor = await Actor.create({
                         name: "_Quench_Attacker",
                         type: "pc",
+                        flags: {
+                            core: {
+                                sheetClass: "herosystem6e.HeroSystemActorSheetV2",
+                            },
+                        },
                         img: "icons/svg/sword.svg",
                         prototypeToken: { actorLink: true },
                     });
@@ -37,6 +42,11 @@ export function registerCombatWorkflowTests(quench) {
                     defenderActor = await Actor.create({
                         name: "_Quench_Defender",
                         type: "pc",
+                        flags: {
+                            core: {
+                                sheetClass: "herosystem6e.HeroSystemActorSheetV2",
+                            },
+                        },
                         img: "icons/svg/shield.svg",
                         prototypeToken: { actorLink: true },
                     });
