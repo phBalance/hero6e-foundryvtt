@@ -1,7 +1,8 @@
 # Releases
 
-### Version 4.3.11 so far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.12 20260627 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- We continue to improve FoundryVTT V14 support. We don't recommend running a game with FoundryVTT V14 yet. There are some [known issues](https://github.com/dmdorman/hero6e-foundryvtt/issues?q=is%3Aissue%20state%3Aopen%20label%3Av14compatibility) ( HTH/NakedAdvantage with AoE, missing/duplicate condition icons, missing text on some ChatMessages) and we need to do more testing. Feel free to play around with it and bring any issues to our attention.
 - Improved compendium prefab support. Improved and drag/drop support of items.
 - Fix crashes with NND maneuvers. [#4326](https://github.com/dmdorman/hero6e-foundryvtt/issues/4326)
 - Added support for overriding AOE templates with manual targeting [#4358](https://github.com/dmdorman/hero6e-foundryvtt/issues/4358)
