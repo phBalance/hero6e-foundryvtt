@@ -352,6 +352,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
     async setActiveEffects(options = {}) {
         try {
+            const _abstractItem = options.futureItem ?? this;
+
             // If there is no actor for this item, then this item is most likely in the Items collection and we can ignore active effects for it.
             if (!this.actor) {
                 console.warn(`Skipping setActiveEffects because there is no actor`, this);
@@ -363,7 +365,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
             // Generic activeEffect from CONFIG.MJS (preferred)
             if (this.baseInfo?.activeEffect) {
-                const effectData = this.baseInfo?.activeEffect(this);
+                const effectData = this.baseInfo?.activeEffect(_abstractItem);
                 if (effectData) {
                     // Ensure v14 is using system.changes
                     if (HeroCompatibility.isV14) {
@@ -406,6 +408,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                             }
                         }
                     }
+
+                    // Some items will have more than one AE, for example a BULKY +X CON item, the BULKY AE has no system.XMLID
                     const currentAE =
                         this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
                         this.effects.find((ae) => !ae.system.XMLID);
@@ -1079,6 +1083,18 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         await super._preUpdate(changes, options, user);
+
+        // preUpdate for ActiveEffects
+        if (this.baseInfo.activeEffect) {
+            const currentData = foundry.utils.deepClone(this.toObject());
+            const expandedChanges = foundry.utils.expandObject(changes);
+            const futureItemData = foundry.utils.mergeObject(currentData, expandedChanges);
+            const futureItem = new this.constructor(futureItemData, { parent: this.parent });
+
+            if (this.baseInfo.activeEffect?.(futureItem)) {
+                this.setActiveEffects({ futureItem });
+            }
+        }
     }
 
     preBuildName(changesSystem) {
@@ -1156,13 +1172,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return newName || `${this.type} ${this.id}`; // Fallback to something identifiable if no name can be built
     }
 
-    async _onUpdate(changed, options, userId) {
+    _onUpdate(changed, options, userId) {
         // We favor effect.disabled over system.active (in fact shouldn't be changing system.active)
         if (this.effect && changed.system.active !== undefined) {
             console.error(`We are updating system.active instead of the effect.disabled`);
         }
 
-        await super._onUpdate(changed, options, userId);
+        super._onUpdate(changed, options, userId);
 
         if (!this.isOwner) {
             //console.log(`Skipping _onUpdate because this client is not an owner of ${this.actor.name}:${this.name}`);
@@ -1174,10 +1190,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return;
         }
 
-        await this.setActiveEffects(options);
-
         if (this.actor && (this.type === "equipment" || this.system.XMLID === "PENALTY_SKILL_LEVELS")) {
-            await this.actor.applyEncumbrancePenalty();
+            // intentionally not using await, mostly because _onUpdate is not async
+            this.actor.applyEncumbrancePenalty();
         }
 
         // Update detection modes for SENSE items
@@ -1249,13 +1264,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         if (this.isCombatManeuver && this.system.active) {
             await this.update({ ["system.active"]: false });
-        }
-
-        if (this.system.XMLID === "INVISIBILITY" && this.system.active) {
-            // Invisibility status effect for SIGHTGROUP?
-            if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
-                this.actor.addActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect);
-            }
         }
     }
 
