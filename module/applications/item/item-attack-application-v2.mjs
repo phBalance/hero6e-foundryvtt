@@ -624,6 +624,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                         // this is the roll:
                         await processActionToHit(this.data.effectiveItem, this.data.formData, {
                             effectiveSubItems: this.data.effectiveSubItems,
+                            token: this.data.token,
                         });
 
                         this.data.formData.execute = this.data.action.current.execute + 1;
