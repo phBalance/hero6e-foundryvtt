@@ -1210,13 +1210,10 @@ async function doSingleTargetActionToHit(action, options) {
         attackerActorUuid: actor.uuid,
         actorId: actor.id,
         actorUuid: actor.uuid,
-        attackerTokenId: token.id,
-        attackerTokenUuid: token.uuid,
-        tokenId: token.id,
-        tokenUuid: token.uuid,
-        //actor,
-        //token,
-
+        attackerTokenId: token?.id,
+        attackerTokenUuid: token?.uuid,
+        tokenId: token?.id,
+        tokenUuid: token?.uuid,
         actionData: actionToJSON(action),
 
         //item,
@@ -1279,7 +1276,10 @@ async function doSingleTargetActionToHit(action, options) {
         },
     };
 
-    await ChatMessage.create(chatData);
+    const message = await ChatMessage.create(chatData);
+    if (!message) {
+        throw new Error(`[HeroSystem6e] ChatMessage was not created!`);
+    }
 
     // If we are in combat, keep track that we made an attack roll.
     // You typically can't make 2 attacks in the same phase.
