@@ -613,7 +613,7 @@ export async function doAoeActionToHit(action, options) {
         .addNumber(parseInt(options.omcvMod) || 0, "OMCV modifier")
         .addNumber(setManeuver?.system.ocv || 0, "Set Maneuver");
 
-    const aoeTemplate = item.getAoeTemplateForBaseItem;
+    const aoeTemplate = item.effectiveAttackItem.getAoeTemplateForBaseItem;
     if (!aoeTemplate) {
         return ui.notifications.error(`Attack AoE template was not found.`);
     }
@@ -931,7 +931,7 @@ async function doSingleTargetActionToHit(action, options) {
     const isAoE = item.effectiveAttackItem.getAoeModifier();
     // Manual targeting has no placed template; resolve against the selected tokens, not an origin.
     const manualAoeTargeting = !!isAoE && !!options.aoeManualTargeting;
-    const aoeTemplate = isAoE && !manualAoeTargeting ? item.getAoeTemplateForBaseItem : null;
+    const aoeTemplate = isAoE && !manualAoeTargeting ? item.effectiveAttackItem.getAoeTemplateForBaseItem : null;
     if (isAoE && !manualAoeTargeting && !aoeTemplate) {
         return ui.notifications.error(`Attack AOE template was not found.`);
     }
