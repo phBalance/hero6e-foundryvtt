@@ -960,7 +960,9 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
      * @returns
      */
     getAoeTemplate() {
-        const effectiveAttackItemOriginalItemId = this.data.effectiveItem.getEffectiveItemOriginalItemId;
+        const effectiveAttackItemOriginalItemId =
+            this.data.effectiveItem.effectiveAttackItem?.getEffectiveItemOriginalItemId ??
+            this.data.effectiveItem.getEffectiveItemOriginalItemId;
 
         return Array.from(canvas.regions.viewedDocuments()).find(
             (template) =>
