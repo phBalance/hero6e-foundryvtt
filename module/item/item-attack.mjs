@@ -85,29 +85,57 @@ export async function onMessageRendered(html) {
 }
 
 /**
+ * Serialize an item to a plain source object, stripping the self-referential maneuver flag from
+ * its ActiveEffects.
+ *
+ * A maneuver item carries an ActiveEffect whose flags include `dehydratedManeuverItem` - a full
+ * dehydration of the item itself (see buildManeuverFlags in maneuver.mjs). Because that effect
+ * lives on the item, serializing the item re-embeds that dehydrated copy, which embeds its own
+ * effects' dehydrated copy, and so on. Every time the maneuver is (re)activated the effect is
+ * rewritten with a fresh dehydration of the (now larger) item, so the blob roughly doubles each
+ * time until it reaches tens of MB and JSON.stringify throws "RangeError: Invalid string length".
+ * The dehydrated item never needs this redundant self-copy, so drop it to break the recursion.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {Object} plain item source
+ */
+function dehydrateItemSource(item) {
+    const obj = item.toObject(false);
+
+    for (const effect of obj.effects ?? []) {
+        const systemFlags = effect.flags?.[game.system.id];
+        if (systemFlags && "dehydratedManeuverItem" in systemFlags) {
+            delete systemFlags.dehydratedManeuverItem;
+        }
+    }
+
+    return obj;
+}
+
+/**
  * Turn an item into JSON.
  * Reverse the process with rehydrateAttackItem
  * @param {HeroSystem6eItem} item - what should be dehydrated
  */
 export function dehydrateAttackItem(item) {
     const dehydratedObj = {};
-    dehydratedObj.item = item.toObject(false);
+    dehydratedObj.item = dehydrateItemSource(item);
 
     // If there is a base attack item, dehydrate it
     if (item.system._active.__baseAttackItem) {
-        dehydratedObj.__baseAttackItem = item.system._active.__baseAttackItem.toObject(false);
+        dehydratedObj.__baseAttackItem = dehydrateItemSource(item.system._active.__baseAttackItem);
         dehydratedObj.item.system._active.__baseAttackItem = null;
     }
 
     // If there is a strength item, dehydrate it
     if (item.system._active.effectiveStrItem) {
-        dehydratedObj.effectiveStrItem = item.system._active.effectiveStrItem.toObject(false);
+        dehydratedObj.effectiveStrItem = dehydrateItemSource(item.system._active.effectiveStrItem);
         dehydratedObj.item.system._active.effectiveStrItem = null;
     }
 
     // If there is a weapon for maneuvers, dehydrate it
     if (item.system._active.maWeaponItem) {
-        dehydratedObj.maWeaponItem = item.system._active.maWeaponItem.toObject(false);
+        dehydratedObj.maWeaponItem = dehydrateItemSource(item.system._active.maWeaponItem);
         dehydratedObj.item.system._active.maWeaponItem = null;
     }
 
@@ -115,7 +143,7 @@ export function dehydrateAttackItem(item) {
     if (item.system._active.linkedEnd && item.system._active.linkedEnd.length > 0) {
         dehydratedObj.linkedEnd = item.system._active.linkedEnd.map((linkedEndItem) => {
             return {
-                item: linkedEndItem.item.toObject(false),
+                item: dehydrateItemSource(linkedEndItem.item),
                 uuid: linkedEndItem.uuid,
             };
         });
@@ -126,7 +154,7 @@ export function dehydrateAttackItem(item) {
     if (item.system._active.linkedAssociated && item.system._active.linkedAssociated.length > 0) {
         dehydratedObj.linkedAssociated = item.system._active.linkedAssociated.map((linkedAssociatedItem) => {
             return {
-                item: linkedAssociatedItem.item.toObject(false),
+                item: dehydrateItemSource(linkedAssociatedItem.item),
                 uuid: linkedAssociatedItem.uuid,
             };
         });
@@ -137,7 +165,7 @@ export function dehydrateAttackItem(item) {
     if (item.system._active.linked && item.system._active.linked.length > 0) {
         dehydratedObj.linked = item.system._active.linked.map((linkedItem) => {
             return {
-                item: linkedItem.item.toObject(false),
+                item: dehydrateItemSource(linkedItem.item),
                 uuid: linkedItem.uuid,
             };
         });
