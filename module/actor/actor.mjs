@@ -546,7 +546,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 author: game.user.id,
                 whisper: whisperUserTargetsForActor(this),
                 speaker: ChatMessage.getSpeaker({ actor: this }),
-                blind: true,
                 content: content,
             };
 
