@@ -2669,6 +2669,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                             `Failed to change ${item.name} from type=${itemExisting.type} to type=${item.type}`,
                         );
                     }
+                }
             }
 
             // If a skill was previously marked as EVERYMAN, but now isn't we
