@@ -2653,13 +2653,22 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         `${item.name} changed from type=${itemExisting.type} to type=${item.type}`,
                     );
 
-                    await itemExisting.update(
-                        {
-                            type: item.type,
-                            system: foundry.utils.mergeObject(item.system.toObject(), { _type: item.type }),
-                        },
-                        { recursive: false },
-                    );
+                    try {
+                        const systemData =
+                            typeof item.system?.toObject === "function" ? item.system.toObject() : item.system;
+                        await itemExisting.update(
+                            {
+                                type: item.type,
+                                system: foundry.utils.mergeObject(systemData, { _type: item.type }),
+                            },
+                            { recursive: false },
+                        );
+                    } catch (e) {
+                        console.error(e);
+                        ui.notifications.error(
+                            `Failed to change ${item.name} from type=${itemExisting.type} to type=${item.type}`,
+                        );
+                    }
                 }
             }
 

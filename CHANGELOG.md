@@ -1,6 +1,10 @@
 # Releases
 
-### Version 4.3.13 20260628 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.14 20260629 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix for HDC uploads when the current item.type is not the same as the item.type in the HDC file. [#4391](https://github.com/dmdorman/hero6e-foundryvtt/issues/4391)
+
+### Version 4.3.13 20260628
 
 - Fixed issue where some attacks silently fail, console logs show "Invalid string length" and/or "lost connection to the server". [#4290](https://github.com/dmdorman/hero6e-foundryvtt/issues/4290)
 - Fixed issue where the ChatMessage for using STUN in place of endurance was a blind GM roll. It is now a whisper where both token owners and GM can see the details. [#4356](https://github.com/dmdorman/hero6e-foundryvtt/issues/4356)
