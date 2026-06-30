@@ -483,19 +483,11 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     _onCreate(data, options, userId) {
         super._onCreate(data, options, userId);
         game[HEROSYS.module].effectPanel.refresh();
-
-        if (this.isOwner) {
-            globalThis.setTimeout(() => this.#updateValueBasedOnMax(data, options), 1);
-        }
     }
 
     _onUpdate(changed, options, userId) {
         super._onUpdate(changed, options, userId);
         game[HEROSYS.module].effectPanel.refresh();
-
-        if (this.isOwner && changed) {
-            globalThis.setTimeout(() => this.#updateValueBasedOnMax(changed, options), 1);
-        }
     }
 
     async #updateValueBasedOnMax(data, options) {
@@ -542,14 +534,41 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         await actor.update(actorChanges);
     }
 
+    /**
+     * Synchronously evaluate and apply characteristic changes directly during the parent document
+     * update lifecycle, avoiding loose asynchronous callbacks.
+     */
+    async updateValueBasedOnMax(options = {}) {
+        const actor = this.target;
+        if (actor?.constructor?.name !== "HeroSystem6eActor") return;
+
+        if (options.action === "create" && this.disabled) return;
+
+        const actorChanges = {};
+        for (const change of this.changes) {
+            const key = change.key.match(/([a-z]+)\.max/)?.[1];
+            if (key && actor?.system?.characteristics?.[key]) {
+                actorChanges[`system.characteristics.${key}.value`] = actor.getCharacteristic(key).max;
+            }
+        }
+
+        if (Object.keys(actorChanges).length > 0) {
+            // Execute directly within the same call frame
+            await actor.update(actorChanges);
+
+            // Handle legacy figured dependencies
+            if (actor.is5e) {
+                for (const change of this.changes) {
+                    const key = change.key.match(/([a-z]+)\.max/)?.[1];
+                    if (key) await actor.updateFiguredCharacteristicDependencies(key.toUpperCase());
+                }
+            }
+        }
+    }
+
     _onDelete(options, userId) {
         super._onDelete(options, userId);
         game[HEROSYS.module].effectPanel.refresh();
-
-        if (this.isOwner) {
-            // Status toggles call this (e.g. prone)
-            globalThis.setTimeout(() => this.#updateValueBasedOnMax({}, options), 1);
-        }
     }
 
     _prepareDuration() {

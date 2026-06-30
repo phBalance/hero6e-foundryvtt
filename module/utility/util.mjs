@@ -11,7 +11,8 @@ export function getPowerInfo(options) {
         options.item?.XMLID ||
         options.item?.system?.XMLID ||
         options.item?.system?.xmlid ||
-        options.item?.system?.id;
+        options.item?.system?.id ||
+        options.xmlTag;
 
     const actor = options?.actor || options?.item?.actor;
 
