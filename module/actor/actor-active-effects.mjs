@@ -483,73 +483,48 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     _onCreate(data, options, userId) {
         super._onCreate(data, options, userId);
         game[HEROSYS.module].effectPanel.refresh();
-
-        if (this.isOwner) {
-            globalThis.setTimeout(() => this.#updateValueBasedOnMax(data, options), 1);
-        }
     }
 
     _onUpdate(changed, options, userId) {
         super._onUpdate(changed, options, userId);
         game[HEROSYS.module].effectPanel.refresh();
-
-        if (this.isOwner && changed) {
-            globalThis.setTimeout(() => this.#updateValueBasedOnMax(changed, options), 1);
-        }
     }
 
-    async #updateValueBasedOnMax(data, options) {
-        // Update characteristic VALUE when MAX is modified
-
-        // Chasing down the extra +2 RUNNING from Diego 102.hdc
-        // if (isGameV14OrLater()) {
-        //     console.error("V14 skipping updateValueBasedOnMax");
-        //     return;
-        // }
-
+    /**
+     * Synchronously evaluate and apply characteristic changes directly during the parent document
+     * update lifecycle, avoiding loose asynchronous callbacks.
+     */
+    async updateValueBasedOnMax(options = {}) {
         const actor = this.target;
-        if (actor.constructor?.name !== "HeroSystem6eActor") {
-            console.warn(`AE target is not an instance of HeroSystem6eActor`, this);
-            return;
-        }
+        if (actor?.constructor?.name !== "HeroSystem6eActor") return;
 
-        // Created a disabled AE, do nothing
-        if (options.action === "create" && data.disabled) {
-            return;
-        }
-
-        if (options.action === "update" && data.changes) {
-            // This is an indication that our implementation needs review
-            console.error("HeroSystem updating of VALUEs based on AE may not update correctly", data);
-            return;
-        }
+        if (options.action === "create" && this.disabled) return;
 
         const actorChanges = {};
         for (const change of this.changes) {
             const key = change.key.match(/([a-z]+)\.max/)?.[1];
-            if (key) {
-                if (actor?.system?.characteristics?.[key]) {
-                    // KLUGE: Set VALUE to MAX for now. We need a better solution.
-                    actorChanges[`system.characteristics.${key}.value`] = actor.getCharacteristic(key).max;
+            if (key && actor?.system?.characteristics?.[key]) {
+                actorChanges[`system.characteristics.${key}.value`] = actor.getCharacteristic(key).max;
+            }
+        }
 
-                    // 5e figured characteristic
-                    if (actor.is5e) {
-                        await actor.updateFiguredCharacteristicDependencies(key.toUpperCase());
-                    }
+        if (Object.keys(actorChanges).length > 0) {
+            // Execute directly within the same call frame
+            await actor.update(actorChanges);
+
+            // Handle legacy figured dependencies
+            if (actor.is5e) {
+                for (const change of this.changes) {
+                    const key = change.key.match(/([a-z]+)\.max/)?.[1];
+                    if (key) await actor.updateFiguredCharacteristicDependencies(key.toUpperCase());
                 }
             }
         }
-        await actor.update(actorChanges);
     }
 
     _onDelete(options, userId) {
         super._onDelete(options, userId);
         game[HEROSYS.module].effectPanel.refresh();
-
-        if (this.isOwner) {
-            // Status toggles call this (e.g. prone)
-            globalThis.setTimeout(() => this.#updateValueBasedOnMax({}, options), 1);
-        }
     }
 
     _prepareDuration() {

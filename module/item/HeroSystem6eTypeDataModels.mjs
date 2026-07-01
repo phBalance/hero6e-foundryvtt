@@ -1535,7 +1535,14 @@ export class HeroItemCharacteristic extends foundry.abstract.DataModel {
 
     get baseInfo() {
         // cache getPowerInfo
-        this.#baseInfo ??= getPowerInfo({ item: this, xmlTag: this.xmlTag ?? this.XMLID });
+        // this.schema.name is used for characteristics
+        const xmlTag = this.XMLID ?? this.schema.name;
+        if (!xmlTag) {
+            if (!squelch(`${this.id}-xmlTag`)) {
+                console.error(`Unknown xmlTag for ${this.name}`);
+            }
+        }
+        this.#baseInfo ??= getPowerInfo({ item: this, xmlTag });
         // if (!this.#baseInfo) {
         //     debugger;
         // }

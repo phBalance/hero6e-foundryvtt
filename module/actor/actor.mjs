@@ -251,90 +251,127 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return this.update(characteristicNamePropertyAndValues, options);
     }
 
-    /// Override and should probably be used instead of add/remove ActiveEffect
+    /**
+     * Toggle a configured status effect for the Actor.
+     * @param {string} statusId A status effect ID defined in CONFIG.statusEffects
+     * @param {object} [options={}] Additional options which modify how the effect is created
+     * @param {boolean} [options.active] Force the effect to be active or inactive regardless of its current state
+     * @param {boolean} [options.overlay=false] Display the toggled effect as an overlay
+     * @returns {Promise<ActiveEffect|boolean|undefined>} A promise which resolves to one of the following values:
+     * - ActiveEffect if a new effect needed to be created
+     * - true if it was already an existing active effect
+     * - false if an existing effect needed to be removed
+     * - undefined if no changes need to be made
+     * @override
+     */
     async toggleStatusEffect(statusId, { active, overlay = false } = {}) {
-        const overlayEffects = [
-            HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id,
-            HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id,
-            HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id,
-        ];
+        const effectsObj = HeroSystem6eActorActiveEffects.statusEffectsObj;
+        const overlayEffects = [effectsObj.deadEffect.id, effectsObj.knockedOutEffect.id, effectsObj.stunEffect.id];
 
-        // Overlay Effects
-        if (overlayEffects.includes(statusId)) {
-            overlay = true;
+        // 1. Force overlay status based on config
+        if (overlayEffects.includes(statusId)) overlay = true;
+
+        // 2. Lockout rules if already dead
+        const isDead = this.statuses.has(effectsObj.deadEffect.id);
+        if (isDead && active && [effectsObj.knockedOutEffect.id, effectsObj.stunEffect.id].includes(statusId)) {
+            return false;
         }
 
-        // If dead don't knockOut or Stun
-        if (this.statuses.has("dead") && active) {
-            if (
-                [
-                    HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id,
-                    HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id,
-                ].includes(statusId)
-            ) {
-                return;
-            }
+        // 3. Process the state machine transformations via immutable constants
+        const incomingDead =
+            statusId === effectsObj.deadEffect.id ? active : this.statuses.has(effectsObj.deadEffect.id);
+        const incomingKO =
+            statusId === effectsObj.knockedOutEffect.id ? active : this.statuses.has(effectsObj.knockedOutEffect.id);
+        const incomingStun =
+            statusId === effectsObj.stunEffect.id ? active : this.statuses.has(effectsObj.stunEffect.id);
+
+        // Track incoming states for asleep and unconscious just like Dead/KO
+        const finalAsleep =
+            statusId === effectsObj.asleepEffect.id ? active : this.statuses.has(effectsObj.asleepEffect.id);
+        const finalUnconscious =
+            statusId === effectsObj.unconsciousEffect.id ? active : this.statuses.has(effectsObj.unconsciousEffect.id);
+
+        // Apply conditional rules directly to determine the final immutable states
+        const finalDead = incomingDead;
+        const finalKO = finalDead ? false : incomingKO;
+        const finalStun = finalDead || finalKO ? false : incomingStun;
+
+        // FIX: Use your final localized state booleans instead of this.statuses.has()
+        const impliesProne = finalDead || finalKO || finalUnconscious || finalAsleep;
+        const finalProne = impliesProne ? true : this.statuses.has(effectsObj.proneEffect.id);
+
+        // 4. Batch target modifications for ActiveEffects array
+        const effectsToCreate = [];
+        const effectsToDelete = [];
+
+        if (finalProne && !this.statuses.has(effectsObj.proneEffect.id)) {
+            effectsToCreate.push(effectsObj.proneEffect);
+        }
+        if (!finalStun && this.statuses.has(effectsObj.stunEffect.id)) {
+            const stunAE = this.effects.find((e) => e.statuses.has(effectsObj.stunEffect.id));
+            if (stunAE) effectsToDelete.push(stunAE.id);
+        }
+        if (!finalKO && this.statuses.has(effectsObj.knockedOutEffect.id)) {
+            const koAE = this.effects.find((e) => e.statuses.has(effectsObj.knockedOutEffect.id));
+            if (koAE) effectsToDelete.push(koAE.id);
         }
 
-        // Toggle effect
-        try {
-            await super.toggleStatusEffect(statusId, { active, overlay });
-        } catch (e) {
-            console.error(e, statusId);
+        if (effectsToDelete.length > 0) {
+            await this.deleteEmbeddedDocuments("ActiveEffect", effectsToDelete);
         }
+        if (effectsToCreate.length > 0) {
+            // FIX: Match standard V14 formatting directly without running constructor scripts
+            const createData = effectsToCreate.map((effect) => {
+                // Find the clean, core definition payload
+                const coreEffect = CONFIG.statusEffects.find((e) => e.id === effect.id);
 
-        // Several status effects also imply prone
-        if (
-            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) ||
-            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id) ||
-            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.unconsciousEffect.id) ||
-            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.asleepEffect.id)
-        ) {
-            if (!this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id)) {
-                await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
-                    active: true,
-                });
-            }
-        }
-
-        // When knockedOut, remove stunned
-        if (
-            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id) &&
-            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id)
-        ) {
-            await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id, {
-                active: false,
+                return {
+                    id: coreEffect.id,
+                    name: game.i18n.localize(coreEffect.name || coreEffect.label),
+                    img: coreEffect.img || coreEffect.icon,
+                    statuses: [coreEffect.id],
+                    disabled: false,
+                };
             });
+
+            await this.createEmbeddedDocuments("ActiveEffect", createData);
         }
 
-        // When dead, remove knockedOut
-        if (
-            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) &&
-            this.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id)
-        ) {
-            await super.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
-                active: false,
-            });
-        }
-
-        // Make overlay effects more obvious by changing the tint on the token img
+        // 5. Run canvas visual scene batch refresh routines
         if (overlayEffects.includes(statusId)) {
-            for (const token of this.getActiveTokens()) {
-                if (this.statuses.has("dead")) {
-                    await token.document.update({ alpha: 0.3, [`texture.tint`]: `ff0000` });
-                    await token.layer._sendToBackOrBringToFront(false); // send to back
-                } else if (this.statuses.has("knockedOut")) {
-                    if (this.knockedOutOfCombat) {
-                        await token.document.update({ alpha: 1, [`texture.tint`]: "ff0000" });
-                    } else {
-                        await token.document.update({ alpha: 1, [`texture.tint`]: "ffff00" });
+            const tokens = this.getActiveTokens();
+            if (tokens.length > 0) {
+                const colors = CONFIG.HERO.statusColors;
+                let updatePayload = { alpha: colors.DEFAULT_ALPHA, "texture.tint": colors.CLEAR_TINT };
+
+                if (finalDead) {
+                    updatePayload = { alpha: colors.DEAD_ALPHA, "texture.tint": colors.DEAD_TINT };
+                } else if (finalKO) {
+                    updatePayload = {
+                        alpha: colors.DEFAULT_ALPHA,
+                        "texture.tint": this.knockedOutOfCombat ? colors.KO_COMBAT_TINT : colors.KO_DEFAULT_TINT,
+                    };
+                } else if (finalStun) {
+                    updatePayload = { alpha: colors.DEFAULT_ALPHA, "texture.tint": colors.STUNNED_TINT };
+                }
+
+                const tokenUpdates = tokens.map((t) => ({ _id: t.document.id, ...updatePayload }));
+                await canvas.scene.updateEmbeddedDocuments("Token", tokenUpdates);
+
+                if (finalDead) {
+                    for (const token of tokens) {
+                        await token.layer._sendToBackOrBringToFront(false);
                     }
-                } else if (this.statuses.has("stunned")) {
-                    await token.document.update({ alpha: 1, [`texture.tint`]: "ffff00" });
-                } else {
-                    await token.document.update({ alpha: 1, [`texture.tint`]: null });
                 }
             }
+        }
+
+        // 6. Fire and directly return core's promise resolution
+        try {
+            return await super.toggleStatusEffect(statusId, { active, overlay });
+        } catch (e) {
+            console.error(`HERO: Status effect toggle failed for ${statusId}`, e);
+            return false;
         }
     }
 
@@ -480,80 +517,125 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     async _preUpdate(changed, options, userId) {
-        await super._preUpdate(changed, options, userId);
+        const allowed = await super._preUpdate(changed, options, userId);
+        if (allowed === false) return false;
 
-        // Forward changed date to _onUpdate.
-        // _preUpdate only seems to run for GM or one user which
-        // results in _displayScrollingChange only showing for those users.
-        // Where as _onUpdate runs for all users.
+        const systemData = changed?.system || {};
+        const is5e = this.is5e || false;
+
+        // =========================================================================
+        // 1. CHARACTERISTIC & TRAIT CALCULATIONS (Alters changed payload inline)
+        // =========================================================================
+
+        // BOTH 5e and 6e vehicles must process size calculations!
+        if ((systemData.characteristics && "size" in systemData.characteristics) || this.type === "vehicle") {
+            if (typeof this.applySizeEffect === "function") {
+                await this.applySizeEffect(changed, options, userId);
+            }
+        }
+
+        // Keep the dedicated 5e overrides framework running right alongside it
+        if (is5e) {
+            if (typeof this._apply5eCalculatedCharacteristics === "function") {
+                await this._apply5eCalculatedCharacteristics(changed, options, userId);
+            }
+        }
+
+        // Inventory weight and carrying capacity corrections
+        if ("items" in changed || systemData.characteristics) {
+            if (typeof this.applyEncumbrancePenalty === "function") {
+                await this.applyEncumbrancePenalty(changed, options, userId);
+            }
+        }
+
+        // Healing processing
+        if ("system" in changed) {
+            if (typeof this.setNaturalHealing === "function") {
+                await this.setNaturalHealing(changed, options, userId);
+            }
+        }
+
+        // System Configuration Toggles
+        if (systemData.toggles) {
+            if (typeof this._handleSystemToggles === "function") {
+                await this._handleSystemToggles(changed, options, userId);
+            }
+        }
+
+        // =========================================================================
+        // 2. AUTOMATED STATUS CONDITION & COMBAT TRACKER MANAGEMENT
+        // =========================================================================
+        if (changed?.system?.characteristics?.stun?.value !== undefined) {
+            const nextStun = changed.system.characteristics.stun.value;
+
+            // Remove Stunned/Knocked Out state modifiers if actor recovers into positives
+            if (nextStun > 0 && typeof this._removeStunConditionAutomations === "function") {
+                await this._removeStunConditionAutomations(changed, options);
+            }
+
+            // Toggle Combat Tracker Defeated status if actor drops to or below 0
+            if (typeof this._setCombatTrackerDefeatedStatus === "function") {
+                if (nextStun <= 0) {
+                    await this._setCombatTrackerDefeatedStatus(true);
+                } else if (this.getCharacteristic("stun")?.value <= 0 && nextStun > 0) {
+                    // Reverted from defeated back to undefeated
+                    await this._setCombatTrackerDefeatedStatus(false);
+                }
+            }
+        }
+
+        // =========================================================================
+        // 3. SCROLLING METADATA BUS (Packed into options for multi-client broadcast)
+        // =========================================================================
         options.displayScrollingChanges = [];
+        let chatContent = "";
 
-        let content = "";
+        const showChangesSetting = game.settings.get(game.system.id, "ShowCombatCharacteristicChanges");
+        const processScrolling = showChangesSetting === "all" || (showChangesSetting === "pc" && this.type === "pc");
 
-        const ShowCombatCharacteristicChanges = game.settings.get(game.system.id, "ShowCombatCharacteristicChanges");
-        const ShowCombatCharacteristicChangesBool =
-            ShowCombatCharacteristicChanges === "all"
-                ? true
-                : ShowCombatCharacteristicChanges === "pc" && this.type === "pc"
-                  ? true
-                  : false;
-
-        if (changed?.system?.characteristics?.stun?.value && ShowCombatCharacteristicChangesBool) {
-            const presentStun = this.getCharacteristic("stun");
-            const presentStunValue = presentStun.value;
-            const presentStunMax = presentStun.max;
-            const changeStunToValue = changed.system.characteristics.stun.value;
-            if (presentStunValue != changeStunToValue) {
-                content += `STUN from ${presentStunValue} to ${changeStunToValue}`;
-
-                if (changeStunToValue === presentStunMax) {
-                    content += " (at max)";
+        if (processScrolling) {
+            // Evaluate STUN text changes
+            if (changed?.system?.characteristics?.stun?.value !== undefined) {
+                const curStun = this.getCharacteristic("stun")?.value || 0;
+                const targetStun = changed.system.characteristics.stun.value;
+                if (curStun !== targetStun) {
+                    chatContent += `STUN from ${curStun} to ${targetStun}`;
+                    options.displayScrollingChanges.push({
+                        value: targetStun - curStun,
+                        options: { max: this.getCharacteristic("stun")?.max || 0, fill: "0x00FF00" },
+                    });
                 }
+            }
 
-                options.displayScrollingChanges.push({
-                    value: changeStunToValue - presentStunValue,
-                    options: { max: presentStunMax, fill: "0x00FF00" },
-                });
+            // Evaluate BODY text changes
+            if (changed?.system?.characteristics?.body?.value !== undefined) {
+                const curBody = this.getCharacteristic("body")?.value || 0;
+                const targetBody = changed.system.characteristics.body.value;
+                if (curBody !== targetBody) {
+                    if (chatContent.length > 0) chatContent += "<br>";
+                    chatContent += `BODY from ${curBody} to ${targetBody}`;
+                    options.displayScrollingChanges.push({
+                        value: targetBody - curBody,
+                        options: { max: this.getCharacteristic("body")?.max || 0, fill: "0xFF1111" },
+                    });
+                }
             }
         }
 
-        if (changed?.system?.characteristics?.body?.value && ShowCombatCharacteristicChangesBool) {
-            const presentBody = this.getCharacteristic("body");
-            const presentBodyValue = presentBody.value;
-            const presentBodyMax = presentBody.max;
-            const changeBodyToValue = changed.system.characteristics.body.value;
-            if (content.length > 0) {
-                content += "<br>";
-            }
-            if (presentBodyValue != changeBodyToValue) {
-                content += `BODY from ${presentBodyValue} to ${changeBodyToValue}`;
+        // Early exit if chat operations or visual updates are explicitly suppressed
+        if (options.hideChatMessage || !options.render) return true;
 
-                if (changeBodyToValue === presentBodyMax) {
-                    content += " (at max)";
-                }
-
-                options.displayScrollingChanges.push({
-                    value: changeBodyToValue - presentBodyValue,
-                    options: { max: presentBodyMax, fill: "0xFF1111" },
-                });
-            }
-        }
-
-        if (options.hideChatMessage || !options.render) return;
-
-        if (!options.quenchCreate && content) {
-            const chatData = {
+        // Post Damage Output Messages
+        if (!options.quenchCreate && chatContent) {
+            ChatMessage.create({
                 author: game.user.id,
                 whisper: whisperUserTargetsForActor(this),
                 speaker: ChatMessage.getSpeaker({ actor: this }),
-                content: content,
-            };
-
-            // Fire and forget
-            ChatMessage.create(chatData);
+                content: chatContent,
+            });
         }
 
-        // Chat card about entering/leaving heroic identity
+        // Heroic Identity Conversion Announcement
         if (
             !options.quenchCreate &&
             changed.system?.heroicIdentity !== undefined &&
@@ -564,184 +646,38 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             const speaker = ChatMessage.getSpeaker({ actor: this, token });
             const tokenName = token?.name || this.name;
             speaker["alias"] = game.user.name;
-            const content = `<b>${tokenName}</b> ${changed.system.heroicIdentity ? "entered" : "left"} their heroic identity.`;
-            const chatData = {
+
+            const identityContent = `<b>${tokenName}</b> ${changed.system.heroicIdentity ? "entered" : "left"} their heroic identity.`;
+            ChatMessage.create({
                 style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
                 author: game.user._id,
-                content: content,
+                content: identityContent,
                 speaker: speaker,
-            };
-
-            // Fire and forget
-            ChatMessage.create(chatData);
+            });
         }
+
+        return true;
     }
 
-    async _onUpdate(data, options, userId) {
-        await super._onUpdate(data, options, userId);
+    _onUpdate(changed, options, userId) {
+        super._onUpdate(changed, options, userId);
 
-        // Only owners have permission to perform updates
-        if (!this.isOwner) {
-            return;
-        }
-
-        // Mark as undefeated in combat tracker (pc/npc)
-        if (
-            (data.system?.characteristics?.body?.value ?? this.getCharacteristic("body").value) >
-                -this.getCharacteristic("body").value &&
-            this.statuses.has("dead")
-        ) {
-            await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                active: false,
-            });
-        }
-
-        // If stun was changed and running under triggering users context
-        if (
-            (data.system?.characteristics?.stun !== undefined || data.system?.characteristics?.body !== undefined) &&
-            userId === game.user.id &&
-            this.hasCharacteristic("STUN")
-        ) {
-            const newStun = data.system?.characteristics?.stun?.value ?? this.getCharacteristic("stun").value;
-
-            if (newStun <= 0) {
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
-                    overlay: true,
-                    active: true,
-                });
-            }
-
-            // Remove STUN condition, unless this was part of a PostSegment12 recovery
-            if (newStun > 0) {
-                if (!options.preventRecoverFromStun) {
-                    await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
-                        active: false,
-                    });
-                    await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect.id, {
-                        active: false,
-                    });
-                    await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                        active: false,
-                    });
-                }
+        // 1. Unpack and execute computed scrolling data across all connected player displays
+        if (options.displayScrollingChanges?.length && typeof this._displayScrollingChange === "function") {
+            for (const change of options.displayScrollingChanges) {
+                this._displayScrollingChange(change.value, change.options);
             }
         }
 
-        // Mark as defeated in combat tracker (automaton)
-        // PH: FIXME: This is not correct for 5e (for instance could buy "cannot bleed" AUTOMATON power) _unless_ they have
-        //            the STUN1 or STUN2 OPTIONID for the AUTOMATON power.
-        //            6e seems to follow the same rules.
-        if (data.system?.characteristics?.body?.value <= 0) {
-            const AUTOMATON = this.items.find((o) => o.system.XMLID === "AUTOMATON");
-            if (AUTOMATON) {
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                    overlay: true,
-                    active: true,
-                });
-            }
+        // 2. Trigger canvas lighting and vision grid refreshes if sensory tracking altered
+        const systemData = changed?.system || {};
+        if (systemData.senses || changed.effects) {
+            canvas.perception?.update({ initializeVision: true, refreshLighting: true });
         }
 
-        // Mark as defeated in combat tracker (pc/npc)
-        if (
-            ["pc", "npc"].includes(this.type) &&
-            data.system?.characteristics?.body?.value <= -this.getCharacteristic("body").max
-        ) {
-            await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                overlay: true,
-                active: true,
-            });
-        }
-
-        // Mark as undefeated in combat tracker (automaton)
-        if (this.type === "automaton" && data.system?.characteristics?.body?.value > 0) {
-            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect);
-            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.bleedingEffect);
-            await this.removeActiveEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect);
-        }
-
-        // If STR was change check encumbrance
-        if (data?.system?.characteristics?.str && userId === game.user.id && options.render !== false) {
-            await this.applyEncumbrancePenalty();
-        }
-
-        // VEHICLE & BASE SIZE
-        if (data?.system?.characteristics?.size || data?.system?.characteristics?.basesize) {
-            await this.applySizeEffect();
-        }
-
-        // Ensure natural healing effect is removed when returned to full BODY
-        if (data?.system?.characteristics?.body || data?.system?.characteristics?.rec) {
-            await this.setNaturalHealing();
-        }
-
-        // Heroic ID
-        if (data.system?.heroicIdentity !== undefined) {
-            // Toggled on (entering ID)
-            if (data.system.heroicIdentity) {
-                for (const item of this.items.filter((item) => item.findModsByXmlid("OIHID") && !item.system.active)) {
-                    if (item.flags[game.system.id]?.preOIHID) {
-                        await item.toggle(); // toggle on
-                    }
-                }
-            } else {
-                // Use flags to keep track which items were disabled so we will enable them when we go back into heroic ID
-                for (const item of this.items.filter((item) => item.findModsByXmlid("OIHID"))) {
-                    await item.update({ [`flags.${game.system.id}.preOIHID`]: item.system.active });
-                    if (item.system.active) {
-                        await item.toggle(); // toggle off
-                    }
-                }
-            }
-        }
-
-        // If LEVELS were changed, update MAX and VALUE
-        // TODO: This can mess up adjustment powers as they fade
-        if (data.system) {
-            for (const charKEY of Object.keys(data.system)) {
-                if (data.system[charKEY]?.LEVELS != null) {
-                    const charKey = charKEY.toLowerCase();
-                    if (this.hasCharacteristic(charKey.toUpperCase())) {
-                        const basePlusLevels = this.getCharacteristic(charKey).basePlusLevels;
-
-                        // PH: FIXME: The fact we have to update separately indicates some kind of a problem being painted over.
-                        await this.updateCharacteristics([[charKey, { max: basePlusLevels }]], {});
-                        await this.updateCharacteristics([[charKey, { value: basePlusLevels }]], {});
-
-                        // Check for any figuredCharacteristic dependencies.
-                        await this.updateFiguredCharacteristicDependencies(charKey);
-                    }
-                }
-            }
-        }
-
-        // 5e calculated characteristics
-        if (this.is5e && data.system?.characteristics) {
-            const characteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(this); // a bit of caching
-            const changes = [];
-            for (const changeKey of Object.keys(data.system.characteristics)) {
-                if (data.system.characteristics[changeKey].value !== undefined) {
-                    for (const char of characteristicInfoArrayForActor.filter(
-                        (o) => o.behaviors.includes(`calculated${changeKey.toUpperCase()}`) || o.key == changeKey,
-                    )) {
-                        const key = char.key.toLocaleLowerCase();
-
-                        if (char.calculated5eCharacteristic) {
-                            const newValue = char.calculated5eCharacteristic(this);
-
-                            changes.push([key, { value: newValue, max: newValue }]);
-                        }
-                    }
-                }
-            }
-
-            if (changes.length > 0) {
-                await this.updateCharacteristics(changes, {});
-            }
-        }
-
-        // Display changes from _preUpdate
-        for (let d of options.displayScrollingChanges) {
-            this._displayScrollingChange(d.value, d.options);
+        // 3. Rerender the active document configuration layout locally for the modifying client
+        if (game.user.id === userId) {
+            this.sheet?.render(false);
         }
     }
 
@@ -1699,12 +1635,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
     async fullHealth(options = {}) {
         const tDelta = 500;
-        let start = Date.now();
-        //await this.statuses.clear();
-        let end = Date.now();
-        if (end - start > tDelta) {
-            console.warn("fullHealth performance concern: this.statuses.clear", end - start);
-        }
+        let start;
+        let end;
 
         // Reset all items
         for (const item of this.items) {
@@ -1719,25 +1651,32 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // Remove temporary effects
         if (!options.keepTemporaryEffects) {
             start = Date.now();
-            for (const ae of this.temporaryEffects) {
-                if (
-                    ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id) ||
-                    ae.statuses.has(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id)
-                )
+            const effectsObj = HeroSystem6eActorActiveEffects.statusEffectsObj;
+            const effectIdsToDelete = [];
+
+            for (const ae of this.effects) {
+                if (ae.statuses.has(effectsObj.deadEffect.id) || ae.statuses.has(effectsObj.knockedOutEffect.id))
                     continue;
 
-                for (const status of ae.statuses) {
-                    await this.toggleStatusEffect(status, { active: false });
-                }
-
-                if (this.temporaryEffects.find((t) => t.id === ae.id)) {
-                    await ae.delete();
-                }
+                effectIdsToDelete.push(ae.id);
             }
 
-            // v14 check of simple statuses (which are no longer considered temporaryEffects)
-            for (const status of this.statuses) {
-                await this.toggleStatusEffect(status, { active: false });
+            if (effectIdsToDelete.length > 0) {
+                await this.deleteEmbeddedDocuments("ActiveEffect", effectIdsToDelete);
+            }
+
+            // ========================================================
+            // FIX: BATCH RESET VISUAL CANVAS TINIS UPON FULL HEALTH RESTORATION
+            // ========================================================
+            const tokens = this.getActiveTokens();
+            if (tokens.length > 0 && CONFIG.HERO.statusColors) {
+                const colors = CONFIG.HERO.statusColors;
+                const tokenUpdates = tokens.map((t) => ({
+                    _id: t.document.id,
+                    alpha: colors.DEFAULT_ALPHA ?? 1.0,
+                    "texture.tint": colors.CLEAR_TINT ?? null,
+                }));
+                await canvas.scene.updateEmbeddedDocuments("Token", tokenUpdates);
             }
 
             end = Date.now();
@@ -1745,13 +1684,16 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 console.warn("fullHealth performance concern: Remove temporary effects", end - start);
             }
 
-            //Remove Maneuver/Martial effects
+            // Remove Maneuver/Martial effects
             start = Date.now();
-            for (const ae of this.appliedEffects.filter(
-                (ae) => ae.flags[game.system.id]?.type === "maneuverNextPhaseEffect",
-            )) {
-                await ae.delete();
+            const maneuverEffectIds = this.appliedEffects
+                .filter((ae) => ae.flags[game.system.id]?.type === "maneuverNextPhaseEffect")
+                .map((ae) => ae.id);
+
+            if (maneuverEffectIds.length > 0) {
+                await this.deleteEmbeddedDocuments("ActiveEffect", maneuverEffectIds);
             }
+
             end = Date.now();
             if (end - start > tDelta) {
                 console.warn("fullHealth performance concern: Remove Maneuver/Martial effects", end - start);
@@ -1770,6 +1712,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 characteristicChangesMax[`system.characteristics.${charKey}.max`] = basePlusLevels;
             }
         }
+
         if (this._id && Object.keys(characteristicChangesMax).length > 0) {
             await this.update(characteristicChangesMax);
         } else if (!this._id && Object.keys(characteristicChangesMax).length > 0) {
@@ -1779,13 +1722,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (end - start > tDelta) {
             console.warn("fullHealth performance concern: Set Characteristics MAX to CORE", end - start);
         }
-
-        // start = Date.now();
-        // this.applyActiveEffects();
-        // end = Date.now();
-        // if (end - start > tDelta) {
-        //     console.warn("FullHealth performance concern: applyActiveEffects", end - start);
-        // }
 
         // Set Characteristics VALUE to MAX
         start = Date.now();
@@ -1798,6 +1734,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 characteristicChangesValue[`system.characteristics.${charKey}.value`] = characteristic.value;
             }
         }
+
         if (this._id && Object.keys(characteristicChangesValue).length > 0) {
             await this.update(characteristicChangesValue);
         } else if (!this._id && Object.keys(characteristicChangesValue).length > 0) {

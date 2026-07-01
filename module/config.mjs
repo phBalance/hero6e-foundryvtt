@@ -50,6 +50,16 @@ export function filterIgnoreCompoundAndFrameworkItems(item) {
 
 export const HERO = { heroDice, heroEncounter };
 
+HERO.statusColors = {
+    DEAD_TINT: "#ff0000",
+    DEAD_ALPHA: 0.3,
+    KO_COMBAT_TINT: "#ff0000",
+    KO_DEFAULT_TINT: "#ffff00",
+    STUNNED_TINT: "#ffff00",
+    DEFAULT_ALPHA: 1.0,
+    CLEAR_TINT: null,
+};
+
 HERO.folderColors = {
     // Base Category
     Perks: "#0000aa",
