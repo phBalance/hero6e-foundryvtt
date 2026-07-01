@@ -295,7 +295,7 @@ export function registerStatusEffectTests(quench) {
 
                     let capturedUpdates = null;
                     const originalUpdate = canvas.scene.updateEmbeddedDocuments;
-                    canvas.scene.updateEmbeddedDocuments = async function (embeddedName, updates, options) {
+                    canvas.scene.updateEmbeddedDocuments = async function (embeddedName, updates) {
                         if (embeddedName === "Token") capturedUpdates = updates;
                         return originalUpdate.apply(this, arguments);
                     };
