@@ -54,14 +54,37 @@ function filterOutNonSkillRollItems(item) {
  * If there are more than one skill, then prompt the user and have them decide.
  *
  * @param {Array<Object>} skillArray
+ *
+ * @returns {Object | null} - returns the info about the item that is selected or null if the user has chosen to cancel the operation at this point by closing the dialog.
  */
-async function selectedSkill(skillArray) {
-    if (skillArray.length === 1) {
-        return skillArray[0];
-    }
+async function userSelectsASkill(skillArray) {
+    const radios = skillArray
+        .map(
+            (skillObject, i) => `
+                <label style="display:flex; align-items:center; gap:0.5em; margin-bottom:4px;">
+                <input type="radio" name="skill" value="${i}" ${i === 0 ? "checked" : ""}>
+                ${skillObject.name}${skillObject.activeItems.length === 0 ? ` (has no active items)` : ""}
+                </label>
+            `,
+        )
+        .join("");
 
-    // PH: FIXME: Implement dialog
-    debugger;
+    const arrayIndex = await foundry.applications.api.DialogV2.wait({
+        window: { title: "Choose Your Variable Skill" },
+        content: `<fieldset><legend>Skills</legend>${radios}</fieldset>`,
+        buttons: [
+            {
+                action: "choose",
+                label: "Confirm",
+                default: true,
+                callback: (event, button) => button.form.elements.skill.value,
+            },
+        ],
+        rejectClose: false, // returns null instead of throwing if the user closes the dialog
+    });
+
+    // null is returned if the user is closing the dialog.
+    return arrayIndex == null ? null : skillArray[arrayIndex];
 }
 
 /**
@@ -82,7 +105,7 @@ function extractSkills(actor, rollAlias, targetSubType) {
 
     const requiredSkillNames = [variableSkillsAliasMatch[1]];
 
-    // Is this a variable roll alias with 2 skills separated by a an " or ".
+    // Is this a variable roll alias with 2 skills separated by an " or " string.
     if (variableSkillsAliasMatch[3] != null) {
         requiredSkillNames.push(variableSkillsAliasMatch[3]);
     }
@@ -461,13 +484,26 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
     // Make sure all skill items require for the activation roll(s) exist on this character and are active before attempting
     // any rolls.
     for (const activationRoll of activationRolls) {
+        // If this is a variable skill roll (i.e. choosing between two skills depending on the situation), have the user select the chosen skill before the resources are paid.
+        if (activationRoll.type === RSR_ROLL_TYPE.ITEM_ROLL && activationRoll.requiredSkills.length > 1) {
+            const requiredSkill = await userSelectsASkill(activationRoll.requiredSkills);
+
+            // Has the user cancelled the action at this point?
+            if (requiredSkill == null) {
+                ui.notifications.info(`${item.name} roll aborted during variable skill selection.`);
+                return false;
+            }
+
+            activationRoll.requiredSkills = [requiredSkill];
+        }
+
         // PH: FIXME: ATTACK_ROLL needs to be considered
 
         // LUCK_ROLL and ITEM_ROLL must have at least 1 active skill
         if (
             (activationRoll.type === RSR_ROLL_TYPE.LUCK_ROLL && activationRoll.activeItems.length === 0) ||
             (activationRoll.type === RSR_ROLL_TYPE.ITEM_ROLL &&
-                activationRoll.requiredSkills.some((requiredSkill) => requiredSkill.activeItems.length === 0))
+                activationRoll.requiredSkills[0].activeItems.length === 0)
         ) {
             const flavor = `${item.name} activation ${emphasizeSuccessFailureFlavour(false, `failed as there is no matching active item for the ${activationRoll.type}.`)}`;
             await generateSuccessChatCard(actor, speaker, flavor, null, null);
@@ -580,9 +616,8 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             succeeded = succeed;
             flavor = updatedFlavor;
         } else if (activationRoll.type === RSR_ROLL_TYPE.ITEM_ROLL) {
-            // PH: FIXME: requiredSkills is a poor name
-            const requiredSkill = await selectedSkill(activationRoll.requiredSkills);
-            const skill = requiredSkill.activeItems[0]; // PH: FIXME: Kludge. How do we best handle multiple powers of the same type?
+            // At this point there should be only 1 requiredSkills entry
+            const skill = activationRoll.requiredSkills[0].activeItems[0]; // PH: FIXME: Kludge. How do we best handle multiple powers of the same type?
             const baseRequiredRoll = parseInt(skill.system.roll);
             const apPenalty = calculateRollApPenalty(item, rar);
             const divisor = findRollDivisor(rar);
@@ -735,7 +770,7 @@ export function requiresRollHeroValidation(modifier, item) {
             activationRoll.requiredSkills.forEach((requiredSkill) => {
                 if (requiredSkill.items.length === 0) {
                     validations.push({
-                        message: `Actor does not have ${requiredSkill.name} skill to make the activation roll.`,
+                        message: `Actor does not have the ${requiredSkill.name} skill to make the activation roll.`,
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                         modifierID: modifier.ID,
                     });
@@ -747,7 +782,7 @@ export function requiresRollHeroValidation(modifier, item) {
         } else if (activationRoll.type === RSR_ROLL_TYPE.LUCK_ROLL) {
             if (activationRoll.items.length === 0) {
                 validations.push({
-                    message: `Actor does not have any luck powers to make the activation roll.`,
+                    message: `Actor does not have a luck power to make the activation roll.`,
                     severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                     modifierID: modifier.ID,
                 });
@@ -783,7 +818,7 @@ export function requiresRollHeroValidation(modifier, item) {
         } else if (activationRoll.type === RSR_ROLL_TYPE.ACTIVATION_ROLL) {
             validations.push(...activationRollHeroValidation(modifier, item));
         } else {
-            console.error(`Unknown activation roll type ${activationRoll.type} for heroValidation`);
+            console.error(`Unknown activation roll type ${activationRoll.type} for heroValidation.`);
         }
     }
 
