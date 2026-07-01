@@ -100,12 +100,18 @@ function extractSkills(actor, rollAlias, targetSubType) {
     const variableSkillsAliasMatch = rollAlias.match(/^([\S\s]+?)((?:\s+or\s+)([\S\s]+))?$/i);
     if (variableSkillsAliasMatch == null) {
         console.error(`RSR extractSkills: ${rollAlias} didn't match regex`);
-        return "";
+        return [
+            {
+                name: rollAlias,
+                activeItems: [],
+                items: [],
+            },
+        ];
     }
 
     const requiredSkillNames = [variableSkillsAliasMatch[1]];
 
-    // Is this a variable roll alias with 2 skills separated by an " or " string.
+    // Is this a variable roll alias with 2 skills separated by " or ".
     if (variableSkillsAliasMatch[3] != null) {
         requiredSkillNames.push(variableSkillsAliasMatch[3]);
     }
@@ -129,8 +135,10 @@ function extractSkills(actor, rollAlias, targetSubType) {
 function findSkill(actor, skillName) {
     const skillsToMatchAgainst = actor.items.filter(filterOutNonSkillRollItems);
 
-    return skillsToMatchAgainst.find((potentialMatchingSkillItem) =>
-        potentialMatchingSkillItem.name.includes(skillName),
+    return skillsToMatchAgainst.find(
+        (potentialMatchingSkillItem) =>
+            // Case insensitive comparison
+            potentialMatchingSkillItem.name.toLowerCase() === skillName.toLowerCase(),
     );
 }
 

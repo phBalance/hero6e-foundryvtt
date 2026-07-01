@@ -1669,6 +1669,15 @@ export function registerRequiresRollCheckTests(quench) {
                             <LIST XMLID="GENERIC_OBJECT" ID="1776305288516" BASECOST="0.0" LEVELS="0" ALIAS="Requires A Skill Roll" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                             <NOTES />
                             </LIST>
+                            <POWER XMLID="AID" ID="1776304663512" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires BrEaKfAlL with no penalty based on AP" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1782940589407" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A BrEaKfAlL Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="0" ROLLALIAS="BrEaKfAlL">
+                                <NOTES />
+                                <ADDER XMLID="NOAPPENALTY" ID="1782940606972" BASECOST="0.5" LEVELS="0" ALIAS="No Active Point penalty to Skill Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                <NOTES />
+                                </ADDER>
+                            </MODIFIER>
+                            </POWER>
                             <POWER XMLID="AID" ID="1776304663512" BASECOST="0.0" LEVELS="1" ALIAS="Aid" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1776305288516" NAME="Requires Breakfall with no penalty based on AP" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                             <NOTES />
                             <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777150924747" BASECOST="-0.5" LEVELS="0" ALIAS="Requires A Breakfall Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="0" ROLLALIAS="Breakfall">
@@ -1801,6 +1810,12 @@ export function registerRequiresRollCheckTests(quench) {
                             <LIST XMLID="GENERIC_OBJECT" ID="1777150891823" BASECOST="0.0" LEVELS="0" ALIAS="Invalid Requires A Skill Roll" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                             <NOTES />
                             </LIST>
+                            <POWER XMLID="DRAIN" ID="1777150364583" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="19" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777150891823" NAME="Drain Invalid RSR missing background skill name" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1782939956278" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A KS: Hot Dogs Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" ROLLALIAS="KS: Hot Dogs">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
                             <POWER XMLID="DRAIN" ID="1777150364583" BASECOST="0.0" LEVELS="1" ALIAS="Drain" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777150891823" NAME="Drain Invalid RSR missing background skill KS: Hot Dogs" INPUT="BODY" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                                 <NOTES />
                                 <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1777151112665" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A KS: Hot Dogs Roll " POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="BASICRSR" OPTIONID="BASICRSR" OPTION_ALIAS="Basic RSR" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No" TYPE="1" ROLLALIAS="KS: Hot Dogs">
@@ -1856,6 +1871,7 @@ export function registerRequiresRollCheckTests(quench) {
                     `;
                     let actor;
 
+                    let aidRequiresBreakfallStrangeCapitalizationWithNoApPenalty;
                     let aidRequiresBreakfallWithNoApPenalty;
                     let aidRequiresBreakfallWith1Per20ApPenalty;
                     let aidRequiresBreakfallWith1Per10ApPenalty;
@@ -1871,6 +1887,7 @@ export function registerRequiresRollCheckTests(quench) {
                     let aidRequiresPerceptionWith1Per5ApPenalty;
                     let aidRequiresStrWith1Per20ApPenalty;
 
+                    let invalidDrainMissingBackgroundSkillNameToLink;
                     let invalidDrainMissingBackgroundSkill;
                     let invalidDrainMissingSkill;
                     let invalidDrainMissingSkillFromVariableSkillChoice;
@@ -1887,6 +1904,9 @@ export function registerRequiresRollCheckTests(quench) {
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: true });
 
+                        aidRequiresBreakfallStrangeCapitalizationWithNoApPenalty = actor.items.find(
+                            (item) => item.name === "Requires BrEaKfAlL with no penalty based on AP",
+                        );
                         aidRequiresBreakfallWithNoApPenalty = actor.items.find(
                             (item) => item.name === "Requires Breakfall with no penalty based on AP",
                         );
@@ -1926,6 +1946,9 @@ export function registerRequiresRollCheckTests(quench) {
                             (item) => item.name === "Requires STR with -1 per 20 AP",
                         );
 
+                        invalidDrainMissingBackgroundSkillNameToLink = actor.items.find(
+                            (item) => item.name === "Drain Invalid RSR missing background skill name",
+                        );
                         invalidDrainMissingBackgroundSkill = actor.items.find(
                             (item) => item.name === "Drain Invalid RSR missing background skill KS: Hot Dogs",
                         );
@@ -2015,6 +2038,12 @@ export function registerRequiresRollCheckTests(quench) {
                     });
 
                     describe("RSRs have hero validations", function () {
+                        it("should have no heroValidation concerns as the character does have listed inante skill despite being different case (success)", function () {
+                            const heroValidation =
+                                aidRequiresBreakfallStrangeCapitalizationWithNoApPenalty.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
                         it("should have no heroValidation concerns as the character does have listed inante skill (success)", function () {
                             const heroValidation = aidRequiresPerceptionWith1Per5ApPenalty.heroValidation;
                             expect(heroValidation).to.have.deep.members([]);
@@ -2024,6 +2053,13 @@ export function registerRequiresRollCheckTests(quench) {
                             const heroValidation =
                                 aidRequiresKsSandwichesAndKsPotatoChipsWith1Per5ApPenalty.heroValidation;
                             expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should have a heroValidation error as the character does not have a listed background skill name (error)", function () {
+                            const heroValidation = invalidDrainMissingBackgroundSkillNameToLink.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
                         it("should have a heroValidation error as the character does not have listed background skill (error)", function () {
