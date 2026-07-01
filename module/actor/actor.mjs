@@ -257,6 +257,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      * @param {object} [options={}] Additional options which modify how the effect is created
      * @param {boolean} [options.active] Force the effect to be active or inactive regardless of its current state
      * @param {boolean} [options.overlay=false] Display the toggled effect as an overlay
+     * @param {object} [options.changed] The delta object tracking raw document modifications passed down from the _preUpdate lifecycle hook to evaluate pending numeric transitions before they are saved to the database.
      * @returns {Promise<ActiveEffect|boolean|undefined>} A promise which resolves to one of the following values:
      * - ActiveEffect if a new effect needed to be created
      * - true if it was already an existing active effect
@@ -264,7 +265,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      * - undefined if no changes need to be made
      * @override
      */
-    async toggleStatusEffect(statusId, { active, overlay = false } = {}) {
+    async toggleStatusEffect(statusId, { active, overlay = false, changed = {} } = {}) {
         const effectsObj = HeroSystem6eActorActiveEffects.statusEffectsObj;
         const overlayEffects = [effectsObj.deadEffect.id, effectsObj.knockedOutEffect.id, effectsObj.stunEffect.id];
 
@@ -320,7 +321,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             await this.deleteEmbeddedDocuments("ActiveEffect", effectsToDelete);
         }
         if (effectsToCreate.length > 0) {
-            // FIX: Match standard V14 formatting directly without running constructor scripts
+            // Match standard V14 formatting directly without running constructor scripts
             const createData = effectsToCreate.map((effect) => {
                 // Find the clean, core definition payload
                 const coreEffect = CONFIG.statusEffects.find((e) => e.id === effect.id);
@@ -347,9 +348,16 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 if (finalDead) {
                     updatePayload = { alpha: colors.DEAD_ALPHA, "texture.tint": colors.DEAD_TINT };
                 } else if (finalKO) {
+                    // FIX: Force the method to know KO is active by overriding the evaluation check.
+                    // This bypasses the empty changed.effects array problem entirely.
+                    const isOutOfCombat = this.getKnockedOutOfCombat({
+                        ...changed,
+                        _forceKOActive: finalKO,
+                    });
+
                     updatePayload = {
                         alpha: colors.DEFAULT_ALPHA,
-                        "texture.tint": this.knockedOutOfCombat ? colors.KO_COMBAT_TINT : colors.KO_DEFAULT_TINT,
+                        "texture.tint": isOutOfCombat ? colors.KO_COMBAT_TINT : colors.KO_DEFAULT_TINT,
                     };
                 } else if (finalStun) {
                     updatePayload = { alpha: colors.DEFAULT_ALPHA, "texture.tint": colors.STUNNED_TINT };
@@ -565,20 +573,42 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // =========================================================================
         // 2. AUTOMATED STATUS CONDITION & COMBAT TRACKER MANAGEMENT
         // =========================================================================
-        if (changed?.system?.characteristics?.stun?.value !== undefined) {
-            const nextStun = changed.system.characteristics.stun.value;
+        if (changed?.system?.characteristics?.stun?.value !== undefined || changed.type !== undefined) {
+            // Grab the incoming STUN value payload, or fall back to the actor's current value
+            const nextStun = changed.system?.characteristics?.stun?.value ?? this.getCharacteristic("stun")?.value ?? 0;
+            const currentStun = this.getCharacteristic("stun")?.value || 0;
 
-            // Remove Stunned/Knocked Out state modifiers if actor recovers into positives
-            if (nextStun > 0 && typeof this._removeStunConditionAutomations === "function") {
-                await this._removeStunConditionAutomations(changed, options);
+            // Calculate dynamic threshold parameters based on the incoming type target frame
+            const currentThreshold = this.stunThreshold;
+            const incomingType = changed.type ?? this.type;
+            const nextThreshold = incomingType === "pc" ? -30 : -10;
+
+            // RULE A: Recovering back into positive STUN -> Clear the unconscious state
+            if (nextStun > 0) {
+                if (this.statuses.has("knockedOut") || this.effects.some((e) => e.statuses.has("knockedOut"))) {
+                    await this.toggleStatusEffect("knockedOut", { active: false, changed });
+                }
+            }
+            // RULE B: Dropping to 0 or lower STUN -> Trigger native toggle pipelines
+            else if (nextStun <= 0 && currentStun > 0) {
+                await this.toggleStatusEffect("knockedOut", { active: true, overlay: true, changed });
+                await this.toggleStatusEffect("prone", { active: true, changed });
+            }
+            // RULE C: Falling below threshold, OR crossing threshold boundaries via type mutations
+            else if (
+                (nextStun < nextThreshold && currentStun >= currentThreshold && currentStun <= 0) ||
+                (changed.type !== undefined && nextStun <= 0)
+            ) {
+                // Re-triggering ensures toggleStatusEffect catches the new threshold data frame
+                // and shifts the texture tint smoothly between KO_DEFAULT_TINT and KO_COMBAT_TINT
+                await this.toggleStatusEffect("knockedOut", { active: true, overlay: true, changed });
             }
 
-            // Toggle Combat Tracker Defeated status if actor drops to or below 0
+            // RULE D: Toggle Combat Tracker Defeated status if actor drops to or below 0
             if (typeof this._setCombatTrackerDefeatedStatus === "function") {
                 if (nextStun <= 0) {
                     await this._setCombatTrackerDefeatedStatus(true);
-                } else if (this.getCharacteristic("stun")?.value <= 0 && nextStun > 0) {
-                    // Reverted from defeated back to undefeated
+                } else if (currentStun <= 0 && nextStun > 0) {
                     await this._setCombatTrackerDefeatedStatus(false);
                 }
             }
@@ -1657,7 +1687,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             for (const ae of this.effects) {
                 if (ae.statuses.has(effectsObj.deadEffect.id) || ae.statuses.has(effectsObj.knockedOutEffect.id))
                     continue;
-
                 effectIdsToDelete.push(ae.id);
             }
 
@@ -1665,19 +1694,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 await this.deleteEmbeddedDocuments("ActiveEffect", effectIdsToDelete);
             }
 
-            // ========================================================
-            // FIX: BATCH RESET VISUAL CANVAS TINIS UPON FULL HEALTH RESTORATION
-            // ========================================================
-            const tokens = this.getActiveTokens();
-            if (tokens.length > 0 && CONFIG.HERO.statusColors) {
-                const colors = CONFIG.HERO.statusColors;
-                const tokenUpdates = tokens.map((t) => ({
-                    _id: t.document.id,
-                    alpha: colors.DEFAULT_ALPHA ?? 1.0,
-                    "texture.tint": colors.CLEAR_TINT ?? null,
-                }));
-                await canvas.scene.updateEmbeddedDocuments("Token", tokenUpdates);
-            }
+            // REMOVED: The duplicate raw token patch block was stripped from here.
+            // toggleStatusEffect now safely owns 100% of your texture tint transformations.
 
             end = Date.now();
             if (end - start > tDelta) {
@@ -1718,6 +1736,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         } else if (!this._id && Object.keys(characteristicChangesMax).length > 0) {
             foundry.utils.mergeObject(this, characteristicChangesMax);
         }
+
         end = Date.now();
         if (end - start > tDelta) {
             console.warn("fullHealth performance concern: Set Characteristics MAX to CORE", end - start);
@@ -1740,6 +1759,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         } else if (!this._id && Object.keys(characteristicChangesValue).length > 0) {
             foundry.utils.mergeObject(this, characteristicChangesValue);
         }
+
         end = Date.now();
         if (end - start > tDelta) {
             console.warn("fullHealth performance concern: Set Characteristics VALUE to MAX", end - start);
@@ -3966,40 +3986,31 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     get knockedOutOfCombat() {
+        console.error(`Depricated use getKnockedOutOfCombat`);
         if (!this.statuses.has("knockedOut")) return false;
         if (this.system.characteristics.stun?.value >= this.stunThreshold) return false;
         return true;
     }
 
-    // prepareEmbeddedDocuments() {
-    //     super.prepareEmbeddedDocuments();
-    // }
+    /**
+     * Determine if the actor is critically unconscious and out of combat.
+     * Supports evaluating incoming data changes during _preUpdate lifecycles.
+     * @param {object} [changed] An optional mutation tracking payload from _preUpdate
+     * @returns {boolean}
+     */
+    getKnockedOutOfCombat(changed = {}) {
+        // 1. Check if KO is explicitly forced active, otherwise fall back to the live cache set
+        const isKO = changed._forceKOActive ?? this.statuses.has("knockedOut");
 
-    // _removeRedundantHalvingActiveEffects() {
-    //     debugger;
-    //     let changes = this.overrides;
-    //     // Filter out redundant multiplies, keeping lowest value
-    //     const mults = changes.filter((c) => c.mode === CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
-    //     if (mults.length > 1) {
-    //         const uniqueKeys = new Set();
-    //         mults.forEach((obj) => {
-    //             uniqueKeys.add(obj.key);
-    //         });
+        // If they are not knocked out, they are definitely not out of combat
+        if (!isKO) return false;
 
-    //         for (const key of uniqueKeys) {
-    //             const multsUniqueKey = mults.filter((c) => c.key === key);
-    //             if (multsUniqueKey.length > 1) {
-    //                 const minValue = Math.min(...multsUniqueKey.map((c) => parseFloat(c.value)));
-    //                 const keepMult = multsUniqueKey.find((c) => parseFloat(c.value) === minValue);
-    //                 // remove all multsUniqueKey and add back in the keepMult
-    //                 changes = changes.filter((c) => c.key !== key || c.mode !== CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
-    //                 changes.push(keepMult);
-    //             }
-    //         }
+        // 2. Fetch the incoming structural target value vs the database state value
+        const stunVal = changed.system?.characteristics?.stun?.value ?? this.system.characteristics.stun?.value ?? 0;
 
-    //         this.overrides = changes;
-    //     }
-    // }
+        // 3. Return true if STUN falls below your system threshold
+        return stunVal < this.stunThreshold;
+    }
 
     // V13 and V14 have different ways of applying active effects
     applyActiveEffects(phase) {
