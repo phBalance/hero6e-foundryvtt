@@ -13,7 +13,6 @@ import { registerUploadTests } from "./testing-upload.mjs";
 import { registerVehicleTests } from "./testing-vehicles.mjs";
 import { registerCombatTests } from "./testing-combat-tracker.mjs";
 import { registerGlobalSetup, registerGlobalTeardown } from "./quench-helper.mjs";
-import { HEROSYS } from "../herosystem6e.mjs";
 import { registerCombatWorkflowTests } from "./testing-combat-workflow.mjs";
 import { registerTypeForceReplaceTests } from "./testing-type-force-replace.mjs";
 import { registerStatusEffectTests } from "./testing-status-effects.mjs";

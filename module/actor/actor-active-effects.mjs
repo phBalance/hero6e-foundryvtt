@@ -490,50 +490,6 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         game[HEROSYS.module].effectPanel.refresh();
     }
 
-    async #updateValueBasedOnMax(data, options) {
-        // Update characteristic VALUE when MAX is modified
-
-        // Chasing down the extra +2 RUNNING from Diego 102.hdc
-        // if (isGameV14OrLater()) {
-        //     console.error("V14 skipping updateValueBasedOnMax");
-        //     return;
-        // }
-
-        const actor = this.target;
-        if (actor.constructor?.name !== "HeroSystem6eActor") {
-            console.warn(`AE target is not an instance of HeroSystem6eActor`, this);
-            return;
-        }
-
-        // Created a disabled AE, do nothing
-        if (options.action === "create" && data.disabled) {
-            return;
-        }
-
-        if (options.action === "update" && data.changes) {
-            // This is an indication that our implementation needs review
-            console.error("HeroSystem updating of VALUEs based on AE may not update correctly", data);
-            return;
-        }
-
-        const actorChanges = {};
-        for (const change of this.changes) {
-            const key = change.key.match(/([a-z]+)\.max/)?.[1];
-            if (key) {
-                if (actor?.system?.characteristics?.[key]) {
-                    // KLUGE: Set VALUE to MAX for now. We need a better solution.
-                    actorChanges[`system.characteristics.${key}.value`] = actor.getCharacteristic(key).max;
-
-                    // 5e figured characteristic
-                    if (actor.is5e) {
-                        await actor.updateFiguredCharacteristicDependencies(key.toUpperCase());
-                    }
-                }
-            }
-        }
-        await actor.update(actorChanges);
-    }
-
     /**
      * Synchronously evaluate and apply characteristic changes directly during the parent document
      * update lifecycle, avoiding loose asynchronous callbacks.
