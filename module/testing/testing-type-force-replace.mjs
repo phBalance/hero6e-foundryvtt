@@ -1,66 +1,70 @@
 import { HeroCompatibility } from "../utility/compatibility.mjs";
 
 export function registerTypeForceReplaceTests(quench) {
-    quench.registerBatch(`${game.system.id}.testing.typeForceReplace`, (context) => {
-        const { describe, it, before, after, assert } = context;
+    quench.registerBatch(
+        `${game.system.id}.testing.typeForceReplace`,
+        (context) => {
+            const { describe, it, before, after, assert } = context;
 
-        // ==========================================
-        // ACTOR TYPE TESTS
-        // ==========================================
-        describe.only(
-            "Actor Type Mutation Matrix",
-            function () {
-                let quenchActor = null;
-                const targetTypes = Actor.TYPES.filter((t) => t !== "base");
+            // ==========================================
+            // ACTOR TYPE TESTS
+            // ==========================================
+            describe(
+                "Actor Type Mutation Matrix",
+                function () {
+                    let quenchActor = null;
+                    const targetTypes = Actor.TYPES.filter((t) => t !== "base");
 
-                before(async function () {
-                    quenchActor = await Actor.create({
-                        name: "_Quench_Attacker",
-                        type: "pc",
-                        img: "icons/svg/sword.svg",
+                    before(async function () {
+                        quenchActor = await Actor.create({
+                            name: "_Quench_Attacker",
+                            type: "pc",
+                            img: "icons/svg/sword.svg",
+                        });
                     });
-                });
 
-                after(async function () {
-                    if (quenchActor) await quenchActor.delete();
-                });
+                    after(async function () {
+                        if (quenchActor) await quenchActor.delete();
+                    });
 
-                it("Custom system _changeType", async function () {
-                    for (const targetType of targetTypes) {
-                        await quenchActor._changeType(targetType);
-                        assert.equal(quenchActor.type, targetType);
-                    }
-                });
-
-                // Shared DataModels break _replace. TODO: refactor DataModel
-                if (HeroCompatibility.isV14) {
-                    it("Native V14 forceReplace", async function () {
+                    it("Custom system _changeType", async function () {
                         for (const targetType of targetTypes) {
-                            await quenchActor.update(
-                                {
-                                    type: targetType,
-                                    system: _replace({}),
-                                },
-                                {
-                                    forceReplace: true,
-                                },
-                            );
+                            await quenchActor._changeType(targetType);
                             assert.equal(quenchActor.type, targetType);
                         }
                     });
-                } else {
-                    it.skip("Native V14 forceReplace (Skipped on V13)", () => {});
-                }
-            },
-            { displayName: "HERO: Actor Type Tests" },
-        );
 
-        // ==========================================
-        // ITEM TYPE TESTS
-        // ==========================================
-        describe.only(
-            "Item Type Mutation Matrix",
-            function () {
+                    // Shared DataModels break _replace. TODO: refactor DataModel
+                    if (HeroCompatibility.isV14) {
+                        it("Native V14 forceReplace", async function () {
+                            for (const targetType of targetTypes) {
+                                // 1. Fetch current system data structure
+                                const currentSystemData = quenchActor.system?.toObject() || {};
+
+                                await quenchActor.update(
+                                    {
+                                        type: targetType,
+                                        // 2. Use the valid system data structure
+                                        system: _replace(currentSystemData),
+                                    },
+                                    {
+                                        forceReplace: true,
+                                    },
+                                );
+                                assert.equal(quenchActor.type, targetType);
+                            }
+                        });
+                    } else {
+                        it.skip("Native V14 forceReplace (Skipped on V13)", () => {});
+                    }
+                },
+                { displayName: "HERO: Actor Type Tests" },
+            );
+
+            // ==========================================
+            // ITEM TYPE TESTS
+            // ==========================================
+            describe("Item Type Mutation Matrix", function () {
                 let quenchItem = null;
                 // Filter out 'base' and the deprecated 'complication' type
                 const itemTypes = Item.TYPES.filter((t) => t !== "base" && t !== "complication");
@@ -121,8 +125,8 @@ export function registerTypeForceReplaceTests(quench) {
                 } else {
                     it.skip("Native V14 forceReplace (Skipped on V13)", () => {});
                 }
-            },
-            { displayName: "HERO: Item Type Tests" },
-        );
-    });
+            });
+        },
+        { displayName: "HERO: Updates with type ForceReplace" },
+    );
 }

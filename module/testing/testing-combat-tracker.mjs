@@ -1,3 +1,5 @@
+import { HEROSYS } from "../herosystem6e.mjs";
+
 export function registerCombatTests(quench) {
     quench.registerBatch(
         "hero6efoundryvttv2.combat.speed-chart-progression",
@@ -13,6 +15,17 @@ export function registerCombatTests(quench) {
                 const combatDocuments = [];
 
                 before(async function () {
+                    const isSingleTracker =
+                        typeof HEROSYS !== "undefined"
+                            ? HEROSYS.isSingleCombatantTrackerEnabled
+                            : game.settings.get(game.system.id, "singleCombatantTracker");
+                    if (!isSingleTracker) {
+                        console.warn(
+                            "[hero6efoundryvttv2] QUENCH | Skipping speed chart tests: singleCombatantTracker is disabled.",
+                        );
+                        this.skip(); // Safely skips every internal "it" statement dynamically
+                    }
+
                     console.log(
                         `[hero6efoundryvttv2] QUENCH | Platform Version: ${foundryVersion} (Gen ${generationLabel})`,
                     );

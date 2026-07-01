@@ -1,15 +1,16 @@
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 
 export function registerStatusEffectTests(quench) {
-    quench.registerBatch(`${game.system.id}.testing.statusEffects`, (context) => {
-        const { describe, it, before, beforeEach, after, assert } = context;
+    quench.registerBatch(
+        `${game.system.id}.testing.statusEffects`,
+        (context) => {
+            const { describe, it, before, beforeEach, after, assert } = context;
 
-        // Awaitable promise helper that resolves exactly when a specific Foundry hook settles
-        const waitForHook = (hookName) => new Promise((resolve) => Hooks.once(hookName, (...args) => resolve(args)));
+            // Awaitable promise helper that resolves exactly when a specific Foundry hook settles
+            const waitForHook = (hookName) =>
+                new Promise((resolve) => Hooks.once(hookName, (...args) => resolve(args)));
 
-        describe.only(
-            "Actor Status Effect State Machine Matrix",
-            function () {
+            describe("Actor Status Effect State Machine Matrix", function () {
                 let quenchActor = null;
                 let effectsObj = null;
 
@@ -212,8 +213,8 @@ export function registerStatusEffectTests(quench) {
                     await canvasTokenDoc.delete();
                     await tokenHook;
                 });
-            },
-            { displayName: "HERO: Status Effects Logic" },
-        );
-    });
+            });
+        },
+        { displayName: "HERO: Status Effects Logic" },
+    );
 }

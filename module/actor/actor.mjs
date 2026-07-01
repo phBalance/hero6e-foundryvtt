@@ -517,76 +517,125 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     async _preUpdate(changed, options, userId) {
-        await super._preUpdate(changed, options, userId);
+        const allowed = await super._preUpdate(changed, options, userId);
+        if (allowed === false) return false;
 
-        // Forward changed date to _onUpdate.
-        // _preUpdate only seems to run for GM or one user which
-        // results in _displayScrollingChange only showing for those users.
-        // Where as _onUpdate runs for all users.
+        const systemData = changed?.system || {};
+        const is5e = this.is5e || false;
+
+        // =========================================================================
+        // 1. CHARACTERISTIC & TRAIT CALCULATIONS (Alters changed payload inline)
+        // =========================================================================
+
+        // BOTH 5e and 6e vehicles must process size calculations!
+        if ((systemData.characteristics && "size" in systemData.characteristics) || this.type === "vehicle") {
+            if (typeof this.applySizeEffect === "function") {
+                await this.applySizeEffect(changed, options, userId);
+            }
+        }
+
+        // Keep the dedicated 5e overrides framework running right alongside it
+        if (is5e) {
+            if (typeof this._apply5eCalculatedCharacteristics === "function") {
+                await this._apply5eCalculatedCharacteristics(changed, options, userId);
+            }
+        }
+
+        // Inventory weight and carrying capacity corrections
+        if ("items" in changed || systemData.characteristics) {
+            if (typeof this.applyEncumbrancePenalty === "function") {
+                await this.applyEncumbrancePenalty(changed, options, userId);
+            }
+        }
+
+        // Healing processing
+        if ("system" in changed) {
+            if (typeof this.setNaturalHealing === "function") {
+                await this.setNaturalHealing(changed, options, userId);
+            }
+        }
+
+        // System Configuration Toggles
+        if (systemData.toggles) {
+            if (typeof this._handleSystemToggles === "function") {
+                await this._handleSystemToggles(changed, options, userId);
+            }
+        }
+
+        // =========================================================================
+        // 2. AUTOMATED STATUS CONDITION & COMBAT TRACKER MANAGEMENT
+        // =========================================================================
+        if (changed?.system?.characteristics?.stun?.value !== undefined) {
+            const nextStun = changed.system.characteristics.stun.value;
+
+            // Remove Stunned/Knocked Out state modifiers if actor recovers into positives
+            if (nextStun > 0 && typeof this._removeStunConditionAutomations === "function") {
+                await this._removeStunConditionAutomations(changed, options);
+            }
+
+            // Toggle Combat Tracker Defeated status if actor drops to or below 0
+            if (typeof this._setCombatTrackerDefeatedStatus === "function") {
+                if (nextStun <= 0) {
+                    await this._setCombatTrackerDefeatedStatus(true);
+                } else if (this.getCharacteristic("stun")?.value <= 0 && nextStun > 0) {
+                    // Reverted from defeated back to undefeated
+                    await this._setCombatTrackerDefeatedStatus(false);
+                }
+            }
+        }
+
+        // =========================================================================
+        // 3. SCROLLING METADATA BUS (Packed into options for multi-client broadcast)
+        // =========================================================================
         options.displayScrollingChanges = [];
-        let content = "";
+        let chatContent = "";
 
-        const ShowCombatCharacteristicChanges = game.settings.get(game.system.id, "ShowCombatCharacteristicChanges");
-        const ShowCombatCharacteristicChangesBool =
-            ShowCombatCharacteristicChanges === "all"
-                ? true
-                : ShowCombatCharacteristicChanges === "pc" && this.type === "pc"
-                  ? true
-                  : false;
+        const showChangesSetting = game.settings.get(game.system.id, "ShowCombatCharacteristicChanges");
+        const processScrolling = showChangesSetting === "all" || (showChangesSetting === "pc" && this.type === "pc");
 
-        if (changed?.system?.characteristics?.stun?.value && ShowCombatCharacteristicChangesBool) {
-            const presentStun = this.getCharacteristic("stun");
-            const presentStunValue = presentStun.value;
-            const presentStunMax = presentStun.max;
-            const changeStunToValue = changed.system.characteristics.stun.value;
-
-            if (presentStunValue != changeStunToValue) {
-                content += `STUN from ${presentStunValue} to ${changeStunToValue}`;
-                if (changeStunToValue === presentStunMax) {
-                    content += " (at max)";
+        if (processScrolling) {
+            // Evaluate STUN text changes
+            if (changed?.system?.characteristics?.stun?.value !== undefined) {
+                const curStun = this.getCharacteristic("stun")?.value || 0;
+                const targetStun = changed.system.characteristics.stun.value;
+                if (curStun !== targetStun) {
+                    chatContent += `STUN from ${curStun} to ${targetStun}`;
+                    options.displayScrollingChanges.push({
+                        value: targetStun - curStun,
+                        options: { max: this.getCharacteristic("stun")?.max || 0, fill: "0x00FF00" },
+                    });
                 }
-                options.displayScrollingChanges.push({
-                    value: changeStunToValue - presentStunValue,
-                    options: { max: presentStunMax, fill: "0x00FF00" },
-                });
+            }
+
+            // Evaluate BODY text changes
+            if (changed?.system?.characteristics?.body?.value !== undefined) {
+                const curBody = this.getCharacteristic("body")?.value || 0;
+                const targetBody = changed.system.characteristics.body.value;
+                if (curBody !== targetBody) {
+                    if (chatContent.length > 0) chatContent += "<br>";
+                    chatContent += `BODY from ${curBody} to ${targetBody}`;
+                    options.displayScrollingChanges.push({
+                        value: targetBody - curBody,
+                        options: { max: this.getCharacteristic("body")?.max || 0, fill: "0xFF1111" },
+                    });
+                }
             }
         }
 
-        if (changed?.system?.characteristics?.body?.value && ShowCombatCharacteristicChangesBool) {
-            const presentBody = this.getCharacteristic("body");
-            const presentBodyValue = presentBody.value;
-            const presentBodyMax = presentBody.max;
-            const changeBodyToValue = changed.system.characteristics.body.value;
+        // Early exit if chat operations or visual updates are explicitly suppressed
+        if (options.hideChatMessage || !options.render) return true;
 
-            if (content.length > 0) {
-                content += "<br>";
-            }
-            if (presentBodyValue != changeBodyToValue) {
-                content += `BODY from ${presentBodyValue} to ${changeBodyToValue}`;
-                if (changeBodyToValue === presentBodyMax) {
-                    content += " (at max)";
-                }
-                options.displayScrollingChanges.push({
-                    value: changeBodyToValue - presentBodyValue,
-                    options: { max: presentBodyMax, fill: "0xFF1111" },
-                });
-            }
-        }
-
-        if (options.hideChatMessage || !options.render) return;
-
-        if (!options.quenchCreate && content) {
-            const chatData = {
+        // Post Damage Output Messages
+        if (!options.quenchCreate && chatContent) {
+            ChatMessage.create({
                 author: game.user.id,
                 whisper: whisperUserTargetsForActor(this),
                 speaker: ChatMessage.getSpeaker({ actor: this }),
-                content: content,
-            };
-            // Fire and forget ChatMessage.create(chatData);
-            ChatMessage.create(chatData);
+                content: chatContent,
+            });
         }
 
-        // Chat card about entering/leaving heroic identity
+        // Heroic Identity Conversion Announcement
         if (
             !options.quenchCreate &&
             changed.system?.heroicIdentity !== undefined &&
@@ -597,190 +646,38 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             const speaker = ChatMessage.getSpeaker({ actor: this, token });
             const tokenName = token?.name || this.name;
             speaker["alias"] = game.user.name;
-            const content = `<b>${tokenName}</b> ${changed.system.heroicIdentity ? "entered" : "left"} their heroic identity.`;
-            const chatData = {
+
+            const identityContent = `<b>${tokenName}</b> ${changed.system.heroicIdentity ? "entered" : "left"} their heroic identity.`;
+            ChatMessage.create({
                 style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
                 author: game.user._id,
-                content: content,
+                content: identityContent,
                 speaker: speaker,
-            };
-            // Fire and forget ChatMessage.create(chatData);
-            ChatMessage.create(chatData);
+            });
         }
+
+        return true;
     }
 
-    async _onUpdate(data, options, userId) {
-        await super._onUpdate(data, options, userId);
+    _onUpdate(changed, options, userId) {
+        super._onUpdate(changed, options, userId);
 
-        // Only owners have permission to perform updates
-        if (!this.isOwner) {
-            return;
-        }
-
-        // ========================================================
-        // BATCHED ACTIVE EFFECTS REFRESH INTERCEPTOR
-        // ========================================================
-        // Catch additions, deletions, or structural schema replacements (V14 type forceReplaces)
-        const structuralUpdate = "effects" in data || options.embedded?.ActiveEffect || options.forceReplace;
-        if (structuralUpdate) {
-            try {
-                for (const effect of this.effects) {
-                    if (!effect.disabled && typeof effect.updateValueBasedOnMax === "function") {
-                        // Await directly within our own call frame to block Quench execution loops safely
-                        await effect.updateValueBasedOnMax({ action: "update" });
-                    }
-                }
-            } catch (e) {
-                console.error("HERO: Active Effect update synchronization crashed.", e);
+        // 1. Unpack and execute computed scrolling data across all connected player displays
+        if (options.displayScrollingChanges?.length && typeof this._displayScrollingChange === "function") {
+            for (const change of options.displayScrollingChanges) {
+                this._displayScrollingChange(change.value, change.options);
             }
         }
 
-        // Mark as undefeated in combat tracker (pc/npc)
-        if (
-            (data.system?.characteristics?.body?.value ?? this.getCharacteristic("body").value) >
-                -this.getCharacteristic("body").value &&
-            this.statuses.has("dead")
-        ) {
-            await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                active: false,
-            });
+        // 2. Trigger canvas lighting and vision grid refreshes if sensory tracking altered
+        const systemData = changed?.system || {};
+        if (systemData.senses || changed.effects) {
+            canvas.perception?.update({ initializeVision: true, refreshLighting: true });
         }
 
-        // If stun was changed and running under triggering users context
-        if (
-            (data.system?.characteristics?.stun !== undefined || data.system?.characteristics?.body !== undefined) &&
-            userId === game.user.id &&
-            this.hasCharacteristic("STUN")
-        ) {
-            const newStun = data.system?.characteristics?.stun?.value ?? this.getCharacteristic("stun").value;
-            if (newStun <= 0) {
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id, {
-                    overlay: true,
-                    active: true,
-                });
-            }
-            // Remove STUN condition, unless this was part of a PostSegment12 recovery
-            if (newStun > 0) {
-                if (!options.preventRecoverFromStun) {
-                    const effectsObj = HeroSystem6eActorActiveEffects.statusEffectsObj;
-
-                    // REFACTORED TO BATCH TARGETED TRANSITIONS
-                    await Promise.all([
-                        this.toggleStatusEffect(effectsObj.knockedOutEffect.id, { active: false }),
-                        this.toggleStatusEffect(effectsObj.bleedingEffect.id, { active: false }),
-                        this.toggleStatusEffect(effectsObj.deadEffect.id, { active: false }),
-                    ]);
-                }
-            }
-        }
-
-        // Mark as defeated in combat tracker (automaton)
-        if (data.system?.characteristics?.body?.value <= 0) {
-            const AUTOMATON = this.items.find((o) => o.system.XMLID === "AUTOMATON");
-            if (AUTOMATON) {
-                await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                    overlay: true,
-                    active: true,
-                });
-            }
-        }
-
-        // Mark as defeated in combat tracker (pc/npc)
-        if (
-            ["pc", "npc"].includes(this.type) &&
-            data.system?.characteristics?.body?.value <= -this.getCharacteristic("body").max
-        ) {
-            await this.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.deadEffect.id, {
-                overlay: true,
-                active: true,
-            });
-        }
-
-        // Mark as undefeated in combat tracker (automaton)
-        if (this.type === "automaton" && data.system?.characteristics?.body?.value > 0) {
-            const effectsObj = HeroSystem6eActorActiveEffects.statusEffectsObj;
-            await Promise.all([
-                this.toggleStatusEffect(effectsObj.knockedOutEffect.id, { active: false }),
-                this.toggleStatusEffect(effectsObj.bleedingEffect.id, { active: false }),
-                this.toggleStatusEffect(effectsObj.deadEffect.id, { active: false }),
-            ]);
-        }
-
-        // If STR was change check encumbrance
-        if (data?.system?.characteristics?.str && userId === game.user.id && options.render !== false) {
-            await this.applyEncumbrancePenalty();
-        }
-
-        // VEHICLE & BASE SIZE
-        if (data?.system?.characteristics?.size || data?.system?.characteristics?.basesize) {
-            await this.applySizeEffect();
-        }
-
-        // Ensure natural healing effect is removed when returned to full BODY
-        if (data?.system?.characteristics?.body || data?.system?.characteristics?.rec) {
-            await this.setNaturalHealing();
-        }
-
-        // Heroic ID
-        if (data.system?.heroicIdentity !== undefined) {
-            // Toggled on (entering ID)
-            if (data.system.heroicIdentity) {
-                for (const item of this.items.filter((item) => item.findModsByXmlid("OIHID") && !item.system.active)) {
-                    if (item.flags[game.system.id]?.preOIHID) {
-                        await item.toggle(); // toggle on
-                    }
-                }
-            } else {
-                // Use flags to keep track which items were disabled so we will enable them when we go back into heroic ID
-                for (const item of this.items.filter((item) => item.findModsByXmlid("OIHID"))) {
-                    await item.update({ [`flags.${game.system.id}.preOIHID`]: item.system.active });
-                    if (item.system.active) {
-                        await item.toggle(); // toggle off
-                    }
-                }
-            }
-        }
-
-        // If LEVELS were changed, update MAX and VALUE
-        if (data.system) {
-            for (const charKEY of Object.keys(data.system)) {
-                if (data.system[charKEY]?.LEVELS != null) {
-                    const charKey = charKEY.toLowerCase();
-                    if (this.hasCharacteristic(charKey.toUpperCase())) {
-                        const basePlusLevels = this.getCharacteristic(charKey).basePlusLevels;
-                        await this.updateCharacteristics([[charKey, { max: basePlusLevels }]], {});
-                        await this.updateCharacteristics([[charKey, { value: basePlusLevels }]], {});
-                        // Check for any figuredCharacteristic dependencies.
-                        await this.updateFiguredCharacteristicDependencies(charKey);
-                    }
-                }
-            }
-        }
-
-        // 5e calculated characteristics
-        if (this.is5e && data.system?.characteristics) {
-            const characteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(this); // a bit of caching
-            const changes = [];
-            for (const changeKey of Object.keys(data.system.characteristics)) {
-                if (data.system.characteristics[changeKey].value !== undefined) {
-                    for (const char of characteristicInfoArrayForActor.filter(
-                        (o) => o.behaviors.includes(`calculated${changeKey.toUpperCase()}`) || o.key == changeKey,
-                    )) {
-                        const key = char.key.toLocaleLowerCase();
-                        if (char.calculated5eCharacteristic) {
-                            const newValue = char.calculated5eCharacteristic(this);
-                            changes.push([key, { value: newValue, max: newValue }]);
-                        }
-                    }
-                }
-            }
-            if (changes.length > 0) {
-                await this.updateCharacteristics(changes, {});
-            }
-        }
-        // Display changes from _preUpdate
-        for (let d of options.displayScrollingChanges) {
-            this._displayScrollingChange(d.value, d.options);
+        // 3. Rerender the active document configuration layout locally for the modifying client
+        if (game.user.id === userId) {
+            this.sheet?.render(false);
         }
     }
 

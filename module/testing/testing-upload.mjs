@@ -8434,8 +8434,13 @@ export function registerUploadTests(quench) {
                     });
 
                     it("description", function () {
+                        // Normalize typography minus signs (U+2212) to standard hyphens (U+002D)
+                        // Issue with FoundryVTT V13 and signedString() returning a unicode minus sign
+                        // The signedString() is only for UI, so shouldn't impact anything.
+                        const actualDescription = item.system.description.replace(/\u2212/g, "-");
+
                         assert.equal(
-                            item.system.description,
+                            actualDescription,
                             "Blast 11d6 (PD; Custom Adder -55 Points), Area Of Effect (16m Long, 2m Tall, 2m Wide Line; +1/4)",
                         );
                     });

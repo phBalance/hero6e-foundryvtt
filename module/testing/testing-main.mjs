@@ -52,12 +52,7 @@ Hooks.on("quenchReady", async (quench) => {
     registerStatusEffectTests(quench);
     registerTypeForceReplaceTests(quench);
     registerCombatWorkflowTests(quench);
-
-    // Combat test are only for single combatant tracker, which is configured onload.
-    // So can't dynamically toggle on/off for testing.
-    if (HEROSYS.isSingleCombatantTrackerEnabled) {
-        registerCombatTests(quench);
-    }
+    registerCombatTests(quench);
 
     registerGlobalTeardown(quench);
 });
