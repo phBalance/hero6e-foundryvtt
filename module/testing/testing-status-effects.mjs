@@ -213,6 +213,134 @@ export function registerStatusEffectTests(quench) {
                     await canvasTokenDoc.delete();
                     await tokenHook;
                 });
+
+                it("Manage knockout states via dynamic PC thresholds", async function () {
+                    const tokenDocument = await TokenDocument.create(
+                        { actorId: quenchActor.id, name: quenchActor.name, x: 0, y: 0 },
+                        { parent: canvas.scene },
+                    );
+
+                    let capturedUpdates = null;
+                    const originalUpdate = canvas.scene.updateEmbeddedDocuments;
+                    canvas.scene.updateEmbeddedDocuments = async function (embeddedName, updates, options) {
+                        if (embeddedName === "Token") capturedUpdates = updates;
+                        return originalUpdate.apply(this, arguments);
+                    };
+
+                    try {
+                        const colors = CONFIG.HERO.statusColors;
+
+                        // A. DOWNWARD DAMAGE PATH
+                        // 1. Drop STUN to -1 (Yellow)
+                        await quenchActor.update({ "system.characteristics.stun.value": -1 });
+                        let tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        assert.equal(
+                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(colors.KO_DEFAULT_TINT).css,
+                            "PC at STUN -1 should be assigned the yellowish configuration tint.",
+                        );
+
+                        // 2. Drop STUN to -11 (Stays Yellow for PC)
+                        capturedUpdates = null;
+                        await quenchActor.update({ "system.characteristics.stun.value": -11 });
+                        await quenchActor.toggleStatusEffect("knockedOut", { active: true, overlay: true });
+                        tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        assert.equal(
+                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(colors.KO_DEFAULT_TINT).css,
+                            "PC at STUN -11 should remain assigned the yellowish configuration tint.",
+                        );
+
+                        // 3. Drop STUN to -31 (Red)
+                        capturedUpdates = null;
+                        await quenchActor.update({ "system.characteristics.stun.value": -31 });
+                        tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        assert.equal(
+                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(colors.KO_COMBAT_TINT).css,
+                            "PC at STUN -31 should shift to the critical reddish combat tint.",
+                        );
+
+                        // B. NEW: UPWARD HEALING RECOVERY PATH
+                        // 4. Heal back up to -1 from -31 (Should shift back from Red to Yellow!)
+                        capturedUpdates = null;
+                        await quenchActor.update({ "system.characteristics.stun.value": -1 });
+                        await quenchActor.toggleStatusEffect("knockedOut", { active: true, overlay: true });
+                        tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        assert.equal(
+                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(colors.KO_DEFAULT_TINT).css,
+                            "Healing PC back to STUN -1 should return the texture configuration tint to yellow.",
+                        );
+                    } finally {
+                        canvas.scene.updateEmbeddedDocuments = originalUpdate;
+                        await tokenDocument.delete();
+                    }
+                });
+
+                it("Re-tint texture when unconscious actor changes type", async function () {
+                    const npcTestActor = await Actor.create({
+                        name: "_Quench_Status_NPC_Tester",
+                        type: "pc",
+                        img: "icons/svg/mystery-man.svg",
+                        system: { characteristics: { stun: { value: 20, max: 20 } } },
+                    });
+
+                    await npcTestActor._changeType("npc");
+
+                    const tokenDocument = await TokenDocument.create(
+                        { actorId: npcTestActor.id, name: npcTestActor.name, x: 0, y: 0 },
+                        { parent: canvas.scene },
+                    );
+
+                    let capturedUpdates = null;
+                    const originalUpdate = canvas.scene.updateEmbeddedDocuments;
+                    canvas.scene.updateEmbeddedDocuments = async function (embeddedName, updates, options) {
+                        if (embeddedName === "Token") capturedUpdates = updates;
+                        return originalUpdate.apply(this, arguments);
+                    };
+
+                    try {
+                        const colors = CONFIG.HERO.statusColors;
+
+                        // A. NPC TO PC PATH
+                        // 1. Drop NPC to -11 (Red)
+                        await npcTestActor.update({ "system.characteristics.stun.value": -11 });
+                        let tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        assert.equal(
+                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(colors.KO_COMBAT_TINT).css,
+                            "NPC at STUN -11 should use the critical reddish configuration tint.",
+                        );
+
+                        // 2. Convert NPC to PC (Should shift Red ➔ Yellow because threshold is now -30)
+                        capturedUpdates = null;
+                        await npcTestActor._changeType("pc");
+                        await npcTestActor.toggleStatusEffect("knockedOut", { active: true, overlay: true });
+                        tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        assert.equal(
+                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(colors.KO_DEFAULT_TINT).css,
+                            "Converting to PC should dynamically adjust the texture target payload back to yellow.",
+                        );
+
+                        // B. NEW: PC TO NPC REVERSE PATH
+                        // 3. Convert PC back to NPC (Should shift Yellow ➔ Red because threshold drops back to -10)
+                        capturedUpdates = null;
+                        await npcTestActor._changeType("npc");
+                        await npcTestActor.toggleStatusEffect("knockedOut", { active: true, overlay: true });
+                        tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        assert.equal(
+                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(colors.KO_COMBAT_TINT).css,
+                            "Converting back to NPC should dynamically return the texture layout tint to red.",
+                        );
+                    } finally {
+                        canvas.scene.updateEmbeddedDocuments = originalUpdate;
+                        await tokenDocument.delete();
+                        await npcTestActor.delete();
+                    }
+                });
             });
         },
         { displayName: "HERO: Status Effects Logic" },
