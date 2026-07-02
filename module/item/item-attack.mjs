@@ -3631,7 +3631,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
     ChatMessage.create(chatData);
 }
 
-export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, entangleAE) {
+export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, entangleAE, action) {
     // Get fully functional ActiveEffect that we can damage (update)
 
     // targetEntangle should belong to token
@@ -3747,6 +3747,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
         tags: defenseTags,
         targetEntangle: true,
         attackTags: getAttackTags(attackItem),
+        attackerToken: tokenEducatedGuess({ action, actor: attackItem.actor }),
         targetToken: token,
     };
 
