@@ -117,12 +117,12 @@ function extractSkills(actor, rollAlias, targetSubType) {
     }
 
     return requiredSkillNames.map((requiredSkillName) => {
-        const skillItems = findSkill(actor, requiredSkillName);
+        const skillItems = findSkills(actor, requiredSkillName);
 
         // Make sure background skill type matches the proclaimed background skill type (i.e. they asked for a PS but specified KS: xxx)
-        const skillItemsOfCorrectSubType = skillItems
-            ? [skillItems].filter((skill) => !targetSubType || skill.system.XMLID === targetSubType)
-            : [];
+        const skillItemsOfCorrectSubType = skillItems.filter(
+            (skill) => !targetSubType || skill.system.XMLID === targetSubType,
+        );
 
         return {
             name: requiredSkillName,
@@ -132,10 +132,10 @@ function extractSkills(actor, rollAlias, targetSubType) {
     });
 }
 
-function findSkill(actor, skillName) {
+function findSkills(actor, skillName) {
     const skillsToMatchAgainst = actor.items.filter(filterOutNonSkillRollItems);
 
-    return skillsToMatchAgainst.find(
+    return skillsToMatchAgainst.filter(
         (potentialMatchingSkillItem) =>
             // Case insensitive comparison
             potentialMatchingSkillItem.name.toLowerCase() === skillName.toLowerCase(),
