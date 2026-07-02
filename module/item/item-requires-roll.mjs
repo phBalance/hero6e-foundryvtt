@@ -364,9 +364,13 @@ function getRollsForRar(item, rar) {
                 console.error(error);
                 return {
                     type: RSR_ROLL_TYPE.ITEM_ROLL,
-                    name: error,
-                    activeItems: [],
-                    items: [],
+                    requiredSkills: [
+                        {
+                            name: error,
+                            activeItems: [],
+                            items: [],
+                        },
+                    ],
                 };
             }
         }
