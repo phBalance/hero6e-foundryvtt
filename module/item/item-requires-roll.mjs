@@ -6,7 +6,7 @@ import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { doSuccessRoll, emphasizeSuccessFailureFlavour, generateSuccessChatCard } from "../utility/success-card.mjs";
 import { tokenEducatedGuess } from "../utility/util.mjs";
 
-const backgroundSkillKeys = Object.freeze({
+const BACKGROUND_SKILL_KEYS = Object.freeze({
     KS: "KNOWLEDGE_SKILL",
     PS: "PROFESSIONAL_SKILL",
     SS: "SCIENCE_SKILL",
@@ -107,17 +107,18 @@ async function testOnlyUserSelectsASkill(skillArray, arrayIndex) {
  *
  * @param {HeroSystem6eActor} actor
  * @param {String} rollAlias
- * @param {String} targetSubType
+ * @param {String} targetSubtype
  *
  * @returns {Array<Object>} - Array of skill objects
  */
-function extractSkills(actor, rollAlias, targetSubType) {
+function extractSkills(actor, rollAlias, targetSubtype) {
     const variableSkillsAliasMatch = rollAlias.match(/^([\S\s]+?)((?:\s+or\s+)([\S\s]+))?$/i);
     if (variableSkillsAliasMatch == null) {
         console.error(`RSR extractSkills: ${rollAlias} didn't match regex`);
         return [
             {
                 name: rollAlias,
+                subtype: targetSubtype,
                 activeItems: [],
                 items: [],
             },
@@ -136,11 +137,12 @@ function extractSkills(actor, rollAlias, targetSubType) {
 
         // Make sure background skill type matches the proclaimed background skill type (i.e. they asked for a PS but specified KS: xxx)
         const skillItemsOfCorrectSubType = skillItems.filter(
-            (skill) => !targetSubType || skill.system.XMLID === targetSubType,
+            (skill) => !targetSubtype || skill.system.XMLID === targetSubtype,
         );
 
         return {
             name: requiredSkillName,
+            subtype: targetSubtype,
             activeItems: skillItemsOfCorrectSubType.filter((skill) => skill.isActive),
             items: skillItemsOfCorrectSubType,
         };
@@ -210,7 +212,7 @@ function calculateRollApPenalty(item, rar) {
     return roundFavorPlayerTowardsZero(item.activePoints / divisor);
 }
 
-function normalizeTypeAndRollTarget(type, skillOrCharacteristic) {
+function normalize5eTypeAndRollTarget(type, skillOrCharacteristic) {
     return {
         type: TYPE_TO_ROLL_TYPE[type] ?? `type ${type} not translated properly`,
         target: skillOrCharacteristic.trim(),
@@ -225,7 +227,7 @@ function normalizeTypeAndRollTarget(type, skillOrCharacteristic) {
  * @param {HeroSystem6eItem} item
  * @param {HeroModifierModel} rar
  *
- * @returns {Object[]}
+ * @returns {Object[]} - rolls required to fulfill the RAR in an intermediate format
  */
 function getRollsForRar(item, rar) {
     const rollsToGenerate = [];
@@ -258,15 +260,15 @@ function getRollsForRar(item, rar) {
         else if (rar.OPTIONID === "TWOROLLS") {
             // This can be a variable roll where the user gets to decide between 2 provided rolls - potentially for each of the rolls.
             // If this is the case, it will have rar.adder[].XMLID === "VARIABLERSR" somewhere. All options, however, are jammed into the rar.
-            rollsToGenerate.push(normalizeTypeAndRollTarget(rar.TYPE, rar.ROLLALIAS || rar.CHARACTERISTIC));
-            rollsToGenerate.push(normalizeTypeAndRollTarget(rar.TYPE2, rar.ROLLALIAS2 || rar.CHARACTERISTIC2));
+            rollsToGenerate.push(normalize5eTypeAndRollTarget(rar.TYPE, rar.ROLLALIAS || rar.CHARACTERISTIC));
+            rollsToGenerate.push(normalize5eTypeAndRollTarget(rar.TYPE2, rar.ROLLALIAS2 || rar.CHARACTERISTIC2));
         }
 
         // 5e 1 roll
         else if (rar.OPTIONID === "BASICRSR") {
             // This can be a variable roll where the user gets to decide between 2 provided rolls.
             // If this is the case, it will have rar.adder[].XMLID === "VARIABLERSR" somewhere. All options, however, are jammed into the rar.
-            rollsToGenerate.push(normalizeTypeAndRollTarget(rar.TYPE, rar.ROLLALIAS || rar.CHARACTERISTIC));
+            rollsToGenerate.push(normalize5eTypeAndRollTarget(rar.TYPE, rar.ROLLALIAS || rar.CHARACTERISTIC));
         }
 
         // PH: FIXME: OPTIONID= attack roll?
@@ -304,11 +306,11 @@ function getRollsForRar(item, rar) {
             rar.OPTIONID === "SS1PER5" ||
             rar.OPTIONID === "SS1PER20"
         ) {
-            const backgroundSkillSubtype = backgroundSkillKeys[rar.OPTIONID.substring(0, 2)];
+            const backgroundSkillSubtype = BACKGROUND_SKILL_KEYS[rar.OPTIONID.substring(0, 2)];
 
             rollsToGenerate.push({
                 type: RSR_ROLL_CATEGORY.BACKGROUNDSKILL,
-                subType: backgroundSkillSubtype,
+                subtype: backgroundSkillSubtype,
                 target: rar.COMMENTS,
             });
         }
@@ -345,7 +347,7 @@ function getRollsForRar(item, rar) {
 
             case RSR_ROLL_CATEGORY.BACKGROUNDSKILL:
             case RSR_ROLL_CATEGORY.SKILL: {
-                const requiredSkills = extractSkills(item.actor, rollToGenerate.target, rollToGenerate.subType);
+                const requiredSkills = extractSkills(item.actor, rollToGenerate.target, rollToGenerate.subtype);
 
                 return {
                     type: RSR_ROLL_TYPE.ITEM_ROLL,
@@ -365,6 +367,7 @@ function getRollsForRar(item, rar) {
                     requiredSkills: [
                         {
                             name: "PERCEPTION",
+                            subtype: null,
                             activeItems: item.actor.items.filter(
                                 (item) => item.system.XMLID === "PERCEPTION" && item.isActive,
                             ),
@@ -382,6 +385,7 @@ function getRollsForRar(item, rar) {
                     requiredSkills: [
                         {
                             name: error,
+                            subtype: null,
                             activeItems: [],
                             items: [],
                         },
