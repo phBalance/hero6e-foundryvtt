@@ -3355,6 +3355,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         // misc
         tags: defenseTags.filter((o) => !o.options?.knockback),
         attackTags: getAttackTags(item),
+        attackerToken: tokenEducatedGuess({ action, actor: item.actor }),
         targetTokenDocument: targetToken?.document ?? targetToken,
         actionData: actionToJSON(action),
         showRemovePowerFromAutomaton: hasStun1 && damageDetail.body > 0,
