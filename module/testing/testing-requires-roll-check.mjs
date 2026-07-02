@@ -2049,10 +2049,12 @@ export function registerRequiresRollCheckTests(quench) {
                             expect(heroValidation).to.have.deep.members([]);
                         });
 
-                        it("should have no heroValidation concerns as the character does have listed background skills (success)", function () {
+                        it("should have a heroValidation info concerns as the character does have listed background skills but 2 required skill rolls is a GM permission modifier (success)", function () {
                             const heroValidation =
                                 aidRequiresKsSandwichesAndKsPotatoChipsWith1Per5ApPenalty.heroValidation;
-                            expect(heroValidation).to.have.deep.members([]);
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.INFO);
                         });
 
                         it("should have a heroValidation error as the character does not have a listed background skill name (error)", function () {
@@ -2083,25 +2085,24 @@ export function registerRequiresRollCheckTests(quench) {
                             expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
-                        it.skip("should not have a heroValidation error as the character does have one of the 2 required listed skills (has breakfall -> success)", function () {
-                            const heroValidation = aidRequiresBreakfallOrAcrobaticsWith1Per10ApPenalty.heroValidation;
-                            expect(heroValidation).to.have.deep.members([]);
-                        });
-
-                        it.skip("should have an warning that allowing 2 required skills requires GM permission");
-
-                        it("should have a heroValidation error as the character does not have one of the 2 required listed skills (error)", function () {
+                        it("should not have a heroValidation error as the character does have one of the 2 required listed skills (has breakfall -> success)", function () {
                             const heroValidation = invalidDrainMissingOneSkillFromTwoRequiredSkills.heroValidation;
-                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation.length).to.equal(2);
                             expect(heroValidation[0]).to.have.property("severity");
-                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.INFO);
+                            expect(heroValidation[1]).to.have.property("severity");
+                            expect(heroValidation[1].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
                         it("should have a heroValidation error as the character does not have either of the 2 required listed skills (error)", function () {
                             const heroValidation = invalidDrainMissingBothSkillsFromTwoRequiredSkills.heroValidation;
-                            expect(heroValidation.length).to.equal(2);
+                            expect(heroValidation.length).to.equal(3);
                             expect(heroValidation[0]).to.have.property("severity");
-                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.INFO);
+                            expect(heroValidation[1]).to.have.property("severity");
+                            expect(heroValidation[1].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                            expect(heroValidation[2]).to.have.property("severity");
+                            expect(heroValidation[2].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
                         it("should have a heroValidation error as the character has an AP penalty with their listed luck power (warning)", function () {

@@ -774,6 +774,15 @@ export function requiresRollHeroValidation(modifier, item) {
     const validations = [];
     const activationRolls = getRollsForRar(item, modifier);
 
+    // 5e 2 rolls requires GM permission
+    if (activationRolls.length >= 2) {
+        validations.push({
+            message: `2 required skill rolls requires GM permission.`,
+            severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
+            modifierID: modifier.ID,
+        });
+    }
+
     // Does the actor have the required powers/skills for the roll?
     for (const activationRoll of activationRolls) {
         // Only naked success rolls can be without a skill
