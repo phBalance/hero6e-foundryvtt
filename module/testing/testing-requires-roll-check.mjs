@@ -2674,7 +2674,7 @@ export function registerRequiresRollCheckTests(quench) {
                                 <LIST XMLID="GENERIC_OBJECT" ID="1779049938892" BASECOST="0.0" LEVELS="0" ALIAS="Skills for Requires" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                                 <NOTES />
                                 </LIST>
-                                <SKILL XMLID="BREAKFALL" ID="1779049571841" BASECOST="3.0" LEVELS="0" ALIAS="Breakfall" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779049938892" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                                <SKILL XMLID="BREAKFALL" ID="1779049571841" BASECOST="3.0" LEVELS="3" ALIAS="Breakfall" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779049938892" NAME="" CHARACTERISTIC="DEX" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
                                 <NOTES />
                                 </SKILL>
                                 <SKILL XMLID="KNOWLEDGE_SKILL" ID="1779049489120" BASECOST="2.0" LEVELS="0" ALIAS="KS" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779049938892" NAME="" INPUT="sardines" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No" TYPE="General">
@@ -2684,6 +2684,9 @@ export function registerRequiresRollCheckTests(quench) {
                                 <NOTES />
                                 </SKILL>
                                 <SKILL XMLID="SCIENCE_SKILL" ID="1779049551025" BASECOST="2.0" LEVELS="0" ALIAS="Science Skill" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779049938892" NAME="" INPUT="xenobotany" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
+                                <NOTES />
+                                </SKILL>
+                                <SKILL XMLID="SCIENCE_SKILL" ID="1783012869110" BASECOST="2.0" LEVELS="3" ALIAS="Science Skill" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1779049938892" NAME="" INPUT="toothbrush chemistry" CHARACTERISTIC="GENERAL" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No">
                                 <NOTES />
                                 </SKILL>
                             </SKILLS>
@@ -2973,6 +2976,18 @@ export function registerRequiresRollCheckTests(quench) {
                                     </ADDER>
                                 </MODIFIER>
                                 </POWER>
+                                <POWER XMLID="ENERGYBLAST" ID="1783012574357" BASECOST="0.0" LEVELS="6" ALIAS="Blast" POSITION="42" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777340991275" NAME="Requires A Science Skill: xenobotany Roll or Science Skill: Toothbrush chemistry Every Use With -1 Per 5 AP" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1783013638139" BASECOST="-0.75" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SS1PER5" OPTIONID="SS1PER5" OPTION_ALIAS="SS roll, -1 per 5 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Science Skill: xenobotany or Science Skill: Toothbrush Chemistry" PRIVATE="No" FORCEALLOW="No">
+                                    <NOTES />
+                                    <ADDER XMLID="EVERYPHASE" ID="1783013640401" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="CHOOSE" ID="1783013640402" BASECOST="0.25" LEVELS="0" ALIAS="Can choose which of two rolls to make from use to use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                    <NOTES />
+                                    </ADDER>
+                                </MODIFIER>
+                                </POWER>
                                 <LIST XMLID="GENERIC_OBJECT" ID="1777427222004" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="35" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
                                 <NOTES />
                                 </LIST>
@@ -3039,6 +3054,63 @@ export function registerRequiresRollCheckTests(quench) {
                                     </ADDER>
                                 </MODIFIER>
                                 </POWER>
+                                <POWER XMLID="DARKNESS" ID="1782963999807" BASECOST="0.0" LEVELS="16" ALIAS="Darkness" POSITION="50" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777427224302" NAME="Requires An Interrogation or Breakfall Every Phase With -1 Per 20 AP But Specified Doesn't Have Interrogation Skill" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                    <NOTES />
+                                    <ADDER XMLID="HEARINGGROUP" ID="1782964153143" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                    <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1782964153180" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL1PER20" OPTIONID="SKILL1PER20" OPTION_ALIAS="Skill roll, -1 per 20 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Interrogation or Breakfall" PRIVATE="No" FORCEALLOW="No">
+                                        <NOTES />
+                                        <ADDER XMLID="EVERYPHASE" ID="1782964177321" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                        </ADDER>
+                                        <ADDER XMLID="CHOOSE" ID="1782964177322" BASECOST="0.25" LEVELS="0" ALIAS="Can choose which of two rolls to make from use to use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                        </ADDER>
+                                    </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="DARKNESS" ID="1782964126700" BASECOST="0.0" LEVELS="16" ALIAS="Darkness" POSITION="51" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777427224302" NAME="Requires An Interrogation or Armourer Every Phase With -1 Per 20 AP But Specified Doesn't Have Either Skill" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                    <NOTES />
+                                    <ADDER XMLID="HEARINGGROUP" ID="1782964198492" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                    <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1782964198529" BASECOST="-0.25" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SKILL1PER20" OPTIONID="SKILL1PER20" OPTION_ALIAS="Skill roll, -1 per 20 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Interrogation or Armourer" PRIVATE="No" FORCEALLOW="No">
+                                        <NOTES />
+                                        <ADDER XMLID="EVERYPHASE" ID="1782964198493" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                        </ADDER>
+                                        <ADDER XMLID="CHOOSE" ID="1782964198494" BASECOST="0.25" LEVELS="0" ALIAS="Can choose which of two rolls to make from use to use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                        </ADDER>
+                                    </MODIFIER>
+                                </POWER>
+                                <POWER XMLID="DARKNESS" ID="1783012369751" BASECOST="0.0" LEVELS="7" ALIAS="Darkness" POSITION="52" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SIGHTGROUP" OPTIONID="SIGHTGROUP" OPTION_ALIAS="Sight Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1777427224302" NAME="Requires A Science Skill: xenobotany Roll or Breakfall Every Use With -1 Per 5 AP But Breakfall Is Not A Background Skill" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                                    <NOTES />
+                                    <ADDER XMLID="SMELLGROUP" ID="1783012703701" BASECOST="5.0" LEVELS="0" ALIAS="Smell/Taste Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="MENTALGROUP" ID="1783012703702" BASECOST="5.0" LEVELS="0" ALIAS="Mental Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="HEARINGGROUP" ID="1783012703703" BASECOST="5.0" LEVELS="0" ALIAS="Hearing Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="RADIOGROUP" ID="1783012703704" BASECOST="5.0" LEVELS="0" ALIAS="Radio Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                    <ADDER XMLID="TOUCHGROUP" ID="1783012703705" BASECOST="5.0" LEVELS="0" ALIAS="Touch Group" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="-1.0" LVLVAL="-1.0" SELECTED="YES">
+                                        <NOTES />
+                                    </ADDER>
+                                    <MODIFIER XMLID="REQUIRESASKILLROLL" ID="1783012703742" BASECOST="-0.75" LEVELS="0" ALIAS="Requires A Roll" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SS1PER5" OPTIONID="SS1PER5" OPTION_ALIAS="SS roll, -1 per 5 Active Points modifier" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Science Skill: xenobotany or Breakfall" PRIVATE="No" FORCEALLOW="No">
+                                        <NOTES />
+                                        <ADDER XMLID="EVERYPHASE" ID="1783012703706" BASECOST="-0.5" LEVELS="0" ALIAS="Must be made each Phase/use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                        </ADDER>
+                                        <ADDER XMLID="CHOOSE" ID="1783012703707" BASECOST="0.25" LEVELS="0" ALIAS="Can choose which of two rolls to make from use to use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES">
+                                        <NOTES />
+                                        </ADDER>
+                                    </MODIFIER>
+                                </POWER>
                             </POWERS>
                             <DISADVANTAGES />
                             <EQUIPMENT />
@@ -3080,12 +3152,16 @@ export function registerRequiresRollCheckTests(quench) {
                     let ebRequiresSsXenobotanyEachUseWith1Per20ApPenalty;
                     let ebRequiresSsXenobotanyEachUseWith1Per10ApPenalty;
                     let ebRequiresSsXenobotanyEachUseWith1Per5ApPenalty;
+                    let ebRequiresSsXenobotanyOrSsToothbrushChemistryEachUseWith1Per5ApPenalty;
 
                     let darknessRequiresPsEachUseWith1Per20ApPenaltyButGivenKsBackgroundSkill;
                     let darknessRequiresKsFrootLoopsButDoesNotHaveKsBackgroundSkill;
                     let darknessRequiresPsFungusDemonstratorButDoesNotHavePsBackgroundSkill;
                     let darknessRequiresSsBatteriesButDoesNotHaveSsBackgroundSkill;
                     let darknessRequiresInterrogationButDoesNotHaveInterogationSkill;
+                    let darknessRequiresInterrogationOrBreakfallButDoesNotHaveInterogationSkill;
+                    let darknessRequiresInterrogationOrArmourerButDoesNotHaveInterogationOrAmourerSkill;
+                    let darknessRequiresSsXenobotanyOrBreakfallEachUseWith1Per5ApPenaltyButBreakfallIsNotABackgroundSkill;
 
                     before(async function () {
                         actor = await createQuenchActor({ quench: this, contents, is5e: false });
@@ -3185,6 +3261,11 @@ export function registerRequiresRollCheckTests(quench) {
                             (item) =>
                                 item.name === "Requires A Science Skill: xenobotany Roll Every Use With -1 Per 5 AP",
                         );
+                        ebRequiresSsXenobotanyOrSsToothbrushChemistryEachUseWith1Per5ApPenalty = actor.items.find(
+                            (item) =>
+                                item.name ===
+                                "Requires A Science Skill: xenobotany Roll or Science Skill: Toothbrush chemistry Every Use With -1 Per 5 AP",
+                        );
 
                         darknessRequiresPsEachUseWith1Per20ApPenaltyButGivenKsBackgroundSkill = actor.items.find(
                             (item) =>
@@ -3210,6 +3291,23 @@ export function registerRequiresRollCheckTests(quench) {
                                 item.name ===
                                 "Requires An Interrogation Every Phase With -1 Per 20 AP But Specified Doesn't Have Skill",
                         );
+                        darknessRequiresInterrogationOrBreakfallButDoesNotHaveInterogationSkill = actor.items.find(
+                            (item) =>
+                                item.name ===
+                                "Requires An Interrogation or Breakfall Every Phase With -1 Per 20 AP But Specified Doesn't Have Interrogation Skill",
+                        );
+                        darknessRequiresInterrogationOrArmourerButDoesNotHaveInterogationOrAmourerSkill =
+                            actor.items.find(
+                                (item) =>
+                                    item.name ===
+                                    "Requires An Interrogation or Armourer Every Phase With -1 Per 20 AP But Specified Doesn't Have Either Skill",
+                            );
+                        darknessRequiresSsXenobotanyOrBreakfallEachUseWith1Per5ApPenaltyButBreakfallIsNotABackgroundSkill =
+                            actor.items.find(
+                                (item) =>
+                                    item.name ===
+                                    "Requires A Science Skill: xenobotany Roll or Breakfall Every Use With -1 Per 5 AP But Breakfall Is Not A Background Skill",
+                            );
                     });
 
                     after(async function () {
@@ -3305,6 +3403,11 @@ export function registerRequiresRollCheckTests(quench) {
                             });
                             it("should have the correct cost for SS: xenobotany roll every phase with -1 per 5 AP", async function () {
                                 expect(ebRequiresSsXenobotanyEachUseWith1Per5ApPenalty.realCost).to.equal(13);
+                            });
+                            it("should have the correct cost for SS: xenobotany or Breakfall roll every phase with -1 per 5 AP (variable roll)", async function () {
+                                expect(
+                                    ebRequiresSsXenobotanyOrSsToothbrushChemistryEachUseWith1Per5ApPenalty.realCost,
+                                ).to.equal(15);
                             });
                         });
                     });
@@ -3408,11 +3511,30 @@ export function registerRequiresRollCheckTests(quench) {
                             expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
+                        it("should have a heroValidation error as the character does not have one (Interrogation) skills (error)", function () {
+                            const heroValidation =
+                                darknessRequiresInterrogationOrBreakfallButDoesNotHaveInterogationSkill.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
+                        it("should have a heroValidation error as the character does not have two (Interrogation and Armourer) skills (error)", function () {
+                            const heroValidation =
+                                darknessRequiresInterrogationOrArmourerButDoesNotHaveInterogationOrAmourerSkill.heroValidation;
+                            expect(heroValidation.length).to.equal(2);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                        });
+
                         it("should have no heroValidation error as the character has STR (success)", function () {
                             const heroValidation = ebRequiresStrRollEachUseWith1Per10ApPenalty.heroValidation;
                             expect(heroValidation).to.have.deep.members([]);
                         });
 
+                        // PH: FIXME: Support these through different actor types (see 5e tests)
                         it.skip("should have a heroValidation error as the character does not have the listed characteristic", function () {});
                         it.skip("should have a heroValidation error as the character does not have perception", function () {});
                         it.skip("should have a heroValidation error as the character cannot make attack rolls (error)", function () {});
@@ -3726,7 +3848,7 @@ export function registerRequiresRollCheckTests(quench) {
 
                     describe("skill rolls", function () {
                         describe("RSR with skill roll and a -1 per 5 AP penalty", function () {
-                            it("should activate with a roll of 3 (against 11- with -6 AP penalty) for activation", async function () {
+                            it("should activate with a roll of 3 (against 14- with -6 AP penalty) for activation", async function () {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         ebRequiresBreakfallEachUseWith1Per5ApPenaltly,
@@ -3735,20 +3857,20 @@ export function registerRequiresRollCheckTests(quench) {
                                     ),
                                 ).to.equal(true);
                             });
-                            it("should activate with a roll of 5 (against 11- with -6 AP penalty) for activation", async function () {
+                            it("should activate with a roll of 8 (against 14- with -6 AP penalty) for activation", async function () {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         ebRequiresBreakfallEachUseWith1Per5ApPenaltly,
-                                        resetDiceClass(Roll5On3Dice),
+                                        resetDiceClass(Roll8On3Dice),
                                         {},
                                     ),
                                 ).to.equal(true);
                             });
-                            it("should fail to activate with a roll of 6 (against 11- with -6 AP penalty) for activation", async function () {
+                            it("should fail to activate with a roll of 9 (against 14- with -6 AP penalty) for activation", async function () {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         ebRequiresBreakfallEachUseWith1Per5ApPenaltly,
-                                        resetDiceClass(Roll6On3Dice),
+                                        resetDiceClass(Roll9On3Dice),
                                         {},
                                     ),
                                 ).to.equal(false);
@@ -3756,7 +3878,7 @@ export function registerRequiresRollCheckTests(quench) {
                         });
 
                         describe("RSR with skill roll and a -1 per 10 AP penalty", function () {
-                            it("should activate with a roll of 3 (against 11- with -3 AP penalty) for activation", async function () {
+                            it("should activate with a roll of 3 (against 14- with -3 AP penalty) for activation", async function () {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         ebRequiresBreakfallEachUseWith1Per10ApPenaltly,
@@ -3765,20 +3887,20 @@ export function registerRequiresRollCheckTests(quench) {
                                     ),
                                 ).to.equal(true);
                             });
-                            it("should activate with a roll of 8 (against 11- with -3 AP penalty) for activation", async function () {
+                            it("should activate with a roll of 11 (against 14- with -3 AP penalty) for activation", async function () {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         ebRequiresBreakfallEachUseWith1Per10ApPenaltly,
-                                        resetDiceClass(Roll8On3Dice),
+                                        resetDiceClass(Roll11On3Dice),
                                         {},
                                     ),
                                 ).to.equal(true);
                             });
-                            it("should fail to activate with a roll of 9 (against 11- with -3 AP penalty) for activation", async function () {
+                            it("should fail to activate with a roll of 12 (against 14- with -3 AP penalty) for activation", async function () {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         ebRequiresBreakfallEachUseWith1Per10ApPenaltly,
-                                        resetDiceClass(Roll9On3Dice),
+                                        resetDiceClass(Roll12On3Dice),
                                         {},
                                     ),
                                 ).to.equal(false);
@@ -3786,29 +3908,29 @@ export function registerRequiresRollCheckTests(quench) {
                         });
 
                         describe("RSR with skill roll and a -1 per 20 AP penalty", function () {
-                            it("should activate with a roll of 9 (against 11- with -1 AP penalty) for activation", async function () {
+                            it("should activate with a roll of 12 (against 14- with -1 AP penalty) for activation", async function () {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         ebRequiresBreakfallEachUseWith1Per20ApPenaltly,
-                                        resetDiceClass(Roll9On3Dice),
+                                        resetDiceClass(Roll12On3Dice),
                                         {},
                                     ),
                                 ).to.equal(true);
                             });
-                            it("should activate with a roll of 9 (against 11- with -1 AP penalty) for activation", async function () {
+                            it("should activate with a roll of 13 (against 14- with -1 AP penalty) for activation", async function () {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         ebRequiresBreakfallEachUseWith1Per20ApPenaltly,
-                                        resetDiceClass(Roll10On3Dice),
+                                        resetDiceClass(Roll13On3Dice),
                                         {},
                                     ),
                                 ).to.equal(true);
                             });
-                            it("should fail to activate with a roll of 10 (against 11- with -1 AP penalty) for activation", async function () {
+                            it("should fail to activate with a roll of 14 (against 14- with -1 AP penalty) for activation", async function () {
                                 expect(
                                     await isActivatedForThisUse_TestingOnly(
                                         ebRequiresBreakfallEachUseWith1Per20ApPenaltly,
-                                        resetDiceClass(Roll11On3Dice),
+                                        resetDiceClass(Roll14On3Dice),
                                         {},
                                     ),
                                 ).to.equal(false);
@@ -3962,6 +4084,48 @@ export function registerRequiresRollCheckTests(quench) {
                                         ebRequiresSsXenobotanyEachUseWith1Per5ApPenalty,
                                         resetDiceClass(Roll6On3Dice),
                                         {},
+                                    ),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe("RSR with Science Skill: xenobotany Roll or Science Skill: Toothbrush Chemistry and a -1 per 5 AP penalty", function () {
+                            it("should activate SS: xenobotany with a 5 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresSsXenobotanyOrSsToothbrushChemistryEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll5On3Dice),
+                                        { test: { variableSelectIndex: 0 } },
+                                    ),
+                                ).to.equal(true);
+                            });
+
+                            it("should not activate SS: xenobotany with a 6 (against 11- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresSsXenobotanyOrSsToothbrushChemistryEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll6On3Dice),
+                                        { test: { variableSelectIndex: 0 } },
+                                    ),
+                                ).to.equal(false);
+                            });
+
+                            it("should activate Science Skill: Toothbrush Chemistry with an 8 (against 14- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresSsXenobotanyOrSsToothbrushChemistryEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll8On3Dice),
+                                        { test: { variableSelectIndex: 1 } },
+                                    ),
+                                ).to.equal(true);
+                            });
+
+                            it("should not activate Science Skill: Toothbrush Chemistry with an 9 (against 14- with -6 AP penalty) for activation", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        ebRequiresSsXenobotanyOrSsToothbrushChemistryEachUseWith1Per5ApPenalty,
+                                        resetDiceClass(Roll9On3Dice),
+                                        { test: { variableSelectIndex: 1 } },
                                     ),
                                 ).to.equal(false);
                             });
