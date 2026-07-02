@@ -50,7 +50,7 @@ function filterOutNonSkillRollItems(item) {
 
 /**
  * Narrow down an array of skills to the one chosen skill.
- * If there is just one skill in the array (a non variable RSR) then it's simple.
+ * If there is just one skill in the array (a non variable RSR) then it's simple and you shouldn't call this function.
  * If there are more than one skill, then prompt the user and have them decide.
  *
  * @param {Array<Object>} skillArray
@@ -83,6 +83,21 @@ async function userSelectsASkill(skillArray) {
         rejectClose: false, // returns null instead of throwing if the user closes the dialog
     });
 
+    // null is returned if the user is closing the dialog.
+    return arrayIndex == null ? null : skillArray[arrayIndex];
+}
+
+/**
+ * Test Only version of userSelectsASkill: Narrow down an array of skills to the one chosen skill.
+ * If there is just one skill in the array (a non variable RSR) then it's simple.
+ * If there are more than one skill, then prompt the user and have them decide.
+ *
+ * @param {Array<Object>} skillArray
+ * @param {Number | null} selectedIndex
+ *
+ * @returns {Object | null} - returns the info about the item that is selected or null if the user has chosen to cancel the operation at this point by closing the dialog.
+ */
+async function testOnlyUserSelectsASkill(skillArray, arrayIndex) {
     // null is returned if the user is closing the dialog.
     return arrayIndex == null ? null : skillArray[arrayIndex];
 }
@@ -496,9 +511,12 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
     // Make sure all skill items require for the activation roll(s) exist on this character and are active before attempting
     // any rolls.
     for (const activationRoll of activationRolls) {
-        // If this is a variable skill roll (i.e. choosing between two skills depending on the situation), have the user select the chosen skill before the resources are paid.
+        // If this is a variable skill roll (i.e. user choosing between two skills depending on the situation), have the user select the chosen skill before the resources are paid.
         if (activationRoll.type === RSR_ROLL_TYPE.ITEM_ROLL && activationRoll.requiredSkills.length > 1) {
-            const requiredSkill = await userSelectsASkill(activationRoll.requiredSkills);
+            const requiredSkill =
+                options?.test?.variableSelectIndex === undefined
+                    ? await userSelectsASkill(activationRoll.requiredSkills)
+                    : await testOnlyUserSelectsASkill(activationRoll.requiredSkills, options.test.variableSelectIndex);
 
             // Has the user cancelled the action at this point?
             if (requiredSkill == null) {
@@ -534,7 +552,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
         }
     }
 
-    // PH: FIXME: Need to pay the resource cost of this skill/etc
+    // PH: FIXME: Need to pay the activation resource cost of the RAR skills/char/etc
 
     // Perform the rolls. Because a roll might consume resources we must perform all rolls (i.e. invoke all skills etc)
     // and then evaluate if there was success.

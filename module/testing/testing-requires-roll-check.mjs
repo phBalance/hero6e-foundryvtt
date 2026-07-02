@@ -2049,6 +2049,11 @@ export function registerRequiresRollCheckTests(quench) {
                             expect(heroValidation).to.have.deep.members([]);
                         });
 
+                        it("should have no heroValidation concerns as the character does have both listed variable skill choices (success)", function () {
+                            const heroValidation = aidRequiresBreakfallOrAcrobaticsWith1Per10ApPenalty.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
                         it("should have a heroValidation info concerns as the character does have listed background skills but 2 required skill rolls is a GM permission modifier (success)", function () {
                             const heroValidation =
                                 aidRequiresKsSandwichesAndKsPotatoChipsWith1Per5ApPenalty.heroValidation;
@@ -2185,7 +2190,47 @@ export function registerRequiresRollCheckTests(quench) {
 
                     describe.skip("RSR with skill vs skill contest", function () {});
 
-                    describe.skip("RSR with 1 of 2 skill rolls", function () {});
+                    describe("RSR with 1 of 2 skill rolls", function () {
+                        it("should succeed to activate with the selection of the first skill (breakfall) with a roll of 13 + 1", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequiresBreakfallOrAcrobaticsWith1Per10ApPenalty,
+                                    resetDiceClass(Roll13On3Dice),
+                                    { test: { variableSelectIndex: 0 } },
+                                ),
+                            ).to.equal(true);
+                        });
+
+                        it("should fail to activate with the selection of the first skill (breakfall) with a roll of 14 + 1", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequiresBreakfallOrAcrobaticsWith1Per10ApPenalty,
+                                    resetDiceClass(Roll14On3Dice),
+                                    { test: { variableSelectIndex: 0 } },
+                                ),
+                            ).to.equal(false);
+                        });
+
+                        it("should succeed to activate with the selection of the second skill (acrobatics) with a roll of 10 + 1", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequiresBreakfallOrAcrobaticsWith1Per10ApPenalty,
+                                    resetDiceClass(Roll10On3Dice),
+                                    { test: { variableSelectIndex: 1 } },
+                                ),
+                            ).to.equal(true);
+                        });
+
+                        it("should fail to activate with the selection of the second skill (acrobatics) with a roll of 11 + 1", async function () {
+                            expect(
+                                await isActivatedForThisUse_TestingOnly(
+                                    aidRequiresBreakfallOrAcrobaticsWith1Per10ApPenalty,
+                                    resetDiceClass(Roll11On3Dice),
+                                    { test: { variableSelectIndex: 1 } },
+                                ),
+                            ).to.equal(false);
+                        });
+                    });
 
                     describe("RSR with both of 2 skill rolls", function () {
                         it("should activate with a roll of 11 (against 11- w/ 0 for AP penalty for KS: sandwiches and 12- w/ 0 for AP penalty for KS: potato chips) for activation", async function () {
