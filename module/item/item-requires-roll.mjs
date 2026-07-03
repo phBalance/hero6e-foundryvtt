@@ -6,10 +6,10 @@ import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { doSuccessRoll, emphasizeSuccessFailureFlavour, generateSuccessChatCard } from "../utility/success-card.mjs";
 import { tokenEducatedGuess } from "../utility/util.mjs";
 
-const BACKGROUND_SKILL_KEYS = Object.freeze({
-    KS: "KNOWLEDGE_SKILL",
-    PS: "PROFESSIONAL_SKILL",
-    SS: "SCIENCE_SKILL",
+const BACKGROUND_SKILL_XMLID_TO_KEY = Object.freeze({
+    KNOWLEDGE_SKILL: "KS",
+    PROFESSIONAL_SKILL: "PS",
+    SCIENCE_SKILL: "SS",
 });
 
 const RSR_ROLL_TYPE = Object.freeze({
@@ -107,18 +107,18 @@ async function testOnlyUserSelectsASkill(skillArray, arrayIndex) {
  *
  * @param {HeroSystem6eActor} actor
  * @param {String} rollAlias
- * @param {String} targetSubtype
+ * @param {Boolean} wantBackgroundSkill
  *
  * @returns {Array<Object>} - Array of skill objects
  */
-function extractSkills(actor, rollAlias, targetSubtype) {
+function extractSkills(actor, rollAlias, wantBackgroundSkill) {
     const variableSkillsAliasMatch = rollAlias.match(/^([\S\s]+?)((?:\s+or\s+)([\S\s]+))?$/i);
     if (variableSkillsAliasMatch == null) {
         console.error(`RSR extractSkills: ${rollAlias} didn't match regex`);
         return [
             {
                 name: rollAlias,
-                subtype: targetSubtype,
+                wantBackgroundSkill: wantBackgroundSkill,
                 activeItems: [],
                 items: [],
             },
@@ -135,16 +135,11 @@ function extractSkills(actor, rollAlias, targetSubtype) {
     return requiredSkillNames.map((requiredSkillName) => {
         const skillItems = findSkills(actor, requiredSkillName);
 
-        // Make sure background skill type matches the proclaimed background skill type (i.e. they asked for a PS but specified KS: xxx)
-        const skillItemsOfCorrectSubType = skillItems.filter(
-            (skill) => !targetSubtype || skill.system.XMLID === targetSubtype,
-        );
-
         return {
             name: requiredSkillName,
-            subtype: targetSubtype,
-            activeItems: skillItemsOfCorrectSubType.filter((skill) => skill.isActive),
-            items: skillItemsOfCorrectSubType,
+            wantBackgroundSkill: wantBackgroundSkill,
+            activeItems: skillItems.filter((skill) => skill.isActive),
+            items: skillItems,
         };
     });
 }
@@ -152,10 +147,9 @@ function extractSkills(actor, rollAlias, targetSubtype) {
 function findSkills(actor, skillName) {
     const skillsToMatchAgainst = actor.items.filter(filterOutNonSkillRollItems);
 
+    // Case insensitive comparison
     return skillsToMatchAgainst.filter(
-        (potentialMatchingSkillItem) =>
-            // Case insensitive comparison
-            potentialMatchingSkillItem.name.toLowerCase() === skillName.toLowerCase(),
+        (potentialMatchingSkillItem) => potentialMatchingSkillItem.name.toLowerCase() === skillName.toLowerCase(),
     );
 }
 
@@ -271,7 +265,7 @@ function getRollsForRar(item, rar) {
             rollsToGenerate.push(normalize5eTypeAndRollTarget(rar.TYPE, rar.ROLLALIAS || rar.CHARACTERISTIC));
         }
 
-        // PH: FIXME: OPTIONID= attack roll?
+        // FIXME: OPTIONID= attack roll doesn't seem to exist in HDC but does in the 5e rules (although it's not well defined). It does exist in 6e
 
         // 5e Unknown OPTIONID
         else {
@@ -306,11 +300,8 @@ function getRollsForRar(item, rar) {
             rar.OPTIONID === "SS1PER5" ||
             rar.OPTIONID === "SS1PER20"
         ) {
-            const backgroundSkillSubtype = BACKGROUND_SKILL_KEYS[rar.OPTIONID.substring(0, 2)];
-
             rollsToGenerate.push({
                 type: RSR_ROLL_CATEGORY.BACKGROUNDSKILL,
-                subtype: backgroundSkillSubtype,
                 target: rar.COMMENTS,
             });
         }
@@ -347,7 +338,11 @@ function getRollsForRar(item, rar) {
 
             case RSR_ROLL_CATEGORY.BACKGROUNDSKILL:
             case RSR_ROLL_CATEGORY.SKILL: {
-                const requiredSkills = extractSkills(item.actor, rollToGenerate.target, rollToGenerate.subtype);
+                const requiredSkills = extractSkills(
+                    item.actor,
+                    rollToGenerate.target,
+                    rollToGenerate.type === RSR_ROLL_CATEGORY.BACKGROUNDSKILL,
+                );
 
                 return {
                     type: RSR_ROLL_TYPE.ITEM_ROLL,
@@ -367,7 +362,7 @@ function getRollsForRar(item, rar) {
                     requiredSkills: [
                         {
                             name: "PERCEPTION",
-                            subtype: null,
+                            wantBackgroundSkill: false,
                             activeItems: item.actor.items.filter(
                                 (item) => item.system.XMLID === "PERCEPTION" && item.isActive,
                             ),
@@ -385,7 +380,7 @@ function getRollsForRar(item, rar) {
                     requiredSkills: [
                         {
                             name: error,
-                            subtype: null,
+                            wantBackgroundSkill: false,
                             activeItems: [],
                             items: [],
                         },
@@ -817,11 +812,28 @@ export function requiresRollHeroValidation(modifier, item) {
                         severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                         modifierID: modifier.ID,
                     });
+                } else {
+                    // Do we have a cost mismatch between how the power was built and how it should have been built?
+                    // PH: FIXME: has the same logic as evaluation that we only look at the first activeItem
+                    const activeItemXmlid = requiredSkill.activeItems[0].system.XMLID;
+                    const isActiveItemBackgroundSkill = !!BACKGROUND_SKILL_XMLID_TO_KEY[activeItemXmlid];
+                    if (requiredSkill.wantBackgroundSkill !== isActiveItemBackgroundSkill) {
+                        if (!requiredSkill.wantBackgroundSkill) {
+                            validations.push({
+                                message: `The requires a skill roll limitation was not bought using the background skill adder but ${requiredSkill.name} is a background skill and you have overpaid for ${activationRoll.name}.`,
+                                severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
+                                modifierID: modifier.ID,
+                            });
+                        } else {
+                            validations.push({
+                                message: `The requires a skill roll limtiation was bought using the background skill adder but the ${requiredSkill.name} is not a background skill and you have underpaid for ${activationRoll.name}.`,
+                                severity: CONFIG.HERO.VALIDATION_SEVERITY.WARNING,
+                                modifierID: modifier.ID,
+                            });
+                        }
+                    }
                 }
             });
-
-            // PH: FIXME: Check that they don't have skills as background skills (warn: cheaper than supposed to be)
-            // PH: FIXME: Check that they don't have background skills as skills (warn: more expensive than supposed to be)
         } else if (activationRoll.type === RSR_ROLL_TYPE.LUCK_ROLL) {
             if (activationRoll.items.length === 0) {
                 validations.push({

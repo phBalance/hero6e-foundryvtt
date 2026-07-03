@@ -2085,18 +2085,22 @@ export function registerRequiresRollCheckTests(quench) {
 
                         it("should have a heroValidation error as the character does not have one of the listed variable skills (error)", function () {
                             const heroValidation = invalidDrainMissingSkillFromVariableSkillChoice.heroValidation;
-                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation.length).to.equal(2);
                             expect(heroValidation[0]).to.have.property("severity");
-                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.WARNING);
+                            expect(heroValidation[1]).to.have.property("severity");
+                            expect(heroValidation[1].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
                         it("should not have a heroValidation error as the character does have one of the 2 required listed skills (has breakfall -> success)", function () {
                             const heroValidation = invalidDrainMissingOneSkillFromTwoRequiredSkills.heroValidation;
-                            expect(heroValidation.length).to.equal(2);
+                            expect(heroValidation.length).to.equal(3);
                             expect(heroValidation[0]).to.have.property("severity");
                             expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.INFO);
                             expect(heroValidation[1]).to.have.property("severity");
-                            expect(heroValidation[1].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                            expect(heroValidation[1].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.WARNING);
+                            expect(heroValidation[2]).to.have.property("severity");
+                            expect(heroValidation[2].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
                         it("should have a heroValidation error as the character does not have either of the 2 required listed skills (error)", function () {
@@ -3471,12 +3475,10 @@ export function registerRequiresRollCheckTests(quench) {
                             expect(heroValidation).to.have.deep.members([]);
                         });
 
-                        it("should have a heroValidation error as the character does have listed KS background skill but user requested a PS (error)", function () {
+                        it("should have a heroValidation error as the character does have listed KS background skill but user requested a PS (not an error as defined in rules despite HD's implementation)", function () {
                             const heroValidation =
                                 darknessRequiresPsEachUseWith1Per20ApPenaltyButGivenKsBackgroundSkill.heroValidation;
-                            expect(heroValidation.length).to.equal(1);
-                            expect(heroValidation[0]).to.have.property("severity");
-                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                            expect(heroValidation.length).to.equal(0);
                         });
 
                         it("should have a heroValidation error as the character does not have listed KS background skill (error)", function () {
@@ -3525,13 +3527,21 @@ export function registerRequiresRollCheckTests(quench) {
                             expect(heroValidation.length).to.equal(2);
                             expect(heroValidation[0]).to.have.property("severity");
                             expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
-                            expect(heroValidation[0]).to.have.property("severity");
-                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
+                            expect(heroValidation[1]).to.have.property("severity");
+                            expect(heroValidation[1].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.ERROR);
                         });
 
                         it("should have no heroValidation error as the character has STR (success)", function () {
                             const heroValidation = ebRequiresStrRollEachUseWith1Per10ApPenalty.heroValidation;
                             expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should have a heroValidation error as the character does not have two background skills (warning - cost is too low)", function () {
+                            const heroValidation =
+                                darknessRequiresSsXenobotanyOrBreakfallEachUseWith1Per5ApPenaltyButBreakfallIsNotABackgroundSkill.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.WARNING);
                         });
 
                         // PH: FIXME: Support these through different actor types (see 5e tests)
