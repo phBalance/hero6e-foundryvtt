@@ -131,26 +131,21 @@ export async function createSkillPopOutFromItem(item, actor) {
     const content = await _renderSkillForm(item, actor, {});
 
     // Attack Card as a Pop Out
-    let options = {
-        width: 500,
-    };
-
-    return new Promise((resolve) => {
-        const data = {
-            title: "Roll Skill",
-            content: content,
-            buttons: {
-                rollSkill: {
-                    label: "Roll Skill",
-                    callback: (target, event) => resolve(skillRoll(item, actor, target, event)),
-                },
+    const result = await foundry.applications.api.DialogV2.wait({
+        window: { title: "Roll Skill" },
+        position: { width: 500 },
+        content,
+        buttons: [
+            {
+                action: "rollSkill",
+                label: "Roll Skill",
+                default: true,
+                callback: () => skillRoll(item, actor),
             },
-            default: "rollSkill",
-            close: () => resolve({}),
-        };
-
-        new Dialog(data, options).render(true);
+        ],
     });
+
+    return result ?? {};
 }
 
 // PH: FIXME: Create a chat message for resource consumption.
