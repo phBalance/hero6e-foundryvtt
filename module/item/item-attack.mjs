@@ -5175,7 +5175,7 @@ export async function _onModalDamageCard(event) {
     content.find(".modal-damage-card").remove();
     content = content.html();
 
-    await new foundry.applications.api.DialogV2({
+    const dialog = new foundry.applications.api.DialogV2({
         window: { title: `Modal Damage` },
         content,
         buttons: [
@@ -5184,8 +5184,18 @@ export async function _onModalDamageCard(event) {
                 label: "Close",
             },
         ],
-        render: (event, dialog) => {
-            this.chatListeners(dialog.element);
-        },
-    }).render({ force: true });
+    });
+
+    // DialogV2 wraps content in a <form> and only honors the `render` option via its static
+    // wait/prompt/confirm helpers, so wire the listener ourselves. The cloned card's buttons
+    // would otherwise submit (and close) the dialog; force them to type="button" so their
+    // delegated chat handlers run instead.
+    dialog.addEventListener("render", () => {
+        for (const button of dialog.element.querySelectorAll(".dialog-content button")) {
+            button.setAttribute("type", "button");
+        }
+        this.chatListeners(dialog.element);
+    });
+
+    await dialog.render({ force: true });
 }
