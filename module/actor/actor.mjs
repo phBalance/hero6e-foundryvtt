@@ -3032,8 +3032,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                             .join("") +
                         `</ul></div>`;
                     const content = `The following items were not included in the HDC file. Do you want to delete them? ${unorderedList}`;
-                    const confirmDeleteExtraItems = await Dialog.confirm({
-                        title: `${this.name}: Delete extra items?`,
+                    const confirmDeleteExtraItems = await foundry.applications.api.DialogV2.confirm({
+                        window: { title: `${this.name}: Delete extra items?` },
                         content: content,
                     });
 
