@@ -267,8 +267,9 @@ async function skillRoll(item, actor, formElement) {
     const total = skillRoller.getSuccessTotal();
     const margin = successValue - total;
 
-    const untrainedSkillXmlid = formElement.querySelector("[name='untrainedSkill']")?.value;
-    const untrainedSkillName = formElement.querySelector("[name='untrainedSkill'] option:selected")?.text;
+    const untrainedSkillSelect = formElement.querySelector("[name='untrainedSkill']");
+    const untrainedSkillXmlid = untrainedSkillSelect?.value;
+    const untrainedSkillName = untrainedSkillSelect?.selectedOptions?.[0]?.text;
 
     let disadFlavor = "";
     switch (untrainedSkillXmlid ?? item.system.XMLID) {
