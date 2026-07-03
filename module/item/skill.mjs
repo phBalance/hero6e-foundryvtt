@@ -140,7 +140,7 @@ export async function createSkillPopOutFromItem(item, actor) {
                 action: "rollSkill",
                 label: "Roll Skill",
                 default: true,
-                callback: () => skillRoll(item, actor),
+                callback: (event, button) => skillRoll(item, actor, button.form),
             },
         ],
     });
@@ -152,7 +152,7 @@ export async function createSkillPopOutFromItem(item, actor) {
 
 // PH: FIXME: This will need some split apart into a "do I need to do a roll" and "do the skill roll".
 
-async function skillRoll(item, actor, target) {
+async function skillRoll(item, actor, formElement) {
     const token = actor.token;
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
 
@@ -173,7 +173,6 @@ async function skillRoll(item, actor, target) {
         return ChatMessage.create(chatData);
     }
 
-    const formElement = target[0].querySelector("form");
     const formData = new FoundryVttFormDataExtended(formElement)?.object;
     const skillRoller = new HeroRoller().addDice(3);
 
@@ -268,8 +267,8 @@ async function skillRoll(item, actor, target) {
     const total = skillRoller.getSuccessTotal();
     const margin = successValue - total;
 
-    const untrainedSkillXmlid = target.find("[name='untrainedSkill']")?.[0]?.value;
-    const untrainedSkillName = target.find("[name='untrainedSkill'] option:selected")?.[0]?.text;
+    const untrainedSkillXmlid = formElement.querySelector("[name='untrainedSkill']")?.value;
+    const untrainedSkillName = formElement.querySelector("[name='untrainedSkill'] option:selected")?.text;
 
     let disadFlavor = "";
     switch (untrainedSkillXmlid ?? item.system.XMLID) {
