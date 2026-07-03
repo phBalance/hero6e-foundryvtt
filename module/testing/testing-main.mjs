@@ -35,6 +35,7 @@ Hooks.on("quenchReady", async (quench) => {
         { registerTypeForceReplaceTests },
         { registerStatusEffectTests },
         { register5eCalculatedActiveEffectAutomationTests },
+        { registerActorCharacteristicTests },
     ] = await Promise.all([
         import("./testing-automaton.mjs"),
         import("./testing-base.mjs"),
@@ -55,6 +56,7 @@ Hooks.on("quenchReady", async (quench) => {
         import("./testing-type-force-replace.mjs"),
         import("./testing-status-effects.mjs"),
         import("./testing-5e-calculated-active-effect.mjs"),
+        import("./testing-default-characteristics.mjs"),
     ]);
 
     registerGlobalSetup(quench);
@@ -76,6 +78,7 @@ Hooks.on("quenchReady", async (quench) => {
     registerStatusEffectTests(quench);
     registerTypeForceReplaceTests(quench);
     registerCombatWorkflowTests(quench);
+    registerActorCharacteristicTests(quench);
     register5eCalculatedActiveEffectAutomationTests(quench);
     registerCombatTests(quench);
 
