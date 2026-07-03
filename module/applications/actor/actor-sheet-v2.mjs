@@ -212,12 +212,6 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             ],
         });
 
-        // const confirmed = await Dialog.confirm({
-        //     title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
-        //     content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Content"),
-        // });
-        // if (!confirmed) return;
-
         switch (action) {
             case "fullHealth":
                 return this.actor.fullHealth();
@@ -257,8 +251,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     static async #onDeleteAllTemporaryEffects() {
-        const confirm = await Dialog.confirm({
-            title: "Delete all Temporary Effects",
+        const confirm = await foundry.applications.api.DialogV2.confirm({
+            window: { title: "Delete all Temporary Effects" },
             content:
                 `<h4>Are you sure?</h4><p>This will permanently delete all ${this.actor.temporaryEffects.length} ` +
                 `temporary effects.</p>`,
@@ -273,8 +267,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     static async #onDeleteAllActiveEffects() {
-        const confirm = await Dialog.confirm({
-            title: "Delete all activeEffects",
+        const confirm = await foundry.applications.api.DialogV2.confirm({
+            window: { title: "Delete all activeEffects" },
             content:
                 `<h4>Are you sure?</h4><p>This will attempt to permanently delete all ${Array.from(this.actor.allApplicableEffects()).length} ` +
                 `active effects.  Some effects will get re-applied.  This may break some powers and/or automation, requiring a re-upload of HDC or FullHealth+Rebuild to fix.</p>`,
