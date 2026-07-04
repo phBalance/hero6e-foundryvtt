@@ -362,9 +362,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     if (calculatedValue !== null) {
                         let calculatedMax;
 
-                        // 5e SPD always rounds down; other figured/calculated
-                        // attributes use player-favorable rounding. This matches the persistence path
-                        // (_computeFiguredCharacteristicChanges) and the integer spd.max expectations.
+                        // 5ER p. 33: "SPD is the only Figured Characteristic that doesn't round in
+                        // favor of the character" — a SPD of 2.9 is still SPD 2, so floor it; every
+                        // other figured/calculated value uses player-favorable rounding. This matches
+                        // the persistence path (_computeFiguredCharacteristicChanges) so a live
+                        // recompute never disagrees with what an update would commit.
                         if (keyLower === "spd") {
                             calculatedMax = Math.floor(calculatedValue);
                         } else {
@@ -377,7 +379,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         });
 
                         // Conditions that lower a dependent's max (e.g. Prone halving DCV) also cap the
-                        // current value; keep the Hero rounding so a halving never leaves a fraction.
+                        // current value. Cap DOWN only — never raise value up to a higher max — because
+                        // for expendables (STUN/END) the gap between value and max is damage/spent
+                        // points, and raising the value here would silently heal them on every render.
                         const currentValue = Number(node.value);
                         if (Number.isFinite(currentValue)) {
                             let cappedValue = Math.min(currentValue, node.max);
@@ -449,7 +453,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 continue;
             }
 
-            // Calculated view: all non-item effects, both directions.
+            // Calculated view: all non-item effects, both directions. Rebuilt from base+LEVELS plus
+            // the filtered entries rather than read from the derived max, because Foundry's native
+            // application already folded item-transferred effects into that max and those must only
+            // flow through the item-sum path. CV formulas read the characteristic's *value*
+            // (safeCharacteristicValue), so that is the property patched.
             if (calculatedSourceKeys.has(key)) {
                 const calculatedSourceValue = this._applyActiveEffectChangeEntries(basePlusLevels, nonItemEntries);
                 if (calculatedSourceValue !== Number(characteristic.value ?? 0)) {
@@ -468,6 +476,10 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     continue;
                 }
 
+                // Figured formulas read basePlusLevels = baseInfo.base(actor) + system.KEY.LEVELS.
+                // The base term is a fixed config function, so LEVELS is the only patchable term:
+                // setting LEVELS to (effective source - base) makes basePlusLevels read exactly the
+                // effect-adjusted source value.
                 const baseValue = Number(characteristic.baseInfo?.base?.(this) ?? 0);
                 const figuredSourceValue = this._applyActiveEffectChangeEntries(basePlusLevels, figuredEntries);
                 if (Number.isFinite(baseValue) && figuredSourceValue !== basePlusLevels) {
@@ -733,6 +745,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         // 5. Run canvas visual scene batch refresh routines
         if (overlayEffects.includes(statusId)) {
+            // (linked=false, document=true): every token representing this actor on the viewed
+            // scene — unlinked copies included — as TokenDocuments, since the tint/alpha update
+            // below is a document operation and must not depend on rendered placeables.
             const tokenDocuments = this.getActiveTokens(false, true);
 
             if (tokenDocuments.length > 0) {

@@ -522,10 +522,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
 
             // Removing an adjustment removes its contribution (5ER p. 107: adjusted points
             // fade/return; deletion is the GM shortcutting that). An AID's boosted points vanish, so
-            // clamp the current value down to the restored max — never subtract, since consumed
-            // boost points came out of the boost first (5ER p. 105-106). A DRAIN's removed points
-            // come back, so restore them to the current value (clamped to max), mirroring
-            // updateCharacteristicValue's return handling.
+            // clamp the current value down to the restored max — never subtract the change amount,
+            // since points consumed while boosted came out of the boost first (5ER p. 105-106) and
+            // are already reflected in the stored value. A DRAIN's removed points come back, so add
+            // them (value - negativeChange) to the current value, mirroring updateCharacteristicValue's
+            // return handling. Both arms clamp to max, which also makes this safe for effects whose
+            // value bookkeeping never happened (e.g. a bare GM-created effect): the restoration can
+            // never push the current value past the freshly recomputed max.
             const changeValue = parseInt(change.value) || 0;
             const newValue = changeValue < 0 ? Math.min(value - changeValue, max) : Math.min(value, max);
             if (newValue !== value) {

@@ -720,7 +720,11 @@ export async function performAdjustment(
         for (const change of fadedChanges) {
             const char = change.key.match(/([a-z]+)\.max/)?.[1];
             const costPerActivePoint2 = determineCostPerActivePoint(char, targetPower, targetActor);
+            // The effect grants trunc(AP / cost) points of the characteristic: adjustments move
+            // Active Points, and only whole purchased increments take effect — a partial increment
+            // stays banked in the AP ledger until enough AP accumulates or fades (5ER p. 107).
             change.value = Math.trunc(activeEffect.flags[game.system.id].adjustmentActivePoints / costPerActivePoint2);
+            // Delta between the pre- and post-fade grant, for the chat card's "faded by N" line.
             adjustmentDamageThisApplicationArray[i] = change.value - adjustmentDamageThisApplicationArray[i];
             i++;
         }
@@ -1107,6 +1111,11 @@ async function updateCharacteristicValue(activeEffect, { targetSystem, previousC
                     foundry.utils.getProperty(targetSystem._source, `system.characteristics.${char}.value`) ??
                     foundry.utils.getProperty(targetSystem, `system.characteristics.${char}.value`);
                 const targetStartingMax = foundry.utils.getProperty(targetSystem, `system.characteristics.${char}.max`);
+                // Move the stored value by the DELTA of this effect's grant (new change minus the
+                // pre-tick change), never to an absolute: damage or spent points unrelated to this
+                // adjustment live in the stored value and must ride along untouched. Everything is
+                // clamped to max because the current value can never exceed the (already
+                // effect-adjusted) maximum.
                 const prevChangeValue = parseInt(previousChanges.find((c) => c.key === change.key)?.value) || 0;
                 const totalPointsDifference = change.value - prevChangeValue;
 

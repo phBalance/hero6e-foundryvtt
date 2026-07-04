@@ -1349,6 +1349,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             figured5eCharacteristic: function (actor) {
                 // 5ER p. 33: a negative Primary Characteristic adds zero to Figured
                 // Characteristics — it never subtracts. Clamp each contribution at 0.
+                // Each term is kept to one decimal (FRed p. 7 works fractions to a single decimal
+                // digit) so float artifacts can't leak into the fractional SPD a character may have
+                // paid to top up; the final total is floored elsewhere since SPD never rounds up.
                 return (
                     1 +
                     Number((Math.max(0, actor.getCharacteristic("dex").basePlusLevels) / 10).toFixed(1)) +
@@ -1605,6 +1608,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             base: fixedValueFunction(0),
+            // 5ER p. 33 table: STUN costs 1 CP per point in 5e. Without this override the 6e
+            // definition's 1/2 per point leaks in and halves every 5e STUN purchase cost.
             costPerLevel: fixedValueFunction(1),
             // figuredBODY so non-adjustment effects on BODY reach STUN, matching the
             // characteristic-bought-as-a-power rules (5ER p. 139-40).

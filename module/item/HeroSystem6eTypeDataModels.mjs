@@ -1658,6 +1658,11 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         return roundFavorPlayerAwayFromZero(raw);
     }
 
+    /**
+     * Active items granting this primary characteristic as a Power (e.g. a magic ring's +35 STR).
+     * Per 5ER p. 139-40 these add to figured characteristics unless bought with the No Figured
+     * Characteristics limitation (or in a Multipower slot, which HD exports as NOFIGURED).
+     */
     get baseItemsContributingToFiguredCharacteristics() {
         return this.actor.items.filter(
             (item) =>
@@ -1667,8 +1672,14 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         );
     }
 
+    /**
+     * Sum of this primary's item-granted contributions to a figured characteristic, each item
+     * divided and rounded SEPARATELY. 5ER p. 140: "calculate the Figured Characteristics deriving
+     * from that Primary Characteristic from each 'part' of the Primary Characteristic separately"
+     * (15 STR + 45 STR bought as a Power gives +8 and +23 STUN, not round(60/2) = 30).
+     * @param {number} divisor - The figured formula's ratio (e.g. 5 for PD = STR/5).
+     */
     baseSumFiguredCharacteristicsFromItems(divisor) {
-        // Each item is rounded seperately
         try {
             const powersWithThisCharacteristic = this.baseItemsContributingToFiguredCharacteristics;
             return powersWithThisCharacteristic.reduce((accumulator, currentItem) => {
@@ -1680,8 +1691,14 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         return 0;
     }
 
+    /**
+     * As baseSumFiguredCharacteristicsFromItems but without per-part rounding. Used for SPD, whose
+     * fractional remainders are real (5ER p. 33-35: DEX 18 gives SPD 2.8; the fraction is kept and
+     * only the final total is floored), so rounding each part would destroy the fraction the
+     * character may have paid to top up.
+     * @param {number} divisor - The figured formula's ratio (10 for SPD = 1 + DEX/10).
+     */
     baseSumFiguredCharacteristicsNoRoundingFromItems(divisor) {
-        // Each item is rounded separately
         try {
             const powersWithThisCharacteristic = this.baseItemsContributingToFiguredCharacteristics;
             return powersWithThisCharacteristic.reduce((accumulator, currentItem) => {
