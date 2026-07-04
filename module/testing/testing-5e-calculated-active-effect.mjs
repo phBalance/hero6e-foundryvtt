@@ -31,8 +31,8 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                 return actor;
             };
 
-            const addAdjustmentEffect = async (actor, { adjustmentActivePoints = 0, flags = {}, ...effectData }) => {
-                await actor.createEmbeddedDocuments("ActiveEffect", [
+            const createAdjustmentEffect = async (actor, { adjustmentActivePoints = 0, flags = {}, ...effectData }) => {
+                const [effect] = await actor.createEmbeddedDocuments("ActiveEffect", [
                     {
                         ...effectData,
                         flags: {
@@ -45,6 +45,10 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         },
                     },
                 ]);
+                return effect;
+            };
+            const addAdjustmentEffect = async (actor, effectData) => {
+                await createAdjustmentEffect(actor, effectData);
                 return actor.system.characteristics;
             };
 
@@ -322,6 +326,41 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         );
                     });
 
+                    it("combined primary and dependent ActiveEffects both apply in one pass", async function () {
+                        const actor = await create5eActor("_Quench_5e_Combined_Primary_Dependent_Target");
+
+                        const chars = await addAdjustmentEffect(actor, {
+                            name: "Combined DEX and DCV adjustment",
+                            adjustmentActivePoints: 30,
+                            changes: [
+                                {
+                                    key: "system.characteristics.dex.max",
+                                    value: "10",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                                {
+                                    key: "system.characteristics.dcv.max",
+                                    value: "-8",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+
+                        const dexSource = 20;
+                        assert.equal(chars.dex.max, dexSource, "Combined effect should raise DEX.");
+                        assert.equal(chars.ocv.max, expectedOcvFromDex(dexSource), "Combined effect should raise OCV.");
+                        assert.equal(
+                            chars.spd.max,
+                            expectedSpdFromDex(actor, dexSource),
+                            "Combined effect should raise SPD from DEX.",
+                        );
+                        assert.equal(
+                            chars.dcv.max,
+                            expectedOcvFromDex(dexSource) - 8,
+                            "Combined effect should apply direct DCV after DEX-derived DCV.",
+                        );
+                    });
+
                     it("AID STR updates STR figured dependents", async function () {
                         const actor = await create5eActor("_Quench_5e_AID_STR_Target");
 
@@ -350,6 +389,76 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                             chars.stun.max,
                             expectedStunFromStrCon(actor, strSource, conSource),
                             "AID STR should raise STUN.",
+                        );
+                    });
+
+                    it("actor-owned adjustment updates and deletes recompute derived values", async function () {
+                        const actor = await create5eActor("_Quench_5e_Adjustment_Update_Target");
+
+                        const effect = await createAdjustmentEffect(actor, {
+                            name: "Scaling AID DEX",
+                            adjustmentActivePoints: 30,
+                            changes: [
+                                {
+                                    key: "system.characteristics.dex.max",
+                                    value: "10",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+
+                        assert.equal(actor.system.characteristics.dex.max, 20, "Initial AID should raise DEX.");
+                        assert.equal(
+                            actor.system.characteristics.ocv.max,
+                            expectedOcvFromDex(20),
+                            "Initial AID should raise OCV.",
+                        );
+                        assert.equal(
+                            actor.system.characteristics.spd.max,
+                            expectedSpdFromDex(actor, 20),
+                            "Initial AID should raise SPD.",
+                        );
+
+                        await effect.update({
+                            changes: [
+                                {
+                                    key: "system.characteristics.dex.max",
+                                    value: "5",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                            flags: {
+                                [game.system.id]: {
+                                    ...effect.flags[game.system.id],
+                                    adjustmentActivePoints: 15,
+                                },
+                            },
+                        });
+
+                        assert.equal(actor.system.characteristics.dex.max, 15, "Updated AID should reduce DEX bonus.");
+                        assert.equal(
+                            actor.system.characteristics.ocv.max,
+                            expectedOcvFromDex(15),
+                            "Updated AID should recompute OCV.",
+                        );
+                        assert.equal(
+                            actor.system.characteristics.spd.max,
+                            expectedSpdFromDex(actor, 15),
+                            "Updated AID should recompute SPD.",
+                        );
+
+                        await effect.delete();
+
+                        assert.equal(actor.system.characteristics.dex.max, 10, "Deleted AID should restore DEX max.");
+                        assert.equal(
+                            actor.system.characteristics.ocv.max,
+                            expectedOcvFromDex(10),
+                            "Deleted AID should restore OCV.",
+                        );
+                        assert.equal(
+                            actor.system.characteristics.spd.max,
+                            expectedSpdFromDex(actor, 10),
+                            "Deleted AID should restore SPD.",
                         );
                     });
 
@@ -451,6 +560,75 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                             expectedPdFromStr(aidedActor, 30),
                             "TRANSFER aid side should raise PD.",
                         );
+                    });
+
+                    it("item-origin actor effects still drive 5e dependents", async function () {
+                        const sourceActor = await create5eActor("_Quench_5e_Item_Origin_Source");
+                        const targetActor = await create5eActor("_Quench_5e_Item_Origin_Target");
+                        const dexContents = `
+                            <DEX XMLID="DEX" ID="1766170024718" BASECOST="0.0" LEVELS="10" ALIAS="DEX" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Source DEX Aid" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
+                            <NOTES />
+                            </DEX>
+                        `;
+                        const sourceItem = await HeroSystem6eItem.create(
+                            HeroSystem6eItem.itemDataFromXml(dexContents, sourceActor),
+                            {
+                                parent: sourceActor,
+                            },
+                        );
+
+                        const chars = await addAdjustmentEffect(targetActor, {
+                            name: "Item-origin AID DEX",
+                            origin: sourceItem.uuid,
+                            adjustmentActivePoints: 30,
+                            changes: [
+                                {
+                                    key: "system.characteristics.dex.max",
+                                    value: "10",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+
+                        assert.equal(chars.dex.max, 20, "Item-origin actor effect should raise DEX.");
+                        assert.equal(
+                            chars.ocv.max,
+                            expectedOcvFromDex(20),
+                            "Item-origin actor effect should raise OCV.",
+                        );
+                        assert.equal(
+                            chars.spd.max,
+                            expectedSpdFromDex(targetActor, 20),
+                            "Item-origin actor effect should raise SPD.",
+                        );
+                    });
+
+                    it("disabled primary ActiveEffects do not drive dependent formulas", async function () {
+                        const actor = await create5eActor("_Quench_5e_Disabled_Primary_AE_Target");
+                        const baseline = {
+                            str: actor.system.characteristics.str.max,
+                            pd: actor.system.characteristics.pd.max,
+                            rec: actor.system.characteristics.rec.max,
+                            stun: actor.system.characteristics.stun.max,
+                        };
+
+                        const chars = await addAdjustmentEffect(actor, {
+                            name: "Disabled AID STR",
+                            disabled: true,
+                            adjustmentActivePoints: 30,
+                            changes: [
+                                {
+                                    key: "system.characteristics.str.max",
+                                    value: "20",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+
+                        assert.equal(chars.str.max, baseline.str, "Disabled STR effect should not raise STR.");
+                        assert.equal(chars.pd.max, baseline.pd, "Disabled STR effect should not raise PD.");
+                        assert.equal(chars.rec.max, baseline.rec, "Disabled STR effect should not raise REC.");
+                        assert.equal(chars.stun.max, baseline.stun, "Disabled STR effect should not raise STUN.");
                     });
 
                     it("active characteristic items do not enter the actor-owned AE formula source path", async function () {

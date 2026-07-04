@@ -390,6 +390,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             const basePlusLevels = Number(characteristic.basePlusLevels ?? 0);
             const value = Number(characteristic.value ?? 0);
             const max = Number(characteristic.max ?? 0);
+            // Positive primary max effects feed dependent 5e formulas; drains below the normal
+            // base/current source remain primary-only adjustment tracking and do not cascade down.
             const formulaSourceValue = Math.max(basePlusLevels, value, max);
             if (!Number.isFinite(formulaSourceValue)) continue;
 
