@@ -109,7 +109,7 @@ window.herosystem6eRunTests = async (numLoops = 1, timeoutInMs = 120 * 1000) => 
 };
 
 async function runTestSuiteOnce(timeoutInMs) {
-    const mochaRunner = await quench.runBatches("hero6efoundryvttv2.**", {
+    const mochaRunner = await quench.runBatches(`${game.system.id}.**`, {
         updateSnapshots: false,
         preSelectedOnly: false,
         json: false,
@@ -134,7 +134,7 @@ async function runTestSuiteOnce(timeoutInMs) {
 
 function registerMainTests(quench) {
     quench.registerBatch(
-        "hero6efoundryvttv2.main",
+        `${game.system.id}.main`,
         (context) => {
             const { describe, expect, it } = context;
 

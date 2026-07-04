@@ -45,6 +45,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             createActiveEffect: HeroSystemActorSheetV2.#onCreateActiveEffect,
             deleteAllActiveEffects: HeroSystemActorSheetV2.#onDeleteAllActiveEffects,
             deleteAllTemporaryEffects: HeroSystemActorSheetV2.#onDeleteAllTemporaryEffects,
+            downloadUploadError: HeroSystemActorSheetV2.#onDownloadUploadError,
             fullHealth: HeroSystemActorSheetV2.#onFullHealth,
             presenceAttack: HeroSystemActorSheetV2.#onPresenceAttack,
             recovery: HeroSystemActorSheetV2.#onRecovery,
@@ -133,6 +134,32 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         await this.actor.actorDescriptionToChat({ token: this.token });
     }
 
+    static async #onDownloadUploadError() {
+        const error = this.actor.getFlag(game.system.id, "uploadingError");
+        if (!error) return;
+
+        const context = this.actor.getFlag(game.system.id, "uploadingErrorContext") ?? {};
+        const foundryBuild = context.foundryBuild ?? game.release?.build ?? null;
+        const report = [
+            `Actor: ${this.actor.name}`,
+            `Foundry: ${context.foundry ?? game.release?.display ?? game.version}${foundryBuild != null ? ` (build ${foundryBuild})` : ``}`,
+            `System: ${game.system.id} ${context.system ?? game.system.version}`,
+            ``,
+            `Error:`,
+            error,
+        ];
+        if (context.actorBase64) {
+            report.push(``, `Original actor state (base64):`, context.actorBase64);
+        }
+        if (context.hdcBase64) {
+            report.push(``, `New HDC (base64):`, context.hdcBase64);
+        }
+
+        const filename = `${this.actor.name.slugify({ strict: true }) || "actor"}-upload-error.txt`;
+        foundry.utils.saveDataToFile(report.join("\n"), "text/plain", filename);
+        ui.notifications.info(`Downloaded upload error report for ${this.actor.name}.`);
+    }
+
     static async #onFullHealth() {
         const resetRebuildDisabled = this.actor.token || !this.actor.system._hdcXml;
         const contentFullHealth = `
@@ -212,12 +239,6 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             ],
         });
 
-        // const confirmed = await Dialog.confirm({
-        //     title: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
-        //     content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Content"),
-        // });
-        // if (!confirmed) return;
-
         switch (action) {
             case "fullHealth":
                 return this.actor.fullHealth();
@@ -257,8 +278,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     static async #onDeleteAllTemporaryEffects() {
-        const confirm = await Dialog.confirm({
-            title: "Delete all Temporary Effects",
+        const confirm = await foundry.applications.api.DialogV2.confirm({
+            window: { title: "Delete all Temporary Effects" },
             content:
                 `<h4>Are you sure?</h4><p>This will permanently delete all ${this.actor.temporaryEffects.length} ` +
                 `temporary effects.</p>`,
@@ -273,8 +294,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     static async #onDeleteAllActiveEffects() {
-        const confirm = await Dialog.confirm({
-            title: "Delete all activeEffects",
+        const confirm = await foundry.applications.api.DialogV2.confirm({
+            window: { title: "Delete all activeEffects" },
             content:
                 `<h4>Are you sure?</h4><p>This will attempt to permanently delete all ${Array.from(this.actor.allApplicableEffects()).length} ` +
                 `active effects.  Some effects will get re-applied.  This may break some powers and/or automation, requiring a re-upload of HDC or FullHealth+Rebuild to fix.</p>`,
