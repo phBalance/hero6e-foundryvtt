@@ -124,10 +124,13 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 `[${targetType}] Active effect failed to modify DEX max proxy.`,
                             );
 
-                            // Evaluate calculations relative to the live, compiled DataModel state tree.
-                            const expectedOcv = buffedChars.ocv.max;
-                            const expectedPd = buffedChars.pd.max;
-                            const expectedRec = buffedChars.rec.max;
+                            // Evaluate calculations from the source formulas so this catches propagation drift.
+                            const expectedOcv = qActor
+                                .getCharacteristic("ocv")
+                                .baseInfo.calculated5eCharacteristic(qActor);
+                            const expectedPd =
+                                qActor.getCharacteristic("pd").baseInfo.figured5eCharacteristic(qActor) +
+                                (qActor.system.PD?.LEVELS ?? 0);
 
                             // Assert outputs cleanly against the dynamic runtime properties
                             assert.equal(
@@ -140,11 +143,16 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 expectedPd,
                                 `[${targetType}] Figured PD calculation ratio mismatch.`,
                             );
-                            assert.equal(
-                                buffedChars.rec.max,
-                                expectedRec,
-                                `[${targetType}] Figured REC calculation ratio mismatch.`,
-                            );
+                            if (qActor.hasCharacteristic("REC")) {
+                                const expectedRec =
+                                    qActor.getCharacteristic("rec").baseInfo.figured5eCharacteristic(qActor) +
+                                    (qActor.system.REC?.LEVELS ?? 0);
+                                assert.equal(
+                                    buffedChars.rec.max,
+                                    expectedRec,
+                                    `[${targetType}] Figured REC calculation ratio mismatch.`,
+                                );
+                            }
 
                             // Clear the buff effect natively
                             const buffEffect = qActor.effects.find((e) => e.name === "Buff Primaries");

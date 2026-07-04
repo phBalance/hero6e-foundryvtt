@@ -150,11 +150,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         actorChanges.system.characteristics ??= {};
         const payloadChars = data.system?.characteristics ?? {};
         const characteristicInfo = getCharacteristicInfoArrayForActor(this);
+        const payloadCharacteristicKeys = new Set();
 
         // Seed baseline rulebook numbers plus purchased point levels (e.g., 10 base + 3 levels = 13)
         for (const info of characteristicInfo) {
             const keyLower = info.key.toLowerCase();
-            if (payloadChars[keyLower]?.value !== undefined) continue;
+            if (payloadChars[keyLower]?.value !== undefined || payloadChars[keyLower]?.max !== undefined) {
+                payloadCharacteristicKeys.add(keyLower);
+                continue;
+            }
 
             const characteristic = this.getCharacteristic(keyLower);
 
@@ -176,15 +180,19 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
 
         // Trigger priority calculations over our point-inclusive payload to evaluate dependent formulas
-        this._recalculateCharacteristicsByPriority(actorChanges.system.characteristics);
+        this._recalculateCharacteristicsByPriority(actorChanges.system.characteristics, {
+            preserveCharacteristicKeys: payloadCharacteristicKeys,
+        });
     }
 
     /**
      * Synchronously processes all 5e Figured and Calculated Characteristic priority matrices.
      * Operates strictly as a database-staging helper during creation and updates.
      * @param {object} targetChars - The characteristics data object to mutate inline
+     * @param {object} options
+     * @param {Set<string>} options.preserveCharacteristicKeys - Characteristics supplied by the payload.
      */
-    _recalculateCharacteristicsByPriority(targetChars) {
+    _recalculateCharacteristicsByPriority(targetChars, { preserveCharacteristicKeys = new Set() } = {}) {
         const characteristicInfo = getCharacteristicInfoArrayForActor(this);
 
         // High-Utility Lambda to identify both calculated and figured dependent stats cleanly
@@ -208,6 +216,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         for (const infoList of executionPasses) {
             for (const info of infoList) {
                 const keyLower = info.key.toLowerCase();
+                if (preserveCharacteristicKeys.has(keyLower)) continue;
+
                 const characteristic = this.getCharacteristic(keyLower);
                 if (!characteristic) continue;
 
