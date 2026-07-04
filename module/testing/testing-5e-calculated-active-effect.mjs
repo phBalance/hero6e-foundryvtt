@@ -601,52 +601,6 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         );
                     });
 
-                    it("item-transferred ActiveEffects on a primary drive 5e dependents", async function () {
-                        const actor = await create5eActor("_Quench_5e_Item_Transferred_AE_Target");
-                        const tkContents = `
-                            <POWER XMLID="TELEKINESIS" ID="1767554249145" BASECOST="0.0" LEVELS="10" ALIAS="Telekinesis" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
-                            <NOTES />
-                            </POWER>
-                        `;
-                        const hostItem = await HeroSystem6eItem.create(
-                            HeroSystem6eItem.itemDataFromXml(tkContents, actor),
-                            {
-                                parent: actor,
-                            },
-                        );
-
-                        // legacyTransferral is false, so this effect stays on the item and reaches the
-                        // actor through allApplicableEffects(); it must cascade like an actor-owned one.
-                        await hostItem.createEmbeddedDocuments("ActiveEffect", [
-                            {
-                                name: "Transferred DEX boost",
-                                transfer: true,
-                                changes: [
-                                    {
-                                        key: "system.characteristics.dex.max",
-                                        value: "10",
-                                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                                    },
-                                ],
-                            },
-                        ]);
-                        actor.prepareData();
-
-                        const chars = actor.system.characteristics;
-                        const dexSource = 20;
-                        assert.equal(chars.dex.max, dexSource, "Item-transferred AE should raise DEX.");
-                        assert.equal(
-                            chars.ocv.max,
-                            expectedOcvFromDex(dexSource),
-                            "Item-transferred AE should raise OCV.",
-                        );
-                        assert.equal(
-                            chars.spd.max,
-                            expectedSpdFromDex(actor, dexSource),
-                            "Item-transferred AE should raise SPD.",
-                        );
-                    });
-
                     it("disabled primary ActiveEffects do not drive dependent formulas", async function () {
                         const actor = await create5eActor("_Quench_5e_Disabled_Primary_AE_Target");
                         const baseline = {

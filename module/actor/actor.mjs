@@ -429,7 +429,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      * Single pass over all applicable effects collecting changes that target a characteristic max,
      * keyed by lowercase characteristic. Hot-path callers (prepareDerivedData, fullHealth) build this
      * once and hand it to the helpers below instead of re-walking actor + item effects per
-     * characteristic.
+     * characteristic. Reads V13 (effect.changes, numeric change.mode) and V14 (effect.system.changes,
+     * string change.type) shapes and normalizes to a numeric mode.
      */
     _collectActiveEffectMaxChanges() {
         const byKey = new Map();
@@ -437,18 +438,26 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             if (effect.disabled || effect.isSuppressed) continue;
 
             const fromStatus = effect.statuses?.size > 0;
-            const parentItemXmlid = effect.parent === this ? undefined : effect.parent?.system?.XMLID;
-            for (const [index, change] of (effect.changes ?? []).entries()) {
-                const match = change.key.match(/^system\.characteristics\.([a-z]+)\.max$/);
+            const fromItem = effect.parent !== this;
+            const effectChanges = effect.changes?.length ? effect.changes : (effect.system?.changes ?? []);
+            for (const [index, change] of effectChanges.entries()) {
+                const match = change.key?.match(/^system\.characteristics\.([a-z]+)\.max$/);
                 if (!match) continue;
+
+                const rawMode = change.mode ?? change.type;
+                const mode =
+                    typeof rawMode === "number"
+                        ? rawMode
+                        : CONST.ACTIVE_EFFECT_MODES[String(rawMode ?? "").toUpperCase()];
 
                 const entries = byKey.get(match[1]) ?? [];
                 entries.push({
                     change,
+                    mode,
                     index,
-                    priority: change.priority ?? (change.mode ?? 0) * 10,
+                    priority: change.priority ?? (mode ?? 0) * 10,
                     fromStatus,
-                    parentItemXmlid,
+                    fromItem,
                 });
                 byKey.set(match[1], entries);
             }
@@ -458,14 +467,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
     _getActiveEffectChangedMaxKeys(maxChangesByKey = this._collectActiveEffectMaxChanges()) {
         const keys = new Set();
-        // Characteristic items (e.g. a bought DEX power) already feed 5e dependents through the
-        // item-sum path; letting their transferred effects trigger the formula-source override would
-        // cascade them twice. Other item effects cascade like actor-owned ones.
-        const fromCharacteristicItem = (entry) =>
-            entry.parentItemXmlid !== undefined && this.hasCharacteristic(entry.parentItemXmlid);
-
+        // Item-held effects (e.g. Density Increase's +STR) must not trigger the formula-source
+        // override: per 5e rules, power-granted characteristic boosts do not feed figured/calculated
+        // characteristics. Characteristic items feed dependents through the item-sum path instead.
         for (const [key, entries] of maxChangesByKey) {
-            if (entries.some((entry) => !fromCharacteristicItem(entry))) keys.add(key);
+            if (entries.some((entry) => !entry.fromItem)) keys.add(key);
         }
         return keys;
     }
@@ -496,12 +502,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         changes.sort((a, b) => a.priority - b.priority || a.index - b.index);
 
         let value = calculatedMax;
-        for (const { change } of changes) {
-            if (change.mode == null) continue;
+        for (const { change, mode } of changes) {
+            if (mode == null) continue;
             const delta = Number(change.value);
             if (!Number.isFinite(delta)) continue;
 
-            switch (change.mode) {
+            switch (mode) {
                 case modes.ADD:
                     value += delta;
                     break;
@@ -2148,11 +2154,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         // Set Characteristics MAX to CORE (or 5e calculated value)
         start = Date.now();
-        const fullHealthValues = this._getFullHealthCharacteristicValues();
+        const fullHealthMaxByCharacteristic = this._getFullHealthCharacteristicMaxes();
         const characteristicChangesMax = {};
-        for (const [charKey, { fullHealthMax }] of Object.entries(fullHealthValues)) {
-            if (fullHealthMax === undefined) continue;
-
+        for (const [charKey, fullHealthMax] of Object.entries(fullHealthMaxByCharacteristic)) {
             if (this.system.characteristics[charKey].max !== fullHealthMax) {
                 characteristicChangesMax[`system.characteristics.${charKey}.max`] = fullHealthMax;
             }
@@ -2169,10 +2173,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             console.warn("fullHealth performance concern: Set Characteristics MAX to CORE", end - start);
         }
 
-        // Set Characteristics VALUE to MAX
+        // Set Characteristics VALUE to MAX. Computed after the max update above so effects
+        // (re)created during its _preUpdate (e.g. applySizeEffect) are included.
         start = Date.now();
+        const fullHealthValues = this._getFullHealthCharacteristicValues(fullHealthMaxByCharacteristic);
         const characteristicChangesValue = {};
-        for (const [charKey, { value }] of Object.entries(fullHealthValues)) {
+        for (const [charKey, value] of Object.entries(fullHealthValues)) {
             const characteristic = this.system.characteristics[charKey];
             if (characteristic.value !== value) {
                 characteristic.value = value;
@@ -2193,36 +2199,39 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     /**
-     * Full-health targets for every characteristic: the recomputed full-health max plus, for the
-     * value, non-status active effects re-applied so mid-session AID/DRAIN adjustments survive a
-     * full heal while status overlays do not. fullHealthMax is undefined for characteristics
-     * outside the actor's characteristic info array. Shared by fullHealth() and the upload path so
-     * the two cannot drift.
+     * Formula/base-derived full-health max per characteristic in the actor's characteristic info
+     * array; characteristics without a finite result are omitted.
      */
-    _getFullHealthCharacteristicValues() {
-        const fullHealthMaxByCharacteristic = {};
+    _getFullHealthCharacteristicMaxes() {
+        const maxes = {};
         for (const info of getCharacteristicInfoArrayForActor(this)) {
             const charKey = info.key.toLowerCase();
             const fullHealthMax = this._getFullHealthCharacteristicMax(info);
             if (Number.isFinite(fullHealthMax)) {
-                fullHealthMaxByCharacteristic[charKey] = fullHealthMax;
+                maxes[charKey] = fullHealthMax;
             }
         }
+        return maxes;
+    }
 
+    /**
+     * Full-health value for every characteristic: the full-health max with non-status active
+     * effects re-applied, so mid-session AID/DRAIN adjustments survive a full heal while status
+     * overlays do not. Reads the actor's current effects, so call it after any update that
+     * (re)creates effects (e.g. applySizeEffect via _preUpdate). Shared by fullHealth() and the
+     * upload path so the two cannot drift.
+     */
+    _getFullHealthCharacteristicValues(fullHealthMaxByCharacteristic = this._getFullHealthCharacteristicMaxes()) {
         const maxChangesByKey = this._collectActiveEffectMaxChanges();
         const values = {};
         for (const charKey of Object.keys(this.system.characteristics)) {
-            const fullHealthMax = fullHealthMaxByCharacteristic[charKey];
-            const baseMax = fullHealthMax ?? this.system.characteristics[charKey].max;
-            values[charKey] = {
-                fullHealthMax,
-                value: parseInt(
-                    this._applyDirectActiveEffectChangesToDerivedMax(charKey, baseMax, {
-                        includeStatusEffects: false,
-                        maxChangesByKey,
-                    }),
-                ),
-            };
+            const baseMax = fullHealthMaxByCharacteristic[charKey] ?? this.system.characteristics[charKey].max;
+            values[charKey] = parseInt(
+                this._applyDirectActiveEffectChangesToDerivedMax(charKey, baseMax, {
+                    includeStatusEffects: false,
+                    maxChangesByKey,
+                }),
+            );
         }
         return values;
     }
@@ -3221,7 +3230,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             try {
                 if (this.id) {
                     const changes = {};
-                    for (const [key, { value }] of Object.entries(this._getFullHealthCharacteristicValues())) {
+                    for (const [key, value] of Object.entries(this._getFullHealthCharacteristicValues())) {
                         if (this.system.characteristics[key].value !== value) {
                             changes[`system.characteristics.${key}.value`] = value;
                         }
