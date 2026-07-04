@@ -443,28 +443,28 @@ async function commitItemsCollectionMigrateDataChanges(item) {
  * plain objects, and JSON-string-encoded blobs (dehydrated items are stored as JSON strings, and
  * one dehydrated item can nest another inside its effect flags).
  */
-function stripDehydratedManeuverItem_4_3_15(value) {
-    if (typeof value === "string") {
+function stripDehydratedManeuverItem_4_3_15(messageDataFragment) {
+    if (typeof messageDataFragment === "string") {
         // Cheap guard - only pay for JSON.parse when the marker is actually present.
-        if (!value.includes("dehydratedManeuverItem")) {
-            return value;
+        if (!messageDataFragment.includes("dehydratedManeuverItem")) {
+            return messageDataFragment;
         }
 
         try {
-            return JSON.stringify(stripDehydratedManeuverItem_4_3_15(JSON.parse(value)));
+            return JSON.stringify(stripDehydratedManeuverItem_4_3_15(JSON.parse(messageDataFragment)));
         } catch {
             // Not a JSON string (e.g. rendered HTML content), leave it untouched.
-            return value;
+            return messageDataFragment;
         }
     }
 
-    if (Array.isArray(value)) {
-        return value.map((entry) => stripDehydratedManeuverItem_4_3_15(entry));
+    if (Array.isArray(messageDataFragment)) {
+        return messageDataFragment.map((entry) => stripDehydratedManeuverItem_4_3_15(entry));
     }
 
-    if (value && typeof value === "object") {
+    if (messageDataFragment && typeof messageDataFragment === "object") {
         const cleaned = {};
-        for (const [key, entry] of Object.entries(value)) {
+        for (const [key, entry] of Object.entries(messageDataFragment)) {
             if (key === "dehydratedManeuverItem") {
                 continue;
             }
@@ -473,7 +473,7 @@ function stripDehydratedManeuverItem_4_3_15(value) {
         return cleaned;
     }
 
-    return value;
+    return messageDataFragment;
 }
 
 async function removeDehydratedManeuverItemFromMessage_4_3_15(message) {
