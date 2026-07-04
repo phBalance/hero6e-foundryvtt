@@ -1800,11 +1800,30 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         const ary = [];
         const effectChangesOf = (ae) => (ae.changes?.length ? ae.changes : (ae.system?.changes ?? []));
 
+        // One tooltip line per effect: name, the same "Attacker: Item" origin string the effect
+        // config sheet shows as HERO.Origin, and the seconds left before it fades/expires.
+        const describeEffect = (ae, viaKey) => {
+            const parts = [`${ae.name}${viaKey ? ` (via ${viaKey.toUpperCase()})` : ""}`];
+
+            const originItem = ae.origin ? fromUuidSync(ae.origin) : null;
+            const originToken = ae.origin ? fromUuidSync(ae.origin.match(/(.*).Actor/)?.[1]) : null;
+            if (originItem) {
+                parts.push(`${originToken?.name || originItem.actor?.name}: ${originItem.name}`);
+            }
+
+            const remaining = ae._prepareDuration?.().remaining;
+            if (remaining != null && remaining > 0) {
+                parts.push(`${Math.ceil(remaining)}s remaining`);
+            }
+
+            return `<li>${parts.join(" — ")}</li>`;
+        };
+
         // Effects that directly target this characteristic's max.
         for (const ae of this.actor.allApplicableEffects()) {
             if (ae.disabled || ae.isSuppressed) continue;
             if (effectChangesOf(ae).find((p) => p.key === `system.characteristics.${this.key}.max`)) {
-                ary.push(`<li>${ae.name}</li>`);
+                ary.push(describeEffect(ae));
             }
         }
 
@@ -1825,7 +1844,7 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
                     if (!isCalculatedDependent && ae.flags?.[game.system.id]?.type === "adjustment") continue;
                     if (effectChangesOf(ae).find((p) => p.key === `system.characteristics.${sourceKey}.max`)) {
                         listed.add(ae.id ?? ae.name);
-                        ary.push(`<li>${ae.name} (via ${sourceKey.toUpperCase()})</li>`);
+                        ary.push(describeEffect(ae, sourceKey));
                     }
                 }
             }
