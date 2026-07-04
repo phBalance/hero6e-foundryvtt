@@ -14,7 +14,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
             const actorTypes = Actor.TYPES.filter((t) => t !== "base");
             const createdActorIds = [];
 
-            describe.only("Hero System 5e Calculated and Figured Characteristics State Machine", function () {
+            describe("Hero System 5e Calculated and Figured Characteristics State Machine", function () {
                 // Multi-client database sweep block to guarantee multi-client parity
                 after(async function () {
                     for (const actorId of createdActorIds) {

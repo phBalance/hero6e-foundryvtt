@@ -86,7 +86,7 @@ export function registerActorCharacteristicTests(quench) {
                 }
             });
 
-            describe.only("Verify Physical Construct Baselines (6e vs 5e)", () => {
+            describe("Verify Physical Construct Baselines (6e vs 5e)", () => {
                 after(cleanup);
 
                 for (const is5e of [false, true]) {
@@ -134,7 +134,7 @@ export function registerActorCharacteristicTests(quench) {
                 }
             });
 
-            describe.only("Verify Mechanical and Processing System Baselines (6e vs 5e)", () => {
+            describe("Verify Mechanical and Processing System Baselines (6e vs 5e)", () => {
                 after(cleanup);
 
                 for (const is5e of [false, true]) {
@@ -191,7 +191,7 @@ export function registerActorCharacteristicTests(quench) {
                 }
             });
 
-            describe.only("Verify Implicit Coverage Safety", () => {
+            describe("Verify Implicit Coverage Safety", () => {
                 after(cleanup);
 
                 it("Catch unexpected variations or undocumented actor types", () => {
