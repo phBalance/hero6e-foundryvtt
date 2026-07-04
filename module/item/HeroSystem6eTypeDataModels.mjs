@@ -1626,7 +1626,7 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
      */
     get base() {
         // Some 5e characteristics are calculated or figured
-        if (this.actor.is5e) {
+        if (this.actor.is5e === true) {
             if (this.baseInfo?.behaviors.includes("calculated")) {
                 if (this.#baseInfo.calculated5eCharacteristic) {
                     return this.#baseInfo.calculated5eCharacteristic(this.actor);
@@ -1644,7 +1644,7 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
 
     get basePlusLevels() {
         // Need to add in LEVELS
-        return (this.base ?? 0) + (this.item?.LEVELS ?? 0);
+        return (this.base ?? 0) + this.levels;
     }
 
     get baseItemsContributingToFiguredCharacteristics() {

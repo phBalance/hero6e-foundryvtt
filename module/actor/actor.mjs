@@ -183,6 +183,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      */
     _recalculateCharacteristicsByPriority(targetChars, { preserveCharacteristicKeys = new Set() } = {}) {
         const characteristicInfo = getCharacteristicInfoArrayForActor(this);
+        const patched = new Map();
+        const patch = (path, value) => {
+            if (!patched.has(path)) patched.set(path, foundry.utils.getProperty(this, path));
+            foundry.utils.setProperty(this, path, value);
+        };
 
         const isDependentCharacteristic = (info) => {
             const keyLower = info.key.toLowerCase();
@@ -192,7 +197,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             const hasFiguredFormula = !!characteristic?.baseInfo?.figured5eCharacteristic;
             const isCombatOrMovementTrack = ["ocv", "dcv", "leaping", "running", "swimming"].includes(keyLower);
 
-            return this.is5e && (hasCalculatedFormula || hasFiguredFormula || isCombatOrMovementTrack);
+            return this.is5e === true && (hasCalculatedFormula || hasFiguredFormula || isCombatOrMovementTrack);
         };
 
         const executionPasses = [
@@ -200,76 +205,84 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             characteristicInfo.filter((info) => isDependentCharacteristic(info)), // Pass 2: Figured & Calculated Dependencies
         ];
 
-        for (const infoList of executionPasses) {
-            for (const info of infoList) {
-                const keyLower = info.key.toLowerCase();
-                if (preserveCharacteristicKeys.has(keyLower)) continue;
+        try {
+            for (const infoList of executionPasses) {
+                for (const info of infoList) {
+                    const keyLower = info.key.toLowerCase();
+                    if (preserveCharacteristicKeys.has(keyLower)) continue;
 
-                const characteristic = this.getCharacteristic(keyLower);
-                if (!characteristic) continue;
+                    const characteristic = this.getCharacteristic(keyLower);
+                    if (!characteristic) continue;
 
-                const currentEntry = targetChars[keyLower] ?? {};
-                const isDependent = isDependentCharacteristic(info);
-                let baseValue;
+                    const currentEntry = targetChars[keyLower] ?? {};
+                    const isDependent = isDependentCharacteristic(info);
+                    let baseValue;
 
-                if (isDependent) {
-                    const baseInfo = characteristic.baseInfo;
-                    let rawCalculatedValue;
+                    if (isDependent) {
+                        const baseInfo = characteristic.baseInfo;
+                        let rawCalculatedValue;
 
-                    if (baseInfo?.figured5eCharacteristic) {
-                        rawCalculatedValue = baseInfo.figured5eCharacteristic(this);
-                    } else if (baseInfo?.calculated5eCharacteristic) {
-                        rawCalculatedValue = baseInfo.calculated5eCharacteristic(this);
+                        if (baseInfo?.figured5eCharacteristic) {
+                            rawCalculatedValue = baseInfo.figured5eCharacteristic(this);
+                        } else if (baseInfo?.calculated5eCharacteristic) {
+                            rawCalculatedValue = baseInfo.calculated5eCharacteristic(this);
+                        } else {
+                            const currentDex = Math.max(0, targetChars.dex?.max ?? targetChars.dex?.value ?? 0);
+                            rawCalculatedValue = ["ocv", "dcv"].includes(keyLower)
+                                ? currentDex / 3
+                                : (characteristic.base ?? 0);
+                        }
+
+                        if (keyLower === "spd") {
+                            baseValue = Number(Number(rawCalculatedValue).toFixed(1));
+                        } else {
+                            baseValue = roundFavorPlayerAwayFromZero(rawCalculatedValue);
+                        }
+
+                        if (baseValue === 0 && characteristic.base !== undefined && characteristic.base > 0) {
+                            baseValue = characteristic.base;
+                        }
                     } else {
-                        const currentDex = Math.max(0, targetChars.dex?.max ?? targetChars.dex?.value ?? 0);
-                        rawCalculatedValue = ["ocv", "dcv"].includes(keyLower)
-                            ? currentDex / 3
-                            : (characteristic.base ?? 0);
+                        const basePoints = characteristic.base ?? 0;
+                        const keyUpper = info.key.toUpperCase();
+
+                        const rawSystemNode = this.system?.[info.key] ?? this.system?.[keyUpper];
+                        const purchasedLevels = Number(rawSystemNode?.LEVELS ?? currentEntry.LEVELS ?? 0);
+
+                        baseValue = currentEntry.value ?? basePoints + purchasedLevels;
+                        if (baseValue === 0 && basePoints > 0) {
+                            baseValue = basePoints + purchasedLevels;
+                        }
                     }
 
-                    if (keyLower === "spd") {
-                        baseValue = Number(Number(rawCalculatedValue).toFixed(1));
+                    // Value follows the recomputed max unless the characteristic is currently damaged or
+                    // depleted (its prior value sits below its prior max), in which case preserve that value
+                    // as a resource-pooling/damage shield. A char at full (value === max) or one whose value
+                    // was never independently set adopts the freshly computed max; this is what lets a
+                    // dependent seeded before its primaries (e.g. figured LEAPING/OCV seeded to 0 while STR/DEX
+                    // were still 0) adopt its correct computed value rather than keeping the stale seed.
+                    let finalValueState;
+                    if (currentEntry.value === undefined || currentEntry.value === currentEntry.max) {
+                        finalValueState = baseValue;
                     } else {
-                        baseValue = roundFavorPlayerAwayFromZero(rawCalculatedValue);
+                        finalValueState = currentEntry.value;
                     }
 
-                    if (baseValue === 0 && characteristic.base !== undefined && characteristic.base > 0) {
-                        baseValue = characteristic.base;
-                    }
-                } else {
-                    const basePoints = characteristic.base ?? 0;
-                    const keyUpper = info.key.toUpperCase();
+                    targetChars[keyLower] = {
+                        value: finalValueState,
+                        max: baseValue,
+                    };
 
-                    const rawSystemNode = this.system?.[info.key] ?? this.system?.[keyUpper];
-                    const purchasedLevels = Number(rawSystemNode?.LEVELS ?? currentEntry.LEVELS ?? 0);
-
-                    baseValue = currentEntry.value ?? basePoints + purchasedLevels;
-                    if (baseValue === 0 && basePoints > 0) {
-                        baseValue = basePoints + purchasedLevels;
-                    }
+                    // Make earlier pass values visible to formulas in later passes without calling
+                    // updateSource during _preCreate, which runs prepareDerivedData on partially seeded data in v13.
+                    patch(`system.characteristics.${keyLower}.value`, finalValueState);
+                    patch(`system.characteristics.${keyLower}.max`, baseValue);
                 }
-
-                // Value follows the recomputed max unless the characteristic is currently damaged or
-                // depleted (its prior value sits below its prior max), in which case preserve that value
-                // as a resource-pooling/damage shield. A char at full (value === max) or one whose value
-                // was never independently set adopts the freshly computed max; this is what lets a
-                // dependent seeded before its primaries (e.g. figured LEAPING/OCV seeded to 0 while STR/DEX
-                // were still 0) adopt its correct computed value rather than keeping the stale seed.
-                let finalValueState;
-                if (currentEntry.value === undefined || currentEntry.value === currentEntry.max) {
-                    finalValueState = baseValue;
-                } else {
-                    finalValueState = currentEntry.value;
-                }
-
-                targetChars[keyLower] = {
-                    value: finalValueState,
-                    max: baseValue,
-                };
             }
-
-            // Make earlier pass values visible to formulas in later passes.
-            this.updateSource({ system: { characteristics: targetChars } });
+        } finally {
+            for (const [path, value] of patched) {
+                foundry.utils.setProperty(this, path, value);
+            }
         }
     }
 
@@ -318,7 +331,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         this.composeMemoizableObjectFunction("analyzeEndurance");
         this.composeMemoizableObjectFunction("getActorCharacterAndActivePoints");
 
-        if (this.is5e) {
+        if (this.is5e === true) {
             const characteristicInfo = getCharacteristicInfoArrayForActor(this);
 
             const restoreFormulaSources = this._apply5eActiveEffectFormulaSourceOverrides(characteristicInfo);
@@ -443,7 +456,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      * @param {number} calculatedMax - Formula-derived max before direct active effects.
      * @returns {number}
      */
-    _applyDirectActiveEffectChangesToDerivedMax(keyLower, calculatedMax) {
+    _applyDirectActiveEffectChangesToDerivedMax(keyLower, calculatedMax, { includeStatusEffects = true } = {}) {
         const targetKey = `system.characteristics.${keyLower}.max`;
         const modes = CONST.ACTIVE_EFFECT_MODES;
         const effects =
@@ -454,6 +467,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         for (const effect of effects) {
             if (effect.disabled || effect.isSuppressed) continue;
+            if (!includeStatusEffects && effect.statuses?.size > 0) continue;
 
             for (const [index, change] of (effect.changes ?? []).entries()) {
                 if (change.key !== targetKey) continue;
@@ -679,7 +693,18 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // 5. Run canvas visual scene batch refresh routines
         if (overlayEffects.includes(statusId)) {
             const tokens = this.getActiveTokens();
-            if (tokens.length > 0) {
+            const sceneTokenDocuments = canvas.scene?.tokens?.contents ?? Array.from(canvas.scene?.tokens ?? []);
+            const tokenDocuments =
+                tokens.length > 0
+                    ? tokens.map((token) => token.document)
+                    : sceneTokenDocuments.filter(
+                          (tokenDocument) =>
+                              tokenDocument.actorId === this.id ||
+                              tokenDocument.actor?.id === this.id ||
+                              tokenDocument.actor === this,
+                      );
+
+            if (tokenDocuments.length > 0) {
                 const colors = CONFIG.HERO.statusColors;
                 let updatePayload = { alpha: colors.DEFAULT_ALPHA, "texture.tint": colors.CLEAR_TINT };
 
@@ -701,7 +726,10 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     updatePayload = { alpha: colors.DEFAULT_ALPHA, "texture.tint": colors.STUNNED_TINT };
                 }
 
-                const tokenUpdates = tokens.map((t) => ({ _id: t.document.id, ...updatePayload }));
+                const tokenUpdates = tokenDocuments.map((tokenDocument) => ({
+                    _id: tokenDocument.id,
+                    ...updatePayload,
+                }));
                 await canvas.scene.updateEmbeddedDocuments("Token", tokenUpdates);
 
                 if (finalDead) {
@@ -867,7 +895,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (allowed === false) return false;
 
         const systemData = changed?.system || {};
-        const is5e = this.is5e || false;
+        const is5e = this.is5e === true;
 
         // =========================================================================
         // 1. CHARACTERISTIC & TRAIT CALCULATIONS (Alters changed payload inline)
@@ -923,7 +951,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 }
             }
             // RULE B: Dropping to 0 or lower STUN -> Trigger native toggle pipelines
-            else if (nextStun <= 0 && currentStun > 0) {
+            else if (nextStun <= 0 && (currentStun > 0 || !this.statuses.has("knockedOut"))) {
                 await this.toggleStatusEffect("knockedOut", { active: true, overlay: true, changed });
                 await this.toggleStatusEffect("prone", { active: true, changed });
             }
@@ -2166,13 +2194,16 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // Set Characteristics MAX to CORE (or 5e calculated value)
         start = Date.now();
         const characteristicChangesMax = {};
-        for (const charKey of getCharacteristicInfoArrayForActor(this).map((infoArray) =>
-            infoArray.key.toLowerCase(),
-        )) {
-            const characteristic = this.system.characteristics[charKey];
-            const basePlusLevels = parseInt(characteristic.basePlusLevels);
-            if (this.system.characteristics[charKey].max !== basePlusLevels) {
-                characteristicChangesMax[`system.characteristics.${charKey}.max`] = basePlusLevels;
+        const fullHealthMaxByCharacteristic = {};
+        for (const info of getCharacteristicInfoArrayForActor(this)) {
+            const charKey = info.key.toLowerCase();
+            const fullHealthMax = this._getFullHealthCharacteristicMax(info);
+            if (!Number.isFinite(fullHealthMax)) continue;
+
+            fullHealthMaxByCharacteristic[charKey] = fullHealthMax;
+
+            if (this.system.characteristics[charKey].max !== fullHealthMax) {
+                characteristicChangesMax[`system.characteristics.${charKey}.max`] = fullHealthMax;
             }
         }
 
@@ -2192,7 +2223,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const characteristicChangesValue = {};
         for (const charKey of Object.keys(this.system.characteristics)) {
             const characteristic = this.system.characteristics[charKey];
-            const max = parseInt(this.system.characteristics[charKey].max);
+            const baseMax = fullHealthMaxByCharacteristic[charKey] ?? this.system.characteristics[charKey].max;
+            const max = parseInt(
+                this._applyDirectActiveEffectChangesToDerivedMax(charKey, baseMax, {
+                    includeStatusEffects: false,
+                }),
+            );
             if (characteristic.value !== max) {
                 characteristic.value = max;
                 characteristicChangesValue[`system.characteristics.${charKey}.value`] = characteristic.value;
@@ -2209,6 +2245,32 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (end - start > tDelta) {
             console.warn("fullHealth performance concern: Set Characteristics VALUE to MAX", end - start);
         }
+    }
+
+    _getFullHealthCharacteristicMax(info) {
+        const charKey = info.key.toLowerCase();
+        const characteristic = this.system.characteristics?.[charKey];
+        if (!characteristic) return null;
+
+        const nativeKey = info.key.toUpperCase();
+        const nativeLevels = Number(
+            this.system?.[info.key]?.LEVELS ?? this.system?.[nativeKey]?.LEVELS ?? this.system?.[charKey]?.LEVELS ?? 0,
+        );
+        const baseInfo = info ?? characteristic.baseInfo;
+
+        if (this.is5e === true) {
+            if (baseInfo?.figured5eCharacteristic) {
+                const rawValue = baseInfo.figured5eCharacteristic(this) + nativeLevels;
+                return charKey === "spd" ? Math.floor(rawValue) : roundFavorPlayerAwayFromZero(rawValue);
+            }
+
+            if (baseInfo?.calculated5eCharacteristic) {
+                return roundFavorPlayerAwayFromZero(baseInfo.calculated5eCharacteristic(this));
+            }
+        }
+
+        const base = Number(baseInfo?.base?.(this) ?? characteristic.base ?? 0);
+        return base + nativeLevels;
     }
 
     async resetActor() {
@@ -3182,8 +3244,22 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             try {
                 if (this.id) {
                     const changes = {};
+                    const fullHealthMaxByCharacteristic = {};
+                    for (const info of getCharacteristicInfoArrayForActor(this)) {
+                        const charKey = info.key.toLowerCase();
+                        const fullHealthMax = this._getFullHealthCharacteristicMax(info);
+                        if (Number.isFinite(fullHealthMax)) {
+                            fullHealthMaxByCharacteristic[charKey] = fullHealthMax;
+                        }
+                    }
+
                     for (const key of Object.keys(this.system.characteristics)) {
-                        changes[`system.characteristics.${key}.value`] = this.system.characteristics[key].max;
+                        const baseMax = fullHealthMaxByCharacteristic[key] ?? this.system.characteristics[key].max;
+                        changes[`system.characteristics.${key}.value`] = parseInt(
+                            this._applyDirectActiveEffectChangesToDerivedMax(key, baseMax, {
+                                includeStatusEffects: false,
+                            }),
+                        );
                     }
                     await this.update(changes);
                 }
