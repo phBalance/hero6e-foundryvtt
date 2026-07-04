@@ -707,21 +707,28 @@ export async function performAdjustment(
         adjustmentDamageThisApplication = parseInt(existingEffect.changes[0].value);
         adjustmentDamageThisApplicationArray = existingEffect.changes.map((ae) => parseInt(ae.value) || 0);
 
+        // Fade against a clone of the source changes. On V14 the document's .changes is prepared
+        // data — mutating it in place never reaches system.changes, so the faded values would not
+        // persist and the effect's max contribution would linger while the value dropped.
+        const changesKey = HeroCompatibility.isV14 ? `system.changes` : `changes`;
+        const fadedChanges = foundry.utils.deepClone(
+            HeroCompatibility.isV14 ? existingEffect.system.changes : existingEffect.changes,
+        );
+
         // Rough estimate of changes (recalc is more accurate and perhaps should be included here)
         let i = 0;
-        for (const change of activeEffect.changes) {
+        for (const change of fadedChanges) {
             const char = change.key.match(/([a-z]+)\.max/)?.[1];
             const costPerActivePoint2 = determineCostPerActivePoint(char, targetPower, targetActor);
             change.value = Math.trunc(activeEffect.flags[game.system.id].adjustmentActivePoints / costPerActivePoint2);
-            adjustmentDamageThisApplicationArray[i] =
-                existingEffect.changes[i].value - adjustmentDamageThisApplicationArray[i];
+            adjustmentDamageThisApplicationArray[i] = change.value - adjustmentDamageThisApplicationArray[i];
             i++;
         }
-        adjustmentDamageThisApplication = existingEffect.changes[0].value - adjustmentDamageThisApplication;
+        adjustmentDamageThisApplication = fadedChanges[0].value - adjustmentDamageThisApplication;
 
         if (activeEffect.flags[game.system.id].adjustmentActivePoints === 0 && !CONFIG.debug.adjustmentFadeKeep) {
             isEffectFinished = true;
-            await existingEffect.update({ changes: existingEffect.changes });
+            await existingEffect.update({ [changesKey]: fadedChanges });
             await updateCharacteristicValue(activeEffect, { targetSystem, previousChanges });
             await existingEffect.delete();
             const chatCard = _generateAdjustmentChatCard({
@@ -743,11 +750,16 @@ export async function performAdjustment(
             });
             return chatCard;
         } else {
-            updateEffectName(existingEffect);
+            // Compute the post-fade name from the faded changes without mutating the document.
+            const nameSurrogate = {
+                changes: fadedChanges,
+                flags: existingEffect.flags,
+                origin: existingEffect.origin,
+            };
+            updateEffectName(nameSurrogate);
             await existingEffect.update({
-                name: existingEffect.name,
-                [HeroCompatibility.isV14 ? `system.changes` : `changes`]:
-                    activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`],
+                name: nameSurrogate.name,
+                [changesKey]: fadedChanges,
                 flags: existingEffect.flags,
                 "duration.startTime": existingEffect.duration.startTime + existingEffect.duration.seconds,
             });
@@ -1024,12 +1036,19 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
                 }
 
                 const previousChanges = foundry.utils.deepClone(ae.changes);
-                ae.changes[0].value = _targetValue;
-                const char = ae.changes[0].key.match(/([a-z]+)\.max/)?.[1];
+                // Mutate a clone of the source changes (on V14 document.changes is prepared data;
+                // an in-place edit would never reach system.changes and would not persist).
+                const changesKey = HeroCompatibility.isV14 ? `system.changes` : `changes`;
+                const updatedChanges = foundry.utils.deepClone(
+                    HeroCompatibility.isV14 ? ae.system.changes : ae.changes,
+                );
+                updatedChanges[0].value = _targetValue;
+                const char = updatedChanges[0].key.match(/([a-z]+)\.max/)?.[1];
                 const startingActorMax = foundry.utils.getProperty(targetActor, `system.characteristics.${char}.max`);
 
-                updateEffectName(ae);
-                await ae.update({ name: ae.name, changes: ae.changes });
+                const nameSurrogate = { changes: updatedChanges, flags: ae.flags, origin: ae.origin };
+                updateEffectName(nameSurrogate);
+                await ae.update({ name: nameSurrogate.name, [changesKey]: updatedChanges });
 
                 // Apparently we sometimes need to delay to let all the async's catch up
                 const delay = (ms) => new Promise((res) => setTimeout(res, ms || 100));
@@ -1064,10 +1083,12 @@ async function updateCharacteristicValue(activeEffect, { targetSystem, previousC
         for (const change of activeEffect.changes ?? activeEffect.system.changes) {
             const char = change.key.match(/([a-z]+)\.max/)?.[1];
             if (char) {
-                const targetStartingValue = foundry.utils.getProperty(
-                    targetSystem,
-                    `system.characteristics.${char}.value`,
-                );
+                // Read the stored (source) value: derived data caps value to the recomputed max
+                // during prepareDerivedData, so reading the derived value here would apply the fade
+                // delta on top of an already-capped number and double-subtract.
+                const targetStartingValue =
+                    foundry.utils.getProperty(targetSystem._source, `system.characteristics.${char}.value`) ??
+                    foundry.utils.getProperty(targetSystem, `system.characteristics.${char}.value`);
                 const targetStartingMax = foundry.utils.getProperty(targetSystem, `system.characteristics.${char}.max`);
                 const prevChangeValue = previousChanges.find((c) => c.key === change.key)?.value || 0;
                 const totalPointsDifference = change.value - prevChangeValue;
