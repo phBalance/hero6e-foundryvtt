@@ -11321,7 +11321,9 @@ export function registerUploadTests(quench) {
                                     .filter((o) => o.behaviors.includes(`calculated`))
                                     .map((o) => o.key)
                                     .join(", "),
-                                "OCV, DCV, OMCV, DMCV",
+                                // LEAPING is a Strength Table ability, not a Figured Characteristic
+                                // (5ER p. 33), so it is calculated from STR like the CVs (5ER p. 105).
+                                "OCV, DCV, OMCV, DMCV, LEAPING",
                             );
                         });
 
