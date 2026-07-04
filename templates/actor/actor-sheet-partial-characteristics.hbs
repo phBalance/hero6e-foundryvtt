@@ -42,8 +42,8 @@
                 <td>
                     {{#unless (eq characteristic.base null)}}
                     <input name="system.{{characteristic.KEY}}.LEVELS" type="number"
-                        value="{{characteristic.levels}}" data-dtype="Number" 
-                        {{#if (and (eq @root/system.is5e true) (includes characteristic.baseInfo.behaviors "calculated"))}}disabled{{/if}}>
+                        value="{{characteristic.levels}}" data-dtype="Number"
+                        {{#if characteristic.levelsLocked}}disabled{{/if}}>
                     {{/unless}}
                 </td>
 

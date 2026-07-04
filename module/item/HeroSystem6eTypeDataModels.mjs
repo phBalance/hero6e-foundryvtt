@@ -1648,6 +1648,17 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
     }
 
     /**
+     * Whether the sheet should lock this characteristic's LEVELS input. 5e calculated combat values
+     * (OCV/DCV/OMCV/DMCV) derive entirely from DEX/EGO and cannot be purchased (cost per level 0);
+     * purchasable calculated abilities (LEAPING at 1 CP per inch) keep an editable input.
+     */
+    get levelsLocked() {
+        if (this.actor.is5e !== true) return false;
+        if (!this.baseInfo?.behaviors.includes("calculated")) return false;
+        return !(this.baseInfo?.costPerLevel?.(this) > 0);
+    }
+
+    /**
      * The formula-derived max (base + purchased levels) with Hero rounding applied — what max should
      * be absent active effects. 5e SPD keeps a fractional base (1 + DEX/10) but its stored max floors,
      * so compare against the floored value to avoid false over/under-max coloring.

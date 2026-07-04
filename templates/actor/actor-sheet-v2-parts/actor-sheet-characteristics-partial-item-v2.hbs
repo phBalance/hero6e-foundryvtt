@@ -27,8 +27,8 @@
         <div class="item-column item-levels">
             {{#unless (eq characteristic.base null)}}
                 <input name="system.{{this.KEY}}.LEVELS" type="number"
-                value="{{this.levels}}" data-dtype="Number" 
-                {{#if (and (eq @root/actor.is5e true) (includes this.baseInfo.behaviors "calculated"))}}disabled{{/if}}
+                value="{{this.levels}}" data-dtype="Number"
+                {{#if this.levelsLocked}}disabled{{/if}}
                 >
             {{/unless}}
         </div>

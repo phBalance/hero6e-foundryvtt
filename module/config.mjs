@@ -2991,7 +2991,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<LEAPING XMLID="LEAPING" ID="1709333946167" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></LEAPING>`,
         },
         {
-            behaviors: ["activatable", "figured", "figuredSTR"],
+            // Leaping is NOT a Figured Characteristic (the 5ER p. 33 table is PD/ED/SPD/REC/END/STUN
+            // only) — it's a Strength Table ability like lifting capacity, and 5ER p. 105 says
+            // adjustments to a primary DO affect abilities calculated from it. Tagged calculated so
+            // AID/DRAIN STR move leaping in both directions ("Negative STR prevents a character from
+            // Leaping", 5ER p. 35), while true figured characteristics stay insulated.
+            // TODO: 5ER p. 35 also halves STR-based movement at STR 0 and again per -10 STR; not
+            // modeled here.
+            behaviors: ["activatable", "calculated", "calculatedSTR"],
             base: function (actor) {
                 if (actor.type === "vehicle") {
                     return 0;
@@ -3000,10 +3007,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return 2;
             },
             costPerLevel: fixedValueFunction(1),
-            figured5eCharacteristic: function (actor) {
+            calculated5eCharacteristic: function (actor) {
                 // STR/2.5 = free meters of leaping
                 // Div by 2 again to get inches to match HD
-                // LEAPING is technically not a figured characteristic, behaves a bit more like a calculated but with LEVELS
                 // You can end up with .5 remainders for a half inch
 
                 //  Vehicles all start with Leaping 0"; they do not get any

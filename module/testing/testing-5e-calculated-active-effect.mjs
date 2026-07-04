@@ -859,6 +859,81 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         assert.equal(drainedChars.omcv.max, 0, "DRAIN EGO floors OMCV at 0.");
                         assert.equal(drainedChars.dmcv.max, 0, "DRAIN EGO floors DMCV at 0.");
                     });
+
+                    it("STR adjustments move Leaping both directions but never Running/Swimming", async function () {
+                        const aidedActor = await create5eActor("_Quench_5e_AID_STR_Leaping_Target");
+                        const drainedActor = await create5eActor("_Quench_5e_DRAIN_STR_Leaping_Target");
+                        const baseline = {
+                            leaping: aidedActor.system.characteristics.leaping.max, // floor(10/2.5)/2 = 2
+                            running: aidedActor.system.characteristics.running.max,
+                            swimming: aidedActor.system.characteristics.swimming.max,
+                            pd: aidedActor.system.characteristics.pd.max,
+                        };
+
+                        // Leaping is a Strength Table ability, not a Figured Characteristic (the 5ER
+                        // p. 33 table is PD/ED/SPD/REC/END/STUN), so adjustments to STR move it
+                        // (5ER p. 105) — and the current value moves with the max: a bigger STR means
+                        // a longer leap now, not just a higher ceiling.
+                        const aidedChars = await addAdjustmentEffect(aidedActor, {
+                            name: "AID STR",
+                            adjustmentActivePoints: 30,
+                            changes: [
+                                {
+                                    key: "system.characteristics.str.max",
+                                    value: "8",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+                        // STR 18: floor(18/2.5)/2 = 3.5, player-favorable rounding -> 4.
+                        assert.equal(aidedChars.leaping.max, 4, "AID STR should raise Leaping max.");
+                        assert.equal(aidedChars.leaping.value, 4, "AID STR should raise the current Leaping too.");
+                        assert.equal(aidedChars.running.max, baseline.running, "AID STR should not touch Running.");
+                        assert.equal(aidedChars.swimming.max, baseline.swimming, "AID STR should not touch Swimming.");
+                        assert.equal(aidedChars.pd.max, baseline.pd, "Figured PD stays insulated from AID STR.");
+
+                        // 5ER p. 35: "Negative STR prevents a character from Leaping."
+                        const drainedChars = await addAdjustmentEffect(drainedActor, {
+                            name: "DRAIN STR",
+                            adjustmentActivePoints: -40,
+                            changes: [
+                                {
+                                    key: "system.characteristics.str.max",
+                                    value: "-40",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+                        assert.equal(drainedChars.leaping.max, 0, "DRAIN STR below zero should remove Leaping.");
+                        assert.equal(drainedChars.leaping.value, 0, "Current Leaping follows the drain down.");
+                        assert.equal(drainedChars.pd.max, baseline.pd, "Figured PD stays insulated from DRAIN STR.");
+                    });
+
+                    it("purchased Leaping inches stack with the STR-derived amount", async function () {
+                        const actor = await create5eActor("_Quench_5e_Leaping_Levels_Target");
+
+                        // Buy +6" of Leaping: floor(10/2.5)/2 = 2 base + 6 = 8/8.
+                        await actor.update({ system: { LEAPING: { LEVELS: 6 } } });
+                        assert.equal(actor.system.characteristics.leaping.max, 8, "Bought Leaping raises the max.");
+                        assert.equal(actor.system.characteristics.leaping.value, 8, "Bought Leaping raises the value.");
+
+                        // +8 STR: 3.5 STR-derived + 6 bought = 9.5, player-favorable rounding -> 10 —
+                        // and the current value follows (regression: max previously rose while the
+                        // current stayed behind, 8/8 -> 8/10).
+                        const chars = await addAdjustmentEffect(actor, {
+                            name: "AID STR",
+                            adjustmentActivePoints: 30,
+                            changes: [
+                                {
+                                    key: "system.characteristics.str.max",
+                                    value: "8",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+                        assert.equal(chars.leaping.max, 10, "STR-derived and purchased Leaping stack in the max.");
+                        assert.equal(chars.leaping.value, 10, "Current Leaping follows the raised max.");
+                    });
                 });
 
                 describe("Adjustment power lifecycle (performAdjustment apply/fade/delete)", function () {

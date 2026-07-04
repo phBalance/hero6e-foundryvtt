@@ -227,9 +227,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     let baseValue;
 
                     if (isDependent) {
-                        const rawCalculatedValue = info.figured5eCharacteristic
-                            ? info.figured5eCharacteristic(this)
-                            : info.calculated5eCharacteristic(this);
+                        // Own purchased LEVELS stack on the formula (bought SPD or LEAPING inches),
+                        // matching prepareDerivedData and the persistence path.
+                        const ownLevels = Number(this.system?.[info.key]?.LEVELS ?? 0);
+                        const rawCalculatedValue =
+                            (info.figured5eCharacteristic
+                                ? info.figured5eCharacteristic(this)
+                                : info.calculated5eCharacteristic(this)) + ownLevels;
 
                         // SPD floors; other figured/calculated use player-favorable rounding. This matches
                         // prepareDerivedData and the persistence path so a fresh actor doesn't disagree
@@ -260,7 +264,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     // depleted (its prior value sits below its prior max), in which case preserve that value
                     // as a resource-pooling/damage shield. A char at full (value === max) or one whose value
                     // was never independently set adopts the freshly computed max; this is what lets a
-                    // dependent seeded before its primaries (e.g. figured LEAPING/OCV seeded to 0 while STR/DEX
+                    // dependent seeded before its primaries (e.g. LEAPING/OCV seeded to 0 while STR/DEX
                     // were still 0) adopt its correct computed value rather than keeping the stale seed.
                     let finalValueState;
                     if (currentEntry.value === undefined || currentEntry.value === currentEntry.max) {
@@ -351,12 +355,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     const baseInfo = characteristic.baseInfo;
                     let calculatedValue = null;
 
-                    // Figured characteristics add the characteristic's own purchased LEVELS (e.g. bought SPD or
-                    // extra LEAPING) on top of the figured base; calculated characteristics (OCV/DCV) do not.
+                    // Both kinds add the characteristic's own purchased LEVELS on top of the formula
+                    // base: bought SPD or extra LEAPING inches stack with the derived amount. 5e CVs
+                    // (OCV/DCV/OMCV/DMCV) cannot be purchased directly, so their LEVELS are always 0
+                    // and this is a no-op for them.
                     if (baseInfo?.figured5eCharacteristic) {
                         calculatedValue = baseInfo.figured5eCharacteristic(this) + (this.system[info.key]?.LEVELS ?? 0);
                     } else if (baseInfo?.calculated5eCharacteristic) {
-                        calculatedValue = baseInfo.calculated5eCharacteristic(this);
+                        calculatedValue =
+                            baseInfo.calculated5eCharacteristic(this) + (this.system[info.key]?.LEVELS ?? 0);
                     }
 
                     if (calculatedValue !== null) {
@@ -378,22 +385,32 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                             maxChangesByKey,
                         });
 
-                        // Conditions that lower a dependent's max (e.g. Prone halving DCV) also cap the
-                        // current value. Cap DOWN only — never raise value up to a higher max — because
-                        // for expendables (STUN/END) the gap between value and max is damage/spent
-                        // points, and raising the value here would silently heal them on every render.
+                        // Keep the current value coherent with the recomputed max:
+                        // - A dependent resting untouched at its stored maximum (no damage, no
+                        //   value-targeting effects) FOLLOWS the max in both directions — a bigger
+                        //   STR means a longer leap right now, not just a higher ceiling.
+                        // - Otherwise only cap DOWN (e.g. Prone halving DCV). Never raise a diverged
+                        //   value: for expendables (STUN/END) the gap below max is damage/spent
+                        //   points and raising it would silently heal them on every render, and a
+                        //   derived value below its stored source means a value-targeting effect
+                        //   (e.g. the Brace maneuver's x1/2 DCV) that must not be erased.
                         const currentValue = Number(node.value);
                         if (Number.isFinite(currentValue)) {
-                            let cappedValue = Math.min(currentValue, node.max);
-                            // Effects that halve the current value directly (e.g. the Brace maneuver's
-                            // x1/2 DCV) can leave a fraction behind; apply Hero rounding.
-                            if (!Number.isInteger(cappedValue)) {
-                                cappedValue =
+                            const sourceNode = this._source.system?.characteristics?.[keyLower] ?? {};
+                            const restingAtStoredMax =
+                                currentValue === Number(sourceNode.value) &&
+                                Number(sourceNode.value) === Number(sourceNode.max);
+
+                            let coherentValue = restingAtStoredMax ? node.max : Math.min(currentValue, node.max);
+                            // Effects that halve the current value directly can leave a fraction
+                            // behind; apply Hero rounding (SPD always rounds down, 5ER p. 33).
+                            if (!Number.isInteger(coherentValue)) {
+                                coherentValue =
                                     keyLower === "spd"
-                                        ? Math.floor(cappedValue)
-                                        : roundFavorPlayerAwayFromZero(cappedValue);
+                                        ? Math.floor(coherentValue)
+                                        : roundFavorPlayerAwayFromZero(coherentValue);
                             }
-                            if (cappedValue !== currentValue) node.value = cappedValue;
+                            if (coherentValue !== currentValue) node.value = coherentValue;
                         }
                     }
                 }
@@ -1245,8 +1262,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 }
             }
 
-            // (B) 5e calculated characteristics (OCV/DCV/OMCV/DMCV). Include LEVELS-changed sources so a
-            // purchased DEX increase also refreshes OCV/DCV.
+            // (B) 5e calculated characteristics (OCV/DCV/OMCV/DMCV, LEAPING). Include LEVELS-changed
+            // sources so a purchased DEX increase also refreshes OCV/DCV (and a STR increase refreshes
+            // LEAPING).
             const calculatedTriggerKeys = new Set([
                 ...relevantValueChangedKeys,
                 ...levelsChanged.map((l) => l.key).filter((k) => calculatedSourceKeys.has(k)),
@@ -1256,7 +1274,10 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     o.behaviors.includes(`calculated${changeKey.toUpperCase()}`),
                 )) {
                     if (char.calculated5eCharacteristic) {
-                        results[char.key.toLowerCase()] = char.calculated5eCharacteristic(this);
+                        // Purchased LEVELS stack on the formula (bought LEAPING inches; always 0 for
+                        // CVs, which cannot be purchased in 5e).
+                        results[char.key.toLowerCase()] =
+                            char.calculated5eCharacteristic(this) + Number(this.system[char.key]?.LEVELS ?? 0);
                     }
                 }
             }
@@ -2312,7 +2333,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             }
 
             if (info.calculated5eCharacteristic) {
-                return roundFavorPlayerAwayFromZero(info.calculated5eCharacteristic(this));
+                // Purchased LEVELS stack on the formula (bought LEAPING inches; always 0 for 5e CVs).
+                return roundFavorPlayerAwayFromZero(info.calculated5eCharacteristic(this) + nativeLevels);
             }
         }
 
