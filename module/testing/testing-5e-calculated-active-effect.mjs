@@ -985,6 +985,38 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         );
                     });
 
+                    it("knocking out an actor preserves an AID'd primary's current value", async function () {
+                        const attacker = await create5eActor("_Quench_5e_KO_AID_DEX_Attacker");
+                        const target = await create5eActor("_Quench_5e_KO_AID_DEX_Target");
+                        const aidItem = await createAdjustmentItem(attacker, {
+                            xmlid: "AID",
+                            input: "DEX",
+                            levels: 3,
+                        });
+
+                        // DEX costs 3 CP per point in 5e: 12 AP -> +4 DEX (14/14, value raised by the flow).
+                        await applyAdjustment(aidItem, "DEX", 12, target);
+                        assert.equal(target.system.characteristics.dex.max, 14, "AID DEX raises max.");
+                        assert.equal(target.system.characteristics.dex.value, 14, "AID DEX raises the current value.");
+
+                        // Drop STUN below zero: rule B toggles knockedOut + prone. The KO status
+                        // overrides the CV maxima but must not disturb the AID'd primary.
+                        await target.update({ system: { characteristics: { stun: { value: -1 } } } });
+                        assert.ok(target.statuses.has("knockedOut"), "Actor is knocked out.");
+
+                        assert.equal(target.system.characteristics.dex.max, 14, "KO keeps the AID'd DEX max.");
+                        assert.equal(
+                            target.system.characteristics.dex.value,
+                            14,
+                            "KO must not reset the AID'd DEX current value to base.",
+                        );
+                        assert.equal(
+                            target._source.system.characteristics.dex.value,
+                            14,
+                            "The stored DEX current value survives the knockout.",
+                        );
+                    });
+
                     it("consumption from an AIDed expendable comes out of the boost first (Gigawatt, 5ER p. 105-06)", async function () {
                         const attacker = await create5eActor("_Quench_5e_Lifecycle_AID_STUN_Attacker");
                         const target = await create5eActor("_Quench_5e_Lifecycle_AID_STUN_Target");
