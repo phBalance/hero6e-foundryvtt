@@ -137,15 +137,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             // so we merge in the entire system
             // Also need to use force replace ==items for this to work in v13
             const items = this.items.map((i) => ({ ...i.toObject(), system: i.system }));
-            if (HeroCompatibility.isV14) {
-                this.updateSource({
-                    items: foundry.data.operators.ForcedReplacement.create(items),
-                });
-            } else {
-                this.updateSource({
-                    [`==items`]: items,
-                });
-            }
+            this.updateSource(HeroCompatibility.forceReplace({ items }));
         }
 
         // For debugging purposes

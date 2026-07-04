@@ -1,3 +1,4 @@
+import { HeroCompatibility } from "./utility/compatibility.mjs";
 import { HeroProgressBar } from "./utility/progress-bar.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
 import { HeroItemCharacteristic } from "./item/HeroSystem6eTypeDataModels.mjs";
@@ -376,7 +377,12 @@ export async function migrateWorld() {
             if (["misc", "attack", "movement", "defense"].includes(item.type)) {
                 console.log(item);
                 console.warn(`changing ${item.name} type from "${item.type}" to "power"`, item);
-                await item.update({ type: "power", name: `[INVALID] ${item.name}`, "==system": item.system });
+                await item.update(
+                    HeroCompatibility.forceReplace(
+                        { system: item.system },
+                        { type: "power", name: `[INVALID] ${item.name}` },
+                    ),
+                );
             } else {
                 console.error("unexpected item.type", item);
             }
@@ -400,14 +406,14 @@ async function commitActorAndItemMigrateDataChangesByActor(actor) {
         const { _id, system, flags, type } = actor.toObject();
         delete flags[game.system.id][needToPersistToDb];
         //TODO: what about items that we removed (like the STR placeholder?), not working as intended.
-        await actor.update({ _id, "==system": system, "==flags": flags, type: type });
+        await actor.update(HeroCompatibility.forceReplace({ system, flags }, { _id, type }));
     }
 
     for (const item of actor.items) {
         if (item.flags[game.system.id]?.[needToPersistToDb]) {
             const { _id, system, flags, type } = item.toObject();
             delete flags[game.system.id][needToPersistToDb];
-            itemUpdates.push({ _id, "==system": system, "==flags": flags, type: type });
+            itemUpdates.push(HeroCompatibility.forceReplace({ system, flags }, { _id, type }));
         }
     }
 
@@ -424,7 +430,7 @@ async function commitItemsCollectionMigrateDataChanges(item) {
     if (item.flags[game.system.id]?.[needToPersistToDb]) {
         const { system, flags, type } = item.toObject();
         delete flags[game.system.id][needToPersistToDb];
-        await item.update({ "==system": system, "==flags": flags, type: type });
+        await item.update(HeroCompatibility.forceReplace({ system, flags }, { type }));
     }
 }
 
