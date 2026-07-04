@@ -493,6 +493,39 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
     _onDelete(options, userId) {
         super._onDelete(options, userId);
         game[HEROSYS.module].effectPanel.refresh();
+
+        // Deleting an adjustment (AID) leaves the stored current value above the restored max; pull it
+        // back in line. Fade handles its own value bookkeeping and zeroes its changes before the final
+        // delete, so this clamp is a no-op there. Only the initiating client writes.
+        if (userId === game.user.id) {
+            this._clampCharacteristicValuesAfterAdjustmentRemoval();
+        }
+    }
+
+    async _clampCharacteristicValuesAfterAdjustmentRemoval() {
+        const actor = this.parent;
+        if (actor?.documentName !== "Actor") return;
+        if (this.flags?.[game.system.id]?.type !== "adjustment") return;
+
+        const updates = {};
+        const effectChanges = this.changes?.length ? this.changes : (this.system?.changes ?? []);
+        for (const change of effectChanges) {
+            const key = change.key?.match(/^system\.characteristics\.([a-z]+)\.max$/)?.[1];
+            if (!key) continue;
+
+            const characteristic = actor.getCharacteristic(key);
+            if (!characteristic) continue;
+
+            const value = Number(characteristic.value);
+            const max = Number(characteristic.max);
+            if (Number.isFinite(value) && Number.isFinite(max) && value > max) {
+                updates[`system.characteristics.${key}.value`] = max;
+            }
+        }
+
+        if (Object.keys(updates).length > 0) {
+            await actor.update(updates);
+        }
     }
 
     _prepareDuration() {

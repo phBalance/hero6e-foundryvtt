@@ -173,6 +173,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     /**
      * Snapshot-and-restore for transient in-memory patches to this actor. Lets 5e formula passes see
      * pending values without updateSource (which flattens HeroActorCharacteristic models to plain objects).
+     *
+     * Performance: patching a handful of properties in place is much cheaper than the alternatives —
+     * actor.clone() + prepareData re-runs the entire embedded item pipeline per recompute, and
+     * updateSource rebuilds the system model. These passes run inside prepareDerivedData/_preUpdate,
+     * which fire on every update and render, so the recompute must stay allocation-light. The patches
+     * are applied and restored synchronously within one call frame, so no other code observes them.
      */
     _createTransientPatcher() {
         const patched = new Map();
@@ -319,10 +325,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         this._clearCachedObjectData();
 
-        if (!this.system || !this.system.characteristics) return;
-
         this.composeMemoizableObjectFunction("analyzeEndurance");
         this.composeMemoizableObjectFunction("getActorCharacterAndActivePoints");
+
+        // The 5e recompute below reads characteristic nodes, which may not exist yet mid-construction.
+        if (!this.system?.characteristics) return;
 
         if (this.is5e === true) {
             const characteristicInfo = getCharacteristicInfoArrayForActor(this);
@@ -364,11 +371,26 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                             calculatedMax = roundFavorPlayerAwayFromZero(calculatedValue);
                         }
 
-                        this.system.characteristics[keyLower].max = this._applyDirectActiveEffectChangesToDerivedMax(
-                            keyLower,
-                            calculatedMax,
-                            { maxChangesByKey },
-                        );
+                        const node = this.system.characteristics[keyLower];
+                        node.max = this._applyDirectActiveEffectChangesToDerivedMax(keyLower, calculatedMax, {
+                            maxChangesByKey,
+                        });
+
+                        // Conditions that lower a dependent's max (e.g. Prone halving DCV) also cap the
+                        // current value; keep the Hero rounding so a halving never leaves a fraction.
+                        const currentValue = Number(node.value);
+                        if (Number.isFinite(currentValue)) {
+                            let cappedValue = Math.min(currentValue, node.max);
+                            // Effects that halve the current value directly (e.g. the Brace maneuver's
+                            // x1/2 DCV) can leave a fraction behind; apply Hero rounding.
+                            if (!Number.isInteger(cappedValue)) {
+                                cappedValue =
+                                    keyLower === "spd"
+                                        ? Math.floor(cappedValue)
+                                        : roundFavorPlayerAwayFromZero(cappedValue);
+                            }
+                            if (cappedValue !== currentValue) node.value = cappedValue;
+                        }
                     }
                 }
             } finally {
@@ -378,17 +400,23 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     _apply5eActiveEffectFormulaSourceOverrides(characteristicInfo, maxChangesByKey) {
+        // Source primaries per dependency kind (config.mjs behaviors tags, e.g. calculatedDEX/figuredSTR).
         const sourceKeys = new Set();
+        const calculatedSourceKeys = new Set();
         for (const info of characteristicInfo) {
             for (const behavior of info.behaviors ?? []) {
-                const match = behavior.match(/^(?:figured|calculated)([A-Z]+)$/);
-                if (match) sourceKeys.add(match[1].toLowerCase());
+                const match = behavior.match(/^(figured|calculated)([A-Z]+)$/);
+                if (!match) continue;
+                sourceKeys.add(match[2].toLowerCase());
+                if (match[1] === "calculated") calculatedSourceKeys.add(match[2].toLowerCase());
             }
         }
 
         const { patch, restore } = this._createTransientPatcher();
 
-        const activeEffectMaxTargets = this._getActiveEffectChangedMaxKeys(maxChangesByKey);
+        const activeEffectMaxTargets = this._getActiveEffectChangedMaxKeys(maxChangesByKey, {
+            calculatedSourceKeys,
+        });
         for (const key of sourceKeys) {
             if (!activeEffectMaxTargets.has(key)) continue;
 
@@ -402,14 +430,22 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             // Positive primary max effects feed dependent 5e formulas; drains below the normal
             // base/current source remain primary-only adjustment tracking and do not cascade down.
             const formulaSourceValue = Math.max(basePlusLevels, value, max);
-            if (!Number.isFinite(formulaSourceValue)) continue;
+            if (!Number.isFinite(formulaSourceValue)) {
+                console.error(
+                    `${this.name}: formula source ${key} is not numeric (base+levels=${basePlusLevels}, value=${value}, max=${max})`,
+                );
+                continue;
+            }
 
             if (formulaSourceValue !== value) {
                 patch(`system.characteristics.${key}.value`, formulaSourceValue);
             }
 
             const nativeKey = key.toUpperCase();
-            if (!this.system[nativeKey]) continue;
+            if (!this.system[nativeKey]) {
+                console.error(`${this.name}: missing native ${nativeKey} node for formula source override`);
+                continue;
+            }
 
             const baseValue = Number(characteristic.baseInfo?.base?.(this) ?? 0);
             if (Number.isFinite(baseValue) && formulaSourceValue !== basePlusLevels) {
@@ -434,6 +470,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             const fromStatus = effect.statuses?.size > 0;
             const fromItem = effect.parent !== this;
+            const fromAdjustment = effect.flags?.[game.system.id]?.type === "adjustment";
             const effectChanges = effect.changes?.length ? effect.changes : (effect.system?.changes ?? []);
             for (const [index, change] of effectChanges.entries()) {
                 const match = change.key?.match(/^system\.characteristics\.([a-z]+)\.max$/);
@@ -453,6 +490,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     priority: change.priority ?? (mode ?? 0) * 10,
                     fromStatus,
                     fromItem,
+                    fromAdjustment,
                 });
                 byKey.set(match[1], entries);
             }
@@ -460,21 +498,35 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return byKey;
     }
 
-    _getActiveEffectChangedMaxKeys(maxChangesByKey = this._collectActiveEffectMaxChanges()) {
+    _getActiveEffectChangedMaxKeys(
+        maxChangesByKey = this._collectActiveEffectMaxChanges(),
+        { calculatedSourceKeys = new Set() } = {},
+    ) {
         const keys = new Set();
         // Item-held effects (e.g. Density Increase's +STR) must not trigger the formula-source
         // override: per 5e rules, power-granted characteristic boosts do not feed figured/calculated
         // characteristics. Characteristic items feed dependents through the item-sum path instead.
+        //
+        // Adjustment powers (AID/DRAIN) on a primary feed calculated dependents (OCV/DCV follow the
+        // current DEX) but never figured ones (AID STR does not raise PD/ED/REC/STUN); figured
+        // characteristics only change with actual purchases or non-adjustment effects.
         for (const [key, entries] of maxChangesByKey) {
-            if (entries.some((entry) => !entry.fromItem)) keys.add(key);
+            const adjustmentsMayFeed = calculatedSourceKeys.has(key);
+            if (entries.some((entry) => !entry.fromItem && (adjustmentsMayFeed || !entry.fromAdjustment))) {
+                keys.add(key);
+            }
         }
         return keys;
     }
 
     /**
      * Foundry applies active effects before prepareDerivedData. The 5e formula pass still needs to run
-     * after that so effects on primaries can propagate to dependents, but it must not erase effects that
-     * directly target the dependent's own max.
+     * after that so effects on primaries can propagate to dependents, but recomputing a dependent's max
+     * from its formula erases any effects that directly target that max (e.g. Prone halving DCV). This
+     * re-applies just those direct changes on top of the formula result — it deliberately mirrors
+     * Foundry's own AE application (modes, priority order) because Foundry offers no way to re-run its
+     * application for a single attribute, plus the Hero-specific rules Foundry can't express:
+     * player-favorable rounding on MULTIPLY and non-stacking halved conditions.
      * @param {string} keyLower - Lowercase characteristic key.
      * @param {number} calculatedMax - Formula-derived max before direct active effects.
      * @param {object} [options]
@@ -497,6 +549,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         changes.sort((a, b) => a.priority - b.priority || a.index - b.index);
 
         let value = calculatedMax;
+        // Halved conditions do not stack: a character who is both Prone and Grabbed is at 1/2 DCV,
+        // not 1/4. Apply the first halving and skip the rest.
+        let halvingApplied = false;
         for (const { change, mode } of changes) {
             if (mode == null) continue;
             const delta = Number(change.value);
@@ -507,6 +562,10 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     value += delta;
                     break;
                 case modes.MULTIPLY:
+                    if (delta === 0.5) {
+                        if (halvingApplied) break;
+                        halvingApplied = true;
+                    }
                     value = roundFavorPlayerAwayFromZero(value * delta);
                     break;
                 case modes.OVERRIDE:
@@ -664,17 +723,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         // 5. Run canvas visual scene batch refresh routines
         if (overlayEffects.includes(statusId)) {
-            const tokens = this.getActiveTokens();
-            const sceneTokenDocuments = canvas.scene?.tokens?.contents ?? Array.from(canvas.scene?.tokens ?? []);
-            const tokenDocuments =
-                tokens.length > 0
-                    ? tokens.map((token) => token.document)
-                    : sceneTokenDocuments.filter(
-                          (tokenDocument) =>
-                              tokenDocument.actorId === this.id ||
-                              tokenDocument.actor?.id === this.id ||
-                              tokenDocument.actor === this,
-                      );
+            const tokenDocuments = this.getActiveTokens(false, true);
 
             if (tokenDocuments.length > 0) {
                 const colors = CONFIG.HERO.statusColors;
@@ -705,8 +754,10 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 await canvas.scene.updateEmbeddedDocuments("Token", tokenUpdates);
 
                 if (finalDead) {
-                    for (const token of tokens) {
-                        await token.layer._sendToBackOrBringToFront(false);
+                    for (const tokenDocument of tokenDocuments) {
+                        if (tokenDocument.object) {
+                            await tokenDocument.object.layer._sendToBackOrBringToFront(false);
+                        }
                     }
                 }
             }
@@ -918,7 +969,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 }
             }
             // RULE B: Dropping to 0 or lower STUN -> Trigger native toggle pipelines
-            else if (nextStun <= 0 && (currentStun > 0 || !this.statuses.has("knockedOut"))) {
+            else if (nextStun <= 0 && currentStun > 0) {
                 await this.toggleStatusEffect("knockedOut", { active: true, overlay: true, changed });
                 await this.toggleStatusEffect("prone", { active: true, changed });
             }
@@ -1069,10 +1120,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return values;
     }
 
-    // Compute figured-characteristic dependencies (e.g. 5e SPD figured from DEX) of changedCharKey.
-    // Reads from `actor` (which may reflect a not-yet-committed patched state), so callers can either
-    // persist the results or merge them into a pending `changed` payload. Returns [characteristicKey,
-    // newValue] tuples.
+    // Compute figured-characteristic dependencies (e.g. 5e PD figured from STR) of changedCharKey.
+    // Figured characteristics only change with actual purchases (LEVELS), so this is only invoked from
+    // the LEVELS-change path — never for AID/DRAIN adjustments. Reads from `actor` (which may reflect a
+    // not-yet-committed patched state), so callers can either persist the results or merge them into a
+    // pending `changed` payload. Returns [characteristicKey, newValue] tuples.
     _computeFiguredCharacteristicChanges(actor, changedCharKey) {
         const changes = [];
         for (const charPowerInfo of getCharacteristicInfoArrayForActor(actor).filter((o) =>
@@ -1095,18 +1147,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return changes;
     }
 
-    // Check for any figuredCharacteristic dependencies of the changedCharKey. Used by the Active Effect
-    // path (actor-active-effects.mjs) to persist figured dependents after an AE changes a primary's max.
-    async updateFiguredCharacteristicDependencies(changedCharKey) {
-        for (const [key, newValue] of this._computeFiguredCharacteristicChanges(this, changedCharKey)) {
-            // FIXME: Intentionally making 2 update calls to allow for AEs to kick in for max so we can set value to match
-            // TODO: May break adjustment powers
-            await this.updateCharacteristics([[key, { max: newValue }]], {});
-            await this.updateCharacteristics([[key, { value: newValue }]], {});
-        }
-    }
-
-    // Recompute 5e figured (e.g. SPD) and calculated (e.g. OCV/DCV) characteristics when their source
+    // Recompute 5e figured (e.g. PD) and calculated (e.g. OCV/DCV) characteristics when their source
     // primaries change, merging the derived max/value into the pending `changed` payload so they commit
     // atomically in the same write. Called from _preUpdate; only mutates `changed`, never calls update().
     // It evaluates the config formulas against the effective (post-update) primaries by temporarily

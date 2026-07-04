@@ -1647,6 +1647,17 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         return (this.base ?? 0) + this.levels;
     }
 
+    /**
+     * The formula-derived max (base + purchased levels) with Hero rounding applied — what max should
+     * be absent active effects. 5e SPD keeps a fractional base (1 + DEX/10) but its stored max floors,
+     * so compare against the floored value to avoid false over/under-max coloring.
+     */
+    get expectedMax() {
+        const raw = this.basePlusLevels;
+        if (this.actor.is5e === true && this.KEY === "SPD") return Math.floor(raw);
+        return roundFavorPlayerAwayFromZero(raw);
+    }
+
     get baseItemsContributingToFiguredCharacteristics() {
         return this.actor.items.filter(
             (item) =>

@@ -65,24 +65,6 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         ) +
                         (actor.system.SPD?.LEVELS ?? 0),
                 );
-            const expectedPdFromStr = (actor, str) =>
-                roundFavorPlayerAwayFromZero(str / 5) +
-                actor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(5) +
-                (actor.system.PD?.LEVELS ?? 0);
-            const expectedRecFromStrCon = (actor, str, con) =>
-                roundFavorPlayerAwayFromZero(str / 5) +
-                actor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(5) +
-                roundFavorPlayerAwayFromZero(con / 5) +
-                actor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(5) +
-                (actor.system.REC?.LEVELS ?? 0);
-            const expectedStunFromStrCon = (actor, str, con) =>
-                actor.getCharacteristic("body").basePlusLevels +
-                roundFavorPlayerAwayFromZero(str / 2) +
-                actor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(2) +
-                roundFavorPlayerAwayFromZero(con / 2) +
-                actor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(2) +
-                (actor.system.STUN?.LEVELS ?? 0);
-
             describe("Hero System 5e Calculated and Figured Characteristics State Machine", function () {
                 // Multi-client database sweep block to guarantee multi-client parity
                 after(async function () {
@@ -296,7 +278,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                 }
 
                 describe("Focused 5e ActiveEffect dependency boundaries", function () {
-                    it("AID DEX from an external origin updates calculated and figured DEX dependents", async function () {
+                    it("AID DEX from an external origin updates DEX dependents (OCV/DCV/SPD)", async function () {
                         const sourceActor = await create5eActor("_Quench_5e_AID_DEX_Source");
                         const targetActor = await create5eActor("_Quench_5e_AID_DEX_Target");
 
@@ -359,8 +341,13 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         );
                     });
 
-                    it("AID STR updates STR figured dependents", async function () {
+                    it("AID STR does not cascade into STR figured dependents", async function () {
                         const actor = await create5eActor("_Quench_5e_AID_STR_Target");
+                        const baseline = {
+                            pd: actor.system.characteristics.pd.max,
+                            rec: actor.system.characteristics.rec.max,
+                            stun: actor.system.characteristics.stun.max,
+                        };
 
                         const chars = await addAdjustmentEffect(actor, {
                             name: "AID STR",
@@ -374,19 +361,43 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                             ],
                         });
 
-                        const strSource = 30;
-                        const conSource = actor.getCharacteristic("con").basePlusLevels;
-                        assert.equal(chars.str.max, strSource, "AID STR should raise the primary max.");
-                        assert.equal(chars.pd.max, expectedPdFromStr(actor, strSource), "AID STR should raise PD.");
+                        // Per 5e adjustment rules, AID to a primary does not change its figured
+                        // characteristics; only actual purchases (LEVELS) or non-adjustment effects do.
+                        assert.equal(chars.str.max, 30, "AID STR should raise the primary max.");
+                        assert.equal(chars.pd.max, baseline.pd, "AID STR should not raise PD.");
+                        assert.equal(chars.rec.max, baseline.rec, "AID STR should not raise REC.");
+                        assert.equal(chars.stun.max, baseline.stun, "AID STR should not raise STUN.");
+                    });
+
+                    it("deleting an adjustment clamps the raised current value back to max", async function () {
+                        const actor = await create5eActor("_Quench_5e_AID_Delete_Clamp_Target");
+
+                        const effect = await createAdjustmentEffect(actor, {
+                            name: "AID STR to delete",
+                            adjustmentActivePoints: 30,
+                            changes: [
+                                {
+                                    key: "system.characteristics.str.max",
+                                    value: "20",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+
+                        // The attack flow raises the current value along with the AID'd max.
+                        await actor.update({ "system.characteristics.str.value": 30 });
+                        assert.equal(actor.system.characteristics.str.value, 30, "AID STR raised the current value.");
+
+                        // The clamp commits in a follow-up actor update after the deletion.
+                        const valueClampHook = waitForHook("updateActor");
+                        await effect.delete();
+                        await valueClampHook;
+
+                        assert.equal(actor.system.characteristics.str.max, 10, "Deleted AID should restore STR max.");
                         assert.equal(
-                            chars.rec.max,
-                            expectedRecFromStrCon(actor, strSource, conSource),
-                            "AID STR should raise REC.",
-                        );
-                        assert.equal(
-                            chars.stun.max,
-                            expectedStunFromStrCon(actor, strSource, conSource),
-                            "AID STR should raise STUN.",
+                            actor.system.characteristics.str.value,
+                            10,
+                            "Deleted AID should clamp the current value back to max.",
                         );
                     });
 
@@ -501,6 +512,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                             ocv: drainedActor.system.characteristics.ocv.max,
                             pd: drainedActor.system.characteristics.pd.max,
                         };
+                        const aidedBaselinePd = aidedActor.system.characteristics.pd.max;
 
                         const drainedChars = await addAdjustmentEffect(drainedActor, {
                             name: "TRANSFER drain side",
@@ -555,8 +567,8 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         );
                         assert.equal(
                             aidedChars.pd.max,
-                            expectedPdFromStr(aidedActor, 30),
-                            "TRANSFER aid side should raise PD.",
+                            aidedBaselinePd,
+                            "TRANSFER aid side STR should not raise figured PD.",
                         );
                     });
 
