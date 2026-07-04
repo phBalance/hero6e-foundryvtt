@@ -757,11 +757,24 @@ export async function performAdjustment(
                 origin: existingEffect.origin,
             };
             updateEffectName(nameSurrogate);
+            // Advance the effect's start by one fade interval so the next fade lands a turn later.
+            // V14 tracks this as start.time + duration.value; duration.startTime is undefined on live
+            // V14 documents, and writing it fails schema validation ("start.time must be a number"),
+            // which rejects the ENTIRE update — including the faded changes — leaving the boosted max
+            // stuck at its full value.
+            const startTimeUpdate = HeroCompatibility.isV14
+                ? {
+                      "start.time":
+                          (existingEffect.start?.time ?? game.time.worldTime) + (existingEffect.duration.value ?? 0),
+                  }
+                : {
+                      "duration.startTime": existingEffect.duration.startTime + existingEffect.duration.seconds,
+                  };
             await existingEffect.update({
                 name: nameSurrogate.name,
                 [changesKey]: fadedChanges,
                 flags: existingEffect.flags,
-                "duration.startTime": existingEffect.duration.startTime + existingEffect.duration.seconds,
+                ...startTimeUpdate,
             });
         }
     }
@@ -885,9 +898,13 @@ export async function performAdjustment(
         updateEffectName(activeEffect);
         const createdEffects = await targetActor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
 
-        if (createdEffects[0].duration.startTime == null) {
+        // V14 tracks the effect start under start.time; duration.startTime only exists on V13.
+        const effectStartTime = HeroCompatibility.isV14
+            ? createdEffects[0].start?.time
+            : createdEffects[0].duration.startTime;
+        if (effectStartTime == null) {
             console.warn(
-                `${targetSystem?.name}: ${createdEffects[0].name} has no duration.startTime and will likely never expire.`,
+                `${targetSystem?.name}: ${createdEffects[0].name} has no start time and will likely never expire.`,
                 createdEffects[0],
             );
         }
