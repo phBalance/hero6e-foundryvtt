@@ -634,6 +634,15 @@ export function gmActive() {
     return !!game.users.filter((u) => u.active && u.isGM).length;
 }
 
+// btoa only accepts latin1, so route UTF-8 text through its percent-encoded byte string first.
+export function utf8ToBase64(str) {
+    return btoa(unescape(encodeURIComponent(str)));
+}
+
+export function base64ToUtf8(base64) {
+    return decodeURIComponent(escape(atob(base64)));
+}
+
 export function squelch(id, options = { timeout: 1000 }) {
     const _id = id ? id.toString() : "undefined";
     globalThis[game.system.id] ??= {};

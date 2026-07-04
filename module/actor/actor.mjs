@@ -16,8 +16,10 @@ import { doSuccessRoll, generateSuccessChatCard } from "../utility/success-card.
 import {
     getCharacteristicInfoArrayForActor,
     getPowerInfo,
+    base64ToUtf8,
     squelch,
     tokenEducatedGuess,
+    utf8ToBase64,
     whisperUserTargetsForActor,
 } from "../utility/util.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.mjs";
@@ -2230,7 +2232,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return ChatMessage.create(chatData);
     }
 
-    async uploadFromXml(xml, options) {
+    async uploadFromXml(xml, options = {}) {
         // Is this a linked actor?  If so upload into parent.
         // if (this.uuid.includes("Scene")) {
         //     console.warn(`Tried to upload a linked actor, redirecting to parent actor`);
@@ -2243,6 +2245,10 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             );
             return;
         }
+
+        // Captured before any mutation so an upload failure can report the actor's original state and the incoming HDC.
+        const originalActorJson = this.id ? JSON.stringify(this.toObject()) : null;
+        const incomingHdcXml = typeof xml === "string" ? xml : new XMLSerializer().serializeToString(xml);
 
         try {
             // Convert xml string to xml document (if necessary)
@@ -2974,6 +2980,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             if (this.id) {
                 await this.setFlag(game.system.id, "uploading", false);
                 await this.setFlag(game.system.id, "uploadingError", null);
+                await this.setFlag(game.system.id, "uploadingErrorContext", null);
             }
             uploadPerformance.retainedDamage = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
@@ -3090,11 +3097,59 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     e.stack.replace(/http(s)?:[/[a-z0-9_.-:()]+\//gi, ""),
                 );
 
+                // Diagnostic context for bug reports. base64 encode blobs so they survive copy/paste intact.
+                await this.setFlag(game.system.id, "uploadingErrorContext", {
+                    foundry: game.release?.display || game.version,
+                    foundryBuild: game.release?.build ?? null,
+                    system: game.system.version,
+                    actorBase64: originalActorJson ? utf8ToBase64(originalActorJson) : null,
+                    hdcBase64: incomingHdcXml ? utf8ToBase64(incomingHdcXml) : null,
+                });
+
                 // Make sure we show the error we just posted to DB.
                 // Needed for when the delete extra items has an error.
                 await this.setFlag(game.system.id, "uploading", true);
             }
         }
+    }
+
+    /**
+     * Rebuild the actor captured in an upload-error report's `actorBase64`.
+     * Returns a transient (unsaved) actor for inspection by default; pass { create: true } to persist it to the world.
+     *
+     * @param {string} actorBase64 - The base64 actor state from the error report.
+     * @param {object} [options]
+     * @param {boolean} [options.create=false] - Persist the rebuilt actor to the world instead of returning a transient one.
+     * @returns {Promise<HeroSystem6eActor>|HeroSystem6eActor}
+     */
+    static recreateActorFromBase64(actorBase64, { create = false } = {}) {
+        const data = JSON.parse(base64ToUtf8(actorBase64));
+        return create ? HeroSystem6eActor.create(data) : new HeroSystem6eActor(data);
+    }
+
+    /**
+     * Decode the HDC captured in an upload-error report's `hdcBase64`.
+     * Returns the HDC XML string, or a parsed XMLDocument when { parse: true } (throws on a parser error).
+     *
+     * The class is module-scoped; from the console reach it via `game.herosystem6e.entities.HeroSystem6eActor`
+     * (or `CONFIG.Actor.documentClass`). Re-run the upload to reproduce, e.g.:
+     *   actor.uploadFromXml(game.herosystem6e.entities.HeroSystem6eActor.loadHdcFromBase64(hdcBase64))
+     *
+     * @param {string} hdcBase64 - The base64 HDC from the error report.
+     * @param {object} [options]
+     * @param {boolean} [options.parse=false] - Return a validated XMLDocument instead of the raw string.
+     * @returns {string|XMLDocument}
+     */
+    static loadHdcFromBase64(hdcBase64, { parse = false } = {}) {
+        const xml = base64ToUtf8(hdcBase64);
+        if (!parse) return xml;
+
+        const doc = new DOMParser().parseFromString(xml.trim(), "text/xml");
+        const parserError = doc.getElementsByTagName("parsererror")?.[0];
+        if (parserError) {
+            throw new Error(`HDC failed to parse: ${parserError.textContent}`);
+        }
+        return doc;
     }
 
     async linkCustomAddersForUpload() {

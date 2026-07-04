@@ -45,6 +45,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             createActiveEffect: HeroSystemActorSheetV2.#onCreateActiveEffect,
             deleteAllActiveEffects: HeroSystemActorSheetV2.#onDeleteAllActiveEffects,
             deleteAllTemporaryEffects: HeroSystemActorSheetV2.#onDeleteAllTemporaryEffects,
+            downloadUploadError: HeroSystemActorSheetV2.#onDownloadUploadError,
             fullHealth: HeroSystemActorSheetV2.#onFullHealth,
             presenceAttack: HeroSystemActorSheetV2.#onPresenceAttack,
             recovery: HeroSystemActorSheetV2.#onRecovery,
@@ -131,6 +132,32 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     static async #onActorDescription() {
         await this.actor.actorDescriptionToChat({ token: this.token });
+    }
+
+    static async #onDownloadUploadError() {
+        const error = this.actor.getFlag(game.system.id, "uploadingError");
+        if (!error) return;
+
+        const context = this.actor.getFlag(game.system.id, "uploadingErrorContext") ?? {};
+        const foundryBuild = context.foundryBuild ?? game.release?.build ?? null;
+        const report = [
+            `Actor: ${this.actor.name}`,
+            `Foundry: ${context.foundry ?? game.release?.display ?? game.version}${foundryBuild != null ? ` (build ${foundryBuild})` : ``}`,
+            `System: ${game.system.id} ${context.system ?? game.system.version}`,
+            ``,
+            `Error:`,
+            error,
+        ];
+        if (context.actorBase64) {
+            report.push(``, `Original actor state (base64):`, context.actorBase64);
+        }
+        if (context.hdcBase64) {
+            report.push(``, `New HDC (base64):`, context.hdcBase64);
+        }
+
+        const filename = `${this.actor.name.slugify({ strict: true }) || "actor"}-upload-error.txt`;
+        foundry.utils.saveDataToFile(report.join("\n"), "text/plain", filename);
+        ui.notifications.info(`Downloaded upload error report for ${this.actor.name}.`);
     }
 
     static async #onFullHealth() {
