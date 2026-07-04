@@ -342,23 +342,22 @@ export async function getTargetArray(formData) {
                 html += `<li style="text-align:left">${target.name}</li>`;
             }
             html += "</ol></td></tr></table>";
-            targetArray = await Dialog.wait({
-                title: `Pick target list`,
+            targetArray = await foundry.applications.api.DialogV2.wait({
+                window: { title: `Pick target list` },
                 content: html,
-                buttons: {
-                    gm: {
+                buttons: [
+                    {
+                        action: "gm",
                         label: game.user.name,
-                        callback: async function () {
-                            return targetArray;
-                        },
+                        default: true,
+                        callback: () => targetArray,
                     },
-                    user: {
+                    {
+                        action: "user",
                         label: game.users.get(formData.userId).name,
-                        callback: async function () {
-                            return userTargetArray;
-                        },
+                        callback: () => userTargetArray,
                     },
-                },
+                ],
             });
         }
     }
@@ -1638,26 +1637,24 @@ export async function _onRollKnockback(event) {
     </form>
     `;
 
-    await new Promise((resolve) => {
-        const data = {
-            title: `Confirm Knockback details`,
-            content: html,
-            buttons: {
-                normal: {
-                    label: "Roll & Apply",
-                    callback: async function (html) {
-                        const dice = html.find("input")[0].value;
-                        await _rollApplyKnockback(token, parseInt(dice));
-                    },
-                },
-                cancel: {
-                    label: "Cancel",
+    await foundry.applications.api.DialogV2.wait({
+        window: { title: `Confirm Knockback details` },
+        content: html,
+        buttons: [
+            {
+                action: "normal",
+                label: "Roll & Apply",
+                default: true,
+                callback: async (event, button) => {
+                    const dice = button.form.elements.knockbackDice.value;
+                    await _rollApplyKnockback(token, parseInt(dice));
                 },
             },
-            default: "normal",
-            close: () => resolve({ cancelled: true }),
-        };
-        new Dialog(data).render(true);
+            {
+                action: "cancel",
+                label: "Cancel",
+            },
+        ],
     });
 }
 
@@ -2999,23 +2996,22 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         // If they clicked "Apply Damage" then prompt
         // WHAT? if (damageRoller.getType === HeroRoller.ROLL_TYPE.ENTANGLE) {
         if (damageRoller.getType() !== HeroRoller.ROLL_TYPE.ENTANGLE && targetEntangle === undefined) {
-            targetEntangle = await Dialog.wait({
-                title: `Confirm Target`,
+            targetEntangle = await foundry.applications.api.DialogV2.wait({
+                window: { title: `Confirm Target` },
                 content: `Target ${targetToken.name} or the ENTANGLE effecting ${targetToken.name}?`,
-                buttons: {
-                    token: {
+                buttons: [
+                    {
+                        action: "token",
                         label: `${targetToken.name}`,
-                        callback: async function () {
-                            return false;
-                        },
+                        default: true,
+                        callback: () => false,
                     },
-                    entangle: {
+                    {
+                        action: "entangle",
                         label: `ENTANGLE`,
-                        callback: async function () {
-                            return true;
-                        },
+                        callback: () => true,
                     },
-                },
+                ],
             });
         }
 
@@ -3870,23 +3866,24 @@ async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDe
             }
             html += `</table>`;
 
-            const data = {
-                title: `Pick power to adjust`,
-                content: html,
-                buttons: {
-                    normal: {
-                        label: "Apply",
-                        callback: async function (html) {
-                            return html.find("input:checked");
+            const checked =
+                (await foundry.applications.api.DialogV2.wait({
+                    window: { title: `Pick power to adjust` },
+                    content: html,
+                    buttons: [
+                        {
+                            action: "normal",
+                            label: "Apply",
+                            default: true,
+                            callback: (event, button) => Array.from(button.form.querySelectorAll("input:checked")),
                         },
-                    },
-                    cancel: {
-                        label: "Cancel",
-                    },
-                },
-            };
-
-            const checked = await Dialog.wait(data);
+                        {
+                            action: "cancel",
+                            label: "Cancel",
+                            callback: () => [],
+                        },
+                    ],
+                })) || [];
 
             for (const checkedElement of checked) {
                 const checkedItem = token.actor.items.find((o) => o.id === checkedElement.id);
@@ -4658,9 +4655,9 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
         const potentialStunCost = calculateRequiredStunDiceForLackOfEnd(actor, resourcesRequired.totalEnd);
 
         if (!options.forceStunUsage) {
-            const confirmed = await Dialog.confirm({
-                title: "USING STUN FOR ENDURANCE",
-                content: `<p><b>${item.name}</b> requires ${resourcesRequired.totalEnd} END. <b>${actor.name}</b> has ${actorEndurance} END. 
+            const confirmed = await foundry.applications.api.DialogV2.confirm({
+                window: { title: "USING STUN FOR ENDURANCE" },
+                content: `<p><b>${item.name}</b> requires ${resourcesRequired.totalEnd} END. <b>${actor.name}</b> has ${actorEndurance} END.
                                 Do you want to take ${potentialStunCost.stunDice}d6 STUN damage to make up for the lack of END?</p>`,
             });
             if (!confirmed) {
@@ -5178,20 +5175,27 @@ export async function _onModalDamageCard(event) {
     content.find(".modal-damage-card").remove();
     content = content.html();
 
-    const data = {
-        title: `Modal Damage`,
+    const dialog = new foundry.applications.api.DialogV2({
+        window: { title: `Modal Damage` },
         content,
-        buttons: {
-            cancel: {
+        buttons: [
+            {
+                action: "cancel",
                 label: "Close",
             },
-        },
-        default: "Cancel",
-        render: (html) => {
-            this.chatListeners(html);
-        },
-        //close: () => resolve({ cancelled: true }),
-    };
-    const d = new Dialog(data, { form: { closeOnSubmit: false } });
-    await d.render(true);
+        ],
+    });
+
+    // DialogV2 wraps content in a <form> and only honors the `render` option via its static
+    // wait/prompt/confirm helpers, so wire the listener ourselves. The cloned card's buttons
+    // would otherwise submit (and close) the dialog; force them to type="button" so their
+    // delegated chat handlers run instead.
+    dialog.addEventListener("render", () => {
+        for (const button of dialog.element.querySelectorAll(".dialog-content button")) {
+            button.setAttribute("type", "button");
+        }
+        this.chatListeners(dialog.element);
+    });
+
+    await dialog.render({ force: true });
 }
