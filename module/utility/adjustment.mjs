@@ -1090,12 +1090,24 @@ async function updateCharacteristicValue(activeEffect, { targetSystem, previousC
                     foundry.utils.getProperty(targetSystem._source, `system.characteristics.${char}.value`) ??
                     foundry.utils.getProperty(targetSystem, `system.characteristics.${char}.value`);
                 const targetStartingMax = foundry.utils.getProperty(targetSystem, `system.characteristics.${char}.max`);
-                const prevChangeValue = previousChanges.find((c) => c.key === change.key)?.value || 0;
+                const prevChangeValue = parseInt(previousChanges.find((c) => c.key === change.key)?.value) || 0;
                 const totalPointsDifference = change.value - prevChangeValue;
-                const newValue = Math.min(
-                    targetStartingValue + totalPointsDifference,
-                    targetStartingMax, // + totalPointsDifference,
-                );
+
+                // 5ER p. 105-106 ("Increasing Expendable Abilities" + the AID Gigawatt example):
+                // points consumed from a boosted expendable (STUN/END spent while AIDed) come out of
+                // the boosted points first, and when the AID fades the character does not lose any of
+                // his own points. So a fading positive boost only clamps the current value down to the
+                // shrinking max — subtracting the fade delta as well would charge the consumption
+                // against the character twice. DRAINs (negative change values) genuinely remove
+                // current points on application and give them back on return, so they keep the
+                // signed delta (still clamped to max).
+                let newValue;
+                const isFadingPositiveBoost = totalPointsDifference < 0 && prevChangeValue > 0;
+                if (isFadingPositiveBoost) {
+                    newValue = Math.min(targetStartingValue, targetStartingMax);
+                } else {
+                    newValue = Math.min(targetStartingValue + totalPointsDifference, targetStartingMax);
+                }
                 await targetSystem.update({ [`system.characteristics.${char}.value`]: newValue });
 
                 if (CONFIG.debug.adjustmentFadeKeep) {

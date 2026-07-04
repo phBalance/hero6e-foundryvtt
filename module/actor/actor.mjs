@@ -399,57 +399,80 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
     }
 
+    /**
+     * Patches the 5e formula source primaries (DEX, EGO, STR, CON, BODY) so the dependent formulas
+     * evaluated in prepareDerivedData read effect-adjusted values, per 5ER p. 105:
+     *
+     *   "Adjustment Powers that affect Primary Characteristics have no effect on Figured
+     *    Characteristics, but do affect abilities calculated from Primary Characteristics
+     *    (such as ... a character's Combat Value derived from DEX)."
+     *
+     * So each source primary gets two independently filtered views, fed through disjoint lever arms:
+     * - Calculated dependents (OCV/DCV/OMCV/DMCV) read the characteristic's *value*
+     *   (config formulas use safeCharacteristicValue). They see every non-item effect on the
+     *   primary's max — adjustments included, in BOTH directions (a DRAIN DEX lowers CV; at
+     *   DEX 1 or less CV is 0, 5ER p. 37).
+     * - Figured dependents (PD/ED/SPD/REC/END/STUN/LEAPING) read *basePlusLevels* (base + LEVELS).
+     *   They see only non-adjustment effects (a transformation or characteristic-bought-as-a-power
+     *   changes figured characteristics, 5ER p. 139-40; AID/DRAIN/TRANSFER never do — the 5ER
+     *   p. 105 Transfer example drains DEX "but loses no SPD").
+     *
+     * Item-held effects are excluded from both views: characteristic items feed dependents through
+     * the item-sum path in the formulas themselves (baseSumFiguredCharacteristicsFromItems), so
+     * counting their transferred effects here would double-propagate.
+     */
     _apply5eActiveEffectFormulaSourceOverrides(characteristicInfo, maxChangesByKey) {
         // Source primaries per dependency kind (config.mjs behaviors tags, e.g. calculatedDEX/figuredSTR).
-        const sourceKeys = new Set();
         const calculatedSourceKeys = new Set();
+        const figuredSourceKeys = new Set();
         for (const info of characteristicInfo) {
             for (const behavior of info.behaviors ?? []) {
                 const match = behavior.match(/^(figured|calculated)([A-Z]+)$/);
                 if (!match) continue;
-                sourceKeys.add(match[2].toLowerCase());
-                if (match[1] === "calculated") calculatedSourceKeys.add(match[2].toLowerCase());
+                (match[1] === "calculated" ? calculatedSourceKeys : figuredSourceKeys).add(match[2].toLowerCase());
             }
         }
 
         const { patch, restore } = this._createTransientPatcher();
 
-        const activeEffectMaxTargets = this._getActiveEffectChangedMaxKeys(maxChangesByKey, {
-            calculatedSourceKeys,
-        });
-        for (const key of sourceKeys) {
-            if (!activeEffectMaxTargets.has(key)) continue;
+        for (const key of new Set([...calculatedSourceKeys, ...figuredSourceKeys])) {
+            const nonItemEntries = (maxChangesByKey.get(key) ?? []).filter((entry) => !entry.fromItem);
+            if (nonItemEntries.length === 0) continue;
 
             const characteristic = this.getCharacteristic(key);
             const characteristicData = this.system.characteristics?.[key];
             if (!characteristic || !characteristicData) continue;
 
             const basePlusLevels = Number(characteristic.basePlusLevels ?? 0);
-            const value = Number(characteristic.value ?? 0);
-            const max = Number(characteristic.max ?? 0);
-            // Positive primary max effects feed dependent 5e formulas; drains below the normal
-            // base/current source remain primary-only adjustment tracking and do not cascade down.
-            const formulaSourceValue = Math.max(basePlusLevels, value, max);
-            if (!Number.isFinite(formulaSourceValue)) {
-                console.error(
-                    `${this.name}: formula source ${key} is not numeric (base+levels=${basePlusLevels}, value=${value}, max=${max})`,
-                );
+            if (!Number.isFinite(basePlusLevels)) {
+                console.error(`${this.name}: formula source ${key} base+levels is not numeric (${basePlusLevels})`);
                 continue;
             }
 
-            if (formulaSourceValue !== value) {
-                patch(`system.characteristics.${key}.value`, formulaSourceValue);
+            // Calculated view: all non-item effects, both directions.
+            if (calculatedSourceKeys.has(key)) {
+                const calculatedSourceValue = this._applyActiveEffectChangeEntries(basePlusLevels, nonItemEntries);
+                if (calculatedSourceValue !== Number(characteristic.value ?? 0)) {
+                    patch(`system.characteristics.${key}.value`, calculatedSourceValue);
+                }
             }
 
-            const nativeKey = key.toUpperCase();
-            if (!this.system[nativeKey]) {
-                console.error(`${this.name}: missing native ${nativeKey} node for formula source override`);
-                continue;
-            }
+            // Figured view: non-adjustment effects only, both directions.
+            if (figuredSourceKeys.has(key)) {
+                const figuredEntries = nonItemEntries.filter((entry) => !entry.fromAdjustment);
+                if (figuredEntries.length === 0) continue;
 
-            const baseValue = Number(characteristic.baseInfo?.base?.(this) ?? 0);
-            if (Number.isFinite(baseValue) && formulaSourceValue !== basePlusLevels) {
-                patch(`system.${nativeKey}.LEVELS`, formulaSourceValue - baseValue);
+                const nativeKey = key.toUpperCase();
+                if (!this.system[nativeKey]) {
+                    console.error(`${this.name}: missing native ${nativeKey} node for formula source override`);
+                    continue;
+                }
+
+                const baseValue = Number(characteristic.baseInfo?.base?.(this) ?? 0);
+                const figuredSourceValue = this._applyActiveEffectChangeEntries(basePlusLevels, figuredEntries);
+                if (Number.isFinite(baseValue) && figuredSourceValue !== basePlusLevels) {
+                    patch(`system.${nativeKey}.LEVELS`, figuredSourceValue - baseValue);
+                }
             }
         }
 
@@ -498,61 +521,25 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return byKey;
     }
 
-    _getActiveEffectChangedMaxKeys(
-        maxChangesByKey = this._collectActiveEffectMaxChanges(),
-        { calculatedSourceKeys = new Set() } = {},
-    ) {
-        const keys = new Set();
-        // Item-held effects (e.g. Density Increase's +STR) must not trigger the formula-source
-        // override: per 5e rules, power-granted characteristic boosts do not feed figured/calculated
-        // characteristics. Characteristic items feed dependents through the item-sum path instead.
-        //
-        // Adjustment powers (AID/DRAIN) on a primary feed calculated dependents (OCV/DCV follow the
-        // current DEX) but never figured ones (AID STR does not raise PD/ED/REC/STUN); figured
-        // characteristics only change with actual purchases or non-adjustment effects.
-        for (const [key, entries] of maxChangesByKey) {
-            const adjustmentsMayFeed = calculatedSourceKeys.has(key);
-            if (entries.some((entry) => !entry.fromItem && (adjustmentsMayFeed || !entry.fromAdjustment))) {
-                keys.add(key);
-            }
-        }
-        return keys;
-    }
-
     /**
-     * Foundry applies active effects before prepareDerivedData. The 5e formula pass still needs to run
-     * after that so effects on primaries can propagate to dependents, but recomputing a dependent's max
-     * from its formula erases any effects that directly target that max (e.g. Prone halving DCV). This
-     * re-applies just those direct changes on top of the formula result — it deliberately mirrors
-     * Foundry's own AE application (modes, priority order) because Foundry offers no way to re-run its
-     * application for a single attribute, plus the Hero-specific rules Foundry can't express:
+     * Applies collected active-effect change entries on top of a starting value, mirroring Foundry's
+     * own AE application (modes, priority order) plus the Hero-specific rules Foundry can't express:
      * player-favorable rounding on MULTIPLY and non-stacking halved conditions.
-     * @param {string} keyLower - Lowercase characteristic key.
-     * @param {number} calculatedMax - Formula-derived max before direct active effects.
-     * @param {object} [options]
-     * @param {boolean} [options.includeStatusEffects] - Include status-effect changes (excluded on heal paths).
-     * @param {Map} [options.maxChangesByKey] - Prebuilt _collectActiveEffectMaxChanges() result.
+     * @param {number} startValue - The value before effects.
+     * @param {Array} entries - Entries from _collectActiveEffectMaxChanges (pre-filtered by caller).
      * @returns {number}
      */
-    _applyDirectActiveEffectChangesToDerivedMax(
-        keyLower,
-        calculatedMax,
-        { includeStatusEffects = true, maxChangesByKey = this._collectActiveEffectMaxChanges() } = {},
-    ) {
+    _applyActiveEffectChangeEntries(startValue, entries) {
+        if (entries.length === 0) return startValue;
+
         const modes = CONST.ACTIVE_EFFECT_MODES;
-        const changes = (maxChangesByKey.get(keyLower) ?? []).filter(
-            (entry) => includeStatusEffects || !entry.fromStatus,
-        );
+        const sorted = [...entries].sort((a, b) => a.priority - b.priority || a.index - b.index);
 
-        if (changes.length === 0) return calculatedMax;
-
-        changes.sort((a, b) => a.priority - b.priority || a.index - b.index);
-
-        let value = calculatedMax;
+        let value = startValue;
         // Halved conditions do not stack: a character who is both Prone and Grabbed is at 1/2 DCV,
         // not 1/4. Apply the first halving and skip the rest.
         let halvingApplied = false;
-        for (const { change, mode } of changes) {
+        for (const { change, mode } of sorted) {
             if (mode == null) continue;
             const delta = Number(change.value);
             if (!Number.isFinite(delta)) continue;
@@ -581,6 +568,29 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
 
         return value;
+    }
+
+    /**
+     * Foundry applies active effects before prepareDerivedData. The 5e formula pass still needs to run
+     * after that so effects on primaries can propagate to dependents, but recomputing a dependent's max
+     * from its formula erases any effects that directly target that max (e.g. Prone halving DCV, or a
+     * direct AID PD). This re-applies just those direct changes on top of the formula result.
+     * @param {string} keyLower - Lowercase characteristic key.
+     * @param {number} calculatedMax - Formula-derived max before direct active effects.
+     * @param {object} [options]
+     * @param {boolean} [options.includeStatusEffects] - Include status-effect changes (excluded on heal paths).
+     * @param {Map} [options.maxChangesByKey] - Prebuilt _collectActiveEffectMaxChanges() result.
+     * @returns {number}
+     */
+    _applyDirectActiveEffectChangesToDerivedMax(
+        keyLower,
+        calculatedMax,
+        { includeStatusEffects = true, maxChangesByKey = this._collectActiveEffectMaxChanges() } = {},
+    ) {
+        const changes = (maxChangesByKey.get(keyLower) ?? []).filter(
+            (entry) => includeStatusEffects || !entry.fromStatus,
+        );
+        return this._applyActiveEffectChangeEntries(calculatedMax, changes);
     }
 
     /**

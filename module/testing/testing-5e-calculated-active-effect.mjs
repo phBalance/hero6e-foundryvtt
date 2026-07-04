@@ -52,19 +52,8 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                 return actor.system.characteristics;
             };
 
+            // 5ER p. 9-10: CV = DEX/3; 5ER p. 37: CV is 0 at DEX 1 or less.
             const expectedOcvFromDex = (dex) => roundFavorPlayerAwayFromZero(Math.max(0, dex) / 3);
-            const expectedSpdFromDex = (actor, dex) =>
-                Math.floor(
-                    1 +
-                        Number((dex / 10).toFixed(1)) +
-                        Number(
-                            actor
-                                .getCharacteristic("dex")
-                                .baseSumFiguredCharacteristicsNoRoundingFromItems(10)
-                                .toFixed(1),
-                        ) +
-                        (actor.system.SPD?.LEVELS ?? 0),
-                );
             describe("Hero System 5e Calculated and Figured Characteristics State Machine", function () {
                 // Multi-client database sweep block to guarantee multi-client parity
                 after(async function () {
@@ -264,23 +253,36 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 `[${targetType}] Primary metric DEX should drop below zero cleanly to map adjustment decay.`,
                             );
 
-                            // 2. Figured Characteristics Verification (5e Non-Cascading Rules Enforcement)
-                            // Since OCV is a calculated characteristic, a Drain on DEX does NOT cascade to reduce it.
-                            // It should stay perfectly insulated at its uncommitted rulebook base configuration total.
-                            const unreducedOcvBase = qActor.getCharacteristic("ocv")?.base ?? 3;
+                            // 2. Dependent Verification. This is a generic (non-adjustment) effect,
+                            // so it behaves like the characteristic actually being lower (a
+                            // transformation, 5ER p. 139-40) and cascades to dependents:
+                            // - CV follows the lowered DEX; at DEX 1 or less CV is 0 (5ER p. 37).
+                            // - Figured characteristics recompute, but a negative primary adds zero
+                            //   rather than subtracting (5ER p. 33), so PD floors at 0 + purchases.
                             assert.equal(
                                 drainedChars.ocv.max,
-                                unreducedOcvBase,
-                                `[${targetType}] Calculated OCV should stay insulated from primary DRAIN per non-cascading rules.`,
+                                0,
+                                `[${targetType}] Calculated OCV should follow DEX lowered below 1 down to the 0 floor.`,
                             );
+                            if (qActor.hasCharacteristic("pd")) {
+                                const expectedFlooredPd =
+                                    qActor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(5) +
+                                    (qActor.system.PD?.LEVELS ?? 0);
+                                assert.equal(
+                                    drainedChars.pd.max,
+                                    expectedFlooredPd,
+                                    `[${targetType}] Figured PD should treat the negative STR as adding zero.`,
+                                );
+                            }
                         });
                     });
                 }
 
                 describe("Focused 5e ActiveEffect dependency boundaries", function () {
-                    it("AID DEX from an external origin updates DEX dependents (OCV/DCV/SPD)", async function () {
+                    it("AID DEX raises calculated CV but never figured SPD", async function () {
                         const sourceActor = await create5eActor("_Quench_5e_AID_DEX_Source");
                         const targetActor = await create5eActor("_Quench_5e_AID_DEX_Target");
+                        const baselineSpd = targetActor.system.characteristics.spd.max;
 
                         const chars = await addAdjustmentEffect(targetActor, {
                             name: "AID DEX",
@@ -295,19 +297,18 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                             ],
                         });
 
+                        // 5ER p. 105: adjustments to a primary affect abilities calculated from it
+                        // (CV = DEX/3) but have no effect on Figured Characteristics (SPD).
                         const dexSource = 20;
                         assert.equal(chars.dex.max, dexSource, "AID DEX should raise the primary max.");
                         assert.equal(chars.ocv.max, expectedOcvFromDex(dexSource), "AID DEX should raise OCV.");
                         assert.equal(chars.dcv.max, expectedOcvFromDex(dexSource), "AID DEX should raise DCV.");
-                        assert.equal(
-                            chars.spd.max,
-                            expectedSpdFromDex(targetActor, dexSource),
-                            "AID DEX should raise SPD.",
-                        );
+                        assert.equal(chars.spd.max, baselineSpd, "AID DEX should not raise figured SPD.");
                     });
 
                     it("combined primary and dependent ActiveEffects both apply in one pass", async function () {
                         const actor = await create5eActor("_Quench_5e_Combined_Primary_Dependent_Target");
+                        const baselineSpd = actor.system.characteristics.spd.max;
 
                         const chars = await addAdjustmentEffect(actor, {
                             name: "Combined DEX and DCV adjustment",
@@ -331,8 +332,8 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         assert.equal(chars.ocv.max, expectedOcvFromDex(dexSource), "Combined effect should raise OCV.");
                         assert.equal(
                             chars.spd.max,
-                            expectedSpdFromDex(actor, dexSource),
-                            "Combined effect should raise SPD from DEX.",
+                            baselineSpd,
+                            "Adjustment to DEX should not touch figured SPD (5ER p. 105).",
                         );
                         assert.equal(
                             chars.dcv.max,
@@ -403,6 +404,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
 
                     it("actor-owned adjustment updates and deletes recompute derived values", async function () {
                         const actor = await create5eActor("_Quench_5e_Adjustment_Update_Target");
+                        const baselineSpd = actor.system.characteristics.spd.max;
 
                         const effect = await createAdjustmentEffect(actor, {
                             name: "Scaling AID DEX",
@@ -424,8 +426,8 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         );
                         assert.equal(
                             actor.system.characteristics.spd.max,
-                            expectedSpdFromDex(actor, 20),
-                            "Initial AID should raise SPD.",
+                            baselineSpd,
+                            "Adjustment to DEX should not touch figured SPD (5ER p. 105).",
                         );
 
                         await effect.update({
@@ -452,8 +454,8 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         );
                         assert.equal(
                             actor.system.characteristics.spd.max,
-                            expectedSpdFromDex(actor, 15),
-                            "Updated AID should recompute SPD.",
+                            baselineSpd,
+                            "Updated adjustment should still not touch figured SPD.",
                         );
 
                         await effect.delete();
@@ -466,16 +468,14 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         );
                         assert.equal(
                             actor.system.characteristics.spd.max,
-                            expectedSpdFromDex(actor, 10),
-                            "Deleted AID should restore SPD.",
+                            baselineSpd,
+                            "Deleted adjustment should leave figured SPD at baseline.",
                         );
                     });
 
-                    it("DRAIN DEX and STR tracks primary loss without cascading dependents downward", async function () {
+                    it("DRAIN DEX and STR lowers calculated CV but never figured dependents", async function () {
                         const actor = await create5eActor("_Quench_5e_DRAIN_Primaries_Target");
                         const baseline = {
-                            ocv: actor.system.characteristics.ocv.max,
-                            dcv: actor.system.characteristics.dcv.max,
                             spd: actor.system.characteristics.spd.max,
                             pd: actor.system.characteristics.pd.max,
                         };
@@ -499,10 +499,13 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
 
                         assert.isBelow(chars.dex.max, 0, "DRAIN DEX should track primary max below zero.");
                         assert.isBelow(chars.str.max, 0, "DRAIN STR should track primary max below zero.");
-                        assert.equal(chars.ocv.max, baseline.ocv, "DRAIN DEX should not reduce OCV.");
-                        assert.equal(chars.dcv.max, baseline.dcv, "DRAIN DEX should not reduce DCV.");
-                        assert.equal(chars.spd.max, baseline.spd, "DRAIN DEX should not reduce SPD.");
-                        assert.equal(chars.pd.max, baseline.pd, "DRAIN STR should not reduce PD.");
+                        // 5ER p. 105: CV is calculated from the (adjusted) DEX, in both directions;
+                        // 5ER p. 37: at DEX 1 or less, CV is 0.
+                        assert.equal(chars.ocv.max, 0, "DRAIN DEX below 1 should floor OCV at 0.");
+                        assert.equal(chars.dcv.max, 0, "DRAIN DEX below 1 should floor DCV at 0.");
+                        // Figured characteristics are never touched by adjustments to their primaries.
+                        assert.equal(chars.spd.max, baseline.spd, "DRAIN DEX should not reduce figured SPD.");
+                        assert.equal(chars.pd.max, baseline.pd, "DRAIN STR should not reduce figured PD.");
                     });
 
                     it("TRANSFER-style opposing actor effects aid one actor without cascading the drained actor", async function () {
@@ -513,6 +516,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                             pd: drainedActor.system.characteristics.pd.max,
                         };
                         const aidedBaselinePd = aidedActor.system.characteristics.pd.max;
+                        const aidedBaselineSpd = aidedActor.system.characteristics.spd.max;
 
                         const drainedChars = await addAdjustmentEffect(drainedActor, {
                             name: "TRANSFER drain side",
@@ -549,21 +553,19 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                             ],
                         });
 
-                        assert.equal(
-                            drainedChars.ocv.max,
-                            drainedBaseline.ocv,
-                            "TRANSFER drain side should not reduce OCV.",
-                        );
+                        // 5ER p. 105: CV follows the adjusted DEX both directions (0 floor per p. 37);
+                        // figured characteristics (SPD/PD) are never touched by primary adjustments.
+                        assert.equal(drainedChars.ocv.max, 0, "TRANSFER drain side DEX loss should floor OCV at 0.");
                         assert.equal(
                             drainedChars.pd.max,
                             drainedBaseline.pd,
-                            "TRANSFER drain side should not reduce PD.",
+                            "TRANSFER drain side should not reduce figured PD.",
                         );
                         assert.equal(aidedChars.ocv.max, expectedOcvFromDex(20), "TRANSFER aid side should raise OCV.");
                         assert.equal(
                             aidedChars.spd.max,
-                            expectedSpdFromDex(aidedActor, 20),
-                            "TRANSFER aid side should raise SPD.",
+                            aidedBaselineSpd,
+                            "TRANSFER aid side DEX should not raise figured SPD.",
                         );
                         assert.equal(
                             aidedChars.pd.max,
@@ -575,6 +577,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                     it("item-origin actor effects still drive 5e dependents", async function () {
                         const sourceActor = await create5eActor("_Quench_5e_Item_Origin_Source");
                         const targetActor = await create5eActor("_Quench_5e_Item_Origin_Target");
+                        const baselineSpd = targetActor.system.characteristics.spd.max;
                         const dexContents = `
                             <DEX XMLID="DEX" ID="1766170024718" BASECOST="0.0" LEVELS="10" ALIAS="DEX" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Source DEX Aid" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
                             <NOTES />
@@ -608,8 +611,8 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         );
                         assert.equal(
                             chars.spd.max,
-                            expectedSpdFromDex(targetActor, 20),
-                            "Item-origin actor effect should raise SPD.",
+                            baselineSpd,
+                            "Item-origin adjustment to DEX should not raise figured SPD.",
                         );
                     });
 
