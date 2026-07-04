@@ -449,6 +449,9 @@ export async function doManeuverEffects(item, action) {
                     active: true,
                 });
                 // TODO: Offer actor an ACROBATICS skill roll to negate the prone effect
+                // Acrobatics allows -3 to negate prone for target, breakfall at -1 per 2d6 to
+                // halve damage but not prevent prone, per UMA p112 and 5ER p400.
+                // They can also make a half roll on acrobatics to retain full DCV but remain prone.
             }
         }
     }
