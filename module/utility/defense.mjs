@@ -561,6 +561,8 @@ export async function getConditionalDefenses(token, item, avad) {
         const html = await foundryVttRenderTemplate(conditionalDefenseCardTemplate, data);
 
         const inputs = await foundry.applications.api.DialogV2.wait({
+            classes: ["herosystem6e"],
+            position: { width: 400 },
             window: { title: token.name + " conditional defenses" },
             content: html,
             buttons: [

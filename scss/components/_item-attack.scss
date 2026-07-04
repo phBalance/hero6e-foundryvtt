@@ -33,9 +33,9 @@
     }
 
     div.description {
-        color: var(--color-text-primary);
-        background: color-mix(in srgb, currentColor 8%, transparent);
-        border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+        border: 1px dashed var(--input-border-color);
+        background: var(--input-background-color);
+        color: var(--input-text-color);
     }
 
     .multi-attack-options.target-container {
