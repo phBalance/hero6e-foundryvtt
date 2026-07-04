@@ -165,6 +165,33 @@ export class HeroCompatibility {
     }
 
     /**
+     * Builds a document update payload that forces the deletion of the given fields,
+     * resetting each back to undefined.
+     *
+     * V14 removed the "-=field" prefix syntax in favor of foundry.data.operators.ForcedDeletion,
+     * while V13 and earlier only understand the "-=field" prefix.
+     *
+     * @param {string[]} forcedKeys - Field names (unprefixed) to delete.
+     * @param {object} [otherFields={}] - Additional fields merged with normal recursive-merge behavior.
+     * @returns {object} A version-appropriate update payload.
+     */
+    static forceDelete(forcedKeys, otherFields = {}) {
+        const payload = { ...otherFields };
+
+        if (this.isV14) {
+            for (const key of forcedKeys) {
+                payload[key] = foundry.data.operators.ForcedDeletion.create();
+            }
+        } else {
+            for (const key of forcedKeys) {
+                payload[`-=${key}`] = null;
+            }
+        }
+
+        return payload;
+    }
+
+    /**
      * FoundryVTT overloads Math to add the clamped or clamp method depending on the version.
      * Just provide a straight implementation.
      *
