@@ -61,11 +61,74 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         const actorChanges = {};
 
-        // Pass the transient in-memory instance context along with the tracking change payload
+        // A "fresh" create is one whose edition has not yet been determined. A compendium drag/drop
+        // already carries full data (including is5e), so we must not overwrite it. Fresh creates get
+        // their edition, prototype token, versioning, flags, free items, and item force-replacement set
+        // up here.
+        const freshCreate = this.system.is5e == undefined;
+        if (freshCreate) {
+            HEROSYS.log(false, "_preCreate");
+
+            // Honor an explicit options.is5e (used by uploads/tests and drag/drop); otherwise fall back
+            // to the world's DefaultEdition setting. Without this, edition-dependent costs (e.g. combat
+            // skill levels) mis-detect the edition and compute the wrong point totals.
+            const is5e =
+                options.is5e != undefined
+                    ? options.is5e
+                    : game.settings.get(HEROSYS.module, "DefaultEdition") === "five";
+
+            actorChanges.prototypeToken = {
+                displayBars: CONST.TOKEN_DISPLAY_MODES.HOVER,
+                displayName: CONST.TOKEN_DISPLAY_MODES.HOVER,
+                sight: { enabled: true },
+            };
+            if (this.type !== "npc") {
+                actorChanges.prototypeToken.actorLink = true;
+                actorChanges.prototypeToken.disposition = CONST.TOKEN_DISPOSITIONS.FRIENDLY;
+                actorChanges.prototypeToken.displayBars = CONST.TOKEN_DISPLAY_MODES.ALWAYS;
+            }
+
+            actorChanges.system = { is5e, versionHeroSystem6eCreated: game.system.version };
+            actorChanges.flags = {
+                [game.system.id]: {
+                    file: {
+                        lastModifiedDate: Date.now(),
+                        uploadedBy: user.name,
+                        name: `[FoundryVTT actor]`,
+                    },
+                },
+            };
+
+            // Apply the edition immediately so the characteristic recalculation below evaluates the 5e
+            // figured/calculated formulas against the correct edition.
+            this.updateSource({ system: { is5e } });
+        }
+
+        // Seed baseline characteristics (base + purchased LEVELS) and evaluate dependent 5e formulas.
+        // No-ops for any characteristic already present in the incoming data (e.g. drag/drop).
         this._preparePreCreateCharacteristics(data, actorChanges);
 
-        // Merge the generated characteristic objects back into the master creation transaction payload
-        foundry.utils.mergeObject(data, actorChanges);
+        // Fold the generated setup + characteristic objects into the transient document source.
+        this.updateSource(actorChanges);
+
+        if (freshCreate) {
+            // Create free stuff unless this is specifically for a quench create.
+            if (!options.quenchCreate) {
+                await this.addFreeStuff();
+            }
+
+            // Merge in the entire system + force-replace items so nested item system data survives
+            // (v13 uses the ==key prefix; v14 uses a ForcedReplacement operator).
+            const items = this.items.map((i) => ({ ...i.toObject(), system: i.system }));
+            if (HeroCompatibility.isV14) {
+                this.updateSource({ items: foundry.data.operators.ForcedReplacement.create(items) });
+            } else {
+                this.updateSource({ [`==items`]: items });
+            }
+        }
+
+        // For debugging purposes
+        window.actor = this;
     }
 
     /**
@@ -193,10 +256,17 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     }
                 }
 
-                // Preserve existing resource pooling states (damage tracking shield)
-                let finalValueState = currentEntry.value;
-                if (finalValueState === undefined) {
+                // Value follows the recomputed max unless the characteristic is currently damaged or
+                // depleted (its prior value sits below its prior max), in which case preserve that value
+                // as a resource-pooling/damage shield. A char at full (value === max) or one whose value
+                // was never independently set adopts the freshly computed max; this is what lets a
+                // dependent seeded before its primaries (e.g. figured LEAPING/OCV seeded to 0 while STR/DEX
+                // were still 0) adopt its correct computed value rather than keeping the stale seed.
+                let finalValueState;
+                if (currentEntry.value === undefined || currentEntry.value === currentEntry.max) {
                     finalValueState = baseValue;
+                } else {
+                    finalValueState = currentEntry.value;
                 }
 
                 // Modify the target tracker payload object inline
@@ -278,25 +348,98 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 const baseInfo = characteristic.baseInfo;
                 let calculatedValue = null;
 
-                // Extract the formula callback directly from your config.mjs metadata blueprints
+                // Extract the formula callback directly from your config.mjs metadata blueprints. Figured
+                // characteristics also add the characteristic's own purchased LEVELS (e.g. bought SPD or
+                // extra LEAPING) on top of the figured base; calculated characteristics (OCV/DCV) do not.
                 if (baseInfo?.figured5eCharacteristic) {
-                    calculatedValue = baseInfo.figured5eCharacteristic(this);
+                    calculatedValue = baseInfo.figured5eCharacteristic(this) + (this.system[info.key]?.LEVELS ?? 0);
                 } else if (baseInfo?.calculated5eCharacteristic) {
                     calculatedValue = baseInfo.calculated5eCharacteristic(this);
                 }
 
                 // If a schema metadata formula is active, pipe it cleanly down to the runtime proxy
                 if (calculatedValue !== null) {
-                    // Enforce strict rules tracking: fractional float formatting for Speed,
-                    // and player-favorable rounding for combat/figured attributes.
+                    let calculatedMax;
+
+                    // 5e SPD always rounds down (you never round SPD up); other figured/calculated
+                    // attributes use player-favorable rounding. This matches the persistence path
+                    // (_computeFiguredCharacteristicChanges) and the integer spd.max expectations.
                     if (keyLower === "spd") {
-                        this.system.characteristics[keyLower].max = Number(Number(calculatedValue).toFixed(1));
+                        calculatedMax = Math.floor(calculatedValue);
                     } else {
-                        this.system.characteristics[keyLower].max = roundFavorPlayerAwayFromZero(calculatedValue);
+                        calculatedMax = roundFavorPlayerAwayFromZero(calculatedValue);
                     }
+
+                    this.system.characteristics[keyLower].max = this._applyDirectActiveEffectChangesToDerivedMax(
+                        keyLower,
+                        calculatedMax,
+                    );
                 }
             }
         }
+    }
+
+    /**
+     * Foundry applies active effects before prepareDerivedData. The 5e formula pass still needs to run
+     * after that so effects on primaries can propagate to dependents, but it must not erase effects that
+     * directly target the dependent's own max.
+     * @param {string} keyLower - Lowercase characteristic key.
+     * @param {number} calculatedMax - Formula-derived max before direct active effects.
+     * @returns {number}
+     */
+    _applyDirectActiveEffectChangesToDerivedMax(keyLower, calculatedMax) {
+        const targetKey = `system.characteristics.${keyLower}.max`;
+        const modes = CONST.ACTIVE_EFFECT_MODES;
+        const effects =
+            typeof this.allApplicableEffects === "function"
+                ? Array.from(this.allApplicableEffects())
+                : Array.from(this.appliedEffects ?? []);
+        const changes = [];
+
+        for (const effect of effects) {
+            if (effect.disabled || effect.isSuppressed) continue;
+
+            for (const [index, change] of (effect.changes ?? []).entries()) {
+                if (change.key !== targetKey) continue;
+                changes.push({
+                    change,
+                    index,
+                    priority: change.priority ?? (change.mode ?? 0) * 10,
+                });
+            }
+        }
+
+        if (changes.length === 0) return calculatedMax;
+
+        changes.sort((a, b) => a.priority - b.priority || a.index - b.index);
+
+        let value = calculatedMax;
+        for (const { change } of changes) {
+            const delta = Number(change.value);
+            if (!Number.isFinite(delta)) continue;
+
+            switch (change.mode) {
+                case modes.ADD:
+                    value += delta;
+                    break;
+                case modes.MULTIPLY:
+                    value = roundFavorPlayerAwayFromZero(value * delta);
+                    break;
+                case modes.OVERRIDE:
+                    value = delta;
+                    break;
+                case modes.UPGRADE:
+                    if (modes.UPGRADE === undefined) break;
+                    value = Math.max(value, delta);
+                    break;
+                case modes.DOWNGRADE:
+                    if (modes.DOWNGRADE === undefined) break;
+                    value = Math.min(value, delta);
+                    break;
+            }
+        }
+
+        return value;
     }
 
     /**
@@ -679,26 +822,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             await this.applySizeEffect(changed, options, userId);
         }
 
-        // Keep the dedicated 5e overrides framework running right alongside it
+        // Recompute 5e figured (SPD) and calculated (OCV/DCV/OMCV/DMCV) characteristics when their
+        // source primaries change, merging the derived max/value into `changed` so they commit
+        // atomically in this same write. This evaluates the config formulas by temporarily patching the
+        // live actor's in-memory fields and restoring them (no updateSource), so the HeroActorCharacteristic
+        // models are never flattened to plain objects mid-lifecycle. Live/display values and Active-Effect
+        // driven recomputation are handled separately in prepareDerivedData().
         if (is5e) {
-            const changedChars = changed.system?.characteristics;
-            if (changedChars) {
-                const primaryKeys = ["str", "dex", "con", "int", "ego", "pre", "body"];
-                const containsPrimaryUpdate = Object.keys(changedChars).some((key) =>
-                    primaryKeys.includes(key.toLowerCase()),
-                );
-
-                if (containsPrimaryUpdate) {
-                    const tempState = foundry.utils.deepClone(this.system.characteristics ?? {});
-                    foundry.utils.mergeObject(tempState, changedChars);
-
-                    // Run our pure database-isolated calculator directly over the scratchpad
-                    this._recalculateCharacteristicsByPriority(tempState);
-
-                    // Pack back into the transactional payload accumulator object
-                    changed.system.characteristics = tempState;
-                }
-            }
+            this._apply5eCalculatedCharacteristics(changed);
         }
 
         // Inventory weight and carrying capacity corrections
@@ -887,28 +1018,151 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return values;
     }
 
-    // Check for any figuredCharacteristic dependencies of the changedCharKey.
-    async __depricated_updateFiguredCharacteristicDependencies(changedCharKey) {
-        const _getCharacteristicInfoArrayForActor = getCharacteristicInfoArrayForActor(this);
-        for (const charPowerInfo of _getCharacteristicInfoArrayForActor.filter((o) =>
+    // Compute figured-characteristic dependencies (e.g. 5e SPD figured from DEX) of changedCharKey.
+    // Reads from `actor` (which may reflect a not-yet-committed patched state), so callers can either
+    // persist the results or merge them into a pending `changed` payload. Returns [characteristicKey,
+    // newValue] tuples.
+    _computeFiguredCharacteristicChanges(actor, changedCharKey) {
+        const changes = [];
+        for (const charPowerInfo of getCharacteristicInfoArrayForActor(actor).filter((o) =>
             o.behaviors.includes(`figured${changedCharKey.toUpperCase()}`),
         )) {
             const key = charPowerInfo.key.toLocaleLowerCase();
 
             if (charPowerInfo.figured5eCharacteristic) {
-                const levels = this.system[charPowerInfo.key].LEVELS;
+                const levels = actor.system[charPowerInfo.key]?.LEVELS;
                 if (levels == null) {
-                    console.warn(`${this.name} has ${key}.LEVELS that is ${levels}`);
+                    console.warn(`${actor.name} has ${key}.LEVELS that is ${levels}`);
                 }
 
                 // Kludge: we only need to floor SPD as everything is prerounded. If we don't round then
                 //         committing to the database will kindly round to an integer for us.
-                const newValue = Math.floor(charPowerInfo.figured5eCharacteristic(this) + (levels ?? 0));
+                const newValue = Math.floor(charPowerInfo.figured5eCharacteristic(actor) + (levels ?? 0));
+                changes.push([key, newValue]);
+            }
+        }
+        return changes;
+    }
 
-                // FIXME: Intentionally making 2 update calls to allow for AEs to kick in for max so we can set value to match
-                // TODO: May break adjustment powers
-                await this.updateCharacteristics([[key, { max: newValue }]], {});
-                await this.updateCharacteristics([[key, { value: newValue }]], {});
+    // Check for any figuredCharacteristic dependencies of the changedCharKey. Used by the Active Effect
+    // path (actor-active-effects.mjs) to persist figured dependents after an AE changes a primary's max.
+    async updateFiguredCharacteristicDependencies(changedCharKey) {
+        for (const [key, newValue] of this._computeFiguredCharacteristicChanges(this, changedCharKey)) {
+            // FIXME: Intentionally making 2 update calls to allow for AEs to kick in for max so we can set value to match
+            // TODO: May break adjustment powers
+            await this.updateCharacteristics([[key, { max: newValue }]], {});
+            await this.updateCharacteristics([[key, { value: newValue }]], {});
+        }
+    }
+
+    // Recompute 5e figured (e.g. SPD) and calculated (e.g. OCV/DCV) characteristics when their source
+    // primaries change, merging the derived max/value into the pending `changed` payload so they commit
+    // atomically in the same write. Called from _preUpdate; only mutates `changed`, never calls update().
+    // It evaluates the config formulas against the effective (post-update) primaries by temporarily
+    // patching this actor's in-memory characteristic fields and restoring them in a finally, rather than
+    // cloning (clone+prepareData re-runs the item pipeline and can throw mid-update on transient state)
+    // or calling updateSource (which flattens the HeroActorCharacteristic models into plain objects,
+    // stripping the methods the figured formulas call). The method is fully synchronous, so no other code
+    // observes the transient state, and nothing persists except via the returned `changed` payload.
+    _apply5eCalculatedCharacteristics(changed) {
+        if (!this.is5e) return;
+        const systemChanged = changed?.system;
+        if (!systemChanged) return;
+
+        const infoArray = getCharacteristicInfoArrayForActor(this);
+
+        // Primaries whose change can drive a *calculated* dependent (e.g. dex -> ocv/dcv). Figured
+        // dependents (e.g. spd) recompute only on a LEVELS change (block A) or via the Active Effect
+        // path, because they derive from base+LEVELS rather than the stored value.
+        const calculatedSourceKeys = new Set();
+        for (const info of infoArray) {
+            for (const behavior of info.behaviors) {
+                const match = behavior.match(/^calculated([A-Z]+)$/);
+                if (match) calculatedSourceKeys.add(match[1].toLowerCase());
+            }
+        }
+
+        // Block A source: purchased LEVELS changed for a characteristic (e.g. HDC upload / edit).
+        // Keep the original (schema-cased) key so we can patch system.<KEY>.LEVELS below.
+        const levelsChanged = Object.keys(systemChanged)
+            .filter((k) => systemChanged[k]?.LEVELS != null && this.hasCharacteristic(k.toUpperCase()))
+            .map((k) => ({ origKey: k, key: k.toLowerCase() }));
+
+        // Block B source: a characteristic value changed and it feeds a calculated dependent.
+        const valueChangedKeys = systemChanged.characteristics
+            ? Object.keys(systemChanged.characteristics).filter(
+                  (k) => systemChanged.characteristics[k]?.value !== undefined,
+              )
+            : [];
+        const relevantValueChangedKeys = valueChangedKeys.filter((k) => calculatedSourceKeys.has(k));
+
+        if (levelsChanged.length === 0 && relevantValueChangedKeys.length === 0) return;
+
+        const patched = new Map();
+        const patch = (path, value) => {
+            if (!patched.has(path)) patched.set(path, foundry.utils.getProperty(this, path));
+            foundry.utils.setProperty(this, path, value);
+        };
+
+        // characteristicKey -> integer value/max to merge into `changed`.
+        const results = {};
+
+        try {
+            // Apply changed LEVELS so basePlusLevels reflects the new purchase.
+            for (const { origKey } of levelsChanged) {
+                patch(`system.${origKey}.LEVELS`, systemChanged[origKey].LEVELS);
+            }
+            // Apply explicit characteristic value changes so calculated formulas read them.
+            for (const k of valueChangedKeys) {
+                patch(`system.characteristics.${k}.value`, systemChanged.characteristics[k].value);
+            }
+
+            // (A) LEVELS changes: sync the primary's stored max/value and recompute figured dependents
+            // (e.g. SPD). Floor basePlusLevels because a 5e figured base can be fractional (SPD = 1 +
+            // DEX/10) and the stored field is an integer that would otherwise round 7.5 up to 8 instead
+            // of down to 7 (matches fullHealth()'s parseInt and the figured helper's Math.floor).
+            for (const { key } of levelsChanged) {
+                const primaryValue = Math.floor(this.getCharacteristic(key).basePlusLevels);
+                results[key] = primaryValue;
+                // Reflect the primary's new value so calculated formulas (which read .value) see it.
+                patch(`system.characteristics.${key}.value`, primaryValue);
+                patch(`system.characteristics.${key}.max`, primaryValue);
+                for (const [depKey, depValue] of this._computeFiguredCharacteristicChanges(this, key)) {
+                    results[depKey] = depValue;
+                }
+            }
+
+            // (B) 5e calculated characteristics (OCV/DCV/OMCV/DMCV). Include LEVELS-changed sources so a
+            // purchased DEX increase also refreshes OCV/DCV.
+            const calculatedTriggerKeys = new Set([
+                ...relevantValueChangedKeys,
+                ...levelsChanged.map((l) => l.key).filter((k) => calculatedSourceKeys.has(k)),
+            ]);
+            for (const changeKey of calculatedTriggerKeys) {
+                for (const char of infoArray.filter(
+                    (o) => o.behaviors.includes(`calculated${changeKey.toUpperCase()}`) || o.key == changeKey,
+                )) {
+                    if (char.calculated5eCharacteristic) {
+                        results[char.key.toLowerCase()] = char.calculated5eCharacteristic(this);
+                    }
+                }
+            }
+
+            // Merge computed derived values into `changed` (dotted leaf paths) so they commit in this same
+            // write and Foundry reconstructs the characteristic models on commit.
+            for (const [key, value] of Object.entries(results)) {
+                foundry.utils.setProperty(changed, `system.characteristics.${key}.max`, value);
+                foundry.utils.setProperty(changed, `system.characteristics.${key}.value`, value);
+            }
+        } catch (e) {
+            console.error(
+                `${this.name}: _apply5eCalculatedCharacteristics failed to recompute derived characteristics`,
+                e,
+            );
+        } finally {
+            // Restore the actor's in-memory state exactly as it was.
+            for (const [path, value] of patched) {
+                foundry.utils.setProperty(this, path, value);
             }
         }
     }
