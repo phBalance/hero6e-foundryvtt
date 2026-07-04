@@ -204,16 +204,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const characteristicInfo = getCharacteristicInfoArrayForActor(this);
         const { patch, restore } = this._createTransientPatcher();
 
-        const isDependentCharacteristic = (info) => {
-            const keyLower = info.key.toLowerCase();
-            const characteristic = this.getCharacteristic(keyLower);
-
-            const hasCalculatedFormula = !!characteristic?.baseInfo?.calculated5eCharacteristic;
-            const hasFiguredFormula = !!characteristic?.baseInfo?.figured5eCharacteristic;
-            const isCombatOrMovementTrack = ["ocv", "dcv", "leaping", "running", "swimming"].includes(keyLower);
-
-            return this.is5e === true && (hasCalculatedFormula || hasFiguredFormula || isCombatOrMovementTrack);
-        };
+        const isDependentCharacteristic = (info) =>
+            this.is5e === true && !!(info.figured5eCharacteristic || info.calculated5eCharacteristic);
 
         const executionPasses = [
             characteristicInfo.filter((info) => !isDependentCharacteristic(info)), // Pass 1: Primaries / Baseline
@@ -234,22 +226,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     let baseValue;
 
                     if (isDependent) {
-                        const baseInfo = characteristic.baseInfo;
-                        let rawCalculatedValue;
+                        const rawCalculatedValue = info.figured5eCharacteristic
+                            ? info.figured5eCharacteristic(this)
+                            : info.calculated5eCharacteristic(this);
 
-                        if (baseInfo?.figured5eCharacteristic) {
-                            rawCalculatedValue = baseInfo.figured5eCharacteristic(this);
-                        } else if (baseInfo?.calculated5eCharacteristic) {
-                            rawCalculatedValue = baseInfo.calculated5eCharacteristic(this);
-                        } else {
-                            const currentDex = Math.max(0, targetChars.dex?.max ?? targetChars.dex?.value ?? 0);
-                            rawCalculatedValue = ["ocv", "dcv"].includes(keyLower)
-                                ? currentDex / 3
-                                : (characteristic.base ?? 0);
-                        }
-
+                        // SPD floors; other figured/calculated use player-favorable rounding. This matches
+                        // prepareDerivedData and the persistence path so a fresh actor doesn't disagree
+                        // with its first recompute.
                         if (keyLower === "spd") {
-                            baseValue = Number(Number(rawCalculatedValue).toFixed(1));
+                            baseValue = Math.floor(rawCalculatedValue);
                         } else {
                             baseValue = roundFavorPlayerAwayFromZero(rawCalculatedValue);
                         }
@@ -347,7 +332,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (this.is5e === true) {
             const characteristicInfo = getCharacteristicInfoArrayForActor(this);
 
-            const restoreFormulaSources = this._apply5eActiveEffectFormulaSourceOverrides(characteristicInfo);
+            // One effect-collection pass shared by the override + per-characteristic passes below;
+            // allApplicableEffects() walks actor and item effects and prepareData runs on every
+            // update/render.
+            const maxChangesByKey = this._collectActiveEffectMaxChanges();
+            const restoreFormulaSources = this._apply5eActiveEffectFormulaSourceOverrides(
+                characteristicInfo,
+                maxChangesByKey,
+            );
             try {
                 for (const info of characteristicInfo) {
                     const keyLower = info.key.toLowerCase();
@@ -380,6 +372,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         this.system.characteristics[keyLower].max = this._applyDirectActiveEffectChangesToDerivedMax(
                             keyLower,
                             calculatedMax,
+                            { maxChangesByKey },
                         );
                     }
                 }
@@ -389,7 +382,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
     }
 
-    _apply5eActiveEffectFormulaSourceOverrides(characteristicInfo) {
+    _apply5eActiveEffectFormulaSourceOverrides(characteristicInfo, maxChangesByKey) {
         const sourceKeys = new Set();
         for (const info of characteristicInfo) {
             for (const behavior of info.behaviors ?? []) {
@@ -400,7 +393,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         const { patch, restore } = this._createTransientPatcher();
 
-        const activeEffectMaxTargets = this._getActiveEffectChangedMaxKeys();
+        const activeEffectMaxTargets = this._getActiveEffectChangedMaxKeys(maxChangesByKey);
         for (const key of sourceKeys) {
             if (!activeEffectMaxTargets.has(key)) continue;
 
@@ -432,20 +425,48 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return restore;
     }
 
-    _getActiveEffectChangedMaxKeys() {
-        const keys = new Set();
-        const effects = Array.from(this.allApplicableEffects());
-
-        for (const effect of effects) {
+    /**
+     * Single pass over all applicable effects collecting changes that target a characteristic max,
+     * keyed by lowercase characteristic. Hot-path callers (prepareDerivedData, fullHealth) build this
+     * once and hand it to the helpers below instead of re-walking actor + item effects per
+     * characteristic.
+     */
+    _collectActiveEffectMaxChanges() {
+        const byKey = new Map();
+        for (const effect of this.allApplicableEffects()) {
             if (effect.disabled || effect.isSuppressed) continue;
-            if (effect.parent !== this) continue;
 
-            for (const change of effect.changes ?? []) {
+            const fromStatus = effect.statuses?.size > 0;
+            const parentItemXmlid = effect.parent === this ? undefined : effect.parent?.system?.XMLID;
+            for (const [index, change] of (effect.changes ?? []).entries()) {
                 const match = change.key.match(/^system\.characteristics\.([a-z]+)\.max$/);
-                if (match) keys.add(match[1]);
+                if (!match) continue;
+
+                const entries = byKey.get(match[1]) ?? [];
+                entries.push({
+                    change,
+                    index,
+                    priority: change.priority ?? (change.mode ?? 0) * 10,
+                    fromStatus,
+                    parentItemXmlid,
+                });
+                byKey.set(match[1], entries);
             }
         }
+        return byKey;
+    }
 
+    _getActiveEffectChangedMaxKeys(maxChangesByKey = this._collectActiveEffectMaxChanges()) {
+        const keys = new Set();
+        // Characteristic items (e.g. a bought DEX power) already feed 5e dependents through the
+        // item-sum path; letting their transferred effects trigger the formula-source override would
+        // cascade them twice. Other item effects cascade like actor-owned ones.
+        const fromCharacteristicItem = (entry) =>
+            entry.parentItemXmlid !== undefined && this.hasCharacteristic(entry.parentItemXmlid);
+
+        for (const [key, entries] of maxChangesByKey) {
+            if (entries.some((entry) => !fromCharacteristicItem(entry))) keys.add(key);
+        }
         return keys;
     }
 
@@ -455,27 +476,20 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      * directly target the dependent's own max.
      * @param {string} keyLower - Lowercase characteristic key.
      * @param {number} calculatedMax - Formula-derived max before direct active effects.
+     * @param {object} [options]
+     * @param {boolean} [options.includeStatusEffects] - Include status-effect changes (excluded on heal paths).
+     * @param {Map} [options.maxChangesByKey] - Prebuilt _collectActiveEffectMaxChanges() result.
      * @returns {number}
      */
-    _applyDirectActiveEffectChangesToDerivedMax(keyLower, calculatedMax, { includeStatusEffects = true } = {}) {
-        const targetKey = `system.characteristics.${keyLower}.max`;
+    _applyDirectActiveEffectChangesToDerivedMax(
+        keyLower,
+        calculatedMax,
+        { includeStatusEffects = true, maxChangesByKey = this._collectActiveEffectMaxChanges() } = {},
+    ) {
         const modes = CONST.ACTIVE_EFFECT_MODES;
-        const effects = Array.from(this.allApplicableEffects());
-        const changes = [];
-
-        for (const effect of effects) {
-            if (effect.disabled || effect.isSuppressed) continue;
-            if (!includeStatusEffects && effect.statuses?.size > 0) continue;
-
-            for (const [index, change] of (effect.changes ?? []).entries()) {
-                if (change.key !== targetKey) continue;
-                changes.push({
-                    change,
-                    index,
-                    priority: change.priority ?? (change.mode ?? 0) * 10,
-                });
-            }
-        }
+        const changes = (maxChangesByKey.get(keyLower) ?? []).filter(
+            (entry) => includeStatusEffects || !entry.fromStatus,
+        );
 
         if (changes.length === 0) return calculatedMax;
 
@@ -1171,8 +1185,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 ...levelsChanged.map((l) => l.key).filter((k) => calculatedSourceKeys.has(k)),
             ]);
             for (const changeKey of calculatedTriggerKeys) {
-                for (const char of infoArray.filter(
-                    (o) => o.behaviors.includes(`calculated${changeKey.toUpperCase()}`) || o.key == changeKey,
+                for (const char of infoArray.filter((o) =>
+                    o.behaviors.includes(`calculated${changeKey.toUpperCase()}`),
                 )) {
                     if (char.calculated5eCharacteristic) {
                         results[char.key.toLowerCase()] = char.calculated5eCharacteristic(this);
@@ -1186,11 +1200,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 foundry.utils.setProperty(changed, `system.characteristics.${key}.max`, value);
                 foundry.utils.setProperty(changed, `system.characteristics.${key}.value`, value);
             }
-        } catch (e) {
-            console.error(
-                `${this.name}: _apply5eCalculatedCharacteristics failed to recompute derived characteristics`,
-                e,
-            );
         } finally {
             // Restore the actor's in-memory state exactly as it was.
             restore();
@@ -2139,14 +2148,10 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         // Set Characteristics MAX to CORE (or 5e calculated value)
         start = Date.now();
+        const fullHealthValues = this._getFullHealthCharacteristicValues();
         const characteristicChangesMax = {};
-        const fullHealthMaxByCharacteristic = {};
-        for (const info of getCharacteristicInfoArrayForActor(this)) {
-            const charKey = info.key.toLowerCase();
-            const fullHealthMax = this._getFullHealthCharacteristicMax(info);
-            if (!Number.isFinite(fullHealthMax)) continue;
-
-            fullHealthMaxByCharacteristic[charKey] = fullHealthMax;
+        for (const [charKey, { fullHealthMax }] of Object.entries(fullHealthValues)) {
+            if (fullHealthMax === undefined) continue;
 
             if (this.system.characteristics[charKey].max !== fullHealthMax) {
                 characteristicChangesMax[`system.characteristics.${charKey}.max`] = fullHealthMax;
@@ -2167,17 +2172,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // Set Characteristics VALUE to MAX
         start = Date.now();
         const characteristicChangesValue = {};
-        for (const charKey of Object.keys(this.system.characteristics)) {
+        for (const [charKey, { value }] of Object.entries(fullHealthValues)) {
             const characteristic = this.system.characteristics[charKey];
-            const baseMax = fullHealthMaxByCharacteristic[charKey] ?? this.system.characteristics[charKey].max;
-            const max = parseInt(
-                this._applyDirectActiveEffectChangesToDerivedMax(charKey, baseMax, {
-                    includeStatusEffects: false,
-                }),
-            );
-            if (characteristic.value !== max) {
-                characteristic.value = max;
-                characteristicChangesValue[`system.characteristics.${charKey}.value`] = characteristic.value;
+            if (characteristic.value !== value) {
+                characteristic.value = value;
+                characteristicChangesValue[`system.characteristics.${charKey}.value`] = value;
             }
         }
 
@@ -2191,6 +2190,41 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (end - start > tDelta) {
             console.warn("fullHealth performance concern: Set Characteristics VALUE to MAX", end - start);
         }
+    }
+
+    /**
+     * Full-health targets for every characteristic: the recomputed full-health max plus, for the
+     * value, non-status active effects re-applied so mid-session AID/DRAIN adjustments survive a
+     * full heal while status overlays do not. fullHealthMax is undefined for characteristics
+     * outside the actor's characteristic info array. Shared by fullHealth() and the upload path so
+     * the two cannot drift.
+     */
+    _getFullHealthCharacteristicValues() {
+        const fullHealthMaxByCharacteristic = {};
+        for (const info of getCharacteristicInfoArrayForActor(this)) {
+            const charKey = info.key.toLowerCase();
+            const fullHealthMax = this._getFullHealthCharacteristicMax(info);
+            if (Number.isFinite(fullHealthMax)) {
+                fullHealthMaxByCharacteristic[charKey] = fullHealthMax;
+            }
+        }
+
+        const maxChangesByKey = this._collectActiveEffectMaxChanges();
+        const values = {};
+        for (const charKey of Object.keys(this.system.characteristics)) {
+            const fullHealthMax = fullHealthMaxByCharacteristic[charKey];
+            const baseMax = fullHealthMax ?? this.system.characteristics[charKey].max;
+            values[charKey] = {
+                fullHealthMax,
+                value: parseInt(
+                    this._applyDirectActiveEffectChangesToDerivedMax(charKey, baseMax, {
+                        includeStatusEffects: false,
+                        maxChangesByKey,
+                    }),
+                ),
+            };
+        }
+        return values;
     }
 
     _getFullHealthCharacteristicMax(info) {
@@ -3187,24 +3221,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             try {
                 if (this.id) {
                     const changes = {};
-                    const fullHealthMaxByCharacteristic = {};
-                    for (const info of getCharacteristicInfoArrayForActor(this)) {
-                        const charKey = info.key.toLowerCase();
-                        const fullHealthMax = this._getFullHealthCharacteristicMax(info);
-                        if (Number.isFinite(fullHealthMax)) {
-                            fullHealthMaxByCharacteristic[charKey] = fullHealthMax;
+                    for (const [key, { value }] of Object.entries(this._getFullHealthCharacteristicValues())) {
+                        if (this.system.characteristics[key].value !== value) {
+                            changes[`system.characteristics.${key}.value`] = value;
                         }
                     }
-
-                    for (const key of Object.keys(this.system.characteristics)) {
-                        const baseMax = fullHealthMaxByCharacteristic[key] ?? this.system.characteristics[key].max;
-                        changes[`system.characteristics.${key}.value`] = parseInt(
-                            this._applyDirectActiveEffectChangesToDerivedMax(key, baseMax, {
-                                includeStatusEffects: false,
-                            }),
-                        );
+                    if (Object.keys(changes).length > 0) {
+                        await this.update(changes);
                     }
-                    await this.update(changes);
                 }
             } catch (e) {
                 console.error(e);
