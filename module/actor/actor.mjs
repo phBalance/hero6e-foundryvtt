@@ -321,42 +321,116 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (this.is5e) {
             const characteristicInfo = getCharacteristicInfoArrayForActor(this);
 
-            for (const info of characteristicInfo) {
-                const keyLower = info.key.toLowerCase();
-                const characteristic = this.getCharacteristic(keyLower);
-                if (!characteristic) continue;
+            const restoreFormulaSources = this._apply5eActiveEffectFormulaSourceOverrides(characteristicInfo);
+            try {
+                for (const info of characteristicInfo) {
+                    const keyLower = info.key.toLowerCase();
+                    const characteristic = this.getCharacteristic(keyLower);
+                    if (!characteristic) continue;
 
-                const baseInfo = characteristic.baseInfo;
-                let calculatedValue = null;
+                    const baseInfo = characteristic.baseInfo;
+                    let calculatedValue = null;
 
-                // Extract the formula callback directly from your config.mjs metadata blueprints. Figured
-                // characteristics also add the characteristic's own purchased LEVELS (e.g. bought SPD or
-                // extra LEAPING) on top of the figured base; calculated characteristics (OCV/DCV) do not.
-                if (baseInfo?.figured5eCharacteristic) {
-                    calculatedValue = baseInfo.figured5eCharacteristic(this) + (this.system[info.key]?.LEVELS ?? 0);
-                } else if (baseInfo?.calculated5eCharacteristic) {
-                    calculatedValue = baseInfo.calculated5eCharacteristic(this);
-                }
-
-                if (calculatedValue !== null) {
-                    let calculatedMax;
-
-                    // 5e SPD always rounds down (you never round SPD up); other figured/calculated
-                    // attributes use player-favorable rounding. This matches the persistence path
-                    // (_computeFiguredCharacteristicChanges) and the integer spd.max expectations.
-                    if (keyLower === "spd") {
-                        calculatedMax = Math.floor(calculatedValue);
-                    } else {
-                        calculatedMax = roundFavorPlayerAwayFromZero(calculatedValue);
+                    // Extract the formula callback directly from your config.mjs metadata blueprints. Figured
+                    // characteristics also add the characteristic's own purchased LEVELS (e.g. bought SPD or
+                    // extra LEAPING) on top of the figured base; calculated characteristics (OCV/DCV) do not.
+                    if (baseInfo?.figured5eCharacteristic) {
+                        calculatedValue = baseInfo.figured5eCharacteristic(this) + (this.system[info.key]?.LEVELS ?? 0);
+                    } else if (baseInfo?.calculated5eCharacteristic) {
+                        calculatedValue = baseInfo.calculated5eCharacteristic(this);
                     }
 
-                    this.system.characteristics[keyLower].max = this._applyDirectActiveEffectChangesToDerivedMax(
-                        keyLower,
-                        calculatedMax,
-                    );
+                    if (calculatedValue !== null) {
+                        let calculatedMax;
+
+                        // 5e SPD always rounds down (you never round SPD up); other figured/calculated
+                        // attributes use player-favorable rounding. This matches the persistence path
+                        // (_computeFiguredCharacteristicChanges) and the integer spd.max expectations.
+                        if (keyLower === "spd") {
+                            calculatedMax = Math.floor(calculatedValue);
+                        } else {
+                            calculatedMax = roundFavorPlayerAwayFromZero(calculatedValue);
+                        }
+
+                        this.system.characteristics[keyLower].max = this._applyDirectActiveEffectChangesToDerivedMax(
+                            keyLower,
+                            calculatedMax,
+                        );
+                    }
                 }
+            } finally {
+                restoreFormulaSources();
             }
         }
+    }
+
+    _apply5eActiveEffectFormulaSourceOverrides(characteristicInfo) {
+        const sourceKeys = new Set();
+        for (const info of characteristicInfo) {
+            for (const behavior of info.behaviors ?? []) {
+                const match = behavior.match(/^(?:figured|calculated)([A-Z]+)$/);
+                if (match) sourceKeys.add(match[1].toLowerCase());
+            }
+        }
+
+        const patched = new Map();
+        const patch = (path, value) => {
+            if (!patched.has(path)) patched.set(path, foundry.utils.getProperty(this, path));
+            foundry.utils.setProperty(this, path, value);
+        };
+
+        const activeEffectMaxTargets = this._getActiveEffectChangedMaxKeys();
+        for (const key of sourceKeys) {
+            if (!activeEffectMaxTargets.has(key)) continue;
+
+            const characteristic = this.getCharacteristic(key);
+            const characteristicData = this.system.characteristics?.[key];
+            if (!characteristic || !characteristicData) continue;
+
+            const basePlusLevels = Number(characteristic.basePlusLevels ?? 0);
+            const value = Number(characteristic.value ?? 0);
+            const max = Number(characteristic.max ?? 0);
+            const formulaSourceValue = Math.max(basePlusLevels, value, max);
+            if (!Number.isFinite(formulaSourceValue)) continue;
+
+            if (formulaSourceValue !== value) {
+                patch(`system.characteristics.${key}.value`, formulaSourceValue);
+            }
+
+            const nativeKey = key.toUpperCase();
+            if (!this.system[nativeKey]) continue;
+
+            const baseValue = Number(characteristic.baseInfo?.base?.(this) ?? 0);
+            if (Number.isFinite(baseValue) && formulaSourceValue !== basePlusLevels) {
+                patch(`system.${nativeKey}.LEVELS`, formulaSourceValue - baseValue);
+            }
+        }
+
+        return () => {
+            for (const [path, value] of patched) {
+                foundry.utils.setProperty(this, path, value);
+            }
+        };
+    }
+
+    _getActiveEffectChangedMaxKeys() {
+        const keys = new Set();
+        const effects =
+            typeof this.allApplicableEffects === "function"
+                ? Array.from(this.allApplicableEffects())
+                : Array.from(this.appliedEffects ?? []);
+
+        for (const effect of effects) {
+            if (effect.disabled || effect.isSuppressed) continue;
+            if (effect.parent !== this) continue;
+
+            for (const change of effect.changes ?? []) {
+                const match = change.key.match(/^system\.characteristics\.([a-z]+)\.max$/);
+                if (match) keys.add(match[1]);
+            }
+        }
+
+        return keys;
     }
 
     /**

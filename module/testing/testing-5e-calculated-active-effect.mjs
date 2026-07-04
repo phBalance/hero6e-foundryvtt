@@ -1,3 +1,5 @@
+import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
+
 /**
  * Registers 5e Calculated Active Effect Automation Tests with Quench.
  * Validates baseline ratios and dynamic buffs while enforcing 5e non-cascading rules.
@@ -107,7 +109,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                         },
                                         {
                                             key: "system.characteristics.dex.max",
-                                            value: "8",
+                                            value: "10",
                                             mode: CONST.ACTIVE_EFFECT_MODES.ADD,
                                         },
                                     ],
@@ -124,28 +126,53 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 `[${targetType}] Active effect failed to modify DEX max proxy.`,
                             );
 
-                            // Evaluate calculations from the source formulas so this catches propagation drift.
-                            const expectedOcv = qActor
-                                .getCharacteristic("ocv")
-                                .baseInfo.calculated5eCharacteristic(qActor);
+                            const effectiveSourceValue = (key) =>
+                                Math.max(Number(buffedChars[key]?.value ?? 0), Number(buffedChars[key]?.max ?? 0));
+                            const dexSourceValue = effectiveSourceValue("dex");
+                            const strSourceValue = effectiveSourceValue("str");
+
+                            const expectedOcv = roundFavorPlayerAwayFromZero(Math.max(0, dexSourceValue) / 3);
                             const expectedPd =
-                                qActor.getCharacteristic("pd").baseInfo.figured5eCharacteristic(qActor) +
+                                roundFavorPlayerAwayFromZero(strSourceValue / 5) +
+                                qActor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(5) +
                                 (qActor.system.PD?.LEVELS ?? 0);
 
                             // Assert outputs cleanly against the dynamic runtime properties
                             assert.equal(
                                 buffedChars.ocv.max,
                                 expectedOcv,
-                                `[${targetType}] Figured OCV calculation ratio mismatch.`,
+                                `[${targetType}] Calculated OCV calculation ratio mismatch.`,
                             );
                             assert.equal(
                                 buffedChars.pd.max,
                                 expectedPd,
                                 `[${targetType}] Figured PD calculation ratio mismatch.`,
                             );
-                            if (qActor.hasCharacteristic("REC")) {
+                            if (qActor.hasCharacteristic("spd")) {
+                                const expectedSpd = Math.floor(
+                                    1 +
+                                        Number((dexSourceValue / 10).toFixed(1)) +
+                                        Number(
+                                            qActor
+                                                .getCharacteristic("dex")
+                                                .baseSumFiguredCharacteristicsNoRoundingFromItems(10)
+                                                .toFixed(1),
+                                        ) +
+                                        (qActor.system.SPD?.LEVELS ?? 0),
+                                );
+                                assert.equal(
+                                    buffedChars.spd.max,
+                                    expectedSpd,
+                                    `[${targetType}] Figured SPD calculation ratio mismatch.`,
+                                );
+                            }
+                            if (qActor.hasCharacteristic("rec")) {
+                                const conSourceValue = effectiveSourceValue("con");
                                 const expectedRec =
-                                    qActor.getCharacteristic("rec").baseInfo.figured5eCharacteristic(qActor) +
+                                    roundFavorPlayerAwayFromZero(strSourceValue / 5) +
+                                    qActor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(5) +
+                                    roundFavorPlayerAwayFromZero(conSourceValue / 5) +
+                                    qActor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(5) +
                                     (qActor.system.REC?.LEVELS ?? 0);
                                 assert.equal(
                                     buffedChars.rec.max,
@@ -191,13 +218,13 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                             );
 
                             // 2. Figured Characteristics Verification (5e Non-Cascading Rules Enforcement)
-                            // Since OCV is a Figured characteristic, a Drain on DEX does NOT cascade to reduce it.
+                            // Since OCV is a calculated characteristic, a Drain on DEX does NOT cascade to reduce it.
                             // It should stay perfectly insulated at its uncommitted rulebook base configuration total.
                             const unreducedOcvBase = qActor.getCharacteristic("ocv")?.base ?? 3;
                             assert.equal(
                                 drainedChars.ocv.max,
                                 unreducedOcvBase,
-                                `[${targetType}] Figured metric OCV should stay insulated from primary DRAIN per non-cascading rules.`,
+                                `[${targetType}] Calculated OCV should stay insulated from primary DRAIN per non-cascading rules.`,
                             );
                         });
                     });
