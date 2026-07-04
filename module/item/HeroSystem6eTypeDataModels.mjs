@@ -1623,15 +1623,25 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
 
     /**
      * base is the starting points you get for free
+     *
+     * For 5e dependents (calculated/figured) this is the formula result WITHOUT active effects on
+     * the source primaries: an AID DEX must not move the displayed OCV base — the max column
+     * carries the adjusted number and the tooltip explains it. Item-granted primaries
+     * (characteristic-bought-as-a-power, e.g. an active +10 DEX item) are real purchases per
+     * 5ER p. 139-40 and DO stay in the base.
      */
     get base() {
         // Some 5e characteristics are calculated or figured
         if (this.actor.is5e === true) {
             if (this.baseInfo?.behaviors.includes("calculated")) {
                 if (this.#baseInfo.calculated5eCharacteristic) {
-                    return this.#baseInfo.calculated5eCharacteristic(this.actor);
+                    // Calculated formulas read the source's current *value*, which non-item effects
+                    // (adjustments included) inflate; evaluate against effect-free sources instead.
+                    return this.#evaluateFormulaAgainstEffectFreeSources(this.#baseInfo.calculated5eCharacteristic);
                 }
             } else if (this.baseInfo?.behaviors.includes("figured")) {
+                // Figured formulas read base + LEVELS (and per-item sums), which effects never
+                // touch, so a direct evaluation is already effect-free.
                 return this.baseInfo.figured5eCharacteristic(this.actor);
             }
         }
@@ -1640,6 +1650,36 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         // return null when this characteristic isn't valid
 
         return this.baseInfo?.base?.(this.actor) ?? null;
+    }
+
+    /**
+     * Evaluates a 5e dependent formula with each source primary's current value transiently reset
+     * to its effect-free amount: base + purchased LEVELS + item-granted amounts (the fromItem
+     * entries of the effect collection — item boosts are purchases, not effects, per 5ER p. 139-40).
+     */
+    #evaluateFormulaAgainstEffectFreeSources(formula) {
+        const actor = this.actor;
+        const { patch, restore } = actor._createTransientPatcher();
+        try {
+            const maxChangesByKey = actor._collectActiveEffectMaxChanges();
+            for (const behavior of this.baseInfo?.behaviors ?? []) {
+                const sourceKey = behavior.match(/^(?:figured|calculated)([A-Z]+)$/)?.[1]?.toLowerCase();
+                if (!sourceKey) continue;
+
+                const source = actor.getCharacteristic(sourceKey);
+                if (!source) continue;
+
+                const itemEntries = (maxChangesByKey.get(sourceKey) ?? []).filter((entry) => entry.fromItem);
+                const effectFreeValue = actor._applyActiveEffectChangeEntries(
+                    Number(source.basePlusLevels ?? 0),
+                    itemEntries,
+                );
+                patch(`system.characteristics.${sourceKey}.value`, effectFreeValue);
+            }
+            return formula(actor);
+        } finally {
+            restore();
+        }
     }
 
     get basePlusLevels() {
@@ -1659,40 +1699,16 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
     }
 
     /**
-     * The max this characteristic would have absent all active effects (formula + purchased levels,
-     * Hero rounding applied) — the sheet compares the live max against this for over/under-max
-     * coloring. 5e SPD keeps a fractional base (1 + DEX/10) but its stored max floors, so compare
-     * against the floored value to avoid false coloring.
-     *
-     * For 5e dependents the formula must be evaluated against EFFECT-FREE sources: an adjustment
-     * (AID DEX) raises the source's current value, and since calculated formulas read exactly that
-     * value, the expectation would otherwise follow the adjustment and the coloring could never
-     * fire. Sources are transiently reset to base + purchased LEVELS for the evaluation.
+     * The max this characteristic would have absent all (non-item) active effects — the sheet
+     * compares the live max against this for over/under-max coloring, so an AID lights the box up
+     * while a plain purchase does not. The base getter already evaluates 5e dependent formulas
+     * against effect-free sources, so base + purchased LEVELS is the natural expectation. 5e SPD
+     * keeps a fractional base (1 + DEX/10) but its stored max floors, so compare against the
+     * floored value to avoid false coloring.
      */
     get expectedMax() {
-        const actor = this.actor;
-        const formula = this.baseInfo?.figured5eCharacteristic ?? this.baseInfo?.calculated5eCharacteristic;
-
-        if (actor?.is5e === true && formula) {
-            const { patch, restore } = actor._createTransientPatcher();
-            try {
-                for (const behavior of this.baseInfo.behaviors ?? []) {
-                    const sourceKey = behavior.match(/^(?:figured|calculated)([A-Z]+)$/)?.[1]?.toLowerCase();
-                    if (!sourceKey) continue;
-                    const source = actor.getCharacteristic(sourceKey);
-                    if (source) {
-                        patch(`system.characteristics.${sourceKey}.value`, Number(source.basePlusLevels ?? 0));
-                    }
-                }
-                const raw = formula(actor) + this.levels;
-                return this.KEY === "SPD" ? Math.floor(raw) : roundFavorPlayerAwayFromZero(raw);
-            } finally {
-                restore();
-            }
-        }
-
         const raw = this.basePlusLevels;
-        if (actor?.is5e === true && this.KEY === "SPD") return Math.floor(raw);
+        if (this.actor?.is5e === true && this.KEY === "SPD") return Math.floor(raw);
         return roundFavorPlayerAwayFromZero(raw);
     }
 
