@@ -111,14 +111,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 await this.addFreeStuff();
             }
 
-            // Merge in the entire system + force-replace items so nested item system data survives
-            // (v13 uses the ==key prefix; v14 uses a ForcedReplacement operator).
+            // Merge in the entire system + force-replace items so nested item system data survives.
             const items = this.items.map((i) => ({ ...i.toObject(), system: i.system }));
-            if (HeroCompatibility.isV14) {
-                this.updateSource({ items: foundry.data.operators.ForcedReplacement.create(items) });
-            } else {
-                this.updateSource({ [`==items`]: items });
-            }
+            this.updateSource(HeroCompatibility.forceReplace({ items }));
         }
 
         // For debugging purposes
