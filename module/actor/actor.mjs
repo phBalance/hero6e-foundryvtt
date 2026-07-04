@@ -50,12 +50,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     ];
 
     /** @inheritdoc */
-    // Pre-process a creation operation for a single Document instance.
-    // Pre-operation events only occur for the client which requested the operation.
-    /**
-     * System level hook running before actor database persistence.
-     * Leverages the transient instance context to populate schema properties cleanly.
-     */
     async _preCreate(data, options, user) {
         await super._preCreate(data, options, user);
 
@@ -104,8 +98,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             this.updateSource({ system: { is5e } });
         }
 
-        // Seed baseline characteristics (base + purchased LEVELS) and evaluate dependent 5e formulas.
-        // No-ops for any characteristic already present in the incoming data (e.g. drag/drop).
+        // Seed missing characteristics and evaluate dependent 5e formulas. Incoming
+        // characteristic values are preserved for drag/drop and imported actors.
         this._preparePreCreateCharacteristics(data, actorChanges);
 
         // Fold the generated setup + characteristic objects into the transient document source.
@@ -132,13 +126,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     /**
-     * Prepares baseline characteristics during actor creation.
-     * Explicitly incorporates purchased point LEVELS to establish true starting baselines.
-     * @param {object} data - Raw incoming creation data payload object
-     * @param {object} actorChanges - The transactional mutation payload accumulator
+     * Prepares missing baseline characteristics during actor creation.
+     * @param {object} data - Raw incoming creation data payload object.
+     * @param {object} actorChanges - The pending source mutation payload.
      */
     _preparePreCreateCharacteristics(data, actorChanges) {
-        // Inject structural identifier nodes safely
+        // Ensure native characteristics have identifiers for downstream baseInfo lookups.
         for (const [key, char] of Object.entries(this.system)) {
             if (key.match(/[A-Z]/) && char instanceof HeroItemCharacteristic && !char.XMLID) {
                 actorChanges.system ??= {};
@@ -152,7 +145,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const characteristicInfo = getCharacteristicInfoArrayForActor(this);
         const payloadCharacteristicKeys = new Set();
 
-        // Seed baseline rulebook numbers plus purchased point levels (e.g., 10 base + 3 levels = 13)
+        // Seed rulebook base plus purchased levels for characteristics missing from the payload.
         for (const info of characteristicInfo) {
             const keyLower = info.key.toLowerCase();
             if (payloadChars[keyLower]?.value !== undefined || payloadChars[keyLower]?.max !== undefined) {
@@ -162,15 +155,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             const characteristic = this.getCharacteristic(keyLower);
 
-            // Extract rulebook baseline (e.g., 10 for STR)
             const basePoints = characteristic?.base ?? characteristic?.baseInfo?.base ?? 0;
 
-            // CORE PARITY FIX: Safely probe the incoming payload data structures or your
-            // internal system node definitions to locate any explicitly purchased point LEVELS
+            // Purchased LEVELS may come from the incoming payload or the transient source.
             const rawSystemNode = data.system?.[info.key] ?? this.system?.[info.key];
             const purchasedLevels = Number(rawSystemNode?.LEVELS ?? payloadChars[keyLower]?.LEVELS ?? 0);
 
-            // Calculate the absolute rules baseline value total
             const totalStartingPoints = basePoints + purchasedLevels;
 
             actorChanges.system.characteristics[keyLower] = {
@@ -179,15 +169,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             };
         }
 
-        // Trigger priority calculations over our point-inclusive payload to evaluate dependent formulas
+        // Evaluate dependent formulas after primaries have been seeded.
         this._recalculateCharacteristicsByPriority(actorChanges.system.characteristics, {
             preserveCharacteristicKeys: payloadCharacteristicKeys,
         });
     }
 
     /**
-     * Synchronously processes all 5e Figured and Calculated Characteristic priority matrices.
-     * Operates strictly as a database-staging helper during creation and updates.
+     * Recalculates seeded characteristics in primary-first order so 5e dependents see current sources.
      * @param {object} targetChars - The characteristics data object to mutate inline
      * @param {object} options
      * @param {Set<string>} options.preserveCharacteristicKeys - Characteristics supplied by the payload.
@@ -195,7 +184,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     _recalculateCharacteristicsByPriority(targetChars, { preserveCharacteristicKeys = new Set() } = {}) {
         const characteristicInfo = getCharacteristicInfoArrayForActor(this);
 
-        // High-Utility Lambda to identify both calculated and figured dependent stats cleanly
         const isDependentCharacteristic = (info) => {
             const keyLower = info.key.toLowerCase();
             const characteristic = this.getCharacteristic(keyLower);
@@ -207,7 +195,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             return this.is5e && (hasCalculatedFormula || hasFiguredFormula || isCombatOrMovementTrack);
         };
 
-        // Group metrics dynamically based on our single source of truth priority criteria
         const executionPasses = [
             characteristicInfo.filter((info) => !isDependentCharacteristic(info)), // Pass 1: Primaries / Baseline
             characteristicInfo.filter((info) => isDependentCharacteristic(info)), // Pass 2: Figured & Calculated Dependencies
@@ -229,7 +216,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     const baseInfo = characteristic.baseInfo;
                     let rawCalculatedValue;
 
-                    // DYNAMIC DRY PASS: Extract formula results cleanly using our un-initialized variable
                     if (baseInfo?.figured5eCharacteristic) {
                         rawCalculatedValue = baseInfo.figured5eCharacteristic(this);
                     } else if (baseInfo?.calculated5eCharacteristic) {
@@ -241,19 +227,16 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                             : (characteristic.base ?? 0);
                     }
 
-                    // Format the outputs relative to 5e rules ruleset parameters
                     if (keyLower === "spd") {
                         baseValue = Number(Number(rawCalculatedValue).toFixed(1));
                     } else {
                         baseValue = roundFavorPlayerAwayFromZero(rawCalculatedValue);
                     }
 
-                    // Seed configuration starting points if uncommitted structures evaluate to 0
                     if (baseValue === 0 && characteristic.base !== undefined && characteristic.base > 0) {
                         baseValue = characteristic.base;
                     }
                 } else {
-                    // Dynamically track purchased levels across both raw update payloads and active document tracks
                     const basePoints = characteristic.base ?? 0;
                     const keyUpper = info.key.toUpperCase();
 
@@ -279,14 +262,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     finalValueState = currentEntry.value;
                 }
 
-                // Modify the target tracker payload object inline
                 targetChars[keyLower] = {
                     value: finalValueState,
                     max: baseValue,
                 };
             }
 
-            // Synchronize properties to the transient document context mid-pass
+            // Make earlier pass values visible to formulas in later passes.
             this.updateSource({ system: { characteristics: targetChars } });
         }
     }
@@ -324,21 +306,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     /**
-     * Processes dynamic 5e figured characteristics relationships in real-time.
-     * Operates purely in transient memory over runtime proxies to inherit Active Effects.
-     */
-    /**
-     * Processes active effects buffs and evaluates 5e figured tracking matrices in real-time.
-     * Strictly separates Calculated (cascading) and Figured (non-cascading) metrics per 5e rules.
-     */
-    /**
-     * Processes active effects buffs and evaluates 5e characteristic tracking matrices in real-time.
-     * Dynamically executes formula callbacks from config.mjs to keep the engine 100% DRY.
+     * Re-evaluates transient 5e derived maxima after active effects have been applied.
      */
     prepareDerivedData() {
         super.prepareDerivedData();
 
-        // 1. Invalidate functional compilation caches first
         this._clearCachedObjectData();
 
         if (!this.system || !this.system.characteristics) return;
@@ -346,7 +318,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         this.composeMemoizableObjectFunction("analyzeEndurance");
         this.composeMemoizableObjectFunction("getActorCharacterAndActivePoints");
 
-        // 2. DYNAMIC METADATA FORMULA PROPAGATION
         if (this.is5e) {
             const characteristicInfo = getCharacteristicInfoArrayForActor(this);
 
@@ -367,7 +338,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     calculatedValue = baseInfo.calculated5eCharacteristic(this);
                 }
 
-                // If a schema metadata formula is active, pipe it cleanly down to the runtime proxy
                 if (calculatedValue !== null) {
                     let calculatedMax;
 
@@ -4436,13 +4406,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
     get stunThreshold() {
         return this.type === "pc" ? -30 : -10;
-    }
-
-    get knockedOutOfCombat() {
-        console.error(`Depricated use getKnockedOutOfCombat`);
-        if (!this.statuses.has("knockedOut")) return false;
-        if (this.system.characteristics.stun?.value >= this.stunThreshold) return false;
-        return true;
     }
 
     /**

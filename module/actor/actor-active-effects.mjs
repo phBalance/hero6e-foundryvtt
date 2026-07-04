@@ -490,38 +490,6 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         game[HEROSYS.module].effectPanel.refresh();
     }
 
-    /**
-     * Synchronously evaluate and apply characteristic changes directly during the parent document
-     * update lifecycle, avoiding loose asynchronous callbacks.
-     */
-    async updateValueBasedOnMax(options = {}) {
-        const actor = this.target;
-        if (actor?.constructor?.name !== "HeroSystem6eActor") return;
-
-        if (options.action === "create" && this.disabled) return;
-
-        const actorChanges = {};
-        for (const change of this.changes) {
-            const key = change.key.match(/([a-z]+)\.max/)?.[1];
-            if (key && actor?.system?.characteristics?.[key]) {
-                actorChanges[`system.characteristics.${key}.value`] = actor.getCharacteristic(key).max;
-            }
-        }
-
-        if (Object.keys(actorChanges).length > 0) {
-            // Execute directly within the same call frame
-            await actor.update(actorChanges);
-
-            // Handle legacy figured dependencies
-            if (actor.is5e) {
-                for (const change of this.changes) {
-                    const key = change.key.match(/([a-z]+)\.max/)?.[1];
-                    if (key) await actor.updateFiguredCharacteristicDependencies(key.toUpperCase());
-                }
-            }
-        }
-    }
-
     _onDelete(options, userId) {
         super._onDelete(options, userId);
         game[HEROSYS.module].effectPanel.refresh();
