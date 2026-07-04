@@ -1,6 +1,7 @@
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import { performAdjustment } from "../utility/adjustment.mjs";
+import { HeroCompatibility } from "../utility/compatibility.mjs";
 
 /**
  * Registers 5e Calculated Active Effect Automation Tests with Quench.
@@ -462,13 +463,17 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                             "Adjustment to DEX should not touch figured SPD (5ER p. 105).",
                         );
 
+                        // Use the version-gated key and change shape: a bare `changes` update silently
+                        // no-ops on V14, where document changes live in system.changes with string types.
                         await effect.update({
-                            changes: [
-                                {
-                                    key: "system.characteristics.dex.max",
-                                    value: "5",
-                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
-                                },
+                            [HeroCompatibility.isV14 ? "system.changes" : "changes"]: [
+                                HeroCompatibility.isV14
+                                    ? { key: "system.characteristics.dex.max", value: "5", type: "add" }
+                                    : {
+                                          key: "system.characteristics.dex.max",
+                                          value: "5",
+                                          mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                      },
                             ],
                             flags: {
                                 [game.system.id]: {
@@ -692,7 +697,8 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         );
                         await dexItem.turnOn();
                         await actor.fullHealth();
-                        actor.prepareData();
+                        // No manual prepareData(): without a reset() it re-applies active effects on
+                        // top of already-applied data; fullHealth's update already re-prepared.
 
                         assert.equal(actor.system.characteristics.dex.value, 20, "Active DEX item should raise DEX.");
                         assert.equal(
@@ -735,6 +741,123 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         assert.equal(chars.pd.max, 7, "Direct PD max AE should survive formula recomputation.");
                         assert.equal(chars.ed.max, 7, "Direct ED max AE should survive formula recomputation.");
                         assert.equal(chars.dcv.max, -5, "Direct DCV max AE should survive formula recomputation.");
+                    });
+
+                    it("halved conditions do not stack and cap the current value", async function () {
+                        const actor = await create5eActor("_Quench_5e_Halving_Target");
+                        const baselineDcv = actor.system.characteristics.dcv.max; // DEX 10/3 -> 3
+
+                        // Prone and Stunned each halve DCV; a character who is both is at 1/2 DCV,
+                        // not 1/4. Rounding favors the character (1.5 -> 2).
+                        await actor.createEmbeddedDocuments("ActiveEffect", [
+                            {
+                                name: "Prone (halved DCV)",
+                                statuses: ["prone"],
+                                changes: [
+                                    {
+                                        key: "system.characteristics.dcv.max",
+                                        value: 0.5,
+                                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                                    },
+                                ],
+                            },
+                            {
+                                name: "Stunned (halved DCV)",
+                                statuses: ["stunned"],
+                                changes: [
+                                    {
+                                        key: "system.characteristics.dcv.max",
+                                        value: 0.5,
+                                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                                    },
+                                ],
+                            },
+                        ]);
+
+                        const halvedDcv = roundFavorPlayerAwayFromZero(baselineDcv / 2);
+                        assert.equal(
+                            actor.system.characteristics.dcv.max,
+                            halvedDcv,
+                            "Two halved conditions should apply a single halving.",
+                        );
+                        assert.equal(
+                            actor.system.characteristics.dcv.value,
+                            halvedDcv,
+                            "The lowered max should cap the current value.",
+                        );
+                    });
+
+                    it("negative primaries add zero to figured characteristics (5ER p. 33)", async function () {
+                        const actor = await create5eActor("_Quench_5e_Negative_Floor_Target");
+
+                        await actor.createEmbeddedDocuments("ActiveEffect", [
+                            {
+                                name: "Massive transformation",
+                                changes: [
+                                    {
+                                        key: "system.characteristics.str.max",
+                                        value: "-40",
+                                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                    },
+                                    {
+                                        key: "system.characteristics.con.max",
+                                        value: "-40",
+                                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                    },
+                                    {
+                                        key: "system.characteristics.dex.max",
+                                        value: "-30",
+                                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                    },
+                                ],
+                            },
+                        ]);
+
+                        const chars = actor.system.characteristics;
+                        assert.equal(chars.pd.max, 0, "PD floors at 0 (negative STR adds zero).");
+                        assert.equal(chars.ed.max, 0, "ED floors at 0 (negative CON adds zero).");
+                        assert.equal(chars.rec.max, 0, "REC floors at 0.");
+                        assert.equal(chars.end.max, 0, "END floors at 0.");
+                        assert.equal(chars.stun.max, 10, "STUN keeps the BODY contribution only.");
+                        assert.equal(chars.spd.max, 1, "SPD never drops below 1 (1 + max(0, DEX)/10).");
+                        assert.equal(chars.ocv.max, 0, "CV is 0 at DEX 1 or less (5ER p. 37).");
+                    });
+
+                    it("EGO adjustments move OMCV/DMCV in both directions", async function () {
+                        const aidedActor = await create5eActor("_Quench_5e_AID_EGO_Target");
+                        const drainedActor = await create5eActor("_Quench_5e_DRAIN_EGO_Target");
+                        const baselineOmcv = aidedActor.system.characteristics.omcv.max; // EGO 10/3 -> 3
+
+                        const aidedChars = await addAdjustmentEffect(aidedActor, {
+                            name: "AID EGO",
+                            adjustmentActivePoints: 30,
+                            changes: [
+                                {
+                                    key: "system.characteristics.ego.max",
+                                    value: "10",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+                        assert.equal(aidedChars.ego.max, 20, "AID EGO raises the primary max.");
+                        assert.equal(aidedChars.omcv.max, expectedOcvFromDex(20), "AID EGO raises OMCV (ECV=EGO/3).");
+                        assert.equal(aidedChars.dmcv.max, expectedOcvFromDex(20), "AID EGO raises DMCV.");
+
+                        const drainedChars = await addAdjustmentEffect(drainedActor, {
+                            name: "DRAIN EGO",
+                            adjustmentActivePoints: -30,
+                            changes: [
+                                {
+                                    key: "system.characteristics.ego.max",
+                                    value: "-30",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+                        assert.isBelow(drainedChars.ego.max, 0, "DRAIN EGO tracks the primary below zero.");
+                        assert.isAbove(baselineOmcv, 0, "Baseline ECV starts above the drained floor.");
+                        assert.equal(drainedChars.omcv.max, 0, "DRAIN EGO floors OMCV at 0.");
+                        assert.equal(drainedChars.dmcv.max, 0, "DRAIN EGO floors DMCV at 0.");
                     });
                 });
 
@@ -872,6 +995,33 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                             target.system.characteristics.str.value,
                             baselineStr,
                             "Deleted DRAIN restores the current value.",
+                        );
+                    });
+
+                    it("multiple casters share the largest single AID maximum (5ER p. 106)", async function () {
+                        const attackerA = await create5eActor("_Quench_5e_MultiAID_Attacker_A");
+                        const attackerB = await create5eActor("_Quench_5e_MultiAID_Attacker_B");
+                        const target = await create5eActor("_Quench_5e_MultiAID_Target");
+                        const aidA = await createAdjustmentItem(attackerA, { xmlid: "AID", input: "STR", levels: 1 });
+                        const aidB = await createAdjustmentItem(attackerB, { xmlid: "AID", input: "STR", levels: 1 });
+
+                        const baselineStr = target.system.characteristics.str.max; // 10
+
+                        // Each AID 1d6 has a maximum effect of 6 AP. Two casters cannot stack past the
+                        // largest single maximum: the second AID adds nothing.
+                        await applyAdjustment(aidA, "STR", 6, target);
+                        assert.equal(target.system.characteristics.str.max, baselineStr + 6, "First AID adds 6 STR.");
+
+                        await applyAdjustment(aidB, "STR", 6, target);
+                        assert.equal(
+                            target.system.characteristics.str.max,
+                            baselineStr + 6,
+                            "Second caster's AID cannot exceed the shared largest maximum.",
+                        );
+                        assert.equal(
+                            target.effects.filter((e) => e.flags[game.system.id]?.type === "adjustment").length,
+                            1,
+                            "A fully capped AID does not create a second adjustment effect.",
                         );
                     });
                 });
