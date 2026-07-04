@@ -8,7 +8,7 @@ import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 
 export function registerUploadTests(quench) {
     quench.registerBatch(
-        "hero6efoundryvttv2.utils.upload",
+        `${game.system.id}.utils.upload`,
         (context) => {
             const { assert, before, after, describe, expect, it } = context;
 

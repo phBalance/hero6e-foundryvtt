@@ -2,7 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 
 export function registerCombatTests(quench) {
     quench.registerBatch(
-        "hero6efoundryvttv2.combat.speed-chart-progression",
+        `${game.system.id}.combat.speed-chart-progression`,
         (context) => {
             const { after, before, describe, expect, it } = context;
 
@@ -21,15 +21,15 @@ export function registerCombatTests(quench) {
                             : game.settings.get(game.system.id, "singleCombatantTracker");
                     if (!isSingleTracker) {
                         console.warn(
-                            "[hero6efoundryvttv2] QUENCH | Skipping speed chart tests: singleCombatantTracker is disabled.",
+                            `[${game.system.id}] QUENCH | Skipping speed chart tests: singleCombatantTracker is disabled.`,
                         );
                         this.skip(); // Safely skips every internal "it" statement dynamically
                     }
 
                     console.log(
-                        `[hero6efoundryvttv2] QUENCH | Platform Version: ${foundryVersion} (Gen ${generationLabel})`,
+                        `[${game.system.id}] QUENCH | Platform Version: ${foundryVersion} (Gen ${generationLabel})`,
                     );
-                    console.log(`[hero6efoundryvttv2] QUENCH | Spawning tactical speed chart test entities...`);
+                    console.log(`[${game.system.id}] QUENCH | Spawning tactical speed chart test entities...`);
 
                     // const isSingleCombatantTracker = game.settings.get(game.system.id, "singleCombatantTracker");
                     // game.settings.set(game.system.id, "singleCombatantTracker", true);
@@ -63,7 +63,7 @@ export function registerCombatTests(quench) {
                 });
 
                 after(async function () {
-                    console.log(`[hero6efoundryvttv2] QUENCH | Cleaning up test documents...`);
+                    console.log(`[${game.system.id}] QUENCH | Cleaning up test documents...`);
 
                     for (const actor of actorDocuments) {
                         if (typeof actor?.delete === "function") await actor.delete();

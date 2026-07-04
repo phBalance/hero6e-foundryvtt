@@ -28,7 +28,7 @@ import { HeroRoll } from "../heroRoller/dice.mjs";
 
 export function registerRequiresRollCheckTests(quench) {
     quench.registerBatch(
-        "hero6efoundryvttv2.item.requiresCheck",
+        `${game.system.id}.item.requiresCheck`,
         (context) => {
             const { after, before, describe, expect, it } = context;
 
