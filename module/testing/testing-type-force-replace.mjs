@@ -1,4 +1,8 @@
-import { HeroCompatibility } from "../utility/compatibility.mjs";
+// Build a system payload for a forced replacement across a document type change: a full replacement
+// object carrying the new type discriminator (`_type`). Used with { recursive: false }.
+function _replace(systemData, type) {
+    return foundry.utils.mergeObject(systemData, { _type: type });
+}
 
 export function registerTypeForceReplaceTests(quench) {
     quench.registerBatch(
@@ -35,28 +39,24 @@ export function registerTypeForceReplaceTests(quench) {
                     });
 
                     // Shared DataModels break _replace. TODO: refactor DataModel
-                    if (HeroCompatibility.isV14) {
-                        it("Native V14 forceReplace", async function () {
-                            for (const targetType of targetTypes) {
-                                // 1. Fetch current system data structure
-                                const currentSystemData = quenchActor.system?.toObject() || {};
+                    // { recursive: false } performs a forced (non-merged) system replacement on both
+                    // V13 and V14. (V14's native { forceReplace: true } instead requires the system to
+                    // be wrapped in a ForcedReplacement operator.)
+                    it("forceReplace type mutation", async function () {
+                        const replaceOptions = { recursive: false };
+                        for (const targetType of targetTypes) {
+                            const currentSystemData = quenchActor.system?.toObject() || {};
 
-                                await quenchActor.update(
-                                    {
-                                        type: targetType,
-                                        // 2. Use the valid system data structure
-                                        system: _replace(currentSystemData),
-                                    },
-                                    {
-                                        forceReplace: true,
-                                    },
-                                );
-                                assert.equal(quenchActor.type, targetType);
-                            }
-                        });
-                    } else {
-                        it.skip("Native V14 forceReplace (Skipped on V13)", () => {});
-                    }
+                            await quenchActor.update(
+                                {
+                                    type: targetType,
+                                    system: _replace(currentSystemData, targetType),
+                                },
+                                replaceOptions,
+                            );
+                            assert.equal(quenchActor.type, targetType);
+                        }
+                    });
                 },
                 { displayName: "HERO: Actor Type Tests" },
             );
@@ -103,28 +103,25 @@ export function registerTypeForceReplaceTests(quench) {
                 });
 
                 // Shared DataModels break _replace. TODO: refactor DataModel
-                if (HeroCompatibility.isV14) {
-                    it("Native V14 forceReplace", async function () {
-                        for (const targetType of itemTypes) {
-                            const currentSystemData = quenchItem.system.toObject();
+                // Native V14 uses the forceReplace option; V13 achieves the same forced replacement
+                // with { recursive: false }.
+                it("forceReplace type mutation", async function () {
+                    const replaceOptions = { recursive: false };
+                    for (const targetType of itemTypes) {
+                        const currentSystemData = quenchItem.system.toObject();
 
-                            await quenchItem.update(
-                                {
-                                    type: targetType,
-                                    system: _replace(currentSystemData),
-                                },
-                                {
-                                    forceReplace: true,
-                                },
-                            );
+                        await quenchItem.update(
+                            {
+                                type: targetType,
+                                system: _replace(currentSystemData, targetType),
+                            },
+                            replaceOptions,
+                        );
 
-                            assert.equal(quenchItem.type, targetType);
-                            assert.equal(quenchItem.system.XMLID, "UNTRAINED");
-                        }
-                    });
-                } else {
-                    it.skip("Native V14 forceReplace (Skipped on V13)", () => {});
-                }
+                        assert.equal(quenchItem.type, targetType);
+                        assert.equal(quenchItem.system.XMLID, "UNTRAINED");
+                    }
+                });
             });
         },
         { displayName: "HERO: Updates with type ForceReplace" },
