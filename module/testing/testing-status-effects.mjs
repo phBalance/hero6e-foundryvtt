@@ -9,6 +9,39 @@ export function registerStatusEffectTests(quench) {
             // Awaitable promise helper that resolves exactly when a specific Foundry hook settles
             const waitForHook = (hookName) =>
                 new Promise((resolve) => Hooks.once(hookName, (...args) => resolve(args)));
+            const getSceneTokenDocuments = () =>
+                canvas.scene?.tokens?.contents ?? Array.from(canvas.scene?.tokens ?? []);
+            const getSceneTokenIdsForActor = (actor) =>
+                new Set(
+                    getSceneTokenDocuments()
+                        .filter(
+                            (tokenDocument) =>
+                                tokenDocument.actorId === actor.id ||
+                                tokenDocument.actor?.id === actor.id ||
+                                tokenDocument.actor === actor,
+                        )
+                        .map((tokenDocument) => tokenDocument.id),
+                );
+            const tintMatchesExpected = (actualTint, expectedTint) =>
+                foundry.utils.Color.from(actualTint).css === foundry.utils.Color.from(expectedTint).css;
+            const getTokenUpdateTint = (update) => update?.["texture.tint"] ?? update?.texture?.tint;
+            const waitForActorTokenTintUpdate = async (actor, getUpdates, expectedTint, timeoutMs = 1000) => {
+                const started = Date.now();
+                while (Date.now() - started < timeoutMs) {
+                    const tintUpdates = (getUpdates() ?? []).filter(
+                        (u) => u["texture.tint"] !== undefined || u.texture?.tint !== undefined,
+                    );
+                    const actorTokenIds = getSceneTokenIdsForActor(actor);
+                    const update = tintUpdates.find(
+                        (u) =>
+                            (actorTokenIds.has(u._id) || tintUpdates.length === 1) &&
+                            tintMatchesExpected(getTokenUpdateTint(u), expectedTint),
+                    );
+                    if (update) return update;
+                    await new Promise((resolve) => setTimeout(resolve, 20));
+                }
+                return null;
+            };
 
             describe("Actor Status Effect State Machine Matrix", function () {
                 let quenchActor = null;
@@ -215,15 +248,24 @@ export function registerStatusEffectTests(quench) {
                 });
 
                 it("Manage knockout states via dynamic PC thresholds", async function () {
+                    const tokenHook = waitForHook("createToken");
                     const tokenDocument = await TokenDocument.create(
                         { actorId: quenchActor.id, name: quenchActor.name, x: 0, y: 0 },
                         { parent: canvas.scene },
                     );
+                    await tokenHook;
 
                     let capturedUpdates = null;
                     const originalUpdate = canvas.scene.updateEmbeddedDocuments;
                     canvas.scene.updateEmbeddedDocuments = async function (embeddedName, updates) {
-                        if (embeddedName === "Token") capturedUpdates = updates;
+                        if (
+                            embeddedName === "Token" &&
+                            updates.some(
+                                (update) => update["texture.tint"] !== undefined || update.texture?.tint !== undefined,
+                            )
+                        ) {
+                            capturedUpdates = updates;
+                        }
                         return originalUpdate.apply(this, arguments);
                     };
 
@@ -233,9 +275,13 @@ export function registerStatusEffectTests(quench) {
                         // A. DOWNWARD DAMAGE PATH
                         // 1. Drop STUN to -1 (Yellow)
                         await quenchActor.update({ "system.characteristics.stun.value": -1 });
-                        let tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        let tokenTargetUpdate = await waitForActorTokenTintUpdate(
+                            quenchActor,
+                            () => capturedUpdates,
+                            colors.KO_DEFAULT_TINT,
+                        );
                         assert.equal(
-                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(getTokenUpdateTint(tokenTargetUpdate)).css,
                             foundry.utils.Color.from(colors.KO_DEFAULT_TINT).css,
                             "PC at STUN -1 should be assigned the yellowish configuration tint.",
                         );
@@ -244,9 +290,13 @@ export function registerStatusEffectTests(quench) {
                         capturedUpdates = null;
                         await quenchActor.update({ "system.characteristics.stun.value": -11 });
                         await quenchActor.toggleStatusEffect("knockedOut", { active: true, overlay: true });
-                        tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        tokenTargetUpdate = await waitForActorTokenTintUpdate(
+                            quenchActor,
+                            () => capturedUpdates,
+                            colors.KO_DEFAULT_TINT,
+                        );
                         assert.equal(
-                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(getTokenUpdateTint(tokenTargetUpdate)).css,
                             foundry.utils.Color.from(colors.KO_DEFAULT_TINT).css,
                             "PC at STUN -11 should remain assigned the yellowish configuration tint.",
                         );
@@ -254,9 +304,13 @@ export function registerStatusEffectTests(quench) {
                         // 3. Drop STUN to -31 (Red)
                         capturedUpdates = null;
                         await quenchActor.update({ "system.characteristics.stun.value": -31 });
-                        tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        tokenTargetUpdate = await waitForActorTokenTintUpdate(
+                            quenchActor,
+                            () => capturedUpdates,
+                            colors.KO_COMBAT_TINT,
+                        );
                         assert.equal(
-                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(getTokenUpdateTint(tokenTargetUpdate)).css,
                             foundry.utils.Color.from(colors.KO_COMBAT_TINT).css,
                             "PC at STUN -31 should shift to the critical reddish combat tint.",
                         );
@@ -266,9 +320,13 @@ export function registerStatusEffectTests(quench) {
                         capturedUpdates = null;
                         await quenchActor.update({ "system.characteristics.stun.value": -1 });
                         await quenchActor.toggleStatusEffect("knockedOut", { active: true, overlay: true });
-                        tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        tokenTargetUpdate = await waitForActorTokenTintUpdate(
+                            quenchActor,
+                            () => capturedUpdates,
+                            colors.KO_DEFAULT_TINT,
+                        );
                         assert.equal(
-                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(getTokenUpdateTint(tokenTargetUpdate)).css,
                             foundry.utils.Color.from(colors.KO_DEFAULT_TINT).css,
                             "Healing PC back to STUN -1 should return the texture configuration tint to yellow.",
                         );
@@ -288,15 +346,24 @@ export function registerStatusEffectTests(quench) {
 
                     await npcTestActor._changeType("npc");
 
+                    const tokenHook = waitForHook("createToken");
                     const tokenDocument = await TokenDocument.create(
                         { actorId: npcTestActor.id, name: npcTestActor.name, x: 0, y: 0 },
                         { parent: canvas.scene },
                     );
+                    await tokenHook;
 
                     let capturedUpdates = null;
                     const originalUpdate = canvas.scene.updateEmbeddedDocuments;
                     canvas.scene.updateEmbeddedDocuments = async function (embeddedName, updates) {
-                        if (embeddedName === "Token") capturedUpdates = updates;
+                        if (
+                            embeddedName === "Token" &&
+                            updates.some(
+                                (update) => update["texture.tint"] !== undefined || update.texture?.tint !== undefined,
+                            )
+                        ) {
+                            capturedUpdates = updates;
+                        }
                         return originalUpdate.apply(this, arguments);
                     };
 
@@ -306,9 +373,13 @@ export function registerStatusEffectTests(quench) {
                         // A. NPC TO PC PATH
                         // 1. Drop NPC to -11 (Red)
                         await npcTestActor.update({ "system.characteristics.stun.value": -11 });
-                        let tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        let tokenTargetUpdate = await waitForActorTokenTintUpdate(
+                            npcTestActor,
+                            () => capturedUpdates,
+                            colors.KO_COMBAT_TINT,
+                        );
                         assert.equal(
-                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(getTokenUpdateTint(tokenTargetUpdate)).css,
                             foundry.utils.Color.from(colors.KO_COMBAT_TINT).css,
                             "NPC at STUN -11 should use the critical reddish configuration tint.",
                         );
@@ -317,9 +388,13 @@ export function registerStatusEffectTests(quench) {
                         capturedUpdates = null;
                         await npcTestActor._changeType("pc");
                         await npcTestActor.toggleStatusEffect("knockedOut", { active: true, overlay: true });
-                        tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        tokenTargetUpdate = await waitForActorTokenTintUpdate(
+                            npcTestActor,
+                            () => capturedUpdates,
+                            colors.KO_DEFAULT_TINT,
+                        );
                         assert.equal(
-                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(getTokenUpdateTint(tokenTargetUpdate)).css,
                             foundry.utils.Color.from(colors.KO_DEFAULT_TINT).css,
                             "Converting to PC should dynamically adjust the texture target payload back to yellow.",
                         );
@@ -329,9 +404,13 @@ export function registerStatusEffectTests(quench) {
                         capturedUpdates = null;
                         await npcTestActor._changeType("npc");
                         await npcTestActor.toggleStatusEffect("knockedOut", { active: true, overlay: true });
-                        tokenTargetUpdate = capturedUpdates?.find((u) => u._id === tokenDocument.id);
+                        tokenTargetUpdate = await waitForActorTokenTintUpdate(
+                            npcTestActor,
+                            () => capturedUpdates,
+                            colors.KO_COMBAT_TINT,
+                        );
                         assert.equal(
-                            foundry.utils.Color.from(tokenTargetUpdate?.["texture.tint"]).css,
+                            foundry.utils.Color.from(getTokenUpdateTint(tokenTargetUpdate)).css,
                             foundry.utils.Color.from(colors.KO_COMBAT_TINT).css,
                             "Converting back to NPC should dynamically return the texture layout tint to red.",
                         );

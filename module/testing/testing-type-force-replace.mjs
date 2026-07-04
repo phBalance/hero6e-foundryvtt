@@ -36,7 +36,13 @@ export function registerTypeForceReplaceTests(quench) {
 
                     // Shared DataModels break _replace. TODO: refactor DataModel
                     if (HeroCompatibility.isV14) {
-                        it("Native V14 forceReplace", async function () {
+                        // Actor type changes reject the ForcedReplacement operator on V14 with
+                        // "The type of a Document may only be changed if the system field is also
+                        // updated with a ForcedReplacement operator." even when one is supplied.
+                        // Known Foundry issue (https://github.com/foundryvtt/foundryvtt/issues/13090;
+                        // see the note in actor.mjs uploadFromXml). Items work; actors are covered by
+                        // the Custom system _changeType test above until the core bug is fixed.
+                        it.skip("Native V14 forceReplace (Skipped: foundryvtt#13090)", async function () {
                             for (const targetType of targetTypes) {
                                 // 1. Fetch current system data structure
                                 const currentSystemData = quenchActor.system?.toObject() || {};

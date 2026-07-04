@@ -728,6 +728,17 @@ function fixedValueFunction(value) {
     };
 }
 
+// Drains/fades may take a primary characteristic negative, but as a source for figured/calculated
+// characteristics it floors at 0.
+function safeCharacteristicValue(actor, key) {
+    const node = actor.getCharacteristic(key);
+    if (!node) {
+        console.error(`${actor?.name} has no ${key} characteristic`);
+        return 0;
+    }
+    return Math.max(0, node.value ?? 0);
+}
+
 function defaultPowerDicePartsBundle(item, diceParts) {
     const formula = dicePartsToFullyQualifiedEffectFormula(item, diceParts);
 
@@ -1123,7 +1134,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             calculated5eCharacteristic: function (actor) {
-                return Math.max(0, roundFavorPlayerAwayFromZero(actor.getCharacteristic("dex").value / 3));
+                return roundFavorPlayerAwayFromZero(safeCharacteristicValue(actor, "dex") / 3);
             },
             xml: `<OCV XMLID="OCV" ID="1712377400048" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></OCV>`,
         },
@@ -1186,7 +1197,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return notes.join(", ");
             },
             calculated5eCharacteristic: function (actor) {
-                return Math.max(0, roundFavorPlayerAwayFromZero(actor.getCharacteristic("dex").value / 3));
+                return roundFavorPlayerAwayFromZero(safeCharacteristicValue(actor, "dex") / 3);
             },
             xml: `<DCV XMLID="DCV" ID="1712377402602" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DCV>`,
         },
@@ -1223,7 +1234,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             calculated5eCharacteristic: function (actor) {
-                return Math.max(0, roundFavorPlayerAwayFromZero(actor.getCharacteristic("ego").value / 3));
+                return roundFavorPlayerAwayFromZero(safeCharacteristicValue(actor, "ego") / 3);
             },
             xml: `<OMCV XMLID="OMCV" ID="1712377404591" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></OMCV>`,
         },
@@ -1281,7 +1292,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return notes.join(", ");
             },
             calculated5eCharacteristic: function (actor) {
-                return Math.max(0, roundFavorPlayerAwayFromZero(actor.getCharacteristic("ego").value / 3));
+                return roundFavorPlayerAwayFromZero(safeCharacteristicValue(actor, "ego") / 3);
             },
 
             xml: `<DMCV XMLID="DMCV" ID="1712377406823" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DMCV>`,
@@ -1336,9 +1347,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             base: fixedValueFunction(0),
             behaviors: ["figured", "figuredDEX"],
             figured5eCharacteristic: function (actor) {
+                // 5ER p. 33: a negative Primary Characteristic adds zero to Figured
+                // Characteristics — it never subtracts. Clamp each contribution at 0.
+                // Each term is kept to one decimal (FRed p. 7 works fractions to a single decimal
+                // digit) so float artifacts can't leak into the fractional SPD a character may have
+                // paid to top up; the final total is floored elsewhere since SPD never rounds up.
                 return (
                     1 +
-                    Number((actor.getCharacteristic("dex").basePlusLevels / 10).toFixed(1)) +
+                    Number((Math.max(0, actor.getCharacteristic("dex").basePlusLevels) / 10).toFixed(1)) +
                     Number(
                         actor.getCharacteristic("dex").baseSumFiguredCharacteristicsNoRoundingFromItems(10).toFixed(1),
                     )
@@ -1386,8 +1402,10 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["defense", "figured", "figuredSTR"],
             ignoreForActor: staticIgnoreForActorFunction(["ai", "base2", "computer"]),
             figured5eCharacteristic: function (actor) {
+                // 5ER p. 33: a negative Primary Characteristic adds zero to Figured
+                // Characteristics (STR -20/CON 10 gives PD 0, not -4).
                 return (
-                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("str").basePlusLevels / 5) +
+                    roundFavorPlayerAwayFromZero(Math.max(0, actor.getCharacteristic("str").basePlusLevels) / 5) +
                     actor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
@@ -1433,8 +1451,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["defense", "figured", "figuredCON"],
             ignoreForActor: staticIgnoreForActorFunction(["ai", "base2", "computer"]),
             figured5eCharacteristic: function (actor) {
+                // 5ER p. 33: a negative Primary Characteristic adds zero to Figured Characteristics.
                 return (
-                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("con").basePlusLevels / 5) +
+                    roundFavorPlayerAwayFromZero(Math.max(0, actor.getCharacteristic("con").basePlusLevels) / 5) +
                     actor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
@@ -1467,10 +1486,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(2),
             behaviors: ["figured", "figuredSTR", "figuredCON"],
             figured5eCharacteristic: function (actor) {
+                // 5ER p. 33: a negative Primary Characteristic adds zero to Figured
+                // Characteristics (STR -20/CON 10 gives REC 2, not -2).
                 return (
-                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("str").basePlusLevels / 5) +
+                    roundFavorPlayerAwayFromZero(Math.max(0, actor.getCharacteristic("str").basePlusLevels) / 5) +
                     actor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(5) +
-                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("con").basePlusLevels / 5) +
+                    roundFavorPlayerAwayFromZero(Math.max(0, actor.getCharacteristic("con").basePlusLevels) / 5) +
                     actor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(5)
                 );
             },
@@ -1504,8 +1525,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             behaviors: ["figured", "figuredCON"],
             figured5eCharacteristic: function (actor) {
                 // 5e figured 2 x CON
+                // 5ER p. 33: a negative Primary Characteristic adds zero to Figured Characteristics.
                 return (
-                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("con").basePlusLevels * 2) +
+                    roundFavorPlayerAwayFromZero(Math.max(0, actor.getCharacteristic("con").basePlusLevels) * 2) +
                     actor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(0.5)
                 );
             },
@@ -1541,7 +1563,13 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         {
             key: "STUN",
             name: "Stun",
-            base: fixedValueFunction(20),
+            base: function (actor) {
+                if (actor.type === "automaton") {
+                    return 0;
+                }
+
+                return 20;
+            },
             costPerLevel: fixedValueFunction(1 / 2),
             type: ["characteristic"],
             behaviors: [],
@@ -1580,14 +1608,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             base: fixedValueFunction(0),
+            // 5ER p. 33 table: STUN costs 1 CP per point in 5e. Without this override the 6e
+            // definition's 1/2 per point leaks in and halves every 5e STUN purchase cost.
             costPerLevel: fixedValueFunction(1),
-            behaviors: ["figured", "figuredSTR", "figuredCON"],
+            // figuredBODY so non-adjustment effects on BODY reach STUN, matching the
+            // characteristic-bought-as-a-power rules (5ER p. 139-40).
+            behaviors: ["figured", "figuredSTR", "figuredCON", "figuredBODY"],
             figured5eCharacteristic: function (actor) {
+                // 5ER p. 33: a negative Primary Characteristic adds zero to Figured Characteristics.
                 return (
-                    actor.getCharacteristic("body").basePlusLevels +
-                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("str").basePlusLevels / 2) +
+                    Math.max(0, actor.getCharacteristic("body").basePlusLevels) +
+                    roundFavorPlayerAwayFromZero(Math.max(0, actor.getCharacteristic("str").basePlusLevels) / 2) +
                     actor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(2) +
-                    roundFavorPlayerAwayFromZero(actor.getCharacteristic("con").basePlusLevels / 2) +
+                    roundFavorPlayerAwayFromZero(Math.max(0, actor.getCharacteristic("con").basePlusLevels) / 2) +
                     actor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(2)
                 );
             },
@@ -2958,7 +2991,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             xml: `<LEAPING XMLID="LEAPING" ID="1709333946167" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="55" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></LEAPING>`,
         },
         {
-            behaviors: ["activatable", "figured", "figuredSTR"],
+            // Leaping is NOT a Figured Characteristic (the 5ER p. 33 table is PD/ED/SPD/REC/END/STUN
+            // only) — it's a Strength Table ability like lifting capacity, and 5ER p. 105 says
+            // adjustments to a primary DO affect abilities calculated from it. Tagged calculated so
+            // AID/DRAIN STR move leaping in both directions ("Negative STR prevents a character from
+            // Leaping", 5ER p. 35), while true figured characteristics stay insulated.
+            // TODO: 5ER p. 35 also halves STR-based movement at STR 0 and again per -10 STR; not
+            // modeled here.
+            behaviors: ["activatable", "calculated", "calculatedSTR"],
             base: function (actor) {
                 if (actor.type === "vehicle") {
                     return 0;
@@ -2967,10 +3007,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return 2;
             },
             costPerLevel: fixedValueFunction(1),
-            figured5eCharacteristic: function (actor) {
+            calculated5eCharacteristic: function (actor) {
                 // STR/2.5 = free meters of leaping
                 // Div by 2 again to get inches to match HD
-                // LEAPING is technically not a figured characteristic, behaves a bit more like a calculated but with LEVELS
                 // You can end up with .5 remainders for a half inch
 
                 //  Vehicles all start with Leaping 0"; they do not get any
@@ -2978,7 +3017,8 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (actor.type === "vehicle") {
                     return 0;
                 }
-                return Math.floor(actor.getCharacteristic("str").value / 2.5) / 2;
+
+                return Math.floor(safeCharacteristicValue(actor, "str") / 2.5) / 2;
             },
         },
     );
@@ -7971,7 +8011,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     // 5e gets a bonus
                     if (actorItemDefense.actor?.is5e) {
                         const bonus = roundFavorPlayerAwayFromZero(
-                            parseInt(actorItemDefense.actor.getCharacteristic("ego").value) / 5 || 0,
+                            safeCharacteristicValue(actorItemDefense.actor, "ego") / 5,
                         );
                         value += bonus;
                     }
