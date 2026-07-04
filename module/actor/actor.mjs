@@ -3100,6 +3100,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 // Diagnostic context for bug reports. base64 encode blobs so they survive copy/paste intact.
                 await this.setFlag(game.system.id, "uploadingErrorContext", {
                     foundry: game.release?.display || game.version,
+                    foundryBuild: game.release?.build ?? null,
                     system: game.system.version,
                     actorBase64: originalActorJson ? utf8ToBase64(originalActorJson) : null,
                     hdcBase64: incomingHdcXml ? utf8ToBase64(incomingHdcXml) : null,

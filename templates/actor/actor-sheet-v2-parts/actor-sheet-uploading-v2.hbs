@@ -5,6 +5,7 @@
                 <span class="uploading-error-title">Upload failed, please Report</span>
                 <span class="uploading-error-versions">
                     Foundry {{getScopedFlagValue actor @root/gameSystemId "uploadingErrorContext" "foundry"}}
+                    {{#if (getScopedFlagValue actor @root/gameSystemId "uploadingErrorContext" "foundryBuild")}}(build {{getScopedFlagValue actor @root/gameSystemId "uploadingErrorContext" "foundryBuild"}}){{/if}}
                     &bull; {{@root/gameSystemId}} {{getScopedFlagValue actor @root/gameSystemId "uploadingErrorContext" "system"}}
                 </span>
                 <pre class="uploading-error-message">{{{getScopedFlagValue actor @root/gameSystemId "uploadingError"}}}</pre>
@@ -19,7 +20,7 @@
                         <i class="fas fa-download"></i> Download Report
                     </button>
                     <button type="button" data-action="fullHealth">
-                        <i class="fas fa-hammer"></i> Fix Actor…
+                        <i class="fas fa-hammer"></i> Attempt Rebuild/Reset…
                     </button>
                 </div>
             </div>
