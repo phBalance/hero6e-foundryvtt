@@ -522,41 +522,55 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         game[HEROSYS.module].effectPanel.refresh();
     }
 
-    /**
-     * Synchronously evaluate and apply characteristic changes directly during the parent document
-     * update lifecycle, avoiding loose asynchronous callbacks.
-     */
-    async updateValueBasedOnMax(options = {}) {
-        const actor = this.target;
-        if (actor?.constructor?.name !== "HeroSystem6eActor") return;
-
-        if (options.action === "create" && this.disabled) return;
-
-        const actorChanges = {};
-        for (const change of this.changes) {
-            const key = change.key.match(/([a-z]+)\.max/)?.[1];
-            if (key && actor?.system?.characteristics?.[key]) {
-                actorChanges[`system.characteristics.${key}.value`] = actor.getCharacteristic(key).max;
-            }
-        }
-
-        if (Object.keys(actorChanges).length > 0) {
-            // Execute directly within the same call frame
-            await actor.update(actorChanges);
-
-            // Handle legacy figured dependencies
-            if (actor.is5e) {
-                for (const change of this.changes) {
-                    const key = change.key.match(/([a-z]+)\.max/)?.[1];
-                    if (key) await actor.updateFiguredCharacteristicDependencies(key.toUpperCase());
-                }
-            }
-        }
-    }
-
     _onDelete(options, userId) {
         super._onDelete(options, userId);
         game[HEROSYS.module].effectPanel.refresh();
+
+        // Deleting an adjustment (AID) leaves the stored current value above the restored max; pull it
+        // back in line. Fade handles its own value bookkeeping and zeroes its changes before the final
+        // delete, so this clamp is a no-op there. Only the initiating client writes.
+        if (userId === game.user.id) {
+            this._clampCharacteristicValuesAfterAdjustmentRemoval();
+        }
+    }
+
+    async _clampCharacteristicValuesAfterAdjustmentRemoval() {
+        const actor = this.parent;
+        if (actor?.documentName !== "Actor") return;
+        if (this.flags?.[game.system.id]?.type !== "adjustment") return;
+
+        const updates = {};
+        const effectChanges = this.changes?.length ? this.changes : (this.system?.changes ?? []);
+        for (const change of effectChanges) {
+            const key = change.key?.match(/^system\.characteristics\.([a-z]+)\.max$/)?.[1];
+            if (!key) continue;
+
+            const characteristic = actor.getCharacteristic(key);
+            if (!characteristic) continue;
+
+            const value = Number(characteristic.value);
+            const max = Number(characteristic.max);
+            if (!Number.isFinite(value) || !Number.isFinite(max)) continue;
+
+            // Removing an adjustment removes its contribution (5ER p. 107: adjusted points
+            // fade/return; deletion is the GM shortcutting that). An AID's boosted points vanish, so
+            // clamp the current value down to the restored max — never subtract the change amount,
+            // since points consumed while boosted came out of the boost first (5ER p. 105-106) and
+            // are already reflected in the stored value. A DRAIN's removed points come back, so add
+            // them (value - negativeChange) to the current value, mirroring updateCharacteristicValue's
+            // return handling. Both arms clamp to max, which also makes this safe for effects whose
+            // value bookkeeping never happened (e.g. a bare GM-created effect): the restoration can
+            // never push the current value past the freshly recomputed max.
+            const changeValue = parseInt(change.value) || 0;
+            const newValue = changeValue < 0 ? Math.min(value - changeValue, max) : Math.min(value, max);
+            if (newValue !== value) {
+                updates[`system.characteristics.${key}.value`] = newValue;
+            }
+        }
+
+        if (Object.keys(updates).length > 0) {
+            await actor.update(updates);
+        }
     }
 
     _prepareDuration() {
