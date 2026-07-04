@@ -1659,13 +1659,40 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
     }
 
     /**
-     * The formula-derived max (base + purchased levels) with Hero rounding applied — what max should
-     * be absent active effects. 5e SPD keeps a fractional base (1 + DEX/10) but its stored max floors,
-     * so compare against the floored value to avoid false over/under-max coloring.
+     * The max this characteristic would have absent all active effects (formula + purchased levels,
+     * Hero rounding applied) — the sheet compares the live max against this for over/under-max
+     * coloring. 5e SPD keeps a fractional base (1 + DEX/10) but its stored max floors, so compare
+     * against the floored value to avoid false coloring.
+     *
+     * For 5e dependents the formula must be evaluated against EFFECT-FREE sources: an adjustment
+     * (AID DEX) raises the source's current value, and since calculated formulas read exactly that
+     * value, the expectation would otherwise follow the adjustment and the coloring could never
+     * fire. Sources are transiently reset to base + purchased LEVELS for the evaluation.
      */
     get expectedMax() {
+        const actor = this.actor;
+        const formula = this.baseInfo?.figured5eCharacteristic ?? this.baseInfo?.calculated5eCharacteristic;
+
+        if (actor?.is5e === true && formula) {
+            const { patch, restore } = actor._createTransientPatcher();
+            try {
+                for (const behavior of this.baseInfo.behaviors ?? []) {
+                    const sourceKey = behavior.match(/^(?:figured|calculated)([A-Z]+)$/)?.[1]?.toLowerCase();
+                    if (!sourceKey) continue;
+                    const source = actor.getCharacteristic(sourceKey);
+                    if (source) {
+                        patch(`system.characteristics.${sourceKey}.value`, Number(source.basePlusLevels ?? 0));
+                    }
+                }
+                const raw = formula(actor) + this.levels;
+                return this.KEY === "SPD" ? Math.floor(raw) : roundFavorPlayerAwayFromZero(raw);
+            } finally {
+                restore();
+            }
+        }
+
         const raw = this.basePlusLevels;
-        if (this.actor.is5e === true && this.KEY === "SPD") return Math.floor(raw);
+        if (actor?.is5e === true && this.KEY === "SPD") return Math.floor(raw);
         return roundFavorPlayerAwayFromZero(raw);
     }
 
@@ -1764,31 +1791,51 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         return _valueTitle;
     }
 
+    /**
+     * Tooltip content for the (locked) max box: lists every active effect responsible for the max
+     * differing from its natural value, so the sheet can explain a changed number instead of
+     * changing it silently.
+     */
     get maxTitle() {
-        // Active Effects may be blocking updates
         const ary = [];
-        const activeEffects = Array.from(this.actor.allApplicableEffects()).filter(
-            (ae) => ae.changes.find((p) => p.key === `system.characteristics.${this.key}.max`) && !ae.disabled,
-        );
+        const effectChangesOf = (ae) => (ae.changes?.length ? ae.changes : (ae.system?.changes ?? []));
 
-        for (const ae of activeEffects) {
-            ary.push(`<li>${ae.name}</li>`);
-            // if (ae._prepareDuration().duration) {
-            //     const change = ae.changes.find((o) => o.key === `system.characteristics.${this.key}.max`);
-            //     if (change.mode === CONST.ACTIVE_EFFECT_MODES.ADD) {
-            //         characteristic.delta += parseInt(change.value);
-            //     }
-            //     if (change.mode === CONST.ACTIVE_EFFECT_MODES.MULTIPLY) {
-            //         characteristic.delta += parseInt(this.max) * parseInt(change.value) - parseInt(this.max);
-            //     }
-            // }
+        // Effects that directly target this characteristic's max.
+        for (const ae of this.actor.allApplicableEffects()) {
+            if (ae.disabled || ae.isSuppressed) continue;
+            if (effectChangesOf(ae).find((p) => p.key === `system.characteristics.${this.key}.max`)) {
+                ary.push(`<li>${ae.name}</li>`);
+            }
         }
+
+        // 5e dependents also recompute when a source primary is adjusted (5ER p. 105), so surface
+        // those effects too — an AID DEX should explain why the OCV max moved. Figured
+        // characteristics ignore adjustment powers (they only move for actual changes or generic
+        // effects), and item-held effects feed through the item-sum path, so both are skipped.
+        if (this.actor.is5e === true && this.baseInfo) {
+            const isCalculatedDependent = !!this.baseInfo.calculated5eCharacteristic;
+            const listed = new Set();
+            for (const behavior of this.baseInfo.behaviors ?? []) {
+                const sourceKey = behavior.match(/^(?:figured|calculated)([A-Z]+)$/)?.[1]?.toLowerCase();
+                if (!sourceKey) continue;
+
+                for (const ae of this.actor.allApplicableEffects()) {
+                    if (ae.disabled || ae.isSuppressed || listed.has(ae.id ?? ae.name)) continue;
+                    if (ae.parent !== this.actor) continue;
+                    if (!isCalculatedDependent && ae.flags?.[game.system.id]?.type === "adjustment") continue;
+                    if (effectChangesOf(ae).find((p) => p.key === `system.characteristics.${sourceKey}.max`)) {
+                        listed.add(ae.id ?? ae.name);
+                        ary.push(`<li>${ae.name} (via ${sourceKey.toUpperCase()})</li>`);
+                    }
+                }
+            }
+        }
+
         let _maxTitle = "";
         if (ary.length > 0) {
-            _maxTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
+            _maxTitle = "<b>CHANGES</b>\n<ul class='left'>";
             _maxTitle += ary.join("\n ");
             _maxTitle += "</ul>";
-            _maxTitle += "<small><i>Click to unblock</i></small>";
         }
         return _maxTitle;
     }
