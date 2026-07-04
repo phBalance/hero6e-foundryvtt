@@ -728,6 +728,17 @@ function fixedValueFunction(value) {
     };
 }
 
+// Drains/fades may take a primary characteristic negative, but as a source for figured/calculated
+// characteristics it floors at 0.
+function safeCharacteristicValue(actor, key) {
+    const node = actor.getCharacteristic(key);
+    if (!node) {
+        console.error(`${actor?.name} has no ${key} characteristic`);
+        return 0;
+    }
+    return Math.max(0, node.value ?? 0);
+}
+
 function defaultPowerDicePartsBundle(item, diceParts) {
     const formula = dicePartsToFullyQualifiedEffectFormula(item, diceParts);
 
@@ -1123,17 +1134,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             calculated5eCharacteristic: function (actor) {
-                const dexNode = actor.getCharacteristic("dex");
-                if (!dexNode) {
-                    console.error(`${actor?.name} as no dexNode`);
-                    return 0;
-                }
-
-                // We allow for negative values for drain/fade reasons.
-                // But they technically have a floor of 0, which matters for figured/calculated characteristics.
-                const safeDexValue = Math.max(0, dexNode.value ?? 0);
-
-                return Math.max(0, roundFavorPlayerAwayFromZero(safeDexValue / 3));
+                return roundFavorPlayerAwayFromZero(safeCharacteristicValue(actor, "dex") / 3);
             },
             xml: `<OCV XMLID="OCV" ID="1712377400048" BASECOST="0.0" LEVELS="0" ALIAS="OCV" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></OCV>`,
         },
@@ -1196,16 +1197,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return notes.join(", ");
             },
             calculated5eCharacteristic: function (actor) {
-                const dexNode = actor.getCharacteristic("dex");
-                if (!dexNode) {
-                    console.error(`${actor?.name} as no dexNode`);
-                    return 0;
-                }
-
-                // We allow for negative values for drain/fade reasons.
-                // But they technically have a floor of 0, which matters for figured/calculated characteristics.
-                const safeDexValue = Math.max(0, dexNode.value ?? 0);
-                return Math.max(0, roundFavorPlayerAwayFromZero(safeDexValue / 3));
+                return roundFavorPlayerAwayFromZero(safeCharacteristicValue(actor, "dex") / 3);
             },
             xml: `<DCV XMLID="DCV" ID="1712377402602" BASECOST="0.0" LEVELS="0" ALIAS="DCV" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DCV>`,
         },
@@ -1242,16 +1234,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return null;
             },
             calculated5eCharacteristic: function (actor) {
-                const egoNode = actor.getCharacteristic("ego");
-                if (!egoNode) {
-                    console.error(`${actor?.name} as no egoNode`);
-                    return 0;
-                }
-
-                // We allow for negative values for drain/fade reasons.
-                // But they technically have a floor of 0, which matters for figured/calculated characteristics.
-                const safeEgoValue = Math.max(0, egoNode.value ?? 0);
-                return Math.max(0, roundFavorPlayerAwayFromZero(safeEgoValue / 3));
+                return roundFavorPlayerAwayFromZero(safeCharacteristicValue(actor, "ego") / 3);
             },
             xml: `<OMCV XMLID="OMCV" ID="1712377404591" BASECOST="0.0" LEVELS="0" ALIAS="OMCV" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></OMCV>`,
         },
@@ -1309,16 +1292,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 return notes.join(", ");
             },
             calculated5eCharacteristic: function (actor) {
-                const egoNode = actor.getCharacteristic("ego");
-                if (!egoNode) {
-                    console.error(`${actor?.name} as no egoNode`);
-                    return 0;
-                }
-
-                // We allow for negative values for drain/fade reasons.
-                // But they technically have a floor of 0, which matters for figured/calculated characteristics.
-                const safeEgoValue = Math.max(0, egoNode.value ?? 0);
-                return Math.max(0, roundFavorPlayerAwayFromZero(safeEgoValue / 3));
+                return roundFavorPlayerAwayFromZero(safeCharacteristicValue(actor, "ego") / 3);
             },
 
             xml: `<DMCV XMLID="DMCV" ID="1712377406823" BASECOST="0.0" LEVELS="0" ALIAS="DMCV" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"></DMCV>`,
@@ -3022,17 +2996,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     return 0;
                 }
 
-                const strNode = actor.getCharacteristic("str");
-                if (!strNode) {
-                    console.error(`${actor?.name} as no strNode`);
-                    return 0;
-                }
-
-                // We allow for negative values for drain/fade reasons.
-                // But they technically have a floor of 0, which matters for figured/calculated characteristics.
-                const safeStrValue = Math.max(0, strNode.value ?? 0);
-
-                return Math.floor(safeStrValue / 2.5) / 2;
+                return Math.floor(safeCharacteristicValue(actor, "str") / 2.5) / 2;
             },
         },
     );
@@ -8024,15 +7988,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (value > 0) {
                     // 5e gets a bonus
                     if (actorItemDefense.actor?.is5e) {
-                        const egoNode = actorItemDefense.actor.getCharacteristic("ego");
-                        if (!egoNode) {
-                            console.error(`${actorItemDefense.actor?.name} as no egoNode`);
-                        }
-
-                        // We allow for negative values for drain/fade reasons.
-                        // But they technically have a floor of 0, which matters for figured/calculated characteristics.
-                        const safeEgoValue = Math.max(0, egoNode.value ?? 0);
-                        const bonus = roundFavorPlayerAwayFromZero(parseInt(safeEgoValue) / 5 || 0);
+                        const bonus = roundFavorPlayerAwayFromZero(
+                            safeCharacteristicValue(actorItemDefense.actor, "ego") / 5,
+                        );
                         value += bonus;
                     }
                     return createDefenseProfile(actorItemDefense, attackItem, value, options);

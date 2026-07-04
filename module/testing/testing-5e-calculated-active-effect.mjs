@@ -183,7 +183,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 },
                             ]);
 
-                            // Synchronize the runtime data engine variables
+                            // Force derived recompute now that the effect is embedded; no render occurs in tests
                             qActor.prepareData();
                             const buffedChars = qActor.system.characteristics;
 
@@ -204,7 +204,6 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 qActor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(5) +
                                 (qActor.system.PD?.LEVELS ?? 0);
 
-                            // Assert outputs cleanly against the dynamic runtime properties
                             assert.equal(
                                 buffedChars.ocv.max,
                                 expectedOcv,
@@ -248,7 +247,6 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 );
                             }
 
-                            // Clear the buff effect natively
                             const buffEffect = qActor.effects.find((e) => e.name === "Buff Primaries");
                             if (buffEffect) {
                                 await buffEffect.delete();

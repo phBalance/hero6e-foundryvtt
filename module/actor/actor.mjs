@@ -176,6 +176,25 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     /**
+     * Snapshot-and-restore for transient in-memory patches to this actor. Lets 5e formula passes see
+     * pending values without updateSource (which flattens HeroActorCharacteristic models to plain objects).
+     */
+    _createTransientPatcher() {
+        const patched = new Map();
+        return {
+            patch: (path, value) => {
+                if (!patched.has(path)) patched.set(path, foundry.utils.getProperty(this, path));
+                foundry.utils.setProperty(this, path, value);
+            },
+            restore: () => {
+                for (const [path, value] of patched) {
+                    foundry.utils.setProperty(this, path, value);
+                }
+            },
+        };
+    }
+
+    /**
      * Recalculates seeded characteristics in primary-first order so 5e dependents see current sources.
      * @param {object} targetChars - The characteristics data object to mutate inline
      * @param {object} options
@@ -183,11 +202,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      */
     _recalculateCharacteristicsByPriority(targetChars, { preserveCharacteristicKeys = new Set() } = {}) {
         const characteristicInfo = getCharacteristicInfoArrayForActor(this);
-        const patched = new Map();
-        const patch = (path, value) => {
-            if (!patched.has(path)) patched.set(path, foundry.utils.getProperty(this, path));
-            foundry.utils.setProperty(this, path, value);
-        };
+        const { patch, restore } = this._createTransientPatcher();
 
         const isDependentCharacteristic = (info) => {
             const keyLower = info.key.toLowerCase();
@@ -280,9 +295,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 }
             }
         } finally {
-            for (const [path, value] of patched) {
-                foundry.utils.setProperty(this, path, value);
-            }
+            restore();
         }
     }
 
@@ -344,8 +357,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     const baseInfo = characteristic.baseInfo;
                     let calculatedValue = null;
 
-                    // Extract the formula callback directly from your config.mjs metadata blueprints. Figured
-                    // characteristics also add the characteristic's own purchased LEVELS (e.g. bought SPD or
+                    // Figured characteristics add the characteristic's own purchased LEVELS (e.g. bought SPD or
                     // extra LEAPING) on top of the figured base; calculated characteristics (OCV/DCV) do not.
                     if (baseInfo?.figured5eCharacteristic) {
                         calculatedValue = baseInfo.figured5eCharacteristic(this) + (this.system[info.key]?.LEVELS ?? 0);
@@ -356,7 +368,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     if (calculatedValue !== null) {
                         let calculatedMax;
 
-                        // 5e SPD always rounds down (you never round SPD up); other figured/calculated
+                        // 5e SPD always rounds down; other figured/calculated
                         // attributes use player-favorable rounding. This matches the persistence path
                         // (_computeFiguredCharacteristicChanges) and the integer spd.max expectations.
                         if (keyLower === "spd") {
@@ -386,11 +398,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             }
         }
 
-        const patched = new Map();
-        const patch = (path, value) => {
-            if (!patched.has(path)) patched.set(path, foundry.utils.getProperty(this, path));
-            foundry.utils.setProperty(this, path, value);
-        };
+        const { patch, restore } = this._createTransientPatcher();
 
         const activeEffectMaxTargets = this._getActiveEffectChangedMaxKeys();
         for (const key of sourceKeys) {
@@ -421,19 +429,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             }
         }
 
-        return () => {
-            for (const [path, value] of patched) {
-                foundry.utils.setProperty(this, path, value);
-            }
-        };
+        return restore;
     }
 
     _getActiveEffectChangedMaxKeys() {
         const keys = new Set();
-        const effects =
-            typeof this.allApplicableEffects === "function"
-                ? Array.from(this.allApplicableEffects())
-                : Array.from(this.appliedEffects ?? []);
+        const effects = Array.from(this.allApplicableEffects());
 
         for (const effect of effects) {
             if (effect.disabled || effect.isSuppressed) continue;
@@ -459,10 +460,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     _applyDirectActiveEffectChangesToDerivedMax(keyLower, calculatedMax, { includeStatusEffects = true } = {}) {
         const targetKey = `system.characteristics.${keyLower}.max`;
         const modes = CONST.ACTIVE_EFFECT_MODES;
-        const effects =
-            typeof this.allApplicableEffects === "function"
-                ? Array.from(this.allApplicableEffects())
-                : Array.from(this.appliedEffects ?? []);
+        const effects = Array.from(this.allApplicableEffects());
         const changes = [];
 
         for (const effect of effects) {
@@ -485,6 +483,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         let value = calculatedMax;
         for (const { change } of changes) {
+            if (change.mode == null) continue;
             const delta = Number(change.value);
             if (!Number.isFinite(delta)) continue;
 
@@ -499,11 +498,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     value = delta;
                     break;
                 case modes.UPGRADE:
-                    if (modes.UPGRADE === undefined) break;
                     value = Math.max(value, delta);
                     break;
                 case modes.DOWNGRADE:
-                    if (modes.DOWNGRADE === undefined) break;
                     value = Math.min(value, delta);
                     break;
             }
@@ -519,46 +516,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     _clearCachedObjectData() {
         // Clear all the rest
         this._lazy = {};
-    }
-
-    /**
-     * Synchronously pools and separates rounding points for characteristic modifiers
-     * purchased via embedded power items to satisfy strict 5e system rules rules.
-     * @param {string} characteristicName - Target layout property key (e.g., 'str', 'dex')
-     * @param {number} [divisor=5] - Base rounding threshold coefficient
-     * @returns {number} Separately rounded integer value contribution from items
-     */
-    baseSumFiguredCharacteristicsFromItems(characteristicName, divisor = 5) {
-        if (!this.items) return 0;
-
-        const keyUpper = characteristicName.toUpperCase();
-
-        // Filter embedded power sheets contributing to this characteristic layout track
-        const contributingPowers = this.items.filter((item) => {
-            const itemXmlid = item?.system?.XMLID ?? item?.XMLID;
-            if (!itemXmlid || typeof itemXmlid !== "string") return false;
-
-            const affectsThisChar =
-                itemXmlid === keyUpper ||
-                item.system?.CHARACTERISTIC === keyUpper ||
-                item.system?.CHARACTERISTIC2 === keyUpper;
-
-            return affectsThisChar && (item.type === "power" || item.system?.AFFECTS_PRIMARY);
-        });
-
-        // Enforce 5e Separate Rounding: Aggregate raw levels before dividing
-        let totalLevelsFromItems = 0;
-        for (const powerItem of contributingPowers) {
-            totalLevelsFromItems += powerItem.system?.LEVELS ?? 0;
-        }
-
-        if (totalLevelsFromItems === 0) return 0;
-
-        // Apply rounding behavior away from zero to favor the player
-        if (typeof roundFavorPlayerAwayFromZero === "function") {
-            return roundFavorPlayerAwayFromZero(totalLevelsFromItems / divisor);
-        }
-        return Math.floor(totalLevelsFromItems / divisor);
     }
 
     /**
@@ -926,11 +883,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             await this.setNaturalHealing(changed, options, userId);
         }
 
-        // System Configuration Toggles
-        if (systemData.toggles) {
-            await this._handleSystemToggles(changed, options, userId);
-        }
-
         // =========================================================================
         // 2. AUTOMATED STATUS CONDITION & COMBAT TRACKER MANAGEMENT
         // =========================================================================
@@ -1182,11 +1134,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         if (levelsChanged.length === 0 && relevantValueChangedKeys.length === 0) return;
 
-        const patched = new Map();
-        const patch = (path, value) => {
-            if (!patched.has(path)) patched.set(path, foundry.utils.getProperty(this, path));
-            foundry.utils.setProperty(this, path, value);
-        };
+        const { patch, restore } = this._createTransientPatcher();
 
         // characteristicKey -> integer value/max to merge into `changed`.
         const results = {};
@@ -1245,9 +1193,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             );
         } finally {
             // Restore the actor's in-memory state exactly as it was.
-            for (const [path, value] of patched) {
-                foundry.utils.setProperty(this, path, value);
-            }
+            restore();
         }
     }
 
@@ -2253,23 +2199,20 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (!characteristic) return null;
 
         const nativeKey = info.key.toUpperCase();
-        const nativeLevels = Number(
-            this.system?.[info.key]?.LEVELS ?? this.system?.[nativeKey]?.LEVELS ?? this.system?.[charKey]?.LEVELS ?? 0,
-        );
-        const baseInfo = info ?? characteristic.baseInfo;
+        const nativeLevels = Number(this.system?.[nativeKey]?.LEVELS ?? 0);
 
         if (this.is5e === true) {
-            if (baseInfo?.figured5eCharacteristic) {
-                const rawValue = baseInfo.figured5eCharacteristic(this) + nativeLevels;
+            if (info.figured5eCharacteristic) {
+                const rawValue = info.figured5eCharacteristic(this) + nativeLevels;
                 return charKey === "spd" ? Math.floor(rawValue) : roundFavorPlayerAwayFromZero(rawValue);
             }
 
-            if (baseInfo?.calculated5eCharacteristic) {
-                return roundFavorPlayerAwayFromZero(baseInfo.calculated5eCharacteristic(this));
+            if (info.calculated5eCharacteristic) {
+                return roundFavorPlayerAwayFromZero(info.calculated5eCharacteristic(this));
             }
         }
 
-        const base = Number(baseInfo?.base?.(this) ?? characteristic.base ?? 0);
+        const base = Number(info.base?.(this) ?? characteristic.base ?? 0);
         return base + nativeLevels;
     }
 

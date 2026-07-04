@@ -183,7 +183,6 @@ export function registerActorCharacteristicTests(quench) {
                         });
                         createdActors.push(actor);
 
-                        // Intangible software scripts possess cognitive profiles but zero locomotion nodes
                         assert.notOk(actor.hasCharacteristic("RUNNING"), "Type [ai] must completely lack [RUNNING]");
                         assert.notOk(actor.hasCharacteristic("SWIMMING"), "Type [ai] must completely lack [SWIMMING]");
                         assert.notOk(actor.hasCharacteristic("LEAPING"), "Type [ai] must completely lack [LEAPING]");
