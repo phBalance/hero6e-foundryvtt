@@ -1605,6 +1605,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {
             base: fixedValueFunction(0),
+            costPerLevel: fixedValueFunction(1),
             // figuredBODY so non-adjustment effects on BODY reach STUN, matching the
             // characteristic-bought-as-a-power rules (5ER p. 139-40).
             behaviors: ["figured", "figuredSTR", "figuredCON", "figuredBODY"],

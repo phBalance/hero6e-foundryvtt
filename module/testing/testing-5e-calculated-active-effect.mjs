@@ -154,8 +154,9 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 },
                             ]);
 
-                            // Force derived recompute now that the effect is embedded; no render occurs in tests
-                            qActor.prepareData();
+                            // createEmbeddedDocuments already reset and re-prepared the actor. Do NOT
+                            // call prepareData() here: without a reset() it re-applies active effects
+                            // on top of already-applied data (dex.max 10 -> 20 -> 30).
                             const buffedChars = qActor.system.characteristics;
 
                             assert.isAbove(
@@ -242,7 +243,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 },
                             ]);
 
-                            qActor.prepareData();
+                            // See above: no manual prepareData() — the embedded create already re-prepared.
                             const drainedChars = qActor.system.characteristics;
 
                             // 1. Primary Characteristics Verification
