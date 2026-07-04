@@ -1,3 +1,4 @@
+import { HeroSystem6eItem } from "../item/item.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 
 /**
@@ -15,6 +16,68 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
 
             const actorTypes = Actor.TYPES.filter((t) => t !== "base");
             const createdActorIds = [];
+            const create5eActor = async (name) => {
+                const createHook = waitForHook("createActor");
+                const initialActor = await Actor.create({
+                    name,
+                    type: "pc",
+                    system: { is5e: true },
+                });
+                await createHook;
+                createdActorIds.push(initialActor.id);
+
+                const actor = game.actors.get(initialActor.id);
+                assert.ok(!!actor, `[${name}] Failed to fetch instantiated actor record.`);
+                return actor;
+            };
+
+            const addAdjustmentEffect = async (actor, { adjustmentActivePoints = 0, flags = {}, ...effectData }) => {
+                await actor.createEmbeddedDocuments("ActiveEffect", [
+                    {
+                        ...effectData,
+                        flags: {
+                            ...flags,
+                            [game.system.id]: {
+                                ...(flags[game.system.id] ?? {}),
+                                type: "adjustment",
+                                adjustmentActivePoints,
+                            },
+                        },
+                    },
+                ]);
+                return actor.system.characteristics;
+            };
+
+            const expectedOcvFromDex = (dex) => roundFavorPlayerAwayFromZero(Math.max(0, dex) / 3);
+            const expectedSpdFromDex = (actor, dex) =>
+                Math.floor(
+                    1 +
+                        Number((dex / 10).toFixed(1)) +
+                        Number(
+                            actor
+                                .getCharacteristic("dex")
+                                .baseSumFiguredCharacteristicsNoRoundingFromItems(10)
+                                .toFixed(1),
+                        ) +
+                        (actor.system.SPD?.LEVELS ?? 0),
+                );
+            const expectedPdFromStr = (actor, str) =>
+                roundFavorPlayerAwayFromZero(str / 5) +
+                actor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(5) +
+                (actor.system.PD?.LEVELS ?? 0);
+            const expectedRecFromStrCon = (actor, str, con) =>
+                roundFavorPlayerAwayFromZero(str / 5) +
+                actor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(5) +
+                roundFavorPlayerAwayFromZero(con / 5) +
+                actor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(5) +
+                (actor.system.REC?.LEVELS ?? 0);
+            const expectedStunFromStrCon = (actor, str, con) =>
+                actor.getCharacteristic("body").basePlusLevels +
+                roundFavorPlayerAwayFromZero(str / 2) +
+                actor.getCharacteristic("str").baseSumFiguredCharacteristicsFromItems(2) +
+                roundFavorPlayerAwayFromZero(con / 2) +
+                actor.getCharacteristic("con").baseSumFiguredCharacteristicsFromItems(2) +
+                (actor.system.STUN?.LEVELS ?? 0);
 
             describe("Hero System 5e Calculated and Figured Characteristics State Machine", function () {
                 // Multi-client database sweep block to guarantee multi-client parity
@@ -229,6 +292,228 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         });
                     });
                 }
+
+                describe("Focused 5e ActiveEffect dependency boundaries", function () {
+                    it("AID DEX from an external origin updates calculated and figured DEX dependents", async function () {
+                        const sourceActor = await create5eActor("_Quench_5e_AID_DEX_Source");
+                        const targetActor = await create5eActor("_Quench_5e_AID_DEX_Target");
+
+                        const chars = await addAdjustmentEffect(targetActor, {
+                            name: "AID DEX",
+                            origin: sourceActor.uuid,
+                            adjustmentActivePoints: 30,
+                            changes: [
+                                {
+                                    key: "system.characteristics.dex.max",
+                                    value: "10",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+
+                        const dexSource = 20;
+                        assert.equal(chars.dex.max, dexSource, "AID DEX should raise the primary max.");
+                        assert.equal(chars.ocv.max, expectedOcvFromDex(dexSource), "AID DEX should raise OCV.");
+                        assert.equal(chars.dcv.max, expectedOcvFromDex(dexSource), "AID DEX should raise DCV.");
+                        assert.equal(
+                            chars.spd.max,
+                            expectedSpdFromDex(targetActor, dexSource),
+                            "AID DEX should raise SPD.",
+                        );
+                    });
+
+                    it("AID STR updates STR figured dependents", async function () {
+                        const actor = await create5eActor("_Quench_5e_AID_STR_Target");
+
+                        const chars = await addAdjustmentEffect(actor, {
+                            name: "AID STR",
+                            adjustmentActivePoints: 30,
+                            changes: [
+                                {
+                                    key: "system.characteristics.str.max",
+                                    value: "20",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+
+                        const strSource = 30;
+                        const conSource = actor.getCharacteristic("con").basePlusLevels;
+                        assert.equal(chars.str.max, strSource, "AID STR should raise the primary max.");
+                        assert.equal(chars.pd.max, expectedPdFromStr(actor, strSource), "AID STR should raise PD.");
+                        assert.equal(
+                            chars.rec.max,
+                            expectedRecFromStrCon(actor, strSource, conSource),
+                            "AID STR should raise REC.",
+                        );
+                        assert.equal(
+                            chars.stun.max,
+                            expectedStunFromStrCon(actor, strSource, conSource),
+                            "AID STR should raise STUN.",
+                        );
+                    });
+
+                    it("DRAIN DEX and STR tracks primary loss without cascading dependents downward", async function () {
+                        const actor = await create5eActor("_Quench_5e_DRAIN_Primaries_Target");
+                        const baseline = {
+                            ocv: actor.system.characteristics.ocv.max,
+                            dcv: actor.system.characteristics.dcv.max,
+                            spd: actor.system.characteristics.spd.max,
+                            pd: actor.system.characteristics.pd.max,
+                        };
+
+                        const chars = await addAdjustmentEffect(actor, {
+                            name: "DRAIN STR DEX",
+                            adjustmentActivePoints: -60,
+                            changes: [
+                                {
+                                    key: "system.characteristics.str.max",
+                                    value: "-40",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                                {
+                                    key: "system.characteristics.dex.max",
+                                    value: "-30",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+
+                        assert.isBelow(chars.dex.max, 0, "DRAIN DEX should track primary max below zero.");
+                        assert.isBelow(chars.str.max, 0, "DRAIN STR should track primary max below zero.");
+                        assert.equal(chars.ocv.max, baseline.ocv, "DRAIN DEX should not reduce OCV.");
+                        assert.equal(chars.dcv.max, baseline.dcv, "DRAIN DEX should not reduce DCV.");
+                        assert.equal(chars.spd.max, baseline.spd, "DRAIN DEX should not reduce SPD.");
+                        assert.equal(chars.pd.max, baseline.pd, "DRAIN STR should not reduce PD.");
+                    });
+
+                    it("TRANSFER-style opposing actor effects aid one actor without cascading the drained actor", async function () {
+                        const drainedActor = await create5eActor("_Quench_5e_TRANSFER_Drained");
+                        const aidedActor = await create5eActor("_Quench_5e_TRANSFER_Aided");
+                        const drainedBaseline = {
+                            ocv: drainedActor.system.characteristics.ocv.max,
+                            pd: drainedActor.system.characteristics.pd.max,
+                        };
+
+                        const drainedChars = await addAdjustmentEffect(drainedActor, {
+                            name: "TRANSFER drain side",
+                            origin: aidedActor.uuid,
+                            adjustmentActivePoints: -40,
+                            changes: [
+                                {
+                                    key: "system.characteristics.dex.max",
+                                    value: "-30",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                                {
+                                    key: "system.characteristics.str.max",
+                                    value: "-40",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+                        const aidedChars = await addAdjustmentEffect(aidedActor, {
+                            name: "TRANSFER aid side",
+                            origin: drainedActor.uuid,
+                            adjustmentActivePoints: 30,
+                            changes: [
+                                {
+                                    key: "system.characteristics.dex.max",
+                                    value: "10",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                                {
+                                    key: "system.characteristics.str.max",
+                                    value: "20",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+
+                        assert.equal(
+                            drainedChars.ocv.max,
+                            drainedBaseline.ocv,
+                            "TRANSFER drain side should not reduce OCV.",
+                        );
+                        assert.equal(
+                            drainedChars.pd.max,
+                            drainedBaseline.pd,
+                            "TRANSFER drain side should not reduce PD.",
+                        );
+                        assert.equal(aidedChars.ocv.max, expectedOcvFromDex(20), "TRANSFER aid side should raise OCV.");
+                        assert.equal(
+                            aidedChars.spd.max,
+                            expectedSpdFromDex(aidedActor, 20),
+                            "TRANSFER aid side should raise SPD.",
+                        );
+                        assert.equal(
+                            aidedChars.pd.max,
+                            expectedPdFromStr(aidedActor, 30),
+                            "TRANSFER aid side should raise PD.",
+                        );
+                    });
+
+                    it("active characteristic items do not enter the actor-owned AE formula source path", async function () {
+                        const actor = await create5eActor("_Quench_5e_Item_DEX_Target");
+                        const dexContents = `
+                            <DEX XMLID="DEX" ID="1766170024717" BASECOST="0.0" LEVELS="10" ALIAS="DEX" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No">
+                            <NOTES />
+                            </DEX>
+                        `;
+
+                        const dexItem = await HeroSystem6eItem.create(
+                            HeroSystem6eItem.itemDataFromXml(dexContents, actor),
+                            {
+                                parent: actor,
+                            },
+                        );
+                        await dexItem.turnOn();
+                        await actor.fullHealth();
+                        actor.prepareData();
+
+                        assert.equal(actor.system.characteristics.dex.value, 20, "Active DEX item should raise DEX.");
+                        assert.equal(
+                            actor.system.characteristics.ocv.base,
+                            7,
+                            "Active DEX item should raise OCV through the item path.",
+                        );
+                        assert.equal(
+                            actor.system.characteristics.spd.value,
+                            3,
+                            "Active DEX item should not double-propagate into SPD.",
+                        );
+                    });
+
+                    it("direct dependent max ActiveEffects survive formula recomputation", async function () {
+                        const actor = await create5eActor("_Quench_5e_Dependent_AE_Target");
+
+                        const chars = await addAdjustmentEffect(actor, {
+                            name: "Direct dependent adjustments",
+                            adjustmentActivePoints: 15,
+                            changes: [
+                                {
+                                    key: "system.characteristics.pd.max",
+                                    value: "5",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                                {
+                                    key: "system.characteristics.ed.max",
+                                    value: "5",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                                {
+                                    key: "system.characteristics.dcv.max",
+                                    value: "-8",
+                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                },
+                            ],
+                        });
+
+                        assert.equal(chars.pd.max, 7, "Direct PD max AE should survive formula recomputation.");
+                        assert.equal(chars.ed.max, 7, "Direct ED max AE should survive formula recomputation.");
+                        assert.equal(chars.dcv.max, -5, "Direct DCV max AE should survive formula recomputation.");
+                    });
+                });
             });
         },
         { displayName: "HERO: 5e Calculated Combat & Figured Values" },
