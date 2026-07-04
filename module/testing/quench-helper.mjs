@@ -80,7 +80,7 @@ export async function deleteQuenchActor({ quench, actor }) {
 
 export function registerGlobalSetup(quench) {
     quench.registerBatch(
-        "hero6efoundryvttv2.a.global-setup",
+        `${game.system.id}.a.global-setup`,
         (context) => {
             const { describe, it } = context;
 
@@ -101,7 +101,7 @@ export function registerGlobalSetup(quench) {
 
 export function registerGlobalTeardown(quench) {
     quench.registerBatch(
-        "hero6efoundryvttv2.z.global-teardown", // Use a unique key for your module.
+        `${game.system.id}.z.global-teardown`, // Use a unique key for your module.
         (context) => {
             const { describe, it } = context;
 

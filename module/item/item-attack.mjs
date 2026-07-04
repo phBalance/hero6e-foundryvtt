@@ -1892,7 +1892,7 @@ export async function processHapCardUpdate({ messageId, targetTokenUuid, hapsToS
     const newTargetId = foundry.utils.parseUuid(targetTokenUuid)?.id;
 
     const templateData = {
-        ...message.flags.hero6efoundryvttv2,
+        ...message.flags[game.system.id],
         targetData: updatedTargetData,
     };
 
@@ -1905,8 +1905,8 @@ export async function processHapCardUpdate({ messageId, targetTokenUuid, hapsToS
     // 5. Securely update both the text interface and the persistent database flags
     await message.update({
         content: newContent,
-        "flags.hero6efoundryvttv2.targetData": updatedTargetData,
-        "flags.hero6efoundryvttv2.targetIds": [...targetIds, newTargetId],
+        [`flags.${game.system.id}.targetData`]: updatedTargetData,
+        [`flags.${game.system.id}.targetIds`]: [...targetIds, newTargetId],
     });
 
     ui.notifications.info(`${targetActorName} spent ${hapsToSpend} HAP to convert a Miss into a Hit!`);
