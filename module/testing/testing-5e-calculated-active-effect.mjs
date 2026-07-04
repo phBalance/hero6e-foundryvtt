@@ -1,5 +1,6 @@
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
+import { performAdjustment } from "../utility/adjustment.mjs";
 
 /**
  * Registers 5e Calculated Active Effect Automation Tests with Quench.
@@ -51,6 +52,36 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                 await createAdjustmentEffect(actor, effectData);
                 return actor.system.characteristics;
             };
+
+            // Real adjustment items driven through performAdjustment (the production attack/fade flow),
+            // as opposed to the bare ActiveEffects above which only exercise the derived-data layer.
+            const createAdjustmentItem = async (actor, { xmlid, input, levels }) => {
+                const xml = `
+                    <POWER XMLID="${xmlid}" ID="17661${Math.floor(Math.random() * 100000000)}" BASECOST="0.0" LEVELS="${levels}" ALIAS="${xmlid}" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="${xmlid} ${input}" INPUT="${input}" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                    <NOTES />
+                    </POWER>
+                `;
+                return HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(xml, actor), { parent: actor });
+            };
+            const applyAdjustment = (attackItem, characteristic, activePoints, targetActor) =>
+                performAdjustment(attackItem, characteristic, activePoints, "", "", false, targetActor, null);
+            // Mirrors expireEffects: AID fades -5 AP per turn, DRAIN returns +5.
+            const fadeAdjustment = (attackItem, characteristic, effect) => {
+                const fade = effect.flags[game.system.id].adjustmentActivePoints >= 0 ? -5 : 5;
+                return performAdjustment(
+                    attackItem,
+                    characteristic,
+                    fade,
+                    "None - Effect Fade",
+                    "",
+                    true,
+                    effect.parent,
+                    null,
+                    effect,
+                );
+            };
+            const findAdjustmentEffect = (actor) =>
+                actor.effects.find((e) => e.flags[game.system.id]?.type === "adjustment");
 
             // 5ER p. 9-10: CV = DEX/3; 5ER p. 37: CV is 0 at DEX 1 or less.
             const expectedOcvFromDex = (dex) => roundFavorPlayerAwayFromZero(Math.max(0, dex) / 3);
@@ -704,6 +735,144 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                         assert.equal(chars.pd.max, 7, "Direct PD max AE should survive formula recomputation.");
                         assert.equal(chars.ed.max, 7, "Direct ED max AE should survive formula recomputation.");
                         assert.equal(chars.dcv.max, -5, "Direct DCV max AE should survive formula recomputation.");
+                    });
+                });
+
+                describe("Adjustment power lifecycle (performAdjustment apply/fade/delete)", function () {
+                    it("AID PD applies halved, fades 5 AP per turn, and ends at baseline", async function () {
+                        const attacker = await create5eActor("_Quench_5e_Lifecycle_AID_PD_Attacker");
+                        const target = await create5eActor("_Quench_5e_Lifecycle_AID_PD_Target");
+                        const aidItem = await createAdjustmentItem(attacker, {
+                            xmlid: "AID",
+                            input: "PD",
+                            levels: 3,
+                        });
+
+                        const baselinePd = target.system.characteristics.pd.max; // STR 10/5 = 2
+
+                        // 5ER p. 110: adjustment of a defense is halved: 12 AP -> 6 points of PD.
+                        await applyAdjustment(aidItem, "PD", 12, target);
+                        assert.equal(
+                            target.system.characteristics.pd.max,
+                            baselinePd + 6,
+                            "AID PD should add half AP.",
+                        );
+                        assert.equal(
+                            target.system.characteristics.pd.value,
+                            baselinePd + 6,
+                            "AID PD should raise the current value with the max.",
+                        );
+
+                        // 5ER p. 110 sidebar: the fade removes 5 CP worth of the adjusted ability per
+                        // turn from the halved ledger (+6 -> +1).
+                        let effect = findAdjustmentEffect(target);
+                        assert.ok(effect, "AID PD adjustment effect exists.");
+                        await fadeAdjustment(aidItem, "PD", effect);
+                        assert.equal(target.system.characteristics.pd.max, baselinePd + 1, "First fade leaves +1 PD.");
+                        assert.equal(
+                            target.system.characteristics.pd.value,
+                            baselinePd + 1,
+                            "Current value follows the fading max down.",
+                        );
+
+                        // Final fade exhausts the ledger, deletes the effect, and restores baseline.
+                        effect = findAdjustmentEffect(target);
+                        await fadeAdjustment(aidItem, "PD", effect);
+                        assert.notOk(findAdjustmentEffect(target), "Fully faded adjustment effect is deleted.");
+                        assert.equal(target.system.characteristics.pd.max, baselinePd, "Faded AID restores PD max.");
+                        assert.equal(
+                            target.system.characteristics.pd.value,
+                            baselinePd,
+                            "Faded AID restores PD current value.",
+                        );
+                    });
+
+                    it("consumption from an AIDed expendable comes out of the boost first (Gigawatt, 5ER p. 105-06)", async function () {
+                        const attacker = await create5eActor("_Quench_5e_Lifecycle_AID_STUN_Attacker");
+                        const target = await create5eActor("_Quench_5e_Lifecycle_AID_STUN_Target");
+                        const aidItem = await createAdjustmentItem(attacker, {
+                            xmlid: "AID",
+                            input: "STUN",
+                            levels: 3,
+                        });
+
+                        const baselineStun = target.system.characteristics.stun.max; // BODY 10 + STR/2 + CON/2 = 20
+
+                        await applyAdjustment(aidItem, "STUN", 18, target);
+                        assert.equal(target.system.characteristics.stun.max, baselineStun + 18, "AID STUN adds 18.");
+                        assert.equal(
+                            target.system.characteristics.stun.value,
+                            baselineStun + 18,
+                            "AID STUN raises the current value.",
+                        );
+
+                        // Take 14 STUN of damage while boosted.
+                        await target.update({
+                            "system.characteristics.stun.value": target.system.characteristics.stun.value - 14,
+                        });
+
+                        // First fade tick: the max drops but the (damaged) current value is untouched —
+                        // subtracting the fade delta as well would charge the damage twice.
+                        await fadeAdjustment(aidItem, "STUN", findAdjustmentEffect(target));
+                        assert.equal(target.system.characteristics.stun.max, baselineStun + 13, "Fade tick 1 max.");
+                        assert.equal(
+                            target.system.characteristics.stun.value,
+                            baselineStun + 4,
+                            "Damaged current value is preserved through the fade tick.",
+                        );
+
+                        // Fade to completion: 14 damage < 18 boost, so it all came out of the boost and
+                        // the character ends at his normal, undamaged STUN.
+                        for (let i = 0; i < 3; i++) {
+                            const effect = findAdjustmentEffect(target);
+                            assert.ok(effect, `Adjustment effect still present before fade tick ${i + 2}.`);
+                            await fadeAdjustment(aidItem, "STUN", effect);
+                        }
+                        assert.notOk(findAdjustmentEffect(target), "Fully faded adjustment effect is deleted.");
+                        assert.equal(
+                            target.system.characteristics.stun.max,
+                            baselineStun,
+                            "Faded AID restores STUN max.",
+                        );
+                        assert.equal(
+                            target.system.characteristics.stun.value,
+                            baselineStun,
+                            "Damage taken while boosted came out of the boost, not the character's own STUN.",
+                        );
+                    });
+
+                    it("deleting a DRAIN restores its removed points to the current value", async function () {
+                        const attacker = await create5eActor("_Quench_5e_Lifecycle_DRAIN_STR_Attacker");
+                        const target = await create5eActor("_Quench_5e_Lifecycle_DRAIN_STR_Target");
+                        const drainItem = await createAdjustmentItem(attacker, {
+                            xmlid: "DRAIN",
+                            input: "STR",
+                            levels: 2,
+                        });
+
+                        const baselineStr = target.system.characteristics.str.max; // 10
+
+                        await applyAdjustment(drainItem, "STR", -12, target);
+                        assert.equal(target.system.characteristics.str.max, baselineStr - 12, "DRAIN lowers STR max.");
+                        assert.equal(
+                            target.system.characteristics.str.value,
+                            baselineStr - 12,
+                            "DRAIN lowers the current value with the max.",
+                        );
+
+                        // GM deletes the drain outright: the removed points come back (the clamp update
+                        // commits in a follow-up actor update after the deletion).
+                        const effect = findAdjustmentEffect(target);
+                        const valueRestoreHook = waitForHook("updateActor");
+                        await effect.delete();
+                        await valueRestoreHook;
+
+                        assert.equal(target.system.characteristics.str.max, baselineStr, "Deleted DRAIN restores max.");
+                        assert.equal(
+                            target.system.characteristics.str.value,
+                            baselineStr,
+                            "Deleted DRAIN restores the current value.",
+                        );
                     });
                 });
             });
