@@ -68,11 +68,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 name: game.i18n.localize("EFFECT.StatusBleeding"),
                 id: "bleeding",
                 img: "icons/svg/blood.svg",
+                showIcon: 2, // always
             },
             unconsciousEffect: {
                 name: game.i18n.localize("EFFECT.StatusUnconscious"),
                 id: "unconscious",
                 img: "icons/svg/unconscious.svg",
+                showIcon: 2, // always
                 changes: [
                     {
                         key: "system.characteristics.dcv.max",
@@ -144,6 +146,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 name: game.i18n.localize("EFFECT.StatusAsleep"),
                 id: "asleep",
                 img: "icons/svg/sleep.svg",
+                showIcon: 2, // always
                 // changes: [
                 //     { key: "system.characteristics.ocv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY },
                 //     { key: "system.characteristics.dcv.value", value: 0.5, mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY }
@@ -153,6 +156,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "prone",
                 name: game.i18n.localize("EFFECT.StatusProne"),
                 img: "icons/svg/falling.svg",
+                showIcon: 2, // always
                 changes: [
                     {
                         key: "system.characteristics.dcv.max",
@@ -166,6 +170,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "entangled",
                 name: game.i18n.localize("EFFECT.StatusEntangled"),
                 img: "icons/svg/net.svg",
+                showIcon: 2, // always
                 changes: [
                     {
                         key: "system.characteristics.dcv.max",
@@ -185,6 +190,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "paralysis",
                 name: game.i18n.localize("EFFECT.StatusParalyzed"),
                 img: "icons/svg/paralysis.svg",
+                showIcon: 2, // always
             },
             mindControlledEffect: {
                 id: "mindControl",
@@ -195,36 +201,43 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "fear",
                 name: game.i18n.localize("EFFECT.StatusFear"),
                 img: "icons/svg/terror.svg",
+                showIcon: 2, // always
             },
             regenerationEffect: {
                 id: "regeneration",
                 name: game.i18n.localize("EFFECT.StatusRegeneration"),
                 img: "icons/svg/regen.svg",
+                showIcon: 2, // always
             },
             aidEffect: {
                 id: "upgrade",
                 name: game.i18n.localize("EFFECT.StatusAdjustmentAid"),
                 img: "icons/svg/upgrade.svg",
+                showIcon: 2, // always
             },
             drainEffect: {
                 id: "downgrade",
                 name: game.i18n.localize("EFFECT.StatusAdjustmentDrain"),
                 img: "icons/svg/downgrade.svg",
+                showIcon: 2, // always
             },
             invisibleEffect: {
                 id: "invisible",
                 name: game.i18n.localize("EFFECT.StatusInvisible"),
                 img: "icons/svg/invisible.svg",
+                showIcon: 2, // always
             },
             targetedEffect: {
                 id: "target",
                 name: game.i18n.localize("EFFECT.StatusTargeted"),
                 img: "icons/svg/target.svg",
+                showIcon: 2, // always
             },
             holdingAnActionEffect: {
                 id: "holding",
                 name: game.i18n.localize("EFFECT.HoldingAnAction"),
                 img: `icons/svg/clockwork.svg`,
+                showIcon: 2, // always
             },
 
             // Water effects
@@ -278,6 +291,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                     [`${game.system.id}.type`]: "maneuver",
                 },
                 img: "icons/svg/statue.svg",
+                showIcon: 2, // always
                 changes: [
                     {
                         key: "system.characteristics.dcv.max",
@@ -299,16 +313,19 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "desolidification",
                 name: game.i18n.localize("EFFECT.StatusDesolidification"),
                 img: `icons/svg/mystery-man.svg`,
+                showIcon: 2, // always
             },
             dodgeEffect: {
                 id: "dodge",
                 name: game.i18n.localize("EFFECT.StatusDodging"),
                 img: `systems/${module}/icons/dodge.svg`,
+                showIcon: 2, // always
             },
             grabEffect: {
                 id: "grab",
                 name: "Grabbed",
                 img: `systems/${module}/icons/noun-wrestling-1061808.svg`,
+                showIcon: 2, // always
                 changes: [
                     {
                         key: "system.characteristics.dcv.max",
@@ -322,6 +339,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "haymaker",
                 name: "Haymaker",
                 img: `icons/svg/sword.svg`,
+                showIcon: 2, // always
                 changes: [
                     {
                         key: "system.characteristics.dcv.max",
@@ -335,6 +353,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "strike",
                 name: game.i18n.localize("EFFECT.StatusStriking"),
                 img: `systems/${module}/icons/fist.svg`,
+                showIcon: 2, // always
             },
 
             // Movement Effects
@@ -342,11 +361,13 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "fly",
                 name: game.i18n.localize("EFFECT.StatusFlying"),
                 img: "icons/svg/wing.svg",
+                showIcon: 2, // always
             },
             nonCombatMovementEffect: {
                 id: "nonCombatMovement",
                 name: "NonCombat Movement",
                 img: `systems/${module}/icons/person-running.svg`,
+                showIcon: 2, // always
                 changes: [
                     {
                         key: "system.characteristics.ocv.max",
@@ -366,6 +387,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "tunneling",
                 name: game.i18n.localize("EFFECT.StatusTunneling"),
                 img: "icons/svg/mole.svg",
+                showIcon: 2, // always
             },
 
             // Sense affecting effects
@@ -373,6 +395,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "dangerSenseDisabled",
                 name: game.i18n.localize("EFFECT.StatusSenseDangerDisabled"),
                 img: `systems/${module}/icons/senses/dangerSenseDisabled.svg`,
+                showIcon: 2, // always
             },
             detectSenseDisabledEffect: {
                 id: "detectSenseDisabled",
@@ -383,16 +406,19 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "hearingSenseDisabled",
                 name: game.i18n.localize("EFFECT.StatusSenseHearingDisabled"),
                 img: "icons/svg/deaf.svg",
+                showIcon: 2, // always
             },
             mentalSenseDisabledEffect: {
                 id: "mentalSenseDisabled",
                 name: game.i18n.localize("EFFECT.StatusSenseMentalDisabled"),
                 img: `systems/${module}/icons/senses/mentalSenseDisabled.svg`,
+                showIcon: 2, // always
             },
             radioSenseDisabledEffect: {
                 id: "radioSenseDisabled",
                 name: game.i18n.localize("EFFECT.StatusSenseRadioDisabled"),
                 img: `systems/${module}/icons/senses/radioSenseDisabled.svg`,
+                showIcon: 2, // always
             },
             // Temporary BLIND status/effect until enhanced senses can be fully implemented.
             // When a character cannot perceive their opponent with any
@@ -408,6 +434,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "blind",
                 name: game.i18n.localize("EFFECT.StatusSenseSightDisabled"),
                 img: "icons/svg/blind.svg",
+                showIcon: 2, // always
                 changes: [
                     {
                         key: "system.characteristics.ocv.max",
@@ -427,26 +454,31 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "silence",
                 name: game.i18n.localize("EFFECT.StatusSilenced"),
                 img: "icons/svg/silenced.svg",
+                showIcon: 2, // always
             },
             smellTasteSenseDisabledEffect: {
                 id: "smellTasteSenseDisabled",
                 name: game.i18n.localize("EFFECT.StatusSenseSmellTasteDisabled"),
                 img: `systems/${module}/icons/senses/smellTasteSenseDisabled.svg`,
+                showIcon: 2, // always
             },
             sonarSenseDisabledEffect: {
                 id: "sonarSenseDisabled",
                 name: game.i18n.localize("EFFECT.StatusSenseSonarDisabled"),
                 img: `systems/${module}/icons/senses/sonarSenseDisabled.svg`,
+                showIcon: 2, // always
             },
             spatialAwarenessSenseDisabledEffect: {
                 id: "spatialAwarenessSenseDisabled",
                 name: game.i18n.localize("EFFECT.StatusSenseSpatialAwarenessDisabled"),
                 img: `systems/${module}/icons/senses/spatialAwarenessSenseDisabled.svg`,
+                showIcon: 2, // always
             },
             touchSenseDisabledEffect: {
                 id: "touchSenseDisabled",
                 name: game.i18n.localize("EFFECT.StatusSenseTouchDisabled"),
                 img: `systems/${module}/icons/senses/touchSenseDisabled.svg`,
+                showIcon: 2, // always
             },
         });
 
