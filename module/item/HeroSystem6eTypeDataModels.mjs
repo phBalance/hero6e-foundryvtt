@@ -1827,8 +1827,10 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
                 parts.push(`${originToken?.name || originItem.actor?.name}: ${originItem.name}`);
             }
 
+            // Durationless effects (statuses like Prone) report an Infinity/null remaining — only a
+            // real countdown is worth showing.
             const remaining = ae._prepareDuration?.().remaining;
-            if (remaining != null && remaining > 0) {
+            if (Number.isFinite(remaining) && remaining > 0) {
                 parts.push(`${Math.ceil(remaining)}s remaining`);
             }
 
