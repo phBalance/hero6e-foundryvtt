@@ -421,22 +421,24 @@ export async function expireEffects(actor, expiresOn) {
                                 break;
                         }
                     } else {
-                        switch (validationEntry.severity) {
-                            case CONFIG.HERO.VALIDATION_SEVERITY.INFO:
-                                console.log(message, ae);
-                                break;
+                        if (!squelch(`expireEffects-herovalidation-${actor.id}`)) {
+                            switch (validationEntry.severity) {
+                                case CONFIG.HERO.VALIDATION_SEVERITY.INFO:
+                                    console.log(message);
+                                    break;
 
-                            case CONFIG.HERO.VALIDATION_SEVERITY.WARNING:
-                                console.warn(message, ae);
-                                break;
+                                case CONFIG.HERO.VALIDATION_SEVERITY.WARNING:
+                                    console.warn(message);
+                                    break;
 
-                            case CONFIG.HERO.VALIDATION_SEVERITY.ERROR:
-                                console.error(message, ae);
-                                break;
+                                case CONFIG.HERO.VALIDATION_SEVERITY.ERROR:
+                                    console.error(message);
+                                    break;
 
-                            default:
-                                console.error("Invalid validation severity", validationEntry.severity);
-                                break;
+                                default:
+                                    console.error("Invalid validation severity", validationEntry.severity);
+                                    break;
+                            }
                         }
                     }
                 }
