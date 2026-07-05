@@ -1056,7 +1056,7 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
             const _targetValue = Math.trunc(_ap / costPerActivePoint) - _value;
 
             if (parseInt(ae.changes[0].value) !== _targetValue) {
-                const msg = `updating AE change value from ${ae.changes[0].value} to ${_targetValue} because sumAP=${_ap} and costPerActivePoint=${costPerActivePoint}.  ${_ap}/${costPerActivePoint} = ${_ap / costPerActivePoint}.  There is already a ${_value} value from other effects.`;
+                const msg = `${ae.actor.name}: ${ae.name} ${ae.changes[0].key} from ${ae.changes[0].value} to ${_targetValue}. sumAP=${_ap} and costPerActivePoint=${costPerActivePoint}.  ${_ap}/${costPerActivePoint} = ${_ap / costPerActivePoint}.  There is already a ${_value} value from other effects.`;
                 if (isFade) {
                     console.warn(msg);
                 } else {
