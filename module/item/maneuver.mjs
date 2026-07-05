@@ -376,6 +376,21 @@ export async function activateManeuver(item) {
         foundry.utils.getProperty(activeEffect, HeroCompatibility.isV14 ? `system.changes` : `changes`) ?? [];
 
     if (activeEffect.name && _changes.length > 0) {
+        // There is no need to keep track of OCV/DCV changes when not in combat
+        if (item.actor) {
+            if (item.actor.inCombat === false) {
+                return ui.notifications.info(
+                    `${item.name} effects were not automated because ${item.actor.name} is not in combat.`,
+                );
+            }
+        }
+
+        // TODO: You can only have 1 combat effect applied at any time.
+        // If there is already a combat effect then either the player is trying to cheat
+        // or the previous combat effect did not properly expire.
+        // I don't believe we have a way to tell if there is a current martial or maneuver effect.
+        // Should add something to flags/system so we can check.
+
         // v14 throws error if effect.duration.value is not an integer.
         // Value = Infinity fails SchemaField validation.
         // We can replace Infinity with null and get this to work.
