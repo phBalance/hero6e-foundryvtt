@@ -389,6 +389,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         // - A dependent resting untouched at its stored maximum (no damage, no
                         //   value-targeting effects) FOLLOWS the max in both directions — a bigger
                         //   STR means a longer leap right now, not just a higher ceiling.
+                        // - A stored value deliberately set above the stored max (GM overfill; both
+                        //   sheets style it with the over-max class, and 6e has no cap at all) is
+                        //   user intent and must survive the recompute.
                         // - Otherwise only cap DOWN (e.g. Prone halving DCV). Never raise a diverged
                         //   value: for expendables (STUN/END) the gap below max is damage/spent
                         //   points and raising it would silently heal them on every render, and a
@@ -400,8 +403,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                             const restingAtStoredMax =
                                 currentValue === Number(sourceNode.value) &&
                                 Number(sourceNode.value) === Number(sourceNode.max);
+                            const storedOverMax = Number(sourceNode.value) > Number(sourceNode.max);
 
-                            let coherentValue = restingAtStoredMax ? node.max : Math.min(currentValue, node.max);
+                            let coherentValue;
+                            if (restingAtStoredMax) coherentValue = node.max;
+                            else if (storedOverMax) coherentValue = currentValue;
+                            else coherentValue = Math.min(currentValue, node.max);
                             // Effects that halve the current value directly can leave a fraction
                             // behind; apply Hero rounding (SPD always rounds down, 5ER p. 33).
                             if (!Number.isInteger(coherentValue)) {
@@ -1218,8 +1225,17 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         // Block A source: purchased LEVELS changed for a characteristic (e.g. HDC upload / edit).
         // Keep the original (schema-cased) key so we can patch system.<KEY>.LEVELS below.
+        // Only an actual LEVELS change counts: payloads that merely echo the current LEVELS
+        // (full-object round-trips) must not resync value/max to base+LEVELS, which would strip
+        // adjustment (AID/DRAIN) results from the stored value.
         const levelsChanged = Object.keys(systemChanged)
-            .filter((k) => systemChanged[k]?.LEVELS != null && this.hasCharacteristic(k.toUpperCase()))
+            .filter(
+                (k) =>
+                    systemChanged[k]?.LEVELS != null &&
+                    this.hasCharacteristic(k.toUpperCase()) &&
+                    Number(systemChanged[k].LEVELS) !==
+                        Number(foundry.utils.getProperty(this.system, `${k}.LEVELS`) ?? 0),
+            )
             .map((k) => ({ origKey: k, key: k.toLowerCase() }));
 
         // Block B source: a characteristic value changed and it feeds a calculated dependent.
