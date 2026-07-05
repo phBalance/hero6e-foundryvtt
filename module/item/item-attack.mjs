@@ -4098,7 +4098,14 @@ async function _onApplyTransformationToSpecificToken(transformationItem, token, 
     ui.notifications.warn("TRANSFORM damage & defenses are not yet implemented.");
 }
 
-async function _onApplyAdjustmentToSpecificToken(adjustmentItem, token, damageDetail, defense, defenseTags, action) {
+export async function _onApplyAdjustmentToSpecificToken(
+    adjustmentItem,
+    token,
+    damageDetail,
+    defense,
+    defenseTags,
+    action,
+) {
     if (
         adjustmentItem.effectiveAttackItem.actor.id === token.actor.id &&
         ["DISPEL", "DRAIN", "SUPPRESS", "TRANSFER"].includes(adjustmentItem.effectiveAttackItem.system.XMLID)

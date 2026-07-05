@@ -902,6 +902,10 @@ export async function performAdjustment(
         updateEffectName(activeEffect);
         const createdEffects = await targetActor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
 
+        if (attackItem.actor.name.match(/test/i)) {
+            console.log(`Created ActiveEffect`, createdEffects);
+        }
+
         // V14 tracks the effect start under start.time; duration.startTime only exists on V13.
         const effectStartTime = HeroCompatibility.isV14
             ? createdEffects[0].start?.time
