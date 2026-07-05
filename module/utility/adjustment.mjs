@@ -405,7 +405,10 @@ function _createNewAdjustmentEffect(options) {
         // This may cause issues as we may need to use updateSource for modifying values and toObject in the update.
         Object.defineProperty(activeEffect, "changes", {
             get: function () {
-                console.warn("V14: Accessing changes via defineProperty of object.");
+                // TODO: AARON needs to re-enable this after 7/4/2026 (Quench tests)
+                if (!attackItem.actor.name.match(/test/i)) {
+                    console.warn("V14: Accessing changes via defineProperty of object.");
+                }
                 return this.system?.changes ?? [];
             },
             set: function (value) {
@@ -901,6 +904,10 @@ export async function performAdjustment(
     if (!existingEffect && activeEffect.flags[game.system.id]?.adjustmentActivePoints !== 0) {
         updateEffectName(activeEffect);
         const createdEffects = await targetActor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+
+        if (attackItem.actor.name.match(/test/i)) {
+            console.log(`Created ActiveEffect id=${createdEffects[0].id} name=${createdEffects[0].name}`);
+        }
 
         // V14 tracks the effect start under start.time; duration.startTime only exists on V13.
         const effectStartTime = HeroCompatibility.isV14

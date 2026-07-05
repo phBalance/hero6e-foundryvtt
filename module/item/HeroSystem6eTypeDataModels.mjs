@@ -1913,7 +1913,11 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         if (!key) {
             console.error(`Unable to determine KEY for characteristic in datamodel`);
         }
-        this.#baseInfo ??= getPowerInfo({ XMLID: key, actor: this.actor, xmlTag: key });
+
+        // FTL is a POWER and an ADDER (not sure how to properly fix, but this kluge seems to work)
+        const xmlTag = key.replace("FTL", "POWER");
+
+        this.#baseInfo ??= getPowerInfo({ XMLID: key, actor: this.actor, xmlTag });
         return this.#baseInfo;
     }
 
