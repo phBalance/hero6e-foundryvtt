@@ -406,7 +406,7 @@ export async function activateManeuver(item) {
  * @param {Object} action - The action payload tracking target and execution metadata.
  * @returns {Promise<void>}
  */
-export async function doManeuverEffects(item, action) {
+export async function doManeuverEffects(item, action, targetToken) {
     const attackerActor = item.actor;
 
     // Guard Clause: If there is no initiating actor, notify the console/UI and terminate execution immediately
@@ -422,6 +422,9 @@ export async function doManeuverEffects(item, action) {
     const hasTargetFallsTrait = maneuverHasTargetFallsTrait(item);
 
     const currentTargets = action.system.currentTargets || [];
+    if (currentTargets.length === 0 && targetToken) {
+        currentTargets.push(targetToken);
+    }
     const validTargets = currentTargets.filter((t) => !!t.actor);
 
     // --- 1. PROCESS ALL TARGETED DEFENDERS SEQUENTIALLY ---

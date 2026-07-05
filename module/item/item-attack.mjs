@@ -3236,7 +3236,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // Maneuvers can include effects beyond damage
     if (["maneuver", "martialart"].includes(item.type)) {
-        await doManeuverEffects(item, action);
+        await doManeuverEffects(item, action, targetToken);
     }
 
     if (item.effectiveAttackItem.isEntangle) {
