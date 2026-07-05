@@ -995,6 +995,31 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     /**
+     * AppV2 form submission serializes every named input on the sheet, so any submit (Enter key,
+     * ClientDocument#sortRelative, ...) would re-write dozens of fields the user never touched.
+     * Those writes are not no-ops: an unchanged system.<KEY>.LEVELS in the payload makes
+     * _apply5eCalculatedCharacteristics resync that characteristic to base+LEVELS, silently
+     * reverting adjustment (AID/DRAIN) results on value/max. Every editable input on this sheet
+     * already persists itself through the per-input change listeners in _onRender, so form-level
+     * submits contribute no form data. Programmatic submit({updateData}) calls still work:
+     * updateData is merged in _prepareSubmitData after this returns.
+     */
+    _processFormData() {
+        return {};
+    }
+
+    /**
+     * Core _prepareSubmitData validates with clean:{addTypes:true, copy:false}, which injects
+     * `type` even into an empty payload. Writing that lone `type` is not harmless: the actor's
+     * _preUpdate runs its KO/stun-threshold logic whenever changed.type is present. Skip the
+     * update entirely when there is nothing real to write.
+     */
+    async _processSubmitData(event, form, submitData, options) {
+        if (Object.keys(submitData ?? {}).every((k) => k === "type")) return;
+        return super._processSubmitData(event, form, submitData, options);
+    }
+
+    /**
      * Define whether a user is able to begin a dragstart workflow for a given drag selector
      * @param {string} selector       The candidate HTML selector for dragging
      * @returns {boolean}             Can the current user drag this selector?

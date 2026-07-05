@@ -1218,8 +1218,17 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         // Block A source: purchased LEVELS changed for a characteristic (e.g. HDC upload / edit).
         // Keep the original (schema-cased) key so we can patch system.<KEY>.LEVELS below.
+        // Only an actual LEVELS change counts: payloads that merely echo the current LEVELS
+        // (full-object round-trips) must not resync value/max to base+LEVELS, which would strip
+        // adjustment (AID/DRAIN) results from the stored value.
         const levelsChanged = Object.keys(systemChanged)
-            .filter((k) => systemChanged[k]?.LEVELS != null && this.hasCharacteristic(k.toUpperCase()))
+            .filter(
+                (k) =>
+                    systemChanged[k]?.LEVELS != null &&
+                    this.hasCharacteristic(k.toUpperCase()) &&
+                    Number(systemChanged[k].LEVELS) !==
+                        Number(foundry.utils.getProperty(this.system, `${k}.LEVELS`) ?? 0),
+            )
             .map((k) => ({ origKey: k, key: k.toLowerCase() }));
 
         // Block B source: a characteristic value changed and it feeds a calculated dependent.
