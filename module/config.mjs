@@ -2812,7 +2812,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 phase: "1/2",
                 ocv: "-1",
                 dcv: "-2",
-                effects: "Knock a target to the ground, making him Prone",
+                effects: "Target Falls",
                 dc: "0",
                 attack: true,
                 addStr: false,

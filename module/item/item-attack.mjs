@@ -1538,27 +1538,283 @@ export function getAttackTags(item) {
         }
     }
 
-    // MartialArts NND
+    /**
+     * Checks if a maneuver item contains a specific mechanical trait string within its system effect text field.
+     * HSMartialArts PDF page 94 has most of the traits.
+     *
+     * @param {string} effectText - The effect string associated with a maneuver (maps to raw 'EFFECT').
+     * @param {string} trait - The trait key phrase to search for (e.g., "[FLASHDC]", "block", "grab").
+     * @returns {boolean} True if the trait is present in the text field.
+     */
+    const maneuverHasTrait = function (effectText, trait) {
+        if (!effectText || !trait) return false;
+
+        // Convert both strings to standard uppercase to ensure a robust case-insensitive check
+        return effectText.toUpperCase().indexOf(trait.toUpperCase()) > -1;
+    };
+
+    // MartialArt EFFECT gets lost with effectiveAttackItem #4426
     // PH: FIXME: need to consider WEAPONEFFECT too.
-    if (effectiveAttackItem.system.EFFECT?.includes("NNDDC")) {
+    const effectText =
+        effectiveAttackItem.system.WEAPONEFFECT ||
+        effectiveAttackItem.system.EFFECT ||
+        item.system.WEAPONEFFECT ||
+        item.system.EFFECT;
+
+    // ABORT
+    //if (maneuverCanBeAbortedTo(effectText)) {
+    if (maneuverHasTrait(effectText, "ABORT")) {
+        attackTags.push({
+            name: `ABORT`,
+            title: `You can abort to maneuver`,
+        });
+    }
+
+    // BIND
+    if (maneuverHasTrait(effectText, "BIND")) {
+        attackTags.push({
+            name: `BIND`,
+            title: `Bind enemy weapon`,
+        });
+    }
+
+    // BLOCK
+    if (maneuverHasTrait(effectText, "BLOCK")) {
+        attackTags.push({
+            name: `BLOCK`,
+            title: `Block instead of Strike. Abort is free.`,
+        });
+    }
+
+    // DISABLE
+    if (maneuverHasTrait(effectText, "DISABLE")) {
+        attackTags.push({
+            name: `DISABLE`,
+            title: `Disable a limb`,
+        });
+    }
+    // DISARM
+    if (maneuverHasTrait(effectText, "DISARM")) {
+        // Remove any previous DISARM as it is likely very generic
+        const disarmIndex = attackTags.findIndex((tag) => tag.name === "DISARM");
+        if (disarmIndex > -1) {
+            attackTags.splice(disarmIndex, 1);
+        }
+
+        attackTags.push({
+            name: `DISARM`,
+            title: `Knock an opponent's weapon out of his grasp.`,
+        });
+
+        // This does no damage, remove PD attackTag
+        const pdIndex = attackTags.findIndex((tag) => tag.name === "PD");
+        if (pdIndex > -1) {
+            attackTags.splice(pdIndex, 1);
+        }
+    }
+
+    // DODGE
+    if (maneuverHasTrait(effectText, "DODGE")) {
+        attackTags.push({
+            name: `DODGE`,
+            title: `Dodge instead of Strike. Abort is free.`,
+        });
+    }
+
+    // FALL
+    //if (maneuverHasAttackerFallsTrait(effectiveAttackItem)) {
+    if (maneuverHasTrait(effectText, "YOU FALL")) {
+        attackTags.push({
+            name: `YOU FALL`,
+            title: `Attacker automatically falls down.`,
+        });
+    }
+    //if (maneuverHasTargetFallsTrait(effectiveAttackItem)) {
+    if (maneuverHasTrait(effectText, "TARGET FALLS")) {
+        attackTags.push({
+            name: `TARGET FALLS`,
+            title: `Target falls prone as if thrown`,
+        });
+    }
+
+    // FLASH
+    // TODO: Find purchasable HDC files to see how they format special FLASH senses.
+    //       In Maneuver listings, this Basis is indicated by
+    //       use of the phrase, "[Sense] Group Flash __d6"
+    //       You can buy additional sense groups, but unclear how that is formatted.
+    if (maneuverHasTrait(effectText, "[FLASHDC]")) {
+        const senseGroup = effectiveAttackItem.system.INPUT || item.system.INPUT;
+        attackTags.push({
+            name: `${senseGroup ? `${senseGroup} Group Flash` : "Flash"}`,
+            title: `Disrupts senses`,
+        });
+    }
+
+    // FMOVE
+    if (maneuverHasTrait(effectText, "FMOVE")) {
+        attackTags.push({
+            name: `FMOVE`,
+            title: `Can attack after Full Move`,
+        });
+    }
+
+    // FOLLOW
+    if (maneuverHasTrait(effectText, "MUST FOLLOW")) {
+        const extractMustFollowTarget = function (effectText) {
+            if (!effectText) return null;
+
+            // Match "Must Follow " case-insensitively, then capture all characters up to the next comma or string end
+            const regex = /Must\s+Follow\s+([^,]+)/i;
+            const match = effectText.match(regex);
+
+            // If a match is found, return the trimmed capturing group contents
+            return match ? match[1].trim() : null;
+        };
+
+        const mustFollowTarget = extractMustFollowTarget(effectText);
+
+        attackTags.push({
+            name: `Must Follow ${mustFollowTarget?.toUpperCase()}`,
+            title: `This maneuver must follow a successful ${mustFollowTarget}`,
+        });
+    }
+
+    // GRAB WEAPON
+    if (maneuverHasTrait(effectText, "GRAB WEAPON")) {
+        attackTags.push({
+            name: `GRAB WEAPON`,
+            title: `Grab a target. If successful you may attempt to disarm them.`,
+        });
+    }
+
+    // GRAB OPPONENT
+    else if (maneuverHasTrait(effectText, "GRAB")) {
+        const extractGrabTarget = function (effectText) {
+            if (!effectText) return null;
+
+            // Match "Must Follow " case-insensitively, then capture all characters up to the next comma or string end
+            const regex = /Grab\s+([^,;]+)/i;
+            const match = effectText.match(regex);
+
+            // If a match is found, return the trimmed capturing group contents
+            return match ? match[1].trim() : null;
+        };
+        const grabTarget = extractGrabTarget(effectText);
+        attackTags.push({
+            name: `GRAB ${grabTarget?.toUpperCase()}`,
+            title: `Grab a target. If successful you may squeeze, slam or throw.`,
+        });
+    }
+
+    // HALF MOVE REQUIRED
+    if (maneuverHasTrait(effectText, "HALF MOVE REQUIRED")) {
+        attackTags.push({
+            name: `HALF MOVE REQUIRED`,
+            title: `This maneuver must follow a half move`,
+        });
+    }
+
+    // K-DAMAGE (this is killing damage and shown elsewhere)
+
+    // LASTING RESTRICTION (these are OCV/DCV penalties and shown elsewhere)
+
+    // N-DAMAGE (this is normal damage and shown elsewhere)
+
+    // NND DMG
+    if (maneuverHasTrait(effectText, "[NNDDC]")) {
+        // Remove any previous NND as it is likely very generic
+        const nndIndex = attackTags.findIndex((tag) => tag.name === "NND");
+        if (nndIndex > -1) {
+            attackTags.splice(nndIndex, 1);
+        }
+
         attackTags.push({
             name: `NND`,
             title: `No Normal Defense`,
         });
     }
 
-    // Martial FLASH
-    // PH: FIXME: need to consider WEAPONEFFECT too.
-    if (effectiveAttackItem.system.EFFECT?.includes("FLASHDC")) {
+    // ONE LIMB (should be included in GRAB)
+
+    // PRONE (careful the TRIP maneuver has a poorly constructed generic effect, which we are changing)
+    // HeroSystem's Trip maneuver is generically described as "Knock a target to the ground, making him Prone"
+    // This causes PRONE to mistakenly match, a migration fixes this using
+    // the proper trait of "Target Falls".
+    if (maneuverHasTrait(effectText, "PRONE") && item.system.XMLID !== "TRIP") {
         attackTags.push({
-            name: `Flash`,
-            title: effectiveAttackItem.name,
-        });
-        attackTags.push({
-            name: effectiveAttackItem.system.INPUT,
-            title: effectiveAttackItem.name,
+            name: `PRONE`,
+            title: `Target is required to be prone before maneuver can be used`,
         });
     }
+
+    // REQUIRES BOTH HANDS
+    if (maneuverHasTrait(effectText, "BOTH HANDS")) {
+        attackTags.push({
+            name: `PRONE`,
+            title: `Must have both hands free before using this maneuver`,
+        });
+    }
+
+    // REQUIRES OBJECT/CONDITION (not sure how to implement)
+
+    // RESPONSE (Need example of this one, likely does not match, does nothing)
+    if (maneuverHasTrait(effectText, "CAN ONLY BE USED AFTER")) {
+        const extractResponseTarget = function (effectText) {
+            if (!effectText) return null;
+
+            // Match "Must Follow " case-insensitively, then capture all characters up to the next comma or string end
+            const regex = /Can\sOnly\sBe\sUsed\sAfter\sSuccessful\s+([^,]+)/i;
+            const match = effectText.match(regex);
+
+            // If a match is found, return the trimmed capturing group contents
+            return match ? match[1].trim() : null;
+        };
+
+        const responseTarget = extractResponseTarget(effectText);
+        attackTags.push({
+            name: `Can Only Be Used After ${responseTarget?.toUpperCase()}`,
+            title: `Can only be used following a successful ${responseTarget?.toUpperCase()} maneuver`,
+        });
+    }
+
+    // STRIKE (this is standard damage and shown elsewhere)
+
+    // TAKE FULL DMG  (not sure how to implement)
+    if (maneuverHasTrait(effectText, "ATTACKER TAKES")) {
+        const extractAttackerDamageModifier = function (effectText) {
+            if (!effectText) return null;
+
+            // Match "attacker takes " case-insensitively, then capture everything up to the next comma or the word "damage"
+            const regex = /attacker\s+takes\s+([^,]+?)(?=\s*damage|$)/i;
+            const match = effectText.match(regex);
+
+            // If a match is found, return the trimmed capturing group contents
+            return match ? match[1].trim() : null;
+        };
+
+        // Execution pattern matching your architecture requirements
+        const attackerDamageModifier = extractAttackerDamageModifier(effectText);
+        attackTags.push({
+            name: `Attacker Takes ${attackerDamageModifier} Damage`,
+            title: `Attacker takes damage if collision takes place`,
+        });
+    }
+
+    // TAKE HALF DMG  (see TAKE FULL DMG)
+
+    // THROW (implemented as Target Falls)
+
+    // TIME+ (not sure how to implement)
+
+    // UNBALANCING  (not sure how to implement)
+
+    // V/6  (not sure how to implement)
+
+    // V/10  (not sure how to implement)
+
+    // SNAP SHOT, Lets character duck back behind cover (not in HSMartialArts so not sure how to implement)
+
+    // SUPPRESSION FIRE, Continuous fire through an area, must be Autofire (not in HSMartialArts so not sure how to implement)
 
     // Remove any duplicates. Like with FLASH #2629
     const deDupedAttackTags = Array.from(
