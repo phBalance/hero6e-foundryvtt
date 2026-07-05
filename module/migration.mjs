@@ -354,6 +354,26 @@ export async function migrateWorld() {
         async (message) => await removeDehydratedManeuverItemFromMessage_4_3_15(message),
     );
 
+    // Strip the recursive self-embedded maneuver dehydration from existing chat messages (see cbbbb44).
+    // Only chat messages created before that fix carry the bloat; the fix stops new ones from getting it.
+    await migrateToVersion(
+        "4.3.15",
+        lastMigration,
+        getAllActorsInGame(),
+        "Updating TRIP maneuver to use standard Target Falls trait",
+        async (actor) => await replaceTripTargetFallsTrait_4_3_15(actor),
+    );
+
+    async function replaceTripTargetFallsTrait_4_3_15(actor) {
+        const tripManeuver = actor.items.find(
+            (item) =>
+                item.system.XMLID === "TRIP" && item.system.EFFECT === "Knock a target to the ground, making him Prone",
+        );
+        if (tripManeuver) {
+            await tripManeuver.update({ "system.EFFECT": "Target Falls" });
+        }
+    }
+
     // Placeholder for notifying GM of items missing XMLID
     // await migrateToVersion(
     //     game.system.version,

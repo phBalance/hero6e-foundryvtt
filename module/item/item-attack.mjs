@@ -1595,10 +1595,22 @@ export function getAttackTags(item) {
     }
     // DISARM
     if (maneuverHasTrait(effectText, "DISARM")) {
+        // Remove any previous DISARM as it is likely very generic
+        const disarmIndex = attackTags.findIndex((tag) => tag.name === "DISARM");
+        if (disarmIndex > -1) {
+            attackTags.splice(disarmIndex, 1);
+        }
+
         attackTags.push({
             name: `DISARM`,
-            title: `Disarm opponent`,
+            title: `Knock an opponent's weapon out of his grasp.`,
         });
+
+        // This does no damage, remove PD attackTag
+        const pdIndex = attackTags.findIndex((tag) => tag.name === "PD");
+        if (pdIndex > -1) {
+            attackTags.splice(pdIndex, 1);
+        }
     }
 
     // DODGE
@@ -1669,28 +1681,27 @@ export function getAttackTags(item) {
 
     // GRAB WEAPON
     if (maneuverHasTrait(effectText, "GRAB WEAPON")) {
-        const extractGrabTarget = function (effectText) {
-            if (!effectText) return null;
-
-            // Match "Must Follow " case-insensitively, then capture all characters up to the next comma or string end
-            const regex = /Grab\s+([^,]+)/i;
-            const match = effectText.match(regex);
-
-            // If a match is found, return the trimmed capturing group contents
-            return match ? match[1].trim() : null;
-        };
-
-        const grabTarget = extractGrabTarget(effectText);
         attackTags.push({
-            name: `Grab ${grabTarget?.toUpperCase()}`,
+            name: `GRAB WEAPON`,
             title: `Grab a target. If successful you may attempt to disarm them.`,
         });
     }
 
     // GRAB OPPONENT
     else if (maneuverHasTrait(effectText, "GRAB")) {
+        const extractGrabTarget = function (effectText) {
+            if (!effectText) return null;
+
+            // Match "Must Follow " case-insensitively, then capture all characters up to the next comma or string end
+            const regex = /Grab\s+([^,;]+)/i;
+            const match = effectText.match(regex);
+
+            // If a match is found, return the trimmed capturing group contents
+            return match ? match[1].trim() : null;
+        };
+        const grabTarget = extractGrabTarget(effectText);
         attackTags.push({
-            name: `Grab WEAPON}`,
+            name: `GRAB ${grabTarget?.toUpperCase()}`,
             title: `Grab a target. If successful you may squeeze, slam or throw.`,
         });
     }
@@ -1710,7 +1721,13 @@ export function getAttackTags(item) {
     // N-DAMAGE (this is normal damage and shown elsewhere)
 
     // NND DMG
-    if (maneuverHasTrait(effectText, "NNDDC")) {
+    if (maneuverHasTrait(effectText, "[NNDDC]")) {
+        // Remove any previous NND as it is likely very generic
+        const nndIndex = attackTags.findIndex((tag) => tag.name === "NND");
+        if (nndIndex > -1) {
+            attackTags.splice(nndIndex, 1);
+        }
+
         attackTags.push({
             name: `NND`,
             title: `No Normal Defense`,
@@ -1719,8 +1736,11 @@ export function getAttackTags(item) {
 
     // ONE LIMB (should be included in GRAB)
 
-    // PRONE
-    if (maneuverHasTrait(effectText, "PRONE")) {
+    // PRONE (careful the TRIP maneuver has a poorly constructed generic effect, which we are changing)
+    // HeroSystem's Trip maneuver is generically described as "Knock a target to the ground, making him Prone"
+    // This causes PRONE to mistakenly match, a migration fixes this using
+    // the proper trait of "Target Falls".
+    if (maneuverHasTrait(effectText, "PRONE") && item.system.XMLID !== "TRIP") {
         attackTags.push({
             name: `PRONE`,
             title: `Target is required to be prone before maneuver can be used`,
@@ -1760,8 +1780,27 @@ export function getAttackTags(item) {
     // STRIKE (this is standard damage and shown elsewhere)
 
     // TAKE FULL DMG  (not sure how to implement)
+    if (maneuverHasTrait(effectText, "ATTACKER TAKES")) {
+        const extractAttackerDamageModifier = function (effectText) {
+            if (!effectText) return null;
 
-    // TAKE HALF DMG  (not sure how to implement)
+            // Match "attacker takes " case-insensitively, then capture everything up to the next comma or the word "damage"
+            const regex = /attacker\s+takes\s+([^,]+?)(?=\s*damage|$)/i;
+            const match = effectText.match(regex);
+
+            // If a match is found, return the trimmed capturing group contents
+            return match ? match[1].trim() : null;
+        };
+
+        // Execution pattern matching your architecture requirements
+        const attackerDamageModifier = extractAttackerDamageModifier(effectText);
+        attackTags.push({
+            name: `Attacker Takes ${attackerDamageModifier} Damage`,
+            title: `Attacker takes damage if collision takes place`,
+        });
+    }
+
+    // TAKE HALF DMG  (see TAKE FULL DMG)
 
     // THROW (implemented as Target Falls)
 
@@ -1772,6 +1811,10 @@ export function getAttackTags(item) {
     // V/6  (not sure how to implement)
 
     // V/10  (not sure how to implement)
+
+    // SNAP SHOT, Lets character duck back behind cover (not in HSMartialArts so not sure how to implement)
+
+    // SUPPRESSION FIRE, Continuous fire through an area, must be Autofire (not in HSMartialArts so not sure how to implement)
 
     // Remove any duplicates. Like with FLASH #2629
     const deDupedAttackTags = Array.from(
