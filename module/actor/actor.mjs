@@ -389,6 +389,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         // - A dependent resting untouched at its stored maximum (no damage, no
                         //   value-targeting effects) FOLLOWS the max in both directions — a bigger
                         //   STR means a longer leap right now, not just a higher ceiling.
+                        // - A stored value deliberately set above the stored max (GM overfill; both
+                        //   sheets style it with the over-max class, and 6e has no cap at all) is
+                        //   user intent and must survive the recompute.
                         // - Otherwise only cap DOWN (e.g. Prone halving DCV). Never raise a diverged
                         //   value: for expendables (STUN/END) the gap below max is damage/spent
                         //   points and raising it would silently heal them on every render, and a
@@ -400,8 +403,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                             const restingAtStoredMax =
                                 currentValue === Number(sourceNode.value) &&
                                 Number(sourceNode.value) === Number(sourceNode.max);
+                            const storedOverMax = Number(sourceNode.value) > Number(sourceNode.max);
 
-                            let coherentValue = restingAtStoredMax ? node.max : Math.min(currentValue, node.max);
+                            let coherentValue;
+                            if (restingAtStoredMax) coherentValue = node.max;
+                            else if (storedOverMax) coherentValue = currentValue;
+                            else coherentValue = Math.min(currentValue, node.max);
                             // Effects that halve the current value directly can leave a fraction
                             // behind; apply Hero rounding (SPD always rounds down, 5ER p. 33).
                             if (!Number.isInteger(coherentValue)) {
