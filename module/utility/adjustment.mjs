@@ -903,7 +903,7 @@ export async function performAdjustment(
         const createdEffects = await targetActor.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
 
         if (attackItem.actor.name.match(/test/i)) {
-            console.log(`Created ActiveEffect`, createdEffects);
+            console.log(`Created ActiveEffect id=${createdEffects[0].id} name=${createdEffects[0].name}`);
         }
 
         // V14 tracks the effect start under start.time; duration.startTime only exists on V13.
