@@ -174,7 +174,7 @@ export function registerAdjustmentFadeTests(quench) {
                     ]);
 
                     // Proxy Actor Isolation: Enforce structural re-evaluation upfront
-                    actor.prepareData();
+                    actor.reset();
 
                     // Return the live instantiated database record caught by our hook
                     return interceptedEffect;
@@ -190,6 +190,18 @@ export function registerAdjustmentFadeTests(quench) {
                  * @returns {Promise<object>} Resolves with the mutated effect document or catches on timeout bounds.
                  */
                 function awaitEffectState(hookName, effectId, evaluationFn = () => true) {
+                    // The mutation may already have landed before this listener attaches: the fade
+                    // pipeline runs asynchronously off the world-time advance, and stepTimeOneSecond
+                    // yields several macro-tasks before returning. Check the current state first so
+                    // an already-satisfied condition resolves immediately instead of timing out.
+                    const currentEffect = testTokenDoc?.actor?.effects.get(effectId);
+                    if (hookName === "deleteActiveEffect" && !currentEffect) {
+                        return Promise.resolve(null);
+                    }
+                    if (hookName === "updateActiveEffect" && currentEffect && evaluationFn(currentEffect)) {
+                        return Promise.resolve(currentEffect);
+                    }
+
                     let hookId = null;
 
                     const clearTracker = () => {
@@ -213,14 +225,15 @@ export function registerAdjustmentFadeTests(quench) {
                         });
                     });
 
-                    // Transaction Branch B: 1000ms explicit lifecycle guard safety timeout
+                    // Transaction Branch B: explicit lifecycle guard safety timeout. Worlds with many
+                    // actors/effects can take a few hundred ms per world-time tick, so leave headroom.
                     const timeoutPromise = new Promise((_, reject) =>
                         setTimeout(() => {
                             clearTracker();
                             reject(
                                 new Error(`Database transaction timeout awaiting Hook: ${hookName} on ID: ${effectId}`),
                             );
-                        }, 1000),
+                        }, 3000),
                     );
 
                     // Return the race execution boundary cleanly back to the caller thread execution context
@@ -278,6 +291,24 @@ export function registerAdjustmentFadeTests(quench) {
                 };
 
                 /**
+                 * Waits for the actor's stored characteristic value to settle at the expected number.
+                 * The fade pipeline updates the ActiveEffect first and then writes the clamped
+                 * characteristic value in a SEPARATE actor update, so awaiting the effect mutation
+                 * alone is not enough — the value write may still be in flight.
+                 *
+                 * @param {Actor} targetActor - The live (token) actor to observe.
+                 * @param {string} characteristicKey - Lowercase characteristic key (e.g. "str").
+                 * @param {number} expectedValue - The value to wait for.
+                 */
+                const awaitCharacteristicSettle = async (targetActor, characteristicKey, expectedValue) => {
+                    for (let i = 0; i < 20; i++) {
+                        if (targetActor.system.characteristics[characteristicKey].value === expectedValue) return;
+                        await new Promise((resolve) => setTimeout(resolve, 50));
+                        targetActor.reset();
+                    }
+                };
+
+                /**
                  * Instantiates the test canvas token sandbox and injects staggered mock adjustment doses.
                  * Secures references cleanly into lifecycle trackers to enforce database parity.
                  *
@@ -318,7 +349,7 @@ export function registerAdjustmentFadeTests(quench) {
                 //     const finalActor = await applyMockAidValue(10);
 
                 //     // Proxy Actor Isolation: Always recalculate directly on the live proxy token instance
-                //     finalActor.prepareData();
+                //     finalActor.reset();
 
                 //     return finalActor;
                 // };
@@ -358,7 +389,7 @@ export function registerAdjustmentFadeTests(quench) {
                 //     // 4. Fetch the pristine proxy actor to verify everything returned to baseline
                 //     const finalActor = testTokenDoc?.actor;
                 //     if (finalActor) {
-                //         finalActor.prepareData();
+                //         finalActor.reset();
                 //         assert.equal(
                 //             finalActor.system.characteristics[characteristicKey].value,
                 //             baselineValue,
@@ -369,12 +400,12 @@ export function registerAdjustmentFadeTests(quench) {
                 // };
 
                 // ─── IT BLOCK 1: STANDARD FORWARD TIMELINE MARCH ───
-                it.only("Should handle 6e STR whole integer scaling and enforce maximum effects", async () => {
+                it("Should handle 6e STR whole integer scaling and enforce maximum effects", async () => {
                     await testActor.update({ "system.is5e": false });
                     await createdItem.update({ "system.INPUT": "STR", "system.is5e": false });
 
                     const actor = testTokenDoc.actor;
-                    actor.prepareData();
+                    actor.reset();
 
                     // Baseline Verification: Both current value and maximum bounds must start at standard baseline (10)
                     assert.equal(
@@ -453,7 +484,7 @@ export function registerAdjustmentFadeTests(quench) {
                     // ─── SECONDS 3 THROUGH 11: HOLD MATRIX BOUNDARIES ───
                     for (let sec = 3; sec <= 11; sec++) {
                         await stepTimeOneSecond(1);
-                        actor.prepareData();
+                        actor.reset();
                         assert.equal(actor.system.characteristics.str.value, 34, `Sec ${sec} Value Hold Check failed.`);
                         assert.equal(
                             actor.system.characteristics.str.max,
@@ -466,10 +497,11 @@ export function registerAdjustmentFadeTests(quench) {
                     await stepTimeOneSecond(1);
                     await awaitEffectState("updateActiveEffect", trackingId1, (eff) => eff.changes[0].value === 3);
 
-                    actor.prepareData();
+                    actor.reset();
                     const liveEffect1 = actor.effects.get(trackingId1);
                     assert.isDefined(liveEffect1, "Dose 1 should still exist in the database collection at Sec 12.");
                     assert.equal(liveEffect1.changes[0].value, 3, "Dose 1 internal value failed to decay down to 3.");
+                    await awaitCharacteristicSettle(actor, "str", 29);
                     console.log(
                         `[HERO-DEBUG-6E-LINEAR] Sec 12 | Dose 1 Decay (Pool: 19 AP) | Sheet STR: ${actor.system.characteristics.str.value} / Max: ${actor.system.characteristics.str.max}`,
                     );
@@ -490,10 +522,11 @@ export function registerAdjustmentFadeTests(quench) {
                     await stepTimeOneSecond(1);
                     await awaitEffectState("updateActiveEffect", trackingId2, (eff) => eff.changes[0].value === 4);
 
-                    actor.prepareData();
+                    actor.reset();
                     const liveEffect2 = actor.effects.get(trackingId2);
                     assert.isDefined(liveEffect2, "Dose 2 should still exist in the database collection at Sec 13.");
                     assert.equal(liveEffect2.changes[0].value, 4, "Dose 2 internal value failed to decay down to 4.");
+                    await awaitCharacteristicSettle(actor, "str", 24);
                     console.log(
                         `[HERO-DEBUG-6E-LINEAR] Sec 13 | Dose 2 Decay (Pool: 14 AP) | Sheet STR: ${actor.system.characteristics.str.value} / Max: ${actor.system.characteristics.str.max}`,
                     );
@@ -513,10 +546,11 @@ export function registerAdjustmentFadeTests(quench) {
                     await stepTimeOneSecond(1);
                     await awaitEffectState("updateActiveEffect", trackingId3, (eff) => eff.changes[0].value === 2);
 
-                    actor.prepareData();
+                    actor.reset();
                     const liveEffect3 = actor.effects.get(trackingId3);
                     assert.isDefined(liveEffect3, "Dose 3 should still exist in the database collection at Sec 14.");
                     assert.equal(liveEffect3.changes[0].value, 2, "Dose 3 internal value failed to decay down to 2.");
+                    await awaitCharacteristicSettle(actor, "str", 19);
                     console.log(
                         `[HERO-DEBUG-6E-LINEAR] Sec 14 | Dose 3 Decay (Pool: 9 AP) | Sheet STR: ${actor.system.characteristics.str.value} / Max: ${actor.system.characteristics.str.max}`,
                     );
@@ -541,7 +575,7 @@ export function registerAdjustmentFadeTests(quench) {
                     await stepTimeOneSecond(1);
                     await awaitEffectState("deleteActiveEffect", trackingId1);
 
-                    actor.prepareData();
+                    actor.reset();
                     const deadEffect1 = actor.effects.get(trackingId1);
                     assert.isUndefined(
                         deadEffect1,
@@ -568,7 +602,7 @@ export function registerAdjustmentFadeTests(quench) {
 
                 //         if (updatedActor) {
                 //             const liveActor = testTokenDoc.actor;
-                //             liveActor.prepareData();
+                //             liveActor.reset();
                 //             currentActor = liveActor;
                 //         }
                 //     }
@@ -598,7 +632,7 @@ export function registerAdjustmentFadeTests(quench) {
                 //     totalElapsedSeconds -= 5;
 
                 //     currentActor = testTokenDoc.actor;
-                //     currentActor.prepareData();
+                //     currentActor.reset();
 
                 //     assert.equal(
                 //         currentActor.system.characteristics.str.value,
@@ -612,7 +646,7 @@ export function registerAdjustmentFadeTests(quench) {
 
                 //         if (updatedActor) {
                 //             const liveActor = testTokenDoc.actor;
-                //             liveActor.prepareData();
+                //             liveActor.reset();
                 //         }
                 //     }
 
@@ -653,7 +687,7 @@ export function registerAdjustmentFadeTests(quench) {
 
                 //         // Always read directly from the live token proxy instance
                 //         const liveActor = testTokenDoc.actor;
-                //         liveActor.prepareData();
+                //         liveActor.reset();
                 //         currentActor = liveActor;
 
                 //         const currentSpd = currentActor.system.characteristics.spd.value;
@@ -725,7 +759,7 @@ export function registerAdjustmentFadeTests(quench) {
 
                 //         // Re-evaluate live proxy token instance data safely
                 //         const liveActor = testTokenDoc.actor;
-                //         liveActor.prepareData();
+                //         liveActor.reset();
                 //         currentActor = liveActor;
 
                 //         console.log(
@@ -746,7 +780,7 @@ export function registerAdjustmentFadeTests(quench) {
                 //         await game.time.advance(-1);
 
                 //         const liveActor = testTokenDoc.actor;
-                //         liveActor.prepareData();
+                //         liveActor.reset();
                 //         currentActor = liveActor;
 
                 //         console.log(
@@ -771,7 +805,7 @@ export function registerAdjustmentFadeTests(quench) {
                 //         totalElapsedSeconds++;
 
                 //         const liveActor = testTokenDoc.actor;
-                //         liveActor.prepareData();
+                //         liveActor.reset();
                 //         currentActor = liveActor;
 
                 //         console.log(
@@ -828,9 +862,9 @@ export function registerAdjustmentFadeTests(quench) {
                 //             assert.fail("Active canvas scene tokens collection is completely empty during step loops.");
                 //         }
 
-                //         // Proxy Actor Isolation: Call prepareData directly on the live proxy token instance
+                //         // Proxy Actor Isolation: Call reset directly on the live proxy token instance
                 //         const liveActor = testTokenDoc.actor;
-                //         liveActor.prepareData();
+                //         liveActor.reset();
                 //         currentActor = liveActor;
 
                 //         const currentSpd = currentActor.system.characteristics.spd.value;
@@ -876,7 +910,7 @@ export function registerAdjustmentFadeTests(quench) {
 
                 //     // Proxy Actor Isolation: Target the live canvas proxy instance directly
                 //     const actor = testTokenDoc.actor;
-                //     actor.prepareData();
+                //     actor.reset();
 
                 //     // Baseline Verification: Confirm base 5e SPD starts at 2
                 //     console.log(`[HERO-DEBUG-5E-LINEAR] Baseline SPD: ${actor.system.characteristics.spd.value}`);
@@ -885,7 +919,7 @@ export function registerAdjustmentFadeTests(quench) {
                 //     // ─── SECOND 0 ───
                 //     // Inject Dose 1: +8 Active Points. 5e Pools fractionally: +0.8 SPD. (2 + 0.8 = 2.8) -> Math.floor rounds to 2 SPD.
                 //     await applyMockAidValue(8);
-                //     actor.prepareData();
+                //     actor.reset();
                 //     console.log(
                 //         `[HERO-DEBUG-5E-LINEAR] Sec 0 | Added Dose 1 (8 AP) | Sheet SPD: ${actor.system.characteristics.spd.value}`,
                 //     );
@@ -897,7 +931,7 @@ export function registerAdjustmentFadeTests(quench) {
 
                 //     // ─── SECOND 1 ───
                 //     await stepTimeOneSecond(1);
-                //     actor.prepareData();
+                //     actor.reset();
                 //     console.log(
                 //         `[HERO-DEBUG-5E-LINEAR] Sec 1 | Ticked Forward | Sheet SPD: ${actor.system.characteristics.spd.value}`,
                 //     );
@@ -909,7 +943,7 @@ export function registerAdjustmentFadeTests(quench) {
 
                 //     // Inject Dose 2: +9 Active Points. Pool scales to: 8 + 9 = 17 AP (+1.7 SPD). (2 + 1.7 = 3.7) -> Floor rounds to 3 SPD.
                 //     await applyMockAidValue(9);
-                //     actor.prepareData();
+                //     actor.reset();
                 //     console.log(
                 //         `[HERO-DEBUG-5E-LINEAR] Sec 1 | Added Dose 2 (9 AP) | Sheet SPD: ${actor.system.characteristics.spd.value}`,
                 //     );
@@ -921,7 +955,7 @@ export function registerAdjustmentFadeTests(quench) {
 
                 //     // ─── SECOND 2 ───
                 //     await stepTimeOneSecond(1);
-                //     actor.prepareData();
+                //     actor.reset();
                 //     console.log(
                 //         `[HERO-DEBUG-5E-LINEAR] Sec 2 | Ticked Forward | Sheet SPD: ${actor.system.characteristics.spd.value}`,
                 //     );
@@ -933,7 +967,7 @@ export function registerAdjustmentFadeTests(quench) {
 
                 //     // Inject Dose 3: +10 Active Points. Pool scales to: 17 + 10 = 27 AP (+2.7 SPD). (2 + 2.7 = 4.7) -> Floor rounds to 4 SPD.
                 //     await applyMockAidValue(10);
-                //     actor.prepareData();
+                //     actor.reset();
                 //     console.log(
                 //         `[HERO-DEBUG-5E-LINEAR] Sec 2 | Added Dose 3 (10 AP) | Sheet SPD: ${actor.system.characteristics.spd.value}`,
                 //     );
@@ -947,7 +981,7 @@ export function registerAdjustmentFadeTests(quench) {
                 //     // March through the stable hold phase, ensuring the 4 SPD maximum cap holds cleanly
                 //     for (let sec = 3; sec <= 11; sec++) {
                 //         await stepTimeOneSecond(1);
-                //         actor.prepareData();
+                //         actor.reset();
                 //         console.log(
                 //             `[HERO-DEBUG-5E-LINEAR] Sec ${sec} | Hold Matrix Loop | Sheet SPD: ${actor.system.characteristics.spd.value}`,
                 //         );
@@ -961,7 +995,7 @@ export function registerAdjustmentFadeTests(quench) {
                 //     // ─── SECOND 12: CRITICAL SYSTEMIC DEGRADATION STEP ───
                 //     // Advance exactly 1 second securely via the async socket-aware helper
                 //     await stepTimeOneSecond(1);
-                //     actor.prepareData();
+                //     actor.reset();
                 //     console.log(
                 //         `[HERO-DEBUG-5E-LINEAR] Sec 12 | First Decay Tick (Pool: 22 AP) | Sheet SPD: ${actor.system.characteristics.spd.value}`,
                 //     );
@@ -974,7 +1008,7 @@ export function registerAdjustmentFadeTests(quench) {
                 //     // ─── SECOND 13: SEQUENTIAL FADE STEP (DOSE 2) ───
                 //     // Advance exactly 1 second to clear the onUpdateWorldTime socket threads
                 //     await stepTimeOneSecond(1);
-                //     actor.prepareData();
+                //     actor.reset();
                 //     console.log(
                 //         `[HERO-DEBUG-5E-LINEAR] Sec 13 | Second Decay Tick (Pool: 17 AP) | Sheet SPD: ${actor.system.characteristics.spd.value}`,
                 //     );
@@ -987,7 +1021,7 @@ export function registerAdjustmentFadeTests(quench) {
                 //     // ─── SECOND 14: SEQUENTIAL FADE STEP (DOSE 3) ───
                 //     // Advance exactly 1 second to ensure multi-client backend socket synchronization
                 //     await stepTimeOneSecond(1);
-                //     actor.prepareData();
+                //     actor.reset();
                 //     console.log(
                 //         `[HERO-DEBUG-5E-LINEAR] Sec 14 | Third Decay Tick (Pool: 12 AP) | Sheet SPD: ${actor.system.characteristics.spd.value}`,
                 //     );
