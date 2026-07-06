@@ -148,6 +148,27 @@ export function registerStatusEffectTests(quench) {
                     assert.ok(!quenchActor.statuses.has(effectsObj.stunEffect.id), "Stunned was dropped cleanly.");
                 });
 
+                it("Manual Toggle Flip Removes KnockedOut", async function () {
+                    // Token HUD and sheet toggles call toggleStatusEffect without an
+                    // explicit active flag; the second call must remove the status.
+                    let hookPromise = waitForHook("createActiveEffect");
+                    await quenchActor.toggleStatusEffect(effectsObj.knockedOutEffect.id);
+                    await hookPromise;
+                    assert.ok(quenchActor.statuses.has(effectsObj.knockedOutEffect.id), "KnockedOut applied via flip.");
+
+                    hookPromise = waitForHook("deleteActiveEffect");
+                    await quenchActor.toggleStatusEffect(effectsObj.knockedOutEffect.id);
+                    await hookPromise;
+                    assert.ok(
+                        !quenchActor.statuses.has(effectsObj.knockedOutEffect.id),
+                        "KnockedOut removed via flip.",
+                    );
+                    assert.ok(
+                        !quenchActor.effects.some((e) => e.statuses.has(effectsObj.knockedOutEffect.id)),
+                        "No lingering KnockedOut active effect.",
+                    );
+                });
+
                 it("Dead Cleans Up KnockedOut", async function () {
                     let hookPromise = waitForHook("createActiveEffect");
                     await quenchActor.toggleStatusEffect(effectsObj.knockedOutEffect.id, { active: true });
