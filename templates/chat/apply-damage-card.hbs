@@ -54,7 +54,13 @@
 
   <div class="card-section">
     <div class="description-tiny">Effect</div>
-    <div class="description-medium">{{ bodyDamageEffective }} BODY; {{ stunDamageEffective }} STUN</div>
+    <div class="description-medium">
+      {{#if damageBreakdown}}
+        <span title="{{damageBreakdown.body}}">{{ bodyDamageEffective }} BODY</span>; <span title="{{damageBreakdown.stun}}">{{ stunDamageEffective }} STUN</span>
+      {{else}}
+        {{ bodyDamageEffective }} BODY; {{ stunDamageEffective }} STUN
+      {{/if}}
+    </div>
     <div class="description-tiny">{{{ effects }}}</div>
   </div>
 
