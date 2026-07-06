@@ -237,6 +237,37 @@ export async function expireEffects(actor, expiresOn) {
 
     const adjustmentChatMessages = [];
 
+    // Deletes are batched (one deleteEmbeddedDocuments per parent) and expiry messages
+    // combined into one ChatMessage per actor, to keep time ticks quick.
+    const pendingDeletes = new Map();
+    const markForDeletion = (ae) => {
+        if (!pendingDeletes.has(ae.parent)) pendingDeletes.set(ae.parent, new Set());
+        pendingDeletes.get(ae.parent).add(ae.id);
+    };
+    const isMarkedForDeletion = (ae) => pendingDeletes.get(ae.parent)?.has(ae.id) ?? false;
+    const expiredCardHtmls = [];
+    const flushPendingWork = async () => {
+        for (const [parent, aeIds] of pendingDeletes) {
+            // A concurrent pass (rapid time advances) or performAdjustment may have already
+            // deleted some of these; deleting a missing id throws and would abort the batch.
+            const ids = Array.from(aeIds).filter((id) => parent.effects.has(id));
+            try {
+                if (ids.length > 0) await parent.deleteEmbeddedDocuments("ActiveEffect", ids);
+            } catch (e) {
+                console.error(`Failed to bulk delete expired effects on ${parent.uuid}: ${e.message}`);
+            }
+        }
+        if (expiredCardHtmls.length > 0) {
+            await ChatMessage.create({
+                content: expiredCardHtmls.join("<br>"),
+                speaker: ChatMessage.getSpeaker({
+                    actor,
+                    token: tokenEducatedGuess({ actor }),
+                }),
+            });
+        }
+    };
+
     // TODO: Move remaining sanity checks to HeroValidation
     for (const ae of temporaryEffects) {
         // We are expecting expiresOn flag
@@ -253,6 +284,7 @@ export async function expireEffects(actor, expiresOn) {
 
         if (!expiresOn) {
             console.error(`${actor?.name}/${ae?.name} is missing expiresOn`, ae);
+            await flushPendingWork();
             return;
         }
 
@@ -261,6 +293,7 @@ export async function expireEffects(actor, expiresOn) {
         }
 
         if (expiresOn.includes("segment") && aeExpiresOn?.includes("turn") && actor.inCombat) {
+            await flushPendingWork();
             return;
         }
 
@@ -305,8 +338,7 @@ export async function expireEffects(actor, expiresOn) {
                     ui.notifications.warn(
                         `The originating item ${ae.origin} of adjustment ${ae.name} appears to have been deleted. Deleting adjustment's active effect.`,
                     );
-                    // TODO: bulk delete all AE's at once, then take a second pass for HeroValidation
-                    await ae.delete();
+                    markForDeletion(ae);
                     break;
                 }
 
@@ -330,9 +362,7 @@ export async function expireEffects(actor, expiresOn) {
                 });
 
                 if (bodyValue === bodyMax) {
-                    // TODO: one ChatMessage per actor
-                    // TODO: bulk delete all AE's at once, then take a second pass for HeroValidation
-                    await ae.delete();
+                    markForDeletion(ae);
                     break;
                 }
             } else {
@@ -348,19 +378,13 @@ export async function expireEffects(actor, expiresOn) {
                 // May need to revisit and make exception for statuses (like prone/recovery)
 
                 if (ae.parent instanceof HeroSystem6eActor) {
-                    const cardHtml = `${ae.name.replace(/\d+ segments remaining/, "")} from ${ae.flags[game.system.id].source} has expired.`;
-                    const chatData = {
-                        //author: game.user._id,
-                        content: cardHtml,
-                        speaker: ChatMessage.getSpeaker({
-                            actor,
-                            token: tokenEducatedGuess({ actor }),
-                        }),
-                    };
-                    // TODO: one ChatMessage per actor
-                    await ChatMessage.create(chatData);
-                    // TODO: bulk delete all AE's at once, then take a second pass for HeroValidation
-                    await ae.delete();
+                    // Effects created outside this system may lack our flags; a throw here would
+                    // abort combat turn events (skipping PostSegment12) and leave the AE undeletable.
+                    const source = ae.flags[game.system.id]?.source ?? "an unknown source";
+                    expiredCardHtmls.push(
+                        `${ae.name.replace(/\d+ segments remaining/, "")} from ${source} has expired.`,
+                    );
+                    markForDeletion(ae);
                 }
                 break;
             }
@@ -370,8 +394,7 @@ export async function expireEffects(actor, expiresOn) {
                 // Sanity delete
                 if (ae.flags[game.system.id]?.adjustmentActivePoints === 0) {
                     console.error(`Sanity deleting ${ae.name}. Shouldn't need to do this.`);
-                    // TODO: bulk delete all AE's at once, then take a second pass for HeroValidation
-                    await ae.delete();
+                    markForDeletion(ae);
                     break;
                 }
 
@@ -386,13 +409,17 @@ export async function expireEffects(actor, expiresOn) {
             }
         }
 
+        // Effects awaiting bulk deletion still report persisted=true; skip cleanup & validation.
+        if (isMarkedForDeletion(ae)) continue;
+
         // Sanity (or cleanup) delete
         if (ae.persisted && !ae.XMLID && ae.statuses.size === 0 && ae.changes.length === 0) {
             // What can this AE possibly be good for, likely a leftover from an old system rev.
             console.error(
                 `Deleted ${ae.parent?.parent?.name}/${ae.parent?.name}/${ae.name} as it has no XMLID, statuses, or changes.`,
             );
-            await ae.delete();
+            markForDeletion(ae);
+            continue;
         }
 
         // If temporary effect is still active, check heroValidation
@@ -449,6 +476,8 @@ export async function expireEffects(actor, expiresOn) {
     }
 
     //delete window.expireEffects[actor.id];
+
+    await flushPendingWork();
 
     await renderAdjustmentChatCards(adjustmentChatMessages);
 }
