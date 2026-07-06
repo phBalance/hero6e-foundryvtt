@@ -584,6 +584,12 @@ function validatePowers() {
 
         const xmlid = xml.children[0].getAttribute("XMLID");
 
+        // Early out for Combat Maneuvers built with custom martial arts
+        if (xmlid === "MANEUVER" && power.type.includes("maneuver")) {
+            const custom = xml.children[0].getAttribute("CUSTOM");
+            if (custom === "Yes") return false;
+        }
+
         // For GENERIC_OBJECT make sure the tag matches the key
         if (xmlid === "GENERIC_OBJECT") {
             return xml.children[0].tagName !== power.key;
