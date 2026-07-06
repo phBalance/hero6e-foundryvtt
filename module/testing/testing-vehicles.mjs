@@ -515,6 +515,174 @@ export function registerVehicleTests(quench) {
                         expect(actor.is5e).to.be.true;
                     });
                 });
+
+                describe("6e vehicle SIZE changes on sheet", async function () {
+                    const contents = `
+                        <?xml version="1.0" encoding="UTF-16"?>
+                        <CHARACTER version="6.0" TEMPLATE="builtIn.Vehicle6E.hdt">
+                          <BASIC_CONFIGURATION BASE_POINTS="150" DISAD_POINTS="0" EXPERIENCE="0" RULES="Default" />
+                          <CHARACTER_INFO CHARACTER_NAME="TEST Size Change Vehicle" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                            <BACKGROUND />
+                            <PERSONALITY />
+                            <QUOTE />
+                            <TACTICS />
+                            <CAMPAIGN_USE />
+                            <APPEARANCE />
+                            <NOTES1 />
+                            <NOTES2 />
+                            <NOTES3 />
+                            <NOTES4 />
+                            <NOTES5 />
+                          </CHARACTER_INFO>
+                          <CHARACTERISTICS>
+                            <SIZE XMLID="SIZE" ID="1764554705399" BASECOST="0.0" LEVELS="1" ALIAS="Size" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                              <NOTES />
+                            </SIZE>
+                            <STR XMLID="STR" ID="1764554705302" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                              <NOTES />
+                            </STR>
+                            <BODY XMLID="BODY" ID="1764554705292" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                              <NOTES />
+                            </BODY>
+                          </CHARACTERISTICS>
+                          <SKILLS />
+                          <PERKS />
+                          <TALENTS />
+                          <MARTIALARTS />
+                          <POWERS />
+                          <DISADVANTAGES />
+                          <EQUIPMENT />
+                        </CHARACTER>
+                    `;
+
+                    let actor;
+
+                    const sizeEffect = () =>
+                        actor.effects.find(
+                            (effect) => effect.name?.includes("size") && effect.flags[game.system.id]?.size === true,
+                        );
+                    const sizeEffectChanges = () => {
+                        const effect = sizeEffect();
+                        return effect?.system?.changes ?? effect?.changes ?? [];
+                    };
+                    const strChangeValue = () =>
+                        parseInt(sizeEffectChanges().find((c) => c.key === "system.characteristics.str.max")?.value);
+
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false, actorType: "vehicle" });
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("should start with a size 1 effect", function () {
+                        expect(sizeEffect()?.name).to.equal("size1");
+                        expect(strChangeValue()).to.equal(5);
+                        expect(actor.system.characteristics.str.max).to.equal(15);
+                        expect(actor.system.characteristics.body.max).to.equal(11);
+                    });
+
+                    it("should apply derived changes immediately when SIZE is increased", async function () {
+                        await actor.update({ "system.characteristics.size.value": 2 });
+                        expect(sizeEffect()?.name).to.equal("size2");
+                        expect(strChangeValue()).to.equal(10);
+                        expect(actor.system.characteristics.str.max).to.equal(20);
+                        expect(actor.system.characteristics.body.max).to.equal(12);
+                    });
+
+                    it("should apply derived changes immediately when SIZE is decreased back", async function () {
+                        await actor.update({ "system.characteristics.size.value": 1 });
+                        expect(sizeEffect()?.name).to.equal("size1");
+                        expect(strChangeValue()).to.equal(5);
+                        expect(actor.system.characteristics.str.max).to.equal(15);
+                        expect(actor.system.characteristics.body.max).to.equal(11);
+                    });
+                });
+
+                describe("5e vehicle SIZE changes on sheet", async function () {
+                    const contents = `
+                        <?xml version="1.0" encoding="UTF-16"?>
+                        <CHARACTER version="6.0" TEMPLATE="builtIn.Vehicle.hdt">
+                            <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
+                            <CHARACTER_INFO CHARACTER_NAME="5e TEST Size Change Vehicle" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                                <BACKGROUND />
+                                <PERSONALITY />
+                                <QUOTE />
+                                <TACTICS />
+                                <CAMPAIGN_USE />
+                                <APPEARANCE />
+                                <NOTES1 />
+                                <NOTES2 />
+                                <NOTES3 />
+                                <NOTES4 />
+                                <NOTES5 />
+                            </CHARACTER_INFO>
+                            <CHARACTERISTICS>
+                                <SIZE XMLID="SIZE" ID="1766364915406" BASECOST="0.0" LEVELS="1" ALIAS="Size" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </SIZE>
+                                <STR XMLID="STR" ID="1766364915761" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </STR>
+                                <BODY XMLID="BODY" ID="1766364915650" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                                <NOTES />
+                                </BODY>
+                            </CHARACTERISTICS>
+                            <SKILLS />
+                            <PERKS />
+                            <TALENTS />
+                            <MARTIALARTS />
+                            <POWERS />
+                            <DISADVANTAGES />
+                            <EQUIPMENT />
+                        </CHARACTER>
+                    `;
+
+                    let actor;
+
+                    const sizeEffect = () =>
+                        actor.effects.find(
+                            (effect) => effect.name?.includes("size") && effect.flags[game.system.id]?.size === true,
+                        );
+                    const sizeEffectChanges = () => {
+                        const effect = sizeEffect();
+                        return effect?.system?.changes ?? effect?.changes ?? [];
+                    };
+                    const strChangeValue = () =>
+                        parseInt(sizeEffectChanges().find((c) => c.key === "system.characteristics.str.max")?.value);
+
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true, actorType: "vehicle" });
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("should start with a size 1 effect", function () {
+                        expect(sizeEffect()?.name).to.equal("size1");
+                        expect(strChangeValue()).to.equal(5);
+                        expect(actor.system.characteristics.str.max).to.equal(15);
+                        expect(actor.system.characteristics.body.max).to.equal(11);
+                    });
+
+                    it("should apply derived changes immediately when SIZE is increased", async function () {
+                        await actor.update({ "system.characteristics.size.value": 2 });
+                        expect(sizeEffect()?.name).to.equal("size2");
+                        expect(strChangeValue()).to.equal(10);
+                        expect(actor.system.characteristics.str.max).to.equal(20);
+                        expect(actor.system.characteristics.body.max).to.equal(12);
+                    });
+
+                    it("should apply derived changes immediately when SIZE is decreased back", async function () {
+                        await actor.update({ "system.characteristics.size.value": 1 });
+                        expect(sizeEffect()?.name).to.equal("size1");
+                        expect(strChangeValue()).to.equal(5);
+                        expect(actor.system.characteristics.str.max).to.equal(15);
+                        expect(actor.system.characteristics.body.max).to.equal(11);
+                    });
+                });
             });
         },
         { displayName: "HERO: Vehicle" },
