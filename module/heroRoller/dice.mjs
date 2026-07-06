@@ -1782,7 +1782,11 @@ export class HeroRoller {
                 return "";
 
             case HeroRoller.ROLL_TYPE.KILLING:
-                return "STUN";
+                // Make it clear where the STUN multiple came from (hit location STUNx replaces the STUNx roll)
+                if (this._useHitLocation) {
+                    return `STUN (BODY x${this._hitLocation.stunMultiplier} ${this._hitLocation.name} STUNx)`;
+                }
+                return `STUN (BODY x${this.getBaseMultiplier()} STUNx)`;
 
             case HeroRoller.ROLL_TYPE.ENTANGLE:
             case HeroRoller.ROLL_TYPE.NORMAL:
