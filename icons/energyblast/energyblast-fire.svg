@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" data-name="Layer 1" viewBox="0 109 512 294" x="0px" y="0px" width="512" height="512">
+  <defs>
+    <!-- 
+      The linearGradient vector defines the fire spectrum layout:
+      x1/y1 to x2/y2 dictates a diagonal top-left to bottom-right flow.
+    -->
+    <linearGradient id="fireGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f97316" />   <!-- Flare Orange -->
+      <stop offset="50%" stop-color="#b91c1c" />  <!-- Magma Crimson -->
+      <stop offset="100%" stop-color="#450a0a" /> <!-- Volcanic Black-Red -->
+    </linearGradient>
+  </defs>
+<g style="fill:url(#fireGradient);fill-opacity:1;stroke:#000000;stroke-width:8;stroke-opacity:0.9;stroke-dasharray:none"> 
+<path d="M250.98,291.184l-5.68,1.9a6.994,6.994,0,1,1-4.434-13.267l5.68-1.881A33.813,33.813,0,0,0,267.6,257.693L270.142,251H219v27.684C219,293.476,230.958,306,245.75,306h46.88l-12.946-40.7A47.407,47.407,0,0,1,250.98,291.184Z"/><path d="M25.41,182.017a21.936,21.936,0,0,0,19.25,21.644L110,211.7V152.34l-65.281,8.037A21.988,21.988,0,0,0,25.41,182.017Z"/><path d="M453.688,141.873,379.272,130.63A601.075,601.075,0,0,0,288.809,124H124V237H288.809a601.43,601.43,0,0,0,90.463-6.93l18.258-2.851a6.975,6.975,0,0,1,6.117-.934l50.041-7.64a38.822,38.822,0,0,0,0-76.772Z"/><path d="M396.809,241.462l-15.424,2.325a615.428,615.428,0,0,1-91.543,6.957l35.34,110.318A38.75,38.75,0,0,0,362.409,388h26.279a38.713,38.713,0,0,0,37.327-50.209Z"/></g></svg>
+
+<!-- noun-blaster-2607287.svg, Created by Kiran Shastr, from the Noun Project</text>-->

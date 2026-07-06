@@ -1272,9 +1272,12 @@ async function doSingleTargetActionToHit(action, options) {
     };
     options.rolledResult = targetData;
 
-    const allInOneToHitDamageApply = true;
-    // game.settings.get(game.system.id, "alphaTesting") &&
-    // game.settings.get(game.system.id, "allInOneToHitDamageApply");
+    // Use new All In One for most stuff.
+    // MINDSCAN not working.
+    // JOINT BREAK not working because it does KILLING not a STRIKE
+    // Review CHOKE and martial NNDs.
+    const allInOneToHitDamageApply =
+        item.attackDefenseVs !== "MD" && !(item.attackDefenseVs === "NND" && item.isKilling);
 
     // render card
     const template = isBlockManeuver

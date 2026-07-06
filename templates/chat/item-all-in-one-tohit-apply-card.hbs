@@ -59,7 +59,6 @@
                             </span>
                         </div>
                     </div> --}}
-                    {{log target.result}}
                     
 
                     <details class="hero6e-to-hit-details" 
@@ -223,7 +222,7 @@
             {{/if}}
         {{/each}} --}}
     {{else}}
-        <div data-visibility="{{actor.id}}">
+        <div data-visibility="{{attackerActorId}}">
             {{!-- <button class="roll-damage" data-actor-uuid="{{actor.uuid}}" data-item-json-str="{{itemJsonStr}}" data-aim="{{aim}}" data-aim-side="{{aimSide}}"
                 data-action-data="{{actionData}}"
                 data-effectiveStr="{{effectiveStr}}" data-effective-levels="{{effectiveLevels}}" data-target-ids="{{targetIds}}" data-velocity="{{velocity}}" 
