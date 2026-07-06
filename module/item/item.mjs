@@ -4272,6 +4272,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 if (this.system.DAMAGETYPE === 0) {
                     results.usesStrength = false;
                 }
+                if (
+                    this.system.EFFECT.match(/\[STRDC\]/) ||
+                    this.system.EFFECT.match(/\[NORMALDC\]/) ||
+                    this.system.EFFECT.match(/\[KILLINGDC\]/)
+                ) {
+                    results.usesStrength = true;
+                }
             } else if (
                 this.system.EFFECT &&
                 (this.system.EFFECT.search(/\[FLASHDC\]/) > -1 || this.system.EFFECT.search(/\[NNDDC\]/) > -1)
