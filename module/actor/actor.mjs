@@ -698,6 +698,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const effectsObj = HeroSystem6eActorActiveEffects.statusEffectsObj;
         const overlayEffects = [effectsObj.deadEffect.id, effectsObj.knockedOutEffect.id, effectsObj.stunEffect.id];
 
+        // Core treats undefined as "flip current state" (token HUD toggles); the state
+        // machine below needs a concrete boolean or removal pre-deletes the effect and
+        // core immediately recreates it.
+        active ??= !this.statuses.has(statusId);
+
         // 1. Force overlay status based on config
         if (overlayEffects.includes(statusId)) overlay = true;
 
@@ -737,11 +742,17 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (finalProne && !this.statuses.has(effectsObj.proneEffect.id)) {
             effectsToCreate.push(effectsObj.proneEffect);
         }
-        if (!finalStun && this.statuses.has(effectsObj.stunEffect.id)) {
+        // Cascade removals only; the toggled status itself belongs to super.toggleStatusEffect,
+        // which also owns its return value semantics.
+        if (!finalStun && statusId !== effectsObj.stunEffect.id && this.statuses.has(effectsObj.stunEffect.id)) {
             const stunAE = this.effects.find((e) => e.statuses.has(effectsObj.stunEffect.id));
             if (stunAE) effectsToDelete.push(stunAE.id);
         }
-        if (!finalKO && this.statuses.has(effectsObj.knockedOutEffect.id)) {
+        if (
+            !finalKO &&
+            statusId !== effectsObj.knockedOutEffect.id &&
+            this.statuses.has(effectsObj.knockedOutEffect.id)
+        ) {
             const koAE = this.effects.find((e) => e.statuses.has(effectsObj.knockedOutEffect.id));
             if (koAE) effectsToDelete.push(koAE.id);
         }
