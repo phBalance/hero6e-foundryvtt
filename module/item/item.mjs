@@ -285,6 +285,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // assign a default image
+        // TODO: When item type or SFX changes, should probably change img
         if (!data.img || data.img === "icons/svg/item-bag.svg") {
             if (this.system.XMLID === "COMPOUNDPOWER") {
                 return this.updateSource({ img: "icons/svg/chest.svg" });
@@ -299,10 +300,42 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 return this.updateSource({ img: "icons/svg/chest.svg" });
             }
             if (itemTypeToIcon[this.type]) {
-                const img =
+                let img =
                     game.system?.id && this.type == "martialart"
                         ? `systems/${game.system.id}/icons/noun-martial-art-5105444.svg`
                         : itemTypeToIcon[this.type];
+
+                // Custom Img based on XMLID
+                switch (this.system.XMLID) {
+                    // SFX with multiple files go first
+                    case "ENERGYBLAST":
+                        switch (this.system.SFX) {
+                            case "Fire/Heat":
+                                img = `systems/${game.system.id}/icons/${this.system.XMLID.toLowerCase()}/${this.system.XMLID.toLowerCase()}-fire.svg`;
+                                break;
+                            default:
+                                img = `systems/${game.system.id}/icons/${this.system.XMLID.toLowerCase()}/${this.system.XMLID.toLowerCase()}.svg`;
+                                break;
+                        }
+                        break;
+
+                    // The rest use a common pattern
+
+                    case "HEALING":
+                    case "HKA":
+                    case "RKA":
+                    case "TELEKINESIS":
+                        switch (this.system.SFX) {
+                            default:
+                                img = `systems/${game.system.id}/icons/${this.system.XMLID.toLowerCase()}/${this.system.XMLID.toLowerCase()}.svg`;
+                                break;
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+
                 this.updateSource({ img });
             }
         }
@@ -5188,6 +5221,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return this.system.XMLID === "ENTANGLE";
     }
 
+    get isGrab() {
+        return this.maneuverHasTrait("GRAB");
+    }
+
     get isTransform() {
         return this.system.XMLID === "TRANSFORM";
     }
@@ -6027,6 +6064,30 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     get effectiveAttackItem() {
         return this.system._active.maWeaponItem || this.system._active.__baseAttackItem || this;
     }
+
+    /**
+     * Checks if a maneuver item contains a specific mechanical trait string within its system effect text field.
+     * HSMartialArts PDF page 94 has most of the traits.
+     *
+     * @param {string} effectText - The effect string associated with a maneuver (maps to raw 'EFFECT').
+     * @param {string} trait - The trait key phrase to search for (e.g., "[FLASHDC]", "block", "grab").
+     * @returns {boolean} True if the trait is present in the text field.
+     */
+    maneuverHasTrait = function (trait) {
+        const effectText = this.system.WEAPONEFFECT || this.system.EFFECT;
+        if (!effectText || !trait) return false;
+
+        // GRAB vs GRAB WEAPON special handling
+        if (trait.toUpperCase() === "GRAB") {
+            if (effectText.toUpperCase().includes("MUST")) {
+                return false;
+            }
+            return effectText.toUpperCase().includes("GRAB") && !effectText.toUpperCase().includes("GRAB WEAPON");
+        }
+
+        // Convert both strings to standard uppercase to ensure a robust case-insensitive check
+        return effectText.toUpperCase().includes(trait.toUpperCase());
+    };
 
     /**
      * Add advantages from itemFrom to this item

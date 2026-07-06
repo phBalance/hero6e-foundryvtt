@@ -3,6 +3,7 @@
 ### Version 4.3.15 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Add support for variable activation rolls. Variable skills should be separated with " or " (e.g. "breakfall or acrobatics") in the HDC "roll" input (5e) or "comments" input (6e). [#3873](https://github.com/dmdorman/hero6e-foundryvtt/issues/3873)
+- Most attacks show a collapsed chat message. When Heroic Action Points (HAP) are enabled you can spend HAPs and turn a miss into a hit. [#2166](https://github.com/dmdorman/hero6e-foundryvtt/issues/2166) [#3052](https://github.com/dmdorman/hero6e-foundryvtt/issues/3052) [#1978](https://github.com/dmdorman/hero6e-foundryvtt/issues/1978) [#1646](https://github.com/dmdorman/hero6e-foundryvtt/issues/1646)
 
 ### Version 4.3.14 20260629
 

@@ -1268,12 +1268,16 @@ async function doSingleTargetActionToHit(action, options) {
         //action,
         inActiveCombat: token?.inCombat,
         _itemPostHitActionString: itemPostHitActionString(item),
+        hapsEnabled: game.settings.get(game.system.id, "HAP"),
     };
     options.rolledResult = targetData;
 
+    // Use new All In One for most stuff.
+    // MINDSCAN not working.
+    // JOINT BREAK not working because it does KILLING not a STRIKE
+    // Review CHOKE and martial NNDs.
     const allInOneToHitDamageApply =
-        game.settings.get(game.system.id, "alphaTesting") &&
-        game.settings.get(game.system.id, "allInOneToHitDamageApply");
+        item.attackDefenseVs !== "MD" && !(item.attackDefenseVs === "NND" && item.isKilling);
 
     // render card
     const template = isBlockManeuver
@@ -1538,32 +1542,9 @@ export function getAttackTags(item) {
         }
     }
 
-    /**
-     * Checks if a maneuver item contains a specific mechanical trait string within its system effect text field.
-     * HSMartialArts PDF page 94 has most of the traits.
-     *
-     * @param {string} effectText - The effect string associated with a maneuver (maps to raw 'EFFECT').
-     * @param {string} trait - The trait key phrase to search for (e.g., "[FLASHDC]", "block", "grab").
-     * @returns {boolean} True if the trait is present in the text field.
-     */
-    const maneuverHasTrait = function (effectText, trait) {
-        if (!effectText || !trait) return false;
-
-        // Convert both strings to standard uppercase to ensure a robust case-insensitive check
-        return effectText.toUpperCase().indexOf(trait.toUpperCase()) > -1;
-    };
-
-    // MartialArt EFFECT gets lost with effectiveAttackItem #4426
-    // PH: FIXME: need to consider WEAPONEFFECT too.
-    const effectText =
-        effectiveAttackItem.system.WEAPONEFFECT ||
-        effectiveAttackItem.system.EFFECT ||
-        item.system.WEAPONEFFECT ||
-        item.system.EFFECT;
-
     // ABORT
     //if (maneuverCanBeAbortedTo(effectText)) {
-    if (maneuverHasTrait(effectText, "ABORT")) {
+    if (item.maneuverHasTrait("ABORT")) {
         attackTags.push({
             name: `ABORT`,
             title: `You can abort to maneuver`,
@@ -1571,7 +1552,7 @@ export function getAttackTags(item) {
     }
 
     // BIND
-    if (maneuverHasTrait(effectText, "BIND")) {
+    if (item.maneuverHasTrait("BIND")) {
         attackTags.push({
             name: `BIND`,
             title: `Bind enemy weapon`,
@@ -1579,7 +1560,7 @@ export function getAttackTags(item) {
     }
 
     // BLOCK
-    if (maneuverHasTrait(effectText, "BLOCK")) {
+    if (item.maneuverHasTrait("BLOCK")) {
         attackTags.push({
             name: `BLOCK`,
             title: `Block instead of Strike. Abort is free.`,
@@ -1587,14 +1568,14 @@ export function getAttackTags(item) {
     }
 
     // DISABLE
-    if (maneuverHasTrait(effectText, "DISABLE")) {
+    if (item.maneuverHasTrait("DISABLE")) {
         attackTags.push({
             name: `DISABLE`,
             title: `Disable a limb`,
         });
     }
     // DISARM
-    if (maneuverHasTrait(effectText, "DISARM")) {
+    if (item.maneuverHasTrait("DISARM")) {
         // Remove any previous DISARM as it is likely very generic
         const disarmIndex = attackTags.findIndex((tag) => tag.name === "DISARM");
         if (disarmIndex > -1) {
@@ -1614,7 +1595,7 @@ export function getAttackTags(item) {
     }
 
     // DODGE
-    if (maneuverHasTrait(effectText, "DODGE")) {
+    if (item.maneuverHasTrait("DODGE")) {
         attackTags.push({
             name: `DODGE`,
             title: `Dodge instead of Strike. Abort is free.`,
@@ -1623,14 +1604,14 @@ export function getAttackTags(item) {
 
     // FALL
     //if (maneuverHasAttackerFallsTrait(effectiveAttackItem)) {
-    if (maneuverHasTrait(effectText, "YOU FALL")) {
+    if (item.maneuverHasTrait("YOU FALL")) {
         attackTags.push({
             name: `YOU FALL`,
             title: `Attacker automatically falls down.`,
         });
     }
     //if (maneuverHasTargetFallsTrait(effectiveAttackItem)) {
-    if (maneuverHasTrait(effectText, "TARGET FALLS")) {
+    if (item.maneuverHasTrait("TARGET FALLS")) {
         attackTags.push({
             name: `TARGET FALLS`,
             title: `Target falls prone as if thrown`,
@@ -1642,7 +1623,7 @@ export function getAttackTags(item) {
     //       In Maneuver listings, this Basis is indicated by
     //       use of the phrase, "[Sense] Group Flash __d6"
     //       You can buy additional sense groups, but unclear how that is formatted.
-    if (maneuverHasTrait(effectText, "[FLASHDC]")) {
+    if (item.maneuverHasTrait("[FLASHDC]")) {
         const senseGroup = effectiveAttackItem.system.INPUT || item.system.INPUT;
         attackTags.push({
             name: `${senseGroup ? `${senseGroup} Group Flash` : "Flash"}`,
@@ -1651,7 +1632,7 @@ export function getAttackTags(item) {
     }
 
     // FMOVE
-    if (maneuverHasTrait(effectText, "FMOVE")) {
+    if (item.maneuverHasTrait("FMOVE")) {
         attackTags.push({
             name: `FMOVE`,
             title: `Can attack after Full Move`,
@@ -1659,7 +1640,7 @@ export function getAttackTags(item) {
     }
 
     // FOLLOW
-    if (maneuverHasTrait(effectText, "MUST FOLLOW")) {
+    if (item.maneuverHasTrait("MUST FOLLOW")) {
         const extractMustFollowTarget = function (effectText) {
             if (!effectText) return null;
 
@@ -1671,7 +1652,7 @@ export function getAttackTags(item) {
             return match ? match[1].trim() : null;
         };
 
-        const mustFollowTarget = extractMustFollowTarget(effectText);
+        const mustFollowTarget = extractMustFollowTarget(item.system.WEAPONEFFECT || item.system.EFFECT);
 
         attackTags.push({
             name: `Must Follow ${mustFollowTarget?.toUpperCase()}`,
@@ -1679,16 +1660,8 @@ export function getAttackTags(item) {
         });
     }
 
-    // GRAB WEAPON
-    if (maneuverHasTrait(effectText, "GRAB WEAPON")) {
-        attackTags.push({
-            name: `GRAB WEAPON`,
-            title: `Grab a target. If successful you may attempt to disarm them.`,
-        });
-    }
-
     // GRAB OPPONENT
-    else if (maneuverHasTrait(effectText, "GRAB")) {
+    if (item.maneuverHasTrait("GRAB")) {
         const extractGrabTarget = function (effectText) {
             if (!effectText) return null;
 
@@ -1699,15 +1672,23 @@ export function getAttackTags(item) {
             // If a match is found, return the trimmed capturing group contents
             return match ? match[1].trim() : null;
         };
-        const grabTarget = extractGrabTarget(effectText);
+        const grabTarget = extractGrabTarget(item.system.WEAPONEFFECT || item.system.EFFECT);
         attackTags.push({
             name: `GRAB ${grabTarget?.toUpperCase()}`,
             title: `Grab a target. If successful you may squeeze, slam or throw.`,
         });
     }
 
+    // GRAB WEAPON
+    if (item.maneuverHasTrait("GRAB WEAPON")) {
+        attackTags.push({
+            name: `GRAB WEAPON`,
+            title: `Grab a target. If successful you may attempt to disarm them.`,
+        });
+    }
+
     // HALF MOVE REQUIRED
-    if (maneuverHasTrait(effectText, "HALF MOVE REQUIRED")) {
+    if (item.maneuverHasTrait("HALF MOVE REQUIRED")) {
         attackTags.push({
             name: `HALF MOVE REQUIRED`,
             title: `This maneuver must follow a half move`,
@@ -1721,7 +1702,7 @@ export function getAttackTags(item) {
     // N-DAMAGE (this is normal damage and shown elsewhere)
 
     // NND DMG
-    if (maneuverHasTrait(effectText, "[NNDDC]")) {
+    if (item.maneuverHasTrait("[NNDDC]")) {
         // Remove any previous NND as it is likely very generic
         const nndIndex = attackTags.findIndex((tag) => tag.name === "NND");
         if (nndIndex > -1) {
@@ -1740,7 +1721,7 @@ export function getAttackTags(item) {
     // HeroSystem's Trip maneuver is generically described as "Knock a target to the ground, making him Prone"
     // This causes PRONE to mistakenly match, a migration fixes this using
     // the proper trait of "Target Falls".
-    if (maneuverHasTrait(effectText, "PRONE") && item.system.XMLID !== "TRIP") {
+    if (item.maneuverHasTrait("PRONE") && item.system.XMLID !== "TRIP") {
         attackTags.push({
             name: `PRONE`,
             title: `Target is required to be prone before maneuver can be used`,
@@ -1748,7 +1729,7 @@ export function getAttackTags(item) {
     }
 
     // REQUIRES BOTH HANDS
-    if (maneuverHasTrait(effectText, "BOTH HANDS")) {
+    if (item.maneuverHasTrait("BOTH HANDS")) {
         attackTags.push({
             name: `PRONE`,
             title: `Must have both hands free before using this maneuver`,
@@ -1758,7 +1739,7 @@ export function getAttackTags(item) {
     // REQUIRES OBJECT/CONDITION (not sure how to implement)
 
     // RESPONSE (Need example of this one, likely does not match, does nothing)
-    if (maneuverHasTrait(effectText, "CAN ONLY BE USED AFTER")) {
+    if (item.maneuverHasTrait("CAN ONLY BE USED AFTER")) {
         const extractResponseTarget = function (effectText) {
             if (!effectText) return null;
 
@@ -1770,7 +1751,7 @@ export function getAttackTags(item) {
             return match ? match[1].trim() : null;
         };
 
-        const responseTarget = extractResponseTarget(effectText);
+        const responseTarget = extractResponseTarget(item.system.WEAPONEFFECT || item.system.EFFECT);
         attackTags.push({
             name: `Can Only Be Used After ${responseTarget?.toUpperCase()}`,
             title: `Can only be used following a successful ${responseTarget?.toUpperCase()} maneuver`,
@@ -1780,7 +1761,7 @@ export function getAttackTags(item) {
     // STRIKE (this is standard damage and shown elsewhere)
 
     // TAKE FULL DMG  (not sure how to implement)
-    if (maneuverHasTrait(effectText, "ATTACKER TAKES")) {
+    if (item.maneuverHasTrait("ATTACKER TAKES")) {
         const extractAttackerDamageModifier = function (effectText) {
             if (!effectText) return null;
 
@@ -1793,7 +1774,7 @@ export function getAttackTags(item) {
         };
 
         // Execution pattern matching your architecture requirements
-        const attackerDamageModifier = extractAttackerDamageModifier(effectText);
+        const attackerDamageModifier = extractAttackerDamageModifier(item.system.WEAPONEFFECT || item.system.EFFECT);
         attackTags.push({
             name: `Attacker Takes ${attackerDamageModifier} Damage`,
             title: `Attacker takes damage if collision takes place`,
@@ -2438,12 +2419,6 @@ export async function _onRollDamage(event) {
 
     const toHitData = foundry.utils.mergeObject({ ...button.dataset }, message.flags[game.system.id]);
 
-    // toHitData.actionData ??= message.getFlag(game.system.id, "actionData");
-    // toHitData.actorUuid ||= message.getFlag(game.system.id, "actorUuid");
-    // toHitData.itemJsonStr ??= message.getFlag(game.system.id, "itemJsonStr");
-    // toHitData.targetEntangle ??= message.getFlag(game.system.id, "targetEntangle");
-    // toHitData.targetIds ??= message.getFlag(game.system.id, "targetIds");
-
     // PH: FIXME: This is now included in the action data and this can be cleaned up
     let { actor, item } = rehydrateActorAndAttackItem(toHitData);
     item ??= rehydrateAttackItem(message.getFlag(game.system.id, "itemJsonStr"), actor).item;
@@ -2451,6 +2426,14 @@ export async function _onRollDamage(event) {
 
     if (!item || !actor) {
         return ui.notifications.error(`Attack details are no longer available.`);
+    }
+
+    // Squeeze overrides from GRAB workflow
+    if (toHitData.grabAction === "squeeze") {
+        item = actor.items.find((i) => i.system.XMLID === "STRIKE");
+        if (!item) {
+            throw new Error(`Unable to find STRIKE`);
+        }
     }
 
     const action = actionFromJSON(toHitData.actionData);
@@ -2476,8 +2459,10 @@ export async function _onRollDamage(event) {
     const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting;
     const isKilling = item.effectiveAttackItem.doesKillingDamage;
     const isEntangle = item.effectiveAttackItem.isEntangle;
+    const isGrab = item.maneuverHasTrait("GRAB");
     const isEffectBasedAttack = item.effectiveAttackItem.isEffectBased;
-    const isNormalAttack = !isEntangle && !isSenseAffecting && !isAdjustment && !isEffectBasedAttack && !isKilling;
+    const isNormalAttack =
+        !isEntangle && !isSenseAffecting && !isAdjustment && !isEffectBasedAttack && !isKilling && !isGrab;
     const isKillingAttack = !isEntangle && !isSenseAffecting && !isAdjustment && !isEffectBasedAttack && isKilling;
 
     const increasedMultiplierLevels = parseInt(
@@ -2517,7 +2502,7 @@ export async function _onRollDamage(event) {
         )
         .makeAdjustmentRoll(isAdjustment)
         .makeFlashRoll(isSenseAffecting)
-        .makeEntangleRoll(isEntangle)
+        .makeEntangleRoll(isEntangle || isGrab)
         .makeEffectRoll(isEffectBasedAttack)
         .addStunMultiplier(increasedMultiplierLevels - decreasedMultiplierLevels)
         .addDice(diceParts.d6Count >= 1 ? diceParts.d6Count : 0)
@@ -2564,30 +2549,6 @@ export async function _onRollDamage(event) {
         }
     }
 
-    // tokens we missed, still show them (blurred, perhaps future HAP)
-    // for (const target of action.current.attacks?.[0]?.targets ?? []) {
-    //     if (!targetTokens.find((t) => t.tokenId === target.targetId)) {
-    //         const tokenDocument = canvas.scene.tokens.get(target.targetId);
-    //         if (tokenDocument) {
-    //             const entangleAE = tokenDocument.actor?.temporaryEffects?.find(
-    //                 (o) => o.flags[game.system.id]?.XMLID === "ENTANGLE",
-    //             );
-    //             const missedToken = {
-    //                 tokenId: tokenDocument.id,
-    //                 tokenUuid: tokenDocument.uuid,
-    //                 name: tokenDocument.name,
-    //                 subTarget:
-    //                     toHitData.targetEntangle && entangleAE
-    //                         ? `${tokenDocument.name} [${entangleAE.flags[game.system.id]?.XMLID}]`
-    //                         : null,
-    //                 targetEntangle: !!toHitData.targetEntangle,
-    //                 missed: true,
-    //             };
-    //             targetTokens.push(missedToken);
-    //         }
-    //     }
-    // }
-
     // Kludge for SIMPLIFIED HEALING
     const isSimpleHealing =
         item.effectiveAttackItem.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i);
@@ -2621,6 +2582,7 @@ export async function _onRollDamage(event) {
         attackTags: getAttackTags(item),
         targetTokens: targetTokens,
         actionDataJSON: actionToJSON(action),
+        possibleGrabActions: ["squeeze", "slam", "throw"],
     };
 
     // render card
@@ -2634,6 +2596,9 @@ export async function _onRollDamage(event) {
         author: game.user._id,
         content: cardHtml,
         speaker: speaker,
+        flags: {
+            [game.system.id]: message.flags[game.system.id],
+        },
     };
 
     await ChatMessage.create(chatData);
