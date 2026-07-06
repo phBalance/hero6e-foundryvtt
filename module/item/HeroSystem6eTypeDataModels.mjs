@@ -1362,6 +1362,12 @@ export class HeroSystem6eItemManeuver extends HeroSystem6eItemTypeDataModelGette
             WEAPONEFFECT: new StringField(),
             XMLID: new StringField(),
 
+            // Trying to make combat maneuver more like martial arts
+            CATEGORY: new StringField(),
+            CUSTOM: new StringField(),
+            DAMAGETYPE: new StringField(),
+            MAXSTR: new HeroNumberField({ initial: 0, nullable: false }),
+
             // NOTE: These don't exist in the HDC XML (because maneuvers aren't in there). We do
             //       need them, because we can copy advantages from Hand-to-Hand attacks.
             ADDER: new ArrayField(new EmbeddedDataField(HeroAdderModel)),

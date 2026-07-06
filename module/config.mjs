@@ -2216,6 +2216,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
             doesKillingDamage: maneuverDoesKillingDamage,
+            xml: `<MANEUVER XMLID="MANEUVER" ID="1783318998398" BASECOST="3.0" LEVELS="0" ALIAS="Grab" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1783306109614" NAME="" CUSTOM="Yes" CATEGORY="Hand to Hand" DISPLAY="Custom Maneuver" OCV="-1" DCV="-2" DC="0" PHASE="1/2" EFFECT="Grab Two Limbs, [STRDC] for holding on" ADDSTR="Yes" ACTIVECOST="0" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Grab Two Limbs, [STRDC] for holding on"></MANEUVER>`,
         },
         {
             maneuverDesc: {
@@ -2700,6 +2701,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
             doesKillingDamage: maneuverDoesKillingDamage,
+            xml: `<MANEUVER XMLID="MANEUVER" ID="1783319859335" BASECOST="3.0" LEVELS="0" ALIAS="Strike" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1783306109614" NAME="" CUSTOM="Yes" CATEGORY="Hand to Hand" DISPLAY="Custom Maneuver" OCV="+0" DCV="+0" DC="0" PHASE="1/2" EFFECT="[NORMALDC] Strike" ADDSTR="Yes" ACTIVECOST="0" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="[NORMALDC] Strike"></MANEUVER>`,
         },
         {},
     );
@@ -2812,7 +2814,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 phase: "1/2",
                 ocv: "-1",
                 dcv: "-2",
-                effects: "Target Falls",
+                effects: "Knock a target to the ground, making him Prone",
                 dc: "0",
                 attack: true,
                 addStr: false,
@@ -2820,6 +2822,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
             doesKillingDamage: maneuverDoesKillingDamage,
+            xml: `<MANEUVER XMLID="MANEUVER" BASECOST="0.0" LEVELS="0" ALIAS="Trip" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1783306109614" NAME="" CUSTOM="Yes" CATEGORY="Hand to Hand" DISPLAY="Custom Maneuver" OCV="-1" DCV="-2" DC="0" PHASE="1/2" EFFECT="[STRDC] Target Falls" ADDSTR="Yes" ACTIVECOST="0" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Target Falls"></MANEUVER>`,
         },
         undefined,
     );

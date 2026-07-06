@@ -1560,6 +1560,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     searchValues = [];
 
     #onSearch(ev) {
+        // If we are uploading don't bother with search as it slows things
+        // down and generates unhelpful errors
+        if (this.actor.getFlag(game.system.id, "uploading")) return;
+
         const filter = ev.target.value;
         const regex = new RegExp(RegExp.escape(filter), "i");
 
@@ -1580,7 +1584,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             for (const li of itemList.children) {
                 const item = this._getEmbeddedDocument(li);
                 if (!item) {
-                    console.error(`onSearch: Unable to locate item}`, li);
+                    console.error(`onSearch: Unable to locate item`);
                     continue;
                 }
 
