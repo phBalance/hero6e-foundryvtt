@@ -38,67 +38,77 @@
             <div class="damage-roll">{{{ renderedDamageRoll }}}</div>
         </div>
 
-        <div data-visibility="gm">
+        {{#if item.isGrab}}
+            {{!-- TODO: Make read only for non token owners --}}
+            <div >
+                <button class="roll-damage" data-grab-action="squeeze" style="">Roll Squeeze</button>
+            </div>
+        {{/if}}
 
-            <button class="apply-damage"
-                title="Apply damage to selected tokens."
-                data-item-json-str="{{itemJsonStr}}"
-                data-actor-uuid="{{actor.uuid}}"
-                data-action-data="{{actionDataJSON}}"
-                data-roller="{{rollerJSON}}"
-                data-target-tokens="{{toJsonArray null}}"
-            >
-                {{#if (or nonDmgEffect isSenseAffecting)}}
-                    Apply {{item.system.XMLID}}
-                {{else}}
-                    Apply Damage to selected token(s)
-                {{/if}}
-            </button>
 
-            {{#each targetTokens as |target id|}}
-            {{log target}}
+        {{#unless item.isGrab}}
+            <div data-visibility="gm">
 
                 <button class="apply-damage"
-                    title="{{#if this.missed}}Original attack missed{{/if}}"
-                    data-actor-uuid="{{../actor.uuid}}"
-                    data-target-tokens="{{toJsonArray target}}"
-                    data-highlight-token="{{target.tokenUuid}}"
-                    data-roller="{{../rollerJSON}}"
-                    data-item-json-str="{{../itemJsonStr}}"
-                    data-action-data="{{../actionDataJSON}}"
-                    data-missed="{{this.missed}}" 
-                >
-                    {{#if (or ../nonDmgEffect ../isSenseAffecting)}}
-                        Apply {{../item.system.XMLID}} to <b>{{target.name}}</b>
-                    {{else}}
-                        {{#if target.subTarget}}
-                            Apply <span title="{{target.roller.title}}">{{target.roller.total}}</span> Damage to <b>{{target.subTarget}} {{item.system.XMLID}}</b>
-                        {{else}}
-                            Apply <span title="{{target.roller.title}}">{{target.roller.total}}</span> Damage to <b>{{target.name}} {{item.system.XMLID}}</b>
-                        {{/if}}
-                    {{/if}}
-                </button>
-            {{/each}}
-
-            {{#if (gt targetTokens.length 1)}}
-                <button class="apply-damage"
-                    title="Apply damage to ALL tokens that were hit"
+                    title="Apply damage to selected tokens."
                     data-item-json-str="{{itemJsonStr}}"
                     data-actor-uuid="{{actor.uuid}}"
-                    data-roller="{{rollerJSON}}"
-                    data-target-tokens="{{toJSON targetTokens}}"
                     data-action-data="{{actionDataJSON}}"
+                    data-roller="{{rollerJSON}}"
+                    data-target-tokens="{{toJsonArray null}}"
                 >
                     {{#if (or nonDmgEffect isSenseAffecting)}}
-                        Apply {{item.system.XMLID}} to <b>ALL</b>
+                        Apply {{item.system.XMLID}}
                     {{else}}
-                        Apply Damage to <b>ALL</b>
+                        Apply Damage to selected token(s)
                     {{/if}}
                 </button>
-            {{/if}}
-            <i class="fa-solid fa-up-right-from-square modal-damage-card" title="Modal damage card"></i>
-                <span class="modal-damage-card">Modal damage card</span>
-        </div>
+
+                {{#each targetTokens as |target id|}}
+                {{log target}}
+
+                    <button class="apply-damage"
+                        title="{{#if this.missed}}Original attack missed{{/if}}"
+                        data-actor-uuid="{{../actor.uuid}}"
+                        data-target-tokens="{{toJsonArray target}}"
+                        data-highlight-token="{{target.tokenUuid}}"
+                        data-roller="{{../rollerJSON}}"
+                        data-item-json-str="{{../itemJsonStr}}"
+                        data-action-data="{{../actionDataJSON}}"
+                        data-missed="{{this.missed}}" 
+                    >
+                        {{#if (or ../nonDmgEffect ../isSenseAffecting)}}
+                            Apply {{../item.system.XMLID}} to <b>{{target.name}}</b>
+                        {{else}}
+                            {{#if target.subTarget}}
+                                Apply <span title="{{target.roller.title}}">{{target.roller.total}}</span> Damage to <b>{{target.subTarget}} {{item.system.XMLID}}</b>
+                            {{else}}
+                                Apply <span title="{{target.roller.title}}">{{target.roller.total}}</span> Damage to <b>{{target.name}} {{item.system.XMLID}}</b>
+                            {{/if}}
+                        {{/if}}
+                    </button>
+                {{/each}}
+
+                {{#if (gt targetTokens.length 1)}}
+                    <button class="apply-damage"
+                        title="Apply damage to ALL tokens that were hit"
+                        data-item-json-str="{{itemJsonStr}}"
+                        data-actor-uuid="{{actor.uuid}}"
+                        data-roller="{{rollerJSON}}"
+                        data-target-tokens="{{toJSON targetTokens}}"
+                        data-action-data="{{actionDataJSON}}"
+                    >
+                        {{#if (or nonDmgEffect isSenseAffecting)}}
+                            Apply {{item.system.XMLID}} to <b>ALL</b>
+                        {{else}}
+                            Apply Damage to <b>ALL</b>
+                        {{/if}}
+                    </button>
+                {{/if}}
+                <i class="fa-solid fa-up-right-from-square modal-damage-card" title="Modal damage card"></i>
+                    <span class="modal-damage-card">Modal damage card</span>
+            </div>
+        {{/unless}}
 
     </div>
 </div>

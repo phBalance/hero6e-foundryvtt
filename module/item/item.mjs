@@ -5188,6 +5188,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return this.system.XMLID === "ENTANGLE";
     }
 
+    get isGrab() {
+        return this.maneuverHasTrait("GRAB");
+    }
+
     get isTransform() {
         return this.system.XMLID === "TRANSFORM";
     }
@@ -6027,6 +6031,29 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     get effectiveAttackItem() {
         return this.system._active.maWeaponItem || this.system._active.__baseAttackItem || this;
     }
+
+    /**
+     * Checks if a maneuver item contains a specific mechanical trait string within its system effect text field.
+     * HSMartialArts PDF page 94 has most of the traits.
+     *
+     * @param {string} effectText - The effect string associated with a maneuver (maps to raw 'EFFECT').
+     * @param {string} trait - The trait key phrase to search for (e.g., "[FLASHDC]", "block", "grab").
+     * @returns {boolean} True if the trait is present in the text field.
+     */
+    maneuverHasTrait = function (trait) {
+        const effectText = this.system.WEAPONEFFECT || this.system.EFFECT;
+        if (!effectText || !trait) return false;
+
+        // GRAB vs GRAB WEAPON special handling
+        if (trait.toUpperCase() === "GRAB") {
+            return (
+                effectText.toUpperCase().indexOf("GRAB") > -1 && effectText.toUpperCase().indexOf("GRAB WEAPON") === -1
+            );
+        }
+
+        // Convert both strings to standard uppercase to ensure a robust case-insensitive check
+        return effectText.toUpperCase().indexOf(trait.toUpperCase()) > -1;
+    };
 
     /**
      * Add advantages from itemFrom to this item
