@@ -2292,6 +2292,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
         damageString: damageRoller.getTotalSummary(),
         useHitLoc: damageDetail.useHitLoc,
         hitLocText: damageDetail.hitLocText,
+        damageBreakdown: damageDetail.damageBreakdown,
 
         // effects
         effects: damageDetail.effects,
@@ -3577,6 +3578,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         damageString: baseDamageRoller.getTotalSummary(),
         useHitLoc: damageDetail.useHitLoc,
         hitLocText: damageDetail.hitLocText,
+        damageBreakdown: damageDetail.damageBreakdown,
 
         // effects
         effects: effectsFinal,
@@ -4431,6 +4433,16 @@ async function _calcDamage(damageRoller, item, options) {
     let bodyForPenetrating = 0;
     let effects = "";
 
+    // Track the arithmetic so the apply card can show how the final numbers were derived.
+    // Only meaningful for the standard STUN/BODY damage path.
+    const damageBreakdown = { stun: [], body: [] };
+    const showDamageBreakdown =
+        !isAdjustment &&
+        !isSenseAffectingPower &&
+        !isEntangle &&
+        !isBodyBasedEffectRollItem &&
+        !isStunBasedEffectRollItem;
+
     if (isAdjustment) {
         // kludge for SIMPLIFIED HEALING
         if (item.effectiveAttackItem.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i)) {
@@ -4480,6 +4492,7 @@ async function _calcDamage(damageRoller, item, options) {
             const preStun = stun;
             stun *= 2;
             effects += `Knocked Out x2 STUN (${preStun}x2=${stun});`;
+            damageBreakdown.stun.push(`x2 (knocked out) = ${stun}`);
         }
     }
 
@@ -4515,13 +4528,13 @@ async function _calcDamage(damageRoller, item, options) {
         effects += `${item.effectiveAttackItem.system._effect || item.effectiveAttackItem.system.effect}; `;
     }
 
-    // VULNERABILITY
-    if (options.vulnStunMultiplier) {
+    // VULNERABILITY (multiplier is 1 when no vulnerability applies)
+    if (options.vulnStunMultiplier > 1) {
         const preStun = stun;
         stun = Math.floor(stun * options.vulnStunMultiplier);
         effects += `${options.VulnDesc.join("/")} x${options.vulnStunMultiplier} STUN (${preStun}x${options.vulnStunMultiplier}=${stun});`;
     }
-    if (options.vulnBodyMultiplier) {
+    if (options.vulnBodyMultiplier > 1) {
         const preBody = body;
         body = Math.floor(body * options.vulnBodyMultiplier);
         effects += `${options.VulnDesc.join("/")} x${options.vulnBodyMultiplier} BODY (${preBody}x${options.vulnBodyMultiplier}=${body});`;
@@ -4574,16 +4587,23 @@ async function _calcDamage(damageRoller, item, options) {
     // -------------------------------------------------
     // determine effective damage
     // -------------------------------------------------
-    if (isKillingAttack) {
-        stun = stun - (options.defenseValue || 0) - (options.resistantValue || 0);
-        body = body - (options.resistantValue || 0);
-    } else {
-        stun = stun - (options.defenseValue || 0) - (options.resistantValue || 0);
-        body = body - (options.defenseValue || 0) - (options.resistantValue || 0);
-    }
+    const stunDefense = (options.defenseValue || 0) + (options.resistantValue || 0);
+    const bodyDefense = isKillingAttack ? options.resistantValue || 0 : stunDefense;
+    const preDefenseStun = stun;
+    const preDefenseBody = body;
+
+    stun = stun - stunDefense;
+    body = body - bodyDefense;
 
     stun = roundFavorPlayerTowardsZero(stun < 0 ? 0 : stun);
     body = roundFavorPlayerTowardsZero(body < 0 ? 0 : body);
+
+    if (showDamageBreakdown) {
+        damageBreakdown.stun.push(`${preDefenseStun} - ${stunDefense} defense = ${stun}`);
+        damageBreakdown.body.push(
+            `${preDefenseBody} - ${bodyDefense}${isKillingAttack ? " resistant" : ""} defense = ${body}`,
+        );
+    }
 
     let hitLocText = "";
     if (useHitLocations) {
@@ -4594,36 +4614,67 @@ async function _calcDamage(damageRoller, item, options) {
             // Killing attacks apply hit location multiplier after resistant damage protection has been subtracted
             // Location : [x Stun, x N Stun, x Body, OCV modifier]
             body = roundFavorPlayerTowardsZero(body * hitLocationBodyMultiplier);
+
+            if (showDamageBreakdown) {
+                // The location STUNx replaced the STUNx roll when the damage was rolled
+                damageBreakdown.stun.unshift(
+                    `${damageRoller.getBodyTotal()} BODY x${hitLocationStunMultiplier} (${hitLocation} STUNx) = ${damageRoller.getStunTotal()}`,
+                );
+                damageBreakdown.body.push(`x${hitLocationBodyMultiplier} (${hitLocation}) = ${body}`);
+            }
         } else {
             // stun attacks apply N STUN hit location and BODY multiplier after defenses have been subtracted
             stun = roundFavorPlayerTowardsZero(stun * hitLocationStunMultiplier);
             body = roundFavorPlayerTowardsZero(body * hitLocationBodyMultiplier);
+
+            if (showDamageBreakdown) {
+                damageBreakdown.stun.push(`x${hitLocationStunMultiplier} (${hitLocation}) = ${stun}`);
+                damageBreakdown.body.push(`x${hitLocationBodyMultiplier} (${hitLocation}) = ${body}`);
+            }
         }
         if (damageRoller.getHitLocation().item || damageRoller.getHitLocation().activeEffect) {
             hitLocText = `Hit ${hitLocation}`;
         } else {
             hitLocText = `Hit ${hitLocation} (x${hitLocationBodyMultiplier} BODY x${hitLocationStunMultiplier} STUN)`;
         }
+    } else if (hasStunMultiplierRoll && showDamageBreakdown) {
+        damageBreakdown.stun.unshift(
+            `${damageRoller.getBodyTotal()} BODY x${stunMultiplier} (STUNx roll) = ${damageRoller.getStunTotal()}`,
+        );
     }
 
     // apply damage reduction
     if (options.damageReductionValue > 0) {
         stun = roundFavorPlayerTowardsZero(stun * (1 - options.damageReductionValue / 100));
         body = roundFavorPlayerTowardsZero(body * (1 - options.damageReductionValue / 100));
+
+        if (showDamageBreakdown) {
+            damageBreakdown.stun.push(`x${100 - options.damageReductionValue}% (damage reduction) = ${stun}`);
+            damageBreakdown.body.push(`x${100 - options.damageReductionValue}% (damage reduction) = ${body}`);
+        }
     }
 
     // Penetrating attack minimum damage
     if (isKillingAttack && penetratingBody > body) {
         body = penetratingBody;
         effects += "penetrating damage; ";
+        if (showDamageBreakdown) {
+            damageBreakdown.body.push(`${body} (penetrating minimum)`);
+        }
     } else if (!isKillingAttack && penetratingBody > stun) {
         stun = penetratingBody;
         effects += "penetrating damage; ";
+        if (showDamageBreakdown) {
+            damageBreakdown.stun.push(`${stun} (penetrating minimum)`);
+        }
     }
 
     // minimum damage rule (needs to be last)
     if (stun < body && !isSenseAffectingPower) {
         stun = body;
+        if (showDamageBreakdown) {
+            damageBreakdown.stun.push(`${stun} (minimum damage: STUN at least equals BODY)`);
+        }
         effects +=
             `minimum damage invoked <i class="fal fa-circle-info" data-tooltip="` +
             `<b>MINIMUM DAMAGE FROM INJURIES</b><br>` +
@@ -4635,8 +4686,14 @@ async function _calcDamage(damageRoller, item, options) {
     // Special effects that change damage?
     if (item.effectiveAttackItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.stunonly) {
         body = 0;
+        if (showDamageBreakdown) {
+            damageBreakdown.body.push(`0 (STUN only attack)`);
+        }
     } else if (item.effectiveAttackItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.bodyonly) {
         stun = 0;
+        if (showDamageBreakdown) {
+            damageBreakdown.stun.push(`0 (BODY only attack)`);
+        }
     } else if (item.effectiveAttackItem.system.stunBodyDamage === CONFIG.HERO.stunBodyDamages.effectonly) {
         if (isBodyBasedEffectRollItem) {
             effect = body;
@@ -4654,6 +4711,9 @@ async function _calcDamage(damageRoller, item, options) {
 
     damageDetail.body = body;
     damageDetail.stun = stun;
+    damageDetail.damageBreakdown = showDamageBreakdown
+        ? { stun: damageBreakdown.stun.join("\n"), body: damageBreakdown.body.join("\n") }
+        : null;
     damageDetail.effects = effects;
     damageDetail.stunDamage = stunDamage;
     damageDetail.bodyDamage = bodyDamage;
