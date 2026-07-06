@@ -88,7 +88,10 @@ Hooks.on("renderHeroSystemActorSheetV2", (_sheet, html) => addInlineHeroRollerLi
  * When a chat message is generated, check if this is a /heroroll command.
  */
 Hooks.on("chatMessage", function (_this, message /*, _chatData*/) {
-    const chatMessageCmd = message.match(chatHeroRollRegExp);
+    // V14's ProseMirror chat input serializes the message as HTML (e.g. "<p>/heroroll 3d6</p>"),
+    // whereas V13's plain input does not. Match against the extracted plain text so both work.
+    const plainMessage = new DOMParser().parseFromString(message, "text/html").body.textContent.trim();
+    const chatMessageCmd = plainMessage.match(chatHeroRollRegExp);
     if (chatMessageCmd?.groups?.cmd.toLowerCase() === "/heroroll") {
         // Minimal error handling: Confirm "d6" or it's just a straight numerical term
         if (
