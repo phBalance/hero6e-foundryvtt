@@ -4433,6 +4433,16 @@ async function _calcDamage(damageRoller, item, options) {
     let bodyForPenetrating = 0;
     let effects = "";
 
+    // Track the arithmetic so the apply card can show how the final numbers were derived.
+    // Only meaningful for the standard STUN/BODY damage path.
+    const damageBreakdown = { stun: [], body: [] };
+    const showDamageBreakdown =
+        !isAdjustment &&
+        !isSenseAffectingPower &&
+        !isEntangle &&
+        !isBodyBasedEffectRollItem &&
+        !isStunBasedEffectRollItem;
+
     if (isAdjustment) {
         // kludge for SIMPLIFIED HEALING
         if (item.effectiveAttackItem.system.XMLID === "HEALING" && item.system.INPUT.match(/simplified/i)) {
@@ -4482,6 +4492,7 @@ async function _calcDamage(damageRoller, item, options) {
             const preStun = stun;
             stun *= 2;
             effects += `Knocked Out x2 STUN (${preStun}x2=${stun});`;
+            damageBreakdown.stun.push(`x2 (knocked out) = ${stun}`);
         }
     }
 
@@ -4572,16 +4583,6 @@ async function _calcDamage(damageRoller, item, options) {
         shrinkingKB,
         preKnockBackProneStatus,
     } = await _calcKnockback(bodyForKbCalculations, item, options, itemData.knockbackMultiplier);
-
-    // Track the arithmetic so the apply card can show how the final numbers were derived.
-    // Only meaningful for the standard STUN/BODY damage path.
-    const damageBreakdown = { stun: [], body: [] };
-    const showDamageBreakdown =
-        !isAdjustment &&
-        !isSenseAffectingPower &&
-        !isEntangle &&
-        !isBodyBasedEffectRollItem &&
-        !isStunBasedEffectRollItem;
 
     // -------------------------------------------------
     // determine effective damage
