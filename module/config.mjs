@@ -2812,7 +2812,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 phase: "1/2",
                 ocv: "-1",
                 dcv: "-2",
-                effects: "Target Falls",
+                effects: "Knock a target to the ground, making him Prone",
                 dc: "0",
                 attack: true,
                 addStr: false,
@@ -2820,6 +2820,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
             doesKillingDamage: maneuverDoesKillingDamage,
+            xml: `<MANEUVER XMLID="MANEUVER" ID="1783305925316" BASECOST="3.0" LEVELS="0" ALIAS="Trip2" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1783306109614" NAME="" CUSTOM="Yes" CATEGORY="Hand to Hand" DISPLAY="Custom Maneuver" OCV="-1" DCV="-2" DC="0" PHASE="1/2" EFFECT="Target Falls" ADDSTR="Yes" ACTIVECOST="0" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Target Falls"></MANEUVER>`,
         },
         undefined,
     );
