@@ -3932,45 +3932,62 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     buildManeuverData(maneuver) {
+        // AARON: As of July 5 2026 we are trying to treat combat maneuvers as much
+        // like martial arts as possible. Specifically using martial arts traits like ("Target Falls")
+        // in EFFECT.  If baseInfo.xml exists the we created a custom martial arts maneuver in Hero Designer
+        // which mostly emulates the combat maneuver with some differences, like COST=0.  Not all combat
+        // maneuvers can be easily emulated with a custom martial art, such as Haymaker or MultiAttack.
+
+        // MARTIALARTS consists of a list of MANEUVERS, the MARTIALARTS MANEUVERS have more props than our basic ones.
+        // Adding in some of those props as we may enhance/rework the basic maneuvers in the future.
+        //  <MANEUVER XMLID="MANEUVER" ID="1705867725258" BASECOST="4.0" LEVELS="0" ALIAS="Block" POSITION="1"
+        //  MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes"
+        //  INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Block" OCV="+2"
+        //  DCV="+2" DC="0" PHASE="1/2" EFFECT="Block, Abort" ADDSTR="No" ACTIVECOST="20" DAMAGETYPE="0"
+        //  MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Block, Abort">
+
+        const itemDataAsIfMartialArt = maneuver.xml ? HeroSystem6eItem.itemDataFromXml(maneuver.xml, this) : null;
+
         const name = maneuver.name;
         const XMLID = maneuver.key;
-
         const maneuverDetails = maneuver.maneuverDesc;
-        const ADDSTR = maneuverDetails.addStr;
-        const DC = maneuverDetails.dc;
-        const DCV = maneuverDetails.dcv;
-        const EFFECT = maneuverDetails.effects;
-        const OCV = maneuverDetails.ocv;
-        const PHASE = maneuverDetails.phase;
-        const RANGE = maneuverDetails.range || "0";
-        const USEWEAPON = maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
-        const WEAPONEFFECT = maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
+        const ADDSTR = itemDataAsIfMartialArt?.system.ADDSTR ?? maneuverDetails.addStr;
+        const CATEGORY = itemDataAsIfMartialArt?.system.CATEGORY;
+        const CUSTOM = itemDataAsIfMartialArt?.system.CUSTOM;
+        const DAMAGETYPE = itemDataAsIfMartialArt?.system.DAMAGETYPE;
+        const DC = itemDataAsIfMartialArt?.system.DC ?? maneuverDetails.dc;
+        const DCV = itemDataAsIfMartialArt?.system.DCV ?? maneuverDetails.dcv;
+        const EFFECT = itemDataAsIfMartialArt?.system.EFFECT ?? maneuverDetails.effects;
+        const MAXSTR = itemDataAsIfMartialArt?.system.MAXSTR;
+        const OCV = itemDataAsIfMartialArt?.system.OCV ?? maneuverDetails.ocv;
+        const PHASE = itemDataAsIfMartialArt?.system.RANGE ?? maneuverDetails.phase;
+        const RANGE = itemDataAsIfMartialArt?.system.RANGE ?? maneuverDetails.range ?? 0;
+        const USEWEAPON = itemDataAsIfMartialArt?.system.USEWEAPON ?? maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
+        const WEAPONEFFECT = itemDataAsIfMartialArt?.system.WEAPONEFFECT ?? maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
 
         const itemData = {
             name,
             type: "maneuver",
+            img: itemDataAsIfMartialArt ? `systems/${game.system.id}/icons/fist.svg` : undefined,
             system: {
                 active: false, // TODO: This is probably not always true. It should, however, be generated in other means.
                 description: EFFECT,
                 is5e: this.is5e,
                 ADDSTR,
+                CATEGORY,
+                CUSTOM,
+                DAMAGETYPE,
                 DC,
                 DCV,
                 DISPLAY: name, // Not sure we should allow editing of basic maneuvers
                 EFFECT,
                 OCV,
+                MAXSTR,
                 PHASE,
                 RANGE,
                 USEWEAPON,
                 WEAPONEFFECT,
                 XMLID,
-                // MARTIALARTS consists of a list of MANEUVERS, the MARTIALARTS MANEUVERS have more props than our basic ones.
-                // Adding in some of those props as we may enhance/rework the basic maneuvers in the future.
-                //  <MANEUVER XMLID="MANEUVER" ID="1705867725258" BASECOST="4.0" LEVELS="0" ALIAS="Block" POSITION="1"
-                //  MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes"
-                //  INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Hand To Hand" DISPLAY="Martial Block" OCV="+2"
-                //  DCV="+2" DC="0" PHASE="1/2" EFFECT="Block, Abort" ADDSTR="No" ACTIVECOST="20" DAMAGETYPE="0"
-                //  MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="Block, Abort">
             },
         };
 
@@ -4020,6 +4037,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             .filter((power) => power.type?.includes("maneuver"))
             .map((item) => item.id);
         if (existingManeuverIds.length) {
+            // Close any open Item sheets
+            Object.values(ui.windows)
+                .filter((app) => app instanceof ItemSheet && existingManeuverIds.includes(app.document.id))
+                .forEach((app) => app.close({ force: true }));
+
+            // Delete all the old items (we will re-create them)
             await this.deleteEmbeddedDocuments("Item", existingManeuverIds, { render: false, renderSheet: false });
         }
 

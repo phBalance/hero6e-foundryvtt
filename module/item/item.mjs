@@ -299,7 +299,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 return this.updateSource({ img: "icons/svg/chest.svg" });
             }
             if (itemTypeToIcon[this.type]) {
-                this.updateSource({ img: itemTypeToIcon[this.type] });
+                const img =
+                    game.system?.id && this.type == "martialart"
+                        ? `systems/${game.system.id}/icons/noun-martial-art-5105444.svg`
+                        : itemTypeToIcon[this.type];
+                this.updateSource({ img });
             }
         }
 
@@ -4262,6 +4266,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         if (["maneuver", "martialart"].includes(this.type)) {
             if (this.system.ADDSTR != undefined) {
                 results.usesStrength = this.system.ADDSTR;
+                if (this.system.MAXSTR === 0) {
+                    results.usesStrength = false;
+                }
+                if (this.system.DAMAGETYPE === 0) {
+                    results.usesStrength = false;
+                }
             } else if (
                 this.system.EFFECT &&
                 (this.system.EFFECT.search(/\[FLASHDC\]/) > -1 || this.system.EFFECT.search(/\[NNDDC\]/) > -1)
