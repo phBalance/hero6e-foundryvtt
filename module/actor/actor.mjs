@@ -985,7 +985,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // =========================================================================
 
         // BOTH 5e and 6e vehicles must process size calculations!
-        if ((systemData.characteristics && "size" in systemData.characteristics) || this.type === "vehicle") {
+        if (
+            (systemData.characteristics &&
+                ("size" in systemData.characteristics || "basesize" in systemData.characteristics)) ||
+            this.type === "vehicle"
+        ) {
             await this.applySizeEffect(changed, options, userId);
         }
 
@@ -1140,9 +1144,21 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     sizeDetails(size) {
-        let _size = Math.max(0, parseInt(size || this.getCharacteristic("size")?.value || 0));
+        // An explicit size of 0 is a valid override; only fall back to the actor when no usable size is given.
+        const overrideSize = parseInt(size);
+        let _size = Math.max(
+            0,
+            Number.isNaN(overrideSize) ? parseInt(this.getCharacteristic("size")?.value || 0) : overrideSize,
+        );
         if (this.type === "base2") {
-            _size = 6 + Math.max(0, parseInt(size || this.getCharacteristic("basesize")?.value || 0));
+            _size =
+                6 +
+                Math.max(
+                    0,
+                    Number.isNaN(overrideSize)
+                        ? parseInt(this.getCharacteristic("basesize")?.value || 0)
+                        : overrideSize,
+                );
         }
 
         const values =
@@ -1875,13 +1891,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return { strLiftText, strThrow: strRunningThrow, strLiftKg };
     }
 
-    async applySizeEffect() {
-        const size = parseInt(
-            this.type === "base2"
-                ? this.system.characteristics.basesize.value
-                : this.system.characteristics.size?.value || 0,
-        );
-        const _sizeDetails = this.sizeDetails();
+    async applySizeEffect(changed) {
+        // During _preUpdate this.system still holds the pre-update value; prefer the pending one.
+        const sizeKey = this.type === "base2" ? "basesize" : "size";
+        const pendingSize = changed?.system?.characteristics?.[sizeKey]?.value;
+        const size = parseInt(pendingSize ?? this.system.characteristics[sizeKey]?.value ?? 0);
+        const _sizeDetails = this.sizeDetails(size);
 
         let activeEffect =
             this.effects.find(
