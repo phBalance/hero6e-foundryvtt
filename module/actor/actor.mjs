@@ -384,47 +384,57 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         node.max = this._applyDirectActiveEffectChangesToDerivedMax(keyLower, calculatedMax, {
                             maxChangesByKey,
                         });
-
-                        // Keep the current value coherent with the recomputed max:
-                        // - A dependent resting untouched at its stored maximum (no damage, no
-                        //   value-targeting effects) FOLLOWS the max in both directions — a bigger
-                        //   STR means a longer leap right now, not just a higher ceiling.
-                        // - A stored value deliberately set above the stored max (GM overfill; both
-                        //   sheets style it with the over-max class, and 6e has no cap at all) is
-                        //   user intent and must survive the recompute.
-                        // - Otherwise only cap DOWN (e.g. Prone halving DCV). Never raise a diverged
-                        //   value: for expendables (STUN/END) the gap below max is damage/spent
-                        //   points and raising it would silently heal them on every render, and a
-                        //   derived value below its stored source means a value-targeting effect
-                        //   (e.g. the Brace maneuver's x1/2 DCV) that must not be erased.
-                        const currentValue = Number(node.value);
-                        if (Number.isFinite(currentValue)) {
-                            const sourceNode = this._source.system?.characteristics?.[keyLower] ?? {};
-                            const restingAtStoredMax =
-                                currentValue === Number(sourceNode.value) &&
-                                Number(sourceNode.value) === Number(sourceNode.max);
-                            const storedOverMax = Number(sourceNode.value) > Number(sourceNode.max);
-
-                            let coherentValue;
-                            if (restingAtStoredMax) coherentValue = node.max;
-                            else if (storedOverMax) coherentValue = currentValue;
-                            else coherentValue = Math.min(currentValue, node.max);
-                            // Effects that halve the current value directly can leave a fraction
-                            // behind; apply Hero rounding (SPD always rounds down, 5ER p. 33).
-                            if (!Number.isInteger(coherentValue)) {
-                                coherentValue =
-                                    keyLower === "spd"
-                                        ? Math.floor(coherentValue)
-                                        : roundFavorPlayerAwayFromZero(coherentValue);
-                            }
-                            if (coherentValue !== currentValue) node.value = coherentValue;
-                        }
                     }
                 }
             } finally {
                 restoreFormulaSources();
             }
         }
+
+        // Effects that alter a characteristic max must move the current value with it on every
+        // edition (this pass replaced the deleted AE-lifecycle value→max sync); it runs after the
+        // 5e recompute above so recomputed maxima are final.
+        for (const keyLower of Object.keys(this.system.characteristics)) {
+            this._syncCharacteristicValueWithMax(keyLower);
+        }
+    }
+
+    /**
+     * Keeps a characteristic's current value coherent with its (effect-adjusted) max:
+     * - A value resting untouched at its stored maximum (no damage, no value-targeting effects)
+     *   FOLLOWS the max in both directions — a bigger STR means a longer leap right now, not just
+     *   a higher ceiling.
+     * - A stored value deliberately set above the stored max (GM overfill; both sheets style it
+     *   with the over-max class, and 6e has no cap at all) is user intent and must survive.
+     * - Otherwise only cap DOWN (e.g. Prone halving DCV). Never raise a diverged value: for
+     *   expendables (STUN/END) the gap below max is damage/spent points and raising it would
+     *   silently heal them on every render, and a value below its stored source may be a
+     *   value-targeting effect (e.g. the Brace maneuver's x1/2 DCV) that must not be erased.
+     */
+    _syncCharacteristicValueWithMax(keyLower) {
+        const node = this.system.characteristics?.[keyLower];
+        if (!node) return;
+
+        const currentValue = Number(node.value);
+        if (!Number.isFinite(currentValue) || !Number.isFinite(Number(node.max))) return;
+
+        const sourceNode = this._source.system?.characteristics?.[keyLower] ?? {};
+        const restingAtStoredMax =
+            currentValue === Number(sourceNode.value) && Number(sourceNode.value) === Number(sourceNode.max);
+        const storedOverMax = Number(sourceNode.value) > Number(sourceNode.max);
+
+        let coherentValue;
+        if (restingAtStoredMax) coherentValue = node.max;
+        else if (storedOverMax) coherentValue = currentValue;
+        else coherentValue = Math.min(currentValue, node.max);
+
+        // Effects that halve the current value directly can leave a fraction behind; apply Hero
+        // rounding (SPD always rounds down, 5ER p. 33).
+        if (!Number.isInteger(coherentValue)) {
+            coherentValue =
+                keyLower === "spd" ? Math.floor(coherentValue) : roundFavorPlayerAwayFromZero(coherentValue);
+        }
+        if (coherentValue !== currentValue) node.value = coherentValue;
     }
 
     /**
