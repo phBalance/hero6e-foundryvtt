@@ -1034,12 +1034,18 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             // Calculate dynamic threshold parameters based on the incoming type target frame
             const currentThreshold = this.stunThreshold;
             const incomingType = changed.type ?? this.type;
-            const nextThreshold = incomingType === "pc" ? -30 : -10;
+            const nextThreshold = this.constructor.stunThresholdForType(incomingType);
 
-            // RULE A: Recovering back into positive STUN -> Clear the unconscious state
+            // RULE A: Recovering back into positive STUN -> Clear the unconscious state.
+            // Post-Segment-12 recoveries never wake a KO'd character (preventRecoverFromStun).
             if (nextStun > 0) {
-                if (this.statuses.has("knockedOut") || this.effects.some((e) => e.statuses.has("knockedOut"))) {
-                    await this.toggleStatusEffect("knockedOut", { active: false, changed });
+                if (!options.preventRecoverFromStun) {
+                    if (this.statuses.has("knockedOut") || this.effects.some((e) => e.statuses.has("knockedOut"))) {
+                        await this.toggleStatusEffect("knockedOut", { active: false, changed });
+                    }
+                    if (this.statuses.has("bleeding")) {
+                        await this.toggleStatusEffect("bleeding", { active: false, changed });
+                    }
                 }
             }
             // RULE B: Dropping to 0 or lower STUN -> Trigger native toggle pipelines
@@ -1055,6 +1061,33 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 // Re-triggering ensures toggleStatusEffect catches the new threshold data frame
                 // and shifts the texture tint smoothly between KO_DEFAULT_TINT and KO_COMBAT_TINT
                 await this.toggleStatusEffect("knockedOut", { active: true, overlay: true, changed });
+            }
+        }
+
+        // BODY-based death automation: pc/npc die at BODY <= -BODY.max, automatons at BODY <= 0;
+        // the dead mark clears when BODY recovers above the threshold.
+        if (changed?.system?.characteristics?.body?.value !== undefined && this.getCharacteristic("body")) {
+            const nextBody = changed.system.characteristics.body.value ?? this.getCharacteristic("body").value ?? 0;
+            const nextBodyMax = changed.system.characteristics.body.max ?? this.getCharacteristic("body").max ?? 0;
+            const isAutomaton =
+                this.type === "automaton" || this.items.some((item) => item.system.XMLID === "AUTOMATON");
+
+            if (isAutomaton || ["pc", "npc"].includes(this.type)) {
+                const deathThreshold = isAutomaton ? 0 : -nextBodyMax;
+                if (nextBody <= deathThreshold && !this.statuses.has("dead")) {
+                    await this.toggleStatusEffect("dead", { active: true, overlay: true, changed });
+                } else if (nextBody > deathThreshold && this.statuses.has("dead")) {
+                    await this.toggleStatusEffect("dead", { active: false, changed });
+                }
+
+                // A functioning automaton is neither knocked out nor bleeding
+                if (isAutomaton && nextBody > 0) {
+                    for (const statusId of ["knockedOut", "bleeding"]) {
+                        if (this.statuses.has(statusId)) {
+                            await this.toggleStatusEffect(statusId, { active: false, changed });
+                        }
+                    }
+                }
             }
         }
 
@@ -4690,8 +4723,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return _activeMovement;
     }
 
+    static stunThresholdForType(type) {
+        return type === "pc" ? -30 : -10;
+    }
+
     get stunThreshold() {
-        return this.type === "pc" ? -30 : -10;
+        return this.constructor.stunThresholdForType(this.type);
     }
 
     /**
