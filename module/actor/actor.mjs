@@ -741,7 +741,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const finalKO = finalDead ? false : incomingKO;
         const finalStun = finalDead || finalKO ? false : incomingStun;
 
-        // FIX: Use your final localized state booleans instead of this.statuses.has()
         const impliesProne = finalDead || finalKO || finalUnconscious || finalAsleep;
         const finalProne = impliesProne ? true : this.statuses.has(effectsObj.proneEffect.id);
 
@@ -771,21 +770,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             await this.deleteEmbeddedDocuments("ActiveEffect", effectsToDelete);
         }
         if (effectsToCreate.length > 0) {
-            // Match standard V14 formatting directly without running constructor scripts
-            const createData = effectsToCreate.map((effect) => {
-                // Find the clean, core definition payload
-                const coreEffect = CONFIG.statusEffects.find((e) => e.id === effect.id);
+            // Build from the full status definition (core's toggle pipeline) so the status'
+            // `changes` (e.g. prone's DCV halving) survive the cascade.
+            const createData = [];
+            for (const effect of effectsToCreate) {
+                const statusEffect = await ActiveEffect.implementation.fromStatusEffect(effect.id);
+                createData.push(statusEffect.toObject());
+            }
 
-                return {
-                    id: coreEffect.id,
-                    name: game.i18n.localize(coreEffect.name || coreEffect.label),
-                    img: coreEffect.img || coreEffect.icon,
-                    statuses: [coreEffect.id],
-                    disabled: false,
-                };
-            });
-
-            await this.createEmbeddedDocuments("ActiveEffect", createData);
+            await this.createEmbeddedDocuments("ActiveEffect", createData, { keepId: true });
         }
 
         // 5. Run canvas visual scene batch refresh routines
@@ -802,8 +795,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 if (finalDead) {
                     updatePayload = { alpha: colors.DEAD_ALPHA, "texture.tint": colors.DEAD_TINT };
                 } else if (finalKO) {
-                    // FIX: Force the method to know KO is active by overriding the evaluation check.
-                    // This bypasses the empty changed.effects array problem entirely.
+                    // The KO effect may not exist yet mid-toggle; force the pending state explicitly.
                     const isOutOfCombat = this.getKnockedOutOfCombat({
                         ...changed,
                         _forceKOActive: finalKO,
