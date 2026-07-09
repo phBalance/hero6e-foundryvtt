@@ -1171,11 +1171,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (systemData.senses || changed.effects) {
             canvas.perception?.update({ initializeVision: true, refreshLighting: true });
         }
-
-        // 3. Rerender the active document configuration layout locally for the modifying client
-        if (game.user.id === userId) {
-            this.sheet?.render(false);
-        }
     }
 
     sizeDetails(size) {
@@ -2281,7 +2276,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             const effectsObj = HeroSystem6eActorActiveEffects.statusEffectsObj;
             const effectIdsToDelete = [];
 
-            for (const ae of this.effects) {
+            // Only temporary effects: permanent effects (the durationless size AE, GM-authored
+            // buffs) must survive a full heal.
+            for (const ae of this.temporaryEffects) {
                 if (ae.statuses.has(effectsObj.deadEffect.id) || ae.statuses.has(effectsObj.knockedOutEffect.id))
                     continue;
                 effectIdsToDelete.push(ae.id);
@@ -2290,9 +2287,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             if (effectIdsToDelete.length > 0) {
                 await this.deleteEmbeddedDocuments("ActiveEffect", effectIdsToDelete);
             }
-
-            // REMOVED: The duplicate raw token patch block was stripped from here.
-            // toggleStatusEffect now safely owns 100% of your texture tint transformations.
 
             end = Date.now();
             if (end - start > tDelta) {
