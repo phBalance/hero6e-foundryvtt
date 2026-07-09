@@ -1828,8 +1828,8 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
             const parts = [`${ae.name}${viaKey ? ` (via ${viaKey.toUpperCase()})` : ""}`];
 
             const originItem = ae.origin ? fromUuidSync(ae.origin) : null;
-            const originToken = ae.origin ? fromUuidSync(ae.origin.match(/(.*).Actor/)?.[1]) : null;
             if (originItem) {
+                const originToken = fromUuidSync(ae.origin.match(/(.*).Actor/)?.[1]);
                 parts.push(`${originToken?.name || originItem.actor?.name}: ${originItem.name}`);
             }
 
@@ -1843,9 +1843,15 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
             return `<li>${parts.join(" — ")}</li>`;
         };
 
-        // Effects that directly target this characteristic's max.
+        // Single effect walk shared by the direct and 5e-source passes below.
+        const applicableEffects = [];
         for (const ae of this.actor.allApplicableEffects()) {
             if (ae.disabled || ae.isSuppressed) continue;
+            applicableEffects.push(ae);
+        }
+
+        // Effects that directly target this characteristic's max.
+        for (const ae of applicableEffects) {
             if (effectChangesOf(ae).find((p) => p.key === `system.characteristics.${this.key}.max`)) {
                 ary.push(describeEffect(ae));
             }
@@ -1862,8 +1868,8 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
                 const sourceKey = behavior.match(/^(?:figured|calculated)([A-Z]+)$/)?.[1]?.toLowerCase();
                 if (!sourceKey) continue;
 
-                for (const ae of this.actor.allApplicableEffects()) {
-                    if (ae.disabled || ae.isSuppressed || listed.has(ae.id ?? ae.name)) continue;
+                for (const ae of applicableEffects) {
+                    if (listed.has(ae.id ?? ae.name)) continue;
                     if (ae.parent !== this.actor) continue;
                     if (!isCalculatedDependent && ae.flags?.[game.system.id]?.type === "adjustment") continue;
                     if (effectChangesOf(ae).find((p) => p.key === `system.characteristics.${sourceKey}.max`)) {

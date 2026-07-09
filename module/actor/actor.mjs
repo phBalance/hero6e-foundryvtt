@@ -533,6 +533,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      * string change.type) shapes and normalizes to a numeric mode.
      */
     _collectActiveEffectMaxChanges() {
+        // Memoized per data-preparation cycle (prepareDerivedData resets _lazy): hot-path callers
+        // (the 5e base getter, maxTitle, fullHealth) otherwise re-walk actor + item effects per access.
+        const lazy = (this._lazy ??= {});
+        if (lazy.maxChangesByKey) return lazy.maxChangesByKey;
+
         const byKey = new Map();
         for (const effect of this.allApplicableEffects()) {
             if (effect.disabled || effect.isSuppressed) continue;
@@ -564,6 +569,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 byKey.set(match[1], entries);
             }
         }
+
+        lazy.maxChangesByKey = byKey;
         return byKey;
     }
 
