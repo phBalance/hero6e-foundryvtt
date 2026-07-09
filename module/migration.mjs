@@ -349,9 +349,9 @@ export async function migrateWorld() {
     await migrateToVersion(
         "4.3.15",
         lastMigration,
-        Array.from(game.messages),
+        [Array.from(game.messages)],
         "reclaiming space from bloated chat messages",
-        async (message) => await removeDehydratedManeuverItemFromMessage_4_3_15(message),
+        async (messages) => await removeDehydratedManeuverItemFromMessages_4_3_15(messages),
     );
 
     // Placeholder for notifying GM of items missing XMLID
@@ -482,20 +482,25 @@ function stripDehydratedManeuverItem_4_3_15(messageDataFragment) {
     return messageDataFragment;
 }
 
-async function removeDehydratedManeuverItemFromMessage_4_3_15(message) {
-    try {
-        const originalFlags = message.toObject().flags;
+async function removeDehydratedManeuverItemFromMessages_4_3_15(messages) {
+    const updates = [];
+    for (const message of messages) {
+        try {
+            const originalFlags = message.toObject().flags;
 
-        // Nothing to do unless this message actually carries the bloat.
-        if (!JSON.stringify(originalFlags ?? {}).includes("dehydratedManeuverItem")) {
-            return;
+            // Nothing to do unless this message actually carries the bloat.
+            if (!JSON.stringify(originalFlags ?? {}).includes("dehydratedManeuverItem")) {
+                continue;
+            }
+
+            updates.push({ _id: message.id, flags: stripDehydratedManeuverItem_4_3_15(originalFlags) });
+        } catch (e) {
+            console.error(`Failed to clean dehydratedManeuverItem from chat message ${message?.id}`, e);
         }
+    }
 
-        const cleanedFlags = stripDehydratedManeuverItem_4_3_15(originalFlags);
-
-        await message.update({ flags: cleanedFlags });
-    } catch (e) {
-        console.error(`Failed to clean dehydratedManeuverItem from chat message ${message?.id}`, e);
+    if (updates.length > 0) {
+        await ChatMessage.updateDocuments(updates);
     }
 }
 
