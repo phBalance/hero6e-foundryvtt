@@ -1006,13 +1006,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
 
         // Inventory weight and carrying capacity corrections
-        if ("items" in changed || systemData.characteristics) {
-            await this.applyEncumbrancePenalty(changed, options, userId);
+        if ("items" in changed || systemData.characteristics?.str) {
+            await this.applyEncumbrancePenalty(changed);
         }
 
-        // Healing processing
-        if ("system" in changed) {
-            await this.setNaturalHealing(changed, options, userId);
+        // Natural Healing tracks BODY damage against REC
+        if (systemData.characteristics?.body || systemData.characteristics?.rec) {
+            await this.setNaturalHealing(changed);
         }
 
         // =========================================================================
@@ -1774,7 +1774,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     strDetails(str) {
         let strLiftText = "0kg";
         let strRunningThrow = 0;
-        const value = str || this.system.characteristics.str?.value;
+        const value = Number.isFinite(Number(str)) ? Number(str) : this.system.characteristics.str?.value;
 
         if (value >= 105) {
             strLiftText = `${50 + Math.floor((value - 105) / 5) * 25} ktons`;
@@ -2002,11 +2002,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
     }
 
-    async applyEncumbrancePenalty() {
+    async applyEncumbrancePenalty(changed) {
         // Only 1 GM should do this
         if (!game.users.activeGM?.isSelf) return;
 
-        const { strLiftKg } = this.strDetails();
+        // During _preUpdate this.system still holds the pre-update value; prefer the pending one.
+        const strValue = Number(
+            changed?.system?.characteristics?.str?.value ?? this.system.characteristics.str?.value ?? 0,
+        );
+        const { strLiftKg } = this.strDetails(strValue);
         const encumbrance = this.encumbrance;
 
         // Is actor encumbered?
@@ -2185,7 +2189,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const minStr = massMultiplier * 5;
 
         const prevStr0ActiveEffect = this.effects.find((effect) => effect.flags?.[game.system.id]?.str0);
-        if (this.system.characteristics.str?.value <= minStr && !prevStr0ActiveEffect) {
+        if (strValue <= minStr && !prevStr0ActiveEffect) {
             const str0ActiveEffect = {
                 name: "STR0",
                 id: "STR0",
@@ -2244,7 +2248,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 myToken.control();
             }
         } else {
-            if (prevStr0ActiveEffect && this.system.characteristics.str.value > minStr) {
+            if (prevStr0ActiveEffect && strValue > minStr) {
                 await prevStr0ActiveEffect.delete();
                 // If we have control of this token, re-acquire to update movement types
                 const myToken = this.getActiveTokens()?.[0] || {};
@@ -4990,15 +4994,19 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return { perPhase, perTurn, phasesUntil0End };
     }
 
-    async setNaturalHealing() {
+    async setNaturalHealing(changed) {
         const naturalBodyHealing = this.temporaryEffects.find(
             (o) => o.flags[game.system.id]?.XMLID === "naturalBodyHealing",
         );
-        if (
-            this.type === "pc" &&
-            parseInt(this.system.characteristics.body.value) < parseInt(this.system.characteristics.body.max)
-        ) {
-            const bodyPerMonth = Math.max(1, parseInt(this.system.characteristics.rec.value));
+
+        // During _preUpdate this.system still holds the pre-update values; prefer the pending ones.
+        const pendingCharacteristics = changed?.system?.characteristics ?? {};
+        const bodyValue = parseInt(pendingCharacteristics.body?.value ?? this.system.characteristics.body?.value);
+        const bodyMax = parseInt(pendingCharacteristics.body?.max ?? this.system.characteristics.body?.max);
+        const recValue = parseInt(pendingCharacteristics.rec?.value ?? this.system.characteristics.rec?.value);
+
+        if (this.type === "pc" && bodyValue < bodyMax) {
+            const bodyPerMonth = Math.max(1, recValue);
             const secondsPerBody = Math.floor(2.628e6 / bodyPerMonth);
             const daysForOneBody = roundFavorPlayerAwayFromZero(30 / bodyPerMonth);
             const activeEffect = {
@@ -5027,11 +5035,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
 
         // Get rid of naturalHealing
-        if (
-            naturalBodyHealing &&
-            this.system?.characteristics?.body?.value &&
-            this?.system?.characteristics?.body?.value >= parseInt(this.system.characteristics.body.max)
-        ) {
+        if (naturalBodyHealing && bodyValue && bodyValue >= bodyMax) {
             await naturalBodyHealing.delete();
         }
     }
