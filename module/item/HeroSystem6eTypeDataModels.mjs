@@ -13,6 +13,13 @@ import { maneuverHasBlockTrait, maneuverHasFlashEffectTrait } from "./maneuver.m
 
 const { StringField, ObjectField, BooleanField, ArrayField, EmbeddedDataField, SchemaField } = foundry.data.fields;
 
+// The value/max tooltip getters below are injected raw into data-tooltip attributes
+// ({{{valueTitle}}}/{{{maxTitle}}}), so document names must be HTML-escaped or a quote in an
+// effect name breaks the attribute.
+function escapeHtmlForTooltip(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+}
+
 // XML parsing is expensive when done frequently during actions like loading characters.
 // Use this for storing the parsed value and then clear it out after 10 seconds.
 // NOTE: This is a kludge. The 10 seconds is based on the fact we don't really want to keep
@@ -1802,7 +1809,7 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         );
         let _valueTitle = "";
         for (const ae of activeEffects) {
-            ary.push(`<li>${ae.name}</li>`);
+            ary.push(`<li>${escapeHtmlForTooltip(ae.name)}</li>`);
         }
         if (ary.length > 0) {
             _valueTitle = "<b>PREVENTING CHANGES</b>\n<ul class='left'>";
@@ -1825,12 +1832,16 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
         // One tooltip line per effect: name, the same "Attacker: Item" origin string the effect
         // config sheet shows as HERO.Origin, and the seconds left before it fades/expires.
         const describeEffect = (ae, viaKey) => {
-            const parts = [`${ae.name}${viaKey ? ` (via ${viaKey.toUpperCase()})` : ""}`];
+            const parts = [
+                `${escapeHtmlForTooltip(ae.name)}${viaKey ? ` (via ${escapeHtmlForTooltip(viaKey.toUpperCase())})` : ""}`,
+            ];
 
             const originItem = ae.origin ? fromUuidSync(ae.origin) : null;
             if (originItem) {
                 const originToken = fromUuidSync(ae.origin.match(/(.*).Actor/)?.[1]);
-                parts.push(`${originToken?.name || originItem.actor?.name}: ${originItem.name}`);
+                parts.push(
+                    `${escapeHtmlForTooltip(originToken?.name || originItem.actor?.name)}: ${escapeHtmlForTooltip(originItem.name)}`,
+                );
             }
 
             // Durationless effects (statuses like Prone) report an Infinity/null remaining — only a

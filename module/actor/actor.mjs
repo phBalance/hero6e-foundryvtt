@@ -2283,11 +2283,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             const effectsObj = HeroSystem6eActorActiveEffects.statusEffectsObj;
             const effectIdsToDelete = [];
 
-            // Only temporary effects: permanent effects (the durationless size AE, GM-authored
-            // buffs) must survive a full heal.
-            for (const ae of this.temporaryEffects) {
+            // Only timed effects and status conditions: permanent effects (the durationless size
+            // AE, GM-authored buffs) must survive a full heal. Statuses are checked explicitly
+            // because V14's isTemporary is duration-only (V13's also counted statuses).
+            for (const ae of this.effects) {
                 if (ae.statuses.has(effectsObj.deadEffect.id) || ae.statuses.has(effectsObj.knockedOutEffect.id))
                     continue;
+                if (!ae.isTemporary && ae.statuses.size === 0) continue;
                 effectIdsToDelete.push(ae.id);
             }
 
