@@ -384,47 +384,57 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         node.max = this._applyDirectActiveEffectChangesToDerivedMax(keyLower, calculatedMax, {
                             maxChangesByKey,
                         });
-
-                        // Keep the current value coherent with the recomputed max:
-                        // - A dependent resting untouched at its stored maximum (no damage, no
-                        //   value-targeting effects) FOLLOWS the max in both directions — a bigger
-                        //   STR means a longer leap right now, not just a higher ceiling.
-                        // - A stored value deliberately set above the stored max (GM overfill; both
-                        //   sheets style it with the over-max class, and 6e has no cap at all) is
-                        //   user intent and must survive the recompute.
-                        // - Otherwise only cap DOWN (e.g. Prone halving DCV). Never raise a diverged
-                        //   value: for expendables (STUN/END) the gap below max is damage/spent
-                        //   points and raising it would silently heal them on every render, and a
-                        //   derived value below its stored source means a value-targeting effect
-                        //   (e.g. the Brace maneuver's x1/2 DCV) that must not be erased.
-                        const currentValue = Number(node.value);
-                        if (Number.isFinite(currentValue)) {
-                            const sourceNode = this._source.system?.characteristics?.[keyLower] ?? {};
-                            const restingAtStoredMax =
-                                currentValue === Number(sourceNode.value) &&
-                                Number(sourceNode.value) === Number(sourceNode.max);
-                            const storedOverMax = Number(sourceNode.value) > Number(sourceNode.max);
-
-                            let coherentValue;
-                            if (restingAtStoredMax) coherentValue = node.max;
-                            else if (storedOverMax) coherentValue = currentValue;
-                            else coherentValue = Math.min(currentValue, node.max);
-                            // Effects that halve the current value directly can leave a fraction
-                            // behind; apply Hero rounding (SPD always rounds down, 5ER p. 33).
-                            if (!Number.isInteger(coherentValue)) {
-                                coherentValue =
-                                    keyLower === "spd"
-                                        ? Math.floor(coherentValue)
-                                        : roundFavorPlayerAwayFromZero(coherentValue);
-                            }
-                            if (coherentValue !== currentValue) node.value = coherentValue;
-                        }
                     }
                 }
             } finally {
                 restoreFormulaSources();
             }
         }
+
+        // Effects that alter a characteristic max must move the current value with it on every
+        // edition (this pass replaced the deleted AE-lifecycle value→max sync); it runs after the
+        // 5e recompute above so recomputed maxima are final.
+        for (const keyLower of Object.keys(this.system.characteristics)) {
+            this._syncCharacteristicValueWithMax(keyLower);
+        }
+    }
+
+    /**
+     * Keeps a characteristic's current value coherent with its (effect-adjusted) max:
+     * - A value resting untouched at its stored maximum (no damage, no value-targeting effects)
+     *   FOLLOWS the max in both directions — a bigger STR means a longer leap right now, not just
+     *   a higher ceiling.
+     * - A stored value deliberately set above the stored max (GM overfill; both sheets style it
+     *   with the over-max class, and 6e has no cap at all) is user intent and must survive.
+     * - Otherwise only cap DOWN (e.g. Prone halving DCV). Never raise a diverged value: for
+     *   expendables (STUN/END) the gap below max is damage/spent points and raising it would
+     *   silently heal them on every render, and a value below its stored source may be a
+     *   value-targeting effect (e.g. the Brace maneuver's x1/2 DCV) that must not be erased.
+     */
+    _syncCharacteristicValueWithMax(keyLower) {
+        const node = this.system.characteristics?.[keyLower];
+        if (!node) return;
+
+        const currentValue = Number(node.value);
+        if (!Number.isFinite(currentValue) || !Number.isFinite(Number(node.max))) return;
+
+        const sourceNode = this._source.system?.characteristics?.[keyLower] ?? {};
+        const restingAtStoredMax =
+            currentValue === Number(sourceNode.value) && Number(sourceNode.value) === Number(sourceNode.max);
+        const storedOverMax = Number(sourceNode.value) > Number(sourceNode.max);
+
+        let coherentValue;
+        if (restingAtStoredMax) coherentValue = node.max;
+        else if (storedOverMax) coherentValue = currentValue;
+        else coherentValue = Math.min(currentValue, node.max);
+
+        // Effects that halve the current value directly can leave a fraction behind; apply Hero
+        // rounding (SPD always rounds down, 5ER p. 33).
+        if (!Number.isInteger(coherentValue)) {
+            coherentValue =
+                keyLower === "spd" ? Math.floor(coherentValue) : roundFavorPlayerAwayFromZero(coherentValue);
+        }
+        if (coherentValue !== currentValue) node.value = coherentValue;
     }
 
     /**
@@ -523,6 +533,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      * string change.type) shapes and normalizes to a numeric mode.
      */
     _collectActiveEffectMaxChanges() {
+        // Memoized per data-preparation cycle (prepareDerivedData resets _lazy): hot-path callers
+        // (the 5e base getter, maxTitle, fullHealth) otherwise re-walk actor + item effects per access.
+        const lazy = (this._lazy ??= {});
+        if (lazy.maxChangesByKey) return lazy.maxChangesByKey;
+
         const byKey = new Map();
         for (const effect of this.allApplicableEffects()) {
             if (effect.disabled || effect.isSuppressed) continue;
@@ -554,6 +569,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 byKey.set(match[1], entries);
             }
         }
+
+        lazy.maxChangesByKey = byKey;
         return byKey;
     }
 
@@ -731,7 +748,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const finalKO = finalDead ? false : incomingKO;
         const finalStun = finalDead || finalKO ? false : incomingStun;
 
-        // FIX: Use your final localized state booleans instead of this.statuses.has()
         const impliesProne = finalDead || finalKO || finalUnconscious || finalAsleep;
         const finalProne = impliesProne ? true : this.statuses.has(effectsObj.proneEffect.id);
 
@@ -761,21 +777,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             await this.deleteEmbeddedDocuments("ActiveEffect", effectsToDelete);
         }
         if (effectsToCreate.length > 0) {
-            // Match standard V14 formatting directly without running constructor scripts
-            const createData = effectsToCreate.map((effect) => {
-                // Find the clean, core definition payload
-                const coreEffect = CONFIG.statusEffects.find((e) => e.id === effect.id);
+            // Build from the full status definition (core's toggle pipeline) so the status'
+            // `changes` (e.g. prone's DCV halving) survive the cascade.
+            const createData = [];
+            for (const effect of effectsToCreate) {
+                const statusEffect = await ActiveEffect.implementation.fromStatusEffect(effect.id);
+                createData.push(statusEffect.toObject());
+            }
 
-                return {
-                    id: coreEffect.id,
-                    name: game.i18n.localize(coreEffect.name || coreEffect.label),
-                    img: coreEffect.img || coreEffect.icon,
-                    statuses: [coreEffect.id],
-                    disabled: false,
-                };
-            });
-
-            await this.createEmbeddedDocuments("ActiveEffect", createData);
+            await this.createEmbeddedDocuments("ActiveEffect", createData, { keepId: true });
         }
 
         // 5. Run canvas visual scene batch refresh routines
@@ -792,8 +802,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 if (finalDead) {
                     updatePayload = { alpha: colors.DEAD_ALPHA, "texture.tint": colors.DEAD_TINT };
                 } else if (finalKO) {
-                    // FIX: Force the method to know KO is active by overriding the evaluation check.
-                    // This bypasses the empty changed.effects array problem entirely.
+                    // The KO effect may not exist yet mid-toggle; force the pending state explicitly.
                     const isOutOfCombat = this.getKnockedOutOfCombat({
                         ...changed,
                         _forceKOActive: finalKO,
@@ -1004,13 +1013,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
 
         // Inventory weight and carrying capacity corrections
-        if ("items" in changed || systemData.characteristics) {
-            await this.applyEncumbrancePenalty(changed, options, userId);
+        if ("items" in changed || systemData.characteristics?.str) {
+            await this.applyEncumbrancePenalty(changed);
         }
 
-        // Healing processing
-        if ("system" in changed) {
-            await this.setNaturalHealing(changed, options, userId);
+        // Natural Healing tracks BODY damage against REC
+        if (systemData.characteristics?.body || systemData.characteristics?.rec) {
+            await this.setNaturalHealing(changed);
         }
 
         // =========================================================================
@@ -1024,12 +1033,18 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             // Calculate dynamic threshold parameters based on the incoming type target frame
             const currentThreshold = this.stunThreshold;
             const incomingType = changed.type ?? this.type;
-            const nextThreshold = incomingType === "pc" ? -30 : -10;
+            const nextThreshold = this.constructor.stunThresholdForType(incomingType);
 
-            // RULE A: Recovering back into positive STUN -> Clear the unconscious state
+            // RULE A: Recovering back into positive STUN -> Clear the unconscious state.
+            // Post-Segment-12 recoveries never wake a KO'd character (preventRecoverFromStun).
             if (nextStun > 0) {
-                if (this.statuses.has("knockedOut") || this.effects.some((e) => e.statuses.has("knockedOut"))) {
-                    await this.toggleStatusEffect("knockedOut", { active: false, changed });
+                if (!options.preventRecoverFromStun) {
+                    if (this.statuses.has("knockedOut") || this.effects.some((e) => e.statuses.has("knockedOut"))) {
+                        await this.toggleStatusEffect("knockedOut", { active: false, changed });
+                    }
+                    if (this.statuses.has("bleeding")) {
+                        await this.toggleStatusEffect("bleeding", { active: false, changed });
+                    }
                 }
             }
             // RULE B: Dropping to 0 or lower STUN -> Trigger native toggle pipelines
@@ -1045,6 +1060,33 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 // Re-triggering ensures toggleStatusEffect catches the new threshold data frame
                 // and shifts the texture tint smoothly between KO_DEFAULT_TINT and KO_COMBAT_TINT
                 await this.toggleStatusEffect("knockedOut", { active: true, overlay: true, changed });
+            }
+        }
+
+        // BODY-based death automation: pc/npc die at BODY <= -BODY.max, automatons at BODY <= 0;
+        // the dead mark clears when BODY recovers above the threshold.
+        if (changed?.system?.characteristics?.body?.value !== undefined && this.getCharacteristic("body")) {
+            const nextBody = changed.system.characteristics.body.value ?? this.getCharacteristic("body").value ?? 0;
+            const nextBodyMax = changed.system.characteristics.body.max ?? this.getCharacteristic("body").max ?? 0;
+            const isAutomaton =
+                this.type === "automaton" || this.items.some((item) => item.system.XMLID === "AUTOMATON");
+
+            if (isAutomaton || ["pc", "npc"].includes(this.type)) {
+                const deathThreshold = isAutomaton ? 0 : -nextBodyMax;
+                if (nextBody <= deathThreshold && !this.statuses.has("dead")) {
+                    await this.toggleStatusEffect("dead", { active: true, overlay: true, changed });
+                } else if (nextBody > deathThreshold && this.statuses.has("dead")) {
+                    await this.toggleStatusEffect("dead", { active: false, changed });
+                }
+
+                // A functioning automaton is neither knocked out nor bleeding
+                if (isAutomaton && nextBody > 0) {
+                    for (const statusId of ["knockedOut", "bleeding"]) {
+                        if (this.statuses.has(statusId)) {
+                            await this.toggleStatusEffect(statusId, { active: false, changed });
+                        }
+                    }
+                }
             }
         }
 
@@ -1135,11 +1177,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const systemData = changed?.system || {};
         if (systemData.senses || changed.effects) {
             canvas.perception?.update({ initializeVision: true, refreshLighting: true });
-        }
-
-        // 3. Rerender the active document configuration layout locally for the modifying client
-        if (game.user.id === userId) {
-            this.sheet?.render(false);
         }
     }
 
@@ -1739,7 +1776,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     strDetails(str) {
         let strLiftText = "0kg";
         let strRunningThrow = 0;
-        const value = str || this.system.characteristics.str?.value;
+        const value = Number.isFinite(Number(str)) ? Number(str) : this.system.characteristics.str?.value;
 
         if (value >= 105) {
             strLiftText = `${50 + Math.floor((value - 105) / 5) * 25} ktons`;
@@ -1967,11 +2004,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
     }
 
-    async applyEncumbrancePenalty() {
+    async applyEncumbrancePenalty(changed) {
         // Only 1 GM should do this
         if (!game.users.activeGM?.isSelf) return;
 
-        const { strLiftKg } = this.strDetails();
+        // During _preUpdate this.system still holds the pre-update value; prefer the pending one.
+        const strValue = Number(
+            changed?.system?.characteristics?.str?.value ?? this.system.characteristics.str?.value ?? 0,
+        );
+        const { strLiftKg } = this.strDetails(strValue);
         const encumbrance = this.encumbrance;
 
         // Is actor encumbered?
@@ -2150,7 +2191,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const minStr = massMultiplier * 5;
 
         const prevStr0ActiveEffect = this.effects.find((effect) => effect.flags?.[game.system.id]?.str0);
-        if (this.system.characteristics.str?.value <= minStr && !prevStr0ActiveEffect) {
+        if (strValue <= minStr && !prevStr0ActiveEffect) {
             const str0ActiveEffect = {
                 name: "STR0",
                 id: "STR0",
@@ -2209,7 +2250,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 myToken.control();
             }
         } else {
-            if (prevStr0ActiveEffect && this.system.characteristics.str.value > minStr) {
+            if (prevStr0ActiveEffect && strValue > minStr) {
                 await prevStr0ActiveEffect.delete();
                 // If we have control of this token, re-acquire to update movement types
                 const myToken = this.getActiveTokens()?.[0] || {};
@@ -2242,18 +2283,19 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             const effectsObj = HeroSystem6eActorActiveEffects.statusEffectsObj;
             const effectIdsToDelete = [];
 
+            // Only timed effects and status conditions: permanent effects (the durationless size
+            // AE, GM-authored buffs) must survive a full heal. Statuses are checked explicitly
+            // because V14's isTemporary is duration-only (V13's also counted statuses).
             for (const ae of this.effects) {
                 if (ae.statuses.has(effectsObj.deadEffect.id) || ae.statuses.has(effectsObj.knockedOutEffect.id))
                     continue;
+                if (!ae.isTemporary && ae.statuses.size === 0) continue;
                 effectIdsToDelete.push(ae.id);
             }
 
             if (effectIdsToDelete.length > 0) {
                 await this.deleteEmbeddedDocuments("ActiveEffect", effectIdsToDelete);
             }
-
-            // REMOVED: The duplicate raw token patch block was stripped from here.
-            // toggleStatusEffect now safely owns 100% of your texture tint transformations.
 
             end = Date.now();
             if (end - start > tDelta) {
@@ -3986,7 +4028,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const EFFECT = itemDataAsIfMartialArt?.system.EFFECT ?? maneuverDetails.effects;
         const MAXSTR = itemDataAsIfMartialArt?.system.MAXSTR;
         const OCV = itemDataAsIfMartialArt?.system.OCV ?? maneuverDetails.ocv;
-        const PHASE = itemDataAsIfMartialArt?.system.RANGE ?? maneuverDetails.phase;
+        const PHASE = itemDataAsIfMartialArt?.system.PHASE ?? maneuverDetails.phase;
         const RANGE = itemDataAsIfMartialArt?.system.RANGE ?? maneuverDetails.range ?? 0;
         const USEWEAPON = itemDataAsIfMartialArt?.system.USEWEAPON ?? maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
         const WEAPONEFFECT = itemDataAsIfMartialArt?.system.WEAPONEFFECT ?? maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
@@ -4680,8 +4722,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return _activeMovement;
     }
 
+    static stunThresholdForType(type) {
+        return type === "pc" ? -30 : -10;
+    }
+
     get stunThreshold() {
-        return this.type === "pc" ? -30 : -10;
+        return this.constructor.stunThresholdForType(this.type);
     }
 
     /**
@@ -4951,15 +4997,19 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return { perPhase, perTurn, phasesUntil0End };
     }
 
-    async setNaturalHealing() {
+    async setNaturalHealing(changed) {
         const naturalBodyHealing = this.temporaryEffects.find(
             (o) => o.flags[game.system.id]?.XMLID === "naturalBodyHealing",
         );
-        if (
-            this.type === "pc" &&
-            parseInt(this.system.characteristics.body.value) < parseInt(this.system.characteristics.body.max)
-        ) {
-            const bodyPerMonth = Math.max(1, parseInt(this.system.characteristics.rec.value));
+
+        // During _preUpdate this.system still holds the pre-update values; prefer the pending ones.
+        const pendingCharacteristics = changed?.system?.characteristics ?? {};
+        const bodyValue = parseInt(pendingCharacteristics.body?.value ?? this.system.characteristics.body?.value);
+        const bodyMax = parseInt(pendingCharacteristics.body?.max ?? this.system.characteristics.body?.max);
+        const recValue = parseInt(pendingCharacteristics.rec?.value ?? this.system.characteristics.rec?.value);
+
+        if (this.type === "pc" && bodyValue < bodyMax) {
+            const bodyPerMonth = Math.max(1, recValue);
             const secondsPerBody = Math.floor(2.628e6 / bodyPerMonth);
             const daysForOneBody = roundFavorPlayerAwayFromZero(30 / bodyPerMonth);
             const activeEffect = {
@@ -4988,11 +5038,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
 
         // Get rid of naturalHealing
-        if (
-            naturalBodyHealing &&
-            this.system?.characteristics?.body?.value &&
-            this?.system?.characteristics?.body?.value >= parseInt(this.system.characteristics.body.max)
-        ) {
+        if (naturalBodyHealing && bodyValue && bodyValue >= bodyMax) {
             await naturalBodyHealing.delete();
         }
     }
