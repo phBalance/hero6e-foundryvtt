@@ -1644,11 +1644,7 @@ export function getAttackTags(item) {
         const extractMustFollowTarget = function (effectText) {
             if (!effectText) return null;
 
-            // Match "Must Follow " case-insensitively, then capture all characters up to the next comma or string end
-            const regex = /Must\s+Follow\s+([^,]+)/i;
-            const match = effectText.match(regex);
-
-            // If a match is found, return the trimmed capturing group contents
+            const match = effectText.match(/Must\s+Follow\s+([^,]+)/i);
             return match ? match[1].trim() : null;
         };
 
@@ -1765,15 +1761,10 @@ export function getAttackTags(item) {
         const extractAttackerDamageModifier = function (effectText) {
             if (!effectText) return null;
 
-            // Match "attacker takes " case-insensitively, then capture everything up to the next comma or the word "damage"
-            const regex = /attacker\s+takes\s+([^,]+?)(?=\s*damage|$)/i;
-            const match = effectText.match(regex);
-
-            // If a match is found, return the trimmed capturing group contents
+            const match = effectText.match(/attacker\s+takes\s+([^,]+?)(?=\s*damage|$)/i);
             return match ? match[1].trim() : null;
         };
 
-        // Execution pattern matching your architecture requirements
         const attackerDamageModifier = extractAttackerDamageModifier(item.system.WEAPONEFFECT || item.system.EFFECT);
         attackTags.push({
             name: `Attacker Takes ${attackerDamageModifier} Damage`,

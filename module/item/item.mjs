@@ -325,11 +325,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     case "HKA":
                     case "RKA":
                     case "TELEKINESIS":
-                        switch (this.system.SFX) {
-                            default:
-                                img = `systems/${game.system.id}/icons/${this.system.XMLID.toLowerCase()}/${this.system.XMLID.toLowerCase()}.svg`;
-                                break;
-                        }
+                        img = `systems/${game.system.id}/icons/${this.system.XMLID.toLowerCase()}/${this.system.XMLID.toLowerCase()}.svg`;
                         break;
 
                     default:
@@ -6085,7 +6081,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return effectText.toUpperCase().includes("GRAB") && !effectText.toUpperCase().includes("GRAB WEAPON");
         }
 
-        // Convert both strings to standard uppercase to ensure a robust case-insensitive check
         return effectText.toUpperCase().includes(trait.toUpperCase());
     };
 
