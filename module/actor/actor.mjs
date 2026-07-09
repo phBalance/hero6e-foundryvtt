@@ -4019,7 +4019,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const EFFECT = itemDataAsIfMartialArt?.system.EFFECT ?? maneuverDetails.effects;
         const MAXSTR = itemDataAsIfMartialArt?.system.MAXSTR;
         const OCV = itemDataAsIfMartialArt?.system.OCV ?? maneuverDetails.ocv;
-        const PHASE = itemDataAsIfMartialArt?.system.RANGE ?? maneuverDetails.phase;
+        const PHASE = itemDataAsIfMartialArt?.system.PHASE ?? maneuverDetails.phase;
         const RANGE = itemDataAsIfMartialArt?.system.RANGE ?? maneuverDetails.range ?? 0;
         const USEWEAPON = itemDataAsIfMartialArt?.system.USEWEAPON ?? maneuverDetails.useWeapon; // "No" if unarmed or not offensive maneuver
         const WEAPONEFFECT = itemDataAsIfMartialArt?.system.WEAPONEFFECT ?? maneuverDetails.weaponEffect; // Not be present if not offensive maneuver
