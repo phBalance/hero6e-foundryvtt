@@ -357,6 +357,118 @@ export function registerStatusEffectTests(quench) {
                     }
                 });
 
+                it("Prone halves DCV value as well as max on 6e", async function () {
+                    const actor6e = await Actor.create({
+                        name: "_Quench_6e_Prone_Tester",
+                        type: "pc",
+                        img: "icons/svg/mystery-man.svg",
+                        system: { is5e: false },
+                    });
+
+                    try {
+                        const dcvMaxBefore = actor6e.system.characteristics.dcv.max;
+                        assert.ok(dcvMaxBefore > 0, "6e actor starts with a positive DCV max.");
+                        assert.strictEqual(
+                            actor6e.system.characteristics.dcv.value,
+                            dcvMaxBefore,
+                            "6e actor starts with DCV value at max.",
+                        );
+
+                        const hookPromise = waitForHook("createActiveEffect");
+                        await actor6e.toggleStatusEffect(effectsObj.proneEffect.id, { active: true });
+                        await hookPromise;
+
+                        const dcv = actor6e.system.characteristics.dcv;
+                        assert.ok(dcv.max < dcvMaxBefore, "Prone lowered the DCV max.");
+                        assert.strictEqual(dcv.value, dcv.max, "DCV value follows the halved max on 6e.");
+
+                        await actor6e.toggleStatusEffect(effectsObj.proneEffect.id, { active: false });
+                        assert.strictEqual(
+                            actor6e.system.characteristics.dcv.max,
+                            dcvMaxBefore,
+                            "DCV max restored after prone removed.",
+                        );
+                        assert.strictEqual(
+                            actor6e.system.characteristics.dcv.value,
+                            dcvMaxBefore,
+                            "DCV value restored after prone removed.",
+                        );
+                    } finally {
+                        await actor6e.delete();
+                    }
+                });
+
+                it("KO cascade prone effect carries its DCV halving changes", async function () {
+                    const hookPromise = waitForHook("createActiveEffect");
+                    await quenchActor.toggleStatusEffect(effectsObj.knockedOutEffect.id, { active: true });
+                    await hookPromise;
+
+                    const proneAE = quenchActor.effects.find((e) => e.statuses.has(effectsObj.proneEffect.id));
+                    assert.ok(proneAE, "Prone effect created via KO cascade.");
+
+                    // V13 keeps changes at effect.changes; V14 moved them to effect.system.changes
+                    const changes = proneAE.changes?.length ? proneAE.changes : (proneAE.system?.changes ?? []);
+                    assert.ok(
+                        changes.some((change) => change.key === "system.characteristics.dcv.max"),
+                        "Cascaded prone effect kept its DCV halving change.",
+                    );
+                });
+
+                it("Post-Segment-12 recovery does not wake a KO'd character", async function () {
+                    await quenchActor.update({ "system.characteristics.stun.value": 20 });
+                    await quenchActor.update({ "system.characteristics.stun.value": -5 });
+                    assert.ok(quenchActor.statuses.has(effectsObj.knockedOutEffect.id), "Actor KO'd at negative STUN.");
+
+                    await quenchActor.update(
+                        { "system.characteristics.stun.value": 10 },
+                        { preventRecoverFromStun: true },
+                    );
+                    assert.ok(
+                        quenchActor.statuses.has(effectsObj.knockedOutEffect.id),
+                        "preventRecoverFromStun keeps the actor KO'd despite positive STUN.",
+                    );
+
+                    await quenchActor.update({ "system.characteristics.stun.value": 12 });
+                    assert.ok(
+                        !quenchActor.statuses.has(effectsObj.knockedOutEffect.id),
+                        "Normal recovery clears knockedOut.",
+                    );
+                });
+
+                it("BODY at or below negative max marks dead; recovery clears it", async function () {
+                    const bodyMax = quenchActor.system.characteristics.body.max;
+                    assert.ok(bodyMax > 0, "Actor starts with a positive BODY max.");
+
+                    await quenchActor.update({ "system.characteristics.body.value": -bodyMax });
+                    assert.ok(quenchActor.statuses.has(effectsObj.deadEffect.id), "Actor marked dead at -BODY max.");
+
+                    await quenchActor.update({ "system.characteristics.body.value": bodyMax });
+                    assert.ok(
+                        !quenchActor.statuses.has(effectsObj.deadEffect.id),
+                        "Dead cleared when BODY recovers above the threshold.",
+                    );
+                });
+
+                it("fullHealth preserves permanent (durationless) effects", async function () {
+                    await quenchActor.createEmbeddedDocuments("ActiveEffect", [
+                        { name: "_Quench_Permanent_Buff", img: "icons/svg/upgrade.svg" },
+                    ]);
+                    await quenchActor.toggleStatusEffect(effectsObj.stunEffect.id, { active: true });
+
+                    const hookPromise = waitForHook("deleteActiveEffect");
+                    await quenchActor.fullHealth();
+                    await hookPromise;
+
+                    assert.ok(
+                        !quenchActor.statuses.has(effectsObj.stunEffect.id),
+                        "Temporary status effect removed by fullHealth.",
+                    );
+                    assert.ok(
+                        quenchActor.effects.some((e) => e.name === "_Quench_Permanent_Buff"),
+                        "Permanent effect survives fullHealth.",
+                    );
+                });
+
                 it("Re-tint texture when knockedOut actor changes type", async function () {
                     const npcTestActor = await Actor.create({
                         name: "_Quench_Status_NPC_Tester",
