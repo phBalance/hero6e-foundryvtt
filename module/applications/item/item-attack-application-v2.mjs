@@ -180,7 +180,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
             // If so assume we are targeting the entangle
             const entangles = [];
             for (const target of this.data.targets) {
-                const ae = target.actor?.temporaryEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
+                const ae = target.actor?.appliedEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
                 if (ae) {
                     entangles.push(ae);
                 }

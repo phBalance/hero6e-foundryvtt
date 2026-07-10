@@ -2522,7 +2522,7 @@ export async function _onRollDamage(event) {
     for (const id of targetIdsArray) {
         const tokenDocument = canvas.scene.tokens.get(id);
         if (tokenDocument) {
-            const entangleAE = tokenDocument.actor?.temporaryEffects?.find(
+            const entangleAE = tokenDocument.actor?.appliedEffects?.find(
                 (o) => o.flags[game.system.id]?.XMLID === "ENTANGLE",
             );
             const targetToken = {
@@ -3073,7 +3073,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
             // If entangle is transparent to damage, damage actor too
             if (targetToken.targetEntangle) {
                 const token = canvas.scene.tokens.get(targetToken.tokenId);
-                const ae = token.actor?.temporaryEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
+                const ae = token.actor?.appliedEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
                 if (ae) {
                     const { item: entangle } = rehydrateAttackItem(
                         ae.flags[game.system.id].dehydratedEntangleItem,
@@ -3201,7 +3201,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     }
 
     // Target an ENTANGLE?
-    const entangleAE = targetToken.actor.temporaryEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
+    const entangleAE = targetToken.actor.appliedEffects.find((o) => o.flags[game.system.id]?.XMLID === "ENTANGLE");
     if (entangleAE) {
         // Targeting ENTANGLE based on attack-application checkbox
         let targetEntangle = targetData.targetEntangle;
@@ -3772,6 +3772,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         changes: foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.entangledEffect.changes),
         name: `${item.system.XMLID} ${body} BODY ${entangleDefense.string}`,
         description: item.system.description,
+        showIcon: 2, // always
         flags: {
             [game.system.id]: {
                 entangleDefense,
