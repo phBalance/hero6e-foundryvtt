@@ -117,8 +117,9 @@
                                 <span data-visibility="gm"> ({{target.toHitChar}} {{target.value}}) </span> 
                             </div>
 
-                            {{#if @root.hapsEnabled}}
-                                {{#if (eq (toLowerCase target.result.hit) "miss")}} 
+                            {{!-- HAP spending needs a real target; targetless rolls have no uuid --}}
+                            {{#if (and @root.hapsEnabled target.uuid)}}
+                                {{#if (eq (toLowerCase target.result.hit) "miss")}}
                                     <div class="flexrow action-row"> 
                                         <button data-action="spendHaps" data-by="{{target.result.by}}">Spend {{target.result.by}} HAP</button> 
                                     </div> 
