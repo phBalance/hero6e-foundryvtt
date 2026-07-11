@@ -264,6 +264,7 @@ export async function expireEffects(actor, expiresOn) {
                     actor,
                     token: tokenEducatedGuess({ actor }),
                 }),
+                whisper: whisperUserTargetsForActor(actor),
             });
         }
     };
