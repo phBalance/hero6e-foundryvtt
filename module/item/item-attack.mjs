@@ -1832,12 +1832,11 @@ export async function _onRollKnockback(event) {
     // up prone at the location where his Knockback travel stops.
 
     const html = `
-    <form autocomplete="off">
         <p>
             A character takes 1d6 damage for every ${getRoundedDownDistanceInSystemUnits(
                 2,
                 token.actor.is5e,
-            )}${getSystemDisplayUnits(token.actor.is5e)} they are knocked into a solid object, 
+            )}${getSystemDisplayUnits(token.actor.is5e)} they are knocked into a solid object,
             to a maximum of the PD + BODY of the object hit.
         </p>
         <p>
@@ -1849,25 +1848,21 @@ export async function _onRollKnockback(event) {
         <p>
             The character typically winds up prone.
         </p>
-        
+        <div class="form-group">
+            <label>KB damage dice</label>
+            <input type="text" name="knockbackDice" value="${Math.max(
+                0,
+                Math.floor(knockbackResultTotal / 2),
+            )}" data-dtype="Number" />
+        </div>
         <p>
-            <div class="form-group">
-                <label>KB damage dice</label>
-                <input type="text" name="knockbackDice" value="${Math.max(
-                    0,
-                    Math.floor(knockbackResultTotal / 2),
-                )}" data-dtype="Number" />
-            </div>
+            NOTE: Don't forget to move the token to the appropriate location as KB movement is not automated.
         </p>
-
-        <p>
-            NOTE: Don't forget to move the token to the appropriate location as KB movement is not automated. 
-        </p>
-    </form>
     `;
 
     await foundry.applications.api.DialogV2.wait({
         window: { title: `Confirm Knockback details` },
+        position: { width: 400 },
         content: html,
         buttons: [
             {
