@@ -1032,7 +1032,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // =========================================================================
         // 2. AUTOMATED STATUS CONDITION & COMBAT TRACKER MANAGEMENT
         // =========================================================================
-        if (changed?.system?.characteristics?.stun?.value !== undefined || changed.type !== undefined) {
+        const stunValueChanged = changed?.system?.characteristics?.stun?.value !== undefined;
+        // V13 echoes the document's unchanged type into every update delta (V14 does not),
+        // so only a real type mutation counts. Actors whose type has no STUN characteristic
+        // (vehicles, bases) cannot be stunned or knocked out; without this guard their
+        // missing STUN reads as 0 and every update would knock them out.
+        const typeChanged = changed.type !== undefined && changed.type !== this.type;
+        const actorTypeSupportsStun = getCharacteristicInfoArrayForActor(this).some((info) => info.key === "STUN");
+        if ((stunValueChanged || typeChanged) && actorTypeSupportsStun) {
             // Grab the incoming STUN value payload, or fall back to the actor's current value
             const nextStun = changed.system?.characteristics?.stun?.value ?? this.getCharacteristic("stun")?.value ?? 0;
             const currentStun = this.getCharacteristic("stun")?.value || 0;
@@ -1062,7 +1069,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             // RULE C: Falling below threshold, OR crossing threshold boundaries via type mutations
             else if (
                 (nextStun < nextThreshold && currentStun >= currentThreshold && currentStun <= 0) ||
-                (changed.type !== undefined && nextStun <= 0)
+                (typeChanged && nextStun <= 0)
             ) {
                 // Re-triggering ensures toggleStatusEffect catches the new threshold data frame
                 // and shifts the texture tint smoothly between KO_DEFAULT_TINT and KO_COMBAT_TINT
