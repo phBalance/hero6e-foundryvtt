@@ -750,70 +750,103 @@ Hooks.on("getActorDirectoryEntryContext", (_dialog, html) => {
 let secondsSinceRecovery = 0;
 
 /**
+ * Cheap non-empty equivalent of actor.getTemporaryEffects() (no Array.from/filter/sort).
+ * Intentionally ignores `active` so suppressed temporary item effects still qualify.
+ * @param {HeroSystem6eActor} actor
+ * @returns {boolean}
+ */
+function actorHasTemporaryEffects(actor) {
+    for (const ae of actor.allApplicableEffects()) {
+        if (ae.isTemporary) return true;
+    }
+    return false;
+}
+
+// Foundry does not await async hook callbacks, so rapid time advances (combat clicking,
+// large calendar jumps) can otherwise overlap and double-process the same effects.
+let worldTimeWorkChain = Promise.resolve();
+
+/**
  * Handle follow-up actions when the official World time is changed
  * @param {number} worldTime      The new canonical World time.
- * @param {object} options        Options passed from the requesting client where the change was made
- * @param {string} userId         The ID of the User who advanced the time
+ * @param {number} dt             The time delta in seconds.
  */
-Hooks.on("updateWorldTime", async (worldTime, options) => {
-    //console.log(`updateWorldTime`, game.time.worldTime);
-    const _start = Date.now();
-
+Hooks.on("updateWorldTime", (worldTime, dt) => {
     // Ensure that this only runs for 1 user to we don't have multiple user attempting to
     // initiate actions. For simplicity we will limit it to the GM.
     if (game.user !== game.users.activeGM) return;
 
-    let deltaSeconds = parseInt(options || 0);
+    worldTimeWorkChain = worldTimeWorkChain
+        .then(() => _processWorldTimeUpdate(dt))
+        .catch((e) => console.error(`updateWorldTime processing failed: ${e.message}`, e));
+});
+
+async function _processWorldTimeUpdate(dt) {
+    //console.log(`updateWorldTime`, game.time.worldTime);
+    const _start = Date.now();
+
+    const deltaSeconds = parseInt(dt || 0);
     secondsSinceRecovery += deltaSeconds;
 
-    const multiplier = Math.floor(secondsSinceRecovery / 12);
-    secondsSinceRecovery = Math.max(0, secondsSinceRecovery - secondsSinceRecovery * multiplier);
-
-    // Charges and Body use days
-    const dt = new Date(worldTime * 1000);
-    dt.setHours(0);
-    dt.setMinutes(0);
-    dt.setSeconds(0);
-    dt.setMilliseconds(0);
+    // Recoveries occur every 12 seconds; bank any remainder toward the next advance.
+    const multiplier = Math.max(0, Math.floor(secondsSinceRecovery / 12));
+    secondsSinceRecovery = Math.max(0, secondsSinceRecovery - 12 * multiplier);
 
     await reRenderSheetsWithTemporyEffects();
 
     // All actors plus any unlinked actors in active scene
     const _actorCollection = Date.now();
     const actors = Array.from(game.actors);
+    const worldActorIds = new Set(actors.map((o) => o.id));
     const currentTokens = game.scenes.current?.tokens || [];
     for (const token of currentTokens) {
-        if (token.actor && (!token.actorLink || !actors.find((o) => o.id === token.actor.id))) {
+        if (token.actor && (!token.actorLink || !worldActorIds.has(token.actor.id))) {
             actors.push(token.actor);
         }
     }
     console.debug(`updateWorldTime.actorCollection took ${Date.now() - _actorCollection} ms`);
 
+    // Recovery only matters when 12+ seconds have accumulated; _outOfCombatRecovery
+    // keeps its own inCombat/automation gates.
+    const runRecovery = multiplier > 0;
+    let processedCount = 0;
     const _startExpire1 = {};
     for (const actor of actors) {
         try {
-            // Expire effects that expire on segment end
-            const _ee = Date.now();
-            await expireEffects(actor, "segment");
-            _startExpire1.ee = (_startExpire1.ee ?? 0) + (Date.now() - _ee);
+            // Most actors need nothing on a time tick.
+            const hasTempEffects = actorHasTemporaryEffects(actor);
+            if (!hasTempEffects && !runRecovery) continue;
+            processedCount++;
 
-            // Out of combat recovery.  When SimpleCalendar is used to advance time.
-            // This simple routine only handles increments of 12 seconds or more.
-            const _oocr = Date.now();
-            await _outOfCombatRecovery(actor, multiplier);
-            _startExpire1.oocr = (_startExpire1.oocr ?? 0) + (Date.now() - _oocr);
+            if (hasTempEffects) {
+                // Expire effects that expire on segment end
+                const _ee = Date.now();
+                await expireEffects(actor, "segment");
+                _startExpire1.ee = (_startExpire1.ee ?? 0) + (Date.now() - _ee);
+            }
 
-            // Expire continuing charges
-            const _ecc = Date.now();
-            await _expireContinuingCharges(actor);
-            _startExpire1.ecc = (_startExpire1.ecc ?? 0) + (Date.now() - _ecc);
+            if (runRecovery) {
+                // Out of combat recovery.  When SimpleCalendar is used to advance time.
+                // This simple routine only handles increments of 12 seconds or more.
+                const _oocr = Date.now();
+                await _outOfCombatRecovery(actor, multiplier);
+                _startExpire1.oocr = (_startExpire1.oocr ?? 0) + (Date.now() - _oocr);
+            }
+
+            if (hasTempEffects) {
+                // Expire continuing charges
+                const _ecc = Date.now();
+                await _expireContinuingCharges(actor);
+                _startExpire1.ecc = (_startExpire1.ecc ?? 0) + (Date.now() - _ecc);
+            }
         } catch (e) {
             console.error(e, actor, actor?.temporaryEffects[0]);
         }
     }
-    console.debug(`updateWorldTime.expireEffects took ${_startExpire1.ee} ms`);
-    console.debug(`updateWorldTime.outOfCombatRecovery took ${_startExpire1.oocr} ms`);
-    console.debug(`updateWorldTime.expireContinuingCharges took ${_startExpire1.ecc} ms`);
+    console.debug(`updateWorldTime processed ${processedCount}/${actors.length} actors`);
+    console.debug(`updateWorldTime.expireEffects took ${_startExpire1.ee ?? 0} ms`);
+    console.debug(`updateWorldTime.outOfCombatRecovery took ${_startExpire1.oocr ?? 0} ms`);
+    console.debug(`updateWorldTime.expireContinuingCharges took ${_startExpire1.ecc ?? 0} ms`);
 
     // If there are lots of actors updateWorldTime may result in performance issues.
     // Notify GM when this is a concern.
@@ -828,7 +861,7 @@ Hooks.on("updateWorldTime", async (worldTime, options) => {
     } else {
         console.debug(`updateWorldTime took ${deltaMs} ms`);
     }
-});
+}
 
 async function reRenderSheetsWithTemporyEffects() {
     try {
@@ -859,6 +892,7 @@ async function reRenderSheetsWithTemporyEffects() {
 }
 
 async function _expireContinuingCharges(actor) {
+    let needsRefresh = false;
     for (const aeWithCharges of actor.temporaryEffects.filter((o) =>
         o.parent instanceof HeroSystem6eItem ? o.parent.findModsByXmlid("CONTINUING") : false,
     )) {
@@ -869,9 +903,10 @@ async function _expireContinuingCharges(actor) {
         if (game.time.worldTime >= aeWithCharges.flags[game.system.id]?.startTime + aeWithCharges.duration.seconds) {
             await aeWithCharges.parent.toggle();
         } else {
-            if (game.ready) game[HEROSYS.module].effectPanel.refresh();
+            needsRefresh = true;
         }
     }
+    if (needsRefresh && game.ready) game[HEROSYS.module].effectPanel.refresh();
 }
 
 /**
