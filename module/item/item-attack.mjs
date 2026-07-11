@@ -2222,8 +2222,8 @@ async function _rollApplyKnockback(token, knockbackDice) {
     const damageDetail = await _calcDamage(damageRoller, knockbackAttackItem, damageData);
     damageDetail.effects = `${damageDetail.effects || ""} Prone`.replace("; ", "").trim();
 
-    const CANNOTBESTUNNED = token.actor.items.find((o) => o.system.XMLID === "AUTOMATON");
-    if (CANNOTBESTUNNED) {
+    const specialAutomatonPowers = token.actor.getAutomatonSpecialPowers();
+    if (specialAutomatonPowers.takesNoStunButLosesFunctionOnBody || specialAutomatonPowers.takesNoStun) {
         defenseTags.push({
             name: "TAKES NO STUN",
             value: "immune",
@@ -3400,15 +3400,10 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // A number of actor types (Base, Vehicle) don't have STUN. Other actor types (e.g. automaton, npc, pc) sometimes don't have
     // STUN. Consider these cases and eliminate the STUN portion of things if it's one of these cases but provide information why.
-    const hasStun1 = !!targetToken.actor.items.find(
-        (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN1",
-    ); // AUTOMATION Takes No STUN (loses abilities when takes BODY)
-    const hasStun2 = !!targetToken.actor.items.find(
-        (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "NOSTUN2",
-    ); // Takes No STUN
+    const specialAutomatonPowers = targetToken.actor.getAutomatonSpecialPowers();
     const hasStunCharacteristic = targetToken.actor.hasCharacteristic("STUN");
     if (damageDetail.stun > 0) {
-        if (hasStun1) {
+        if (specialAutomatonPowers.takesNoStunButLosesFunctionOnBody) {
             defenseTags.push({
                 name: "TAKES NO STUN",
                 value: "immune",
@@ -3418,7 +3413,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
             damageDetail.effects = damageDetail.effects + "Takes No STUN (loses abilities when takes BODY); ";
             damageDetail.stun = 0;
-        } else if (hasStun2) {
+        } else if (specialAutomatonPowers.takesNoStun) {
             defenseTags.push({
                 name: "TAKES NO STUN",
                 value: "immune",
@@ -3446,14 +3441,14 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     // See if there was any STUN done (i.e. 0 STUN attack can't STUN someone with zero or negative CON)
     // See if token has CON.  Notice we check raw actor type from config, not current actor props as
     // this token may have originally been a PC, and changed to a BASE.
-    // check if target is stunned.  Must have CON
+    // check if target is stunned.  Must have CON.
     const hasCon = targetToken.actor.hasCharacteristic("CON");
     if (damageDetail.stun > 0 && game.settings.get(HEROSYS.module, "stunned") && hasCon) {
         // determine if target was Stunned
-        const CANNOTBESTUNNED = targetToken.actor.items.find(
-            (o) => o.system.XMLID === "AUTOMATON" && o.system.OPTION === "CANNOTBESTUNNED",
-        );
-        if (damageDetail.stun > targetToken.actor.system.characteristics.con.value && !CANNOTBESTUNNED) {
+        if (
+            damageDetail.stun > targetToken.actor.system.characteristics.con.value &&
+            !specialAutomatonPowers.cannotBeStunned
+        ) {
             damageDetail.effects = damageDetail.effects + "inflicts Stunned; ";
 
             // none: "No Automation",
@@ -3556,11 +3551,6 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
             (targetToken?.document ?? targetToken).actor.items.find(
                 (o) => o.system.XMLID === "BREAKFALL" && o.isActive,
             ),
-        // canAcrobatics:
-        //     !damageDetail.preKnockBackProneStatus &&
-        //     (targetToken?.document ?? targetToken).actor.items.find(
-        //         (o) => o.system.XMLID === "ACROBATICS" && o.isActive,
-        //     ),
 
         // misc
         tags: defenseTags.filter((o) => !o.options?.knockback),
@@ -3568,7 +3558,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         attackerToken: tokenEducatedGuess({ action, actor: item.actor }),
         targetTokenDocument: targetToken?.document ?? targetToken,
         actionData: actionToJSON(action),
-        showRemovePowerFromAutomaton: hasStun1 && damageDetail.body > 0,
+        showRemovePowerFromAutomaton: specialAutomatonPowers.takesNoStunButLosesFunctionOnBody && damageDetail.body > 0,
     };
 
     // render card

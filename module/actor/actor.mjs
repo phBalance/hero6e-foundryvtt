@@ -331,6 +331,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         this.composeMemoizableObjectFunction("analyzeEndurance");
         this.composeMemoizableObjectFunction("getActorCharacterAndActivePoints");
+        this.composeMemoizableObjectFunction("getAutomatonItems");
+        this.composeMemoizableObjectFunction("getAutomatonSpecialPowers");
 
         // The 5e recompute below reads characteristic nodes, which may not exist yet mid-construction.
         if (!this.system?.characteristics) return;
@@ -1068,8 +1070,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (changed?.system?.characteristics?.body?.value !== undefined && this.getCharacteristic("body")) {
             const nextBody = changed.system.characteristics.body.value ?? this.getCharacteristic("body").value ?? 0;
             const nextBodyMax = changed.system.characteristics.body.max ?? this.getCharacteristic("body").max ?? 0;
-            const isAutomaton =
-                this.type === "automaton" || this.items.some((item) => item.system.XMLID === "AUTOMATON");
+            const isAutomaton = this.type === "automaton" || this.getAutomatonItems().length > 0;
 
             if (isAutomaton || ["pc", "npc"].includes(this.type)) {
                 const deathThreshold = isAutomaton ? 0 : -nextBodyMax;
@@ -2473,11 +2474,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (!this.system.is5e) return base;
 
         // TODO: Can this be combined with getCharacteristicInfoArrayForActor? See also actor-sheet.mjs changes
-        const isAutomatonWithNoStun = !!this.items.find(
-            (power) =>
-                power.system.XMLID === "AUTOMATON" &&
-                (power.system.OPTION === "NOSTUN1" || power.system.OPTION === "NOSTUN2"),
-        );
+        const specialAutomatonPowers = this.getAutomatonSpecialPowers();
+        const isAutomatonWithNoStun =
+            specialAutomatonPowers.takesNoStunButLosesFunctionOnBody || specialAutomatonPowers.takesNoStun;
 
         const _str = this.appliedEffects
             .filter(
@@ -3589,19 +3588,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     await flight.toggle();
                 }
             }
-
-            // // Set newly created items to be non-active when uses END/CHARGES/MP
-            // for (const item of this.items) {
-            //     if (
-            //         item.system.end > 0 ||
-            //         (item.system.numCharges.max > 0 && !item.parentItem?.system.XMLID === "MULTIPOWER")
-            //     ) {
-            //         item.system.active = false;
-            //         if (this.id) {
-            //             await item.update({ [`system.active`]: item.system.active });
-            //         }
-            //     }
-            // }
 
             uploadPerformance.actorPostUpload = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
@@ -5126,5 +5112,66 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 tagObjectForPersistence(source);
             }
         }
+    }
+
+    /**
+     * Get all items relating to special automaton powers for this actor.
+     *
+     * @returns
+     */
+    getAutomatonItems() {
+        return {
+            automaton: this.items.filter((item) => item.system.XMLID === "AUTOMATON"),
+            noHitLocations: this.items.filter((item) => item.system.XMLID === "NOHITLOCATIONS"),
+            doesNotBleed: this.items.filter((item) => item.system.XMLID === "DOESNOTBLEED"),
+        };
+    }
+
+    /**
+     * Provide a more processed list of special automaton powers for this actor.
+     *
+     * @returns
+     */
+    getAutomatonSpecialPowers() {
+        const automatonItems = this.getAutomatonItems();
+
+        const specialAutomatonPowers = {
+            cannotBeStunned: false,
+            doesNotBleed: false,
+            noHitLocations: false,
+            takesNoStunButLosesFunctionOnBody: false,
+            takesNoStun: false,
+        };
+
+        // Examine all AUTOMATON powers. An error to have more than 1 defined.
+        automatonItems.automaton.forEach((automatonItem) => {
+            const automatonItemOptionId = automatonItem.system.OPTIONID;
+            switch (automatonItemOptionId) {
+                case "CANNOTBESTUNNED":
+                    specialAutomatonPowers.cannotBeStunned = true;
+                    break;
+
+                case "NOSTUN1":
+                    specialAutomatonPowers.takesNoStunButLosesFunctionOnBody = true;
+                    break;
+
+                case "NOSTUN2":
+                    specialAutomatonPowers.takesNoStun = true;
+                    break;
+
+                default:
+                    console.error(`Unknown AUTOMATON OPTIONID ${automatonItemOptionId}`);
+            }
+        });
+
+        if (automatonItems.doesNotBleed.length > 0) {
+            specialAutomatonPowers.doesNotBleed = true;
+        }
+
+        if (automatonItems.noHitLocations.length > 0) {
+            specialAutomatonPowers.noHitLocations = true;
+        }
+
+        return specialAutomatonPowers;
     }
 }
