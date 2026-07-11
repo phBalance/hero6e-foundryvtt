@@ -725,9 +725,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // 1. Force overlay status based on config
         if (overlayEffects.includes(statusId)) overlay = true;
 
-        // 2. Lockout rules if already dead
+        // 2. Lockout rules: overlay priority is Dead > Knocked Out > Stunned, and a
+        // Knocked Out character cannot also be Stunned.
         const isDead = this.statuses.has(effectsObj.deadEffect.id);
         if (isDead && active && [effectsObj.knockedOutEffect.id, effectsObj.stunEffect.id].includes(statusId)) {
+            return false;
+        }
+        const isKnockedOut = this.statuses.has(effectsObj.knockedOutEffect.id);
+        if (isKnockedOut && active && statusId === effectsObj.stunEffect.id) {
             return false;
         }
 
