@@ -558,6 +558,17 @@ export function toHHMMSS(secs) {
 }
 
 /**
+ * TokenDocument uuid for a Token placeable, TokenDocument, or PrototypeToken.
+ * Token placeables only expose a uuid via their document; PrototypeTokens have none.
+ *
+ * @param {HeroSystem6eToken | HeroSystem6eTokenDocument | PrototypeToken | null} token
+ * @returns {string | null}
+ */
+export function getTokenUuid(token) {
+    return token?.document?.uuid ?? token?.uuid ?? null;
+}
+
+/**
  * Given information, find the best guess for the token in the scene which we should use.
  *
  * NOTE: Typically we want the token that is making an attack or receiving the attack so that we can

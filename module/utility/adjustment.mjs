@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { getPowerInfo, hdcTimeOptionIdToSeconds, squelch, tokenEducatedGuess } from "./util.mjs";
+import { getPowerInfo, getTokenUuid, hdcTimeOptionIdToSeconds, squelch, tokenEducatedGuess } from "./util.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { calculateDicePartsForItem } from "./damage.mjs";
 import { HeroCompatibility } from "../utility/compatibility.mjs";
@@ -342,7 +342,7 @@ function _createNewAdjustmentEffect(options) {
                 targetDisplay: fromUuidSync(targetPower?.uuid)?.XMLID || potentialCharacteristic,
                 key: targetPower?.system?.XMLID || potentialCharacteristic,
                 itemTokenName,
-                attackerTokenUuid: _attackerToken?.uuid,
+                attackerTokenUuid: getTokenUuid(_attackerToken),
                 createTime: game.time.worldTime,
                 initialCostPerActivePoint: determineCostPerActivePoint(
                     potentialCharacteristic,

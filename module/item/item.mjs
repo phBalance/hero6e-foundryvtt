@@ -38,6 +38,7 @@ import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits } from "../uti
 import {
     foundryVttDeleteProperty,
     getPowerInfo,
+    getTokenUuid,
     hdcTimeOptionIdToSeconds,
     squelch,
     tokenEducatedGuess,
@@ -1969,7 +1970,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     async changeVpp(options = {}) {
-        await ItemVppConfig.create({ item: this, token: options.token, tokenUuid: options.token?.uuid });
+        await ItemVppConfig.create({ item: this, token: options.token, tokenUuid: getTokenUuid(options.token) });
     }
 
     isPerceivable(perceptionSuccess) {

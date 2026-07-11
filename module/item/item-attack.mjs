@@ -40,7 +40,7 @@ import {
     getRoundedDownDistanceInSystemUnits,
     getSystemDisplayUnits,
 } from "../utility/units.mjs";
-import { getPowerInfo, tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
+import { getPowerInfo, getTokenUuid, tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -1238,10 +1238,9 @@ async function doSingleTargetActionToHit(action, options) {
         actorId: actor.id,
         actorUuid: actor.uuid,
         attackerTokenId: token?.id,
-        // token may be a Token placeable, which only exposes its uuid via its document
-        attackerTokenUuid: token?.document?.uuid ?? token?.uuid,
+        attackerTokenUuid: getTokenUuid(token),
         tokenId: token?.id,
-        tokenUuid: token?.document?.uuid ?? token?.uuid,
+        tokenUuid: getTokenUuid(token),
         actionData: actionToJSON(action),
 
         //item,
