@@ -58,7 +58,6 @@ import { HeroSystem6eItem, initializeItemHandlebarsHelpers } from "./item/item.m
 import SettingsHelpers from "./settings/settings-helpers.mjs";
 
 import { testingMockRollInitialize } from "./heroRoller/dice-testing-helper.mjs";
-import { HeroSystem6eEndToEndTest } from "./testing/end-to-end.mjs";
 import "./testing/testing-main.mjs";
 
 import { HeroSystem6eToken, HeroSystem6eTokenDocument } from "./token/actor-token.mjs";
@@ -629,9 +628,6 @@ Hooks.once("ready", async function () {
         // Update lastMigration
         await game.settings.set(game.system.id, "lastMigration", game.system.version.replace("-alpha", ""));
     }
-
-    // Testing
-    window.HeroSystem6eEndToEndTest = new HeroSystem6eEndToEndTest();
 });
 
 // New Actor Dialog
