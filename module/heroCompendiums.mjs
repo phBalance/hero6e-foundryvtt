@@ -7,7 +7,8 @@ export async function CreateHeroCompendiums() {
     if (!game.user.isGM) return;
 
     try {
-        await CreateHeroItems();
+        await CreateHeroItems("five");
+        await CreateHeroItems("six");
         await CreateHeroMacros();
     } catch (e) {
         console.error(e);
@@ -88,9 +89,23 @@ if(user_token)
     await pack.configure({ locked: true });
 }
 
-async function CreateHeroItems() {
-    const label = "HeroItems";
+async function CreateHeroItems(edition) {
+    // 5e vs 6e
+    edition ??= game.settings.get(HEROSYS.module, "DefaultEdition");
+    const powers = edition === "five" ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
+    const bogusActor = {
+        system: { is5e: edition === "five" ? true : false },
+    };
+
+    const label = `HeroItems ${edition === "five" ? "5e" : "6e"}`;
     const metadata = { label: label, name: label.slugify({ strict: true }), type: "Item" };
+
+    // Delete legacy edition-less HeroItem compendium
+    const legacyHeroItemPack = game.packs.get("world.heroitems");
+    if (legacyHeroItemPack) {
+        await legacyHeroItemPack.configure({ locked: false });
+        await legacyHeroItemPack.deleteCompendium();
+    }
 
     // Delete compendium and re-create it.
     let pack = game.packs.get(`world.${metadata.name}`);
@@ -103,13 +118,6 @@ async function CreateHeroItems() {
     if (pack.locked) {
         await pack.configure({ locked: false });
     }
-
-    // 5e vs 6e
-    const DefaultEdition = game.settings.get(HEROSYS.module, "DefaultEdition");
-    const powers = DefaultEdition === "five" ? CONFIG.HERO.powers5e : CONFIG.HERO.powers6e;
-    const bogusActor = {
-        system: { is5e: DefaultEdition === "five" ? true : false },
-    };
 
     // POWERS
     const folderPower = await Folder.createDocuments(
