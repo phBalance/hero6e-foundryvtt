@@ -37,6 +37,7 @@ Hooks.on("quenchReady", async (quench) => {
         { register5eCalculatedActiveEffectAutomationTests },
         { registerActorCharacteristicTests },
         { registerAdjustmentFadeTests },
+        { registerItemEditionTests },
     ] = await Promise.all([
         import("./testing-automaton.mjs"),
         import("./testing-base.mjs"),
@@ -59,6 +60,7 @@ Hooks.on("quenchReady", async (quench) => {
         import("./testing-5e-calculated-active-effect.mjs"),
         import("./testing-default-characteristics.mjs"),
         import("./testing-adjustment-fade.mjs"),
+        import("./testing-item-edition.mjs"),
     ]);
 
     registerGlobalSetup(quench);
@@ -84,6 +86,7 @@ Hooks.on("quenchReady", async (quench) => {
     register5eCalculatedActiveEffectAutomationTests(quench);
     registerCombatTests(quench);
     registerAdjustmentFadeTests(quench);
+    registerItemEditionTests(quench);
 
     registerGlobalTeardown(quench);
 });

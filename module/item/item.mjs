@@ -336,8 +336,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             }
         }
 
+        // Keep the item's own edition when there is no actor to inherit from (e.g. dragging
+        // an actor's 5e power to the Item sidebar must not restamp it with the world default).
         const is5e =
-            (options.is5e ?? this.actor?.is5e ?? game.settings.get(HEROSYS.module, "DefaultEdition") === "five")
+            (options.is5e ??
+            this.actor?.is5e ??
+            data.system?.is5e ??
+            game.settings.get(HEROSYS.module, "DefaultEdition") === "five")
                 ? true
                 : false;
 
@@ -7596,6 +7601,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             if (failure.severity === CONFIG.HERO.VALIDATION_SEVERITY.ERROR) {
                 return accum + 1;
             }
+            return accum;
         }, 0);
 
         return numErrorInValidationFailures === 0;
@@ -7607,6 +7613,17 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         const validationFailureMessages = [];
+
+        // Without baseInfo the is* type getters below throw. Typically an item stamped with
+        // the wrong edition (e.g. a 5e-only XMLID like ARMOR marked as 6e).
+        if (!this.baseInfo) {
+            validationFailureMessages.push({
+                itemId: this.id,
+                message: `${this.detailedName()} is not a known ${this.is5e ? "5e" : "6e"} ${this.type} and cannot be converted.`,
+                severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+            });
+            return validationFailureMessages;
+        }
 
         // Verify the item is valid for the targetActor's type
         validationFailureMessages.push(...this.validationForActor(targetActor));
