@@ -1,11 +1,11 @@
-{{log "HEROSYS item-toHit-block-card" this}}
+{{!-- {{log "HEROSYS item-toHit-block-card" this}} --}}
 <div class="hero chat-card item-card to-hit-card">
 
     <span class="flavor-text">
         {{! Attack Name }}
         <header class="card-header attack flexrow">
-            <img src="{{item.img}}" title="{{item.name}}" width="36" height="36" />
-            <h3 class="item-name">{{{itemNameHtml item}}}</h3>
+            <img src="{{itemImg}}" title="{{itemName}}" width="36" height="36" />
+            <h3 class="item-name">{{{itemName}}}</h3>
         </header>
 
         {{! Show Target, if any }}
@@ -30,7 +30,7 @@
         </div>
 
         <div class="tags">
-            <span class="tag">{{item.attackDefenseVs}}</span>
+            <span class="tag">{{itemAttackDefenseVs}}</span>
         </div>
         <hr />
         <div class="tags">
