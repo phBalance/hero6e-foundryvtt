@@ -1,9 +1,20 @@
 # Releases
 
-### Version 4.3.15 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.15 20260711 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
+- FoundryVTT V14 is now supported. As always, we recommend making a backup before attempting to upgrade.
+  	- AoE now works via Scene Regions rather than Measured Templates. This has allowed us to support "Any Area" and "Surface" AoE placement and wall restrictions, and a prompt will show on phase change to delete any relevant AoE regions rather than requiring manual GM resolution. [#4225](https://github.com/dmdorman/hero6e-foundryvtt/issues/4225) [#4358](https://github.com/dmdorman/hero6e-foundryvtt/issues/4358)
+  	- HeroVision has been reimplemented for V14. There is still work being done around parts of this including token detection, but the basic functionality is live.
+  	- We are aware of issues around effect icons not appearing in some cases.
 - Add support for variable activation rolls. Variable skills should be separated with " or " (e.g. "breakfall or acrobatics") in the HDC "roll" input (5e) or "comments" input (6e). [#3873](https://github.com/dmdorman/hero6e-foundryvtt/issues/3873)
 - Most attacks show a collapsed chat message. When Heroic Action Points (HAP) are enabled you can spend HAPs and turn a miss into a hit. [#2166](https://github.com/dmdorman/hero6e-foundryvtt/issues/2166) [#3052](https://github.com/dmdorman/hero6e-foundryvtt/issues/3052) [#1978](https://github.com/dmdorman/hero6e-foundryvtt/issues/1978) [#1646](https://github.com/dmdorman/hero6e-foundryvtt/issues/1646)
+- Reworked 5e figured and calculated characteristics significantly for stability and performance purposes. Most of this is behind the scenes, but let us know if you see issues.
+- Damage chat cards now include a tooltip on hovering stun/body, breaking down how the final damage was derived
+- Damage chat cards no longer print misleading "x1 STUN/x1 BODY" lines. [#4394](https://github.com/dmdorman/hero6e-foundryvtt/issues/4394)
+- Added a migration which may improve world load times in some cases.
+- Fixed Mind Scan GM buttons ("Mind Scan details are no longer available"). [#4467](https://github.com/dmdorman/hero6e-foundryvtt/issues/4467)
+- Pressing Enter in a field on the V2 actor sheet no longer reverts other (e.g. adjusted) characteristics. This was also applied to several other dialogs. [#4427](https://github.com/dmdorman/hero6e-foundryvtt/issues/4427)
+- Fixed HDC upload failure for characters with SHAPESHIFT (BODYONLY). [#4415](https://github.com/dmdorman/hero6e-foundryvtt/issues/4415)
 
 ### Version 4.3.14 20260629
 
