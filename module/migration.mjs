@@ -355,11 +355,11 @@ export async function migrateWorld() {
     );
 
     await migrateToVersion(
-	"4.3.15",
-	lastMigration,
-	[],
-	"rebuild compendium",
-	async () => await CreateHeroCompendiums(),
+        "4.3.15",
+        lastMigration,
+        [],
+        "rebuild compendium",
+        async () => await CreateHeroCompendiums(),
     );
 
     // Placeholder for notifying GM of items missing XMLID
