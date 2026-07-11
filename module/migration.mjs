@@ -354,6 +354,14 @@ export async function migrateWorld() {
         async (messages) => await removeDehydratedManeuverItemFromMessages_4_3_15(messages),
     );
 
+    await migrateToVersion(
+	"4.3.15",
+	lastMigration,
+	[],
+	"rebuild compendium",
+	async () => await CreateHeroCompendiums(),
+    );
+
     // Placeholder for notifying GM of items missing XMLID
     // await migrateToVersion(
     //     game.system.version,
