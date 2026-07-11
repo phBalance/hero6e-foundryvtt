@@ -478,7 +478,11 @@ export function registerAdjustmentFadeTests(quench) {
 
                     // ─── SECOND 12: DOSE 1 CHRONOLOGICAL DECAY ───
                     await stepTimeOneSecond(1);
-                    await awaitEffectState("updateActiveEffect", trackingId1, (eff) => eff.changes[0].value === 3);
+                    await awaitEffectState(
+                        "updateActiveEffect",
+                        trackingId1,
+                        (eff) => parseInt(eff.changes[0].value) === 3,
+                    );
 
                     actor.reset();
                     const liveEffect1 = actor.effects.get(trackingId1);
@@ -503,7 +507,11 @@ export function registerAdjustmentFadeTests(quench) {
 
                     // ─── SECOND 13: DOSE 2 CHRONOLOGICAL DECAY ───
                     await stepTimeOneSecond(1);
-                    await awaitEffectState("updateActiveEffect", trackingId2, (eff) => eff.changes[0].value === 4);
+                    await awaitEffectState(
+                        "updateActiveEffect",
+                        trackingId2,
+                        (eff) => parseInt(eff.changes[0].value) === 4,
+                    );
 
                     actor.reset();
                     const liveEffect2 = actor.effects.get(trackingId2);
@@ -527,7 +535,11 @@ export function registerAdjustmentFadeTests(quench) {
 
                     // ─── SECOND 14: DOSE 3 CHRONOLOGICAL DECAY ───
                     await stepTimeOneSecond(1);
-                    await awaitEffectState("updateActiveEffect", trackingId3, (eff) => eff.changes[0].value === 2);
+                    await awaitEffectState(
+                        "updateActiveEffect",
+                        trackingId3,
+                        (eff) => parseInt(eff.changes[0].value) === 2,
+                    );
 
                     actor.reset();
                     const liveEffect3 = actor.effects.get(trackingId3);
