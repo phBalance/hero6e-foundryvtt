@@ -3344,7 +3344,15 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
             uploadPerformance.preItems = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
-            await this.createEmbeddedDocuments("Item", itemsToCreate, { render: false, renderSheet: false });
+            if (this.id) {
+                await this.createEmbeddedDocuments("Item", itemsToCreate, { render: false, renderSheet: false });
+            } else {
+                // Temporary actor: createEmbeddedDocuments would silently create world items.
+                for (const itemData of itemsToCreate) {
+                    const item = new HeroSystem6eItem(itemData, { parent: this });
+                    this.items.set(item.system.ID?.toString() || item.system.XMLID, item);
+                }
+            }
 
             uploadPerformance.createItems = new Date().getTime() - uploadPerformance._d;
             uploadPerformance._d = new Date().getTime();
