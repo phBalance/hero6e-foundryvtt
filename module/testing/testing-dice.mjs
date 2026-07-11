@@ -239,6 +239,24 @@ export function registerDiceTests(quench) {
                         expect(roller.getFormula()).to.equal("8d6");
                     });
 
+                    it("should serialize mock rolls as evaluated core-shaped roll data", async function () {
+                        const TestRollMock = Roll6Mock;
+
+                        const roller = new HeroRoller({}, TestRollMock).addDice(3).addNumber(2);
+                        await roller.roll();
+
+                        // ChatMessage validation JSON.parses each roll and requires `evaluated`;
+                        // stored messages must also deserialize without the testing mock classes.
+                        for (const rawRoll of roller.rawRolls()) {
+                            const data = JSON.parse(JSON.stringify(rawRoll));
+                            expect(data.evaluated).to.equal(true);
+                            expect(data.class).to.equal("HeroRoll");
+                            for (const term of data.terms) {
+                                expect(term.class in foundry.dice.terms).to.equal(true);
+                            }
+                        }
+                    });
+
                     it("should handle removing largest terms from multi term formulas and 1 part completely (explosions)", async function () {
                         const TestRollMock = Roll6Mock;
 
