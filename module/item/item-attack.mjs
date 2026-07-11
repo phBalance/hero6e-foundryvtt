@@ -2033,9 +2033,12 @@ export async function _onSpendHaps(event) {
 
     const targetContainer = button.closest(`[data-target-token-uuid]`);
     const targetTokenUuid = targetContainer?.dataset.targetTokenUuid;
-    const targetToken = await fromUuid(targetTokenUuid);
-    const targetActor = targetToken.actor;
-    if (!targetActor) throw new Error("TargetActor not found.");
+    // Older cards rendered this button for targetless rolls, which have no uuid
+    const targetToken = targetTokenUuid ? await fromUuid(targetTokenUuid) : null;
+    const targetActor = targetToken?.actor;
+    if (!targetActor) {
+        return ui.notifications.warn("HAP cannot be spent on an attack roll without a target.");
+    }
 
     // Get message
     const messageId = button.closest(`li[data-message-id]`).dataset.messageId;
