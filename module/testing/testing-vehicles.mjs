@@ -203,6 +203,11 @@ export function registerVehicleTests(quench) {
                         expect(actor.hasCharacteristic("STUN")).to.be.false;
                     });
 
+                    it("should not be knocked out by upload (stun automation)", function () {
+                        expect(actor.statuses.has("knockedOut")).to.be.false;
+                        expect(actor.statuses.has("prone")).to.be.false;
+                    });
+
                     it("should have 0m of leaping", function () {
                         expect(actor.system.characteristics.leaping.value).to.equal(0);
                     });
@@ -491,6 +496,11 @@ export function registerVehicleTests(quench) {
 
                     it("should NOT have the STUN characteristic", function () {
                         expect(actor.hasCharacteristic("STUN")).to.be.false;
+                    });
+
+                    it("should not be knocked out by upload (stun automation)", function () {
+                        expect(actor.statuses.has("knockedOut")).to.be.false;
+                        expect(actor.statuses.has("prone")).to.be.false;
                     });
 
                     it('should have 0" of leaping', function () {

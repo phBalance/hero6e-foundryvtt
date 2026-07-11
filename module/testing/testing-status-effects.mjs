@@ -94,6 +94,24 @@ export function registerStatusEffectTests(quench) {
                     assert.ok(!quenchActor.statuses.has(effectsObj.stunEffect.id), "Stunned status blocked.");
                 });
 
+                it("KnockedOut Lockout Blocks Stunned", async function () {
+                    const hookPromise = waitForHook("createActiveEffect");
+                    await quenchActor.toggleStatusEffect(effectsObj.knockedOutEffect.id, { active: true });
+                    await hookPromise;
+                    assert.ok(
+                        quenchActor.statuses.has(effectsObj.knockedOutEffect.id),
+                        "Actor successfully seeded as KnockedOut.",
+                    );
+
+                    const stunResult = await quenchActor.toggleStatusEffect(effectsObj.stunEffect.id, {
+                        active: true,
+                    });
+
+                    assert.strictEqual(stunResult, false, "Toggling stun while knockedOut returns false.");
+                    assert.ok(!quenchActor.statuses.has(effectsObj.stunEffect.id), "Stunned status blocked.");
+                    assert.ok(quenchActor.statuses.has(effectsObj.knockedOutEffect.id), "KnockedOut overlay retained.");
+                });
+
                 it("Prone Implication Chains (KO)", async function () {
                     const hookPromise = waitForHook("createActiveEffect");
                     await quenchActor.toggleStatusEffect(effectsObj.knockedOutEffect.id, { active: true });

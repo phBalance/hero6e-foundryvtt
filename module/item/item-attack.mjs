@@ -40,7 +40,7 @@ import {
     getRoundedDownDistanceInSystemUnits,
     getSystemDisplayUnits,
 } from "../utility/units.mjs";
-import { getPowerInfo, tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
+import { getPowerInfo, getTokenUuid, tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
@@ -1238,14 +1238,15 @@ async function doSingleTargetActionToHit(action, options) {
         actorId: actor.id,
         actorUuid: actor.uuid,
         attackerTokenId: token?.id,
-        attackerTokenUuid: token?.uuid,
+        attackerTokenUuid: getTokenUuid(token),
         tokenId: token?.id,
-        tokenUuid: token?.uuid,
+        tokenUuid: getTokenUuid(token),
         actionData: actionToJSON(action),
 
         //item,
         itemImg: item.img,
         itemName: item.name,
+        itemAttackDefenseVs: item.attackDefenseVs,
         itemJsonStr: dehydrateAttackItem(item), // PH: FIXME: Can remove some things like item etc because they're in the actionData.
         originalUuid: item.id || foundry.utils.parseUuid(item.system._active?.__originalUuid)?.id,
 
@@ -2047,8 +2048,15 @@ export async function _onSpendHaps(event) {
     if (!message) throw new Error("Chat message context not found.");
 
     const attackerTokenUuid = message.getFlag(game.system.id, "attackerTokenUuid");
-    const attackerToken = await fromUuid(attackerTokenUuid);
-    const attackerActor = attackerToken?.actor;
+    const attackerToken = attackerTokenUuid ? await fromUuid(attackerTokenUuid) : null;
+    let attackerActor = attackerToken?.actor;
+
+    // Older cards (and tokenless attackers) may lack the token uuid; fall back to the actor uuid.
+    if (!attackerActor) {
+        const attackerActorUuid =
+            message.getFlag(game.system.id, "attackerActorUuid") ?? message.getFlag(game.system.id, "actorUuid");
+        attackerActor = attackerActorUuid ? await fromUuid(attackerActorUuid) : null;
+    }
 
     if (!attackerActor) throw new Error("Attacker actor not found.");
 
@@ -2057,7 +2065,7 @@ export async function _onSpendHaps(event) {
     const currentHaps = attackerActor.system.hap.value ?? 0;
 
     if (currentHaps < hapsToSpend) {
-        return ui.notifications.warn(`${attackerToken.name} does not have enough HAPs.`);
+        return ui.notifications.warn(`${attackerToken?.name ?? attackerActor.name} does not have enough HAPs.`);
     }
 
     await attackerActor.update({

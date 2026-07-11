@@ -1,5 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { getPowerInfo, hdcTimeOptionIdToSeconds, squelch, tokenEducatedGuess } from "./util.mjs";
+import { getPowerInfo, getTokenUuid, hdcTimeOptionIdToSeconds, squelch, tokenEducatedGuess } from "./util.mjs";
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { calculateDicePartsForItem } from "./damage.mjs";
 import { HeroCompatibility } from "../utility/compatibility.mjs";
@@ -342,7 +342,7 @@ function _createNewAdjustmentEffect(options) {
                 targetDisplay: fromUuidSync(targetPower?.uuid)?.XMLID || potentialCharacteristic,
                 key: targetPower?.system?.XMLID || potentialCharacteristic,
                 itemTokenName,
-                attackerTokenUuid: _attackerToken?.uuid,
+                attackerTokenUuid: getTokenUuid(_attackerToken),
                 createTime: game.time.worldTime,
                 initialCostPerActivePoint: determineCostPerActivePoint(
                     potentialCharacteristic,
@@ -1051,7 +1051,8 @@ async function recalcEffectBasedOnTotalApForXmlid(activeEffect, isFade) {
             const _targetValue = Math.trunc(_ap / costPerActivePoint) - _value;
 
             if (parseInt(ae.changes[0].value) !== _targetValue) {
-                const msg = `${ae.actor.name}: ${ae.name} ${ae.changes[0].key} from ${ae.changes[0].value} to ${_targetValue}. sumAP=${_ap} and costPerActivePoint=${costPerActivePoint}.  ${_ap}/${costPerActivePoint} = ${_ap / costPerActivePoint}.  There is already a ${_value} value from other effects.`;
+                // ActiveEffect#actor only exists on V14; use the owning actor directly
+                const msg = `${targetActor.name}: ${ae.name} ${ae.changes[0].key} from ${ae.changes[0].value} to ${_targetValue}. sumAP=${_ap} and costPerActivePoint=${costPerActivePoint}.  ${_ap}/${costPerActivePoint} = ${_ap / costPerActivePoint}.  There is already a ${_value} value from other effects.`;
                 if (isFade) {
                     console.warn(msg);
                 } else {

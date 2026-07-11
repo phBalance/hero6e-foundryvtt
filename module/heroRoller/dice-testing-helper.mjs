@@ -1,7 +1,5 @@
 import { HeroRoll } from "../heroRoller/dice.mjs";
 
-// PH: FIXME: Need to make the chat message capable of deserializing.
-
 export function resetDiceClass(DiceClass) {
     DiceClass.resetIndex();
     return DiceClass;
@@ -178,69 +176,31 @@ export class RollMock extends HeroRoll {
 
         const formula = Roll.getFormula(newTerms);
 
-        const mock = new this(formula, options);
+        const mock = new this(formula, {}, options);
         mock.terms = newTerms;
 
         return mock;
     }
 
-    toData() {
-        // const obj = {};
-        // for (const prop in this) {
-        //     obj[prop] = JSON.stringify(this[prop]);
-        // }
-        // return obj;
-
-        return {
-            data: this.data,
-            formula: this.formula,
-            options: this.options,
-
-            terms: JSON.stringify(this.terms),
-
-            _dice: JSON.stringify(this._dice),
-            _evaluated: JSON.stringify(this._evaluated),
-            _formula: JSON.stringify(this._formula),
-            _resolver: JSON.stringify(this._resolver),
-            _root: JSON.stringify(this._root),
-            _total: JSON.stringify(this._total),
-        };
-    }
-
+    /**
+     * Serialize as a plain evaluated HeroRoll with standard Die terms. Chat message validation
+     * requires the core Roll JSON shape (an `evaluated` key), and persisted messages must
+     * deserialize in worlds where the testing mock classes are not registered.
+     */
     toJSON() {
-        return this.toData();
-        // PH: FIXME: toJSON is just data return? If so, fix HeroRoller.
-        // return JSON.stringify(this.toData());
-    }
-
-    static fromData(dataObj) {
-        const formula = dataObj.formula;
-        const data = dataObj.data;
-        const options = dataObj.options;
-
-        // PH: FIXME: This needs to be making it based on the invoked function so that it can be inherited without duplication.
-        const rollMock = new RollMock(formula, data, options);
-
-        // for (const prop in dataObj) {
-        //     rollMock[prop] = dataObj[prop] ? JSON.parse(dataObj[prop]) : undefined;
-        // }
-
-        rollMock._dice = dataObj._dice ? JSON.parse(dataObj._dice) : undefined;
-        rollMock._evaluated = dataObj._evaluated ? JSON.parse(dataObj._evaluated) : undefined;
-        rollMock._formula = dataObj._formula ? JSON.parse(dataObj._formula) : undefined;
-        rollMock._resolver = dataObj._resolver ? JSON.parse(dataObj._resolver) : undefined;
-        rollMock._root = dataObj._root ? JSON.parse(dataObj._root) : undefined;
-        rollMock._total = dataObj._total ? JSON.parse(dataObj._total) : undefined;
-
-        return rollMock;
-    }
-
-    static fromJSON(json) {
-        return RollMock.fromData(JSON.parse(json));
-    }
-
-    constructor(formula, data, options) {
-        super(formula, data, options);
+        const data = super.toJSON();
+        data.class = HeroRoll.name;
+        for (const termData of data.terms ?? []) {
+            if (termData.class && !(termData.class in foundry.dice.terms)) {
+                termData.class = "Die";
+            }
+        }
+        for (const dieData of data.dice ?? []) {
+            if (dieData.class && !(dieData.class in foundry.dice.terms)) {
+                dieData.class = "Die";
+            }
+        }
+        return data;
     }
 }
 

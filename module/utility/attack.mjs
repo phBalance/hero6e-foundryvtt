@@ -3,7 +3,7 @@ import { calculateDistanceBetween } from "./range.mjs";
 
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { addRangeIntoToHitRoll, dehydrateAttackItem, rehydrateAttackItem } from "../item/item-attack.mjs";
-import { tokenEducatedGuess } from "../utility/util.mjs";
+import { getTokenUuid, tokenEducatedGuess } from "../utility/util.mjs";
 
 const FoundryVttPrototypeToken = foundry.data.PrototypeToken;
 
@@ -304,7 +304,7 @@ export class Attack {
 
         // TODO: need to adjust DCV
         const maneuver = {
-            attackerTokenUuid: system.attackerToken?.uuid ?? null,
+            attackerTokenUuid: getTokenUuid(system.attackerToken),
             isMultipleAttackManeuver: isMultipleAttack || isRapidFire || isSweep,
             isMultipleAttack,
             isRapidFire,
@@ -363,7 +363,7 @@ export class Attack {
         }
 
         return {
-            attackerTokenUuid: system.attackerToken?.uuid ?? null,
+            attackerTokenUuid: getTokenUuid(system.attackerToken),
             attacks: [Attack.getAttackInfo(item, targetedTokens, options, system)],
             itemId: item.id,
             cvModifiers: [],
@@ -540,7 +540,7 @@ function tokenToTokenObj(token) {
 
     return {
         // uuid of Token Document accessed via Token || uuid of TokenDocument
-        uuid: token.document?.uuid || token.uuid,
+        uuid: getTokenUuid(token),
 
         // PrototypeToken
         protoObj: isPrototypeToken ? token.toObject(false) : null,
