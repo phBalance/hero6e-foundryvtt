@@ -833,12 +833,10 @@ function staticIgnoreForActorFunction(alwaysIgnore) {
 
 function pdEdCostPerLevel(itemOrActor) {
     const actor = itemOrActor instanceof HeroSystem6eActor ? itemOrActor : itemOrActor.actor;
-    const hasAutomatonPowerWithNoStun = !!actor?.items.find(
-        (power) =>
-            power.system.XMLID === "AUTOMATON" &&
-            (power.system.OPTIONID === "NOSTUN1" || power.system.OPTIONID === "NOSTUN2"),
-    );
-    if (hasAutomatonPowerWithNoStun) {
+    const specialAutomatonPowers = actor.getAutomatonSpecialPowers();
+    const isAutomatonWithNoStun =
+        specialAutomatonPowers.takesNoStunButLosesFunctionOnBody || specialAutomatonPowers.takesNoStun;
+    if (isAutomatonWithNoStun) {
         return 3;
     }
 
@@ -1592,13 +1590,11 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // The Automaton power presents awkwardly in HDC. A character has STUN unless they have certain levels
                 // of the AUTOMATON powers.
                 if (["automaton", "pc", "npc"].includes(actor.type)) {
-                    const isAutomatonPowerWithNoStun = !!actor.items.find(
-                        (item) =>
-                            item.system.XMLID === "AUTOMATON" &&
-                            (item.system.OPTIONID === "NOSTUN1" || item.system.OPTIONID === "NOSTUN2"),
-                    );
+                    const specialAutomatonPowers = actor.getAutomatonSpecialPowers();
+                    const isAutomatonWithNoStun =
+                        specialAutomatonPowers.takesNoStunButLosesFunctionOnBody || specialAutomatonPowers.takesNoStun;
 
-                    return isAutomatonPowerWithNoStun;
+                    return isAutomatonWithNoStun;
                 }
 
                 return false;
@@ -6644,7 +6640,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="AUTOMATON" ID="1709333784244" BASECOST="15.0" LEVELS="0" ALIAS="Automaton" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="CANNOTBESTUNNED" OPTIONID="CANNOTBESTUNNED" OPTION_ALIAS="Cannot Be Stunned" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
-        {},
+        {
+            type: ["automaton", "defense", "special"],
+        },
     );
 
     addPower(
@@ -7092,7 +7090,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     addPower(
         {
             key: "DOESNOTBLEED",
-            type: ["automaton", "special"],
+            type: ["automaton"],
             behaviors: ["activatable"],
             duration: HERO.DURATION_TYPES.INHERENT, // All automaton powers are inherent
             costPerLevel: fixedValueFunction(3),
@@ -7102,7 +7100,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="DOESNOTBLEED" ID="1709333885275" BASECOST="15.0" LEVELS="0" ALIAS="Does Not Bleed" POSITION="35" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
-        {},
+        {
+            type: ["automaton", "defense", "special"],
+        },
     );
     addPower(
         {
@@ -8201,7 +8201,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             baseEffectDicePartsBundle: noDamageBaseEffectDicePartsBundle,
             xml: `<POWER XMLID="NOHITLOCATIONS" ID="1709333986337" BASECOST="10.0" LEVELS="0" ALIAS="No Hit Locations" POSITION="66" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
-        {},
+        {
+            type: ["automaton", "defense", "special"],
+        },
     );
 
     addPower(
