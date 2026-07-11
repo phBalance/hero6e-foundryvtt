@@ -304,7 +304,8 @@ export class Attack {
 
         // TODO: need to adjust DCV
         const maneuver = {
-            attackerTokenUuid: system.attackerToken?.uuid ?? null,
+            // attackerToken may be a Token placeable, which only exposes its uuid via its document
+            attackerTokenUuid: system.attackerToken?.document?.uuid ?? system.attackerToken?.uuid ?? null,
             isMultipleAttackManeuver: isMultipleAttack || isRapidFire || isSweep,
             isMultipleAttack,
             isRapidFire,
@@ -363,7 +364,7 @@ export class Attack {
         }
 
         return {
-            attackerTokenUuid: system.attackerToken?.uuid ?? null,
+            attackerTokenUuid: system.attackerToken?.document?.uuid ?? system.attackerToken?.uuid ?? null,
             attacks: [Attack.getAttackInfo(item, targetedTokens, options, system)],
             itemId: item.id,
             cvModifiers: [],
