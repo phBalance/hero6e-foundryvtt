@@ -8,7 +8,7 @@ export function registerCombatWorkflowTests(quench) {
 
             // Utility helper to wait for any AppV2 sheet/dialog rendering cycle
             // Removed waitForRender function as it will be replaced by Hooks.once and direct await render()
-            describe("End-to-End Combat Action Workflow", function () {
+            describe.only("End-to-End Combat Action Workflow", function () {
                 let attackerActor = null;
                 let defenderActor = null;
                 let attackerTokenDoc = null;
