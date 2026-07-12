@@ -214,6 +214,26 @@ export function registerCombatWorkflowTests(quench) {
                     await attackAppInstance.close();
                     await attackerSheet.close();
                 });
+
+                it.skip("AID", async function () {});
+
+                it.skip("ENERGYBLAST", async function () {});
+
+                it.skip("DRAIN", async function () {});
+
+                it.skip("ENTANGLE", async function () {});
+
+                it.skip("FLASH", async function () {});
+
+                it.skip("HTH", async function () {});
+
+                it.skip("HEALING", async function () {});
+
+                it.skip("HKA", async function () {});
+
+                it.skip("MENTALBLAST", async function () {});
+
+                it.skip("MINDSCAN", async function () {});
             });
         },
         { displayName: "End-to-End Combat Execution" },
