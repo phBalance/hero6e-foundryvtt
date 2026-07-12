@@ -1,7 +1,7 @@
-import { HEROSYS } from "../herosystem6e.mjs";
 import { filterIgnoreCompoundAndFrameworkItems } from "../config.mjs";
+import { HEROSYS } from "../herosystem6e.mjs";
 
-import { calculateRequiredResourcesToUse, processActionToHit } from "../item/item-attack.mjs";
+import { processActionToHit } from "../item/item-attack.mjs";
 import { buildEffectiveObject } from "../item/item.mjs";
 import { Attack } from "../utility/attack.mjs";
 import {
@@ -16,6 +16,7 @@ import {
     getSystemDisplayUnits,
     gridUnitsToMeters,
 } from "../utility/units.mjs";
+import { calculateRequiredResourcesToUse } from "./item-resources.mjs";
 
 /**
  * 5e HEX type and NORMAL are converted to RADIUS
