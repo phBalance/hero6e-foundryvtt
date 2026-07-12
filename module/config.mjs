@@ -8845,7 +8845,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             target: "self only",
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costPerLevel: fixedValueFunction(1),
-            xml: `<POWER XMLID="CONCEALED" ID="1763945879583" BASECOST="0.0" LEVELS="1" ALIAS="Concealed" POSITION="117" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="fasdfasdf" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
+            xml: `<POWER XMLID="CONCEALED" ID="1763945879583" BASECOST="0.0" LEVELS="1" ALIAS="Concealed" POSITION="117" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="HEARINGGROUP" OPTIONID="HEARINGGROUP" OPTION_ALIAS="Hearing Group" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
         },
         {},
     );
