@@ -2,13 +2,7 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
 import { HeroRoller } from "../heroRoller/dice.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
-import {
-    collectActionDataBeforeToHitOptions,
-    rollEffect,
-    rollLuck,
-    rollUnluck,
-    userInteractiveVerifyOptionallyPromptThenSpendResources,
-} from "../item/item-attack.mjs";
+import { collectActionDataBeforeToHitOptions, rollEffect, rollLuck, rollUnluck } from "../item/item-attack.mjs";
 import { createSkillPopOutFromItem } from "../item/skill.mjs";
 import { tagObjectForPersistence } from "../migration.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
@@ -46,6 +40,7 @@ import {
 } from "../utility/util.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
+import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
 import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
 
 export function initializeItemHandlebarsHelpers() {

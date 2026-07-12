@@ -1,12 +1,12 @@
 // REF: https://foundryvtt.wiki/en/development/api/applicationv2
-import { HEROSYS } from "../../herosystem6e.mjs";
 import { filterIgnoreCompoundAndFrameworkItems } from "../../config.mjs";
+import { HeroSystem6eRegionDocument } from "../../heroRegion.mjs";
+import { HEROSYS } from "../../herosystem6e.mjs";
+import { dehydrateAttackItem, processActionToHit } from "../../item/item-attack.mjs";
 import {
     calculateRequiredResourcesToUse,
-    dehydrateAttackItem,
-    processActionToHit,
     userInteractiveVerifyOptionallyPromptThenSpendResources,
-} from "../../item/item-attack.mjs";
+} from "../../item/item-resources.mjs";
 import { buildEffectiveObject } from "../../item/item.mjs";
 import { Attack } from "../../utility/attack.mjs";
 import {
@@ -16,7 +16,6 @@ import {
     isRangedCombatManeuver,
 } from "../../utility/damage.mjs";
 import { convertSystemUnitsToMetres, getSystemDisplayUnits, gridUnitsToMeters } from "../../utility/units.mjs";
-import { HeroSystem6eRegionDocument } from "../../heroRegion.mjs";
 
 /**
  * 5e HEX type and NORMAL are converted to RADIUS

@@ -1,8 +1,9 @@
-import { HEROSYS } from "./herosystem6e.mjs";
-import { HeroCompatibility } from "./utility/compatibility.mjs";
-import { whisperUserTargetsForActor, expireEffects, toHHMMSS, gmActive } from "./utility/util.mjs";
-import { rehydrateAttackItem, userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-attack.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
+import { HEROSYS } from "./herosystem6e.mjs";
+import { rehydrateAttackItem } from "./item/item-attack.mjs";
+import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-resources.mjs";
+import { HeroCompatibility } from "./utility/compatibility.mjs";
+import { expireEffects, gmActive, toHHMMSS, whisperUserTargetsForActor } from "./utility/util.mjs";
 
 export class HeroSystem6eCombat extends Combat {
     // static defineSchema() {

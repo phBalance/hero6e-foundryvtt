@@ -2,7 +2,8 @@ import { PresenceAttackApplication } from "../applications/apps/presence-attack.
 import { HeroRoller } from "../heroRoller/dice.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroItemCharacteristic } from "../item/HeroSystem6eTypeDataModels.mjs";
-import { dehydrateAttackItem, userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-attack.mjs";
+import { dehydrateAttackItem } from "../item/item-attack.mjs";
+import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "../item/item-resources.mjs";
 import { HeroSystem6eItem, cloneToEffectiveAttackItem } from "../item/item.mjs";
 import { tagObjectForPersistence } from "../migration.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
@@ -14,9 +15,9 @@ import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { doSuccessRoll, generateSuccessChatCard } from "../utility/success-card.mjs";
 import {
+    base64ToUtf8,
     getCharacteristicInfoArrayForActor,
     getPowerInfo,
-    base64ToUtf8,
     squelch,
     tokenEducatedGuess,
     utf8ToBase64,

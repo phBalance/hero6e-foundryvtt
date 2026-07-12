@@ -1,8 +1,8 @@
 import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 
 import { HeroSystem6eActor } from "../actor/actor.mjs";
+import { calculateRequiredResourcesToUse } from "../item/item-resources.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
-import { calculateRequiredResourcesToUse } from "../item/item-attack.mjs";
 import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
 import { addDiceParts, calculateDicePartsFromDcForItem, characteristicValueToDiceParts } from "../utility/damage.mjs";
 

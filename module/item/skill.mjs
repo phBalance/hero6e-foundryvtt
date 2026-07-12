@@ -1,7 +1,7 @@
 import { HeroRoller } from "../heroRoller/dice.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
-import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-attack.mjs";
+import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
 
 // v13 compatibility
 const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
