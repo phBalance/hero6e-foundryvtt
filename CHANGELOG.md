@@ -1,6 +1,10 @@
 # Releases
 
-### Version 4.3.15 20260711 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.16 So far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Adding icons to some powers. Fire, Air, and Earth SFX include an appropriate fill. [#4500](https://github.com/dmdorman/hero6e-foundryvtt/issues/4500)
+
+### Version 4.3.15 20260711
 
 - FoundryVTT V14 is now supported. As always, we recommend making a backup before attempting to upgrade.
   - AoE now works via Scene Regions rather than Measured Templates. This has allowed us to support "Any Area" and "Surface" AoE placement and wall restrictions, and a prompt will show on phase change to delete any relevant AoE regions rather than requiring manual GM resolution. [#4225](https://github.com/dmdorman/hero6e-foundryvtt/issues/4225) [#4358](https://github.com/dmdorman/hero6e-foundryvtt/issues/4358)

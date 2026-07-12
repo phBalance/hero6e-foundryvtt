@@ -265,6 +265,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         html.on("click", ".roll-damage", this.__onChatCardAction.bind(this));
     }
 
+    static imgExists = {};
+
     // Perform preliminary operations before a Document of this type is created. Pre-creation operations only
     // occur for the client which requested the operation. Modifications to the pending document before it is
     // persisted should be performed with this.updateSource().
@@ -300,41 +302,22 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             if (this.baseInfo?.type.includes("framework")) {
                 return this.updateSource({ img: "icons/svg/chest.svg" });
             }
+
             if (itemTypeToIcon[this.type]) {
                 let img =
                     game.system?.id && this.type == "martialart"
                         ? `systems/${game.system.id}/icons/noun-martial-art-5105444.svg`
                         : itemTypeToIcon[this.type];
-
-                // Custom Img based on XMLID
-                switch (this.system.XMLID) {
-                    // SFX with multiple files go first
-                    case "ENERGYBLAST":
-                        switch (this.system.SFX) {
-                            case "Fire/Heat":
-                                img = `systems/${game.system.id}/icons/${this.system.XMLID.toLowerCase()}/${this.system.XMLID.toLowerCase()}-fire.svg`;
-                                break;
-                            default:
-                                img = `systems/${game.system.id}/icons/${this.system.XMLID.toLowerCase()}/${this.system.XMLID.toLowerCase()}.svg`;
-                                break;
-                        }
-                        break;
-
-                    // The rest use a common pattern
-
-                    case "HEALING":
-                    case "HKA":
-                    case "RKA":
-                    case "TELEKINESIS":
-                        img = `systems/${game.system.id}/icons/${this.system.XMLID.toLowerCase()}/${this.system.XMLID.toLowerCase()}.svg`;
-                        break;
-
-                    default:
-                        break;
-                }
-
                 this.updateSource({ img });
             }
+
+            // Movement and some other items have img in config
+            if (this.baseInfo?.img) {
+                this.updateSource({ img: this.baseInfo?.img });
+            }
+
+            // Custom img based on XMLID and/or SFX and/or OPTIONID
+            await this._assignSfxIcon();
         }
 
         // Keep the item's own edition when there is no actor to inherit from (e.g. dragging
@@ -361,18 +344,152 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         });
     }
 
-    async _onCreate(data, options, userId) {
-        // If this is an ITEMS pack then override default name
-        if (this.pack && this.name.match(/New Item \(\d+\)/)) {
-            const myPack = game.packs.get(this.pack);
-            await myPack.getIndex();
-            const count = myPack.index.size;
-            await this.update({
-                name: `New ${String(data.type).titleCase()} (${count})`,
-            });
-        }
+    // Assign a custom img based on XMLID, SFX, and in the future OPTIONID.
+    // This may generate a new SGV file based on the XMLID with a SFX fill.
+    async _assignSfxIcon(changes) {
+        const sfxValue = changes?.system?.SFX ?? this.system.SFX;
+        const firstWord = sfxValue?.match(/^\w+/)?.[0]?.toLowerCase();
+        const baseImgPath = `systems/${game.system.id}/icons/${this.system.XMLID.toLowerCase()}/${this.system.XMLID.toLowerCase()}.svg`;
 
-        return super._onCreate(data, options, userId);
+        // Check the static class cache for the base icon path
+        this.constructor.imgExists[baseImgPath] ??= foundry.utils.srcExists(baseImgPath);
+        const baseFileExists = await this.constructor.imgExists[baseImgPath];
+
+        if (baseFileExists) {
+            if (firstWord && firstWord !== "default") {
+                const targetFolder = `systems/${game.system.id}/icons/${this.system.XMLID.toLowerCase()}`;
+                const fileName = `${this.system.XMLID.toLowerCase()}-${firstWord}.svg`;
+                const customFilePath = `${targetFolder}/${fileName}`;
+
+                // 2. CONCURRENCY BLOCK: Safely reference the static class cache
+                if (!this.constructor.imgExists[customFilePath]) {
+                    this.constructor.imgExists[customFilePath] = foundry.utils
+                        .srcExists(customFilePath)
+                        .then(async (existsOnServer) => {
+                            if (existsOnServer) return true; // File exists, skip regeneration
+
+                            if (game.user.isGM) {
+                                // Execute the file creation logic
+                                return await this._generateAndSaveSvgBySfx(
+                                    baseImgPath,
+                                    customFilePath,
+                                    targetFolder,
+                                    fileName,
+                                    firstWord,
+                                );
+                            }
+                            return false; // Non-GMs wait for fallback
+                        });
+                }
+
+                // 3. Await the outcome of the static cached promise
+                const successfullyReady = await this.constructor.imgExists[customFilePath];
+
+                if (successfullyReady) {
+                    if (changes) {
+                        foundry.utils.setProperty(changes, "img", customFilePath);
+                    } else {
+                        this.updateSource({ img: customFilePath });
+                    }
+                } else {
+                    if (changes) {
+                        foundry.utils.setProperty(changes, "img", baseImgPath);
+                    } else {
+                        this.updateSource({ img: baseImgPath }); // Safe fallback
+                    }
+                }
+            } else {
+                if (changes) {
+                    foundry.utils.setProperty(changes, "img", baseImgPath);
+                } else {
+                    this.updateSource({ img: baseImgPath }); // Safe fallback
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles the actual file extraction, mutation, and single-write sequence
+     * Kept as an internal instance method for easy access to 'this'
+     */
+    async _generateAndSaveSvgBySfx(sourcePath, targetFilePath, targetFolder, fileName, sfx) {
+        try {
+            const response = await fetch(sourcePath);
+            const svgText = await response.text();
+
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(svgText, "image/svg+xml");
+
+            let defs = xmlDoc.querySelector("defs") || xmlDoc.createElementNS("http://w3.org", "defs");
+            if (!xmlDoc.querySelector("defs")) xmlDoc.documentElement.prepend(defs);
+
+            let gradientHtml = "";
+            switch (sfx) {
+                case "fire":
+                    gradientHtml = `
+                        <linearGradient id="dynamicGradient" gradientUnits="userSpaceOnUse" 
+                            x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#fed7aa" />
+                            <stop offset="45%" stop-color="#ef4444" />
+                            <stop offset="100%" stop-color="#ca2020" />
+                        </linearGradient>
+                        `;
+                    break;
+
+                case "air":
+                case "wind":
+                    gradientHtml = `
+                        <linearGradient id="dynamicGradient" gradientUnits="userSpaceOnUse" 
+                            x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#e0f2fe" />
+                            <stop offset="45%" stop-color="#38bdf8" />
+                            <stop offset="100%" stop-color="#0ea5e9" />
+                        </linearGradient>
+                        `;
+                    break;
+
+                case "earth":
+                case "stone":
+                    gradientHtml = `
+                        <linearGradient id="dynamicGradient" 
+                                gradientUnits="userSpaceOnUse" 
+                                x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#5c4d42" />   <!-- Muted Rocky Umber (Deepest tone) -->
+                            <stop offset="40%" stop-color="#968373" />  <!-- Light Granite Gray-Brown -->
+                            <stop offset="80%" stop-color="#c7b8ac" />  <!-- Soft Desert Sand -->
+                            <stop offset="100%" stop-color="#e3dac9" /> <!-- Bright Clay Highlight -->
+                        </linearGradient>
+                        `;
+                    break;
+
+                default:
+                    return false;
+            }
+
+            defs.innerHTML = gradientHtml;
+            const graphicGroup = xmlDoc.querySelector("g");
+            if (graphicGroup) {
+                // style.setProperty() automatically serializes and sanitizes CSS string values,
+                // which can result in unexpected double quotes around the url(#)
+                graphicGroup.style.fill = "url(dynamicGradient)";
+            }
+
+            const serializer = new XMLSerializer();
+            const updatedSvgText = serializer
+                .serializeToString(xmlDoc)
+                .replace("url(&quot;dynamicGradient&quot;)", "url(#dynamicGradient)")
+                .replace(`<defs xmlns="http://w3.org">`, `<defs>`);
+            const svgBlob = new Blob([updatedSvgText], { type: "image/svg+xml" });
+            const svgFile = new File([svgBlob], fileName, { type: "image/svg+xml" });
+
+            // FilePicker executes exactly once per unique file name across simultaneous loops
+            await FilePicker.upload("data", targetFolder, svgFile, {});
+            console.log(`HeroSystem6e | Generated and stored custom SFX file: ${fileName}`);
+            return true;
+        } catch (err) {
+            console.error(`HeroSystem6e | Failed executing dynamic SVG creation for SFX: "${sfx}"`, err);
+            return false;
+        }
     }
 
     prepareDerivedData() {
@@ -1133,6 +1250,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             if (this.baseInfo.activeEffect?.(futureItem)) {
                 this.setActiveEffects({ futureItem });
             }
+        }
+
+        // Changing SFX may result in new img
+        if (changes?.system?.SFX) {
+            await this._assignSfxIcon(changes);
         }
     }
 
