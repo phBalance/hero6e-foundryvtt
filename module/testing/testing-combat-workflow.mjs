@@ -1,10 +1,110 @@
 import { waitForElementInChat, waitForTokenDrawn } from "./quench-helper.mjs";
+import { getPowerInfo } from "../utility/util.mjs";
 
 export function registerCombatWorkflowTests(quench) {
     quench.registerBatch(
         `${game.system.id}.testing.e2e.combat-workflow`,
         (context) => {
-            const { describe, it, before, after, assert } = context;
+            const { describe, it, before, beforeEach, after, assert } = context;
+
+            // ==========================================
+            // ENCAPSULATED UI AUTOMATION HELPERS
+            // ==========================================
+
+            /**
+             * Resolves token drawing and handles client targeting on the canvas.
+             */
+            async function targetToken(tokenDoc, fallbackActor) {
+                game.user.targets.clear();
+                const targetTokenObject = await waitForTokenDrawn(tokenDoc);
+                if (targetTokenObject) {
+                    game.user.targets.add(targetTokenObject);
+                } else {
+                    console.warn("Token object not found on active canvas, pushing fallback reference.");
+                    game.user.targets.add({ actor: fallbackActor, id: tokenDoc.id });
+                }
+            }
+
+            /**
+             * Renders actor sheet and intercepts the V13/V14 ApplicationV2 lifecycle hooks.
+             */
+            async function launchAttackForm(actor, item) {
+                const sheet = actor.sheet;
+                await sheet.render(true);
+                const $sheetHtml = $(sheet.element);
+
+                const rowSelector = `[data-document-uuid="Actor.${actor.id}.Item.${item.id}"] .roll-icon, [data-document-uuid="Actor.${actor.id}.Item.${item.id}"] .item-control, [data-document-uuid="Actor.${actor.id}.Item.${item.id}"] .action-button, [data-document-uuid="Actor.${actor.id}.Item.${item.id}"] [data-action="roll"], [data-document-uuid="Actor.${actor.id}.Item.${item.id}"] button[type="submit"][name="roll"]`;
+                let $btn = $sheetHtml.find(rowSelector).first();
+
+                if (!$btn.length) {
+                    const fallbackSelector = `[data-item-id="${item.id}"] .roll-icon, [data-item-id="${item.id}"] .item-control, [data-item-id="${item.id}"] .action-button, [data-item-id="${item.id}"] [data-action="roll"], [data-item-id="${item.id}"] button[type="submit"][name="roll"]`;
+                    $btn = $sheetHtml.find(fallbackSelector).first();
+                }
+
+                assert.ok($btn.length, `Attack trigger element located for item: ${item.name}`);
+
+                const appPromise = new Promise((resolve) => {
+                    let hookV14Id, hookV13Id;
+                    const cleanupAndResolve = (app) => {
+                        if (hookV14Id) Hooks.off("renderItemAttackFormApplicationV2", hookV14Id);
+                        if (hookV13Id) Hooks.off("renderApplication", hookV13Id);
+                        resolve(app);
+                    };
+
+                    hookV14Id = Hooks.on("renderItemAttackFormApplicationV2", (app) => cleanupAndResolve(app));
+                    hookV13Id = Hooks.on("renderApplication", (app) => {
+                        if (app.constructor.name === "ItemAttackFormApplication" || app.id?.includes("attack")) {
+                            cleanupAndResolve(app);
+                        }
+                    });
+                });
+
+                $btn.click();
+                const appInstance = await appPromise;
+                await appInstance.render(true);
+                return { appInstance, sheet };
+            }
+
+            /**
+             * Executes the full automated three-stage click pipeline inside the chat log window.
+             */
+            async function executeChatCardSequence(attackForm, targetTokenDoc, ocvBonus = 9) {
+                const $appHtml = $(attackForm.element);
+                const $ocvMod = $appHtml.find(`input[name="ocvMod"]`);
+                if ($ocvMod.length) {
+                    $ocvMod.val(ocvBonus);
+                    $ocvMod.blur();
+                }
+
+                let $rollToHitBtn = $appHtml.find(
+                    "button:contains('Roll to Hit'), button[data-action='roll-to-hit'], button.roll-to-hit",
+                );
+                if (!$rollToHitBtn.length) {
+                    $rollToHitBtn = $appHtml.find("button").filter(function () {
+                        return $(this).text().trim().toLowerCase() === "roll to hit";
+                    });
+                }
+
+                assert.ok($rollToHitBtn.length, "Found the 'Roll to Hit' actionable element inside config window.");
+                $rollToHitBtn.click();
+
+                const { foundElement: rollDamageButton } = await waitForElementInChat(`button.roll-damage`);
+                assert.ok(rollDamageButton, "Roll Damage button found within chat card.");
+                rollDamageButton.click();
+
+                const { foundElement: applyDamageButton } = await waitForElementInChat(
+                    `button.apply-damage[data-highlight-token="${targetTokenDoc.uuid}"]`,
+                );
+                assert.ok(applyDamageButton, "Apply Damage button found within chat card.");
+                applyDamageButton.click();
+
+                const { foundElement: finalSummaryDiv } = await waitForElementInChat(
+                    `div.adjustment-summary, div.damage-summary`,
+                );
+                assert.ok(finalSummaryDiv, "Execution summary element container located successfully.");
+
+                return finalSummaryDiv;
+            }
 
             // Utility helper to wait for any AppV2 sheet/dialog rendering cycle
             // Removed waitForRender function as it will be replaced by Hooks.once and direct await render()
@@ -36,8 +136,23 @@ export function registerCombatWorkflowTests(quench) {
                             },
                         },
                         img: "icons/svg/sword.svg",
-                        prototypeToken: { actorLink: true },
                     });
+
+                    const itemsToCreate = [];
+
+                    // AID
+                    const aidPowerInfo = getPowerInfo({ xmlid: "AID", actor: attackerActor });
+                    const aidItemData = HeroSystem6eItem.itemDataFromXml(aidPowerInfo.xml, attackerActor);
+                    const aidPowerData = foundry.utils.mergeObject(aidItemData, {
+                        system: {
+                            NAME: "Aid STR",
+                            LEVELS: 4,
+                            INPUT: "STR",
+                        },
+                    });
+                    itemsToCreate.push(aidPowerData);
+
+                    await attackerActor.createEmbeddedDocuments("Item", itemsToCreate);
 
                     defenderActor = await Actor.create({
                         name: "_Quench_Defender",
@@ -48,16 +163,21 @@ export function registerCombatWorkflowTests(quench) {
                             },
                         },
                         img: "icons/svg/shield.svg",
-                        prototypeToken: { actorLink: true },
                     });
 
                     [attackerTokenDoc] = await activeScene.createEmbeddedDocuments("Token", [
-                        await attackerActor.getTokenDocument({ x: 100, y: 100 }),
+                        await attackerActor.getTokenDocument({ x: 100, y: 100, actorLink: false }),
                     ]);
 
                     [defenderTokenDoc] = await activeScene.createEmbeddedDocuments("Token", [
-                        await defenderActor.getTokenDocument({ x: 300, y: 100 }),
+                        await defenderActor.getTokenDocument({ x: 300, y: 100, actorLink: false }),
                     ]);
+                });
+
+                // Using unlinked actors so we can quickly restore them to actor baseline between tests
+                beforeEach(async function () {
+                    await attackerTokenDoc.delta.restore();
+                    await defenderTokenDoc.delta.restore();
                 });
 
                 after(async function () {
@@ -196,8 +316,8 @@ export function registerCombatWorkflowTests(quench) {
                     const { foundElement: damageSpan } = await waitForElementInChat(`.apply-damage-amount span`);
                     assert.ok(damageSpan, "Damage applied and found apply-damage-amount");
 
-                    // Fetch fresh document references from the DB to avoid working with stale data
-                    const updatedDefender = game.actors.get(defenderActor.id);
+                    // Fetch fresh document references from the unlinked actor to avoid working with stale data
+                    const updatedDefender = defenderTokenDoc.actor;
                     const finalStun = updatedDefender.system.characteristics?.stun?.value;
 
                     // Verification: Confirm state change matches automation calculations
@@ -215,7 +335,41 @@ export function registerCombatWorkflowTests(quench) {
                     await attackerSheet.close();
                 });
 
-                it.skip("AID", async function () {});
+                it("AID", async function () {
+                    assert.ok(attackerActor, "Attacker database record exists.");
+                    assert.ok(defenderActor, "Defender database record exists.");
+
+                    const attackAid = attackerActor.items.find((item) => item.system?.XMLID === "AID");
+                    assert.ok(attackAid, `Pre-seeded ${attackAid?.name} was successfully located on the actor.`);
+
+                    // 1. Establish canvas target layer
+                    await targetToken(defenderTokenDoc, defenderActor);
+                    const baselineStr = defenderActor.system.characteristics?.str?.value;
+
+                    // 2. Open Attacker Sheet and capture form context
+                    const { appInstance, sheet } = await launchAttackForm(attackerActor, attackAid);
+
+                    // 3. Complete chat interaction sequences via encapsulated pipeline
+                    const adjustmentSummaryDiv = await executeChatCardSequence(appInstance, defenderTokenDoc, 9);
+                    assert.ok(adjustmentSummaryDiv, "Adjustment summary wrapper confirmed.");
+
+                    // 4. Verification calculations against live document database state
+                    const updatedDefender = defenderTokenDoc.actor;
+                    const finalStr = updatedDefender.system.characteristics?.str?.value;
+
+                    const strAidAmount = Number(adjustmentSummaryDiv.innerHTML.match(/(\d+) STR/)[1]);
+                    const expectedStrAfterAid = baselineStr + strAidAmount;
+
+                    assert.strictEqual(
+                        finalStr,
+                        expectedStrAfterAid,
+                        `Defender's STR.value should be ${expectedStrAfterAid} (Baseline: ${baselineStr} + Aid: ${strAidAmount} = Final: ${finalStr}).`,
+                    );
+
+                    // 5. Explicit structural window cleanup
+                    await appInstance.close();
+                    await sheet.close();
+                });
 
                 it.skip("ENERGYBLAST", async function () {});
 
