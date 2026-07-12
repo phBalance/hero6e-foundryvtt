@@ -351,8 +351,32 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         const firstWord = sfxValue?.match(/^\w+/)?.[0]?.toLowerCase();
         const baseImgPath = `systems/${game.system.id}/icons/${this.system.XMLID.toLowerCase()}/${this.system.XMLID.toLowerCase()}.svg`;
 
+        /**
+         * Safely checks if a file exists without causing browser 404 console errors.
+         * @param {string} targetSrc - The file path (e.g., 'modules/my-module/icons/fire.svg')
+         * @return {Promise<boolean>}
+         */
+        const safeFileExists = async (targetSrc) => {
+            try {
+                // 1. Separate the file name from its enclosing folder path
+                const parts = targetSrc.split("/");
+                const folderPath = parts.join("/");
+
+                // 2. Query Foundry's file server for the directory contents
+                const source = targetSrc.startsWith("data/") ? "data" : "user";
+                const result = await FilePicker.browse(source, folderPath);
+
+                // 3. Return true if the file name exists in the returned file list array
+                return result.files.includes(targetSrc);
+            } catch (err) {
+                // Gracefully fallback if the parent directory does not exist either
+                console.debug(err);
+                return false;
+            }
+        };
+
         // Check the static class cache for the base icon path
-        this.constructor.imgExists[baseImgPath] ??= foundry.utils.srcExists(baseImgPath);
+        this.constructor.imgExists[baseImgPath] ??= safeFileExists(baseImgPath);
         const baseFileExists = await this.constructor.imgExists[baseImgPath];
 
         if (baseFileExists) {
