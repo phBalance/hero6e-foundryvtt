@@ -2680,6 +2680,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         It is subtle and identified as an issue with V14 where effect is suppressed instead of disabled/deleted
         when duration expires.
         This may require a CONFIG.ActiveEffect.expiryAction = "delete" fix at some point.
+        NOTE: actorHasTemporaryEffects (herosystem6e.mjs) is a cheap non-empty check that must
+        mirror this filter; keep them in sync.
     */
     getTemporaryEffects() {
         return Array.from(this.allApplicableEffects())
