@@ -1279,7 +1279,8 @@ async function doSingleTargetActionToHit(action, options) {
     // JOINT BREAK not working because it does KILLING not a STRIKE
     // Review CHOKE and martial NNDs.
     const allInOneToHitDamageApply =
-        item.attackDefenseVs !== "MD" && !(item.attackDefenseVs === "NND" && item.isKilling);
+        (item.attackDefenseVs !== "MD" || item.system.XMLID === "EGOATTACK") &&
+        !(item.attackDefenseVs === "NND" && item.isKilling);
 
     // render card
     const template = isBlockManeuver

@@ -90,6 +90,13 @@ export function registerCombatWorkflowTests(quench) {
 
                 const { foundElement: rollDamageButton } = await waitForElementInChat(`button.roll-damage`);
                 assert.ok(rollDamageButton, "Roll Damage button found within chat card.");
+
+                const allInOneChatCard = rollDamageButton.closest("div.item-all-in-one-tohit-apply-card");
+                assert.ok(
+                    allInOneChatCard,
+                    `${attackForm.data?.originalItem?.system?.XMLID} is not using all in one chat card`,
+                );
+
                 rollDamageButton.click();
 
                 const { foundElement: applyDamageButton } = await waitForElementInChat(
@@ -106,7 +113,7 @@ export function registerCombatWorkflowTests(quench) {
 
             // Utility helper to wait for any AppV2 sheet/dialog rendering cycle
             // Removed waitForRender function as it will be replaced by Hooks.once and direct await render()
-            describe.only("End-to-End Combat Action Workflow", function () {
+            describe("End-to-End Combat Action Workflow", function () {
                 let attackerActor = null;
                 let defenderActor = null;
                 let attackerTokenDoc = null;

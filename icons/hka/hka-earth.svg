@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" version="1.1" style="shape-rendering:geometricPrecision;text-rendering:geometricPrecision;image-rendering:optimizeQuality;" viewBox="-20 -20 668 683" x="0px" y="0px" fill-rule="evenodd" clip-rule="evenodd" widht="512" height="512"><defs>
+                        <linearGradient id="dynamicGradient" gradientUnits="userSpaceOnUse" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#5c4d42"/>   <!-- Muted Rocky Umber (Deepest tone) -->
+                            <stop offset="40%" stop-color="#968373"/>  <!-- Light Granite Gray-Brown -->
+                            <stop offset="80%" stop-color="#c7b8ac"/>  <!-- Soft Desert Sand -->
+                            <stop offset="100%" stop-color="#e3dac9"/> <!-- Bright Clay Highlight -->
+                        </linearGradient>
+                        </defs>
+
+<g style="fill: url(#dynamicGradient); fill-opacity: 1; stroke: rgb(0, 0, 0); stroke-width: 8; stroke-opacity: 0.9; stroke-dasharray: none;"> 
+
+<polygon class="fil0" points="182,380 223,405 251,449 582,147 628,0 483,45 "/><path class="fil0" d="M52 537l75 -98 -65 -67 31 -34 114 81 82 118 -31 33 -66 -67 -98 75c4,29 -17,55 -47,55 -26,0 -47,-21 -47,-48 0,-29 23,-49 52,-48z"/></g></svg><!-- noun-blade-2199926.svg, Created by Manaqib S, from the Noun Project-->
