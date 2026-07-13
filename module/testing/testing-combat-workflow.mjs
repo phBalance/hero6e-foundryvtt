@@ -157,8 +157,14 @@ export function registerCombatWorkflowTests(quench) {
                     // AID
                     itemsToCreate.push(createItem("AID", { NAME: "Aid STR", LEVELS: 4, INPUT: "STR" }));
 
+                    // DRAIN
+                    itemsToCreate.push(createItem("DRAIN", { NAME: "Drain STR", LEVELS: 4, INPUT: "STR" }));
+
                     // ENERGYBLAST
                     itemsToCreate.push(createItem("ENERGYBLAST", { LEVELS: 4, INPUT: "ED" }));
+
+                    // ENTANGLE (it is possible to roll 0 BODY, which results in no entangle, so use standard effect)
+                    itemsToCreate.push(createItem("ENTANGLE", { LEVELS: 4, USESTANDARDEFFECT: true }));
 
                     // MENTALBLAST aka EGOATTACK
                     itemsToCreate.push(createItem("EGOATTACK", { LEVELS: 4 }));
@@ -285,6 +291,47 @@ export function registerCombatWorkflowTests(quench) {
                     await sheet.close();
                 });
 
+                it("DRAIN", async function () {
+                    assert.ok(attackerActor, "Attacker database record exists.");
+                    assert.ok(defenderActor, "Defender database record exists.");
+
+                    const attackItem = attackerActor.items.find((item) => item.system?.XMLID === "DRAIN");
+                    assert.ok(attackItem, `Pre-seeded ${attackItem?.name} was successfully located on the actor.`);
+
+                    // 1. Establish canvas target layer
+                    await targetToken(defenderTokenDoc, defenderActor);
+                    const baselineStr = defenderActor.system.characteristics?.str?.value;
+
+                    // 2. Open Attacker Sheet and capture form context
+                    const { appInstance, sheet } = await launchAttackForm(attackerActor, attackItem);
+
+                    // 3. Complete chat interaction sequences via encapsulated pipeline
+                    const adjustmentSummaryDiv = await executeChatCardSequence(
+                        appInstance,
+                        defenderTokenDoc,
+                        20,
+                        `div.adjustment-summary, div.damage-summary`,
+                    );
+                    assert.ok(adjustmentSummaryDiv, "Adjustment summary wrapper confirmed.");
+
+                    // 4. Verification calculations against live document database state
+                    const updatedDefender = defenderTokenDoc.actor;
+                    const finalStr = updatedDefender.system.characteristics?.str?.value;
+
+                    const strDrainAmount = Number(adjustmentSummaryDiv.innerHTML.match(/(\d+) STR/)[1]);
+                    const expectedStrAfterDrain = baselineStr - strDrainAmount;
+
+                    assert.strictEqual(
+                        finalStr,
+                        expectedStrAfterDrain,
+                        `Defender's STR.value should be ${expectedStrAfterDrain} (Baseline: ${baselineStr} + Drain: ${strDrainAmount} = Final: ${finalStr}).`,
+                    );
+
+                    // 5. Explicit structural window cleanup
+                    await appInstance.close();
+                    await sheet.close();
+                });
+
                 it("ENERGYBLAST", async function () {
                     assert.ok(attackerActor, "Attacker database record exists.");
                     assert.ok(defenderActor, "Defender database record exists.");
@@ -330,9 +377,55 @@ export function registerCombatWorkflowTests(quench) {
                     await sheet.close();
                 });
 
-                it.skip("DRAIN", async function () {});
+                it("ENTANGLE", async function () {
+                    assert.ok(attackerActor, "Attacker database record exists.");
+                    assert.ok(defenderActor, "Defender database record exists.");
 
-                it.skip("ENTANGLE", async function () {});
+                    const attackItem = attackerActor.items.find((item) => item.system?.XMLID === "ENTANGLE");
+                    assert.ok(attackItem, `Pre-seeded ${attackItem?.name} was successfully located on the actor.`);
+
+                    // 1. Establish canvas target layer
+                    await targetToken(defenderTokenDoc, defenderActor);
+
+                    // 2. Open Attacker Sheet and capture form context
+                    const { appInstance, sheet } = await launchAttackForm(attackerActor, attackItem);
+
+                    // 3. Complete chat interaction sequences via encapsulated pipeline
+                    const damageSpan = await executeChatCardSequence(
+                        appInstance,
+                        defenderTokenDoc,
+                        20,
+                        `.apply-damage-amount span`,
+                    );
+                    assert.ok(damageSpan, "Element found in chat card.");
+
+                    // 4. Verification calculations against live document database state
+                    const updatedDefender = defenderTokenDoc.actor;
+
+                    // Verification: Confirm state change matches automation calculations
+                    const bodyRawDamage = Number(damageSpan.innerHTML.match(/(\d+) BODY/)[1]);
+                    assert.strictEqual(bodyRawDamage, 4, `${attackItem.name} exptected to have BODY of 4`);
+
+                    const effectElement = damageSpan.closest("div.message-content").querySelector("div.effects");
+                    const expectedEffect = `is entangled. The entangle has 4 BODY 4 rPD/4 rED.`;
+
+                    assert.ok(
+                        effectElement.textContent.includes(expectedEffect),
+                        `${attackItem.name} has unexpected ENTANGLE effect`,
+                    );
+
+                    assert.ok(
+                        updatedDefender.statuses.has("entangled"),
+                        `${attackItem.name} expected to have entangled status/condition.`,
+                    );
+
+                    const ae = updatedDefender.appliedEffects?.[0];
+                    assert.ok(ae?.showIcon, `${attackItem.name} expected ActiveEffect status to showIcon=true`);
+
+                    // 5. Explicit structural window cleanup
+                    await appInstance.close();
+                    await sheet.close();
+                });
 
                 it.skip("FLASH", async function () {});
 
