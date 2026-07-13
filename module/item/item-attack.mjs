@@ -3382,7 +3382,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     } else if (isAdjustment) {
         return _onApplyAdjustmentToSpecificToken(item, targetToken, damageDetail, defense, defenseTags, action);
     } else if (isSenseAffecting) {
-        return _onApplySenseAffectingToSpecificToken(item, targetToken, damageDetail, action);
+        return _onApplySenseAffectingToSpecificToken(item, targetToken, damageDetail, damageRoller, action);
     }
 
     // Ablate defenses in the defenseTags, if appropriate.
@@ -4229,7 +4229,13 @@ export async function _onApplyAdjustmentToSpecificToken(
     }
 }
 
-async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, targetToken, damageData, action) {
+async function _onApplySenseAffectingToSpecificToken(
+    senseAffectingItem,
+    targetToken,
+    damageDetail,
+    damageRoller,
+    action,
+) {
     const defenseTags = [];
 
     // We currently only support sense groups, not individual senses
@@ -4277,7 +4283,7 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, targetT
 
         const senseGroup = senseGroups.find((sg) => sg.XMLID === adder2);
         if (senseGroup) {
-            senseGroup.bodyDamage = damageData.bodyDamage;
+            senseGroup.bodyDamage = damageDetail.bodyDamage;
         } else {
             console.warn(`Unable to find senseGroup ${adder2}`);
         }
@@ -4340,8 +4346,12 @@ async function _onApplySenseAffectingToSpecificToken(senseAffectingItem, targetT
         item: senseAffectingItem,
         senseGroups: senseGroups.filter((sg) => sg.defenseItems || sg.bodyDamage > 0),
 
+        // Incoming Damage Information
+        incomingDamageSummary: damageRoller.getTotalSummary(),
+        incomingAnnotatedDamageTerms: damageRoller.getAnnotatedTermsSummary(),
+
         // body
-        damageData,
+        damageDetail,
 
         // misc
         targetToken: targetToken,
