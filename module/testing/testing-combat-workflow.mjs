@@ -163,8 +163,11 @@ export function registerCombatWorkflowTests(quench) {
                     // ENERGYBLAST
                     itemsToCreate.push(createItem("ENERGYBLAST", { LEVELS: 4, INPUT: "ED" }));
 
-                    // ENTANGLE (it is possible to roll 0 BODY, which results in no entangle, so use standard effect)
+                    // ENTANGLE (it is possible to roll 0 BODY, which results in no effect)
                     itemsToCreate.push(createItem("ENTANGLE", { LEVELS: 4, USESTANDARDEFFECT: true }));
+
+                    // FLASH (it is possible to roll 0 BODY, which results in no effect)
+                    itemsToCreate.push(createItem("FLASH", { LEVELS: 4, USESTANDARDEFFECT: true }));
 
                     // MENTALBLAST aka EGOATTACK
                     itemsToCreate.push(createItem("EGOATTACK", { LEVELS: 4 }));
@@ -427,7 +430,51 @@ export function registerCombatWorkflowTests(quench) {
                     await sheet.close();
                 });
 
-                it.skip("FLASH", async function () {});
+                it.only("FLASH", async function () {
+                    assert.ok(attackerActor, "Attacker database record exists.");
+                    assert.ok(defenderActor, "Defender database record exists.");
+
+                    const attackItem = attackerActor.items.find((item) => item.system?.XMLID === "FLASH");
+                    assert.ok(attackItem, `Pre-seeded ${attackItem?.name} was successfully located on the actor.`);
+
+                    // 1. Establish canvas target layer
+                    await targetToken(defenderTokenDoc, defenderActor);
+
+                    // 2. Open Attacker Sheet and capture form context
+                    const { appInstance, sheet } = await launchAttackForm(attackerActor, attackItem);
+
+                    // 3. Complete chat interaction sequences via encapsulated pipeline
+                    const damageSpan = await executeChatCardSequence(
+                        appInstance,
+                        defenderTokenDoc,
+                        20,
+                        `.apply-damage-amount span`,
+                    );
+                    assert.ok(damageSpan, "Element found in chat card.");
+
+                    // 4. Verification calculations against live document database state
+                    const updatedDefender = defenderTokenDoc.actor;
+
+                    // Verification: Confirm state change matches automation calculations
+                    const bodyRawDamage = Number(damageSpan.innerHTML.match(/(\d+) Segments/)[1]);
+                    assert.strictEqual(bodyRawDamage, 4, `${attackItem.name} exptected to have BODY of 4`);
+
+                    const effectElement = damageSpan.closest("div.message-content").querySelector("div.effects");
+                    const expectedEffect = `SIGHTGROUP for 4 segments.`;
+
+                    assert.ok(
+                        effectElement.textContent.includes(expectedEffect),
+                        `${attackItem.name} has unexpected effect`,
+                    );
+
+                    const ae = updatedDefender.appliedEffects?.[0];
+                    assert.ok(ae?.img.includes("blind"), `${attackItem.name} expected ActiveEffect to have blind img`);
+                    assert.ok(ae?.showIcon, `${attackItem.name} expected ActiveEffect to showIcon=true`);
+
+                    // 5. Explicit structural window cleanup
+                    await appInstance.close();
+                    await sheet.close();
+                });
 
                 it.skip("HTH", async function () {});
 
