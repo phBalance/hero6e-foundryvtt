@@ -992,12 +992,6 @@ async function doSingleTargetActionToHit(action, options) {
         await addAttackHitLocationsIntoToHitRoll(item.effectiveAttackItem, attackHeroRoller, options);
     }
 
-    // This is the actual roll to hit. In order to provide for a die roll
-    // that indicates the upper bound of DCV hit, we have added the base (11) and the OCV, and subtracted the mods
-    // and lastly we subtract the die roll. The value returned is the maximum DCV hit
-    // (so we can be sneaky and not tell the target's DCV out loud).
-    attackHeroRoller.addDice(-3);
-
     const aoeModifier = item.effectiveAttackItem.getAoeModifier();
     const explosion = item.effectiveAttackItem.hasExplosionAdvantage();
     const SELECTIVETARGET = aoeModifier?.ADDER ? aoeModifier.ADDER.find((o) => o.XMLID === "SELECTIVETARGET") : null;
@@ -1051,6 +1045,20 @@ async function doSingleTargetActionToHit(action, options) {
         } else {
             // TODO: Autofire against multiple targets should have increasing difficulty
 
+            // Pick the appropriate target based on the attack type. For AoE it's the base of the AoE template for
+            // a single target attack it's the actual target.
+            const targetForDistance = isAoE && aoeTemplate ? aoeTemplate : target;
+            const distance = token ? calculateDistanceBetween(token, targetForDistance).distance : 0;
+
+            // Range modifiers
+            addRangeIntoToHitRoll(distance, item, actor, targetHeroRoller);
+
+            // This is the actual roll to hit. In order to provide for a die roll
+            // that indicates the upper bound of DCV hit, we have added the base (11) and the OCV, and subtracted the mods
+            // and lastly we subtract the die roll. The value returned is the maximum DCV hit
+            // (so we can be sneaky and not tell the target's DCV out loud).
+            targetHeroRoller.addDice(-3);
+
             // TODO: FIXME: This should not be looking at internals. When mind scan can only affect 1 target, remove.
             if (typeof targetHeroRoller._successRolledValue === "undefined") {
                 //TODO: add a methods to check if roll has been made.
@@ -1082,14 +1090,6 @@ async function doSingleTargetActionToHit(action, options) {
                 )} from template origin)`;
             }
         }
-
-        // Pick the appropriate target based on the attack type. For AoE it's the base of the AoE template for
-        // a single target attack it's the actual target.
-        const targetForDistance = isAoE && aoeTemplate ? aoeTemplate : target;
-        const distance = token ? calculateDistanceBetween(token, targetForDistance).distance : 0;
-
-        // Range modifiers
-        addRangeIntoToHitRoll(distance, item, actor, targetHeroRoller);
 
         targetData.push({
             id: target.id,
