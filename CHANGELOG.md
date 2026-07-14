@@ -3,6 +3,7 @@
 ### Version 4.3.16 So far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
 - Adding icons to some powers. Fire, Air, and Earth SFX include an appropriate fill. [#4500](https://github.com/dmdorman/hero6e-foundryvtt/issues/4500)
+- Fixed missing range penalty [#4519](https://github.com/dmdorman/hero6e-foundryvtt/issues/4519)
 
 ### Version 4.3.15 20260711
 

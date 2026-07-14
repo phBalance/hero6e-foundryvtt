@@ -76,17 +76,17 @@ export function registerCombatWorkflowTests(quench) {
                     $ocvMod.blur();
                 }
 
-                let $rollToHitBtn = $appHtml.find(
+                let rollToHitBtn = $appHtml.find(
                     "button:contains('Roll to Hit'), button[data-action='roll-to-hit'], button.roll-to-hit",
                 );
-                if (!$rollToHitBtn.length) {
-                    $rollToHitBtn = $appHtml.find("button").filter(function () {
+                if (!rollToHitBtn.length) {
+                    rollToHitBtn = $appHtml.find("button").filter(function () {
                         return $(this).text().trim().toLowerCase() === "roll to hit";
                     });
                 }
 
-                assert.ok($rollToHitBtn.length, "Found the 'Roll to Hit' actionable element inside config window.");
-                $rollToHitBtn.click();
+                assert.ok(rollToHitBtn.length, "Found the 'Roll to Hit' actionable element inside config window.");
+                rollToHitBtn.click();
 
                 const { foundElement: rollDamageButton } = await waitForElementInChat(`button.roll-damage`);
                 assert.ok(rollDamageButton, "Roll Damage button found within chat card.");
@@ -108,12 +108,12 @@ export function registerCombatWorkflowTests(quench) {
                 const { foundElement: finalSummaryDiv } = await waitForElementInChat(querySelector);
                 assert.ok(finalSummaryDiv, "Execution summary element container located successfully.");
 
-                return finalSummaryDiv;
+                return { finalSummaryDiv, rollToHitBtn, allInOneChatCard };
             }
 
             // Utility helper to wait for any AppV2 sheet/dialog rendering cycle
             // Removed waitForRender function as it will be replaced by Hooks.once and direct await render()
-            describe("End-to-End Combat Action Workflow", function () {
+            describe.only("End-to-End Combat Action Workflow", function () {
                 let attackerActor = null;
                 let defenderActor = null;
                 let attackerTokenDoc = null;
@@ -192,8 +192,9 @@ export function registerCombatWorkflowTests(quench) {
                         await attackerActor.getTokenDocument({ x: 100, y: 100, actorLink: false }),
                     ]);
 
+                    // Put over 8m away to we can test range penalties (bonus test)
                     [defenderTokenDoc] = await activeScene.createEmbeddedDocuments("Token", [
-                        await defenderActor.getTokenDocument({ x: 300, y: 100, actorLink: false }),
+                        await defenderActor.getTokenDocument({ x: 900, y: 100, actorLink: false }),
                     ]);
                 });
 
@@ -226,7 +227,7 @@ export function registerCombatWorkflowTests(quench) {
                     const { appInstance, sheet } = await launchAttackForm(attackerActor, attackStrike);
 
                     // 3. Complete chat interaction sequences via encapsulated pipeline
-                    const damageSpan = await executeChatCardSequence(
+                    const { finalSummaryDiv: damageSpan } = await executeChatCardSequence(
                         appInstance,
                         defenderTokenDoc,
                         20,
@@ -271,7 +272,7 @@ export function registerCombatWorkflowTests(quench) {
                     const { appInstance, sheet } = await launchAttackForm(attackerActor, attackAid);
 
                     // 3. Complete chat interaction sequences via encapsulated pipeline
-                    const adjustmentSummaryDiv = await executeChatCardSequence(
+                    const { finalSummaryDiv: adjustmentSummaryDiv } = await executeChatCardSequence(
                         appInstance,
                         defenderTokenDoc,
                         20,
@@ -312,7 +313,7 @@ export function registerCombatWorkflowTests(quench) {
                     const { appInstance, sheet } = await launchAttackForm(attackerActor, attackItem);
 
                     // 3. Complete chat interaction sequences via encapsulated pipeline
-                    const adjustmentSummaryDiv = await executeChatCardSequence(
+                    const { finalSummaryDiv: adjustmentSummaryDiv } = await executeChatCardSequence(
                         appInstance,
                         defenderTokenDoc,
                         20,
@@ -338,7 +339,7 @@ export function registerCombatWorkflowTests(quench) {
                     await sheet.close();
                 });
 
-                it("ENERGYBLAST", async function () {
+                it.only("ENERGYBLAST", async function () {
                     assert.ok(attackerActor, "Attacker database record exists.");
                     assert.ok(defenderActor, "Defender database record exists.");
 
@@ -353,13 +354,30 @@ export function registerCombatWorkflowTests(quench) {
                     const { appInstance, sheet } = await launchAttackForm(attackerActor, attackItem);
 
                     // 3. Complete chat interaction sequences via encapsulated pipeline
-                    const damageSpan = await executeChatCardSequence(
+                    const { finalSummaryDiv: damageSpan, allInOneChatCard } = await executeChatCardSequence(
                         appInstance,
                         defenderTokenDoc,
                         20,
                         `.apply-damage-amount span`,
                     );
                     assert.ok(damageSpan, "Element found in chat card.");
+
+                    // Check diceRoller details (OCV and RANGE)
+                    const toHitDetailsDiv = allInOneChatCard.querySelector("details.hero6e-to-hit-details");
+                    assert.ok(toHitDetailsDiv, "toHitDetailsDiv");
+
+                    const tags = toHitDetailsDiv.querySelector("div.tags");
+                    assert.ok(tags, "tags");
+                    assert.ok(tags.textContent.includes("Base to hit 11"), "Base to hit 11");
+                    assert.ok(tags.textContent.includes("ocv 3"), "ocv 3");
+                    assert.ok(tags.textContent.includes("OCV modifier 20"), "OCV modifier 20");
+                    assert.ok(tags.textContent.includes("Range penalty (16m) -2"), "+20 OCV");
+
+                    const diceResultDiv = toHitDetailsDiv.querySelector("div.dice-result");
+                    assert.ok(
+                        diceResultDiv.textContent.includes("11 + 3 + 20 - 2 - 3d6"),
+                        "TOHIT: 11 + 3 + 20 - 2 - 3d6",
+                    );
 
                     // 4. Verification calculations against live document database state
                     const updatedDefender = defenderTokenDoc.actor;
@@ -397,7 +415,7 @@ export function registerCombatWorkflowTests(quench) {
                     const { appInstance, sheet } = await launchAttackForm(attackerActor, attackItem);
 
                     // 3. Complete chat interaction sequences via encapsulated pipeline
-                    const damageSpan = await executeChatCardSequence(
+                    const { finalSummaryDiv: damageSpan } = await executeChatCardSequence(
                         appInstance,
                         defenderTokenDoc,
                         20,
@@ -447,7 +465,7 @@ export function registerCombatWorkflowTests(quench) {
                     const { appInstance, sheet } = await launchAttackForm(attackerActor, attackItem);
 
                     // 3. Complete chat interaction sequences via encapsulated pipeline
-                    const damageSpan = await executeChatCardSequence(
+                    const { finalSummaryDiv: damageSpan } = await executeChatCardSequence(
                         appInstance,
                         defenderTokenDoc,
                         20,
@@ -500,7 +518,7 @@ export function registerCombatWorkflowTests(quench) {
                     const { appInstance, sheet } = await launchAttackForm(attackerActor, attackItem);
 
                     // 3. Complete chat interaction sequences via encapsulated pipeline
-                    const damageSpan = await executeChatCardSequence(
+                    const { finalSummaryDiv: damageSpan } = await executeChatCardSequence(
                         appInstance,
                         defenderTokenDoc,
                         20,
@@ -541,7 +559,7 @@ export function registerCombatWorkflowTests(quench) {
                     const { appInstance, sheet } = await launchAttackForm(attackerActor, attackItem);
 
                     // 3. Complete chat interaction sequences via encapsulated pipeline
-                    const damageSpan = await executeChatCardSequence(
+                    const { finalSummaryDiv: damageSpan } = await executeChatCardSequence(
                         appInstance,
                         defenderTokenDoc,
                         20,
