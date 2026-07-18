@@ -1387,7 +1387,8 @@ export class HeroSystem6eItemManeuver extends HeroSystem6eItemTypeDataModelGette
     }
 
     get ocv() {
-        return parseInt(this.OCV) || 0;
+        // parseInt returns -2 for "-2/x" multiattack, but we really want 0 use use Number
+        return Number(this.OCV) || 0;
     }
 
     get dcv() {
