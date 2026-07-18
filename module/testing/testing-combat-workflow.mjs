@@ -1,5 +1,6 @@
 import { waitForElementInChat, waitForTokenDrawn } from "./quench-helper.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
+import { HeroCompatibility } from "../utility/compatibility.mjs";
 
 export function registerCombatWorkflowTests(quench) {
     quench.registerBatch(
@@ -444,7 +445,9 @@ export function registerCombatWorkflowTests(quench) {
                     );
 
                     const ae = updatedDefender.appliedEffects?.[0];
-                    assert.ok(ae?.showIcon, `${attackItem.name} expected ActiveEffect status to showIcon=true`);
+                    if (HeroCompatibility.isV14) {
+                        assert.ok(ae?.showIcon, `${attackItem.name} expected ActiveEffect status to showIcon=true`);
+                    }
 
                     // 5. Explicit structural window cleanup
                     await appInstance.close();
@@ -490,7 +493,10 @@ export function registerCombatWorkflowTests(quench) {
 
                     const ae = updatedDefender.appliedEffects?.[0];
                     assert.ok(ae?.img.includes("blind"), `${attackItem.name} expected ActiveEffect to have blind img`);
-                    assert.ok(ae?.showIcon, `${attackItem.name} expected ActiveEffect to showIcon=true`);
+
+                    if (HeroCompatibility.isV14) {
+                        assert.ok(ae?.showIcon, `${attackItem.name} expected ActiveEffect to showIcon=true`);
+                    }
 
                     // 5. Explicit structural window cleanup
                     await appInstance.close();
