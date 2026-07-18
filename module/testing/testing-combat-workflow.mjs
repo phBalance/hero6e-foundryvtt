@@ -113,7 +113,7 @@ export function registerCombatWorkflowTests(quench) {
 
             // Utility helper to wait for any AppV2 sheet/dialog rendering cycle
             // Removed waitForRender function as it will be replaced by Hooks.once and direct await render()
-            describe.only("End-to-End Combat Action Workflow", function () {
+            describe("End-to-End Combat Action Workflow", function () {
                 let attackerActor = null;
                 let defenderActor = null;
                 let attackerTokenDoc = null;
@@ -339,7 +339,7 @@ export function registerCombatWorkflowTests(quench) {
                     await sheet.close();
                 });
 
-                it.only("ENERGYBLAST", async function () {
+                it("ENERGYBLAST", async function () {
                     assert.ok(attackerActor, "Attacker database record exists.");
                     assert.ok(defenderActor, "Defender database record exists.");
 
