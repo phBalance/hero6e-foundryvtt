@@ -1,5 +1,6 @@
 import { waitForElementInChat, waitForTokenDrawn } from "./quench-helper.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
+import { HeroCompatibility } from "../utility/compatibility.mjs";
 
 export function registerCombatWorkflowTests(quench) {
     quench.registerBatch(
@@ -113,7 +114,7 @@ export function registerCombatWorkflowTests(quench) {
 
             // Utility helper to wait for any AppV2 sheet/dialog rendering cycle
             // Removed waitForRender function as it will be replaced by Hooks.once and direct await render()
-            describe.only("End-to-End Combat Action Workflow", function () {
+            describe("End-to-End Combat Action Workflow", function () {
                 let attackerActor = null;
                 let defenderActor = null;
                 let attackerTokenDoc = null;
@@ -339,7 +340,7 @@ export function registerCombatWorkflowTests(quench) {
                     await sheet.close();
                 });
 
-                it.only("ENERGYBLAST", async function () {
+                it("ENERGYBLAST", async function () {
                     assert.ok(attackerActor, "Attacker database record exists.");
                     assert.ok(defenderActor, "Defender database record exists.");
 
@@ -444,7 +445,9 @@ export function registerCombatWorkflowTests(quench) {
                     );
 
                     const ae = updatedDefender.appliedEffects?.[0];
-                    assert.ok(ae?.showIcon, `${attackItem.name} expected ActiveEffect status to showIcon=true`);
+                    if (HeroCompatibility.isV14) {
+                        assert.ok(ae?.showIcon, `${attackItem.name} expected ActiveEffect status to showIcon=true`);
+                    }
 
                     // 5. Explicit structural window cleanup
                     await appInstance.close();
@@ -490,7 +493,10 @@ export function registerCombatWorkflowTests(quench) {
 
                     const ae = updatedDefender.appliedEffects?.[0];
                     assert.ok(ae?.img.includes("blind"), `${attackItem.name} expected ActiveEffect to have blind img`);
-                    assert.ok(ae?.showIcon, `${attackItem.name} expected ActiveEffect to showIcon=true`);
+
+                    if (HeroCompatibility.isV14) {
+                        assert.ok(ae?.showIcon, `${attackItem.name} expected ActiveEffect to showIcon=true`);
+                    }
 
                     // 5. Explicit structural window cleanup
                     await appInstance.close();

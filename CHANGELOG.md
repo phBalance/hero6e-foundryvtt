@@ -1,9 +1,11 @@
 # Releases
 
-### Version 4.3.16 So far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.16 20260718 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
-- Adding icons to some powers. Fire, Air, and Earth SFX include an appropriate fill. [#4500](https://github.com/dmdorman/hero6e-foundryvtt/issues/4500)
+- We are looking for community feedback on FoundryVTT V14 to make sure we aren't missing anything important. We intend to drop V13 support next week, at which time only V14 will continue to get features/fixes.
+- Initial pass at adding icons to some powers. Fire, Air, and Earth SFX include an appropriate fill. [#4500](https://github.com/dmdorman/hero6e-foundryvtt/issues/4500)
 - Fixed missing range penalty [#4519](https://github.com/dmdorman/hero6e-foundryvtt/issues/4519)
+- Fixed extra -2 OCV and modifier incorrectly added to MULTIATTACK. Also fixed a related issue where effective strength defaults to 1. [#4476](https://github.com/dmdorman/hero6e-foundryvtt/issues/4476)
 
 ### Version 4.3.15 20260711
 

@@ -1046,7 +1046,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
         // Limit strength's push
         // PH: FIXME: Should be working with limited strength and not desired strength
-        const desiredStrengthRealCost = formData.effectiveStr || 0;
+        const desiredStrengthRealCost = formData.effectiveStr ?? this.data.effectiveStr ?? 0;
         if (this.data.effectiveStr > 0) {
             ({ effectiveRealCost: this.data.effectiveStr, pushedRealPoints: this.data.effectiveStrPushedRealPoints } =
                 calculateReduceOrPushRealCost(this.data.str, desiredStrengthRealCost));
