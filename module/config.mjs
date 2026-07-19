@@ -1,7 +1,11 @@
 import { getOffHandDefenseDcv } from "./actor/actor-utils.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 import * as heroDice from "./heroRoller/dice.mjs";
-import { activationRollHeroValidation, requiresRollHeroValidation } from "./item/item-requires-roll.mjs";
+import {
+    activationRollHeroValidation,
+    requiresRollHeroValidation,
+    sectionalDefenseHeroValidation,
+} from "./item/item-requires-roll.mjs";
 import { HeroSystem6eItem } from "./item/item.mjs";
 import {
     maneuverHasBindTrait,
@@ -19256,17 +19260,17 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
-    addPower(
-        {
-            key: "SECTIONAL_DEFENSES",
-            behaviors: ["modifier"],
-            type: ["modifier"],
-            costPerLevel: fixedValueFunction(0),
-            dcAffecting: fixedValueFunction(false),
-            xml: `<MODIFIER XMLID="SECTIONAL_DEFENSES" ID="1762138737417" BASECOST="-2.0" LEVELS="0" ALIAS="Sectional Defenses" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SHORTVEST" OPTIONID="SHORTVEST" OPTION_ALIAS="Short Vest (Protects Locations 12-13" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
+    addPower(undefined, {
+        key: "SECTIONAL_DEFENSES",
+        behaviors: ["modifier"],
+        type: ["modifier"],
+        costPerLevel: fixedValueFunction(0),
+        dcAffecting: fixedValueFunction(false),
+        heroValidation: function (modifier, item) {
+            return sectionalDefenseHeroValidation(modifier, item);
         },
-        {},
-    );
+        xml: `<MODIFIER XMLID="SECTIONAL_DEFENSES" ID="1762138737417" BASECOST="-2.0" LEVELS="0" ALIAS="Sectional Defenses" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SHORTVEST" OPTIONID="SHORTVEST" OPTION_ALIAS="Short Vest (Protects Locations 12-13" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="Yes"></MODIFIER>`,
+    });
     addPower(
         {
             // CHANGEENVIRONMENT/DARKNESS (anything AOE by default) related

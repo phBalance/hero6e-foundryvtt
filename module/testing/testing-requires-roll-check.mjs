@@ -36,7 +36,7 @@ export function registerRequiresRollCheckTests(quench) {
                 // The default timeout tends to be insufficient with multiple actors being created at the same time.
                 setQuenchTimeout(this);
 
-                describe("Old HDC 5e character with sectional defenses #3876", function () {
+                describe("Old HDC 5e character with sectional defenses as activation roll (#3876)", function () {
                     const contents = `
                         <?xml version="1.0" encoding="UTF-16"?>
                         <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
@@ -158,7 +158,7 @@ export function registerRequiresRollCheckTests(quench) {
                     });
                 });
 
-                describe("5e - activation roll", function () {
+                describe("5e - activation roll (including behaving as section defense XMLID)", function () {
                     const contents = `
                         <?xml version="1.0" encoding="UTF-16"?>
                         <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic.hdt">
@@ -1567,6 +1567,274 @@ export function registerRequiresRollCheckTests(quench) {
 
                         it("Succeeds when roll is equal to or less than activation number", function () {
                             // Expected: Standard Success/Failure Scenarios
+                        });
+                    });
+                });
+
+                describe("5e character with sectional defenses", function () {
+                    const contents = `
+                        <?xml version="1.0" encoding="UTF-16"?>
+                        <CHARACTER version="6.0" TEMPLATE="builtIn.Heroic.hdt">
+                        <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
+                        <CHARACTER_INFO CHARACTER_NAME="TEST 5e Sectional Defense Man" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78.74015748031496" WEIGHT="220.4622476037958" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM="">
+                            <BACKGROUND />
+                            <PERSONALITY />
+                            <QUOTE />
+                            <TACTICS />
+                            <CAMPAIGN_USE />
+                            <APPEARANCE />
+                            <NOTES1 />
+                            <NOTES2 />
+                            <NOTES3 />
+                            <NOTES4 />
+                            <NOTES5 />
+                        </CHARACTER_INFO>
+                        <CHARACTERISTICS>
+                            <STR XMLID="STR" ID="1784471604220" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </STR>
+                            <DEX XMLID="DEX" ID="1784471603971" BASECOST="0.0" LEVELS="0" ALIAS="DEX" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </DEX>
+                            <CON XMLID="CON" ID="1784471603953" BASECOST="0.0" LEVELS="0" ALIAS="CON" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </CON>
+                            <BODY XMLID="BODY" ID="1784471604189" BASECOST="0.0" LEVELS="0" ALIAS="BODY" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </BODY>
+                            <INT XMLID="INT" ID="1784471604018" BASECOST="0.0" LEVELS="0" ALIAS="INT" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </INT>
+                            <EGO XMLID="EGO" ID="1784471604622" BASECOST="0.0" LEVELS="0" ALIAS="EGO" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </EGO>
+                            <PRE XMLID="PRE" ID="1784471604098" BASECOST="0.0" LEVELS="0" ALIAS="PRE" POSITION="7" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </PRE>
+                            <COM XMLID="COM" ID="1784471604571" BASECOST="0.0" LEVELS="0" ALIAS="COM" POSITION="8" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </COM>
+                            <PD XMLID="PD" ID="1784471604644" BASECOST="0.0" LEVELS="0" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </PD>
+                            <ED XMLID="ED" ID="1784471604870" BASECOST="0.0" LEVELS="0" ALIAS="ED" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </ED>
+                            <SPD XMLID="SPD" ID="1784471604262" BASECOST="0.0" LEVELS="0" ALIAS="SPD" POSITION="11" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </SPD>
+                            <REC XMLID="REC" ID="1784471604589" BASECOST="0.0" LEVELS="0" ALIAS="REC" POSITION="12" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </REC>
+                            <END XMLID="END" ID="1784471604140" BASECOST="0.0" LEVELS="0" ALIAS="END" POSITION="13" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </END>
+                            <STUN XMLID="STUN" ID="1784471604176" BASECOST="0.0" LEVELS="0" ALIAS="STUN" POSITION="14" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </STUN>
+                            <RUNNING XMLID="RUNNING" ID="1784471604340" BASECOST="0.0" LEVELS="0" ALIAS="Running" POSITION="15" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </RUNNING>
+                            <SWIMMING XMLID="SWIMMING" ID="1784471603958" BASECOST="0.0" LEVELS="0" ALIAS="Swimming" POSITION="16" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </SWIMMING>
+                            <LEAPING XMLID="LEAPING" ID="1784471604589" BASECOST="0.0" LEVELS="0" ALIAS="Leaping" POSITION="17" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                            </LEAPING>
+                        </CHARACTERISTICS>
+                        <SKILLS />
+                        <PERKS />
+                        <TALENTS />
+                        <MARTIALARTS />
+                        <POWERS>
+                            <LIST XMLID="GENERIC_OBJECT" ID="1784472619462" BASECOST="0.0" LEVELS="0" ALIAS="Valid Sectional Defenses" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                            </LIST>
+                            <POWER XMLID="ARMOR" ID="1784471619010" BASECOST="0.0" LEVELS="20" ALIAS="Armor" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1784472619462" NAME="Short Vest" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="10" EDLEVELS="10">
+                            <NOTES />
+                            <MODIFIER XMLID="SECTIONAL_DEFENSES" ID="1784472400240" BASECOST="-2.0" LEVELS="0" ALIAS="Sectional Defenses" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SHORTVEST" OPTIONID="SHORTVEST" OPTION_ALIAS="Short Vest (Protects Locations 12-13" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="ARMOR" ID="1784471687882" BASECOST="0.0" LEVELS="20" ALIAS="Armor" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1784472619462" NAME="Standard Vest" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="10" EDLEVELS="10">
+                            <NOTES />
+                            <MODIFIER XMLID="SECTIONAL_DEFENSES" ID="1784472410213" BASECOST="-1.5" LEVELS="0" ALIAS="Sectional Defenses" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="STANDARDVEST" OPTIONID="STANDARDVEST" OPTION_ALIAS="Standard Vest (Protects Locations 11-13" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                            <POWER XMLID="ARMOR" ID="1784471737394" BASECOST="0.0" LEVELS="20" ALIAS="Armor" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1784472619462" NAME="Full Coverage Helmet, Long Jacket with Gauntlets, High Boots" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="10" EDLEVELS="10">
+                            <NOTES />
+                            <MODIFIER XMLID="SECTIONAL_DEFENSES" ID="1784472420928" BASECOST="-0.25" LEVELS="0" ALIAS="Sectional Defenses" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="FULLCOVERAGE" OPTIONID="FULLCOVERAGE" OPTION_ALIAS="Full Coverage Helmet, Long Jacket with Gauntlets, High Boots (Protects Locations 3-5, 7-14, 16-18" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                            <LIST XMLID="GENERIC_OBJECT" ID="1784472639649" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                            </LIST>
+                            <LIST XMLID="GENERIC_OBJECT" ID="1784472643444" BASECOST="0.0" LEVELS="0" ALIAS="Invalid Sectional Defenses" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                            </LIST>
+                            <POWER XMLID="ARMOR" ID="1784472658826" BASECOST="0.0" LEVELS="20" ALIAS="Armor" POSITION="6" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1784472643444" NAME="Invalid Short Vest That Specifies More Locations So Incorrect Cost" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="10" EDLEVELS="10">
+                            <NOTES />
+                            <MODIFIER XMLID="SECTIONAL_DEFENSES" ID="1784472676520" BASECOST="-2.0" LEVELS="0" ALIAS="Sectional Defenses" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SHORTVEST" OPTIONID="SHORTVEST" OPTION_ALIAS="Override that covers stomach to feet" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="Protects Locations 12-18" PRIVATE="No" FORCEALLOW="No">
+                                <NOTES />
+                            </MODIFIER>
+                            </POWER>
+                        </POWERS>
+                        <DISADVANTAGES />
+                        <EQUIPMENT />
+                        </CHARACTER>
+                    `;
+
+                    let actor;
+                    let defaultHitLocationsEnabled;
+
+                    let sectionalDefenseShortVestArmor;
+                    let sectionalDefenseStandardVestArmor;
+                    let sectionalDefenseFullCoverageArmor;
+
+                    let invalidSectionalDefenseStomachToFeetArmor;
+
+                    before(async function () {});
+
+                    after(async function () {});
+
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: true });
+
+                        defaultHitLocationsEnabled = await getAndSetGameSetting("hit locations", true);
+
+                        sectionalDefenseShortVestArmor = actor.items.find((item) => item.name === "Short Vest");
+                        sectionalDefenseStandardVestArmor = actor.items.find((item) => item.name === "Standard Vest");
+                        sectionalDefenseFullCoverageArmor = actor.items.find(
+                            (item) => item.name === "Full Coverage Helmet, Long Jacket with Gauntlets, High Boots",
+                        );
+
+                        invalidSectionalDefenseStomachToFeetArmor = actor.items.find(
+                            (item) =>
+                                item.name === "Invalid Short Vest That Specifies More Locations So Incorrect Cost",
+                        );
+                    });
+
+                    after(async function () {
+                        await getAndSetGameSetting("hit locations", defaultHitLocationsEnabled);
+
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    describe("sectional security armor cost", function () {
+                        it("should have the short vest cost correct", function () {
+                            expect(sectionalDefenseShortVestArmor.realCost).to.equal(10);
+                        });
+
+                        it("should have the short vest cost correct", function () {
+                            expect(sectionalDefenseStandardVestArmor.realCost).to.equal(12);
+                        });
+
+                        it("should have the short vest cost correct", function () {
+                            expect(sectionalDefenseFullCoverageArmor.realCost).to.equal(24);
+                        });
+                    });
+
+                    describe("sectional security armor hero validation", function () {
+                        it("should have no heroValidation concerns for short vest (success)", function () {
+                            const heroValidation = sectionalDefenseShortVestArmor.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should have no heroValidation concerns for standard vest (success)", function () {
+                            const heroValidation = sectionalDefenseStandardVestArmor.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should have no heroValidation concerns for full coverage (success)", function () {
+                            const heroValidation = sectionalDefenseFullCoverageArmor.heroValidation;
+                            expect(heroValidation).to.have.deep.members([]);
+                        });
+
+                        it("should recognize an valid section defense declaration with incorrect probability calculation", function () {
+                            const heroValidation = invalidSectionalDefenseStomachToFeetArmor.heroValidation;
+                            expect(heroValidation.length).to.equal(1);
+                            expect(heroValidation[0]).to.have.property("severity");
+                            expect(heroValidation[0].severity).to.equal(CONFIG.HERO.VALIDATION_SEVERITY.WARNING);
+                        });
+                    });
+
+                    describe("sectional security armor activation with hit locations active", function () {
+                        describe("simple 1 range activation roll (12-13) (equivalent of 8-)", function () {
+                            it("should not activate with a hit location of 12", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        sectionalDefenseShortVestArmor,
+                                        resetDiceClass(Roll9On3Dice),
+                                        {
+                                            hitLocationNum: 12,
+                                        },
+                                    ),
+                                ).to.equal(true);
+                            });
+
+                            it("should activate with a hit location of 13", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        sectionalDefenseShortVestArmor,
+                                        resetDiceClass(Roll6On3Dice),
+                                        {
+                                            hitLocationNum: 13,
+                                        },
+                                    ),
+                                ).to.equal(true);
+                            });
+
+                            it("should not activate with a hit location of 14", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        sectionalDefenseShortVestArmor,
+                                        resetDiceClass(Roll6On3Dice),
+                                        {
+                                            hitLocationNum: 14,
+                                        },
+                                    ),
+                                ).to.equal(false);
+                            });
+                        });
+
+                        describe("simple invalid 1 range activation roll (12-18) should still work", function () {
+                            it("should activate with a hit location of 12", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        invalidSectionalDefenseStomachToFeetArmor,
+                                        resetDiceClass(Roll9On3Dice),
+                                        {
+                                            hitLocationNum: 12,
+                                        },
+                                    ),
+                                ).to.equal(true);
+                            });
+
+                            it("should activate with a hit location of 19", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        invalidSectionalDefenseStomachToFeetArmor,
+                                        resetDiceClass(Roll6On3Dice),
+                                        {
+                                            hitLocationNum: 19,
+                                        },
+                                    ),
+                                ).to.equal(true);
+                            });
+
+                            it("should not activate with a hit location of 11", async function () {
+                                expect(
+                                    await isActivatedForThisUse_TestingOnly(
+                                        invalidSectionalDefenseStomachToFeetArmor,
+                                        resetDiceClass(Roll6On3Dice),
+                                        {
+                                            hitLocationNum: 11,
+                                        },
+                                    ),
+                                ).to.equal(false);
+                            });
                         });
                     });
                 });
