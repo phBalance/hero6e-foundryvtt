@@ -2,7 +2,7 @@
 
 ### Version 4.3.17 So far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
 
--
+- Add support for SECTIONAL_DEFENSE XMLID. [#4534](https://github.com/dmdorman/hero6e-foundryvtt/issues/4534)
 
 ### Version 4.3.16 20260718
 

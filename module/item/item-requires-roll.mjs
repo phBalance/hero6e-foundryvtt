@@ -2,9 +2,112 @@ import { HEROSYS } from "../herosystem6e.mjs";
 
 import { HeroRoll, HeroRoller } from "../heroRoller/dice.mjs";
 import { calculateDicePartsForItem } from "../utility/damage.mjs";
+import { FrozenSet } from "../utility/frozen-set.mjs";
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { doSuccessRoll, emphasizeSuccessFailureFlavour, generateSuccessChatCard } from "../utility/success-card.mjs";
 import { tokenEducatedGuess } from "../utility/util.mjs";
+
+// Probability, in %, of that number on 3d6
+const HIT_LOCATION_PROBABILITY = Object.freeze({
+    3: 0.46,
+    4: 1.38,
+    5: 2.77,
+    6: 4.62,
+    7: 6.94,
+    8: 9.72,
+    9: 11.57,
+    10: 12.5,
+    11: 12.5,
+    12: 11.57,
+    13: 9.72,
+    14: 6.94,
+    15: 4.62,
+    16: 2.77,
+    17: 1.38,
+    18: 0.46,
+});
+
+// Probability, in %, of that number or less on 3d6
+const DICE_CUMULATIVE_PROBABILITY = Object.freeze({
+    3: 0.46,
+    4: 1.85,
+    5: 4.62,
+    6: 9.25,
+    7: 16.2,
+    8: 25.92,
+    9: 37.5,
+    10: 50.0,
+    11: 62.5,
+    12: 74.07,
+    13: 83.79,
+    14: 90.74,
+    15: 95.37,
+    16: 98.14,
+    17: 99.53,
+    18: 100,
+});
+
+const CAP_HIT_LOCATIONS = new FrozenSet([5]); // Protects location 5? (part of head) (NOTE: not defined properly in HD)
+const HELMET_HIT_LOCATIONS = new FrozenSet([4, ...CAP_HIT_LOCATIONS.values()]); // Protects location 4-5 (adds more head)
+const FULLHELMET_HIT_LOCATIONS = new FrozenSet([3, ...HELMET_HIT_LOCATIONS.values()]); // Protects location 3-5 (adds rest of head)
+
+const SHORTVEST_HIT_LOCATIONS = new FrozenSet([12, 13]); // Protects location 12-13 (stomach + vitals)
+const STANDARDVEST_HIT_LOCATIONS = new FrozenSet([11, ...SHORTVEST_HIT_LOCATIONS.values()]); // Protects location 11-13 (adds part of chest)
+const LONGVEST_HIT_LOCATIONS = new FrozenSet([10, ...STANDARDVEST_HIT_LOCATIONS.values()]); // Protects location 10-13 (add rest of chest)
+const JACKET_HIT_LOCATIONS = new FrozenSet([9, ...LONGVEST_HIT_LOCATIONS.values()]); // Protects location 9-13 (adds shoulders)
+const LONGJACKET_HIT_LOCATIONS = new FrozenSet([...JACKET_HIT_LOCATIONS.values(), 14]); // Protects location 9-14 (adds thighs)
+const LONGJACKETWITHSLEEVES_HIT_LOCATIONS = new FrozenSet([7, 8, ...LONGJACKET_HIT_LOCATIONS.values()]); // Protects location 7-14 (adds arms)
+
+const SHOES_HIT_LOCATIONS = new FrozenSet([17, 18]); // Protects location 17-18
+const HIGHBOOTS_HIT_LOCATIONS = new FrozenSet([16, ...SHOES_HIT_LOCATIONS.values()]); // Protects location 16-18 (adds part of legs)
+
+const GAUNTLETS_HIT_LOCATIONS = new FrozenSet([6]); // Protects location 6
+
+const SECTIONAL_DEFENSES_OPTIONID_TO_HIT_LOCATIONS_SET = Object.freeze({
+    SHORTVEST: SHORTVEST_HIT_LOCATIONS,
+    STANDARDVEST: STANDARDVEST_HIT_LOCATIONS,
+    LONGVEST: LONGVEST_HIT_LOCATIONS,
+    JACKET: new FrozenSet([...HELMET_HIT_LOCATIONS.values(), ...JACKET_HIT_LOCATIONS.values()]),
+    LONGJACKET: new FrozenSet([...FULLHELMET_HIT_LOCATIONS.values(), ...JACKET_HIT_LOCATIONS.values()]),
+    LONGJACKETSLEEVES: new FrozenSet([
+        ...FULLHELMET_HIT_LOCATIONS.values(),
+        ...LONGJACKETWITHSLEEVES_HIT_LOCATIONS.values(),
+        ...HIGHBOOTS_HIT_LOCATIONS.values(),
+    ]),
+    FULLCOVERAGE: new FrozenSet([
+        ...FULLHELMET_HIT_LOCATIONS.values(),
+        ...GAUNTLETS_HIT_LOCATIONS.values(),
+        ...LONGJACKETWITHSLEEVES_HIT_LOCATIONS.values(),
+        ...HIGHBOOTS_HIT_LOCATIONS.values(),
+    ]), // NOTE: that there is a bug in HD description
+});
+
+/**
+ * Generate a probability for the provided set of hit locations
+ *
+ * @param {Set} sectionalDefenseLocationsSet
+ *
+ * @returns  {Number}
+ */
+function summedHitProbability(sectionalDefenseLocationsSet) {
+    let hitLocationCumulativeProbability = 0;
+
+    for (const hitLocation of sectionalDefenseLocationsSet.values()) {
+        hitLocationCumulativeProbability += HIT_LOCATION_PROBABILITY[hitLocation];
+    }
+
+    return hitLocationCumulativeProbability;
+}
+
+const SECTIONAL_DEFENSES_OPTIONID_TO_PROBABILITY = Object.freeze({
+    SHORTVEST: summedHitProbability(SECTIONAL_DEFENSES_OPTIONID_TO_HIT_LOCATIONS_SET.SHORTVEST),
+    STANDARDVEST: summedHitProbability(SECTIONAL_DEFENSES_OPTIONID_TO_HIT_LOCATIONS_SET.STANDARDVEST),
+    LONGVEST: summedHitProbability(SECTIONAL_DEFENSES_OPTIONID_TO_HIT_LOCATIONS_SET.LONGVEST),
+    JACKET: summedHitProbability(SECTIONAL_DEFENSES_OPTIONID_TO_HIT_LOCATIONS_SET.JACKET),
+    LONGJACKET: summedHitProbability(SECTIONAL_DEFENSES_OPTIONID_TO_HIT_LOCATIONS_SET.LONGJACKET),
+    LONGJACKETSLEEVES: summedHitProbability(SECTIONAL_DEFENSES_OPTIONID_TO_HIT_LOCATIONS_SET.LONGJACKETSLEEVES),
+    FULLCOVERAGE: summedHitProbability(SECTIONAL_DEFENSES_OPTIONID_TO_HIT_LOCATIONS_SET.FULLCOVERAGE), // NOTE: that there is a bug in HD description
+});
 
 const BACKGROUND_SKILL_XMLID_TO_KEY = Object.freeze({
     KNOWLEDGE_SKILL: "KS",
@@ -18,6 +121,7 @@ const RSR_ROLL_TYPE = Object.freeze({
     CHARACTERISTIC_ROLL: "characteristic roll",
     LUCK_ROLL: "luck roll",
     ITEM_ROLL: "item roll", // Skill, background skill, power
+    SECTIONAL_DEFENSES_ROLL: "sectional defense roll",
 });
 
 const RSR_ROLL_CATEGORY = Object.freeze({
@@ -227,14 +331,9 @@ function getRollsForRar(item, rar) {
     const rollsToGenerate = [];
 
     if (item.is5e) {
-        // 5e ACTIVATIONROLL or flat number 6e REQUIRESASKILLROLL?
-        if (rar.XMLID === "ACTIVATIONROLL") {
-            return [
-                {
-                    type: RSR_ROLL_TYPE.ACTIVATION_ROLL,
-                    rollValue: parseInt(rar.OPTIONID),
-                },
-            ];
+        // 5e normal ACTIVATIONROLL, an ACTIVATIONROLL incorrectly defined as a SECTIONAL_DEFENSES, or a SECTIONAL_DEFENSES?
+        if (rar.XMLID === "ACTIVATIONROLL" || rar.XMLID === "SECTIONAL_DEFENSES") {
+            return [buildActivationOrSectionalDefenseInternalRepresentation(item, rar)];
         }
 
         // 5e Luck roll?
@@ -278,12 +377,7 @@ function getRollsForRar(item, rar) {
         // 6e activation roll
         const isOnlyDigits = /^\d+$/.test(rar.OPTIONID);
         if (isOnlyDigits) {
-            return [
-                {
-                    type: RSR_ROLL_TYPE.ACTIVATION_ROLL,
-                    rollValue: parseInt(rar.OPTIONID),
-                },
-            ];
+            return [buildActivationOrSectionalDefenseInternalRepresentation(item, rar)];
         }
 
         // 6e Skills and background skills
@@ -404,14 +498,25 @@ const VALIDATE_SECTION_DEFENSE_ERROR_REASON = Object.freeze({
  *
  * @returns {{ valid: boolean, reason?: string, sectionalDefenseLocationsSet?: Set }} - returns validation result with location Set on success or error reason on failure
  */
-function validateSectionalComments(item, potentialSectionalComment) {
+function validateSectionalComments(item, modifier) {
+    const potentialSectionalComment = modifier.COMMENTS;
+
+    // Is this a sectional defenses with default values?
+    if (modifier.XMLID === "SECTIONAL_DEFENSES" && !potentialSectionalComment) {
+        return {
+            valid: true,
+            sectionalDefenseLocationsSet: SECTIONAL_DEFENSES_OPTIONID_TO_HIT_LOCATIONS_SET[modifier.OPTIONID],
+        };
+    }
+
     // Are there comments that could be sectional instructions?
     if (!potentialSectionalComment) {
         return { valid: false, reason: VALIDATE_SECTION_DEFENSE_ERROR_REASON.NO_COMMENT };
     }
 
-    // Are there sectional instructions that we understand?
-    const sectionalRangeComment = potentialSectionalComment.trim().match(/^locations? (.*)$/i);
+    // Are there sectional instructions that we understand? The form should be something like "protects locations" or
+    // at its simplest just "location".
+    const sectionalRangeComment = potentialSectionalComment.trim().match(/^(?:.*\s)?locations? (.*)$/i);
     if (!sectionalRangeComment) {
         return { valid: false, reason: VALIDATE_SECTION_DEFENSE_ERROR_REASON.NOT_DECLARATION };
     }
@@ -458,6 +563,54 @@ function validateSectionalComments(item, potentialSectionalComment) {
 }
 
 /**
+ * An HDC can represent sectional defenses in one of two way:
+ *   - a SECTIONAL_DEFENSES XMLID, which makes it nice an clear.
+ *   - an ACTIVATIONROLL or REQUIRESASKILLROLL XMLID which then requires a COMMENT explaining that it "protects locations"
+ *
+ * To further complicate matters, the SECTIONAL_DEFENSES XMLID doesn't have a great way to provide non standard
+ * hit locations. This is due to a HD deficiency/bug.
+ *
+ * @param {HeroSystem6eItem} item
+ * @param {Object} rar
+ *
+ * @returns {Object}
+ */
+function buildActivationOrSectionalDefenseInternalRepresentation(item, rar) {
+    // What to do when the defense type is sectional but hit locations not enabled. Ignore the case when hit location is not passed in.
+
+    // Checking for sectional Defense takes precedence over a standard activation roll.
+    const sectionalDefenseActivationRollModifier =
+        item.modifiers.find(
+            (modifier) => modifier.XMLID === "ACTIVATIONROLL" || modifier.XMLID === "SECTIONAL_DEFENSES",
+        ) ?? item.findModsByXmlid("EVERYPHASE")?.parent;
+    if (sectionalDefenseActivationRollModifier) {
+        // mod.COMMENTS take precedence for finding a sectional defense declaration, but for SECTIONAL_DEFENSES modifiers it is
+        // possible one of the location presets were used.
+
+        // PH: FIXME: Support overrides or custom values.
+
+        const { valid: validSectionalComment, sectionalDefenseLocationsSet } = validateSectionalComments(
+            item,
+            sectionalDefenseActivationRollModifier,
+        );
+
+        // Do we have valid ranges defined and are hit locations turned on? If not, then sectional defense don't make sense to consider.
+        if (validSectionalComment && game.settings.get(HEROSYS.module, "hit locations")) {
+            return {
+                type: RSR_ROLL_TYPE.SECTIONAL_DEFENSES_ROLL,
+                sectionalDefenseLocationsSet: sectionalDefenseLocationsSet,
+            };
+        }
+    }
+
+    // Guess it seems to be an activation roll
+    return {
+        type: RSR_ROLL_TYPE.ACTIVATION_ROLL,
+        rollValue: parseInt(rar.OPTIONID), // PH: FIXME: Wrong for sectional defenses that are being used without hit locations
+    };
+}
+
+/**
  *
  * @param {Set} sectionalDefenseLocationsSet - A set of all hit locations which provide a defense
  * @param {number} hitLocationNum
@@ -494,7 +647,12 @@ export async function isActivatedForThisUse_TestingOnly(item, rollClass, options
 }
 
 async function isActivatedForThisUseInternal(item, rollClass, options) {
-    const rar = item.modifiers.find((o) => o.XMLID === "REQUIRESASKILLROLL" || o.XMLID === "ACTIVATIONROLL");
+    const rar = item.modifiers.find(
+        (item) =>
+            item.XMLID === "REQUIRESASKILLROLL" ||
+            item.XMLID === "ACTIVATIONROLL" ||
+            item.XMLID === "SECTIONAL_DEFENSES",
+    );
     if (!rar) {
         return true;
     }
@@ -547,7 +705,9 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
 
             return false;
         } else if (activationRoll.type === RSR_ROLL_TYPE.ACTIVATION_ROLL) {
-            // PH: FIXME: Should probably sanity here for sectional defenses
+            // PH: FIXME: Should probably sanity check here for sectional defenses
+        } else if (activationRoll.type === RSR_ROLL_TYPE.SECTIONAL_DEFENSES_ROLL) {
+            // PH: FIXME: Should probably sanity check here for sectional defenses
         }
     }
 
@@ -560,30 +720,22 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
         let succeeded = false;
         let flavor;
 
-        if (activationRoll.type === RSR_ROLL_TYPE.ACTIVATION_ROLL) {
-            // Sectional Defense takes precedence over a standard activation roll.
-            const sectionalDefenseActivationRollModifier =
-                item.modifiers.find((o) => o.XMLID === "ACTIVATIONROLL") ?? item.findModsByXmlid("EVERYPHASE")?.parent;
-            if (options.hitLocationNum && sectionalDefenseActivationRollModifier) {
-                const { valid: validSectionalComment, sectionalDefenseLocationsSet } = validateSectionalComments(
-                    item,
-                    sectionalDefenseActivationRollModifier.COMMENTS,
-                );
-
-                // Do we have valid ranges defined and are hit locations turned on? If not, then sectional defense don't make sense to consider.
-                if (validSectionalComment && game.settings.get(HEROSYS.module, "hit locations")) {
-                    const sectionalDefenseApply = doSectionalDefensesApply(
-                        sectionalDefenseLocationsSet,
-                        options.hitLocationNum,
-                    );
-
-                    const flavor = `The sectional defense from ${item.name} ${emphasizeSuccessFailureFlavour(sectionalDefenseApply, `${sectionalDefenseApply ? "applied" : "does not apply"} to hit location ${options.hitLocationNum}.`)}`;
-                    await generateSuccessChatCard(actor, speaker, flavor, null, null);
-
-                    return sectionalDefenseApply;
-                }
+        if (activationRoll.type === RSR_ROLL_TYPE.SECTIONAL_DEFENSES_ROLL) {
+            // PH: FIXME: We can simplify this since it has to be section defense by this point in time.
+            if (!options.hitLocationNum) {
+                console.error(`sectional defense with no hitLocationNum provided`);
             }
 
+            const sectionalDefenseApply = doSectionalDefensesApply(
+                activationRoll.sectionalDefenseLocationsSet,
+                options.hitLocationNum,
+            );
+
+            const flavor = `The sectional defense from ${item.name} ${emphasizeSuccessFailureFlavour(sectionalDefenseApply, `${sectionalDefenseApply ? "applied" : "does not apply"} to hit location ${options.hitLocationNum}.`)}`;
+            await generateSuccessChatCard(actor, speaker, flavor, null, null);
+
+            return sectionalDefenseApply;
+        } else if (activationRoll.type === RSR_ROLL_TYPE.ACTIVATION_ROLL) {
             // Regular plain activation roll
             roller.makeSuccessRoll(true, activationRoll.rollValue).addDice(3);
 
@@ -686,57 +838,18 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
     });
 }
 
-// Probability, in %, of that number on 3d6
-const HIT_LOCATION_PROBABILITY = Object.freeze({
-    3: 0.46,
-    4: 1.38,
-    5: 2.77,
-    6: 4.62,
-    7: 6.94,
-    8: 9.72,
-    9: 11.57,
-    10: 12.5,
-    11: 12.5,
-    12: 11.57,
-    13: 9.72,
-    14: 6.94,
-    15: 4.62,
-    16: 2.77,
-    17: 1.38,
-    18: 0.46,
-});
-
-// Probability, in %, of that number or less on 3d6
-const DICE_CUMULATIVE_PROBABILITY = Object.freeze({
-    3: 0.46,
-    4: 1.85,
-    5: 4.62,
-    6: 9.25,
-    7: 16.2,
-    8: 25.92,
-    9: 37.5,
-    10: 50.0,
-    11: 62.5,
-    12: 74.07,
-    13: 83.79,
-    14: 90.74,
-    15: 95.37,
-    16: 98.14,
-    17: 99.53,
-    18: 100,
-});
-
-export function activationRollHeroValidation(modifier, item) {
+export function sectionalDefenseHeroValidation(modifier, item) {
     const validations = [];
 
-    // Since sectional defenses are optional we can only check a subset of errors
-    const sectionalDefenseRanges = validateSectionalComments(item, modifier.COMMENTS);
+    // There are two possibilities for sectional defense comments. There are presets that appear
+    // in OPTIONID that have no good way to override. Assume that overrides appear in the COMMENTS.
+    const sectionalDefenseRanges = validateSectionalComments(item, modifier);
     if (!sectionalDefenseRanges.valid) {
         if (sectionalDefenseRanges.reason === VALIDATE_SECTION_DEFENSE_ERROR_REASON.INVALID_RANGE) {
             validations.push({
                 property: "COMMENTS",
                 message: sectionalDefenseRanges.reason,
-                example: "locations 4-6, 8, and 10-12",
+                example: "protects locations 4-6, 8, and 10-12",
                 severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                 modifierID: modifier.ID,
             });
@@ -754,12 +867,13 @@ export function activationRollHeroValidation(modifier, item) {
         }
 
         // Check that the sectional defense description roughly matches the expected probability based on the limitation taken
-        const activationRollLimitation = modifier.OPTIONID;
-        const activationRollCumulativeProbability = DICE_CUMULATIVE_PROBABILITY[activationRollLimitation];
-        let hitLocationCumulativeProbability = 0;
-        for (const hitLocation of sectionalDefenseRanges.sectionalDefenseLocationsSet.values()) {
-            hitLocationCumulativeProbability += HIT_LOCATION_PROBABILITY[hitLocation];
-        }
+        const activationRollCumulativeProbability =
+            modifier.XMLID === "SECTIONAL_DEFENSES"
+                ? SECTIONAL_DEFENSES_OPTIONID_TO_PROBABILITY[modifier.OPTIONID]
+                : DICE_CUMULATIVE_PROBABILITY[modifier.OPTIONID];
+        const hitLocationCumulativeProbability = summedHitProbability(
+            sectionalDefenseRanges.sectionalDefenseLocationsSet,
+        );
 
         // If cumulative probability of hit locations is larger than the probability at the activation roll (with a 1% fuzz)
         // then this is "cheating" and the limitation should probably be bought down.
@@ -785,6 +899,10 @@ export function activationRollHeroValidation(modifier, item) {
     }
 
     return validations;
+}
+
+export function activationRollHeroValidation(modifier, item) {
+    return sectionalDefenseHeroValidation(modifier, item);
 }
 
 export function requiresRollHeroValidation(modifier, item) {
