@@ -2572,7 +2572,7 @@ export async function _onRollDamage(event) {
 
         // hit locations
         useHitLoc: damageRoller.hitLocationValid(),
-        hitLocText: damageRoller.getHitLocation().fullName,
+        hitLocText: `${damageRoller.getHitLocation().fullName} (${damageRoller.getHitLocation().num})`,
 
         // misc
         targetIds: toHitData.targetIds,
@@ -3278,13 +3278,14 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         return;
     }
 
-    // Some defenses require a roll not just to activate, but on each use: 6e EVERYPHASE, 5e ACTIVATIONROLL, and 5e & 6e ABLATIVE
+    // Some defenses require a roll not just to activate, but on each use: 6e EVERYPHASE, 5e ACTIVATIONROLL, 5e SECTIONAL_DEFENSES, and 5e & 6e ABLATIVE
     const activatableDefenses = targetToken.actor.items
         .filter(
             (o) =>
                 o.isActive &&
                 (o.findModsByXmlid("EVERYPHASE") ||
                     o.findModsByXmlid("ACTIVATIONROLL") ||
+                    o.findModsByXmlid("SECTIONAL_DEFENSES") ||
                     o.findModsByXmlid("ABLATIVE")) &&
                 o.baseInfo.behaviors.includes("defense"),
         )
@@ -3297,7 +3298,10 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         );
 
     for (const defense of activatableDefenses) {
-        const rar = defense.findModsByXmlid("EVERYPHASE") || defense.findModsByXmlid("ACTIVATIONROLL");
+        const rar =
+            defense.findModsByXmlid("EVERYPHASE") ||
+            defense.findModsByXmlid("ACTIVATIONROLL") ||
+            defense.findModsByXmlid("SECTIONAL_DEFENSES");
         let rarSuccess = true;
         if (rar) {
             rarSuccess = await isActivatedForThisUse(defense, {
