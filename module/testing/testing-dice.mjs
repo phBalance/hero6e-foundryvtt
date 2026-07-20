@@ -1410,7 +1410,7 @@ export function registerDiceTests(quench) {
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
-                            .addToHitLocation(true, "Foot")
+                            .addToHitLocation(true, "Foot", false, "ignore me", true, 17)
                             .addDice(3)
                             .addDiceMinus1(1)
                             .addNumber(1);
@@ -1424,7 +1424,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
-                            num: 17, // Foot is either 17 or 18. The code happens to choose 17.
+                            num: 17, // Foot is either 17 or 18. The test code above chooses 17.
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
@@ -1435,7 +1435,7 @@ export function registerDiceTests(quench) {
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
-                            .addToHitLocation(true, "Foot", false, "none")
+                            .addToHitLocation(true, "Foot", false, "ignore me", true, 18)
                             .addDice(3)
                             .addDiceMinus1(1)
                             .addNumber(1);
@@ -1449,7 +1449,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "none",
                             fullName: "Foot",
-                            num: 17, // Foot is either 17 or 18. The code happens to choose 17.
+                            num: 18, // Foot is either 17 or 18. The test code above chooses 18.
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });
@@ -1460,7 +1460,7 @@ export function registerDiceTests(quench) {
 
                         const roller = new HeroRoller({}, TestRollMock)
                             .makeNormalRoll()
-                            .addToHitLocation(true, "Foot", true, "Right")
+                            .addToHitLocation(true, "Foot", true, "Right", true, 17)
                             .addDice(3)
                             .addDiceMinus1(1)
                             .addNumber(1);
@@ -1474,7 +1474,7 @@ export function registerDiceTests(quench) {
                             name: "Foot",
                             side: "Right",
                             fullName: "Right Foot",
-                            num: 17, // Foot is either 17 or 18. The code happens to choose 17.
+                            num: 17, // Foot is either 17 or 18. The test code above chooses 17.
                             stunMultiplier: 1,
                             bodyMultiplier: 0.5,
                         });

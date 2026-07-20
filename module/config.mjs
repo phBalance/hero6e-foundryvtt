@@ -186,7 +186,7 @@ HERO.hitLocationRanges = Object.freeze({
     Vitals: [13],
     Thigh: [14],
     Leg: [15, 16],
-    Foot: [17, 18, 19], // 19 is possible only with special hit locations
+    Foot: [17, 18], // 19 is possible only with special hit locations
 });
 
 HERO.hitLocationsToHit = Object.freeze({
