@@ -2572,7 +2572,7 @@ export async function _onRollDamage(event) {
 
         // hit locations
         useHitLoc: damageRoller.hitLocationValid(),
-        hitLocText: damageRoller.getHitLocation().fullName,
+        hitLocText: `${damageRoller.getHitLocation().fullName} (${damageRoller.getHitLocation().num})`,
 
         // misc
         targetIds: toHitData.targetIds,
