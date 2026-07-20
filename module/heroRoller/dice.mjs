@@ -1226,7 +1226,9 @@ export class HeroRoller {
                     .setPurpose(DICE_SO_NICE_CUSTOM_SETS.HIT_LOC)
                     .makeBasicRoll()
                     .addDice(3);
+
                 await this._hitLocationRoller.roll();
+
                 locationRollTotal = this._hitLocationRoller.getBasicTotal();
                 locationName = CONFIG.HERO.hitLocationsToHit[locationRollTotal];
             } else if (CONFIG.HERO.isSpecialHitLocation(this._alreadyHitLocation)) {
@@ -1236,15 +1238,56 @@ export class HeroRoller {
                     .makeBasicRoll()
                     .addDice(CONFIG.HERO.hitLocations[this._alreadyHitLocation].dice)
                     .addNumber(CONFIG.HERO.hitLocations[this._alreadyHitLocation].constant);
+
                 await this._hitLocationRoller.roll();
+
                 locationRollTotal = this._hitLocationRoller.getBasicTotal();
                 locationName = CONFIG.HERO.hitLocationsToHit[locationRollTotal];
             } else {
-                // Placed shot
+                // Placed shot. Is this a range of numbers? If so the user can select which
+                // number in the location they've hit. This is useful for bypassing sectional defenses.
+                const hitNumbersAssociatedWithHitLocation = CONFIG.HERO.hitLocationRanges[this._alreadyHitLocation];
+                if (hitNumbersAssociatedWithHitLocation.length > 1) {
+                    const radios = hitNumbersAssociatedWithHitLocation
+                        .map(
+                            (hitLocationNumber, i) => `
+                                <label style="display:flex; align-items:center; gap:0.5em; margin-bottom:4px;">
+                                    <input type="radio" name="hitNumber" value="${hitLocationNumber}" ${i === 0 ? "checked" : ""}>
+                                    hit location #${hitLocationNumber}
+                                </label>
+                            `,
+                        )
+                        .join("");
+
+                    const hitLocation = await foundry.applications.api.DialogV2.wait({
+                        window: { title: `Select Specific ${this._alreadyHitLocation} Location To Hit` },
+                        content: `<fieldset><legend>Skills</legend>${radios}</fieldset>`,
+                        buttons: [
+                            {
+                                action: "choose",
+                                label: "Confirm",
+                                default: true,
+                                callback: (event, button) => button.form.elements.hitNumber.value,
+                            },
+                        ],
+                        rejectClose: false, // returns null instead of throwing if the user closes the dialog
+                    });
+
+                    if (!hitLocation) {
+                        // They have aborted selection. Default to the first hit location number.
+                        locationRollTotal = hitNumbersAssociatedWithHitLocation[0];
+
+                        ui.notifications.warn(
+                            `Precise ${this._alreadyHitLocation} Hit Location not chosen. Defaulting to ${locationRollTotal}.`,
+                        );
+                    } else {
+                        locationRollTotal = parseInt(hitLocation);
+                    }
+                } else {
+                    locationRollTotal = hitNumbersAssociatedWithHitLocation[0];
+                }
+
                 locationName = this._alreadyHitLocation;
-                locationRollTotal = parseInt(
-                    Object.entries(CONFIG.HERO.hitLocationsToHit).find((o) => o[1] === locationName)?.[0],
-                );
             }
 
             let locationSide;

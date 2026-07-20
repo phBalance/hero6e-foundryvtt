@@ -32,6 +32,7 @@ import {
 } from "./utility/damage.mjs";
 import { createDefenseProfile } from "./utility/defense.mjs";
 import * as heroEncounter from "./utility/encounter/encounter.mjs";
+import { FrozenSet } from "./utility/frozen-set.mjs";
 import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "./utility/round.mjs";
 import {
     convertHexesToSystemUnits,
@@ -174,6 +175,19 @@ HERO.skillTraining = {
     proficient: "Proficient",
     trained: "Trained",
 };
+
+HERO.hitLocationRanges = Object.freeze({
+    Head: [3, 4, 5],
+    Hand: [6],
+    Arm: [7, 8],
+    Shoulder: [9],
+    Chest: [10, 11],
+    Stomach: [12],
+    Vitals: [13],
+    Thigh: [14],
+    Leg: [15, 16],
+    Foot: [17, 18, 19], // 19 is possible only with special hit locations
+});
 
 HERO.hitLocationsToHit = Object.freeze({
     3: "Head",
@@ -349,21 +363,21 @@ HERO.hitLocations = Object.freeze({
     },
 });
 
-HERO.VALIDATION_SEVERITY = {
-    INFO: 1,
-    WARNING: 2,
-    ERROR: 3,
-};
-
 HERO.isSpecialHitLocation = function (location) {
     return HERO.hitLocations[location]?.isSpecialHl ?? false;
 };
 
-HERO.sidedLocations = new Set(["Hand", "Shoulder", "Arm", "Thigh", "Leg", "Foot"]);
+HERO.sidedLocations = new FrozenSet(["Hand", "Shoulder", "Arm", "Thigh", "Leg", "Foot"]);
 
 HERO.hitLocationSide = Object.freeze({
     Left: "Left",
     Right: "Right",
+});
+
+HERO.VALIDATION_SEVERITY = Object.freeze({
+    INFO: 1,
+    WARNING: 2,
+    ERROR: 3,
 });
 
 HERO.ACTIVE_EFFECT_PRIORITY = Object.freeze({
