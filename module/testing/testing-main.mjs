@@ -80,10 +80,10 @@ Hooks.on("quenchReady", async (quench) => {
     registerRequiresRollCheckTests(quench);
     registerUploadTests(quench);
     registerVehicleTests(quench);
+    registerActorCharacteristicTests(quench);
     registerStatusEffectTests(quench);
     registerTypeForceReplaceTests(quench);
     registerCombatWorkflowTests(quench);
-    registerActorCharacteristicTests(quench);
     register5eCalculatedActiveEffectAutomationTests(quench);
     registerCombatTests(quench);
     registerAdjustmentFadeTests(quench);
