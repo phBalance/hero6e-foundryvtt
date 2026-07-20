@@ -244,6 +244,8 @@ export class HeroRoller {
         this._hitLocationRoller = undefined;
         this._useHitLocation = false;
         this._alreadyHitLocation = "none";
+        this._doNotPromptUserForPlacedShotSelection = false;
+        this._placedShotHitLocationOverride = 0;
 
         this._hitSideRoller = undefined;
         this._useHitLocationSide = false;
@@ -396,6 +398,8 @@ export class HeroRoller {
         alreadyHitLocation = "none",
         useHitLocationSide = false,
         alreadyHitLocationSide = "none",
+        doNotPromptUserForPlacedShotSelection = false,
+        placedShotHitLocationOverride = 0, // An invalid value
     ) {
         if (useHitLocation) {
             if (
@@ -413,6 +417,11 @@ export class HeroRoller {
             this._useHitLocationSide = useHitLocationSide;
             if (useHitLocationSide) {
                 this._alreadyHitLocationSide = alreadyHitLocationSide;
+            }
+
+            this._doNotPromptUserForPlacedShotSelection = doNotPromptUserForPlacedShotSelection;
+            if (doNotPromptUserForPlacedShotSelection) {
+                this._placedShotHitLocationOverride = placedShotHitLocationOverride;
             }
         }
         return this;
@@ -1259,19 +1268,22 @@ export class HeroRoller {
                         )
                         .join("");
 
-                    const hitLocation = await foundry.applications.api.DialogV2.wait({
-                        window: { title: `Select Specific ${this._alreadyHitLocation} Location To Hit` },
-                        content: `<fieldset><legend>Skills</legend>${radios}</fieldset>`,
-                        buttons: [
-                            {
-                                action: "choose",
-                                label: "Confirm",
-                                default: true,
-                                callback: (event, button) => button.form.elements.hitNumber.value,
-                            },
-                        ],
-                        rejectClose: false, // returns null instead of throwing if the user closes the dialog
-                    });
+                    // Prompt the user for hit location unless we explicitly don't want to.
+                    const hitLocation = this._doNotPromptUserForPlacedShotSelection
+                        ? this._placedShotHitLocationOverride
+                        : await foundry.applications.api.DialogV2.wait({
+                              window: { title: `Select Specific ${this._alreadyHitLocation} Location To Hit` },
+                              content: `<fieldset><legend>Skills</legend>${radios}</fieldset>`,
+                              buttons: [
+                                  {
+                                      action: "choose",
+                                      label: "Confirm",
+                                      default: true,
+                                      callback: (event, button) => button.form.elements.hitNumber.value,
+                                  },
+                              ],
+                              rejectClose: false, // returns null instead of throwing if the user closes the dialog
+                          });
 
                     if (!hitLocation) {
                         // They have aborted selection. Default to the first hit location number.
