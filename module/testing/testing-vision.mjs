@@ -12,9 +12,9 @@ export function registerVisionTests(quench) {
             const { describe, it, assert, before, after } = context;
 
             // Targeted Iteration Isolation: Focus execution entirely on the Vision module
-            describe.only("Vision", () => {
+            describe("Vision", () => {
                 // --- UNIT TESTS LEVEL ---
-                describe.only("Unit tests", () => {
+                describe("Unit tests", () => {
                     it("Should resolve true via SIGHT FRINGE math if adjacent despite active invisibility", () => {
                         const detectionMode = CONFIG.Canvas.detectionModes["heroTargetingV14"];
 
@@ -56,7 +56,7 @@ export function registerVisionTests(quench) {
                 });
 
                 // --- WORKFLOW / SCENE WORKFLOW TESTS LEVEL ---
-                describe.only("Integration", () => {
+                describe("Integration", () => {
                     let testScene;
                     let pcActor;
                     let invisibleActor;
