@@ -5,7 +5,7 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { addRangeIntoToHitRoll, dehydrateAttackItem, rehydrateAttackItem } from "../item/item-attack.mjs";
 import { getTokenUuid, tokenEducatedGuess } from "../utility/util.mjs";
 
-const { PrototypeToken } = foundry.documents;
+const { PrototypeToken } = foundry.data;
 
 export class Attack {
     static async makeActionActiveEffects(action) {

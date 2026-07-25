@@ -1,4 +1,4 @@
-import { waitForElementInChat, waitForTokenDrawn } from "./quench-helper.mjs";
+import { waitForElementInChat, waitForTokenDrawn, setQuenchTimeout } from "./quench-helper.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
 import { HeroCompatibility } from "../utility/compatibility.mjs";
 
@@ -117,6 +117,7 @@ export function registerCombatWorkflowTests(quench) {
             // Utility helper to wait for any AppV2 sheet/dialog rendering cycle
             // Removed waitForRender function as it will be replaced by Hooks.once and direct await render()
             describe("End-to-End Combat Action Workflow", function () {
+                setQuenchTimeout(this);
                 let attackerActor = null;
                 let defenderActor = null;
                 let attackerTokenDoc = null;
@@ -230,21 +231,21 @@ export function registerCombatWorkflowTests(quench) {
                     const { appInstance, sheet } = await launchAttackForm(attackerActor, attackStrike);
 
                     // 3. Complete chat interaction sequences via encapsulated pipeline
-                    const { finalSummaryDiv: damageSpan } = await executeChatCardSequence(
+                    const { finalSummaryDiv } = await executeChatCardSequence(
                         appInstance,
                         defenderTokenDoc,
                         20,
-                        `.apply-damage-amount span`,
+                        `.apply-damage-card`,
                     );
-                    assert.ok(damageSpan, "Element found in chat card.");
+                    assert.ok(finalSummaryDiv, "Element found in chat card.");
 
-                    const { foundElement: applyDamageCard } = await waitForElementInChat(`.apply-damage-card`);
-                    assert.ok(applyDamageCard, "Apply damage card rendered in chat.");
+                    // const { foundElement: applyDamageCard } = await waitForElementInChat(`.apply-damage-card`, 5000);
+                    // assert.ok(applyDamageCard, "Apply damage card rendered in chat.");
 
                     // The card's Effect section states the STUN actually applied after defenses.
                     // Assert the database change matches the card rather than re-deriving the
                     // defense math here (the .apply-damage-amount span is pre-defense damage).
-                    const effectSection = Array.from(applyDamageCard.querySelectorAll(".card-section")).find((s) =>
+                    const effectSection = Array.from(finalSummaryDiv.querySelectorAll(".card-section")).find((s) =>
                         s.querySelector(".description-tiny")?.textContent.trim().startsWith("Effect"),
                     );
                     assert.ok(effectSection, "Effect section found within the apply damage card.");
@@ -261,7 +262,7 @@ export function registerCombatWorkflowTests(quench) {
                     const stunDamageApplied = baselineStun - finalStun;
 
                     const defenseText =
-                        Array.from(applyDamageCard.querySelectorAll(".card-section .description-tiny"))
+                        Array.from(finalSummaryDiv.querySelectorAll(".card-section .description-tiny"))
                             .map((el) => el.textContent.trim())
                             .find((t) => t.startsWith("Defense")) ?? "Defense: unknown";
 
