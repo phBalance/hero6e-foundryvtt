@@ -1,5 +1,7 @@
 import { HeroSystem6eItem } from "../item/item.mjs";
 
+const { Actor, Item } = foundry.documents;
+
 export function registerItemEditionTests(quench) {
     quench.registerBatch(
         `${game.system.id}.testing.itemEdition`,

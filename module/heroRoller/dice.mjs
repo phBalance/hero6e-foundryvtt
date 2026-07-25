@@ -1,5 +1,4 @@
-// v13 compatibility
-const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+const { renderTemplate } = foundry.applications.handlebars;
 
 export const DICE_SO_NICE_CUSTOM_SETS = Object.freeze({
     HIT_LOC: {
@@ -715,7 +714,7 @@ export class HeroRoller {
                   total: this.getTotalSummary(),
               };
 
-        return foundryVttRenderTemplate(template, chatData);
+        return renderTemplate(template, chatData);
     }
 
     tags() {

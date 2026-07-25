@@ -2,12 +2,12 @@ import { HeroSystem6eActor } from "./actor/actor.mjs";
 import { HeroSystem6eItem } from "./item/item.mjs";
 import { getPowerInfo } from "./utility/util.mjs";
 
-// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
-const FoundryVttCompendiumDirectory = foundry.applications?.sidebar?.tabs?.CompendiumDirectory || CompendiumDirectory;
-const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
-const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended || FormDataExtended;
+const { CompendiumDirectory } = foundry.applications.sidebar.tabs;
+const { CompendiumCollection } = foundry.documents.collections;
+const { renderTemplate } = foundry.applications.handlebars;
+const { FormDataExtended } = foundry.applications.ux;
 
-export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirectory {
+export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
     constructor(...args) {
         super(...args);
     }
@@ -30,7 +30,7 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
             game.i18n.sortObjects(types, "label");
             const folders = game.packs._formatFolderSelectOptions();
 
-            let html = await foundryVttRenderTemplate(
+            let html = await renderTemplate(
                 `templates/sidebar/compendium-create.${game.version.split(".")[0] === "12" ? "html" : "hbs"}`,
                 {
                     types,
@@ -76,7 +76,7 @@ export class HeroSystem6eCompendiumDirectory extends FoundryVttCompendiumDirecto
                 position: { width: 480 },
                 ok: {
                     label: "COMPENDIUM.Create",
-                    callback: (_event, button) => new FoundryVttFormDataExtended(button.form).object,
+                    callback: (_event, button) => new FormDataExtended(button.form).object,
                 },
                 render: handleRender,
             });

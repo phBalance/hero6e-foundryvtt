@@ -1,7 +1,6 @@
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
-// v13 compatibility
-const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+const { renderTemplate } = foundry.applications.handlebars;
 
 /**
  * Make a success roll and update the flavor passed in with the results. We put emphasis on the results and style it.
@@ -69,7 +68,7 @@ export async function generateSuccessChatCard(actor, speaker, flavor, roller, re
 
         tags: roller?.tags(),
     };
-    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
 
     const chatData = {
         style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,

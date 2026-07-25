@@ -5,8 +5,7 @@ import { ftlLevelsToLightYearsPerYear } from "../item/item.mjs";
 // PH: FIXME: Megamovement is always non combat.
 // PH: FIXME: Encumberance can slow actors down
 
-// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
-const FoundryVttTokenHUD = foundry.applications.hud?.TokenHUD || TokenHUD;
+const { TokenHUD } = foundry.applications.hud;
 
 /**
  * Generate a canSelect function that is appropriate for the characteristic
@@ -150,7 +149,7 @@ function getMovementCostFunctionForGravityAffectedMovementType(/*token, options*
     return gravityAffectedMovementCostFunction;
 }
 
-export class HeroSystemTokenHud extends FoundryVttTokenHUD {
+export class HeroSystemTokenHud extends TokenHUD {
     /**
      * Return initialize movement actions
      * @param {string} module

@@ -1,6 +1,10 @@
 # Releases
 
-### Version 4.3.17 20260725 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 4.3.0 So Far... [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- This (and future) releases no longer support FoundryVTT V13. This release only works with FoundryVTT V14.
+
+### Version 4.3.17 20260725
 
 - This is the last version that supports Foundry v13. Please upgrade to v14 if you wish to receive enhancements and bug fixes.
 - Add support for SECTIONAL_DEFENSE XMLID. [#4534](https://github.com/dmdorman/hero6e-foundryvtt/issues/4534)

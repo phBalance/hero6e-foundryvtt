@@ -43,8 +43,7 @@ import {
 import { getPowerInfo, getTokenUuid, tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
 
-// v13 compatibility
-const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+const { renderTemplate } = foundry.applications.handlebars;
 
 export async function chatListeners(_html) {
     const html = $(_html); // v13 compatibility
@@ -722,7 +721,7 @@ export async function doAoeActionToHit(action, options) {
     };
 
     const template = `systems/${HEROSYS.module}/templates/chat/item-toHitAoe-card.hbs`;
-    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
 
     const chatData = {
@@ -1288,7 +1287,7 @@ async function doSingleTargetActionToHit(action, options) {
         : allInOneToHitDamageApply
           ? `systems/${HEROSYS.module}/templates/chat/item-all-in-one-tohit-apply-card.hbs`
           : `systems/${HEROSYS.module}/templates/chat/item-toHit-card.hbs`;
-    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
 
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
 
@@ -1954,7 +1953,7 @@ export async function _onRollPowerToRemove(event) {
     fisherYatesShuffle(choices);
 
     const template = `systems/${HEROSYS.module}/templates/attack/remove-power-from-automaton.hbs`;
-    const content = await foundryVttRenderTemplate(template, { choices });
+    const content = await renderTemplate(template, { choices });
 
     const powerToRemoveId = await foundry.applications.api.DialogV2.prompt({
         window: { title: `Remove power from ${targetToken.name}` },
@@ -2296,7 +2295,7 @@ async function _rollApplyKnockback(token, knockbackDice) {
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
-    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: actor, token });
 
     const chatData = {
@@ -2586,7 +2585,7 @@ export async function _onRollDamage(event) {
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/item-damage-card.hbs`;
-    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
 
     const chatData = {
@@ -2742,7 +2741,7 @@ export async function _onRollBreakfall(event) {
             speaker: speaker,
         };
         const template = `systems/${HEROSYS.module}/templates/chat/skill-success-roll-card.hbs`;
-        const cardHtml = await foundryVttRenderTemplate(template, cardData);
+        const cardHtml = await renderTemplate(template, cardData);
 
         const chatData = {
             style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
@@ -2814,7 +2813,7 @@ export async function _onRollMindScan(event) {
     };
 
     const template = `systems/${HEROSYS.module}/templates/attack/item-mindscan-target-card.hbs`;
-    const content = await foundryVttRenderTemplate(template, data);
+    const content = await renderTemplate(template, data);
     const chatData = {
         author: game.user._id,
         style: CONST.CHAT_MESSAGE_STYLES.OTHER,
@@ -2948,7 +2947,7 @@ export async function _onRollMindScanEffectRoll(event) {
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/attack/item-mindscan-damage-card.hbs`;
-    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
 
     const chatData = {
@@ -3575,7 +3574,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
-    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor, token: targetToken });
 
     const chatData = {
@@ -3726,7 +3725,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
 
         // render card
         const template = `systems/${HEROSYS.module}/templates/chat/apply-entangle-card.hbs`;
-        const cardHtml = await foundryVttRenderTemplate(template, cardData);
+        const cardHtml = await renderTemplate(template, cardData);
         const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
 
         const chatData = {
@@ -3831,7 +3830,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-entangle-card.hbs`;
-    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: item.actor, token });
 
     const chatData = {
@@ -3966,7 +3965,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-damage-card.hbs`;
-    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: attackItem.actor, token });
 
     const chatData = {
@@ -4365,7 +4364,7 @@ async function _onApplySenseAffectingToSpecificToken(
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-sense-affecting-card.hbs`;
-    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({ actor: senseAffectingItem.actor });
 
     const chatData = {

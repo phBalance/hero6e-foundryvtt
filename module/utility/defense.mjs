@@ -2,8 +2,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { roundFavorPlayerAwayFromZero } from "./round.mjs";
 
-// v13 compatibility
-const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+const { renderTemplate } = foundry.applications.handlebars;
 
 export function createDefenseProfile(actorItemDefense, attackItem, value, options = {}) {
     let itemNameExpanded =
@@ -558,7 +557,7 @@ export async function getConditionalDefenses(token, item, avad) {
         };
 
         const conditionalDefenseCardTemplate = `systems/${HEROSYS.module}/templates/attack/item-conditional-defense-card.hbs`;
-        const html = await foundryVttRenderTemplate(conditionalDefenseCardTemplate, data);
+        const html = await renderTemplate(conditionalDefenseCardTemplate, data);
 
         const inputs = await foundry.applications.api.DialogV2.wait({
             classes: ["herosystem6e"],

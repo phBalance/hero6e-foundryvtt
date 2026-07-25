@@ -2,8 +2,7 @@ import { HeroRoller } from "../../heroRoller/dice.mjs";
 import { tokenEducatedGuess } from "../../utility/util.mjs";
 import { HeroApplication } from "../api/application.mjs";
 
-// v13 compatibility
-const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+const { renderTemplate } = foundry.applications.handlebars;
 
 export class PresenceAttackApplication extends HeroApplication {
     // Dynamic PARTS based on system.id
@@ -208,7 +207,7 @@ export class PresenceAttackApplication extends HeroApplication {
             speaker: speaker,
         };
         const template = `systems/${game.system.id}/templates/chat/presence-attack-result-card.hbs`;
-        const cardHtml = await foundryVttRenderTemplate(template, cardData);
+        const cardHtml = await renderTemplate(template, cardData);
 
         const chatData = {
             style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,

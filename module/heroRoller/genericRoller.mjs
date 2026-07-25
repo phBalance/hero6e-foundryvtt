@@ -4,8 +4,8 @@ import { HeroRoller } from "./dice.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 
 // v13 compatibility
-const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
-const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended || FormDataExtended;
+const { renderTemplate } = foundry.applications.handlebars;
+const { FormDataExtended } = foundry.applications.ux;
 
 export class GenericRoller {
     static Initialize() {
@@ -18,12 +18,9 @@ export class GenericRoller {
                 //console.warn(`unable to find dom element`);
                 return;
             }
-            const content = await foundryVttRenderTemplate(
-                `systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`,
-                {
-                    css: `game-version-major-${game.version.split(".")[0]}`,
-                },
-            );
+            const content = await renderTemplate(`systems/${HEROSYS.module}/templates/system/hero-generic-roller.hbs`, {
+                css: `game-version-major-${game.version.split(".")[0]}`,
+            });
             const $content = $(content);
             $chat.after($content);
 
@@ -54,17 +51,14 @@ export class GenericRoller {
 
     static async toHit() {
         const options = { ocv: canvas.tokens.controlled.at(0)?.actor?.system.characteristics.ocv?.value || 0 };
-        const template = await foundryVttRenderTemplate(
-            `systems/${HEROSYS.module}/templates/system/heroRoll-toHit.hbs`,
-            options,
-        );
+        const template = await renderTemplate(`systems/${HEROSYS.module}/templates/system/heroRoll-toHit.hbs`, options);
 
         const userSelection = await foundry.applications.api.DialogV2.prompt({
             window: { title: "Roll ToHit" },
             content: template,
             ok: {
                 label: "Roll ToHit",
-                callback: (event, button) => new FoundryVttFormDataExtended(button.form).object,
+                callback: (event, button) => new FormDataExtended(button.form).object,
             },
             rejectClose: false,
         });
@@ -140,7 +134,7 @@ export class GenericRoller {
             }
         }
 
-        const template = await foundryVttRenderTemplate(
+        const template = await renderTemplate(
             `systems/${HEROSYS.module}/templates/system/heroRoll-damage.hbs`,
             options,
         );
@@ -149,7 +143,7 @@ export class GenericRoller {
             content: template,
             ok: {
                 label: "Roll Damage",
-                callback: (event, button) => new FoundryVttFormDataExtended(button.form).object,
+                callback: (event, button) => new FormDataExtended(button.form).object,
             },
             rejectClose: false,
         });

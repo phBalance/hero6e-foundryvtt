@@ -30,7 +30,6 @@ import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "../ut
 import { doSuccessRoll, generateSuccessChatCard } from "../utility/success-card.mjs";
 import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
 import {
-    foundryVttDeleteProperty,
     getPowerInfo,
     getTokenUuid,
     hdcTimeOptionIdToSeconds,
@@ -42,6 +41,9 @@ import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
 import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
+
+const { Item } = foundry.documents;
+const { FilePicker } = foundry.applications.ux;
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
@@ -7582,11 +7584,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             if (!this._addDataFieldMigration(source, "system.charges.clips", "system._clips")) {
                 console.error(`Unable to migrate "system.charges.clips: for ${source.name}/${source._id}`);
             }
-
-            // Delete the now migrated system.charges object.
-            // This is the data that needs removed from that database. No longer needed as we migrated
-            // important values to _charges and _clips.
-            foundryVttDeleteProperty(source, "system.charges");
 
             // Signal to migration code that this object has changed and needs to be persisted to the DB
             tagObjectForPersistence(source);

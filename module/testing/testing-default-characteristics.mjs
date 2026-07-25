@@ -1,5 +1,7 @@
 import { setQuenchTimeout } from "./quench-helper.mjs";
 
+const { Actor } = foundry.documents;
+
 export function registerActorCharacteristicTests(quench) {
     const createdActors = [];
 

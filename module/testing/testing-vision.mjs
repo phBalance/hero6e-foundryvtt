@@ -99,14 +99,14 @@ export function registerVisionTests(quench) {
                             await new Promise((resolve) => Hooks.once("canvasReady", resolve));
                         }
 
-                        pcActor = await Actor.create({
+                        pcActor = await foundry.documents.Actor.create({
                             name: "Breeze 5e",
                             type: "pc",
                             system: { is5e: true },
                             img: "icons/svg/sword.svg",
                         });
 
-                        invisibleActor = await Actor.create({
+                        invisibleActor = await foundry.documents.Actor.create({
                             name: "Spectral Knight",
                             type: "npc",
                             system: { is5e: false },

@@ -10,7 +10,8 @@ import {
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
-const FoundryVttDragDrop = foundry.applications.ux?.DragDrop || DragDrop; // V12 compatibility
+const { DragDrop } = foundry.applications.ux;
+const { FilePicker } = foundry.applications.ux;
 
 // REF: https://foundryvtt.wiki/en/development/guides/converting-to-appv2
 // REF: https://foundryvtt.wiki/en/development/guides/applicationV2-conversion-guide
@@ -114,7 +115,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 dragenter: this._onDragEnter.bind(this),
                 dragleave: this._onDragLeave.bind(this),
             };
-            return new FoundryVttDragDrop(dragDropHandler);
+            return new DragDrop(dragDropHandler);
         });
     }
 

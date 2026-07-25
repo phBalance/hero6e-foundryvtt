@@ -25,9 +25,10 @@ import {
 } from "../utility/util.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.mjs";
 
-// v13 compatibility
-const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
-const FoundryVttFilePicker = foundry.applications?.apps?.FilePicker?.implementation || FilePicker;
+const { renderTemplate } = foundry.applications.handlebars;
+const { FilePicker } = foundry.applications.ux;
+const { Actor, Item } = foundry.documents;
+const { ItemSheet } = foundry.appv1.sheets;
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -925,7 +926,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             ), // base is internal type and/or keyword. BASE2 is for bases.
             chosen: actor.type,
         };
-        const content = await foundryVttRenderTemplate(template, cardData);
+        const content = await renderTemplate(template, cardData);
 
         await foundry.applications.api.DialogV2.prompt(
             foundry.utils.mergeObject(
@@ -2866,7 +2867,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         // render card
         const template = `systems/${HEROSYS.module}/templates/chat/item-damage-card.hbs`;
-        const cardHtml = await foundryVttRenderTemplate(template, cardData);
+        const cardHtml = await renderTemplate(template, cardData);
         const speaker = ChatMessage.getSpeaker({ actor: this.actor, token });
 
         const chatData = {
@@ -3500,14 +3501,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
                 // Create a directory if it doesn't already exist
                 try {
-                    await FoundryVttFilePicker.createDirectory("user", path);
+                    await FilePicker.createDirectory("user", path);
                 } catch (error) {
                     console.debug("create directory error", error);
                 }
 
                 // Set the image, uploading if not already in the file system
                 try {
-                    const imageFileExists = (await FoundryVttFilePicker.browse("user", path)).files.includes(
+                    const imageFileExists = (await FilePicker.browse("user", path)).files.includes(
                         encodeURI(relativePathName),
                     );
                     if (!imageFileExists) {

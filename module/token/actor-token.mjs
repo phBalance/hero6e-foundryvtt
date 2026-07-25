@@ -2,11 +2,10 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroCompatibility } from "../utility/compatibility.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 
-// v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
-const FoundryVttTokenDocument = foundry.appv1?.sheets?.TokenDocument || TokenDocument;
-const FoundryVttToken = foundry.canvas?.placeables?.Token || Token;
+const { TokenDocument } = foundry.documents;
+const { Token } = foundry.canvas.placeables;
 
-export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
+export class HeroSystem6eTokenDocument extends TokenDocument {
     constructor(data, context) {
         super(data, context);
     }
@@ -269,7 +268,7 @@ export class HeroSystem6eTokenDocument extends FoundryVttTokenDocument {
     }
 }
 
-export class HeroSystem6eToken extends FoundryVttToken {
+export class HeroSystem6eToken extends Token {
     constructor(document) {
         super(document);
     }

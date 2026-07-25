@@ -4,8 +4,7 @@ import { AttackAction } from "../utility/attack-action.mjs";
 import { calculateDistanceBetween } from "../utility/range.mjs";
 import { addRangeIntoToHitRoll } from "./item-attack.mjs";
 
-// v13 compatibility
-const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+const { renderTemplate } = foundry.applications.handlebars;
 
 export class ItemAttackV2 {
     static chatListeners(_html) {
@@ -54,7 +53,7 @@ export class ItemAttackV2 {
             attackAction,
         };
         const template = `systems/${HEROSYS.module}/templates/chat/item-attack-allinone-card-v2.hbs`;
-        const cardHtml = await foundryVttRenderTemplate(template, cardData);
+        const cardHtml = await renderTemplate(template, cardData);
 
         const chatData = {
             style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,

@@ -1,5 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 
+const { Actor } = foundry.documents;
+
 /**
  * Registers tests for the updateWorldTime pipeline: out-of-combat recovery (including
  * banked remainder seconds), batched effect expiry with combined chat messages, and

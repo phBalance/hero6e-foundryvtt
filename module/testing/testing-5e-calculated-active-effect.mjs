@@ -3,6 +3,8 @@ import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import { performAdjustment } from "../utility/adjustment.mjs";
 import { HeroCompatibility } from "../utility/compatibility.mjs";
 
+const { Actor } = foundry.documents;
+
 /**
  * Registers 5e Calculated Active Effect Automation Tests with Quench.
  * Validates baseline ratios and dynamic buffs while enforcing 5e non-cascading rules.

@@ -17,6 +17,8 @@ import {
 } from "../../utility/damage.mjs";
 import { convertSystemUnitsToMetres, getSystemDisplayUnits, gridUnitsToMeters } from "../../utility/units.mjs";
 
+const { FormDataExtended } = foundry.applications.ux;
+
 /**
  * 5e HEX type and NORMAL are converted to RADIUS
  */

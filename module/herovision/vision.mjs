@@ -2,6 +2,8 @@ import { HeroCompatibility } from "../utility/compatibility.mjs";
 import { calculateDistanceBetween } from "../utility/range.mjs";
 import { HeroVisionModeInfraredPerception } from "./vision-modes/infrared-perception2.mjs";
 
+const { VisionMode, DetectionMode } = foundry.canvas.perception;
+
 export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSource {
     get isBlinded() {
         try {
@@ -64,18 +66,14 @@ export class HeroPointVisionSource extends foundry.canvas.sources.PointVisionSou
 }
 
 export function setPerceptionModes() {
-    // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
-    const FoundryVttVisionMode = foundry.canvas.perception?.VisionMode || VisionMode;
-    const FoundryVttDetectionMode = foundry.canvas.perception?.DetectionMode || DetectionMode;
-
-    class HeroVisionMode extends FoundryVttVisionMode {
+    class HeroVisionMode extends VisionMode {
         constructor() {
             super({
                 id: "heroVision",
                 label: "Hero Vision",
                 // walls: true,
                 // angle: false,
-                type: FoundryVttDetectionMode.DETECTION_TYPES.SIGHT,
+                type: DetectionMode.DETECTION_TYPES.SIGHT,
             });
         }
     }
@@ -89,23 +87,23 @@ export function setPerceptionModes() {
     /**
      * Hero Generic Sense
      */
-    class HeroDetectionSightMode extends FoundryVttDetectionMode {
+    class HeroDetectionSightMode extends DetectionMode {
         constructor() {
             super({
                 id: "heroDetectSight",
                 //label: "PF2E.Actor.Creature.Sense.Type.Thoughts",
                 //walls: true,
                 //angle: false,
-                type: FoundryVttDetectionMode.DETECTION_TYPES.SIGHT,
+                type: DetectionMode.DETECTION_TYPES.SIGHT,
             });
         }
 
         static getDetectionFilter() {
-            FoundryVttDetectionMode._detectionFilter ??= OutlineOverlayFilter.create({
+            DetectionMode._detectionFilter ??= OutlineOverlayFilter.create({
                 wave: true,
                 knockout: false,
             });
-            const filter2 = FoundryVttDetectionMode._detectionFilter;
+            const filter2 = DetectionMode._detectionFilter;
             filter2.thickness = 1;
 
             return filter2;

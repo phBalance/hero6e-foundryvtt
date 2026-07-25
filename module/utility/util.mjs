@@ -4,6 +4,8 @@ import { HeroSystem6eItem } from "../item/item.mjs";
 //import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { performAdjustment, renderAdjustmentChatCards } from "./adjustment.mjs";
 
+const { Item } = foundry.documents;
+
 export function getPowerInfo(options) {
     const xmlid =
         options.xmlid ||

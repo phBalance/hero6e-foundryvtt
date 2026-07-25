@@ -1,3 +1,5 @@
+const { Actor } = foundry.documents;
+
 export async function createQuenchActor({ quench, contents, is5e, actorType = "pc" }) {
     const CHARACTER_NAME = contents?.match(/CHARACTER_NAME=".*?"/)?.[0];
     const name = CHARACTER_NAME?.match(/CHARACTER_NAME="(.*?)"/)?.[1] || "";

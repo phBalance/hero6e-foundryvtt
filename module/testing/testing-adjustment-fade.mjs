@@ -2,6 +2,8 @@ import { getPowerInfo } from "../utility/util.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { _onApplyAdjustmentToSpecificToken } from "../item/item-attack.mjs";
 
+const { Actor } = foundry.documents;
+
 /**
  * Registers the Aid power fade evaluation test batch with Quench.
  * Fully harmonized, isolated, and leak-free production test matrix.
