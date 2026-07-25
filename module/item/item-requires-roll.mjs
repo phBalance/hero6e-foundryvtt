@@ -902,10 +902,10 @@ export function sectionalDefenseHeroValidation(modifier, item) {
 }
 
 // There are no validations we can perform for a correctly formed activation roll.
-// 5e and 6e activation rolls that masquerade as section defense rolls will
-// be considered sectional defense rolls.
+// However, 5e and 6e activation rolls can masquerade as sectional defenses so we need to
+// check that possibility.
 export function activationRollHeroValidation(modifier, item) {
-    return [];
+    return sectionalDefenseHeroValidation(modifier, item);
 }
 
 function activationAttackRollHeroValidation(modifier, item) {
