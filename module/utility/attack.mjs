@@ -5,9 +5,7 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { addRangeIntoToHitRoll, dehydrateAttackItem, rehydrateAttackItem } from "../item/item-attack.mjs";
 import { getTokenUuid, tokenEducatedGuess } from "../utility/util.mjs";
 
-const FoundryVttPrototypeToken = foundry.data.PrototypeToken;
-
-// PH: TODO: Actually define the type of an action
+const { PrototypeToken } = foundry.documents;
 
 export class Attack {
     static async makeActionActiveEffects(action) {
@@ -522,7 +520,7 @@ export function actionFromJSON(json) {
 
 /**
  * A way to serialize a token (either a HeroSystem6eToken, HeroSystem6eTokenDocument or PrototypeToken). It will, however,
- * only lead to deserializing a HeroSystem6eTokenDocument or PrototypeToken. HeroSystem6eToken will be convered into a HeroSystem6eTokenDocument
+ * only lead to deserializing a HeroSystem6eTokenDocument or PrototypeToken. HeroSystem6eToken will be converted into a HeroSystem6eTokenDocument
  * upon deserialization by tokenFromTokenObj.
  *
  * A Token has a TokenDocument that we can restore from a uuid (Scene and TokenDocument id)
@@ -536,7 +534,7 @@ function tokenToTokenObj(token) {
         console.warn(`token = ${token}`);
         return null;
     }
-    const isPrototypeToken = token instanceof FoundryVttPrototypeToken;
+    const isPrototypeToken = token instanceof PrototypeToken;
 
     return {
         // uuid of Token Document accessed via Token || uuid of TokenDocument
@@ -566,7 +564,7 @@ function tokenFromTokenObj(tokenObj) {
     }
 
     // This needs to become a PrototypeToken by deserializing and adding the actor/parent link
-    return FoundryVttPrototypeToken.fromSource(tokenObj.protoObj, { parent: actorObjToActor(tokenObj.actorObj) });
+    return PrototypeToken.fromSource(tokenObj.protoObj, { parent: actorObjToActor(tokenObj.actorObj) });
 }
 
 /**

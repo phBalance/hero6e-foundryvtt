@@ -1,21 +1,19 @@
-// v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
-const FoundryVttVisionMode = foundry.canvas.perception?.VisionMode || VisionMode;
-const FoundryVttAmplificationBackgroundVisionShader =
-    foundry.canvas.rendering?.shaders?.AmplificationBackgroundVisionShader || AmplificationBackgroundVisionShader;
+const { VisionMode } = foundry.canvas.perception;
+const { AmplificationBackgroundVisionShader } = foundry.canvas.rendering.shaders;
 
-export class HeroVisionModeInfraredPerception extends FoundryVttVisionMode {
+export class HeroVisionModeInfraredPerception extends foundry.canvas.perception.VisionMode {
     constructor() {
         super(
             {
                 id: "infraredPerception",
                 label: "Infrared Perception",
                 lighting: {
-                    background: { visibility: FoundryVttVisionMode.LIGHTING_VISIBILITY.REQUIRED },
+                    background: { visibility: VisionMode.LIGHTING_VISIBILITY.REQUIRED },
                 },
                 vision: {
                     darkness: { adaptive: false },
                     background: {
-                        shader: FoundryVttAmplificationBackgroundVisionShader,
+                        shader: AmplificationBackgroundVisionShader,
                         uniforms: {
                             contrast: 0,
                             saturation: 0,

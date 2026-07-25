@@ -43,6 +43,9 @@ import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
 import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
 
+const { Item } = foundry.documents;
+const { FilePicker } = foundry.applications.ux;
+
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
     Handlebars.registerHelper("itemNameHtml", _itemNameHtml);

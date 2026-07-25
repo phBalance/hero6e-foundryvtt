@@ -1,5 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 
+const { Actor } = foundry.documents;
+
 export function registerCombatTests(quench) {
     quench.registerBatch(
         `${game.system.id}.combat.speed-chart-progression`,

@@ -1,5 +1,7 @@
 import { HeroCompatibility } from "../utility/compatibility.mjs";
 
+const { Actor, Item } = foundry.documents;
+
 export function registerTypeForceReplaceTests(quench) {
     quench.registerBatch(
         `${game.system.id}.testing.typeForceReplace`,

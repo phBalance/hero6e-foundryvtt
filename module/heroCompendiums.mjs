@@ -1,7 +1,8 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 
-// v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
-const FoundryVttCompendiumCollection = foundry.documents?.collections?.CompendiumCollection || CompendiumCollection;
+const { Item, Macro } = foundry.documents;
+
+const { CompendiumCollection } = foundry.documents.collections;
 
 export async function CreateHeroCompendiums() {
     if (!game.user.isGM) return;
@@ -35,7 +36,7 @@ async function CreateHeroMacros() {
         await pack.configure({ locked: false });
         await pack.deleteCompendium();
     }
-    pack = await FoundryVttCompendiumCollection.createCompendium(metadata);
+    pack = await CompendiumCollection.createCompendium(metadata);
 
     // V13 seems to default new compendiums to locked
     if (pack.locked) {
@@ -113,7 +114,7 @@ async function CreateHeroItems(edition) {
         await pack.configure({ locked: false });
         await pack.deleteCompendium();
     }
-    pack = await FoundryVttCompendiumCollection.createCompendium(metadata);
+    pack = await CompendiumCollection.createCompendium(metadata);
 
     if (pack.locked) {
         await pack.configure({ locked: false });

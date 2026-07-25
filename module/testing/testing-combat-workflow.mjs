@@ -2,6 +2,8 @@ import { waitForElementInChat, waitForTokenDrawn } from "./quench-helper.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
 import { HeroCompatibility } from "../utility/compatibility.mjs";
 
+const { Actor } = foundry.documents;
+
 export function registerCombatWorkflowTests(quench) {
     quench.registerBatch(
         `${game.system.id}.testing.e2e.combat-workflow`,

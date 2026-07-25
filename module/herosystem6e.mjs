@@ -67,12 +67,8 @@ import "./utility/adjustment.mjs";
 import { HeroCompatibility } from "./utility/compatibility.mjs";
 import { expireEffects } from "./utility/util.mjs";
 
-// v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
-const FoundryVttActors = foundry.documents?.collections?.Actors || Actors;
-const FoundryVttItems = foundry.documents?.collections?.Items || Items;
-const FoundryVttItemSheet = foundry.appv1?.sheets?.ItemSheet || ItemSheet;
-const FoundryVttDocumentSheetConfig = foundry.applications?.apps?.DocumentSheetConfig || DocumentSheetConfig;
-const foundryVttLoadTemplates = foundry.applications?.handlebars?.loadTemplates || loadTemplates;
+const { Macro } = foundry.documents;
+const { Actors, Items } = foundry.documents.collections;
 
 export class HEROSYS {
     static ID = "HEROSYS";
@@ -253,7 +249,7 @@ Hooks.once("init", async function () {
     initializeHandlebarsHelpers();
     initializeItemHandlebarsHelpers();
 
-    FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSheetV2, {
+    Actors.registerSheet("herosystem6e", HeroSystemActorSheetV2, {
         makeDefault: true,
         themes: {
             "": "Default",
@@ -264,20 +260,25 @@ Hooks.once("init", async function () {
         label: "HeroSystem v2",
     });
 
-    FoundryVttItems.unregisterSheet("core", FoundryVttItemSheet);
-    FoundryVttItems.registerSheet("herosystem6e", HeroSystem6eItemSheet, {
+    Items.unregisterSheet("core", foundry.appv1.sheets.ItemSheet);
+    Items.registerSheet("herosystem6e", HeroSystem6eItemSheet, {
         makeDefault: true,
         label: "Default HeroSystem",
     });
-    FoundryVttItems.registerSheet("herosystem6e", HeroSystemItemSheetV2, {
+    Items.registerSheet("herosystem6e", HeroSystemItemSheetV2, {
         label: "HeroSystem V2",
     });
 
     //Not sure why ActiveEffect.registerSheet is missing.
-    FoundryVttDocumentSheetConfig.registerSheet(ActiveEffect, "herosystem6e", HeroSystemActiveEffectConfig, {
-        makeDefault: true,
-        label: "HeroSystemActiveEffectConfig",
-    });
+    foundry.applications.apps.DocumentSheetConfig.registerSheet(
+        ActiveEffect,
+        "herosystem6e",
+        HeroSystemActiveEffectConfig,
+        {
+            makeDefault: true,
+            label: "HeroSystemActiveEffectConfig",
+        },
+    );
 
     const templatePaths = [
         `systems/${HEROSYS.module}/templates/actor/active-effect-config.hbs`,
@@ -350,7 +351,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-effects-partial-item-v2.hbs`,
     ];
     // Handlebars Templates and Partials
-    foundryVttLoadTemplates(templatePaths);
+    foundry.applications.handlebars.loadTemplates(templatePaths);
 
     ItemVppConfig.initializeTemplate();
 

@@ -1,5 +1,7 @@
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 
+const { Actor, TokenDocument } = foundry.documents;
+
 export function registerStatusEffectTests(quench) {
     quench.registerBatch(
         `${game.system.id}.testing.statusEffects`,

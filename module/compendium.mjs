@@ -1,7 +1,7 @@
 // v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
-const FoundryVttCompendium = foundry.applications?.sidebar?.apps?.Compendium || Compendium;
+const { Compendium } = foundry.applications.sidebar.apps;
 
-export class HeroSystem6eCompendium extends FoundryVttCompendium {
+export class HeroSystem6eCompendium extends Compendium {
     async _handleDroppedEntry(target, data) {
         console.log("_handleDroppedEntry", target, data);
 

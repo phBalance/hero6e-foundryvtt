@@ -8,15 +8,14 @@ import { adjustmentSourcesPermissive, adjustmentSourcesStrict } from "../utility
 import { ItemModifierFormApplication } from "../item/item-modifier-application.mjs";
 import { HeroAdderModel, HeroModifierModel } from "./HeroSystem6eTypeDataModels.mjs";
 
-// v13 has namespaced this. Remove when support is no longer provided. Also remove from eslint template.
-const FoundryVttItemSheet = foundry.appv1?.sheets?.ItemSheet || ItemSheet;
-const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended || FormDataExtended;
+const { ItemSheet } = foundry.appv1.sheets;
+const { FormDataExtended } = foundry.applications.ux;
 
 /**
  * Extend the basic ItemSheet with some very simple modifications
  * @extends {ItemSheet}
  */
-export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
+export class HeroSystem6eItemSheet extends ItemSheet {
     /** @override */
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
@@ -345,7 +344,7 @@ export class HeroSystem6eItemSheet extends FoundryVttItemSheet {
                     label: "Create",
                     callback: async function (html) {
                         const formElement = html[0].querySelector("form");
-                        const formData = new FoundryVttFormDataExtended(formElement);
+                        const formData = new FormDataExtended(formElement);
                         const formDataObject = formData.object;
                         if (formDataObject.xmlid === "none") return;
 

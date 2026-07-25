@@ -3,9 +3,8 @@ import { HEROSYS } from "../herosystem6e.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
 
-// v13 compatibility
-const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
-const FoundryVttFormDataExtended = foundry.applications?.ux?.FormDataExtended || FormDataExtended;
+const { renderTemplate } = foundry.applications.handlebars;
+const { FormDataExtended } = foundry.applications.ux;
 
 export function isAgilitySkill(item) {
     return item.system.CHARACTERISTIC === "DEX";
@@ -124,7 +123,7 @@ async function _renderSkillForm(item, actor, stateData) {
 
     var path = `systems/${HEROSYS.module}/templates/pop-out/item-skill-card.hbs`;
 
-    return await foundryVttRenderTemplate(path, templateData);
+    return await renderTemplate(path, templateData);
 }
 
 export async function createSkillPopOutFromItem(item, actor) {
@@ -173,7 +172,7 @@ async function skillRoll(item, actor, formElement) {
         return ChatMessage.create(chatData);
     }
 
-    const formData = new FoundryVttFormDataExtended(formElement)?.object;
+    const formData = new FormDataExtended(formElement)?.object;
     const skillRoller = new HeroRoller().addDice(3);
 
     // SkillMods
@@ -323,7 +322,7 @@ async function skillRoll(item, actor, formElement) {
         speaker: speaker,
     };
     const template = `systems/${HEROSYS.module}/templates/chat/skill-success-roll-card.hbs`;
-    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
 
     const chatData = {
         style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,

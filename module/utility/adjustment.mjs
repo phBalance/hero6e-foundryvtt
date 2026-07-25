@@ -4,8 +4,7 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { calculateDicePartsForItem } from "./damage.mjs";
 import { HeroCompatibility } from "../utility/compatibility.mjs";
 
-// v13 compatibility
-const foundryVttRenderTemplate = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+const { renderTemplate } = foundry.applications.handlebars;
 
 /**
  * Return the full list of possible powers and characteristics. No skills, talents, or perks.
@@ -1307,7 +1306,7 @@ export async function renderAdjustmentChatCards(cardOrCards, adjustmentItemTags,
 
     // render card
     const template = `systems/${HEROSYS.module}/templates/chat/apply-adjustment-card.hbs`;
-    const cardHtml = await foundryVttRenderTemplate(template, cardData);
+    const cardHtml = await renderTemplate(template, cardData);
     const speaker = ChatMessage.getSpeaker({
         actor: cardOrCards[0].targetActor,
     });

@@ -3,6 +3,8 @@ import { HeroProgressBar } from "./utility/progress-bar.mjs";
 import { CreateHeroCompendiums } from "./heroCompendiums.mjs";
 import { HeroItemCharacteristic } from "./item/HeroSystem6eTypeDataModels.mjs";
 
+const { Item } = foundry.documents;
+
 // Signal to migration code that this object has changed and needs to be persisted to the DB
 const needToPersistToDb = "persistMigrationToDb";
 

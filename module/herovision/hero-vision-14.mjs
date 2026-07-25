@@ -1,4 +1,5 @@
 import { calculateDistanceBetween } from "../utility/range.mjs";
+const { Token } = foundry.canvas.placeables;
 
 // Volatile-free, top-level static tracker to store frame state deduplication
 if (!globalThis.HERO_VISION_DEBUG_CACHE) {
@@ -21,7 +22,7 @@ class BaseHeroDetectionModeV14 extends foundry.canvas.perception.DetectionMode {
 
         // 2. Structural Source/Observer context validation
         const sourceToken =
-            visionSource.object instanceof Actor
+            visionSource.object instanceof foundry.documents.Actor
                 ? canvas.tokens.contents.find((t) => t.actor?.id === visionSource.object.id)
                 : visionSource.object;
         const sourceActor = sourceToken?.actor;

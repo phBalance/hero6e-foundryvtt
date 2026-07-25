@@ -1,6 +1,6 @@
-const FoundryVttTemplateLayer = foundry.canvas.layers?.TemplateLayer || TemplateLayer;
+const { TemplateLayer } = foundry.canvas.layers;
 
-export class HeroSystem6eTemplateLayer extends FoundryVttTemplateLayer {
+export class HeroSystem6eTemplateLayer extends TemplateLayer {
     #previewListeners = null;
 
     async createPreview(createData) {
