@@ -29,8 +29,6 @@ import {
     HeroSystem6eActorActiveEffects,
     HeroSystem6eActorActiveEffectsSystemData,
 } from "./actor/actor-active-effects.mjs";
-import { HeroSystemActorSavuoriSheet } from "./actor/actor-savuori-sheet.mjs";
-import { HeroSystemActorSheet } from "./actor/actor-sheet.mjs";
 import { HeroSystem6eActor } from "./actor/actor.mjs";
 import { HeroSystemActorSheetV2 } from "./applications/actor/actor-sheet-v2.mjs";
 
@@ -72,7 +70,6 @@ import { expireEffects } from "./utility/util.mjs";
 // v13 has namespaced these. Remove when support is no longer provided. Also remove from eslint template.
 const FoundryVttActors = foundry.documents?.collections?.Actors || Actors;
 const FoundryVttItems = foundry.documents?.collections?.Items || Items;
-const FoundryVttActorSheet = foundry.appv1?.sheets?.ActorSheet || ActorSheet;
 const FoundryVttItemSheet = foundry.appv1?.sheets?.ItemSheet || ItemSheet;
 const FoundryVttDocumentSheetConfig = foundry.applications?.apps?.DocumentSheetConfig || DocumentSheetConfig;
 const foundryVttLoadTemplates = foundry.applications?.handlebars?.loadTemplates || loadTemplates;
@@ -256,13 +253,6 @@ Hooks.once("init", async function () {
     initializeHandlebarsHelpers();
     initializeItemHandlebarsHelpers();
 
-    // Register sheet application classes
-    FoundryVttActors.unregisterSheet("core", FoundryVttActorSheet);
-    FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSheet, {
-        makeDefault: false,
-        label: "HeroSystem v1",
-    });
-
     FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSheetV2, {
         makeDefault: true,
         themes: {
@@ -272,11 +262,6 @@ Hooks.once("init", async function () {
             hc: "High Contrast",
         },
         label: "HeroSystem v2",
-    });
-
-    FoundryVttActors.registerSheet("herosystem6e", HeroSystemActorSavuoriSheet, {
-        makeDefault: false,
-        label: "Savuori",
     });
 
     FoundryVttItems.unregisterSheet("core", FoundryVttItemSheet);
