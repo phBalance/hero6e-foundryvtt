@@ -190,14 +190,14 @@ class BaseHeroDetectionModeV14 extends foundry.canvas.perception.DetectionMode {
 
         // --- TELEMETRY LOG GENERATION ---
         if (isAnySenseSuccessful) {
-            console.debug(
-                `${modeHeader}: ${sourceName} detects ${targetName} via ${targetDetectedLabels.join(" / ")} (Dist: ${distanceMeters}m, PER Target: ${finalModifiedPerTarget}-)`,
-            );
+            // console.debug(
+            //     `${modeHeader}: ${sourceName} detects ${targetName} via ${targetDetectedLabels.join(" / ")} (Dist: ${distanceMeters}m, PER Target: ${finalModifiedPerTarget}-)`,
+            // );
             return true;
         } else {
-            console.debug(
-                `${modeHeader}: ${sourceName} CANNOT detect ${targetName} (Sight/Special Blocked or Range Penalty Too High | Dist: ${distanceMeters}m, PER Target: ${finalModifiedPerTarget}-)`,
-            );
+            // console.debug(
+            //     `${modeHeader}: ${sourceName} CANNOT detect ${targetName} (Sight/Special Blocked or Range Penalty Too High | Dist: ${distanceMeters}m, PER Target: ${finalModifiedPerTarget}-)`,
+            // );
             return false;
         }
     }
