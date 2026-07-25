@@ -84,9 +84,9 @@ class BaseHeroDetectionModeV14 extends foundry.canvas.perception.DetectionMode {
         const gridSpaces = calculatedDistance.gridSpaces;
         const sourceActor = sourceToken.actor;
 
-        const sourceName = sourceToken.name || "Token A";
-        const targetName = targetToken.name || "Token B";
-        const modeHeader = isTargetingClassRun ? "[TARGETING]" : "[NON-TARGETING]";
+        // const sourceName = sourceToken.name || "Token A";
+        // const targetName = targetToken.name || "Token B";
+        // const modeHeader = isTargetingClassRun ? "[TARGETING]" : "[NON-TARGETING]";
 
         // Establish proximity flags
         const isAdjacentFringe = distanceMeters <= 2 || gridSpaces <= 1;
