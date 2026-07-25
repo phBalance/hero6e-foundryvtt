@@ -901,8 +901,102 @@ export function sectionalDefenseHeroValidation(modifier, item) {
     return validations;
 }
 
+// There are no validations we can perform for a correctly formed activation roll.
+// 5e and 6e activation rolls that masquerade as section defense rolls will
+// be considered sectional defense rolls.
 export function activationRollHeroValidation(modifier, item) {
-    return sectionalDefenseHeroValidation(modifier, item);
+    return [];
+}
+
+function activationAttackRollHeroValidation(modifier, item) {
+    const validations = [];
+
+    // Should check if this actor type is capable of attack
+    const actor = item.actor;
+    if (actor?.type === "base2") {
+        validations.push({
+            message: `Bases do not make attack rolls.`,
+            severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+            modifierID: modifier.ID,
+        });
+    }
+
+    return validations;
+}
+
+function activationCharacteristicRollHeroValidation(activationRoll, modifier, item) {
+    const validations = [];
+
+    if (!item.actor.hasCharacteristic(activationRoll.characteristicKey)) {
+        validations.push({
+            message: `Actor does not have the characteristic ${activationRoll.characteristicKey} to make the activation roll.`,
+            severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+            modifierID: modifier.ID,
+        });
+    }
+
+    return validations;
+}
+
+function activationLuckRollHeroValidation(activationRoll, modifier /*, item*/) {
+    const validations = [];
+
+    if (activationRoll.items.length === 0) {
+        validations.push({
+            message: `Actor does not have a luck power to make the activation roll.`,
+            severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+            modifierID: modifier.ID,
+        });
+    }
+
+    // Should not have AP penalty on RSR against Luck (warn: just doesn't make sense and behaviour would be GM fiat)
+    const luckRollHasApPenalty = findRollDivisor(modifier) !== 0;
+    if (activationRoll.items.length > 0 && luckRollHasApPenalty) {
+        validations.push({
+            message: `RSR that are based on luck should not have a penalty based on Active Points.`,
+            severity: CONFIG.HERO.VALIDATION_SEVERITY.WARNING,
+            modifierID: modifier.ID,
+        });
+    }
+
+    return validations;
+}
+
+function activationItemRollHeroValidation(activationRoll, modifier /*, item*/) {
+    const validations = [];
+
+    // Do we have items that match?
+    activationRoll.requiredSkills.forEach((requiredSkill) => {
+        if (requiredSkill.items.length === 0) {
+            validations.push({
+                message: `Actor does not have the ${requiredSkill.name} skill to make the activation roll.`,
+                severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                modifierID: modifier.ID,
+            });
+        } else {
+            // Do we have a cost mismatch between how the power was built and how it should have been built?
+            // PH: FIXME: has the same logic as evaluation that we only look at the first activeItem
+            const activeItemXmlid = requiredSkill.activeItems[0].system.XMLID;
+            const isActiveItemBackgroundSkill = !!BACKGROUND_SKILL_XMLID_TO_KEY[activeItemXmlid];
+            if (requiredSkill.wantBackgroundSkill !== isActiveItemBackgroundSkill) {
+                if (!requiredSkill.wantBackgroundSkill) {
+                    validations.push({
+                        message: `The requires a skill roll limitation was not bought using the background skill adder but ${requiredSkill.name} is a background skill and you have overpaid for ${activationRoll.name}.`,
+                        severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
+                        modifierID: modifier.ID,
+                    });
+                } else {
+                    validations.push({
+                        message: `The requires a skill roll limtiation was bought using the background skill adder but the ${requiredSkill.name} is not a background skill and you have underpaid for ${activationRoll.name}.`,
+                        severity: CONFIG.HERO.VALIDATION_SEVERITY.WARNING,
+                        modifierID: modifier.ID,
+                    });
+                }
+            }
+        }
+    });
+
+    return validations;
 }
 
 export function requiresRollHeroValidation(modifier, item) {
@@ -922,74 +1016,17 @@ export function requiresRollHeroValidation(modifier, item) {
     for (const activationRoll of activationRolls) {
         // Only naked success rolls can be without a skill
         if (activationRoll.type === RSR_ROLL_TYPE.ITEM_ROLL) {
-            // Do we have items that match?
-            activationRoll.requiredSkills.forEach((requiredSkill) => {
-                if (requiredSkill.items.length === 0) {
-                    validations.push({
-                        message: `Actor does not have the ${requiredSkill.name} skill to make the activation roll.`,
-                        severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
-                        modifierID: modifier.ID,
-                    });
-                } else {
-                    // Do we have a cost mismatch between how the power was built and how it should have been built?
-                    // PH: FIXME: has the same logic as evaluation that we only look at the first activeItem
-                    const activeItemXmlid = requiredSkill.activeItems[0].system.XMLID;
-                    const isActiveItemBackgroundSkill = !!BACKGROUND_SKILL_XMLID_TO_KEY[activeItemXmlid];
-                    if (requiredSkill.wantBackgroundSkill !== isActiveItemBackgroundSkill) {
-                        if (!requiredSkill.wantBackgroundSkill) {
-                            validations.push({
-                                message: `The requires a skill roll limitation was not bought using the background skill adder but ${requiredSkill.name} is a background skill and you have overpaid for ${activationRoll.name}.`,
-                                severity: CONFIG.HERO.VALIDATION_SEVERITY.INFO,
-                                modifierID: modifier.ID,
-                            });
-                        } else {
-                            validations.push({
-                                message: `The requires a skill roll limtiation was bought using the background skill adder but the ${requiredSkill.name} is not a background skill and you have underpaid for ${activationRoll.name}.`,
-                                severity: CONFIG.HERO.VALIDATION_SEVERITY.WARNING,
-                                modifierID: modifier.ID,
-                            });
-                        }
-                    }
-                }
-            });
+            validations.push(...activationItemRollHeroValidation(activationRoll, modifier, item));
         } else if (activationRoll.type === RSR_ROLL_TYPE.LUCK_ROLL) {
-            if (activationRoll.items.length === 0) {
-                validations.push({
-                    message: `Actor does not have a luck power to make the activation roll.`,
-                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
-                    modifierID: modifier.ID,
-                });
-            }
-
-            // Should not have AP penalty on RSR against Luck (warn: just doesn't make sense and behaviour would be GM fiat)
-            const luckRollHasApPenalty = findRollDivisor(modifier) !== 0;
-            if (activationRoll.items.length > 0 && luckRollHasApPenalty) {
-                validations.push({
-                    message: `RSR that are based on luck should not have a penalty based on Active Points.`,
-                    severity: CONFIG.HERO.VALIDATION_SEVERITY.WARNING,
-                    modifierID: modifier.ID,
-                });
-            }
+            validations.push(...activationLuckRollHeroValidation(activationRoll, modifier, item));
         } else if (activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL) {
-            if (!item.actor.hasCharacteristic(activationRoll.characteristicKey)) {
-                validations.push({
-                    message: `Actor does not have the characteristic ${activationRoll.characteristicKey} to make the activation roll.`,
-                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
-                    modifierID: modifier.ID,
-                });
-            }
+            validations.push(...activationCharacteristicRollHeroValidation(activationRoll, modifier, item));
         } else if (activationRoll.type === RSR_ROLL_TYPE.ATTACK_ROLL) {
-            // Should check if this actor type is capable of attack
-            const actor = item.actor;
-            if (actor?.type === "base2") {
-                validations.push({
-                    message: `Bases do not make attack rolls.`,
-                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
-                    modifierID: modifier.ID,
-                });
-            }
+            validations.push(...activationAttackRollHeroValidation(activationRoll, modifier, item));
         } else if (activationRoll.type === RSR_ROLL_TYPE.ACTIVATION_ROLL) {
             validations.push(...activationRollHeroValidation(modifier, item));
+        } else if (activationRoll.type === RSR_ROLL_TYPE.SECTIONAL_DEFENSES_ROLL) {
+            validations.push(...sectionalDefenseHeroValidation(modifier, item));
         } else {
             console.error(`Unknown activation roll type ${activationRoll.type} for heroValidation.`);
         }
