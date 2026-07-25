@@ -856,7 +856,7 @@ export function sectionalDefenseHeroValidation(modifier, item) {
         }
     } else {
         // A sectional defense only makes sense for a defense
-        if (!item.baseInfo?.type.includes("defense")) {
+        if (!item.baseInfo?.behaviors.includes("defense")) {
             validations.push({
                 property: undefined,
                 message: `${item.detailedName()} should not have a sectional defense declaration as it is not a defensive power`,
