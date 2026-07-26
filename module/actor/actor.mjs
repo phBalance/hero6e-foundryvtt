@@ -26,7 +26,7 @@ import {
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.mjs";
 
 const { renderTemplate } = foundry.applications.handlebars;
-const { FilePicker } = foundry.applications.ux;
+const { FilePicker } = foundry.applications.apps;
 const { Actor, Item } = foundry.documents;
 const { ItemSheet } = foundry.appv1.sheets;
 

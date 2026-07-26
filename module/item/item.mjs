@@ -43,7 +43,7 @@ import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-
 import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
 
 const { Item } = foundry.documents;
-const { FilePicker } = foundry.applications.ux;
+const { FilePicker } = foundry.applications.apps;
 
 export function initializeItemHandlebarsHelpers() {
     Handlebars.registerHelper("itemFullDescription", itemFullDescription);
