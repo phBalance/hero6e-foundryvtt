@@ -1,5 +1,4 @@
 const { Actor } = foundry.documents;
-import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
 
 export async function createQuenchActor({ quench, contents, is5e, actorType = "pc" }) {
     const CHARACTER_NAME = contents?.match(/CHARACTER_NAME=".*?"/)?.[0];
