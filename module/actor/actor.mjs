@@ -889,7 +889,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     // Assumes ActiveEffect is a statusEffects.
     // TODO: Allow for a non-statusEffects ActiveEffect (like from a power)
     async addActiveEffect(activeEffect) {
-        console.warn("Consider using 'toggleStatusEffect'", activeEffect);
+        console.warn(`Consider using 'toggleStatusEffect' for ${activeEffect.name}`);
         const newEffect = foundry.utils.deepClone(activeEffect);
 
         // Check for standard StatusEffects
