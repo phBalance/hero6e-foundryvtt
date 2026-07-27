@@ -365,9 +365,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
                 // 3. Return true if the file name exists in the returned file list array
                 return result.files.includes(targetSrc);
-            } catch (err) {
+            } catch {
                 // Gracefully fallback if the parent directory does not exist either
-                console.debug(err);
+                //console.warn(err);
                 return false;
             }
         };
@@ -1480,9 +1480,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     async roll(options = {}) {
         if (!this.actor.canAct(true, event)) return;
 
-        if (this.actor.needsToAbortToAct() && !this.canBeAbortedTo()) {
+        if (
+            !options.token?.scene.name.includes("_Quench") &&
+            this.actor.needsToAbortToAct() &&
+            !this.canBeAbortedTo()
+        ) {
             await ui.notifications.warn(`${this.actor.name} is not the active combatant`);
-            //return;
         }
 
         if (this.baseInfo.behaviors.includes("to-hit")) {

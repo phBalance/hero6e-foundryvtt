@@ -850,7 +850,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         await super._onFirstRender(context, options);
 
         // Keep track of token; needed for linked actors
-        this.#token = options.token ?? tokenEducatedGuess({ actor: this.actor });
+        this.#token = options.token ?? this.document.token ?? tokenEducatedGuess({ actor: this.actor });
 
         this.#contextMenus = [
             // General right click on row
