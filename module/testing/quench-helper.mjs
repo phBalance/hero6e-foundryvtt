@@ -187,7 +187,11 @@ export async function createQuenchScene(options = {}) {
     if (quench?.test) {
         // Collect full test title path (Suite Name -> Test Title) and replace spaces/special characters
         const fullTitle = quench.test?.fullTitle() || quench.fullTitle();
-        testSuffix = fullTitle.replace(/[^a-z0-9]/gi, "_").substring(0, 40);
+        testSuffix = fullTitle
+            .replace(game.system.id, "")
+            .replace(/[^a-z0-9]/gi, "_")
+            .replace("__", "_")
+            .substring(0, 40);
     }
 
     const quenchTestSceneName = `_Quench_${testSuffix}`;
@@ -253,10 +257,14 @@ export async function deleteQuenchScenes() {
     // 1. Explicitly await any pending UI notification cleanups
     await waitForNotificationQueueToClear();
 
-    // 2. Safely return the GM view to the active scene if they are looking at a test scene
-    if (game.scenes.active && game.scenes.active !== game.scenes.viewed) {
+    // 2. Safely return the to the active scene (or any non-quench scene)
+    const preferedScene = !game.scenes.active.name.startsWith("_Quench")
+        ? game.scenes.active
+        : game.scenes.find((s) => !s.name.startsWith("_Quench"));
+    if (preferedScene && preferedScene !== game.scenes.viewed) {
         const canvasIsSettled = new Promise((resolve) => Hooks.once("canvasReady", resolve));
-        await game.scenes.active.view();
+        await preferedScene.view();
+        await preferedScene.activate();
         await canvasIsSettled; // Wait for the new canvas geometry layout to completely load
     }
 

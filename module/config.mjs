@@ -2218,6 +2218,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 useWeapon: false,
             },
             baseEffectDicePartsBundle: maneuverBaseEffectDicePartsBundle,
+            doesKillingDamage: maneuverDoesKillingDamage,
             xml: `<MANEUVER XMLID="MANEUVER" ID="1785019798542" BASECOST="1.0" LEVELS="0" ALIAS="Dodge" POSITION="10" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CUSTOM="Yes" CATEGORY="Hand to Hand" DISPLAY="Custom Maneuver" OCV="+0" DCV="+3" DC="2" PHASE="1/2" EFFECT="Dodge, Affects All Attacks, Abort" ADDSTR="Yes" ACTIVECOST="0" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Dodge, Affects All Attacks, Abort"></MANEUVER>`,
         },
         {},

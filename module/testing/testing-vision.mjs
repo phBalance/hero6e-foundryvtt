@@ -72,7 +72,7 @@ export function registerVisionTests(quench) {
                     let tokenDocA;
                     let tokenDocB;
 
-                    before(async () => {
+                    before(async function () {
                         // Recommended when doing integration test with the UI
                         await waitForNotificationQueueToClear();
                         quenchScene = await createQuenchScene({
@@ -82,14 +82,14 @@ export function registerVisionTests(quench) {
                         });
 
                         pcActor = await foundry.documents.Actor.create({
-                            name: "Breeze 5e",
+                            name: "_Quench Observer",
                             type: "pc",
                             system: { is5e: true },
                             img: "icons/svg/sword.svg",
                         });
 
                         invisibleActor = await foundry.documents.Actor.create({
-                            name: "Spectral Knight",
+                            name: "_Quench Invisible",
                             type: "npc",
                             system: { is5e: false },
                             img: "icons/svg/shield.svg",
