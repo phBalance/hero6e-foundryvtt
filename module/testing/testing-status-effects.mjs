@@ -1,4 +1,10 @@
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
+import {
+    setQuenchTimeout,
+    createQuenchScene,
+    deleteQuenchScenes,
+    waitForNotificationQueueToClear,
+} from "./quench-helper.mjs";
 
 const { Actor, TokenDocument } = foundry.documents;
 
@@ -46,10 +52,16 @@ export function registerStatusEffectTests(quench) {
             };
 
             describe("Actor Status Effect State Machine Matrix", function () {
+                setQuenchTimeout(this);
                 let quenchActor = null;
                 let effectsObj = null;
 
                 before(async function () {
+                    await waitForNotificationQueueToClear();
+                    await createQuenchScene({
+                        quench: this,
+                    });
+
                     effectsObj = HeroSystem6eActorActiveEffects.statusEffectsObj;
 
                     quenchActor = await Actor.create({
@@ -66,6 +78,8 @@ export function registerStatusEffectTests(quench) {
                         await quenchActor.delete();
                         await hookPromise;
                     }
+
+                    await deleteQuenchScenes();
                 });
 
                 beforeEach(async function () {
