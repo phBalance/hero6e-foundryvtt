@@ -6887,39 +6887,44 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(1 / 2),
             defenseTagVsAttack: function (actorItemDefense, attackItem, options) {
                 let value = 0;
+                let purchasedLevels = 0;
                 let maxValue = 0;
                 switch (options.attackDefenseVs) {
                     case "PD":
-                        value = parseInt(actorItemDefense.system.PDLEVELS) || 0;
-                        maxValue = parseInt(actorItemDefense.actor?.getCharacteristic("pd").base) || 0;
+                    case "ED": {
+                        const characteristic = actorItemDefense.actor?.getCharacteristic(
+                            options.attackDefenseVs.toLowerCase(),
+                        );
+                        purchasedLevels = parseInt(actorItemDefense.system[`${options.attackDefenseVs}LEVELS`]) || 0;
+                        maxValue = parseInt(characteristic?.basePlusLevels) || 0;
+                        // Damage Resistance converts existing normal defense (5ER p. 146); it can
+                        // only convert what the characteristic currently holds, and a
+                        // characteristic drained into the negatives functions as 0 (6E1 p. 135).
+                        value = Math.min(purchasedLevels, Math.max(0, parseInt(characteristic?.value) || 0));
                         break;
-
-                    case "ED":
-                        value = parseInt(actorItemDefense.system.EDLEVELS) || 0;
-                        maxValue = parseInt(actorItemDefense.actor?.getCharacteristic("ed").base) || 0;
-                        break;
+                    }
 
                     case "MD":
-                        value = parseInt(actorItemDefense.system.MDLEVELS) || 0;
+                        value = purchasedLevels = parseInt(actorItemDefense.system.MDLEVELS) || 0;
                         // Icky to calculate maxValue. Deferring for now.
                         maxValue = value;
                         break;
 
                     case "FLASHDEFENSE":
-                        value = parseInt(actorItemDefense.system.FDLEVELS) || 0;
+                        value = purchasedLevels = parseInt(actorItemDefense.system.FDLEVELS) || 0;
                         // Icky to calculate maxValue. Deferring for now.
                         maxValue = value;
                         break;
 
                     case "POWERDEFENSE":
-                        value = parseInt(actorItemDefense.system.POWDLEVELS) || 0;
+                        value = purchasedLevels = parseInt(actorItemDefense.system.POWDLEVELS) || 0;
                         // Icky to calculate maxValue. Deferring for now.
                         maxValue = value;
                         break;
                 }
 
-                if (value > maxValue) {
-                    const msg = `${actorItemDefense.detailedName()} has more ${options.attackDefenseVs} LEVELS (${value}) than natural LEVELS (${maxValue}). Defenses may not properly represent this defense. Consider ARMOR if you want resistant defenses.`;
+                if (purchasedLevels > maxValue) {
+                    const msg = `${actorItemDefense.detailedName()} has more ${options.attackDefenseVs} LEVELS (${purchasedLevels}) than natural LEVELS (${maxValue}). Defenses may not properly represent this defense. Consider ARMOR if you want resistant defenses.`;
                     if (!squelch(actorItemDefense.id)) {
                         ui.notifications.warn(msg, actorItemDefense);
                     }
