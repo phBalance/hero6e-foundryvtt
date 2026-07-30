@@ -1900,30 +1900,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // A continuing charges use is tracked by an active effect. Start it.
         await _startIfIsAContinuingCharge(this);
 
-        // Toggle status effect on based on power
-        // if (this.system.XMLID === "INVISIBILITY") {
-        //     // Invisibility status effect for SIGHTGROUP?
-        //     if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
-        //         await this.actor.toggleStatusEffect(
-        //             HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect.id,
-        //             {
-        //                 active: true,
-        //             },
-        //         );
-        //     }
-        // } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
-        //     await this.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect.id, {
-        //         active: true,
-        //     });
-        // } else if (this.system.XMLID === "DESOLIDIFICATION") {
-        //     await this.actor.toggleStatusEffect(
-        //         HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect.id,
-        //         {
-        //             active: true,
-        //         },
-        //     );
-        // } else
-        //
         if (["maneuver", "martialart"].includes(item.type)) {
             await activateManeuver(this);
         }
@@ -5497,6 +5473,28 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return this.system.active;
     }
 
+    // Used by ActorSheetV2 (for display only) when equipment is disabled.
+    get _isActiveAe() {
+        // Favor disable status of associated ActiveEffect
+        if (this.effects.size > 0) {
+            const _disabled = this.effects.contents[0].disabled;
+            for (const ae of this.effects) {
+                if (ae.disabled !== _disabled) {
+                    console.error(`ActiveEffect.disabled mismatch ${this.actor}/${this.name}/${ae.name}`, this);
+                }
+            }
+            return !_disabled;
+        }
+
+        if (this.system.active === undefined) {
+            console.warn(`${this.name} system.active === undefined, assuming true`);
+
+            return true;
+        }
+
+        return this.system.active;
+    }
+
     get isCarried() {
         if (!this.isEquipment) {
             console.error(`isCarried check for ${this.name} is invalid since it is a ${this.type} and not equipment.`);
@@ -7976,10 +7974,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
     }
 
-    static parseItemsFromHeroJsonToItemDataArray(heroJson, actor) {
+    static parseItemsFromHeroJsonToItemDataArray(heroJson, actor, options = {}) {
         const itemsToCreate = [];
         let sortBase = 0;
-        const root = heroJson.CHARACTER ?? heroJson.PREFAB;
+        const root = heroJson.CHARACTER ?? heroJson.PREFAB ?? (options.partial ? heroJson : null);
 
         if (!root) {
             throw new Error("Unable to find root");

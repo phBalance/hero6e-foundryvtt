@@ -19,13 +19,20 @@
 
         {{#if (itemHasActionBehavior this "activatable")}}
             {{#if this.restrictEquipmentActiveToggle}}
-                <input class="Xitem-toggle" type="checkbox"
-                    Xname="this.isActive" {{checked this.system.active}} data-action="toggle" data-dtype="Boolean"
-                    title="Activation toggle" disabled 
-                />
+                {{#if isCarried}}
+                    <input class="Xitem-toggle" type="checkbox"
+                        {{checked this.isActive}} data-action="toggle" data-dtype="Boolean"
+                        title="Activation toggle" 
+                    />
+                {{ else}}
+                    <input class="Xitem-toggle" type="checkbox"
+                        {{checked this._isActiveAe}} data-action="toggle" data-dtype="Boolean"
+                        title="Activation toggle" disabled
+                    />
+                {{/if}}
             {{else}}
                 <input class="Xitem-toggle" type="checkbox"
-                    Xname="this.isActive" {{checked this.isActive}} data-action="toggle" data-dtype="Boolean"
+                    {{checked this.isActive}} data-action="toggle" data-dtype="Boolean"
                     title="Activation toggle" {{#if this.vppUnSlotted}}disabled{{/if}} 
                 />
             {{/if}}
