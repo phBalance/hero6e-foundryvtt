@@ -2129,7 +2129,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // Power must be turned on
-        if (this.baseInfo?.behaviors.includes("activatable") && !this.isActive) {
+        if (!this.isActive) {
             return false;
         }
 
@@ -2743,7 +2743,15 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
      * @returns {HeroSystem6eItem|null} The parent item if found, otherwise null.
      */
     get parentItem() {
-        const parentId = this.system?.PARENTID;
+        // Sanity Check
+        if (this.system.ID && this.system.PARENTID === this.system.ID) {
+            ui.notifications.error(
+                `${this.actor?.name}/${this.name} has critical error. PARENTID and ID are the same.`,
+            );
+            this.system.PARENTID = null;
+        }
+
+        const parentId = this.system.PARENTID;
         if (!parentId) return null;
         if (!this.system?.ID) return null;
 
@@ -5434,7 +5442,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 return false;
             } else if (this.system.XMLID === "STRIKE") {
                 return true;
-            } else if (this.isCombatManeuver) {
+            } else if (this.type === "maneuver") {
                 return false;
             } else if (this.system.XMLID === "HANDTOHANDATTACK") {
                 // TODO: Collaborate with Peter.
@@ -7869,25 +7877,48 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return validationFailureMessages;
     }
 
+    /**
+     * Entry point: Validates the state and coordinates the flat database update.
+     * @param {string} targetType - The type string to convert to.
+     */
     async convertToType(targetType) {
-        // If the item is already of the correct type, return it
+        // 1. Base validation check
         if (this.type === targetType) {
             console.warn(`${this.detailedName()} for ${this.actor?.name} is already of type ${targetType}`);
             return;
         }
 
-        // Update item's type
-        await this.update(
-            {
-                type: targetType,
-                system: foundry.utils.mergeObject(this.system.toObject(), { _type: targetType }),
-            },
-            { recursive: false },
-        );
+        // 2. Gather all updates recursively across the deep tree
+        const allUpdates = [];
+        this._getDeepTypeUpdates(targetType, allUpdates);
 
-        // Update child items
-        for (const child of this.childItems) {
-            await child.convertToType(targetType);
+        // 3. Fire one clean batch database transaction
+        if (this.isEmbedded && this.actor) {
+            await this.actor.updateEmbeddedDocuments("Item", allUpdates, { recursive: false, render: false });
+        } else {
+            await game.items.documentClass.updateDocuments(allUpdates, { recursive: false, render: false });
+        }
+    }
+
+    /**
+     * Internal helper: Recursively extracts update instructions into a flat payload tracker.
+     * @param {string} targetType - The type string to convert to.
+     * @param {object[]} updatesArray - The tracking array to push updates into.
+     * @private
+     */
+    _getDeepTypeUpdates(targetType, updatesArray) {
+        // Push the payload for this specific document branch
+        updatesArray.push({
+            _id: this.id,
+            type: targetType,
+            system: foundry.utils.mergeObject(this.system.toObject(), { _type: targetType }),
+        });
+
+        // Tail-recurse down through all child nesting layers without blocking
+        if (this.childItems && this.childItems.length > 0) {
+            for (const child of this.childItems) {
+                child._getDeepTypeUpdates(targetType, updatesArray);
+            }
         }
     }
 
