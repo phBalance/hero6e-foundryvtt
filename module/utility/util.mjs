@@ -296,8 +296,7 @@ export async function expireEffects(actor, expiresOn) {
         }
 
         if (expiresOn.includes("segment") && aeExpiresOn?.includes("turn") && actor.inCombat) {
-            await flushPendingWork();
-            return;
+            continue;
         }
 
         const zero = aeExpiresOn === "segmentEnd" ? -1 : 0;

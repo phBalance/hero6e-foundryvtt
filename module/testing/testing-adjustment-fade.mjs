@@ -1,4 +1,4 @@
-import { getPowerInfo } from "../utility/util.mjs";
+import { expireEffects, getPowerInfo } from "../utility/util.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { _onApplyAdjustmentToSpecificToken } from "../item/item-attack.mjs";
 import { performAdjustment } from "../utility/adjustment.mjs";
@@ -1143,6 +1143,69 @@ export function registerAdjustmentFadeTests(quench) {
                     assert.equal(body().max, 10, "Fully faded drain should restore BODY max.");
                     assert.equal(body().value, 10, "Fully faded drain should restore BODY value.");
                     assert.notOk(findAdjustmentEffect(), "Fully faded drain effect should be deleted.");
+                });
+
+                // Issue #4564: in combat the segment pass hit a turn-based AE (the drain) and
+                // returned, stranding every later-sorted segment AE — a lapsed FLASH lingered
+                // showing "N sec ago" instead of being deleted.
+                it("segmentEnd effect expires in combat despite an earlier-sorted turn-based adjustment (#4564)", async function () {
+                    await performAdjustment(drainItem, "BODY", -7, "", "", false, drainActor, null);
+                    drainActor.reset();
+                    assert.ok(findAdjustmentEffect(), "Drain adjustment effect should exist.");
+
+                    const [flashEffect] = await drainActor.createEmbeddedDocuments("ActiveEffect", [
+                        {
+                            name: "FLASH SIGHTGROUP",
+                            img: "icons/svg/blind.svg",
+                            duration: { seconds: 1 },
+                            flags: {
+                                [game.system.id]: {
+                                    bodyDamage: 1,
+                                    XMLID: "FLASH",
+                                    source: "Quench Test",
+                                    expiresOn: "segmentEnd",
+                                },
+                            },
+                        },
+                    ]);
+                    // Backdate the flash so its segmentEnd expiry (remaining <= -1) is already due.
+                    await flashEffect.update(
+                        HeroCompatibility.isV14
+                            ? { "start.time": game.time.worldTime - 2 }
+                            : { "duration.startTime": game.time.worldTime - 2 },
+                    );
+
+                    // The bug requires the turn-based AE to sort before the flash ("DRAIN..." < "FLASH...").
+                    const ordered = drainActor.getTemporaryEffects();
+                    assert.isBelow(
+                        ordered.findIndex((e) => e.flags[game.system.id]?.type === "adjustment"),
+                        ordered.findIndex((e) => e.id === flashEffect.id),
+                        "Premise: the adjustment must sort before the flash effect.",
+                    );
+
+                    // Combat state is what routes turn-based AEs away from the segment pass;
+                    // shadow inCombat rather than standing up a full speed-chart combat.
+                    Object.defineProperty(drainActor, "inCombat", { get: () => true, configurable: true });
+                    try {
+                        await expireEffects(drainActor, "segment");
+                    } finally {
+                        delete drainActor.inCombat;
+                    }
+
+                    drainActor.reset();
+                    assert.notOk(
+                        drainActor.effects.get(flashEffect.id),
+                        "Lapsed segmentEnd flash should be deleted by the in-combat segment pass.",
+                    );
+                    assert.ok(
+                        findAdjustmentEffect(),
+                        "Turn-based drain must be untouched by the segment pass (fades on the actor's Phase).",
+                    );
+                    assert.equal(
+                        findAdjustmentEffect().flags[game.system.id].adjustmentActivePoints,
+                        -7,
+                        "Drain must not fade during the segment pass.",
+                    );
                 });
             });
         },
