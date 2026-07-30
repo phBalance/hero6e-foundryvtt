@@ -2161,8 +2161,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 //await prevActiveEffect.delete();
                 await prevActiveEffect.update({
                     name: name,
-                    [HeroCompatibility.isV14 ? `system.changes` : `changes`]:
-                        activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`],
+                    "system.changes": activeEffect.system?.changes,
                     origin: activeEffect.origin,
                     flags: activeEffect.flags,
                 });
