@@ -39,7 +39,6 @@ import {
     getGridSizeInMeters,
     getRoundedDownDistanceInSystemUnits,
     getSystemDisplayUnits,
-    gridUnitsToMeters,
 } from "../utility/units.mjs";
 import { getPowerInfo, getTokenUuid, tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
@@ -3170,15 +3169,10 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
                 console.warn(`targetToken.object.center was unexpected`);
             }
 
-            // Region (v14) shape sizes are in pixels; MeasuredTemplate (v13) distance is in scene grid units.
-            let templateSizeInMeters;
-            if (aoeTemplate.documentName === "Region") {
-                const shape = aoeTemplate.shapes[0];
-                templateSizeInMeters =
-                    ((shape?.radius ?? shape?.length ?? 0) / canvas.grid.size) * getGridSizeInMeters();
-            } else {
-                templateSizeInMeters = aoeTemplate.distance * gridUnitsToMeters();
-            }
+            // Region shape sizes are in pixels.
+            const shape = aoeTemplate.shapes?.[0];
+            const templateSizeInMeters =
+                ((shape?.radius ?? shape?.length ?? 0) / canvas.grid.size) * getGridSizeInMeters();
 
             if (!templateSizeInMeters) {
                 console.warn(`Unable to determine AoE template size, applying full effect`, aoeTemplate);
