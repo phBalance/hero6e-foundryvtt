@@ -188,6 +188,13 @@ Hooks.once("init", async function () {
     // the need to transfer the effect to the actor.
     CONFIG.ActiveEffect.legacyTransferral = false;
 
+    // The system expires effects itself (expireEffects). Keep core's ActiveEffectRegistry from
+    // persisting duration.expired on lapsed effects — with the default "update" action it
+    // suppresses adjustments before their fade runs on the actor's Phase (#4524), and the
+    // stale flag re-suppresses them on every later lapse since nothing ever clears it.
+    // TODO: Fix this in the AE overhaul for V14
+    CONFIG.ActiveEffect.expiryAction = null;
+
     /**
      * Set an initiative formula for the system
      * @type {String}
