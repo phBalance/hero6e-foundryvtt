@@ -256,6 +256,20 @@ $combat-tracker-hero-dispositions: (
     text-decoration: line-through;
 }
 
+/* 2k. HAYMAKER: delayed-landing marker at the bottom of its segment */
+.combat-tracker li.combatant.hero-haymaker-row {
+    opacity: 0.8;
+    pointer-events: none;
+}
+
+.combat-tracker li.combatant.hero-haymaker-row .name {
+    font-style: italic;
+}
+
+.combat-tracker li.combatant.hero-haymaker-row .combatant-controls {
+    display: none;
+}
+
 /* 2j. LEDGER HISTORY: past segments render what actually happened */
 .combat-tracker li.combatant.hero-history-row {
     cursor: default;

@@ -365,6 +365,39 @@ export async function getTargetArray(formData) {
     return targetArray;
 }
 
+/**
+ * Under the single-combatant tracker, a declared Haymaker resolves at the end of
+ * the NEXT segment: schedule that resolution instead of ending the maneuver now.
+ * @param {Actor} actor
+ * @param {Item} [item]
+ * @returns {Promise<boolean>} True when a delayed resolution was scheduled
+ */
+async function scheduleHaymakerViaCombat(actor, item = null) {
+    if (!actor) return false;
+    const combat = game.combats.find(
+        (c) =>
+            c.started && typeof c.scheduleHaymaker === "function" && c.combatants.some((ct) => ct.actorId === actor.id),
+    );
+    if (!combat) return false;
+    return combat.scheduleHaymaker(actor, item);
+}
+
+/**
+ * Whether the actor has a Haymaker resolution pending in a single-tracker combat —
+ * its -5 DCV effect must persist until the landing segment ends.
+ * @param {Actor} actor
+ * @returns {boolean}
+ */
+function hasScheduledHaymaker(actor) {
+    if (!actor) return false;
+    return game.combats.some(
+        (c) =>
+            c.started &&
+            typeof c.scheduleHaymaker === "function" &&
+            c.combatants.some((ct) => ct.actorId === actor.id && ct.getFlag(game.system.id, "haymaker")),
+    );
+}
+
 export async function processActionToHit(item, formData, options = {}) {
     const targetArray = await getTargetArray(formData);
     const action = Attack.buildActionInfo(item, targetArray, { ...formData, ...options });
@@ -393,10 +426,12 @@ export async function processActionToHit(item, formData, options = {}) {
         await doSingleTargetActionToHit(action, formData, options);
     }
 
-    // turn off haymaker
-    await item?.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
-        active: false,
-    });
+    // turn off haymaker — unless the single tracker scheduled its delayed resolution
+    if (!(haymakerManeuverActive && (await scheduleHaymakerViaCombat(item?.actor, item)))) {
+        await item?.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
+            active: false,
+        });
+    }
 }
 
 /**
@@ -2604,10 +2639,12 @@ export async function _onRollDamage(event) {
 
     await ChatMessage.create(chatData);
 
-    // turn off haymaker
-    await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
-        active: false,
-    });
+    // turn off haymaker — a scheduled delayed resolution keeps the -5 DCV until it lands
+    if (!hasScheduledHaymaker(actor)) {
+        await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
+            active: false,
+        });
+    }
 
     return;
 }
@@ -3129,10 +3166,12 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    // Remove haymaker status
-    const haymakerAe = item.actor?.effects.find((effect) => effect.statuses.has("haymaker"));
-    if (haymakerAe) {
-        await item.actor.removeActiveEffect(haymakerAe);
+    // Remove haymaker status — a scheduled delayed resolution keeps it until it lands
+    if (!hasScheduledHaymaker(item.actor)) {
+        const haymakerAe = item.actor?.effects.find((effect) => effect.statuses.has("haymaker"));
+        if (haymakerAe) {
+            await item.actor.removeActiveEffect(haymakerAe);
+        }
     }
 
     const damageRoller = HeroRoller.fromJSON(damageData.roller);

@@ -473,6 +473,15 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
             combat?.applyPendingSpdNow?.(button.dataset.combatantId);
         });
     });
+
+    // Wound-up Haymaker: interruption cancel (owner or GM)
+    html.querySelectorAll("button.hero-haymaker-cancel").forEach((button) => {
+        button.addEventListener("click", (event) => {
+            event.preventDefault();
+            const combat = game.combats.get(button.dataset.combatId);
+            combat?.cancelHaymaker?.(button.dataset.combatantId);
+        });
+    });
 });
 
 // Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));

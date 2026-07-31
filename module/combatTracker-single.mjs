@@ -305,6 +305,14 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             }
         }
 
+        // A wound-up Haymaker's landing segment always renders, even if otherwise empty
+        for (const combatant of combat.combatants) {
+            const haymaker = combatant.getFlag(game.system.id, "haymaker");
+            if (haymaker?.resolveAbs >= currentAbs && haymaker.resolveAbs <= currentAbs + 24) {
+                positions.add(haymaker.resolveAbs);
+            }
+        }
+
         // The single tracker follows only Foundry's own disposition setting; the legacy
         // combatTrackerDispositionHighlighting system setting applies to the old tracker
         let dispositionTint = false;
@@ -486,6 +494,16 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     }
                 }
             }
+            // A Haymaker lands at the END of its resolution segment: marker row last
+            if (!isPast) {
+                for (const combatant of combat.combatants) {
+                    if (combatant.hidden && !game.user.isGM) continue;
+                    const haymaker = combatant.getFlag(game.system.id, "haymaker");
+                    if (haymaker?.resolveAbs === abs) {
+                        entries.push({ combatant, priority: -1, lrShadow: false, haymaker: true });
+                    }
+                }
+            }
             // Same order _comparePriority produces: priority descending, id tiebreak
             entries.sort(
                 (a, b) => b.priority - a.priority || HeroSystem6eCombatSingle.stableTiebreak(a.combatant, b.combatant),
@@ -496,9 +514,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             // member when the group contains it so click/hover target the acting token.
             const groups = [];
             for (const entry of entries) {
-                const key = `${entry.combatant.actorId || entry.combatant.id}${entry.lrShadow ? ":lr-shadow" : ""}`;
+                const key = `${entry.combatant.actorId || entry.combatant.id}${entry.lrShadow ? ":lr-shadow" : ""}${entry.haymaker ? ":haymaker" : ""}`;
                 const prev = groups.at(-1);
-                if (prev && prev.key === key && prev.priority === entry.priority) {
+                if (prev && prev.key === key && prev.priority === entry.priority && !entry.haymaker) {
                     prev.combatants.push(entry.combatant);
                 } else {
                     groups.push({
@@ -506,6 +524,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         priority: entry.priority,
                         combatants: [entry.combatant],
                         lrShadow: entry.lrShadow,
+                        haymaker: !!entry.haymaker,
                     });
                 }
             }
@@ -576,6 +595,17 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         row.name = `▶ ${row.name} ×${group.combatants.length}`;
                         row.effects = { icons: [], tooltip: "" };
                         row.css = `${row.css} hero-group-row hero-group-collapsed`.trim();
+                    }
+
+                    if (group.haymaker) {
+                        // Delayed Haymaker landing: informational marker, no controls
+                        // (a truthy initiative keeps core's d20 roll button away)
+                        row.name = `💥 ${row.name} — Haymaker resolves`;
+                        row.initiative = "—";
+                        row.effects = { icons: [], tooltip: "" };
+                        row.css = `${row.css} hero-haymaker-row ${stateCss}`.trim();
+                        timelineTurns.push(row);
+                        continue;
                     }
 
                     // Positional holds render at their declared slot with the held marker;

@@ -444,7 +444,6 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         const parentCombat = combatant.combat ?? this;
         const activeSegment = targetSegment ?? parentCombat?.segment ?? 12;
-        const statuses = combatant.actor.statuses;
 
         const combatSegment = parentCombat?.segment ?? activeSegment;
         const combatAbs = HeroSystem6eCombatantSingle.absoluteSegment(parentCombat?.round ?? 0, combatSegment);
@@ -502,14 +501,9 @@ export class HeroSystem6eCombatSingle extends Combat {
             return (spentHold.dex ?? baseScore) + (spentHold.fraction ?? tieBreakerFraction);
         }
 
-        let maneuverOffset = 0;
-        if (statuses.has("haymaker")) {
-            maneuverOffset = CONFIG.HERO?.combatManeuverOffsets?.haymaker ?? -3.0;
-        } else if (statuses.has("delayedPhase")) {
-            maneuverOffset = CONFIG.HERO?.combatManeuverOffsets?.delayedPhase ?? -5.0;
-        }
-
-        return baseScore + lightningReflexesLevels + tieBreakerFraction + maneuverOffset;
+        // A Haymaker does not move the character's DEX position (6E2 — the wind-up
+        // resolves at the end of the next Segment; see the haymaker combatant flag)
+        return baseScore + lightningReflexesLevels + tieBreakerFraction;
     }
 
     /**
@@ -1548,6 +1542,11 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (pendingSpd && (pendingSpd.declaredAbs ?? Infinity) >= targetAbs) {
                 update[`flags.${game.system.id}.pendingSpd`] = null;
             }
+            // A Haymaker wound up at or after the target is undone by the rewind
+            const haymaker = combatant.getFlag(game.system.id, "haymaker");
+            if (haymaker && (haymaker.declaredAbs ?? Infinity) >= targetAbs) {
+                update[`flags.${game.system.id}.haymaker`] = null;
+            }
             if (Object.keys(update).length > 0) resets.push({ _id: combatant.id, ...update });
         }
         return resets;
@@ -1577,6 +1576,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 [`flags.${game.system.id}.spdLockout`]: null,
                 [`flags.${game.system.id}.knownSpd`]: null,
                 [`flags.${game.system.id}.pendingSpd`]: null,
+                [`flags.${game.system.id}.haymaker`]: null,
             });
         });
 
@@ -1781,6 +1781,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 await this._demotePassedPositionalHolds();
                 if (turnAdvance) await this._consumeExpiredHeldActions(null);
                 await this._clearExpiredAborts(elapsedSegments);
+                await this._resolveHaymakers();
             }
 
             const previousCombatant = prevId ? this.combatants.get(prevId) : null;
@@ -2091,6 +2092,97 @@ export class HeroSystem6eCombatSingle extends Combat {
         } catch (e) {
             console.error(e);
         }
+    }
+
+    /* -------------------------------------------- */
+    /*  Haymaker delayed resolution                 */
+    /* -------------------------------------------- */
+
+    /**
+     * Schedules a declared Haymaker's delayed landing: the attack resolves at the
+     * end of the NEXT Segment (6E2), with the -5 DCV effect persisting until then.
+     * Called from the attack workflow instead of ending the maneuver immediately.
+     * @param {Actor} actor
+     * @param {Item} [item] - The attack the Haymaker boosts
+     * @returns {Promise<boolean>} Whether a resolution was scheduled
+     */
+    async scheduleHaymaker(actor, item = null) {
+        if (!this.started || !actor) return false;
+        const combatant = this.combatants.find((c) => c.actorId === actor.id);
+        if (!combatant) return false;
+        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const resolveAbs = currentAbs + 1;
+        await combatant.setFlag(game.system.id, "haymaker", {
+            declaredAbs: currentAbs,
+            resolveAbs,
+            itemUuid: item?.uuid ?? null,
+            targetTokenIds: Array.from(game.user.targets ?? []).map((t) => t.id),
+        });
+        await this._combatCard(
+            combatant,
+            `${actor.name} winds up a Haymaker — it lands at the end of ${HeroSystem6eCombatantSingle.phaseLabel(resolveAbs)} (-5 DCV until it does).
+            <button type="button" class="hero-haymaker-cancel" data-combat-id="${this.id}" data-combatant-id="${combatant.id}">Cancel Haymaker (interrupted)</button>`,
+        );
+        await this.logEvent("haymaker.declare", { combatant, data: { resolveAbs, itemUuid: item?.uuid ?? null } });
+        return true;
+    }
+
+    /**
+     * Cancels a wound-up Haymaker (the attacker was damaged, Stunned, Knocked Out,
+     * or the target moved out of reach — standard interruption, GM-adjudicated).
+     * @param {string} combatantId
+     * @returns {Promise<void>}
+     */
+    async cancelHaymaker(combatantId) {
+        const combatant = this.combatants.get(combatantId);
+        if (!combatant?.isOwner) return;
+        const haymaker = combatant.getFlag(game.system.id, "haymaker");
+        if (!haymaker) return;
+        await this._finishHaymaker(combatant, { cancelled: true });
+    }
+
+    /**
+     * Resolves wound-up Haymakers once their landing segment has fully passed:
+     * the -5 DCV drops and the owner is reminded to apply the (already rolled)
+     * damage. Runs in the segment-boundary maintenance chain.
+     * @private
+     */
+    async _resolveHaymakers() {
+        if (!this.started) return;
+        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        for (const combatant of this.combatants) {
+            const haymaker = combatant.getFlag(game.system.id, "haymaker");
+            if (!haymaker || currentAbs <= haymaker.resolveAbs) continue;
+            await this._finishHaymaker(combatant, { cancelled: false });
+        }
+    }
+
+    /**
+     * Shared teardown for a scheduled Haymaker: clears the flag, removes the -5
+     * DCV effect, cards the outcome, and ledgers it.
+     * @param {Combatant} combatant
+     * @param {object} options
+     * @param {boolean} options.cancelled
+     * @private
+     */
+    async _finishHaymaker(combatant, { cancelled }) {
+        const actor = combatant.actor;
+        const haymaker = combatant.getFlag(game.system.id, "haymaker");
+        await combatant.update({ [`flags.${game.system.id}.haymaker`]: null });
+        const haymakerEffect = actor?.effects.find((e) => e.statuses.has("haymaker"));
+        if (haymakerEffect) await haymakerEffect.delete();
+        const haymakerItem = actor?.items.find((i) => i.system?.XMLID === "HAYMAKER" && i.isActive);
+        if (haymakerItem) await haymakerItem.toggle();
+        await this._combatCard(
+            combatant,
+            cancelled
+                ? `${actor?.name}'s Haymaker is interrupted and lost.`
+                : `${actor?.name}'s Haymaker resolves now — apply its damage (${HeroSystem6eCombatantSingle.phaseLabel(haymaker?.resolveAbs ?? 0)}).`,
+        );
+        await this.logEvent(cancelled ? "haymaker.cancel" : "haymaker.resolve", {
+            combatant,
+            data: { resolveAbs: haymaker?.resolveAbs ?? null },
+        });
     }
 
     /* -------------------------------------------- */
@@ -2850,6 +2942,7 @@ const LEGACY_COMBATANT_FLAG_KEYS = [
     "spdLockout",
     "knownSpd",
     "pendingSpd",
+    "haymaker",
 ];
 const LEGACY_COMBAT_FLAG_KEYS = [
     "segment",
