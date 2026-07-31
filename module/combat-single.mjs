@@ -1630,23 +1630,19 @@ export class HeroSystem6eCombatSingle extends Combat {
             ) {
                 update[`flags.${game.system.id}.heldSlotTakenAbs`] = null;
             }
-            if ((combatant.lrElevatedAbs ?? -1) >= targetAbs) {
-                update[`flags.${game.system.id}.lrElevatedAbs`] = null;
-            }
-            // A completed LR stop within the rewind's own segment stays acted when it
-            // happened BEFORE the rewind target; a stop below the target is being
-            // un-acted, so its elevation comes back as pending. Cross-segment rewinds
-            // (no targetPriority) replay the whole segment: the record simply clears
-            // and candidates re-elevate during the replay.
+            // Declared LR elevations survive rewinds outright: the flag is bound to
+            // its absolute segment, so a rewind to an earlier position simply leaves
+            // it pending and the replay re-runs the stop when the count returns to
+            // it. A completed stop within the rewind's own segment stays acted when
+            // it happened BEFORE the rewind target; otherwise it un-acts and its
+            // elevation comes back as pending.
             const spentLr = combatant.getFlag(game.system.id, "spentLrPosition");
             if (spentLr && spentLr.segmentAbs >= targetAbs) {
                 const staysActed =
                     spentLr.segmentAbs === targetAbs && targetPriority !== null && spentLr.priority > targetPriority;
                 if (!staysActed) {
                     update[`flags.${game.system.id}.spentLrPosition`] = null;
-                    if (spentLr.segmentAbs === targetAbs && targetPriority !== null) {
-                        update[`flags.${game.system.id}.lrElevatedAbs`] = spentLr.segmentAbs;
-                    }
+                    update[`flags.${game.system.id}.lrElevatedAbs`] = spentLr.segmentAbs;
                 }
             }
             // A SPD change detected at or after the rewind target is un-detected: the
