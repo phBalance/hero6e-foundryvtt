@@ -1903,13 +1903,21 @@ export function registerCombatTests(quench) {
                     );
                     expect(seeded, "knownSpd seeded at the first segment boundary").to.be.true;
 
-                    // Aid the SPD mid-Turn: SPD 2 (Phases 6, 12) becomes SPD 4 (Phases 3, 6, 9, 12)
+                    // Change the SPD mid-Turn: SPD 2 (Phases 6, 12) becomes SPD 4 (Phases 3, 6, 9, 12).
+                    // A sheet edit is a VOLUNTARY change and defers to Post-Segment 12; the GM's
+                    // apply-immediately override converts it into the adjustment-style lockout,
+                    // which is what the rest of this test exercises (6E2 17).
                     await slow.update({ "system.characteristics.spd.value": 4 });
 
                     await combat.nextTurn(); // Crosses into Segment 2; boundary detects the change
                     expect(combat.segment).to.equal(2);
+                    const deferred = await waitUntil(() => !!slowCombatant.getFlag(game.system.id, "pendingSpd"));
+                    expect(deferred, "voluntary sheet edit deferred at the segment boundary").to.be.true;
+                    expect(slowCombatant.combatSpd, "old SPD still governs while deferred").to.equal(2);
+
+                    await combat.applyPendingSpdNow(slowCombatant.id);
                     const detected = await waitUntil(() => !!slowCombatant.getFlag(game.system.id, "spdLockout"));
-                    expect(detected, "SPD change detected at the segment boundary").to.be.true;
+                    expect(detected, "GM override applies the change with the SPD-change lockout").to.be.true;
 
                     // Old SPD 2 would next act in Segment 6, new SPD 4 in Segment 3, so no actions
                     // until Segment 6 (6E2 17)

@@ -679,6 +679,18 @@ export function gmActive() {
     return !!game.users.filter((u) => u.active && u.isGM).length;
 }
 
+/**
+ * Whether a Quench test run is in progress. Quench keeps its active mocha
+ * runner on the global instance for the duration of a run (cleared when it
+ * ends); optional chaining makes this safely false without the module or if a
+ * future Quench renames the field. Use it to suppress interactive prompts that
+ * would stall unattended test loops.
+ * @returns {boolean}
+ */
+export function isQuenchTestRunning() {
+    return !!globalThis.quench?._currentRunner;
+}
+
 // btoa only accepts latin1, so route UTF-8 text through its percent-encoded byte string first.
 export function utf8ToBase64(str) {
     return btoa(unescape(encodeURIComponent(str)));

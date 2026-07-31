@@ -3,7 +3,7 @@ import { HEROSYS } from "./herosystem6e.mjs";
 import { rehydrateAttackItem } from "./item/item-attack.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-resources.mjs";
 import { HeroCompatibility } from "./utility/compatibility.mjs";
-import { expireEffects, gmActive, toHHMMSS, whisperUserTargetsForActor } from "./utility/util.mjs";
+import { expireEffects, gmActive, isQuenchTestRunning, toHHMMSS, whisperUserTargetsForActor } from "./utility/util.mjs";
 
 export class HeroSystem6eCombat extends Combat {
     // static defineSchema() {
@@ -1677,6 +1677,9 @@ const promptedAoeRegionUuids = new Set();
 
 export async function promptToDeleteAoeInstantRegions() {
     if (!HeroCompatibility.isV14) return;
+    // Nobody is present to answer during an unattended test run, and an open
+    // modal stalls the Phase-start chain behind it
+    if (isQuenchTestRunning()) return;
 
     // We only care about AoEs
     const regionsToPrompt = Array.from(canvas.regions.viewedDocuments()).filter(
