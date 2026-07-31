@@ -491,6 +491,32 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
             combat?.cancelDelayedAction?.(button.dataset.combatantId, button.dataset.delayedId ?? null);
         });
     });
+
+    // Delayed Extra Time attack: the roll happens when the power goes off. The
+    // stored declaration (dialog inputs + targets) rides on the message flag.
+    html.querySelectorAll("button.hero-delayed-roll").forEach((button) => {
+        button.addEventListener("click", async (event) => {
+            event.preventDefault();
+            button.disabled = true;
+            try {
+                const payload = app.getFlag(game.system.id, "delayedAttack");
+                const item = payload?.itemUuid ? fromUuidSync(payload.itemUuid) : null;
+                if (!item) return ui.notifications.error(`Attack details are no longer available.`);
+                if (!item.isOwner) return ui.notifications.warn(`Only the attacker (or GM) rolls this attack.`);
+                // Restore the declaration's targets for the rolling user
+                if (payload.targetTokenIds?.length) await game.user.updateTokenTargets(payload.targetTokenIds);
+                const { processActionToHit } = await import("./item/item-attack.mjs");
+                await processActionToHit(
+                    item,
+                    // Resources and activation rolls were paid at declaration
+                    { ...(payload.formData ?? {}), userId: game.user.id, delayedResolution: true, noResourceUse: true },
+                    { delayedResolution: true },
+                );
+            } finally {
+                button.disabled = false;
+            }
+        });
+    });
 });
 
 // Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));

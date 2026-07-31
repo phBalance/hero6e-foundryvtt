@@ -2482,6 +2482,8 @@ export class HeroSystem6eCombatSingle extends Combat {
             commit: !!plan.commit,
             targetTokenIds: Array.from(game.user.targets ?? []).map((t) => t.id),
         };
+        // Roll-at-resolution attacks carry their declaration inputs for the replay
+        if (plan.actionData) record.actionData = plan.actionData;
         await combatant.setFlag(game.system.id, `delayedActions.${id}`, record);
 
         const landing =
@@ -2650,10 +2652,27 @@ export class HeroSystem6eCombatSingle extends Combat {
                 : `${actor?.name}'s ${record.label} finished its Extra Time but could not activate — adjudicate (interrupted? Stunned?).`;
         } else if (record.kind === "haymaker") {
             outcome = `${actor?.name}'s ${record.label} resolves now — apply its damage (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}).`;
+        } else if (record.kind === "attack" && record.actionData) {
+            // The attack is ROLLED now (6E1 377: the roll happens when the power
+            // goes off); the stored declaration rides on the message flag
+            outcome = null;
+            const rollCard = {
+                speaker: ChatMessage.getSpeaker({ actor }),
+                content: `${actor?.name}'s ${record.label} goes off now (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}) — roll the attack.
+                    <button type="button" class="hero-delayed-roll">Roll the attack now</button>
+                    <p class="hint">A target that moved since the declaration is missed automatically; resources were already spent when the activation began.</p>`,
+                flags: {
+                    [game.system.id]: {
+                        delayedAttack: { itemUuid: record.itemUuid, ...record.actionData },
+                    },
+                },
+            };
+            if (combatant.hidden) rollCard.whisper = ChatMessage.getWhisperRecipients("GM");
+            await ChatMessage.create(rollCard);
         } else {
             outcome = `${actor?.name}'s ${record.label} goes off now (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}) — resolve its effect. A target that moved since the declaration is missed automatically.`;
         }
-        await this._combatCard(combatant, outcome);
+        if (outcome) await this._combatCard(combatant, outcome);
         await this.logEvent(cancelled ? "delayed.cancel" : "delayed.resolve", {
             combatant,
             data: { id, kind: record.kind, label: record.label, resolveAbs: record.resolveAbs ?? null },

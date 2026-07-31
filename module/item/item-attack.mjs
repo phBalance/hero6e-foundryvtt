@@ -399,13 +399,17 @@ function hasScheduledHaymaker(actor) {
 }
 
 /**
- * Under the single tracker, an attack with the Extra Time Limitation lands later
- * (6E1 377-378): schedule its delayed resolution. The to-hit/damage were rolled
- * at declaration; the resolution card reminds the table to apply them.
+ * Under the single tracker, an attack with the Extra Time Limitation begins
+ * activating now but is ROLLED when it goes off (6E1 377-378): resources and
+ * activation/RSR rolls are paid up front per RAW (lost on interruption), the
+ * dialog's inputs and targets are stored on the schedule, and the resolution
+ * card offers the actual attack roll.
  * @param {Item} item
- * @returns {Promise<boolean>} True when a delayed resolution was scheduled
+ * @param {object} formData - The attack dialog's inputs
+ * @returns {Promise<boolean>} True when the attack was intercepted (scheduled
+ *   or consumed by a failed up-front activation)
  */
-async function scheduleExtraTimeAttackViaCombat(item) {
+async function scheduleExtraTimeAttackDeclaration(item, formData) {
     const actor = item?.actor;
     if (!actor) return false;
     const combat = game.combats.find(
@@ -414,7 +418,40 @@ async function scheduleExtraTimeAttackViaCombat(item) {
     if (!combat) return false;
     const plan = combat.extraTimePlan(actor, item) ?? combat.extraTimePlan(actor, item.effectiveAttackItem);
     if (!plan) return false;
-    await combat.scheduleDelayedAction(actor, plan, item);
+
+    // RAW: END is committed when the activation begins and stays spent if it is
+    // interrupted; activation/RSR rolls happen now too
+    const { error, warning } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {});
+    if (error) {
+        ui.notifications.error(`${item.name} ${error}`);
+        return true;
+    }
+    if (warning) {
+        ui.notifications.warn(`${item.name} ${warning}`);
+        return true;
+    }
+    if (!(await isActivatedForThisUse(item, {}))) return true; // attempt failed; resources stay spent
+
+    // Only plain values survive the flag round-trip; the replay recomputes the rest
+    const sanitizedFormData = {};
+    for (const [key, value] of Object.entries(formData ?? {})) {
+        if (value === null || ["string", "number", "boolean"].includes(typeof value)) {
+            sanitizedFormData[key] = value;
+        }
+    }
+    await combat.scheduleDelayedAction(
+        actor,
+        {
+            ...plan,
+            kind: "attack",
+            actionData: {
+                formData: sanitizedFormData,
+                targetTokenIds: Array.from(game.user.targets).map((t) => t.id),
+                userId: game.user.id,
+            },
+        },
+        item,
+    );
     return true;
 }
 
@@ -439,6 +476,17 @@ export async function processActionToHit(item, formData, options = {}) {
 
     // PH: FIXME: Need to not pass in formData and move the interesting stuff into action
 
+    // Extra Time attacks (6E1 377-378): the activation begins now — resources and
+    // activation rolls are paid up front — but the attack itself is rolled when
+    // the power goes off (the scheduled resolution card offers the roll)
+    if (!formData?.delayedResolution && !options?.delayedResolution) {
+        try {
+            if (await scheduleExtraTimeAttackDeclaration(item, formData)) return;
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     // Manual targeting resolves an AoE per-target via the single-target path, not the origin roll.
     if (item.effectiveAttackItem.getAoeModifier() && !formData.aoeManualTargeting) {
         await doAoeActionToHit(action, formData, options);
@@ -451,13 +499,6 @@ export async function processActionToHit(item, formData, options = {}) {
         await item?.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
             active: false,
         });
-    }
-
-    // Extra Time attacks land later (6E1 377-378): schedule the delayed resolution
-    try {
-        await scheduleExtraTimeAttackViaCombat(item);
-    } catch (e) {
-        console.error(e);
     }
 }
 
@@ -956,7 +997,8 @@ async function doSingleTargetActionToHit(action, options) {
         resourcesUsedDescriptionRenderedRoll,
     } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
         ...options,
-        ...{ noResourceUse: overrideCanAct },
+        // A delayed Extra Time resolution paid its resources at declaration
+        ...{ noResourceUse: overrideCanAct || !!options.delayedResolution },
     });
     if (resourceError) {
         return ui.notifications.error(`${item.name} ${resourceError}`);
@@ -964,10 +1006,13 @@ async function doSingleTargetActionToHit(action, options) {
         return ui.notifications.warn(`${item.name} ${resourceWarning}`);
     }
 
-    // Does base item Requires A Rolls
-    const attackItemRSR = await isActivatedForThisUse(item, {
-        resourcesUsedDescription: `${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`,
-    });
+    // Does base item Requires A Rolls — a delayed Extra Time resolution already
+    // rolled this when the activation began
+    const attackItemRSR =
+        options.delayedResolution ||
+        (await isActivatedForThisUse(item, {
+            resourcesUsedDescription: `${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`,
+        }));
     if (!attackItemRSR) {
         return;
     }
@@ -977,9 +1022,10 @@ async function doSingleTargetActionToHit(action, options) {
         item.system._active?.__originalUuid === item.effectiveAttackItem.system._active?.__originalUuid;
     const effectiveAttackItemRSR =
         !attackItemAndEffectiveItemAreSame &&
-        (await isActivatedForThisUse(item.effectiveAttackItem, {
-            resourcesUsedDescription: `${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`,
-        }));
+        (options.delayedResolution ||
+            (await isActivatedForThisUse(item.effectiveAttackItem, {
+                resourcesUsedDescription: `${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`,
+            })));
     if (!attackItemAndEffectiveItemAreSame && !effectiveAttackItemRSR) {
         return;
     }
