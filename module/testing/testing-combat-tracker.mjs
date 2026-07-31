@@ -43,13 +43,16 @@ export function registerCombatTests(quench) {
                     // game.settings.set(game.system.id, "singleCombatantTracker", true);
                     // getAndSetGameSetting
 
+                    // The _Quench prefix keeps these visible to the global cleanup batch
+                    // (quench-helper deletes _Quench-prefixed actors), so an aborted run
+                    // cannot leak them past this suite's own after() hook
                     const roster = [
-                        { name: "Test Guard (SPD 3)", dex: 18, spd: 3 },
-                        { name: "Test Behemoth (SPD 4)", dex: 8, spd: 4 },
-                        { name: "Test Speedster (SPD 12)", dex: 25, spd: 12 },
-                        { name: "Test Sluggish (SPD 1)", dex: 5, spd: 1 },
-                        { name: "Test Overcapped (SPD 13)", dex: 12, spd: 13 },
-                        { name: "Test Drained (SPD -1)", dex: 10, spd: -1 },
+                        { name: "_Quench Guard (SPD 3)", dex: 18, spd: 3 },
+                        { name: "_Quench Behemoth (SPD 4)", dex: 8, spd: 4 },
+                        { name: "_Quench Speedster (SPD 12)", dex: 25, spd: 12 },
+                        { name: "_Quench Sluggish (SPD 1)", dex: 5, spd: 1 },
+                        { name: "_Quench Overcapped (SPD 13)", dex: 12, spd: 13 },
+                        { name: "_Quench Drained (SPD -1)", dex: 10, spd: -1 },
                     ];
 
                     for (const config of roster) {
