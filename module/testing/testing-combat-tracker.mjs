@@ -2435,6 +2435,60 @@ export function registerCombatTests(quench) {
                     expect(resolved, "delayed action resolved after its segment ended").to.be.true;
                 });
 
+                it("Should keep tied groups and outsiders in a consistent order (no re-admission cycling)", async function () {
+                    const boss = await makeActor("_Quench Cycle Group", { dex: 15, spd: 2 });
+                    const outsider = await makeActor("_Quench Cycle Outsider", { dex: 15, spd: 2 });
+                    const combat = await makeCombat([boss, outsider]);
+                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: boss.id }]);
+                    const members = combat.combatants.filter((c) => c.actorId === boss.id);
+                    const outsiderCombatant = combat.combatants.find((c) => c.actorId === outsider.id);
+
+                    // Rig an EXACT fraction collision (both roll groups r=50) with
+                    // adversarial sub-rolls — the historical failure: sub-roll order
+                    // inside the group vs identity order against the outsider made the
+                    // comparator non-transitive, and nextTurn's tie re-admission
+                    // bounced the pointer between the group and the outsider forever
+                    const [m1, m2] = members;
+                    await combat.setFlag(game.system.id, "segmentRolls", {
+                        24: {
+                            [boss.id]: {
+                                r: 50,
+                                fd: null,
+                                m: { [m1.tokenId || m1.id]: 0, [m2.tokenId || m2.id]: 99 },
+                            },
+                            [outsider.id]: {
+                                r: 50,
+                                fd: null,
+                                m: { [outsiderCombatant.tokenId || outsiderCombatant.id]: 40 },
+                            },
+                        },
+                    });
+                    await combat.startCombat();
+
+                    // The full comparator must be a consistent total order
+                    const all = combat.combatants.contents;
+                    const sorted = [...all].sort((a, b) => combat._comparePriority(a, b, combat, 12, { queryAbs: 24 }));
+                    for (let i = 0; i < sorted.length; i++) {
+                        for (let j = i + 1; j < sorted.length; j++) {
+                            expect(
+                                combat._comparePriority(sorted[i], sorted[j], combat, 12, { queryAbs: 24 }),
+                                `sorted[${i}] before sorted[${j}]`,
+                            ).to.be.lessThan(0);
+                        }
+                    }
+
+                    // Advancing through the segment reaches everyone exactly once
+                    const acted = [combat.combatant.id];
+                    let guard = 0;
+                    while (combat.segment === 12 && guard++ < 6) {
+                        await combat.nextTurn();
+                        if (combat.segment === 12) acted.push(combat.combatant.id);
+                    }
+                    expect(guard, "the segment ends without cycling").to.be.lessThan(6);
+                    expect([...new Set(acted)].length, "no combatant acted twice").to.equal(acted.length);
+                    expect(acted.length, "all three combatants acted").to.equal(3);
+                });
+
                 it("Should refuse initiative rolls entirely (HERO has none)", async function () {
                     const actor = await makeActor("_Quench No Init", { dex: 12, spd: 2 });
                     const combat = await makeCombat([actor]);

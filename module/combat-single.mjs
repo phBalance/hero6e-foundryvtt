@@ -388,14 +388,21 @@ export class HeroSystem6eCombatSingle extends Combat {
     tieBreakOrder(a, b, queryAbs = null) {
         const keyA = this._tieRollKey(a);
         const keyB = this._tieRollKey(b);
-        if (keyA === keyB) {
-            const abs = queryAbs ?? HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
-            const rollsFlag = this.getFlag(game.system.id, "segmentRolls") ?? {};
-            const rollsMap = rollsFlag[abs] ?? rollsFlag[HeroSystem6eCombatantSingle.segmentOf(abs)] ?? {};
-            const subA = this._memberSubRoll(a, rollsMap);
-            const subB = this._memberSubRoll(b, rollsMap);
-            if (subA !== null && subB !== null && subA !== subB) return subB - subA;
+        // Different roll groups tied on the same priority order by GROUP first.
+        // This keeps the comparator TRANSITIVE: mixing per-member sub-roll order
+        // (inside a group) with identity order (against outsiders) allowed
+        // m2 < m1 < U < m2 cycles when an outsider's fraction collided with a
+        // group's — Array.sort went unstable and nextTurn's tie re-admission
+        // bounced the pointer between the group and the outsider forever.
+        if (keyA !== keyB) {
+            return keyA.localeCompare(keyB) || HeroSystem6eCombatSingle.stableTiebreak(a, b);
         }
+        const abs = queryAbs ?? HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const rollsFlag = this.getFlag(game.system.id, "segmentRolls") ?? {};
+        const rollsMap = rollsFlag[abs] ?? rollsFlag[HeroSystem6eCombatantSingle.segmentOf(abs)] ?? {};
+        const subA = this._memberSubRoll(a, rollsMap);
+        const subB = this._memberSubRoll(b, rollsMap);
+        if (subA !== null && subB !== null && subA !== subB) return subB - subA;
         return HeroSystem6eCombatSingle.stableTiebreak(a, b);
     }
 
