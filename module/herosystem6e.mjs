@@ -500,12 +500,27 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
             button.disabled = true;
             try {
                 const payload = app.getFlag(game.system.id, "delayedAttack");
-                const item = payload?.itemUuid ? fromUuidSync(payload.itemUuid) : null;
+                if (!payload) return ui.notifications.error(`Attack details are no longer available.`);
+                const { processActionToHit, rehydrateAttackItem } = await import("./item/item-attack.mjs");
+                // The declared item is usually a temporary effective clone: try the
+                // stored uuids, then rebuild it from the dehydrated snapshot
+                let item = payload.itemUuid ? fromUuidSync(payload.itemUuid) : null;
+                item ??= payload.originalItemUuid ? fromUuidSync(payload.originalItemUuid) : null;
+                if (!item && payload.itemJson) {
+                    const owner = payload.actorUuid ? fromUuidSync(payload.actorUuid) : null;
+                    try {
+                        item = rehydrateAttackItem(payload.itemJson, owner)?.item ?? null;
+                    } catch (e) {
+                        console.error(`Unable to rehydrate the delayed attack item`, e);
+                    }
+                }
                 if (!item) return ui.notifications.error(`Attack details are no longer available.`);
-                if (!item.isOwner) return ui.notifications.warn(`Only the attacker (or GM) rolls this attack.`);
+                const owningActor = item.actor ?? (payload.actorUuid ? fromUuidSync(payload.actorUuid) : null);
+                if (!(item.isOwner || owningActor?.isOwner || game.user.isGM)) {
+                    return ui.notifications.warn(`Only the attacker (or GM) rolls this attack.`);
+                }
                 // Restore the declaration's targets for the rolling user
                 if (payload.targetTokenIds?.length) await game.user.updateTokenTargets(payload.targetTokenIds);
-                const { processActionToHit } = await import("./item/item-attack.mjs");
                 await processActionToHit(
                     item,
                     // Resources and activation rolls were paid at declaration

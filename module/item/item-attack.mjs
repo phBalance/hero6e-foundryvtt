@@ -439,6 +439,15 @@ async function scheduleExtraTimeAttackDeclaration(item, formData) {
             sanitizedFormData[key] = value;
         }
     }
+    // The attack item is often a TEMPORARY effective clone whose uuid resolves to
+    // nothing later; dehydrate it (the regions' pattern) so the replay can always
+    // rebuild it, and keep the original DB item's uuid as a fallback
+    let itemJson = null;
+    try {
+        itemJson = JSON.stringify(dehydrateAttackItem(item));
+    } catch (e) {
+        console.error(`Unable to dehydrate ${item.name} for its delayed resolution`, e);
+    }
     await combat.scheduleDelayedAction(
         actor,
         {
@@ -448,6 +457,9 @@ async function scheduleExtraTimeAttackDeclaration(item, formData) {
                 formData: sanitizedFormData,
                 targetTokenIds: Array.from(game.user.targets).map((t) => t.id),
                 userId: game.user.id,
+                itemJson,
+                originalItemUuid: item.system?._active?.__originalUuid ?? null,
+                actorUuid: actor.uuid ?? null,
             },
         },
         item,
