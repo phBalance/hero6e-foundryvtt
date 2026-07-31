@@ -2501,6 +2501,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         await this._combatCard(
             combatant,
             `${actor.name} begins ${record.label} — it goes off ${landing}.${commitText}
+            <button type="button" class="hero-delayed-now" data-combat-id="${this.id}" data-combatant-id="${combatant.id}" data-delayed-id="${id}">Resolve now</button>
             <button type="button" class="hero-delayed-cancel" data-combat-id="${this.id}" data-combatant-id="${combatant.id}" data-delayed-id="${id}">Cancel (interrupted)</button>`,
         );
         await this.logEvent("delayed.declare", { combatant, data: { ...record, id } });
@@ -2577,6 +2578,22 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
+     * Resolves a scheduled delayed action immediately (owner/GM fiat — e.g. the
+     * table rules the moment has come, or wants to skip the wait).
+     * @param {string} combatantId
+     * @param {string} [delayedId] - Defaults to the combatant's only/legacy record
+     * @returns {Promise<void>}
+     */
+    async resolveDelayedActionNow(combatantId, delayedId = null) {
+        const combatant = this.combatants.get(combatantId);
+        if (!combatant?.isOwner) return;
+        const records = this.delayedActionsFor(combatant);
+        const entry = delayedId ? records.find(([id]) => id === delayedId) : records[0];
+        if (!entry) return;
+        await this._finishDelayedAction(combatant, entry[0], entry[1], { cancelled: false, early: true });
+    }
+
+    /**
      * Backward-compatible alias for in-flight Haymaker cancel buttons.
      * @param {string} combatantId
      * @returns {Promise<void>}
@@ -2629,8 +2646,11 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @param {boolean} options.cancelled
      * @private
      */
-    async _finishDelayedAction(combatant, id, record, { cancelled }) {
+    async _finishDelayedAction(combatant, id, record, { cancelled, early = false } = {}) {
         const actor = combatant.actor;
+        const momentLabel = early
+            ? `${this.currentPhaseLabel}, early`
+            : HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs ?? 0);
         if (id === "legacy-haymaker") {
             await combatant.update({ [`flags.${game.system.id}.haymaker`]: null });
         } else {
@@ -2659,7 +2679,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 await item.turnOn({ delayedResolution: true, token: combatant.token });
             }
             outcome = item?.isActive
-                ? `${actor?.name}'s ${record.label} activates now (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}).`
+                ? `${actor?.name}'s ${record.label} activates now (${momentLabel}).`
                 : `${actor?.name}'s ${record.label} finished its Extra Time but could not activate — adjudicate (interrupted? Stunned?).`;
         } else if ((record.kind === "attack" || record.kind === "haymaker") && record.actionData) {
             // The attack is ROLLED now (6E1 377 / 6E2 68: it happens when it goes
@@ -2671,7 +2691,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                     : "A target that moved since the declaration is missed automatically; resources were already spent when the activation began.";
             const rollCard = {
                 speaker: ChatMessage.getSpeaker({ actor }),
-                content: `${actor?.name}'s ${record.label} ${record.kind === "haymaker" ? "lands" : "goes off"} now (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}) — roll the attack.
+                content: `${actor?.name}'s ${record.label} ${record.kind === "haymaker" ? "lands" : "goes off"} now (${momentLabel}) — roll the attack.
                     <button type="button" class="hero-delayed-roll">Roll the attack now</button>
                     <p class="hint">${hint}</p>`,
                 flags: {
@@ -2683,14 +2703,14 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (combatant.hidden) rollCard.whisper = ChatMessage.getWhisperRecipients("GM");
             await ChatMessage.create(rollCard);
         } else if (record.kind === "haymaker") {
-            outcome = `${actor?.name}'s ${record.label} resolves now — apply its damage (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}).`;
+            outcome = `${actor?.name}'s ${record.label} resolves now — apply its damage (${momentLabel}).`;
         } else {
-            outcome = `${actor?.name}'s ${record.label} goes off now (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}) — resolve its effect. A target that moved since the declaration is missed automatically.`;
+            outcome = `${actor?.name}'s ${record.label} goes off now (${momentLabel}) — resolve its effect. A target that moved since the declaration is missed automatically.`;
         }
         if (outcome) await this._combatCard(combatant, outcome);
         await this.logEvent(cancelled ? "delayed.cancel" : "delayed.resolve", {
             combatant,
-            data: { id, kind: record.kind, label: record.label, resolveAbs: record.resolveAbs ?? null },
+            data: { id, kind: record.kind, label: record.label, resolveAbs: record.resolveAbs ?? null, early },
         });
     }
 

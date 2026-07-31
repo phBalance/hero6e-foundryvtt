@@ -492,6 +492,15 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
         });
     });
 
+    // Delayed action: resolve immediately (owner/GM fiat)
+    html.querySelectorAll("button.hero-delayed-now").forEach((button) => {
+        button.addEventListener("click", (event) => {
+            event.preventDefault();
+            const combat = game.combats.get(button.dataset.combatId);
+            combat?.resolveDelayedActionNow?.(button.dataset.combatantId, button.dataset.delayedId ?? null);
+        });
+    });
+
     // Delayed Extra Time attack: the roll happens when the power goes off. The
     // stored declaration (dialog inputs + targets) rides on the message flag.
     html.querySelectorAll("button.hero-delayed-roll").forEach((button) => {
