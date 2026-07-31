@@ -501,18 +501,10 @@ body.theme-light .combat-tracker,
     white-space: nowrap;
 }
 
+/* The clockwork glyph never read well against the header bands (invisible in
+   light mode); the caret + label carry the row on their own */
 .combat-tracker .combatant.hero-timeline-header-row .token-image {
-    width: 16px !important;
-    height: 16px !important;
-    min-width: 16px !important;
-    max-height: 16px !important;
-    flex: 0 0 16px !important;
-    object-fit: contain !important;
-    border: none !important;
-    border-radius: 0 !important;
-    opacity: 0.6;
-    margin: 0 !important;
-    padding: 0 !important;
+    display: none !important;
 }
 
 /* 4. STRIP NATIVE UTILITY CONTROLS FROM HEADER SLOTS */
