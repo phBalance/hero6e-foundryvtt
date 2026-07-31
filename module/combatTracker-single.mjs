@@ -95,6 +95,41 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 panelMemberRows.forEach((li) => list.appendChild(li));
             }
 
+            // Delayed-action markers: owners get inline Resolve-now / Cancel controls
+            element.querySelectorAll("li.combatant.hero-delayed-row[data-combatant-id]").forEach((li) => {
+                if (li.querySelector(".hero-delayed-controls")) return;
+                const combatant = app.viewed.combatants.get(li.dataset.combatantId);
+                if (!combatant?.isOwner) return;
+                const delayedId = [...li.classList]
+                    .find((cls) => cls.startsWith("hero-delayed-id-"))
+                    ?.slice("hero-delayed-id-".length);
+                if (!delayedId) return;
+                const wrap = document.createElement("span");
+                wrap.className = "hero-delayed-controls";
+                const makeControl = (icon, tooltip, onClick) => {
+                    const control = document.createElement("button");
+                    control.type = "button";
+                    control.className = `inline-control combatant-control icon fa-solid ${icon}`;
+                    control.dataset.tooltip = tooltip;
+                    control.setAttribute("aria-label", tooltip);
+                    control.addEventListener("click", (clickEvent) => {
+                        clickEvent.preventDefault();
+                        clickEvent.stopPropagation();
+                        onClick();
+                    });
+                    return control;
+                };
+                wrap.append(
+                    makeControl("fa-bolt", "Resolve now", () =>
+                        app.viewed.resolveDelayedActionNow?.(combatant.id, delayedId),
+                    ),
+                    makeControl("fa-xmark", "Cancel (interrupted)", () =>
+                        app.viewed.cancelDelayedAction?.(combatant.id, delayedId),
+                    ),
+                );
+                li.appendChild(wrap);
+            });
+
             // Owners can click condition icons to toggle them (prone → stand up, etc.)
             element.querySelectorAll("li.combatant[data-combatant-id] .token-effects").forEach((container) => {
                 const li = container.closest("li.combatant");
@@ -805,7 +840,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         row.initiative =
                             record.priority !== null && record.priority !== undefined ? String(record.priority) : "—";
                         row.effects = { icons: [], tooltip: "" };
-                        row.css = `${row.css} hero-haymaker-row hero-delayed-row ${stateCss} ${memberClasses}`.trim();
+                        row.css =
+                            `${row.css} hero-haymaker-row hero-delayed-row hero-delayed-id-${group.delayedId} ${stateCss} ${memberClasses}`.trim();
                         timelineTurns.push(row);
                         continue;
                     }

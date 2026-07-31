@@ -414,6 +414,19 @@ ol.combat-tracker.plain {
     display: none;
 }
 
+/* The row is inert, but its injected Resolve-now / Cancel controls are live */
+.combat-tracker li.combatant.hero-delayed-row .hero-delayed-controls {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 4px;
+}
+
+.combat-tracker li.combatant.hero-delayed-row .hero-delayed-controls .combatant-control:hover {
+    color: var(--hero-held-text);
+}
+
 /* 2j. LEDGER HISTORY: past segments render what actually happened */
 .combat-tracker li.combatant.hero-history-row {
     cursor: default;
