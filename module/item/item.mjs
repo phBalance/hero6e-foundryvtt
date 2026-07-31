@@ -1900,30 +1900,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // A continuing charges use is tracked by an active effect. Start it.
         await _startIfIsAContinuingCharge(this);
 
-        // Toggle status effect on based on power
-        // if (this.system.XMLID === "INVISIBILITY") {
-        //     // Invisibility status effect for SIGHTGROUP?
-        //     if (this.system.OPTIONID === "SIGHTGROUP" && !this.actor.statuses.has("invisible")) {
-        //         await this.actor.toggleStatusEffect(
-        //             HeroSystem6eActorActiveEffects.statusEffectsObj.invisibleEffect.id,
-        //             {
-        //                 active: true,
-        //             },
-        //         );
-        //     }
-        // } else if (this.system.XMLID === "FLIGHT" || this.system.XMLID === "GLIDING") {
-        //     await this.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.flyingEffect.id, {
-        //         active: true,
-        //     });
-        // } else if (this.system.XMLID === "DESOLIDIFICATION") {
-        //     await this.actor.toggleStatusEffect(
-        //         HeroSystem6eActorActiveEffects.statusEffectsObj.desolidificationEffect.id,
-        //         {
-        //             active: true,
-        //         },
-        //     );
-        // } else
-        //
         if (["maneuver", "martialart"].includes(item.type)) {
             await activateManeuver(this);
         }
@@ -2129,7 +2105,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // Power must be turned on
-        if (this.baseInfo?.behaviors.includes("activatable") && !this.isActive) {
+        if (!this.isActive) {
             return false;
         }
 
@@ -2743,7 +2719,15 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
      * @returns {HeroSystem6eItem|null} The parent item if found, otherwise null.
      */
     get parentItem() {
-        const parentId = this.system?.PARENTID;
+        // Sanity Check
+        if (this.system.ID && this.system.PARENTID === this.system.ID) {
+            ui.notifications.error(
+                `${this.actor?.name}/${this.name} has critical error. PARENTID and ID are the same.`,
+            );
+            this.system.PARENTID = null;
+        }
+
+        const parentId = this.system.PARENTID;
         if (!parentId) return null;
         if (!this.system?.ID) return null;
 
@@ -5434,7 +5418,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 return false;
             } else if (this.system.XMLID === "STRIKE") {
                 return true;
-            } else if (this.isCombatManeuver) {
+            } else if (this.type === "maneuver") {
                 return false;
             } else if (this.system.XMLID === "HANDTOHANDATTACK") {
                 // TODO: Collaborate with Peter.
@@ -5469,6 +5453,28 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             if (!this.isCarried) return false;
         }
 
+        // Favor disable status of associated ActiveEffect
+        if (this.effects.size > 0) {
+            const _disabled = this.effects.contents[0].disabled;
+            for (const ae of this.effects) {
+                if (ae.disabled !== _disabled) {
+                    console.error(`ActiveEffect.disabled mismatch ${this.actor}/${this.name}/${ae.name}`, this);
+                }
+            }
+            return !_disabled;
+        }
+
+        if (this.system.active === undefined) {
+            console.warn(`${this.name} system.active === undefined, assuming true`);
+
+            return true;
+        }
+
+        return this.system.active;
+    }
+
+    // Used by ActorSheetV2 (for display only) when equipment is disabled.
+    get _isActiveAe() {
         // Favor disable status of associated ActiveEffect
         if (this.effects.size > 0) {
             const _disabled = this.effects.contents[0].disabled;
@@ -7869,25 +7875,48 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return validationFailureMessages;
     }
 
+    /**
+     * Entry point: Validates the state and coordinates the flat database update.
+     * @param {string} targetType - The type string to convert to.
+     */
     async convertToType(targetType) {
-        // If the item is already of the correct type, return it
+        // 1. Base validation check
         if (this.type === targetType) {
             console.warn(`${this.detailedName()} for ${this.actor?.name} is already of type ${targetType}`);
             return;
         }
 
-        // Update item's type
-        await this.update(
-            {
-                type: targetType,
-                system: foundry.utils.mergeObject(this.system.toObject(), { _type: targetType }),
-            },
-            { recursive: false },
-        );
+        // 2. Gather all updates recursively across the deep tree
+        const allUpdates = [];
+        this._getDeepTypeUpdates(targetType, allUpdates);
 
-        // Update child items
-        for (const child of this.childItems) {
-            await child.convertToType(targetType);
+        // 3. Fire one clean batch database transaction
+        if (this.isEmbedded && this.actor) {
+            await this.actor.updateEmbeddedDocuments("Item", allUpdates, { recursive: false, render: false });
+        } else {
+            await game.items.documentClass.updateDocuments(allUpdates, { recursive: false, render: false });
+        }
+    }
+
+    /**
+     * Internal helper: Recursively extracts update instructions into a flat payload tracker.
+     * @param {string} targetType - The type string to convert to.
+     * @param {object[]} updatesArray - The tracking array to push updates into.
+     * @private
+     */
+    _getDeepTypeUpdates(targetType, updatesArray) {
+        // Push the payload for this specific document branch
+        updatesArray.push({
+            _id: this.id,
+            type: targetType,
+            system: foundry.utils.mergeObject(this.system.toObject(), { _type: targetType }),
+        });
+
+        // Tail-recurse down through all child nesting layers without blocking
+        if (this.childItems && this.childItems.length > 0) {
+            for (const child of this.childItems) {
+                child._getDeepTypeUpdates(targetType, updatesArray);
+            }
         }
     }
 
@@ -7945,10 +7974,10 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
     }
 
-    static parseItemsFromHeroJsonToItemDataArray(heroJson, actor) {
+    static parseItemsFromHeroJsonToItemDataArray(heroJson, actor, options = {}) {
         const itemsToCreate = [];
         let sortBase = 0;
-        const root = heroJson.CHARACTER ?? heroJson.PREFAB;
+        const root = heroJson.CHARACTER ?? heroJson.PREFAB ?? (options.partial ? heroJson : null);
 
         if (!root) {
             throw new Error("Unable to find root");

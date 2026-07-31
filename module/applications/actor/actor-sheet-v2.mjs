@@ -1292,7 +1292,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         // Update The Type of the Item
         try {
             // Ensure there is no parent ID
-            await item.update({ "system.-=PARENTID": null });
+            await item.update({ "system.-=PARENTID": null }, { render: false });
 
             // Convert the item & children to targetType
             await item.convertToType(targetType);
