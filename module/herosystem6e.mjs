@@ -520,7 +520,14 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
                     return ui.notifications.warn(`Only the attacker (or GM) rolls this attack.`);
                 }
                 // Restore the declaration's targets for the rolling user
-                if (payload.targetTokenIds?.length) await game.user.updateTokenTargets(payload.targetTokenIds);
+                // (V14 replaced User#updateTokenTargets with TokenLayer#setTargets)
+                if (payload.targetTokenIds?.length) {
+                    if (typeof canvas.tokens?.setTargets === "function") {
+                        canvas.tokens.setTargets(payload.targetTokenIds);
+                    } else {
+                        await game.user.updateTokenTargets(payload.targetTokenIds);
+                    }
+                }
                 await processActionToHit(
                     item,
                     // Resources and activation rolls were paid at declaration
