@@ -1,4 +1,5 @@
 import { HeroSystem6eCombatantSingle } from "./combatant-single.mjs";
+import { HeroSystem6eCombatSingle } from "./combat-single.mjs";
 import { HeroCompatibility } from "./utility/compatibility.mjs";
 
 const { CombatTracker } = foundry.applications.sidebar.tabs;
@@ -329,7 +330,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             .sort(
                 (a, b) =>
                     (b.actor.system?.characteristics?.dex?.value ?? 0) -
-                        (a.actor.system?.characteristics?.dex?.value ?? 0) || a.id.localeCompare(b.id),
+                        (a.actor.system?.characteristics?.dex?.value ?? 0) ||
+                    HeroSystem6eCombatSingle.stableTiebreak(a, b),
             );
 
         const panelExpanded = expansionOverrides["held"] ?? true;
@@ -486,7 +488,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 }
             }
             // Same order _comparePriority produces: priority descending, id tiebreak
-            entries.sort((a, b) => b.priority - a.priority || a.combatant.id.localeCompare(b.combatant.id));
+            entries.sort(
+                (a, b) => b.priority - a.priority || HeroSystem6eCombatSingle.stableTiebreak(a.combatant, b.combatant),
+            );
 
             // Tokens of the same root actor tied on the same priority act back to back;
             // collapse them into a single row with a count. The row represents the active

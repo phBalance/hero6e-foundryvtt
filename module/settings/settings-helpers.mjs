@@ -594,6 +594,16 @@ export default class SettingsHelpers {
             default: false,
         });
 
+        // GM-option tie-break: Fast Draw wins exact-DEX ties (6E2 19)
+        game.settings.register(module, "fastDrawTieBreak", {
+            name: game.i18n.localize("Settings.AlphaTesting.fastDrawTieBreak.Name"),
+            hint: game.i18n.localize("Settings.AlphaTesting.fastDrawTieBreak.Hint"),
+            scope: "world",
+            config: game.settings.get(game.system.id, "alphaTesting"),
+            type: Boolean,
+            default: false,
+        });
+
         // Cap on the single tracker's per-combat event ledger (~120 bytes/event)
         game.settings.register(module, "combatLogMaxEvents", {
             name: game.i18n.localize("Settings.AlphaTesting.combatLogMaxEvents.Name"),

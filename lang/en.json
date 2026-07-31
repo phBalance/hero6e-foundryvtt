@@ -205,6 +205,11 @@
                 "Name": "Last Migration"
             },
 
+            "fastDrawTieBreak": {
+                "Name": "Fast Draw Breaks DEX Ties",
+                "Hint": "Optional rule (6E2 19): characters with the Fast Draw skill act before others at the same DEX; two Fast Draw characters compare their Fast Draw tie-break rolls. Off = pure random tie-breaks."
+            },
+
             "combatLogMaxEvents": {
                 "Name": "Combat Log Size",
                 "Hint": "Maximum events kept in each combat's audit ledger (holds, aborts, turn flow, removed combatants). Older events are pruned first; recent Turns are always kept. 0 disables pruning."

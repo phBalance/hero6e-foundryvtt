@@ -251,42 +251,80 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
-     * Rolls a fresh 0-99 initiative tie-breaker for every combatant. Rolls are keyed by
-     * root actor id so every token of the same base actor shares one roll and therefore
-     * ties on the same DEX, letting the tracker group them.
-     * @returns {Record<string, number>} A flat mapping of { [rollKey]: 0-99 }
+     * Rolls a tie-break entry for one combatant: a 0-99 roll, plus a Fast Draw
+     * roll when the actor owns the FAST_DRAW skill (the GM-option tie-break, 6E2 19).
+     * @param {Combatant} combatant
+     * @returns {{r: number, fd: number|null}}
+     * @protected
+     */
+    _rollTieBreak(combatant) {
+        const hasFastDraw = !!combatant.actor?.items.find((i) => i.system?.XMLID === "FAST_DRAW");
+        return {
+            r: Math.floor(Math.random() * 100),
+            fd: hasFastDraw ? Math.floor(Math.random() * 100) : null,
+        };
+    }
+
+    /**
+     * Resolves a stored tie-break entry to the initiative fraction. With the
+     * fastDrawTieBreak setting on, Fast Draw owners always outrank non-owners at
+     * the same DEX (their fraction lives in the upper half) and compare fd rolls
+     * among themselves. Scalar entries from older combats read as plain rolls.
+     * @param {{r: number, fd: number|null}|number|undefined} rollEntry
+     * @returns {number} 0..0.99
+     * @protected
+     */
+    _tieBreakerFraction(rollEntry) {
+        const entry = typeof rollEntry === "number" ? { r: rollEntry, fd: null } : (rollEntry ?? { r: 50, fd: null });
+        let fastDraw = false;
+        try {
+            fastDraw = !!game.settings.get(game.system.id, "fastDrawTieBreak");
+        } catch (e) {
+            console.warn(`Unable to read the Fast Draw tie-break setting`, e);
+        }
+        if (!fastDraw) return (entry.r ?? 50) * 0.01;
+        if (entry.fd !== null && entry.fd !== undefined) return 0.5 + entry.fd * 0.0049;
+        return (entry.r ?? 50) * 0.0049;
+    }
+
+    /**
+     * Rolls fresh tie-breaker entries for every combatant. Rolls are keyed by
+     * root actor id so every token of the same base actor shares one roll and
+     * therefore ties on the same DEX, letting the tracker group them.
+     * @returns {Record<string, {r: number, fd: number|null}>}
      * @protected
      */
     _buildSegmentRollMap() {
         const newSegmentMap = {};
         for (const combatant of this.combatants) {
             const rollKey = combatant.actorId || combatant.id;
-            newSegmentMap[rollKey] ??= Math.floor(Math.random() * 100);
+            newSegmentMap[rollKey] ??= this._rollTieBreak(combatant);
         }
         return newSegmentMap;
     }
 
     /**
-     * Generates or fetches a flat dictionary cache of 0-99 initiative tie-breaker rolls
-     * specifically for the requested segment index window.
-     * @param {number|string} targetSegment - The calendar segment to process (1-12)
-     * @returns {Promise<Record<string, number>>} A flat mapping of { [rollKey]: 0-99 }
+     * Generates or fetches the tie-breaker roll map for an absolute segment. Maps
+     * are keyed by ABSOLUTE segment so ties re-roll every Turn (6E2 18: tied
+     * characters roll off per Segment) while rewinds within recorded history
+     * reuse the original rolls.
+     * @param {number|string} targetAbs - Absolute segment (round*12+segment)
+     * @returns {Promise<Record<string, {r: number, fd: number|null}>>}
      * @protected
      */
-    async _generateSegmentRollCache(targetSegment) {
+    async _generateSegmentRollCache(targetAbs) {
         // 1. Fetch the multi-segment master data map from flags safely
         const masterRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
 
-        // 2. HERO 6E RULE: If rolls already exist for this segment, preserve them to allow rewinding safely
-        if (masterRollsCache[targetSegment]) {
-            // FIX: Return ONLY the specific segment's flat dictionary window so turn loops read it correctly
-            return masterRollsCache[targetSegment];
+        // 2. If rolls already exist for this position, preserve them to allow rewinding safely
+        if (masterRollsCache[targetAbs]) {
+            return masterRollsCache[targetAbs];
         }
 
         const newSegmentMap = this._buildSegmentRollMap();
 
         // 3. Update the local master reference before writing back to the database flag tree
-        masterRollsCache[targetSegment] = newSegmentMap;
+        masterRollsCache[targetAbs] = newSegmentMap;
 
         // 4. Persist, with a ledger record of the fresh tie-break rolls
         const payload = { [`flags.${game.system.id}.segmentRolls`]: masterRollsCache };
@@ -294,13 +332,31 @@ export class HeroSystem6eCombatSingle extends Combat {
             Object.assign(
                 payload,
                 this.eventLogAppendPayload([
-                    this.buildEvent("tie.roll", { data: { segment: targetSegment, rolls: newSegmentMap } }),
+                    this.buildEvent("tie.roll", {
+                        abs: Number(targetAbs) || undefined,
+                        data: { rolls: newSegmentMap },
+                    }),
                 ]),
             );
         }
         await this.update(payload);
 
         return newSegmentMap;
+    }
+
+    /**
+     * Final sort tiebreak, stable across delete-and-re-add: combatant ids change on
+     * re-creation, so equal-priority pairs would silently flip order. Token (or
+     * actor) identity persists; the id compare stays only as the total-order
+     * backstop for tokenless duplicates.
+     * @param {Combatant} a
+     * @param {Combatant} b
+     * @returns {number}
+     */
+    static stableTiebreak(a, b) {
+        const keyA = a.tokenId || a.actorId || a.id;
+        const keyB = b.tokenId || b.actorId || b.id;
+        return keyA.localeCompare(keyB) || a.id.localeCompare(b.id);
     }
 
     /**
@@ -364,7 +420,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             return priorityB - priorityA; // Descending order (highest score acts first)
         }
 
-        return a.id.localeCompare(b.id);
+        return HeroSystem6eCombatSingle.stableTiebreak(a, b);
     }
 
     /**
@@ -426,12 +482,13 @@ export class HeroSystem6eCombatSingle extends Combat {
             return 0;
         }
 
-        const segmentRolls = parentCombat
-            ? parentCombat.getFlag(game.system.id, "segmentRolls")?.[activeSegment] || {}
-            : {};
+        // Maps are keyed by absolute segment; segment-number keys are the legacy
+        // shape from in-flight combats and read as a fallback
+        const rollsFlag = (parentCombat ? parentCombat.getFlag(game.system.id, "segmentRolls") : null) ?? {};
+        const segmentRolls = rollsFlag[scoredAbs] ?? rollsFlag[activeSegment] ?? {};
         // Rolls are keyed by root actor id; fall back to combatant id for pre-existing combats
-        const tieBreakerRoll = segmentRolls[combatant.actorId || combatant.id] ?? segmentRolls[combatant.id] ?? 50;
-        const tieBreakerFraction = tieBreakerRoll * 0.01;
+        const tieBreakerEntry = segmentRolls[combatant.actorId || combatant.id] ?? segmentRolls[combatant.id];
+        const tieBreakerFraction = this._tieBreakerFraction(tieBreakerEntry);
 
         if (positionalHold) {
             // The declared DEX is the exact acting position: LR and maneuver offsets
@@ -511,8 +568,11 @@ export class HeroSystem6eCombatSingle extends Combat {
         startPayload[`flags.${game.system.id}.currentSegment`] = 12;
         startPayload[`flags.${game.system.id}.recoveredRounds`] = [];
 
-        const initialRolls = (await this._generateSegmentRollCache(12)) || {};
-        startPayload[`flags.${game.system.id}.segmentRolls`] = initialRolls;
+        // Combat opens at Turn 1 Segment 12 (abs 24); nest under the abs key — the
+        // old code wrote the flat roll map over the whole flag, corrupting its shape
+        const startAbs = HeroSystem6eCombatantSingle.absoluteSegment(1, 12);
+        const initialRolls = (await this._generateSegmentRollCache(startAbs)) || {};
+        startPayload[`flags.${game.system.id}.segmentRolls`] = { [startAbs]: initialRolls };
 
         const combatantUpdates = [];
         this.combatants.forEach((combatant) => {
@@ -557,7 +617,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             ? this.getInitiativePriority(targetActorDoc, 12)
             : null;
 
-        const startAbs = HeroSystem6eCombatantSingle.absoluteSegment(1, 12);
         const startEvents = [this.buildEvent("segment.start", { abs: startAbs })];
         if (targetActorDoc) {
             startEvents.push(
@@ -813,7 +872,12 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (c.id === ending?.id && !cHeldHere && c.id !== lrRemainderId) return false;
             const priority = this.getInitiativePriority(c, activeSegment);
             if (priority < endingPriority) return true;
-            return priority === endingPriority && !!ending && c.id !== ending.id && c.id.localeCompare(ending.id) > 0;
+            return (
+                priority === endingPriority &&
+                !!ending &&
+                c.id !== ending.id &&
+                HeroSystem6eCombatSingle.stableTiebreak(c, ending) > 0
+            );
         });
 
         if (stillToAct.length > 0) {
@@ -961,18 +1025,26 @@ export class HeroSystem6eCombatSingle extends Combat {
             return this;
         }
 
+        const nextAbs = nextRoundCycle * 12 + nextSegment;
         const masterRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
-        let updatedRollsCache = masterRollsCache[nextSegment];
+        let updatedRollsCache = masterRollsCache[nextAbs];
 
         let freshRollMap = null;
         if (!updatedRollsCache) {
             updatedRollsCache = this._buildSegmentRollMap();
-            masterRollsCache[nextSegment] = updatedRollsCache;
+            masterRollsCache[nextAbs] = updatedRollsCache;
             freshRollMap = updatedRollsCache;
         }
+        // Prune maps outside the tracker's two-Turn rewind window; this also drops
+        // the legacy segment-number keys (1-12) from in-flight combats over time
+        for (const key of Object.keys(masterRollsCache)) {
+            const keyAbs = Number(key);
+            if (Number.isFinite(keyAbs) && keyAbs < currentAbsNow - 24) {
+                delete masterRollsCache[key];
+                updateData[`flags.${game.system.id}.segmentRolls.-=${key}`] = null;
+            }
+        }
         updateData[`flags.${game.system.id}.segmentRolls`] = masterRollsCache;
-
-        const nextAbs = nextRoundCycle * 12 + nextSegment;
         let targetCombatantId = null;
         const upcomingActors = allCombatants.filter((c) =>
             this._takesTurnInSegment(c, nextSegment, {
@@ -1719,6 +1791,220 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (activeCombatant?.actor) {
             expireManeuverNextPhaseEffects(activeCombatant.actor).catch((e) => console.error(e));
         }
+    }
+
+    /* -------------------------------------------- */
+    /*  Combatant add/delete reconciliation         */
+    /* -------------------------------------------- */
+
+    /** @override */
+    _preCreateDescendantDocuments(parent, collection, data, options, userId) {
+        super._preCreateDescendantDocuments(parent, collection, data, options, userId);
+        if (collection === "combatants" && this.started) {
+            // Captured before core re-sorts turns under the numeric index
+            this._pointerBeforeCombatantChange = this.combatant?.id ?? null;
+        }
+    }
+
+    /** @override */
+    _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
+        super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
+        if (collection !== "combatants") return;
+        const activeIdBefore = this._pointerBeforeCombatantChange ?? null;
+        this._pointerBeforeCombatantChange = null;
+        if (!game.users.activeGM?.isSelf || !this.started) return;
+        this._reconcileCreatedCombatants(documents, activeIdBefore).catch((e) => console.error(e));
+    }
+
+    /** @override */
+    _preDeleteDescendantDocuments(parent, collection, ids, options, userId) {
+        super._preDeleteDescendantDocuments(parent, collection, ids, options, userId);
+        if (collection === "combatants" && this.started) {
+            // Snapshot while the combatants (and their priorities) still resolve;
+            // only present on the initiating client — _onDelete falls back otherwise
+            this._preDeleteCapture = {
+                activeId: this.combatant?.id ?? null,
+                events: ids
+                    .map((id) => {
+                        const combatant = this.combatants.get(id);
+                        if (!combatant) return null;
+                        return this.buildEvent("combatant.remove", {
+                            combatant,
+                            data: { snapshot: { tokenId: combatant.tokenId ?? null } },
+                        });
+                    })
+                    .filter(Boolean),
+            };
+        }
+    }
+
+    /** @override */
+    _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
+        super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
+        if (collection !== "combatants") return;
+        const capture = this._preDeleteCapture ?? null;
+        this._preDeleteCapture = null;
+        if (!game.users.activeGM?.isSelf || !this.started) return;
+        this._reconcileDeletedCombatants(capture, documents).catch((e) => console.error(e));
+    }
+
+    /**
+     * Repairs combat state after combatants join mid-combat: duplicate adds are
+     * removed, tie-break rolls are backfilled for every recorded position (a
+     * newcomer otherwise sorts at the +0.50 default — #4566), initiative and the
+     * SPD baseline are seeded, stale hold/abort effects bound to removed combatants
+     * are cleared, and the turn index is re-pointed at the active combatant.
+     * @param {Combatant[]} created
+     * @param {string|null} activeIdBefore
+     * @private
+     */
+    async _reconcileCreatedCombatants(created, activeIdBefore) {
+        // 1. De-dupe: a token (or tokenless actor) fields exactly one combatant
+        const deleteIds = new Set();
+        let legacyDupes = false;
+        for (const combatant of created) {
+            if (!this.combatants.has(combatant.id)) continue;
+            const key = combatant.tokenId || combatant.actorId;
+            if (!key) continue;
+            const dupes = this.combatants.filter((c) => (c.tokenId || c.actorId) === key);
+            if (dupes.length <= 1) continue;
+            if (dupes.length > 2) legacyDupes = true;
+            const keeper = dupes.find((c) => !created.some((n) => n.id === c.id)) ?? dupes[0];
+            for (const dupe of dupes) {
+                if (dupe.id !== keeper.id && created.some((n) => n.id === dupe.id)) deleteIds.add(dupe.id);
+            }
+        }
+        if (deleteIds.size > 0) {
+            await this.deleteEmbeddedDocuments("Combatant", [...deleteIds]);
+            ui.notifications.info(`Duplicate combatant(s) removed — one combatant per token.`);
+        }
+        if (legacyDupes) {
+            ui.notifications.warn(
+                `This combat has legacy per-Phase duplicate combatants. Run game.herosystem6e.migrateCombatsToSingleCombatantTracker() to collapse them.`,
+            );
+        }
+        const survivors = created.filter((c) => this.combatants.has(c.id));
+        if (survivors.length === 0) return;
+
+        // 2. Backfill tie-break rolls for every recorded position
+        const masterRollsCache = foundry.utils.deepClone(this.getFlag(game.system.id, "segmentRolls") ?? {});
+        let rollsDirty = false;
+        for (const map of Object.values(masterRollsCache)) {
+            for (const combatant of survivors) {
+                const rollKey = combatant.actorId || combatant.id;
+                if (map[rollKey] === undefined) {
+                    map[rollKey] = this._rollTieBreak(combatant);
+                    rollsDirty = true;
+                }
+            }
+        }
+
+        // 3. Stale effect reconciliation: hold/abort records bound to a combatant
+        // no longer in this combat are meaningless on re-add
+        for (const combatant of survivors) {
+            for (const effect of combatant.actor?.effects ?? []) {
+                const isHold = effect.statuses.has("holding");
+                const isAbort = effect.statuses.has("aborted");
+                if (!isHold && !isAbort) continue;
+                const record = effect.getFlag(game.system.id, isHold ? "hold" : "abort");
+                if (record?.combatantId && !this.combatants.has(record.combatantId)) {
+                    await effect.delete();
+                    await this._combatCard(
+                        combatant,
+                        `${combatant.actor.name}'s stale ${isHold ? "Held Action" : "abort"} from a removed combatant was cleared.`,
+                    );
+                }
+            }
+        }
+
+        // 4. Seed initiative and the SPD-change baseline
+        await this.updateEmbeddedDocuments(
+            "Combatant",
+            survivors.map((c) => ({
+                _id: c.id,
+                initiative: this.getInitiativePriority(c, this.segment),
+                [`flags.${game.system.id}.knownSpd`]: c.combatSpd,
+            })),
+        );
+
+        // 5. Re-point the turn index at the active combatant (the index addresses a
+        // freshly sorted array) and commit rolls + ledger in one update
+        if (!HeroCompatibility.isV14) {
+            this._turns = null;
+            this.setupTurns();
+        }
+        const payload = {};
+        if (rollsDirty) payload[`flags.${game.system.id}.segmentRolls`] = masterRollsCache;
+        Object.assign(
+            payload,
+            this.eventLogAppendPayload(survivors.map((c) => this.buildEvent("combatant.add", { combatant: c }))),
+        );
+        const activeId = activeIdBefore ?? this.combatant?.id ?? null;
+        if (activeId && this.combatants.has(activeId)) {
+            const index = this.turns.findIndex((t) => t.id === activeId);
+            if (index !== -1 && index !== this.turn) payload.turn = index;
+        }
+        await this.update(payload);
+    }
+
+    /**
+     * Repairs combat state after combatants are removed mid-combat: the removal is
+     * ledgered with a snapshot (history rows survive), and the turn index is
+     * re-pointed — at the surviving active combatant, or at the next combatant by
+     * the recorded acting-priority threshold when the active one was deleted.
+     * @param {{activeId: string|null, events: object[]}|null} capture
+     * @param {Combatant[]} documents - The deleted combatant documents (detached)
+     * @private
+     */
+    async _reconcileDeletedCombatants(capture, documents) {
+        // The initiating client snapshots in _preDelete; other clients (e.g. the GM
+        // relaying a player deletion) reconstruct from the detached documents
+        const events =
+            capture?.events ??
+            documents.map((combatant) =>
+                this.buildEvent("combatant.remove", {
+                    combatant,
+                    priority: 0,
+                    data: { snapshot: { tokenId: combatant.tokenId ?? null } },
+                }),
+            );
+        const activeId = capture?.activeId ?? this.previous?.combatantId ?? null;
+
+        if (!HeroCompatibility.isV14) {
+            this._turns = null;
+            this.setupTurns();
+        }
+        const payload = this.eventLogAppendPayload(events);
+
+        if (activeId && this.combatants.has(activeId)) {
+            const index = this.turns.findIndex((t) => t.id === activeId);
+            if (index !== -1 && index !== this.turn) payload.turn = index;
+        } else if (activeId) {
+            // The active combatant was deleted: select the next actor below the
+            // recorded acting position, exactly as nextTurn's threshold does
+            const segment = this.segment;
+            const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, segment);
+            const priorPriority = this.getFlag(game.system.id, "actingPriority");
+            const candidates = this.combatants.contents
+                .filter((c) => {
+                    if (!this._takesTurnInSegment(c, segment, { queryAbs: currentAbs })) return false;
+                    const hold = c.heldAction;
+                    const heldHere = hold?.mode === "position" && hold.segmentAbs === currentAbs;
+                    if (heldHere && c.getFlag(game.system.id, "heldSlotTakenAbs") === currentAbs) return false;
+                    if (priorPriority === null || priorPriority === undefined) return true;
+                    return this.getInitiativePriority(c, segment) < priorPriority;
+                })
+                .sort((a, b) => this._comparePriority(a, b, this, segment));
+            const target = candidates[0] ?? null;
+            if (target) {
+                const index = this.turns.findIndex((t) => t.id === target.id);
+                if (index !== -1) {
+                    payload.turn = index;
+                    payload[`flags.${game.system.id}.actingPriority`] = this.getInitiativePriority(target, segment);
+                }
+            }
+        }
+        await this.update(payload);
     }
 
     /**
