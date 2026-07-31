@@ -116,6 +116,7 @@ export function registerCombatTests(quench) {
                     };
 
                     const testCombatDocument = await Combat.create({
+                        name: "_Quench Combat",
                         scene: canvas.scene?.id || null,
                         active: true,
                     });
@@ -301,6 +302,7 @@ export function registerCombatTests(quench) {
                     };
 
                     const testCombatDocument = await Combat.create({
+                        name: "_Quench Combat",
                         scene: canvas.scene?.id || null,
                         active: true,
                     });
@@ -405,6 +407,7 @@ export function registerCombatTests(quench) {
                     const { HeroCompatibility } = await import("../utility/compatibility.mjs");
 
                     const testCombatDocument = await Combat.create({
+                        name: "_Quench Combat",
                         scene: canvas.scene?.id || null,
                         active: true,
                     });
@@ -523,7 +526,11 @@ export function registerCombatTests(quench) {
                         chartActors.push(actor);
                     }
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments(
                         "Combatant",
@@ -569,7 +576,11 @@ export function registerCombatTests(quench) {
                             "system.characteristics.end.value": endMax - rec - 3,
                         });
 
-                        const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                        const combat = await Combat.create({
+                            name: "_Quench Combat",
+                            scene: canvas.scene?.id || null,
+                            active: true,
+                        });
                         combatDocuments.push(combat);
                         await combat.createEmbeddedDocuments("Combatant", [{ actorId: actor.id }]);
                         await combat.startCombat();
@@ -636,7 +647,7 @@ export function registerCombatTests(quench) {
                         });
                         const worldStun = npcActor.system.characteristics.stun.value;
 
-                        const combat = await Combat.create({ scene: scene.id, active: true });
+                        const combat = await Combat.create({ name: "_Quench Combat", scene: scene.id, active: true });
                         combatDocuments.push(combat);
                         await combat.createEmbeddedDocuments("Combatant", [
                             { actorId: npcActor.id, tokenId: tokenDoc.id, sceneId: scene.id },
@@ -687,7 +698,11 @@ export function registerCombatTests(quench) {
                         });
                         actorDocuments.push(holder, rusher);
 
-                        const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                        const combat = await Combat.create({
+                            name: "_Quench Combat",
+                            scene: canvas.scene?.id || null,
+                            active: true,
+                        });
                         combatDocuments.push(combat);
                         await combat.createEmbeddedDocuments("Combatant", [
                             { actorId: holder.id },
@@ -775,7 +790,11 @@ export function registerCombatTests(quench) {
                         { name: "Holding An Action", img: "icons/svg/clockwork.svg", statuses: ["holding"] },
                     ]);
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: alpha.id }, { actorId: holder.id }]);
                     await combat.startCombat();
@@ -811,7 +830,11 @@ export function registerCombatTests(quench) {
                     });
                     actorDocuments.push(slug);
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: slug.id }]);
                     await combat.startCombat();
@@ -859,7 +882,11 @@ export function registerCombatTests(quench) {
                     });
                     actorDocuments.push(loner);
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: loner.id }]);
                     await combat.startCombat();
@@ -912,7 +939,11 @@ export function registerCombatTests(quench) {
                     });
                     actorDocuments.push(alpha, holder, gamma);
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [
                         { actorId: alpha.id },
@@ -963,7 +994,11 @@ export function registerCombatTests(quench) {
                     });
                     actorDocuments.push(bruiser, dodger);
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [
                         { actorId: bruiser.id },
@@ -1026,7 +1061,11 @@ export function registerCombatTests(quench) {
                     });
                     actorDocuments.push(reactor, pacer);
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: reactor.id }, { actorId: pacer.id }]);
                     await combat.startCombat();
@@ -1082,7 +1121,11 @@ export function registerCombatTests(quench) {
                         { name: "Holding An Action", img: "icons/svg/clockwork.svg", statuses: ["holding"] },
                     ]);
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: alpha.id }, { actorId: holder.id }]);
                     await combat.startCombat();
@@ -1144,7 +1187,11 @@ export function registerCombatTests(quench) {
                         { name: "Stunned", img: "icons/svg/daze.svg", statuses: ["stunned"] },
                     ]);
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: guard.id }, { actorId: stunny.id }]);
                     await combat.startCombat();
@@ -1192,7 +1239,11 @@ export function registerCombatTests(quench) {
                     });
                     actorDocuments.push(alpha, burner);
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: alpha.id }, { actorId: burner.id }]);
                     await combat.startCombat();
@@ -1232,7 +1283,11 @@ export function registerCombatTests(quench) {
                         await weaver.addHeroSystemManeuvers();
                     }
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: alpha.id }, { actorId: weaver.id }]);
                     await combat.startCombat();
@@ -1276,7 +1331,11 @@ export function registerCombatTests(quench) {
                     });
                     actorDocuments.push(sleeper);
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: sleeper.id }]);
 
@@ -1332,7 +1391,11 @@ export function registerCombatTests(quench) {
                         { parent: lrActor },
                     );
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [
                         { actorId: lrActor.id },
@@ -1391,7 +1454,11 @@ export function registerCombatTests(quench) {
                         { parent: fiver },
                     );
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: sniper.id }, { actorId: fiver.id }]);
                     await combat.startCombat();
@@ -1439,7 +1506,11 @@ export function registerCombatTests(quench) {
                         { parent: mika },
                     );
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: alpha.id }, { actorId: mika.id }]);
                     await combat.startCombat();
@@ -1515,7 +1586,11 @@ export function registerCombatTests(quench) {
                         { parent: mika },
                     );
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [
                         { actorId: alpha.id },
@@ -1592,7 +1667,11 @@ export function registerCombatTests(quench) {
                         { parent: mika },
                     );
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [
                         { actorId: fast.id },
@@ -1665,7 +1744,11 @@ export function registerCombatTests(quench) {
                             { parent: mika },
                         );
 
-                        const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                        const combat = await Combat.create({
+                            name: "_Quench Combat",
+                            scene: canvas.scene?.id || null,
+                            active: true,
+                        });
                         combatDocuments.push(combat);
                         await combat.createEmbeddedDocuments("Combatant", [{ actorId: fast.id }, { actorId: mika.id }]);
                         await combat.startCombat();
@@ -1726,7 +1809,11 @@ export function registerCombatTests(quench) {
                             { parent: mika },
                         );
 
-                        const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                        const combat = await Combat.create({
+                            name: "_Quench Combat",
+                            scene: canvas.scene?.id || null,
+                            active: true,
+                        });
                         combatDocuments.push(combat);
                         await combat.createEmbeddedDocuments("Combatant", [{ actorId: fast.id }, { actorId: mika.id }]);
                         await combat.startCombat();
@@ -1771,7 +1858,11 @@ export function registerCombatTests(quench) {
                     });
                     actorDocuments.push(alpha, bravo);
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: alpha.id }, { actorId: bravo.id }]);
                     await combat.startCombat();
@@ -1839,7 +1930,11 @@ export function registerCombatTests(quench) {
                             "system.characteristics.stun.value": stunMax - rec - 3,
                         });
 
-                        const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                        const combat = await Combat.create({
+                            name: "_Quench Combat",
+                            scene: canvas.scene?.id || null,
+                            active: true,
+                        });
                         combatDocuments.push(combat);
                         await combat.createEmbeddedDocuments("Combatant", [{ actorId: actor.id }]);
                         await combat.startCombat();
@@ -1887,7 +1982,11 @@ export function registerCombatTests(quench) {
                     });
                     actorDocuments.push(slow, pacer);
 
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: slow.id }, { actorId: pacer.id }]);
                     await combat.startCombat();
@@ -2009,7 +2108,11 @@ export function registerCombatTests(quench) {
                 }
 
                 async function makeCombat(actors) {
-                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    const combat = await Combat.create({
+                        name: "_Quench Combat",
+                        scene: canvas.scene?.id || null,
+                        active: true,
+                    });
                     combatDocuments.push(combat);
                     await combat.createEmbeddedDocuments(
                         "Combatant",

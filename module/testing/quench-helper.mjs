@@ -96,6 +96,22 @@ export function registerGlobalSetup(quench) {
                         game.actors.filter((a) => a.name.startsWith("_Quench")).map((o) => o.id),
                     );
                 });
+
+                it("Delete '_Quench' combats", async () => {
+                    // Test combats are created with the _Quench name prefix. Also sweep
+                    // combats left by OLDER test runs: every combatant points at a
+                    // _Quench actor or at an actor that no longer exists (the actor
+                    // cleanup above orphans them).
+                    const ids = game.combats
+                        .filter(
+                            (c) =>
+                                c.name?.startsWith("_Quench") ||
+                                (c.combatants.size > 0 &&
+                                    c.combatants.every((ct) => !ct.actor || ct.actor.name.startsWith("_Quench"))),
+                        )
+                        .map((c) => c.id);
+                    if (ids.length > 0) await Combat.deleteDocuments(ids);
+                });
             });
         },
         {
@@ -126,6 +142,22 @@ export function registerGlobalTeardown(quench) {
                     await Actor.deleteDocuments(
                         game.actors.filter((a) => a.name.startsWith("_Quench")).map((o) => o.id),
                     );
+                });
+
+                it("Delete '_Quench' combats", async () => {
+                    // Test combats are created with the _Quench name prefix. Also sweep
+                    // combats left by OLDER test runs: every combatant points at a
+                    // _Quench actor or at an actor that no longer exists (the actor
+                    // cleanup above orphans them).
+                    const ids = game.combats
+                        .filter(
+                            (c) =>
+                                c.name?.startsWith("_Quench") ||
+                                (c.combatants.size > 0 &&
+                                    c.combatants.every((ct) => !ct.actor || ct.actor.name.startsWith("_Quench"))),
+                        )
+                        .map((c) => c.id);
+                    if (ids.length > 0) await Combat.deleteDocuments(ids);
                 });
 
                 it("Delete '_Quench' scenes", async () => {
