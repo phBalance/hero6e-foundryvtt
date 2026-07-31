@@ -29,8 +29,10 @@ $combat-tracker-hero-dispositions: (
     --hero-next-turn: #{$hero-next-turn-dark};
     --hero-lr-accent: #{$hero-lr-accent-dark};
     --hero-tracker-surface: var(--color-cool-5, rgb(28 27 34));
+    --hero-header-surface: var(--color-cool-5, rgb(28 27 34));
     --hero-header-text: #e2e8f0;
     --hero-muted-text: #8a929e;
+    --hero-on-accent: #f3f3f3;
     --hero-defeated-accent: #e5484d;
     --hero-header-shadow: rgb(0 0 0 / 30%);
 }
@@ -44,10 +46,12 @@ body.theme-light .combat-tracker,
     --hero-next-turn: #{$hero-next-turn-light};
     --hero-lr-accent: #{$hero-lr-accent-light};
     --hero-tracker-surface: var(--color-light-1, #f0f0e0);
+    --hero-header-surface: #d9d3c2;
     --hero-header-text: var(--color-text-emphatic, #1b1d24);
-    --hero-muted-text: var(--color-text-subtle, #5d626e);
+    --hero-muted-text: #4a4f58;
+    --hero-on-accent: #f3f3f3;
     --hero-defeated-accent: #a72a35;
-    --hero-header-shadow: rgb(0 0 0 / 12%);
+    --hero-header-shadow: rgb(0 0 0 / 15%);
 }
 
 // .combat-sidebar covers the legacy tracker, .combat-tracker the single-combatant timeline
@@ -103,6 +107,7 @@ body.theme-light .combat-tracker,
     margin-bottom: 2px !important;
     align-items: center !important;
     overflow: hidden !important;
+    background: var(--hero-header-surface);
     box-shadow: 0 2px 4px var(--hero-header-shadow);
 }
 
@@ -121,13 +126,20 @@ body.theme-light .combat-tracker,
 /* 2. ACTIVE CURRENT SEGMENT UNIQUE THEMING */
 .combat-tracker .active-segment-header-slot {
     background: var(--color-shadow-primary) !important;
-    color: var(--hero-header-text) !important;
+    color: var(--hero-on-accent) !important;
     border: 1px solid var(--color-border-highlight) !important;
     border-left: 5px solid var(--color-border-highlight) !important;
     font-size: 1.1em;
 
     /* The current segment cannot be collapsed */
     pointer-events: none;
+}
+
+/* The accent band is the same orange in both themes: its label stays light
+   even in light mode. li.combatant outranks the shared header-text rule in
+   section 3, which carries equal class specificity and comes later. */
+.combat-tracker li.combatant.active-segment-header-slot .name {
+    color: var(--hero-on-accent) !important;
 }
 
 /* 2b. COLLAPSIBLE SEGMENT HEADERS */
@@ -139,7 +151,8 @@ body.theme-light .combat-tracker,
     border-color: var(--color-border-highlight) !important;
 }
 
-.combat-tracker .past-segment-header-slot .name {
+/* li.combatant outranks the shared header-text rule in section 3 */
+.combat-tracker li.combatant.past-segment-header-slot .name {
     color: var(--hero-muted-text) !important;
 }
 
@@ -179,7 +192,7 @@ body.theme-light .combat-tracker,
     border-left: 5px solid var(--hero-next-turn) !important;
 }
 
-.combat-tracker .combatant.next-turn-header-slot .name {
+.combat-tracker li.combatant.next-turn-header-slot .name {
     color: var(--hero-next-turn) !important;
 }
 
@@ -247,7 +260,7 @@ body.theme-light .combat-tracker,
     background: var(--hero-tracker-surface) !important;
 }
 
-.combat-tracker .combatant.hero-held-panel-header .name {
+.combat-tracker li.combatant.hero-held-panel-header .name {
     color: var(--hero-held-text) !important;
 }
 
