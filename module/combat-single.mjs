@@ -777,6 +777,15 @@ export class HeroSystem6eCombatSingle extends Combat {
         const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
         if (!this.started || combatant?.lrElevatedAbs !== currentAbs) return;
         if (!activeId || activeId === combatantId) return;
+        // Reached via the async maintenance chain, chat buttons, and the socket
+        // relay — staleness guards (#4558): the displaced combatant must still
+        // exist, and the threshold is re-read HERE, not at capture time, so a
+        // concurrent advance that already passed the elevated position bails out
+        // below instead of pointing the turn backward. (A strict active-identity
+        // check is deliberately NOT used: the elevation flag write itself re-sorts
+        // the turns array under the stored index, so the live lookup drifts even
+        // without any real advance.)
+        if (!this.combatants.has(activeId)) return;
 
         const elevatedPriority = this.getInitiativePriority(combatant, this.segment);
         const active = this.combatants.get(activeId);
@@ -1431,11 +1440,21 @@ export class HeroSystem6eCombatSingle extends Combat {
         updateData[`flags.${game.system.id}.currentSegment`] = this.segment;
         updateData[`flags.${game.system.id}.actingPriority`] = null;
         updateData[`flags.${game.system.id}.segmentHighWater`] = null;
+
+        // The landing position is a fresh absolute segment: roll its tie-breaks
+        // (nextTurn's cross-segment block never runs on a full-Turn skip)
+        const landingAbs = (this.round + 1) * 12 + this.segment;
+        const roundRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
+        if (!roundRollsCache[landingAbs]) {
+            roundRollsCache[landingAbs] = this._buildSegmentRollMap();
+            updateData[`flags.${game.system.id}.segmentRolls`] = roundRollsCache;
+        }
+
         Object.assign(
             updateData,
             this.eventLogAppendPayload([
                 this.buildEvent("round.start", {
-                    abs: (this.round + 1) * 12 + this.segment,
+                    abs: landingAbs,
                     data: { skippedTurn: true },
                 }),
             ]),

@@ -1933,4 +1933,319 @@ export function registerCombatTests(quench) {
         },
         { displayName: "HERO SYSTEM 6E: Speed Chart Combat Validation" },
     );
+
+    quench.registerBatch(
+        `${game.system.id}.combat.alpha-tracker-fixes`,
+        (context) => {
+            const { after, before, describe, expect, it } = context;
+
+            describe(`Hero System 6e Alpha Tracker Fix Validation`, function () {
+                const actorDocuments = [];
+                const combatDocuments = [];
+
+                before(async function () {
+                    const isSingleTracker =
+                        typeof HEROSYS !== "undefined"
+                            ? HEROSYS.isSingleCombatantTrackerEnabled
+                            : game.settings.get(game.system.id, "singleCombatantTracker");
+                    if (!isSingleTracker) {
+                        console.warn(
+                            `[${game.system.id}] QUENCH | Skipping alpha tracker fix tests: singleCombatantTracker is disabled.`,
+                        );
+                        this.skip();
+                    }
+                });
+
+                after(async function () {
+                    for (const actor of actorDocuments) {
+                        if (typeof actor?.delete === "function") await actor.delete();
+                    }
+                    for (const combatDoc of combatDocuments) {
+                        if (typeof combatDoc?.delete === "function") {
+                            const combatId = combatDoc.id;
+                            await combatDoc.delete();
+                            if (ui.combat?.viewed?.id === combatId) ui.combat.viewed = null;
+                        }
+                    }
+                    if (ui.combat) ui.combat.render(true);
+                });
+
+                async function waitUntil(condition, timeoutMs = 3000, intervalMs = 50) {
+                    const start = Date.now();
+                    while (Date.now() - start < timeoutMs) {
+                        if (condition()) return true;
+                        await new Promise((resolve) => setTimeout(resolve, intervalMs));
+                    }
+                    return condition();
+                }
+
+                async function makeActor(name, { dex = 10, spd = 2, extra = {} } = {}) {
+                    const actor = await Actor.create({
+                        name,
+                        type: "pc",
+                        system: {
+                            initiativeCharacteristic: "dex",
+                            characteristics: {
+                                dex: { value: dex, max: dex },
+                                spd: { value: spd, max: spd },
+                            },
+                            ...extra,
+                        },
+                    });
+                    actor.prepareData();
+                    actorDocuments.push(actor);
+                    return actor;
+                }
+
+                async function makeCombat(actors) {
+                    const combat = await Combat.create({ scene: canvas.scene?.id || null, active: true });
+                    combatDocuments.push(combat);
+                    await combat.createEmbeddedDocuments(
+                        "Combatant",
+                        actors.map((a) => ({ actorId: a.id })),
+                    );
+                    ui.combat.viewed = combat;
+                    return combat;
+                }
+
+                it("Should compute the 5e shared-Phase lockout and phase labels from the statics", async function () {
+                    const { HeroSystem6eCombatantSingle } = await import("../combatant-single.mjs");
+                    // 5ER 357: SPD 2 {6,12} and SPD 4 {3,6,9,12} first share Segment 6.
+                    // From Turn 2 Segment 1 (abs 25) the next shared Phase is abs 30.
+                    expect(HeroSystem6eCombatantSingle.nextSharedPhaseAbs(2, 4, 25)).to.equal(30);
+                    // SPD 2 {6,12} and SPD 3 {4,8,12} only share Segment 12 (abs 36)
+                    expect(HeroSystem6eCombatantSingle.nextSharedPhaseAbs(2, 3, 25)).to.equal(36);
+                    expect(HeroSystem6eCombatantSingle.phaseLabel(30)).to.equal("Segment 6 of Turn 2");
+                });
+
+                it("Should keep equal-priority ordering stable across combatant re-creation (stableTiebreak)", async function () {
+                    const { HeroSystem6eCombatSingle } = await import("../combat-single.mjs");
+                    const a = { id: "zzz", tokenId: "tokA", actorId: "actA" };
+                    const b = { id: "aaa", tokenId: "tokB", actorId: "actB" };
+                    const before = Math.sign(HeroSystem6eCombatSingle.stableTiebreak(a, b));
+                    // Re-created combatant gets a fresh id; token identity keeps the order
+                    const after = Math.sign(HeroSystem6eCombatSingle.stableTiebreak({ ...a, id: "aab" }, b));
+                    expect(before).to.equal(after);
+                });
+
+                it("Should resolve tie-break entries per the Fast Draw setting", async function () {
+                    const combat = await makeCombat([await makeActor("_Quench FD Resolver")]);
+                    const saved = game.settings.get(game.system.id, "fastDrawTieBreak");
+                    try {
+                        await game.settings.set(game.system.id, "fastDrawTieBreak", false);
+                        expect(combat._tieBreakerFraction({ r: 80, fd: null })).to.be.closeTo(0.8, 0.0001);
+                        expect(combat._tieBreakerFraction(80)).to.be.closeTo(0.8, 0.0001); // legacy scalar
+                        await game.settings.set(game.system.id, "fastDrawTieBreak", true);
+                        // A Fast Draw owner always lands in the upper half of the fraction range
+                        expect(combat._tieBreakerFraction({ r: 99, fd: 0 })).to.be.greaterThan(
+                            combat._tieBreakerFraction({ r: 99, fd: null }),
+                        );
+                        expect(combat._tieBreakerFraction({ r: 10, fd: 90 })).to.be.closeTo(0.941, 0.001);
+                    } finally {
+                        await game.settings.set(game.system.id, "fastDrawTieBreak", saved);
+                    }
+                });
+
+                it("Should key tie-break rolls by absolute segment and re-roll them for a new Turn", async function () {
+                    const one = await makeActor("_Quench Tie One", { dex: 15, spd: 2 });
+                    const two = await makeActor("_Quench Tie Two", { dex: 15, spd: 2 });
+                    const combat = await makeCombat([one, two]);
+                    await combat.startCombat();
+
+                    const startRolls = combat.getFlag(game.system.id, "segmentRolls");
+                    expect(startRolls, "rolls keyed by combat-start abs 24").to.have.property("24");
+                    const entry = startRolls["24"][one.id];
+                    expect(entry, "entry carries the {r, fd} shape").to.have.property("r");
+                    expect(entry.fd, "no FAST_DRAW skill -> fd null").to.equal(null);
+
+                    // A full-Turn skip lands on a NEW absolute segment with fresh rolls
+                    await combat.nextRound();
+                    const roundRolls = combat.getFlag(game.system.id, "segmentRolls");
+                    expect(roundRolls, "fresh rolls for Turn 2 Segment 12 (abs 36)").to.have.property("36");
+                });
+
+                it("Should bind holds to the declaring combatant, not the shared actor", async function () {
+                    const actor = await makeActor("_Quench Linked Holder", { dex: 14, spd: 3 });
+                    const bystander = await makeActor("_Quench Bystander", { dex: 8, spd: 2 });
+                    const combat = await makeCombat([actor, bystander]);
+                    // A second combatant of the SAME actor (linked-token scenario)
+                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: actor.id }]);
+                    const [memberOne, memberTwo] = combat.combatants.filter((c) => c.actorId === actor.id);
+                    await combat.startCombat();
+
+                    await actor.toggleStatusEffect("holding", { active: true });
+                    const effect = actor.effects.find((e) => e.statuses.has("holding"));
+                    await effect.setFlag(game.system.id, "hold", {
+                        mode: "generic",
+                        declaredAbs: 24,
+                        id: foundry.utils.randomID(),
+                        combatantId: memberOne.id,
+                    });
+
+                    expect(memberOne.heldAction, "declaring member holds").to.not.equal(null);
+                    expect(memberTwo.heldAction, "sibling member does NOT hold").to.equal(null);
+                    expect(
+                        combat._takesTurnInSegment(memberTwo, combat.segment),
+                        "sibling still takes their natural turn",
+                    ).to.be.true;
+                    await effect.delete();
+                });
+
+                it("Should honor a declared decimal fraction and clear the slot marker on spend", async function () {
+                    const holder = await makeActor("_Quench Pinned Holder", { dex: 20, spd: 3 });
+                    const pacer = await makeActor("_Quench Pacer", { dex: 10, spd: 2 });
+                    const combat = await makeCombat([holder, pacer]);
+                    await combat.startCombat();
+                    const combatant = combat.combatants.find((c) => c.actorId === holder.id);
+                    const currentAbs = combat.round * 12 + combat.segment;
+
+                    await holder.toggleStatusEffect("holding", { active: true });
+                    const effect = holder.effects.find((e) => e.statuses.has("holding"));
+                    await effect.setFlag(game.system.id, "hold", {
+                        mode: "position",
+                        segmentAbs: currentAbs,
+                        dex: 13,
+                        fraction: 0.12,
+                        declaredAbs: currentAbs,
+                        id: foundry.utils.randomID(),
+                        combatantId: combatant.id,
+                    });
+                    expect(
+                        combat.getInitiativePriority(combatant, combat.segment),
+                        "declared decimal pins the exact position",
+                    ).to.be.closeTo(13.12, 0.0001);
+
+                    await combatant.setFlag(game.system.id, "heldSlotTakenAbs", currentAbs);
+                    await combat._spendHold(combatant, { used: true });
+                    expect(combatant.getFlag(game.system.id, "heldSlotTakenAbs"), "slot marker cleared").to.equal(null);
+                    const spent = combatant.getFlag(game.system.id, "spentHoldPosition");
+                    expect(spent?.fraction, "spent record keeps the pinned fraction").to.be.closeTo(0.12, 0.0001);
+                });
+
+                it("Should demote an unused passed positional hold instead of forfeiting it", async function () {
+                    const holder = await makeActor("_Quench Demoted Holder", { dex: 18, spd: 6 });
+                    const pacer = await makeActor("_Quench Demote Pacer", { dex: 10, spd: 12 });
+                    const combat = await makeCombat([holder, pacer]);
+                    await combat.startCombat();
+                    const combatant = combat.combatants.find((c) => c.actorId === holder.id);
+                    const currentAbs = combat.round * 12 + combat.segment;
+
+                    await holder.toggleStatusEffect("holding", { active: true });
+                    const effect = holder.effects.find((e) => e.statuses.has("holding"));
+                    // The declared slot is already behind the pointer and was never taken
+                    await effect.setFlag(game.system.id, "hold", {
+                        mode: "position",
+                        segmentAbs: currentAbs - 1,
+                        dex: 5,
+                        declaredAbs: currentAbs - 1,
+                        id: foundry.utils.randomID(),
+                        combatantId: combatant.id,
+                    });
+
+                    await combat._demotePassedPositionalHolds();
+                    const hold = combatant.heldAction;
+                    expect(hold?.mode, "banked Phase persists as a generic hold").to.equal("generic");
+                    expect(hold?.demotedFrom?.dex, "demotion records the lost slot").to.equal(5);
+                    await combatant.heldActionEffect?.delete();
+                });
+
+                it("Should append ledger events and rebuild past-segment history rows", async function () {
+                    const actor = await makeActor("_Quench Chronicler", { dex: 12, spd: 2 });
+                    const combat = await makeCombat([actor]);
+                    await combat.startCombat();
+                    const combatant = combat.combatants.find((c) => c.actorId === actor.id);
+
+                    // startCombat itself ledgers segment.start + turn.start at abs 24
+                    const log = combat.getEventLog();
+                    expect(log.length, "combat start is ledgered").to.be.greaterThan(0);
+                    expect(log.some((e) => e.t === "turn.start" && e.abs === 24)).to.be.true;
+
+                    await combat.logEvent("hold.use", { combatant, data: { mode: "generic" } });
+                    const holdEvents = combat.getEventLog({ types: ["hold.use"] });
+                    expect(holdEvents.length).to.equal(1);
+                    expect(holdEvents[0].name).to.include("Chronicler");
+
+                    const rows = combat.historyRowsForSegment(24);
+                    expect(rows, "history rows assemble for the recorded segment").to.not.equal(null);
+                    expect(rows[0].kind, "the hold.use outranks the plain turn.start row").to.equal("held-used");
+                });
+
+                it("Should de-duplicate a mid-combat duplicate add and backfill newcomer tie rolls", async function () {
+                    const one = await makeActor("_Quench Dupe One", { dex: 15, spd: 2 });
+                    const two = await makeActor("_Quench Dupe Two", { dex: 12, spd: 2 });
+                    const combat = await makeCombat([one, two]);
+                    await combat.startCombat();
+
+                    // Duplicate add of an existing tokenless actor is removed
+                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: one.id }]);
+                    const deduped = await waitUntil(
+                        () => combat.combatants.filter((c) => c.actorId === one.id).length === 1,
+                    );
+                    expect(deduped, "duplicate combatant removed").to.be.true;
+
+                    // A brand-new actor gets a backfilled roll for the already-visited abs
+                    const three = await makeActor("_Quench Dupe Three", { dex: 15, spd: 2 });
+                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: three.id }]);
+                    const backfilled = await waitUntil(
+                        () => combat.getFlag(game.system.id, "segmentRolls")?.["24"]?.[three.id] !== undefined,
+                    );
+                    expect(backfilled, "newcomer tie roll backfilled (no +0.50 default)").to.be.true;
+                });
+
+                it("Should defer a voluntary SPD edit to Post-Segment 12 and allow the GM to apply it early", async function () {
+                    const changer = await makeActor("_Quench Voluntary SPD", { dex: 12, spd: 2 });
+                    const pacer = await makeActor("_Quench SPD Pacer", { dex: 20, spd: 12 });
+                    const combat = await makeCombat([changer, pacer]);
+                    await combat.startCombat();
+                    const combatant = combat.combatants.find((c) => c.actorId === changer.id);
+
+                    // First boundary seeds the {effective, source} baseline
+                    await combat.nextTurn();
+                    await combat.nextTurn();
+                    const seeded = await waitUntil(() => combatant.getFlag(game.system.id, "knownSpd") !== undefined);
+                    expect(seeded, "SPD baseline seeded at a boundary").to.be.true;
+
+                    // A sheet edit is a VOLUNTARY change: deferred, old SPD still governs
+                    await changer.update({ "system.characteristics.spd.value": 6 });
+                    await combat.nextTurn();
+                    const deferred = await waitUntil(() => !!combatant.getFlag(game.system.id, "pendingSpd"));
+                    expect(deferred, "voluntary change deferred via pendingSpd").to.be.true;
+                    expect(combatant.combatSpd, "still acts at the old SPD meanwhile").to.equal(2);
+
+                    // GM fiat applies it immediately, with the normal lockout
+                    await combat.applyPendingSpdNow(combatant.id);
+                    expect(combatant.getFlag(game.system.id, "pendingSpd")).to.equal(null);
+                    expect(combatant.combatSpd, "new SPD in force after the override").to.equal(6);
+                });
+
+                it("Should schedule a Haymaker landing and resolve it after its segment passes", async function () {
+                    const bruiser = await makeActor("_Quench Haymaker", { dex: 12, spd: 12 });
+                    const combat = await makeCombat([bruiser]);
+                    await combat.startCombat();
+                    const combatant = combat.combatants.find((c) => c.actorId === bruiser.id);
+                    const currentAbs = combat.round * 12 + combat.segment;
+
+                    const scheduled = await combat.scheduleHaymaker(bruiser);
+                    expect(scheduled).to.be.true;
+                    expect(combatant.getFlag(game.system.id, "haymaker")?.resolveAbs).to.equal(currentAbs + 1);
+
+                    // Advance past the landing segment; boundary maintenance resolves it
+                    await combat.nextTurn(); // into the landing segment
+                    await combat.nextTurn(); // past it
+                    const resolved = await waitUntil(() => !combatant.getFlag(game.system.id, "haymaker"));
+                    expect(resolved, "wind-up resolved once its segment fully passed").to.be.true;
+                });
+
+                it("Should refuse initiative rolls entirely (HERO has none)", async function () {
+                    const actor = await makeActor("_Quench No Init", { dex: 12, spd: 2 });
+                    const combat = await makeCombat([actor]);
+                    const combatant = combat.combatants.find((c) => c.actorId === actor.id);
+                    await combat.rollInitiative([combatant.id]);
+                    await combat.rollAll();
+                    expect(combatant.initiative, "no core formula written").to.equal(null);
+                });
+            });
+        },
+        { displayName: "HERO SYSTEM 6E: Alpha Tracker Fix Validation" },
+    );
 }
