@@ -2687,7 +2687,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             outcome = null;
             const hint =
                 record.kind === "haymaker"
-                    ? "+4 Damage Classes; END is paid with this roll. If the target moved 1m+ or the attacker took Knockback, was Stunned, or Knocked Out, use Cancel on the wind-up card instead — the Phase is wasted."
+                    ? "+4 Damage Classes; END is paid with this roll. If the target moved 1m+ or the attacker took Knockback, was Stunned, or Knocked Out, the Haymaker fails — don't roll (the Phase is wasted, and per 6E2 69 the END is still owed)."
                     : "A target that moved since the declaration is missed automatically; resources were already spent when the activation began.";
             const rollCard = {
                 speaker: ChatMessage.getSpeaker({ actor }),
