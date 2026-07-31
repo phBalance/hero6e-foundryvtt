@@ -393,9 +393,29 @@ function hasScheduledHaymaker(actor) {
     return game.combats.some(
         (c) =>
             c.started &&
-            typeof c.scheduleHaymaker === "function" &&
-            c.combatants.some((ct) => ct.actorId === actor.id && ct.getFlag(game.system.id, "haymaker")),
+            typeof c.hasDelayedAction === "function" &&
+            c.combatants.some((ct) => ct.actorId === actor.id && c.hasDelayedAction(ct, "haymaker")),
     );
+}
+
+/**
+ * Under the single tracker, an attack with the Extra Time Limitation lands later
+ * (6E1 377-378): schedule its delayed resolution. The to-hit/damage were rolled
+ * at declaration; the resolution card reminds the table to apply them.
+ * @param {Item} item
+ * @returns {Promise<boolean>} True when a delayed resolution was scheduled
+ */
+async function scheduleExtraTimeAttackViaCombat(item) {
+    const actor = item?.actor;
+    if (!actor) return false;
+    const combat = game.combats.find(
+        (c) => c.started && typeof c.extraTimePlan === "function" && c.combatants.some((ct) => ct.actorId === actor.id),
+    );
+    if (!combat) return false;
+    const plan = combat.extraTimePlan(actor, item) ?? combat.extraTimePlan(actor, item.effectiveAttackItem);
+    if (!plan) return false;
+    await combat.scheduleDelayedAction(actor, plan, item);
+    return true;
 }
 
 export async function processActionToHit(item, formData, options = {}) {
@@ -431,6 +451,13 @@ export async function processActionToHit(item, formData, options = {}) {
         await item?.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
             active: false,
         });
+    }
+
+    // Extra Time attacks land later (6E1 377-378): schedule the delayed resolution
+    try {
+        await scheduleExtraTimeAttackViaCombat(item);
+    } catch (e) {
+        console.error(e);
     }
 }
 

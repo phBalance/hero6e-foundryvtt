@@ -397,17 +397,20 @@ ol.combat-tracker.plain {
     text-decoration: line-through;
 }
 
-/* 2k. HAYMAKER: delayed-landing marker at the bottom of its segment */
-.combat-tracker li.combatant.hero-haymaker-row {
+/* 2k. DELAYED ACTIONS (Haymaker, Extra Time): landing markers in their segment */
+.combat-tracker li.combatant.hero-haymaker-row,
+.combat-tracker li.combatant.hero-delayed-row {
     opacity: 0.8;
     pointer-events: none;
 }
 
-.combat-tracker li.combatant.hero-haymaker-row .name {
+.combat-tracker li.combatant.hero-haymaker-row .name,
+.combat-tracker li.combatant.hero-delayed-row .name {
     font-style: italic;
 }
 
-.combat-tracker li.combatant.hero-haymaker-row .combatant-controls {
+.combat-tracker li.combatant.hero-haymaker-row .combatant-controls,
+.combat-tracker li.combatant.hero-delayed-row .combatant-controls {
     display: none;
 }
 

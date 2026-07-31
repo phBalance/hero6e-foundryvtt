@@ -1787,6 +1787,13 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (haymaker && (haymaker.declaredAbs ?? Infinity) >= targetAbs) {
                 update[`flags.${game.system.id}.haymaker`] = null;
             }
+            // Likewise delayed actions declared at or after the target
+            const delayed = combatant.getFlag(game.system.id, "delayedActions") ?? {};
+            for (const [delayedId, record] of Object.entries(delayed)) {
+                if ((record?.declaredAbs ?? Infinity) >= targetAbs) {
+                    update[`flags.${game.system.id}.delayedActions.-=${delayedId}`] = null;
+                }
+            }
             if (Object.keys(update).length > 0) resets.push({ _id: combatant.id, ...update });
         }
         return resets;
@@ -1818,6 +1825,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 [`flags.${game.system.id}.knownSpd`]: null,
                 [`flags.${game.system.id}.pendingSpd`]: null,
                 [`flags.${game.system.id}.haymaker`]: null,
+                [`flags.${game.system.id}.delayedActions`]: null,
             });
         });
 
@@ -2022,8 +2030,12 @@ export class HeroSystem6eCombatSingle extends Combat {
                 await this._demotePassedPositionalHolds();
                 if (turnAdvance) await this._consumeExpiredHeldActions(null);
                 await this._clearExpiredAborts(elapsedSegments);
-                await this._resolveHaymakers();
             }
+
+            // Delayed actions can land mid-segment (Delayed Phase's half-DEX
+            // position, Extra Phase's own-Phase activation), so this runs on
+            // every pointer move, not just at boundaries
+            await this._resolveDelayedActions();
 
             const previousCombatant = prevId ? this.combatants.get(prevId) : null;
             if (previousCombatant?.actor) {
@@ -2336,8 +2348,155 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /* -------------------------------------------- */
-    /*  Haymaker delayed resolution                 */
+    /*  Delayed actions (Extra Time, Haymaker)      */
     /* -------------------------------------------- */
+
+    /**
+     * Delayed actions are things declared now that land later: a Haymaker (end of
+     * the next Segment, 6E2), or a power/attack with the Extra Time Limitation
+     * (6E1 376-378; 5ER 290-291 — the two editions are word-for-word identical).
+     * Stored on the combatant flag `delayedActions` keyed by id:
+     *
+     *   { kind: "haymaker"|"attack"|"activation",
+     *     label, itemUuid, declaredAbs, resolveAbs,
+     *     priority,          // marker position in the landing segment; null = very end
+     *     commit,            // true = no other Actions until it resolves (Extra Phase)
+     *     targetTokenIds? }
+     *
+     * The timeline shows a marker row in the landing segment; resolution happens in
+     * the pointer-move maintenance chain; a chat Cancel button covers interruption
+     * (GM-adjudicated — RAW makes interruption a judgment call, and END spent up
+     * front stays spent).
+     */
+
+    /**
+     * Classifies an item's Extra Time Limitation into a delayed-action plan, or
+     * null when the item has none that needs scheduling (Full Phase is pure action
+     * economy; durations resolve on the character's DEX N segments later).
+     * Option semantics verified against 6E1 377-378 / 5ER 290-291.
+     * @param {Actor} actor
+     * @param {Item} item
+     * @returns {{kind: string, label: string, resolveAbs: number, priority: number|null,
+     *            commit: boolean}|null}
+     */
+    extraTimePlan(actor, item) {
+        if (!this.started || !actor || !item) return null;
+        const extraTime = item.findModsByXmlid?.("EXTRATIME");
+        if (!extraTime) return null;
+        const combatant = this.combatants.find((c) => c.actorId === actor.id);
+        if (!combatant) return null;
+
+        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const characteristicKey = actor.system?.initiativeCharacteristic ?? "dex";
+        const dex = actor.system?.characteristics?.[characteristicKey]?.value ?? 10;
+        const optionId = extraTime.OPTIONID ?? "";
+        const alias = extraTime.OPTION_ALIAS ?? extraTime.ALIAS ?? "";
+        const matches = (needle) => optionId === needle.id || alias.toLowerCase().includes(needle.text);
+
+        // Delayed Phase (-1/4): activates at HALF the character's DEX in the same
+        // Phase (a Half Phase Action still happens at normal DEX)
+        if (matches({ id: "DELAYEDPHASE", text: "delayed phase" })) {
+            return {
+                kind: "attack",
+                label: `${item.name} (Delayed Phase)`,
+                resolveAbs: currentAbs,
+                priority: Math.floor(dex / 2),
+                commit: false,
+            };
+        }
+        // Extra Segment (-1/2): activates at the very end of the NEXT Segment,
+        // multiple such powers in DEX order; a moved target is missed (adjudicated)
+        if (matches({ id: "SEGMENT", text: "extra segment" })) {
+            return {
+                kind: "attack",
+                label: `${item.name} (Extra Segment)`,
+                resolveAbs: currentAbs + 1,
+                priority: null,
+                commit: false,
+            };
+        }
+        // Full Phase (-1/2): activates on normal DEX; pure action economy — nothing
+        // to schedule
+        if (matches({ id: "FULL", text: "full phase" })) return null;
+        // Extra Phase (-3/4): activates on the character's DEX in their SECOND
+        // Phase; no other Actions in between or the power stops; END paid up front
+        if (matches({ id: "EXTRA", text: "extra phase" })) {
+            const spd = combatant.combatSpd;
+            return {
+                kind: "attack",
+                label: `${item.name} (Extra Phase)`,
+                resolveAbs: spd > 0 ? HeroSystem6eCombatantSingle.nextPhaseAbs(spd, currentAbs + 1) : currentAbs + 12,
+                priority: dex,
+                commit: true,
+            };
+        }
+        // Durations: activates on the character's DEX N segments later (Andarra,
+        // 6E1 377); they may act in the meantime unless the power needs an Attack
+        // Roll — table-adjudicated, noted on the card
+        const durations = [
+            { id: "TURN", text: "1 turn", segments: 12 },
+            { id: "MINUTE", text: "1 minute", segments: 60 },
+            { id: "FIVEMINUTES", text: "5 minutes", segments: 300 },
+            { id: "TWENTYMINUTES", text: "20 minutes", segments: 1200 },
+            { id: "HOUR", text: "1 hour", segments: 3600 },
+            { id: "SIXHOURS", text: "6 hours", segments: 21600 },
+            { id: "DAY", text: "1 day", segments: 86400 },
+        ];
+        for (const duration of durations) {
+            if (matches(duration)) {
+                return {
+                    kind: "attack",
+                    label: `${item.name} (Extra Time: ${extraTime.OPTION_ALIAS ?? duration.text})`,
+                    resolveAbs: currentAbs + duration.segments,
+                    priority: dex,
+                    commit: false,
+                };
+            }
+        }
+        // Longer periods (a week and up) cannot land inside a combat
+        return null;
+    }
+
+    /**
+     * Registers a delayed action for the actor's combatant and cards it with a
+     * Cancel button. Owners write their own combatant flags, so no GM relay is
+     * needed; the ledger append relays itself for players.
+     * @param {Actor} actor
+     * @param {object} plan - See {@link extraTimePlan}; itemUuid/targetTokenIds added here
+     * @param {Item} [item]
+     * @returns {Promise<string|null>} The delayed-action id, or null
+     */
+    async scheduleDelayedAction(actor, plan, item = null) {
+        if (!this.started || !actor || !plan) return null;
+        const combatant = this.combatants.find((c) => c.actorId === actor.id);
+        if (!combatant) return null;
+        const id = foundry.utils.randomID();
+        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const record = {
+            kind: plan.kind,
+            label: plan.label,
+            itemUuid: item?.uuid ?? plan.itemUuid ?? null,
+            declaredAbs: currentAbs,
+            resolveAbs: plan.resolveAbs,
+            priority: plan.priority ?? null,
+            commit: !!plan.commit,
+            targetTokenIds: Array.from(game.user.targets ?? []).map((t) => t.id),
+        };
+        await combatant.setFlag(game.system.id, `delayedActions.${id}`, record);
+
+        const landing =
+            record.priority !== null
+                ? `at DEX ${record.priority} in ${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}`
+                : `at the very end of ${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}`;
+        const commitText = record.commit ? " They can take no other Actions until it does." : "";
+        await this._combatCard(
+            combatant,
+            `${actor.name} begins ${record.label} — it goes off ${landing}.${commitText}
+            <button type="button" class="hero-delayed-cancel" data-combat-id="${this.id}" data-combatant-id="${combatant.id}" data-delayed-id="${id}">Cancel (interrupted)</button>`,
+        );
+        await this.logEvent("delayed.declare", { combatant, data: { ...record, id } });
+        return id;
+    }
 
     /**
      * Schedules a declared Haymaker's delayed landing: the attack resolves at the
@@ -2349,80 +2508,155 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async scheduleHaymaker(actor, item = null) {
         if (!this.started || !actor) return false;
-        const combatant = this.combatants.find((c) => c.actorId === actor.id);
-        if (!combatant) return false;
         const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
-        const resolveAbs = currentAbs + 1;
-        await combatant.setFlag(game.system.id, "haymaker", {
-            declaredAbs: currentAbs,
-            resolveAbs,
-            itemUuid: item?.uuid ?? null,
-            targetTokenIds: Array.from(game.user.targets ?? []).map((t) => t.id),
-        });
-        await this._combatCard(
-            combatant,
-            `${actor.name} winds up a Haymaker — it lands at the end of ${HeroSystem6eCombatantSingle.phaseLabel(resolveAbs)} (-5 DCV until it does).
-            <button type="button" class="hero-haymaker-cancel" data-combat-id="${this.id}" data-combatant-id="${combatant.id}">Cancel Haymaker (interrupted)</button>`,
+        const id = await this.scheduleDelayedAction(
+            actor,
+            {
+                kind: "haymaker",
+                label: "their Haymaker",
+                resolveAbs: currentAbs + 1,
+                priority: null,
+                commit: false,
+            },
+            item,
         );
-        await this.logEvent("haymaker.declare", { combatant, data: { resolveAbs, itemUuid: item?.uuid ?? null } });
-        return true;
+        return id !== null;
     }
 
     /**
-     * Cancels a wound-up Haymaker (the attacker was damaged, Stunned, Knocked Out,
-     * or the target moved out of reach — standard interruption, GM-adjudicated).
+     * Whether the combatant has any scheduled delayed action, optionally of a kind.
+     * Reads the legacy single haymaker flag from in-flight combats too.
+     * @param {Combatant} combatant
+     * @param {string} [kind]
+     * @returns {boolean}
+     */
+    hasDelayedAction(combatant, kind = null) {
+        return this.delayedActionsFor(combatant, kind).length > 0;
+    }
+
+    /**
+     * The combatant's scheduled delayed actions as [id, record] pairs (legacy
+     * haymaker flag included), optionally filtered by kind.
+     * @param {Combatant} combatant
+     * @param {string} [kind]
+     * @returns {[string, object][]}
+     */
+    delayedActionsFor(combatant, kind = null) {
+        const records = Object.entries(combatant?.getFlag(game.system.id, "delayedActions") ?? {});
+        const legacy = combatant?.getFlag(game.system.id, "haymaker");
+        if (legacy) {
+            records.push(["legacy-haymaker", { kind: "haymaker", label: "their Haymaker", commit: false, ...legacy }]);
+        }
+        return records.filter(([, record]) => !kind || record.kind === kind);
+    }
+
+    /**
+     * Cancels a scheduled delayed action (interruption: the character took damage,
+     * was Stunned/Knocked Out, or the target moved — GM-adjudicated; END already
+     * spent stays spent per RAW).
+     * @param {string} combatantId
+     * @param {string} [delayedId] - Defaults to the combatant's only/legacy record
+     * @returns {Promise<void>}
+     */
+    async cancelDelayedAction(combatantId, delayedId = null) {
+        const combatant = this.combatants.get(combatantId);
+        if (!combatant?.isOwner) return;
+        const records = this.delayedActionsFor(combatant);
+        const entry = delayedId ? records.find(([id]) => id === delayedId) : records[0];
+        if (!entry) return;
+        await this._finishDelayedAction(combatant, entry[0], entry[1], { cancelled: true });
+    }
+
+    /**
+     * Backward-compatible alias for in-flight Haymaker cancel buttons.
      * @param {string} combatantId
      * @returns {Promise<void>}
      */
     async cancelHaymaker(combatantId) {
         const combatant = this.combatants.get(combatantId);
         if (!combatant?.isOwner) return;
-        const haymaker = combatant.getFlag(game.system.id, "haymaker");
-        if (!haymaker) return;
-        await this._finishHaymaker(combatant, { cancelled: true });
+        const entry = this.delayedActionsFor(combatant, "haymaker")[0];
+        if (entry) await this._finishDelayedAction(combatant, entry[0], entry[1], { cancelled: true });
     }
 
     /**
-     * Resolves wound-up Haymakers once their landing segment has fully passed:
-     * the -5 DCV drops and the owner is reminded to apply the (already rolled)
-     * damage. Runs in the segment-boundary maintenance chain.
+     * Resolves delayed actions whose moment has arrived. Runs on every pointer
+     * move: a record lands when its segment has fully passed, when the count
+     * passes below its declared position within the segment, or — for records
+     * that activate on the character's own DEX — when their Phase begins.
      * @private
      */
-    async _resolveHaymakers() {
+    async _resolveDelayedActions() {
         if (!this.started) return;
         const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const actingPriority = this.getFlag(game.system.id, "actingPriority");
+        const activeId = this.combatant?.id ?? null;
         for (const combatant of this.combatants) {
-            const haymaker = combatant.getFlag(game.system.id, "haymaker");
-            if (!haymaker || currentAbs <= haymaker.resolveAbs) continue;
-            await this._finishHaymaker(combatant, { cancelled: false });
+            for (const [id, record] of this.delayedActionsFor(combatant)) {
+                const segmentPassed = currentAbs > record.resolveAbs;
+                const countPassed =
+                    currentAbs === record.resolveAbs &&
+                    record.priority !== null &&
+                    record.priority !== undefined &&
+                    actingPriority !== null &&
+                    actingPriority !== undefined &&
+                    actingPriority < record.priority;
+                const ownPhase = currentAbs === record.resolveAbs && combatant.id === activeId;
+                if (segmentPassed || countPassed || ownPhase) {
+                    await this._finishDelayedAction(combatant, id, record, { cancelled: false });
+                }
+            }
         }
     }
 
     /**
-     * Shared teardown for a scheduled Haymaker: clears the flag, removes the -5
-     * DCV effect, cards the outcome, and ledgers it.
+     * Shared teardown: clears the record, performs kind-specific work (Haymaker
+     * effect/maneuver cleanup; deferred activations actually turn on), cards the
+     * outcome, and ledgers it.
      * @param {Combatant} combatant
+     * @param {string} id
+     * @param {object} record
      * @param {object} options
      * @param {boolean} options.cancelled
      * @private
      */
-    async _finishHaymaker(combatant, { cancelled }) {
+    async _finishDelayedAction(combatant, id, record, { cancelled }) {
         const actor = combatant.actor;
-        const haymaker = combatant.getFlag(game.system.id, "haymaker");
-        await combatant.update({ [`flags.${game.system.id}.haymaker`]: null });
-        const haymakerEffect = actor?.effects.find((e) => e.statuses.has("haymaker"));
-        if (haymakerEffect) await haymakerEffect.delete();
-        const haymakerItem = actor?.items.find((i) => i.system?.XMLID === "HAYMAKER" && i.isActive);
-        if (haymakerItem) await haymakerItem.toggle();
-        await this._combatCard(
+        if (id === "legacy-haymaker") {
+            await combatant.update({ [`flags.${game.system.id}.haymaker`]: null });
+        } else {
+            await combatant.update({ [`flags.${game.system.id}.delayedActions.-=${id}`]: null });
+        }
+
+        if (record.kind === "haymaker") {
+            const haymakerEffect = actor?.effects.find((e) => e.statuses.has("haymaker"));
+            if (haymakerEffect) await haymakerEffect.delete();
+            const haymakerItem = actor?.items.find((i) => i.system?.XMLID === "HAYMAKER" && i.isActive);
+            if (haymakerItem) await haymakerItem.toggle();
+        }
+
+        let outcome;
+        if (cancelled) {
+            outcome = `${actor?.name}'s ${record.label} is interrupted and lost${record.kind === "activation" ? " (resources already spent stay spent)" : ""}.`;
+        } else if (record.kind === "activation") {
+            const item = record.itemUuid ? fromUuidSync(record.itemUuid) : null;
+            if (item && !item.isActive) {
+                // Resources and rolls were paid when the activation began (RAW:
+                // END up front); delayedResolution skips re-charging them
+                await item.turnOn({ delayedResolution: true, token: combatant.token });
+            }
+            outcome = item?.isActive
+                ? `${actor?.name}'s ${record.label} activates now (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}).`
+                : `${actor?.name}'s ${record.label} finished its Extra Time but could not activate — adjudicate (interrupted? Stunned?).`;
+        } else if (record.kind === "haymaker") {
+            outcome = `${actor?.name}'s ${record.label} resolves now — apply its damage (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}).`;
+        } else {
+            outcome = `${actor?.name}'s ${record.label} goes off now (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}) — resolve its effect. A target that moved since the declaration is missed automatically.`;
+        }
+        await this._combatCard(combatant, outcome);
+        await this.logEvent(cancelled ? "delayed.cancel" : "delayed.resolve", {
             combatant,
-            cancelled
-                ? `${actor?.name}'s Haymaker is interrupted and lost.`
-                : `${actor?.name}'s Haymaker resolves now — apply its damage (${HeroSystem6eCombatantSingle.phaseLabel(haymaker?.resolveAbs ?? 0)}).`,
-        );
-        await this.logEvent(cancelled ? "haymaker.cancel" : "haymaker.resolve", {
-            combatant,
-            data: { resolveAbs: haymaker?.resolveAbs ?? null },
+            data: { id, kind: record.kind, label: record.label, resolveAbs: record.resolveAbs ?? null },
         });
     }
 
@@ -3180,6 +3414,7 @@ const LEGACY_COMBATANT_FLAG_KEYS = [
     "knownSpd",
     "pendingSpd",
     "haymaker",
+    "delayedActions",
     "soloTieRoll",
 ];
 const LEGACY_COMBAT_FLAG_KEYS = [

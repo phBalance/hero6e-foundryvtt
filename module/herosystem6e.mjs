@@ -482,6 +482,15 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
             combat?.cancelHaymaker?.(button.dataset.combatantId);
         });
     });
+
+    // Delayed action (Extra Time): interruption cancel (owner or GM)
+    html.querySelectorAll("button.hero-delayed-cancel").forEach((button) => {
+        button.addEventListener("click", (event) => {
+            event.preventDefault();
+            const combat = game.combats.get(button.dataset.combatId);
+            combat?.cancelDelayedAction?.(button.dataset.combatantId, button.dataset.delayedId ?? null);
+        });
+    });
 });
 
 // Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));

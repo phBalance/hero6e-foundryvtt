@@ -2383,6 +2383,58 @@ export function registerCombatTests(quench) {
                     expect(combat._tieRollKey(split)).to.equal(boss.id);
                 });
 
+                it("Should classify Extra Time options and resolve delayed actions", async function () {
+                    const { HeroSystem6eCombatantSingle } = await import("../combatant-single.mjs");
+                    const caster = await makeActor("_Quench Extra Time", { dex: 16, spd: 3 });
+                    const pacer = await makeActor("_Quench ET Pacer", { dex: 10, spd: 12 });
+                    const combat = await makeCombat([caster, pacer]);
+                    await combat.startCombat();
+                    const combatant = combat.combatants.find((c) => c.actorId === caster.id);
+                    const currentAbs = combat.round * 12 + combat.segment;
+
+                    // Classification reads the item's EXTRATIME modifier (6E1 377-378;
+                    // 5ER 290-291 — identical): a duck item suffices for the plan
+                    const et = (OPTIONID, OPTION_ALIAS) => ({
+                        name: "Delayed Blast",
+                        findModsByXmlid: (x) => (x === "EXTRATIME" ? { OPTIONID, OPTION_ALIAS } : null),
+                    });
+                    const segmentPlan = combat.extraTimePlan(caster, et("SEGMENT", "Extra Segment"));
+                    expect(segmentPlan.resolveAbs, "Extra Segment: end of the NEXT segment").to.equal(currentAbs + 1);
+                    expect(segmentPlan.priority, "…after everyone (no position)").to.equal(null);
+
+                    const delayedPlan = combat.extraTimePlan(caster, et("DELAYEDPHASE", "Delayed Phase"));
+                    expect(delayedPlan.resolveAbs, "Delayed Phase: same segment").to.equal(currentAbs);
+                    expect(delayedPlan.priority, "…at HALF the character's DEX").to.equal(8);
+
+                    const extraPhasePlan = combat.extraTimePlan(caster, et("EXTRA", "Extra Phase"));
+                    expect(extraPhasePlan.commit, "Extra Phase: no other Actions meanwhile").to.be.true;
+                    expect(extraPhasePlan.resolveAbs, "…activates on their NEXT Phase (SPD 3)").to.equal(
+                        HeroSystem6eCombatantSingle.nextPhaseAbs(3, currentAbs + 1),
+                    );
+
+                    expect(
+                        combat.extraTimePlan(caster, et("FULL", "Full Phase")),
+                        "Full Phase: nothing to schedule",
+                    ).to.equal(null);
+
+                    // Commit blocks other tracker-mediated actions until it goes off
+                    const commitId = await combat.scheduleDelayedAction(caster, extraPhasePlan);
+                    expect(ui.combat._blockedActionReason(combatant), "committed: no other Actions").to.include(
+                        "no other Actions",
+                    );
+                    await combat.cancelDelayedAction(combatant.id, commitId);
+                    expect(ui.combat._blockedActionReason(combatant), "cancel releases the commitment").to.equal(null);
+
+                    // An Extra Segment record resolves once its segment fully passes
+                    await combat.scheduleDelayedAction(caster, segmentPlan);
+                    expect(combat.hasDelayedAction(combatant)).to.be.true;
+                    await combat.nextTurn(); // pacer, still Segment 12
+                    await combat.nextTurn(); // Segment 1 (pacer only)
+                    await combat.nextTurn(); // Segment 2 — the landing segment has passed
+                    const resolved = await waitUntil(() => !combat.hasDelayedAction(combatant));
+                    expect(resolved, "delayed action resolved after its segment ended").to.be.true;
+                });
+
                 it("Should refuse initiative rolls entirely (HERO has none)", async function () {
                     const actor = await makeActor("_Quench No Init", { dex: 12, spd: 2 });
                     const combat = await makeCombat([actor]);

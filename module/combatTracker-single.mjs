@@ -455,11 +455,12 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             }
         }
 
-        // A wound-up Haymaker's landing segment always renders, even if otherwise empty
+        // A delayed action's landing segment always renders, even if otherwise empty
         for (const combatant of combat.combatants) {
-            const haymaker = combatant.getFlag(game.system.id, "haymaker");
-            if (haymaker?.resolveAbs >= currentAbs && haymaker.resolveAbs <= currentAbs + 24) {
-                positions.add(haymaker.resolveAbs);
+            for (const [, record] of combat.delayedActionsFor?.(combatant) ?? []) {
+                if (record.resolveAbs >= currentAbs && record.resolveAbs <= currentAbs + 24) {
+                    positions.add(record.resolveAbs);
+                }
             }
         }
 
@@ -662,13 +663,20 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     entries.push({ combatant, priority: spentLr.priority, lrShadow: false, lrSpent: true });
                 }
             }
-            // A Haymaker lands at the END of its resolution segment: marker row last
+            // Delayed actions land at their scheduled position (declared DEX, or the
+            // very end of the segment when none): inert marker rows
             if (!isPast) {
                 for (const combatant of combat.combatants) {
                     if (combatant.hidden && !game.user.isGM) continue;
-                    const haymaker = combatant.getFlag(game.system.id, "haymaker");
-                    if (haymaker?.resolveAbs === abs) {
-                        entries.push({ combatant, priority: -1, lrShadow: false, haymaker: true });
+                    for (const [delayedId, record] of combat.delayedActionsFor?.(combatant) ?? []) {
+                        if (record.resolveAbs !== abs) continue;
+                        entries.push({
+                            combatant,
+                            priority: record.priority ?? -1,
+                            lrShadow: false,
+                            delayed: record,
+                            delayedId,
+                        });
                     }
                 }
             }
@@ -689,9 +697,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             for (const entry of entries) {
                 const rollKey =
                     combat._tieRollKey?.(entry.combatant) ?? (entry.combatant.actorId || entry.combatant.id);
-                const key = `${rollKey}${entry.lrShadow ? ":lr-shadow" : ""}${entry.haymaker ? ":haymaker" : ""}${entry.lrSpent ? ":lr-spent" : ""}`;
+                const key = `${rollKey}${entry.lrShadow ? ":lr-shadow" : ""}${entry.delayed ? `:delayed:${entry.delayedId}` : ""}${entry.lrSpent ? ":lr-spent" : ""}`;
                 const prev = groups.at(-1);
-                if (prev && prev.key === key && prev.priority === entry.priority && !entry.haymaker && !entry.lrSpent) {
+                if (prev && prev.key === key && prev.priority === entry.priority && !entry.delayed && !entry.lrSpent) {
                     prev.combatants.push(entry.combatant);
                 } else {
                     groups.push({
@@ -699,7 +707,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         priority: entry.priority,
                         combatants: [entry.combatant],
                         lrShadow: entry.lrShadow,
-                        haymaker: !!entry.haymaker,
+                        delayed: entry.delayed ?? null,
+                        delayedId: entry.delayedId ?? null,
                         lrSpent: !!entry.lrSpent,
                     });
                 }
@@ -785,13 +794,18 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         continue;
                     }
 
-                    if (group.haymaker) {
-                        // Delayed Haymaker landing: informational marker, no controls
+                    if (group.delayed) {
+                        // Delayed-action landing: informational marker, no controls
                         // (a truthy initiative keeps core's d20 roll button away)
-                        row.name = `💥 ${row.name} — Haymaker resolves`;
-                        row.initiative = "—";
+                        const record = group.delayed;
+                        row.name =
+                            record.kind === "haymaker"
+                                ? `💥 ${row.name} — Haymaker resolves`
+                                : `⏳ ${row.name} — ${record.label}`;
+                        row.initiative =
+                            record.priority !== null && record.priority !== undefined ? String(record.priority) : "—";
                         row.effects = { icons: [], tooltip: "" };
-                        row.css = `${row.css} hero-haymaker-row ${stateCss} ${memberClasses}`.trim();
+                        row.css = `${row.css} hero-haymaker-row hero-delayed-row ${stateCss} ${memberClasses}`.trim();
                         timelineTurns.push(row);
                         continue;
                     }
@@ -1659,6 +1673,14 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         }
         if (combat?.started) {
             const currentAbs = combat.round * 12 + combat.segment;
+            // Extra Phase (and kin): no other Actions while the activation runs
+            const committed = (combat.delayedActionsFor?.(combatant) ?? []).find(
+                ([, record]) =>
+                    record.commit && (record.declaredAbs ?? 0) <= currentAbs && currentAbs <= (record.resolveAbs ?? 0),
+            );
+            if (committed) {
+                return `${actor.name} is activating ${committed[1].label} and can take no other Actions until it goes off.`;
+            }
             if (combatant.abortAppliesAtAbs?.(currentAbs)) {
                 const spentAbs = combatant.abortSpentAbs;
                 const until =
