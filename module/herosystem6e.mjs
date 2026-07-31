@@ -440,6 +440,38 @@ Hooks.once("ready", async function () {
     }
 });
 
+/**
+ * Resolves the item a delayed-attack chat payload refers to: the (usually
+ * temporary) declared uuid, the original DB item, or the dehydrated snapshot.
+ * @param {object} payload - The message's delayedAttack flag
+ * @returns {Promise<Item|null>}
+ */
+async function resolveDelayedAttackItem(payload) {
+    let item = payload.itemUuid ? fromUuidSync(payload.itemUuid) : null;
+    item ??= payload.originalItemUuid ? fromUuidSync(payload.originalItemUuid) : null;
+    if (!item && payload.itemJson) {
+        const owner = payload.actorUuid ? fromUuidSync(payload.actorUuid) : null;
+        try {
+            const { rehydrateAttackItem } = await import("./item/item-attack.mjs");
+            item = rehydrateAttackItem(payload.itemJson, owner)?.item ?? null;
+        } catch (e) {
+            console.error(`Unable to rehydrate the delayed attack item`, e);
+        }
+    }
+    return item;
+}
+
+/**
+ * Whether the current user may act on a delayed-attack payload's item.
+ * @param {Item} item
+ * @param {object} payload
+ * @returns {boolean}
+ */
+function canActOnDelayedAttack(item, payload) {
+    const owningActor = item.actor ?? (payload.actorUuid ? fromUuidSync(payload.actorUuid) : null);
+    return !!(item.isOwner || owningActor?.isOwner || game.user.isGM);
+}
+
 Hooks.on("renderChatMessageHTML", (app, html, data) => {
     // Display action buttons
     chat.displayChatActionButtons(app, $(html), data);
@@ -492,6 +524,39 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
         });
     });
 
+    // Failed Haymaker: the Phase is wasted but the END is still owed (6E2 69) —
+    // charge the attack's resources without rolling anything
+    html.querySelectorAll("button.hero-delayed-fail").forEach((button) => {
+        button.addEventListener("click", async (event) => {
+            event.preventDefault();
+            button.disabled = true;
+            try {
+                const payload = app.getFlag(game.system.id, "delayedAttack");
+                if (!payload) return ui.notifications.error(`Attack details are no longer available.`);
+                const item = await resolveDelayedAttackItem(payload);
+                if (!item) return ui.notifications.error(`Attack details are no longer available.`);
+                if (!canActOnDelayedAttack(item, payload)) {
+                    return ui.notifications.warn(`Only the attacker (or GM) can resolve this attack.`);
+                }
+                const { userInteractiveVerifyOptionallyPromptThenSpendResources } =
+                    await import("./item/item-resources.mjs");
+                const { resourcesUsedDescription, resourcesUsedDescriptionRenderedRoll } =
+                    await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {});
+                const actor = item.actor ?? (payload.actorUuid ? fromUuidSync(payload.actorUuid) : null);
+                await ChatMessage.create({
+                    speaker: ChatMessage.getSpeaker({ actor }),
+                    content: `${actor?.name}'s Haymaker fails — the Phase is wasted${
+                        resourcesUsedDescription
+                            ? `, and ${resourcesUsedDescription} is spent anyway (6E2 69)${resourcesUsedDescriptionRenderedRoll ?? ""}`
+                            : ""
+                    }.`,
+                });
+            } finally {
+                button.disabled = false;
+            }
+        });
+    });
+
     // Delayed action: resolve immediately (owner/GM fiat)
     html.querySelectorAll("button.hero-delayed-now").forEach((button) => {
         button.addEventListener("click", (event) => {
@@ -510,22 +575,10 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
             try {
                 const payload = app.getFlag(game.system.id, "delayedAttack");
                 if (!payload) return ui.notifications.error(`Attack details are no longer available.`);
-                const { processActionToHit, rehydrateAttackItem } = await import("./item/item-attack.mjs");
-                // The declared item is usually a temporary effective clone: try the
-                // stored uuids, then rebuild it from the dehydrated snapshot
-                let item = payload.itemUuid ? fromUuidSync(payload.itemUuid) : null;
-                item ??= payload.originalItemUuid ? fromUuidSync(payload.originalItemUuid) : null;
-                if (!item && payload.itemJson) {
-                    const owner = payload.actorUuid ? fromUuidSync(payload.actorUuid) : null;
-                    try {
-                        item = rehydrateAttackItem(payload.itemJson, owner)?.item ?? null;
-                    } catch (e) {
-                        console.error(`Unable to rehydrate the delayed attack item`, e);
-                    }
-                }
+                const { processActionToHit } = await import("./item/item-attack.mjs");
+                const item = await resolveDelayedAttackItem(payload);
                 if (!item) return ui.notifications.error(`Attack details are no longer available.`);
-                const owningActor = item.actor ?? (payload.actorUuid ? fromUuidSync(payload.actorUuid) : null);
-                if (!(item.isOwner || owningActor?.isOwner || game.user.isGM)) {
+                if (!canActOnDelayedAttack(item, payload)) {
                     return ui.notifications.warn(`Only the attacker (or GM) rolls this attack.`);
                 }
                 // Restore the declaration's targets for the rolling user

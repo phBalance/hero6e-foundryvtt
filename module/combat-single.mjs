@@ -2687,12 +2687,16 @@ export class HeroSystem6eCombatSingle extends Combat {
             outcome = null;
             const hint =
                 record.kind === "haymaker"
-                    ? "+4 Damage Classes; END is paid with this roll. If the target moved 1m+ or the attacker took Knockback, was Stunned, or Knocked Out, the Haymaker fails — don't roll (the Phase is wasted, and per 6E2 69 the END is still owed)."
+                    ? "+4 Damage Classes; END is paid with this roll. If the target moved 1m+ or the attacker took Knockback, was Stunned, or Knocked Out, the Haymaker fails — use the failure button instead: the Phase is wasted but the END is still owed (6E2 69)."
                     : "A target that moved since the declaration is missed automatically; resources were already spent when the activation began.";
+            const failButton =
+                record.kind === "haymaker"
+                    ? `\n                    <button type="button" class="hero-delayed-fail">Fails — spend END only</button>`
+                    : "";
             const rollCard = {
                 speaker: ChatMessage.getSpeaker({ actor }),
                 content: `${actor?.name}'s ${record.label} ${record.kind === "haymaker" ? "lands" : "goes off"} now (${momentLabel}) — roll the attack.
-                    <button type="button" class="hero-delayed-roll">Roll the attack now</button>
+                    <button type="button" class="hero-delayed-roll">Roll the attack now</button>${failButton}
                     <p class="hint">${hint}</p>`,
                 flags: {
                     [game.system.id]: {
