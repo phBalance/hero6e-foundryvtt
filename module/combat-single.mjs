@@ -363,6 +363,26 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
+     * HERO rolls no initiative in this tracker: priorities derive from DEX + the
+     * per-segment tie-break rolls. Core's roll paths (row d20, Roll All/NPCs,
+     * macros, modules) would otherwise write the raw formula over them.
+     * @override
+     */
+    async rollInitiative() {
+        return this;
+    }
+
+    /** @override */
+    async rollAll() {
+        return this;
+    }
+
+    /** @override */
+    async rollNPC() {
+        return this;
+    }
+
+    /**
      * Modern Foundry V14 comparison anchor method.
      * @override
      */

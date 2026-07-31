@@ -19,6 +19,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
             const element = html instanceof HTMLElement ? html : html;
             if (!element) return;
+            // Marks this app's DOM so single-tracker-only CSS (e.g. hiding the core
+            // Roll All / Roll NPCs header buttons) never leaks onto the legacy tracker
+            element.classList.add("hero-single-tracker");
 
             // Update header titles using standard Hero System nomenclature variables
             const encounterTitle = element.querySelector(".combat-tracker-header .encounter-title");
@@ -50,7 +53,28 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     const firstRender = app._lastAutoScrolledId === undefined;
                     if ((isCombatUpdate || firstRender) && app._lastAutoScrolledId !== activeId) {
                         app._lastAutoScrolledId = activeId;
-                        activeRow.scrollIntoView({ block: "center", behavior: "smooth" });
+                        // Pin the current segment header near the top of the viewport
+                        // (below the sticky held panel), keeping the acting row visible;
+                        // deep segments fall back to centering the acting row (#4556)
+                        const tracker = activeRow.closest(".combat-tracker");
+                        const headerRow = tracker?.querySelector(".active-segment-header-slot");
+                        if (tracker && headerRow) {
+                            const stickyOffset =
+                                (tracker.querySelector(".combatant.hero-held-panel-header")?.offsetHeight ?? 0) +
+                                (tracker.querySelector(".hero-held-scroll-wrapper:not(.hero-held-collapsed)")
+                                    ?.offsetHeight ?? 0);
+                            const trackerRect = tracker.getBoundingClientRect();
+                            const headerRect = headerRow.getBoundingClientRect();
+                            const activeRect = activeRow.getBoundingClientRect();
+                            if (activeRect.top - headerRect.top > tracker.clientHeight / 2) {
+                                activeRow.scrollIntoView({ block: "center", behavior: "smooth" });
+                            } else {
+                                const delta = headerRect.top - trackerRect.top - stickyOffset - 4;
+                                tracker.scrollTo({ top: Math.max(0, tracker.scrollTop + delta), behavior: "smooth" });
+                            }
+                        } else {
+                            activeRow.scrollIntoView({ block: "center", behavior: "smooth" });
+                        }
                     }
                 }
             }
@@ -61,13 +85,24 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             const panelMemberRows = element.querySelectorAll("li.combatant.hero-held-panel-member");
             if (panelHeaderRow && panelMemberRows.length > 0 && !element.querySelector(".hero-held-scroll-wrapper")) {
                 const wrapper = document.createElement("li");
-                wrapper.className = "hero-held-scroll-wrapper";
+                wrapper.className = `hero-held-scroll-wrapper${
+                    panelHeaderRow.classList.contains("segment-collapsed") ? " hero-held-collapsed" : ""
+                }`;
                 const list = document.createElement("ol");
                 list.className = "hero-held-scroll plain";
                 wrapper.appendChild(list);
                 panelHeaderRow.after(wrapper);
                 panelMemberRows.forEach((li) => list.appendChild(li));
             }
+
+            // Owners can click condition icons to toggle them (prone → stand up, etc.)
+            element.querySelectorAll("li.combatant[data-combatant-id] .token-effects").forEach((container) => {
+                const li = container.closest("li.combatant");
+                const combatant = app.viewed.combatants.get(li?.dataset.combatantId);
+                if (combatant?.isOwner && container.querySelector("img.token-effect")) {
+                    container.classList.add("hero-effects-clickable");
+                }
+            });
 
             // Compact hold controls: panel rows show "⚡ <condition>" (the use control for
             // owners, a passive label otherwise); positional timeline rows get a plain ⚡
@@ -188,11 +223,40 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     _setSegmentExpansion(combatId, segment, expanded) {
         const overrides = this._getSegmentExpansion(combatId);
         overrides[segment] = expanded;
+        this._persistSegmentExpansion(combatId);
+    }
+
+    _persistSegmentExpansion(combatId) {
         try {
-            localStorage.setItem(this._segmentExpansionStorageKey(combatId), JSON.stringify(overrides));
+            localStorage.setItem(
+                this._segmentExpansionStorageKey(combatId),
+                JSON.stringify(this._getSegmentExpansion(combatId)),
+            );
         } catch (e) {
             console.warn(`Unable to persist segment expansion state`, e);
         }
+    }
+
+    /**
+     * Drops expansion overrides for segments the fight has moved past, restoring
+     * the collapsed default for passed segments.
+     * @param {string} combatId
+     * @param {number} currentAbs
+     * @param {number} round
+     * @private
+     */
+    _dropStaleSegmentOverrides(combatId, currentAbs, round) {
+        const overrides = this._getSegmentExpansion(combatId);
+        let dirty = false;
+        for (const key of Object.keys(overrides)) {
+            const segmentNumber = Number(key);
+            if (!Number.isFinite(segmentNumber)) continue;
+            if (round * 12 + segmentNumber < currentAbs) {
+                delete overrides[key];
+                dirty = true;
+            }
+        }
+        if (dirty) this._persistSegmentExpansion(combatId);
     }
 
     /**
@@ -216,6 +280,67 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         safeOptions.parts = [];
 
         await super._onRender(safeContext, safeOptions);
+
+        // Owners toggle conditions by clicking their icons (delegated; the app
+        // element persists across renders, so bind once per instance)
+        if (!this._heroEffectsClickBound && this.element) {
+            this.element.addEventListener("click", this._onTokenEffectClick.bind(this));
+            this._heroEffectsClickBound = true;
+        }
+    }
+
+    /**
+     * The effects core renders as row icons, in render order — the clicked icon's
+     * DOM index maps back into this list. Mirrors core's _prepareTurnContext filter
+     * (V13 cores without showIcon fall back to visible temporary effects).
+     * @param {Actor} actor
+     * @returns {ActiveEffect[]}
+     * @private
+     */
+    _rowEffectsFor(actor) {
+        const SHOW_ICON = CONST.ACTIVE_EFFECT_SHOW_ICON;
+        const defeatedId = CONFIG.specialStatusEffects?.DEFEATED;
+        const result = [];
+        for (const effect of actor?.appliedEffects ?? []) {
+            if (defeatedId && effect.statuses.has(defeatedId)) continue;
+            if (SHOW_ICON) {
+                if (
+                    effect.showIcon === SHOW_ICON.ALWAYS ||
+                    (effect.showIcon === SHOW_ICON.CONDITIONAL && effect.isTemporary)
+                ) {
+                    result.push(effect);
+                }
+            } else if (effect.isTemporary && !effect.disabled) {
+                result.push(effect);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Click-to-toggle for row condition icons (feedback + #4546: standing up from
+     * prone should be one click). Owners only; statusless effects are left alone
+     * so a misclick cannot delete a maneuver effect.
+     * @param {MouseEvent} event
+     * @private
+     */
+    async _onTokenEffectClick(event) {
+        const img = event.target?.closest?.("img.token-effect");
+        if (!img) return;
+        const li = img.closest(".combatant[data-combatant-id]");
+        const combatant = this.viewed?.combatants.get(li?.dataset.combatantId);
+        const actor = combatant?.actor;
+        if (!actor || !combatant.isOwner) return;
+        event.preventDefault();
+        event.stopPropagation();
+
+        const icons = this._rowEffectsFor(actor);
+        const index = [...(img.parentElement?.querySelectorAll("img.token-effect") ?? [])].indexOf(img);
+        const effect = icons[index];
+        if (!effect || effect.statuses.size === 0) return;
+        for (const status of effect.statuses) {
+            await actor.toggleStatusEffect(status);
+        }
     }
 
     /**
@@ -231,7 +356,29 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         // 1. Let Foundry assemble the core combatant turns layout dataset natively
         await super._prepareTrackerContext(context, options);
         const combat = this.viewed;
-        if (!combat?.started) return context;
+        if (!combat?.started) {
+            // HERO rolls no initiative: unstarted rows preview DEX (+ always-on LR)
+            // instead of the core d20 button. hasDecimals forces the plain-span
+            // branch of the core template, which also removes the GM-editable input.
+            for (const turn of context.turns ?? []) {
+                const combatant = combat?.combatants.get(turn.id);
+                const actor = combatant?.actor;
+                if (!actor) {
+                    turn.initiative = "\u2014";
+                    turn.hasRolled = true;
+                    continue;
+                }
+                const characteristicKey = actor.system?.initiativeCharacteristic ?? "dex";
+                const dex = actor.system?.characteristics?.[characteristicKey]?.value ?? 10;
+                const preview = dex + (combatant.lightningReflexes?.always ?? 0);
+                turn.initiative = String(preview);
+                turn.hasRolled = true;
+                turn._heroPreview = preview;
+            }
+            context.turns?.sort((a, b) => (b._heroPreview ?? -1) - (a._heroPreview ?? -1));
+            context.hasDecimals = true;
+            return context;
+        }
 
         const masterTurns = context.turns || [];
         const masterById = new Map(masterTurns.map((t) => [t.id, t]));
@@ -287,11 +434,12 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
         // Include the previous 2 and next 2 non-empty segments, across Turn boundaries,
         // but only auto-expand the nearest one in each direction.
+        // Past segments default to collapsed headers (#4556/#4562); only the
+        // nearest FUTURE segment auto-expands
         const windowAbs = new Set();
         let found = 0;
         for (let abs = currentAbs - 1; abs >= startAbs && found < 2; abs--) {
             if (segmentPopulation(abs) > 0) {
-                if (found === 0) windowAbs.add(abs);
                 positions.add(abs);
                 found++;
             }
@@ -322,6 +470,16 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             console.warn(`Unable to read combat tracker disposition setting`, e);
         }
 
+        // Once the fight moves past a segment, its manual expansion override is
+        // dropped so the past-default (collapsed) applies again; this also clears
+        // the segment-number key aliasing across Turns (#4556/#4562)
+        if (this._lastSeenAbs !== currentAbs) {
+            if (this._lastSeenAbs !== undefined && currentAbs > this._lastSeenAbs) {
+                this._dropStaleSegmentOverrides(combat.id, currentAbs, combat.round);
+            }
+            this._lastSeenAbs = currentAbs;
+        }
+
         const expansionOverrides = this._getSegmentExpansion(combat.id);
         const timelineTurns = [];
 
@@ -346,7 +504,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             const panelHeader = {
                 id: "held-panel-header",
                 _id: "held-panel-header",
-                name: `${panelExpanded ? "▼" : "▶"} ⏳ Held Actions (${panelHolders.length})`,
+                name: `⏳ Held Actions (${panelHolders.length})`,
                 img: "icons/svg/clockwork.svg",
                 css: [
                     "hero-timeline-header-row",
@@ -363,7 +521,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             Object.defineProperty(panelHeader, "actor", { get: () => null, configurable: true, enumerable: true });
             timelineTurns.push(panelHeader);
 
-            if (panelExpanded) {
+            {
                 for (const combatant of panelHolders) {
                     const base = masterById.get(combatant.id);
                     const row = base
@@ -405,14 +563,13 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
             const roundLabel = round === combat.round ? "" : ` (Turn ${round})`;
             const stateLabel = isCurrent ? " — Current" : isPast ? " — Passed" : "";
-            const countLabel = expanded ? "" : ` (${historyRows?.length ?? members.length})`;
-            const caret = expanded ? "▼" : "▶";
+            const countLabel = ` (${historyRows?.length ?? members.length})`;
 
             const headerId = `seg-header-${round}-${segment}`;
             const headerTurn = {
                 id: headerId,
                 _id: headerId,
-                name: `${caret} Segment ${segment}${roundLabel}${stateLabel}${countLabel}`,
+                name: `Segment ${segment}${roundLabel}${stateLabel}${countLabel}`,
                 img: "icons/svg/clockwork.svg",
                 css: [
                     "hero-timeline-header-row",
@@ -432,7 +589,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             Object.defineProperty(headerTurn, "actor", { get: () => null, configurable: true, enumerable: true });
             timelineTurns.push(headerTurn);
 
-            if (!expanded) continue;
+            // Member rows always render; a collapsed segment hides them via class so
+            // expansion toggles animate in place without a re-render
+            const memberClasses = `timeline-member hero-seg-abs-${abs}${expanded ? "" : " segment-member-hidden"}`;
 
             if (historyRows) {
                 for (const [idx, h] of historyRows.entries()) {
@@ -467,6 +626,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         (row.css || "").replace(/\bactive\b/g, "").trim(),
                         "past-segment-preview",
                         "hero-history-row",
+                        memberClasses,
                         live ? "" : "hero-history-removed",
                     ]
                         .filter(Boolean)
@@ -577,6 +737,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     parentRow.css = [
                         parentRow.css,
                         stateCss,
+                        memberClasses,
                         "hero-group-row hero-group-parent",
                         isActiveGroup ? "hero-group-locked" : "",
                     ]
@@ -603,7 +764,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         row.name = `💥 ${row.name} — Haymaker resolves`;
                         row.initiative = "—";
                         row.effects = { icons: [], tooltip: "" };
-                        row.css = `${row.css} hero-haymaker-row ${stateCss}`.trim();
+                        row.css = `${row.css} hero-haymaker-row ${stateCss} ${memberClasses}`.trim();
                         timelineTurns.push(row);
                         continue;
                     }
@@ -640,7 +801,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         row.effects = { icons: [], tooltip: "" };
                     }
 
-                    row.css = `${row.css} ${stateCss}`.trim();
+                    row.css = `${row.css} ${stateCss} ${memberClasses}`.trim();
                     if (isCurrent && combatant.id === activeCombatantId && !group.lrShadow) {
                         row.active = true;
                         row.css = `${row.css} active`.trim();
@@ -714,21 +875,37 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const combatantId = row?.dataset?.combatantId;
         if (!combatantId) return;
 
-        // The Held Actions panel header toggles its expansion
+        // The Held Actions panel header toggles its expansion in place (no render:
+        // a full re-render restores a stale scrollTop and yanks the list around)
         if (combatantId === "held-panel-header") {
             if (!this.viewed) return;
-            this._setSegmentExpansion(this.viewed.id, "held", row.classList.contains("segment-collapsed"));
-            this.render();
+            const expand = row.classList.contains("segment-collapsed");
+            this._setSegmentExpansion(this.viewed.id, "held", expand);
+            row.classList.toggle("segment-collapsed", !expand);
+            row.classList.toggle("segment-expanded", expand);
+            row.closest(".combat-tracker")
+                ?.querySelector(".hero-held-scroll-wrapper")
+                ?.classList.toggle("hero-held-collapsed", !expand);
             return;
         }
 
-        // Segment headers toggle their expansion; the current segment is always expanded
+        // Segment headers toggle their expansion in place; the current segment is
+        // always expanded. Member rows carry hero-seg-abs-<abs> linkage classes so
+        // the flip animates via CSS without a re-render.
         if (combatantId.startsWith("seg-header-")) {
             if (!this.viewed || row.classList.contains("active-segment-header-slot")) return;
-            const segment = parseInt(combatantId.split("-").pop());
-            if (Number.isNaN(segment)) return;
-            this._setSegmentExpansion(this.viewed.id, segment, row.classList.contains("segment-collapsed"));
-            this.render();
+            const parts = combatantId.split("-");
+            const segment = parseInt(parts.at(-1));
+            const round = parseInt(parts.at(-2));
+            if (Number.isNaN(segment) || Number.isNaN(round)) return;
+            const expand = row.classList.contains("segment-collapsed");
+            this._setSegmentExpansion(this.viewed.id, segment, expand);
+            row.classList.toggle("segment-collapsed", !expand);
+            row.classList.toggle("segment-expanded", expand);
+            const abs = round * 12 + segment;
+            row.closest(".combat-tracker")
+                ?.querySelectorAll(`.hero-seg-abs-${abs}`)
+                .forEach((li) => li.classList.toggle("segment-member-hidden", !expand));
             return;
         }
 
