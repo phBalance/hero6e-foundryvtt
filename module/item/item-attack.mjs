@@ -371,14 +371,18 @@ export async function getTargetArray(formData) {
  * @param {Actor} actor
  * @returns {boolean}
  */
+function findScheduledHaymaker(actor) {
+    if (!actor) return null;
+    for (const c of game.combats) {
+        if (!c.started || typeof c.hasDelayedAction !== "function") continue;
+        const combatant = c.combatantForActor?.(actor);
+        if (combatant && c.hasDelayedAction(combatant, "haymaker")) return { combat: c, combatant };
+    }
+    return null;
+}
+
 function hasScheduledHaymaker(actor) {
-    if (!actor) return false;
-    return game.combats.some(
-        (c) =>
-            c.started &&
-            typeof c.hasDelayedAction === "function" &&
-            c.combatants.some((ct) => ct.actorId === actor.id && c.hasDelayedAction(ct, "haymaker")),
-    );
+    return findScheduledHaymaker(actor) !== null;
 }
 
 /**
@@ -396,10 +400,7 @@ async function scheduleHaymakerDeclaration(item, formData) {
     const actor = item?.actor;
     if (!actor) return false;
     const combat = game.combats.find(
-        (c) =>
-            c.started &&
-            typeof c.scheduleDelayedAction === "function" &&
-            c.combatants.some((ct) => ct.actorId === actor.id),
+        (c) => c.started && typeof c.scheduleDelayedAction === "function" && c.combatantForActor?.(actor),
     );
     if (!combat) return false;
 
@@ -454,15 +455,16 @@ async function scheduleExtraTimeAttackDeclaration(item, formData) {
     const actor = item?.actor;
     if (!actor) return false;
     const combat = game.combats.find(
-        (c) => c.started && typeof c.extraTimePlan === "function" && c.combatants.some((ct) => ct.actorId === actor.id),
+        (c) => c.started && typeof c.extraTimePlan === "function" && c.combatantForActor?.(actor),
     );
     if (!combat) return false;
     const plan = combat.extraTimePlan(actor, item) ?? combat.extraTimePlan(actor, item.effectiveAttackItem);
     if (!plan) return false;
 
     // RAW: END is committed when the activation begins and stays spent if it is
-    // interrupted; activation/RSR rolls happen now too
-    const { error, warning } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {});
+    // interrupted; activation/RSR rolls happen now too. The dialog's formData
+    // carries effective STR / boostable charges — without it the spend undercharges
+    const { error, warning } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, formData ?? {});
     if (error) {
         ui.notifications.error(`${item.name} ${error}`);
         return true;
@@ -471,7 +473,14 @@ async function scheduleExtraTimeAttackDeclaration(item, formData) {
         ui.notifications.warn(`${item.name} ${warning}`);
         return true;
     }
+    // The replay skips ALL RSR on prepaid, so both rolls happen here (the roll
+    // site checks base and effective items separately — mirror that)
     if (!(await isActivatedForThisUse(item, {}))) return true; // attempt failed; resources stay spent
+    const sameEffective =
+        item.system._active?.__originalUuid === item.effectiveAttackItem?.system?._active?.__originalUuid;
+    if (!sameEffective && item.effectiveAttackItem && !(await isActivatedForThisUse(item.effectiveAttackItem, {}))) {
+        return true; // attempt failed; resources stay spent
+    }
 
     // Only plain values survive the flag round-trip; the replay recomputes the rest
     const sanitizedFormData = {};
@@ -535,10 +544,18 @@ export async function processActionToHit(item, formData, options = {}) {
     // maneuver (and its +4 DC / -5 DCV) stays active
     if (!formData?.delayedResolution && !options?.delayedResolution) {
         if (haymakerManeuverActive) {
-            try {
-                if (await scheduleHaymakerDeclaration(item, formData)) return;
-            } catch (e) {
-                console.error(e);
+            const scheduled = findScheduledHaymaker(item.actor);
+            if (scheduled) {
+                // A Haymaker is already winding up: performing any other attack
+                // ruins it (6E2 69) — cancel the schedule (its teardown ends the
+                // maneuver) and roll this attack normally
+                await scheduled.combat.cancelHaymaker(scheduled.combatant.id);
+            } else {
+                try {
+                    if (await scheduleHaymakerDeclaration(item, formData)) return;
+                } catch (e) {
+                    console.error(e);
+                }
             }
         }
         // Extra Time attacks (6E1 377-378): the activation begins now — resources

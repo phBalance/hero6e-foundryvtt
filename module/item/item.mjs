@@ -1722,6 +1722,19 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             item.system.duration === CONFIG.HERO.DURATION_TYPES.CONSTANT &&
             item.baseInfo.behaviors.includes("to-hit")
         ) {
+            // Extra Time defers this activation like any other (the resolution
+            // re-enters with delayedResolution); no resources are pre-spent here
+            // because this power class pays per Phase instead
+            if (!options.delayedResolution) {
+                const extraTimeCombat = game.combats.find(
+                    (c) => c.started && typeof c.extraTimePlan === "function" && c.combatantForActor?.(item.actor),
+                );
+                const plan = extraTimeCombat?.extraTimePlan(item.actor, item);
+                if (plan) {
+                    await extraTimeCombat.scheduleDelayedAction(item.actor, { ...plan, kind: "activation" }, item);
+                    return;
+                }
+            }
             await this.setActive(true);
 
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
@@ -1894,10 +1907,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // without one (legacy tracker, out of combat) activation proceeds normally.
         if (!options.delayedResolution) {
             const extraTimeCombat = game.combats.find(
-                (c) =>
-                    c.started &&
-                    typeof c.extraTimePlan === "function" &&
-                    c.combatants.some((ct) => ct.actorId === item.actor?.id),
+                (c) => c.started && typeof c.extraTimePlan === "function" && c.combatantForActor?.(item.actor),
             );
             const plan = extraTimeCombat?.extraTimePlan(item.actor, item);
             if (plan) {

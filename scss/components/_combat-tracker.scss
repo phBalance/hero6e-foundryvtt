@@ -240,7 +240,8 @@ ol.combat-tracker.plain {
     white-space: nowrap;
 }
 
-.combat-tracker li.combatant .combatant-controls {
+// Scoped: the legacy tracker's rows keep core's single-line controls
+.hero-single-tracker .combat-tracker li.combatant .combatant-controls {
     flex-wrap: wrap;
     row-gap: 2px;
 }

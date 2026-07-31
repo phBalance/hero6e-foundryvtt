@@ -447,9 +447,11 @@ Hooks.once("ready", async function () {
  * @returns {Promise<Item|null>}
  */
 async function resolveDelayedAttackItem(payload) {
-    let item = payload.itemUuid ? fromUuidSync(payload.itemUuid) : null;
-    item ??= payload.originalItemUuid ? fromUuidSync(payload.originalItemUuid) : null;
-    if (!item && payload.itemJson) {
+    // The snapshot comes FIRST: the declared item is usually a temporary
+    // effective clone (pushed CP, effective STR, HTH add-ons…) whose uuid never
+    // resolves later, and the raw DB item would drop all of that state
+    let item = null;
+    if (payload.itemJson) {
         const owner = payload.actorUuid ? fromUuidSync(payload.actorUuid) : null;
         try {
             const { rehydrateAttackItem } = await import("./item/item-attack.mjs");
@@ -458,6 +460,8 @@ async function resolveDelayedAttackItem(payload) {
             console.error(`Unable to rehydrate the delayed attack item`, e);
         }
     }
+    item ??= payload.itemUuid ? fromUuidSync(payload.itemUuid) : null;
+    item ??= payload.originalItemUuid ? fromUuidSync(payload.originalItemUuid) : null;
     return item;
 }
 
@@ -470,6 +474,23 @@ async function resolveDelayedAttackItem(payload) {
 function canActOnDelayedAttack(item, payload) {
     const owningActor = item.actor ?? (payload.actorUuid ? fromUuidSync(payload.actorUuid) : null);
     return !!(item.isOwner || owningActor?.isOwner || game.user.isGM);
+}
+
+/**
+ * Marks a landing card consumed so its roll/fail buttons can't fire twice
+ * (players can't update the GM-authored message, so they relay).
+ * @param {ChatMessage} message
+ */
+async function markDelayedCardResolved(message) {
+    if (game.user.isGM) {
+        await message.setFlag(game.system.id, "delayedAttack.resolved", true);
+    } else {
+        game.socket.emit(`system.${game.system.id}`, {
+            operation: "markDelayedCardResolved",
+            userId: game.user.id,
+            messageId: message.id,
+        });
+    }
 }
 
 Hooks.on("renderChatMessageHTML", (app, html, data) => {
@@ -524,6 +545,13 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
         });
     });
 
+    // A consumed landing card keeps its buttons visibly dead on every client
+    if (app.getFlag?.(game.system.id, "delayedAttack")?.resolved) {
+        html.querySelectorAll("button.hero-delayed-roll, button.hero-delayed-fail").forEach((button) => {
+            button.disabled = true;
+        });
+    }
+
     // Failed Haymaker: the Phase is wasted but the END is still owed (6E2 69) —
     // charge the attack's resources without rolling anything
     html.querySelectorAll("button.hero-delayed-fail").forEach((button) => {
@@ -533,16 +561,25 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
             try {
                 const payload = app.getFlag(game.system.id, "delayedAttack");
                 if (!payload) return ui.notifications.error(`Attack details are no longer available.`);
+                if (payload.resolved) return ui.notifications.warn(`This attack has already been resolved.`);
                 const item = await resolveDelayedAttackItem(payload);
                 if (!item) return ui.notifications.error(`Attack details are no longer available.`);
                 if (!canActOnDelayedAttack(item, payload)) {
                     return ui.notifications.warn(`Only the attacker (or GM) can resolve this attack.`);
                 }
+                await markDelayedCardResolved(app);
                 const { userInteractiveVerifyOptionallyPromptThenSpendResources } =
                     await import("./item/item-resources.mjs");
                 const { resourcesUsedDescription, resourcesUsedDescriptionRenderedRoll } =
-                    await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {});
+                    await userInteractiveVerifyOptionallyPromptThenSpendResources(item, payload.formData ?? {});
                 const actor = item.actor ?? (payload.actorUuid ? fromUuidSync(payload.actorUuid) : null);
+                // The Haymaker is over: the roll path's tail would end the maneuver
+                // after the attack rolls, but nothing rolls here — tear it down now
+                // or the -5 DCV persists and the next attack gets re-intercepted
+                const haymakerEffect = actor?.effects.find((e) => e.statuses.has("haymaker"));
+                if (haymakerEffect) await haymakerEffect.delete();
+                const haymakerItem = actor?.items.find((i) => i.system?.XMLID === "HAYMAKER" && i.isActive);
+                if (haymakerItem) await haymakerItem.toggle();
                 await ChatMessage.create({
                     speaker: ChatMessage.getSpeaker({ actor }),
                     content: `${actor?.name}'s Haymaker fails — the Phase is wasted${
@@ -575,12 +612,14 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
             try {
                 const payload = app.getFlag(game.system.id, "delayedAttack");
                 if (!payload) return ui.notifications.error(`Attack details are no longer available.`);
+                if (payload.resolved) return ui.notifications.warn(`This attack has already been resolved.`);
                 const { processActionToHit } = await import("./item/item-attack.mjs");
                 const item = await resolveDelayedAttackItem(payload);
                 if (!item) return ui.notifications.error(`Attack details are no longer available.`);
                 if (!canActOnDelayedAttack(item, payload)) {
                     return ui.notifications.warn(`Only the attacker (or GM) rolls this attack.`);
                 }
+                await markDelayedCardResolved(app);
                 // Restore the declaration's targets for the rolling user
                 // (V14 replaced User#updateTokenTargets with TokenLayer#setTargets)
                 if (payload.targetTokenIds?.length) {

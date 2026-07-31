@@ -91,26 +91,28 @@ export function registerGlobalSetup(quench) {
             const { describe, it } = context;
 
             describe("Global Module Setup", function () {
-                it("Delete '_Quench' actors", async () => {
-                    await Actor.deleteDocuments(
-                        game.actors.filter((a) => a.name.startsWith("_Quench")).map((o) => o.id),
-                    );
-                });
-
+                // Combats FIRST: once the actor sweep runs, leaked combats lose the
+                // _Quench actor names this filter needs
                 it("Delete '_Quench' combats", async () => {
-                    // Test combats are created with the _Quench name prefix. Also sweep
-                    // combats left by OLDER test runs: every combatant points at a
-                    // _Quench actor or at an actor that no longer exists (the actor
-                    // cleanup above orphans them).
+                    // Test combats are created with the _Quench name prefix. The
+                    // fallback sweeps unnamed leaks, but only when at least one
+                    // combatant provably belongs to a _Quench actor — a real saved
+                    // encounter whose actors were deleted must survive this
                     const ids = game.combats
                         .filter(
                             (c) =>
                                 c.name?.startsWith("_Quench") ||
-                                (c.combatants.size > 0 &&
+                                (c.combatants.some((ct) => ct.actor?.name?.startsWith("_Quench")) &&
                                     c.combatants.every((ct) => !ct.actor || ct.actor.name.startsWith("_Quench"))),
                         )
                         .map((c) => c.id);
                     if (ids.length > 0) await Combat.deleteDocuments(ids);
+                });
+
+                it("Delete '_Quench' actors", async () => {
+                    await Actor.deleteDocuments(
+                        game.actors.filter((a) => a.name.startsWith("_Quench")).map((o) => o.id),
+                    );
                 });
             });
         },
@@ -128,6 +130,24 @@ export function registerGlobalTeardown(quench) {
             const { describe, it } = context;
 
             describe("Global Teardown", function () {
+                // Combats FIRST: once the actor sweep runs, leaked combats lose the
+                // _Quench actor names this filter needs
+                it("Delete '_Quench' combats", async () => {
+                    // Test combats are created with the _Quench name prefix. The
+                    // fallback sweeps unnamed leaks, but only when at least one
+                    // combatant provably belongs to a _Quench actor — a real saved
+                    // encounter whose actors were deleted must survive this
+                    const ids = game.combats
+                        .filter(
+                            (c) =>
+                                c.name?.startsWith("_Quench") ||
+                                (c.combatants.some((ct) => ct.actor?.name?.startsWith("_Quench")) &&
+                                    c.combatants.every((ct) => !ct.actor || ct.actor.name.startsWith("_Quench"))),
+                        )
+                        .map((c) => c.id);
+                    if (ids.length > 0) await Combat.deleteDocuments(ids);
+                });
+
                 it("Delete '_Quench' actors", async () => {
                     // The end-to-end tests create tokens, make sure they get deleted
                     const activeScene = game.scenes.active ?? game.scenes.contents?.[0];
@@ -142,22 +162,6 @@ export function registerGlobalTeardown(quench) {
                     await Actor.deleteDocuments(
                         game.actors.filter((a) => a.name.startsWith("_Quench")).map((o) => o.id),
                     );
-                });
-
-                it("Delete '_Quench' combats", async () => {
-                    // Test combats are created with the _Quench name prefix. Also sweep
-                    // combats left by OLDER test runs: every combatant points at a
-                    // _Quench actor or at an actor that no longer exists (the actor
-                    // cleanup above orphans them).
-                    const ids = game.combats
-                        .filter(
-                            (c) =>
-                                c.name?.startsWith("_Quench") ||
-                                (c.combatants.size > 0 &&
-                                    c.combatants.every((ct) => !ct.actor || ct.actor.name.startsWith("_Quench"))),
-                        )
-                        .map((c) => c.id);
-                    if (ids.length > 0) await Combat.deleteDocuments(ids);
                 });
 
                 it("Delete '_Quench' scenes", async () => {

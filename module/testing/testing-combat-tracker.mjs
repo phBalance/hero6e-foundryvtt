@@ -2137,8 +2137,10 @@ export function registerCombatTests(quench) {
                     const a = { id: "zzz", tokenId: "tokA", actorId: "actA" };
                     const b = { id: "aaa", tokenId: "tokB", actorId: "actB" };
                     const before = Math.sign(HeroSystem6eCombatSingle.stableTiebreak(a, b));
-                    // Re-created combatant gets a fresh id; token identity keeps the order
-                    const after = Math.sign(HeroSystem6eCombatSingle.stableTiebreak({ ...a, id: "aab" }, b));
+                    // Re-created combatant gets a fresh id on the OTHER side of b's
+                    // ("0aa" < "aaa" < "zzz") — an id-based comparator would flip
+                    // the sign here, so only token identity keeps this equal
+                    const after = Math.sign(HeroSystem6eCombatSingle.stableTiebreak({ ...a, id: "0aa" }, b));
                     expect(before).to.equal(after);
                 });
 
@@ -2304,6 +2306,37 @@ export function registerCombatTests(quench) {
                         () => combat.getFlag(game.system.id, "segmentRolls")?.["24"]?.[three.id] !== undefined,
                     );
                     expect(backfilled, "newcomer tie roll backfilled (no +0.50 default)").to.be.true;
+
+                    // The seeded SPD baseline is the OBJECT shape: a scalar would
+                    // normalize source=effective and trip a bogus adjustment lockout
+                    const newcomer = combat.combatants.find((c) => c.actorId === three.id);
+                    const seeded = await waitUntil(() => newcomer.getFlag(game.system.id, "knownSpd") !== undefined);
+                    expect(seeded).to.be.true;
+                    const known = newcomer.getFlag(game.system.id, "knownSpd");
+                    expect(known, "knownSpd seeded as {effective, source}").to.be.an("object");
+                    expect(known.source, "source reads the sheet SPD").to.equal(2);
+                });
+
+                it("Should adopt a bare token-HUD holding effect instead of stacking a duplicate", async function () {
+                    const holder = await makeActor("_Quench Hold Adopter", { dex: 12, spd: 2 });
+                    const combat = await makeCombat([holder]);
+                    await combat.startCombat();
+                    const combatant = combat.combatants.find((c) => c.actorId === holder.id);
+
+                    // A bare token-HUD toggle: holding status with no combatantId binding
+                    await holder.toggleStatusEffect("holding", { active: true });
+
+                    // Declaring through the tracker adopts the orphan rather than
+                    // creating a parallel effect no flow could ever consume
+                    await ui.combat._applyHoldingEffect(combatant, {
+                        mode: "generic",
+                        id: foundry.utils.randomID(),
+                        combatantId: combatant.id,
+                        declaredAbs: combat.round * 12 + combat.segment,
+                    });
+                    const holdingEffects = holder.effects.filter((e) => e.statuses.has("holding"));
+                    expect(holdingEffects.length, "no parallel duplicate effect").to.equal(1);
+                    expect(combatant.heldAction?.mode, "the adopted effect binds to the declarer").to.equal("generic");
                 });
 
                 it("Should defer a voluntary SPD edit to Post-Segment 12 and allow the GM to apply it early", async function () {

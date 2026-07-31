@@ -400,9 +400,13 @@ export class HeroSystem6eCombatSingle extends Combat {
         const abs = queryAbs ?? HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
         const rollsFlag = this.getFlag(game.system.id, "segmentRolls") ?? {};
         const rollsMap = rollsFlag[abs] ?? rollsFlag[HeroSystem6eCombatantSingle.segmentOf(abs)] ?? {};
-        const subA = this._memberSubRoll(a, rollsMap);
-        const subB = this._memberSubRoll(b, rollsMap);
-        if (subA !== null && subB !== null && subA !== subB) return subB - subA;
+        // A missing sub-roll compares as -1 (below every real roll): comparing
+        // rolls for some pairs but identity for others is intransitive — an
+        // unbackfilled member could cycle the sort exactly like the old
+        // group-vs-outsider bug
+        const subA = this._memberSubRoll(a, rollsMap) ?? -1;
+        const subB = this._memberSubRoll(b, rollsMap) ?? -1;
+        if (subA !== subB) return subB - subA;
         return HeroSystem6eCombatSingle.stableTiebreak(a, b);
     }
 
@@ -950,7 +954,10 @@ export class HeroSystem6eCombatSingle extends Combat {
                 }),
             ]),
         );
-        await this.update(preemptPayload, { direction: 1, previousCombatantId: combatantId });
+        // previousCombatantId=self suppresses the DISPLACED combatant's phase end
+        // (their Phase continues); lrPreempt lets the elevated combatant's own
+        // Phase START still run (idempotent, so the natural-slot return is safe)
+        await this.update(preemptPayload, { direction: 1, previousCombatantId: combatantId, lrPreempt: true });
     }
 
     /**
@@ -1833,6 +1840,8 @@ export class HeroSystem6eCombatSingle extends Combat {
                 [`flags.${game.system.id}.pendingSpd`]: null,
                 [`flags.${game.system.id}.haymaker`]: null,
                 [`flags.${game.system.id}.delayedActions`]: null,
+                [`flags.${game.system.id}.spentEndOn`]: null,
+                [`flags.${game.system.id}.koRecoveredOn`]: null,
             });
         });
 
@@ -2026,8 +2035,12 @@ export class HeroSystem6eCombatSingle extends Combat {
             }
         }
 
-        // One ordered chain so every step sees its predecessors' writes
-        (async () => {
+        // One ordered chain so every step sees its predecessors' writes. Chains
+        // from successive updates are SERIALIZED: Foundry doesn't await _onUpdate,
+        // and two concurrently-running chains would each resolve the same due
+        // delayed actions / grant the same per-Phase work before either's flag
+        // delete lands
+        const runMaintenance = async () => {
             if (boundary) {
                 // SPD-change lockouts first so the hold/abort checks see updated phase
                 // eligibility; passed-hold cleanup before the natural-turn clear so
@@ -2073,11 +2086,14 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (boundary) await this._segmentStartLightningReflexes();
 
             // Phase end/start work skips pure pointer resyncs — within-segment
-            // updates that land back on the same combatant (LR preempts, mid-segment
-            // re-sorts) are not a Phase transition
+            // updates that land back on the same combatant (mid-segment re-sorts,
+            // reconcile repairs) are not a Phase transition. An LR preempt also
+            // passes prev=self (the interrupted combatant's Phase is NOT ending),
+            // but the elevated combatant's own Phase genuinely BEGINS with it.
             const activeCombatant = this.combatant;
             const isResync = !boundary && prevId !== undefined && prevId === activeCombatant?.id;
-            if (!isResync && previousCombatant?.actor) {
+            const lrPreempt = foundry.utils.getProperty(options, "lrPreempt") === true;
+            if (!isResync && !lrPreempt && previousCombatant?.actor) {
                 await this._onPhaseEnd(previousCombatant, { segmentChanged: boundary });
             }
 
@@ -2102,10 +2118,13 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (activeCombatant?.actor) {
                 await expireManeuverNextPhaseEffects(activeCombatant.actor);
             }
-            if (!isResync && activeCombatant?.actor) {
+            if ((!isResync || lrPreempt) && activeCombatant?.actor) {
                 await this._onPhaseStart(activeCombatant);
             }
-        })().catch((e) => console.error(e));
+        };
+        this._maintenanceChain = (this._maintenanceChain ?? Promise.resolve())
+            .then(runMaintenance)
+            .catch((e) => console.error(e));
     }
 
     /**
@@ -2161,7 +2180,13 @@ export class HeroSystem6eCombatSingle extends Combat {
             await this._combatCard(combatant, `${combatant.name} recovers from being stunned.`);
         } else if (actor.statuses.has("knockedOut")) {
             if ((actor.getCharacteristic("stun")?.value ?? 0) >= -10) {
-                await actor.TakeRecovery({ asAction: false, token: combatant.token });
+                // Stamped like spentEndOn: overlapping update chains and rewind
+                // replays must not grant a second free Recovery
+                const koKey = this.round + this.segment / 100;
+                if ((combatant.getFlag(game.system.id, "koRecoveredOn") || 0) < koKey) {
+                    await combatant.setFlag(game.system.id, "koRecoveredOn", koKey);
+                    await actor.TakeRecovery({ asAction: false, token: combatant.token });
+                }
             }
         }
     }
@@ -2181,6 +2206,13 @@ export class HeroSystem6eCombatSingle extends Combat {
         const actor = combatant?.actor;
         if (!actor) return;
         const segmentNumber = this.segment;
+
+        // Once per Phase: the stamp makes re-fires (LR split-Phase returns,
+        // pointer repairs, overlapping update chains) and rewind replays no-ops —
+        // without it a mid-Phase re-entry wipes the movement/END already accrued
+        const roundSegmentKey = this.round + segmentNumber / 100;
+        if ((combatant.getFlag(game.system.id, "spentEndOn") || 0) >= roundSegmentKey) return;
+        await combatant.update({ [`flags.${game.system.id}.spentEndOn`]: roundSegmentKey });
 
         // Clear movement history and the END-for-movement counter
         try {
@@ -2206,12 +2238,9 @@ export class HeroSystem6eCombatSingle extends Combat {
             });
         }
 
-        // Spend resources for all active powers — but only once per Phase (the key
-        // survives rewind-and-replay)
-        const roundSegmentKey = this.round + segmentNumber / 100;
-        if ((combatant.getFlag(game.system.id, "spentEndOn") || 0) < roundSegmentKey) {
-            await combatant.update({ [`flags.${game.system.id}.spentEndOn`]: roundSegmentKey });
-
+        // Spend resources for all active powers (the Phase-start stamp above
+        // already guarantees once-per-Phase)
+        {
             let content = "";
             let tempContent = "";
             let startContent = "";
@@ -2377,6 +2406,21 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
 
     /**
+     * Resolves the combatant a given actor acts through. Synthetic token actors
+     * share the base actor's id, so an actorId match alone would pin every
+     * unlinked ×N sibling to the first combatant — match by token when possible.
+     * @param {Actor} actor
+     * @returns {Combatant|null}
+     */
+    combatantForActor(actor) {
+        if (!actor) return null;
+        if (actor.isToken && actor.token?.id) {
+            return this.combatants.find((c) => c.tokenId === actor.token.id) ?? null;
+        }
+        return this.combatants.find((c) => c.actorId === actor.id) ?? null;
+    }
+
+    /**
      * Classifies an item's Extra Time Limitation into a delayed-action plan, or
      * null when the item has none that needs scheduling (Full Phase is pure action
      * economy; durations resolve on the character's DEX N segments later).
@@ -2390,7 +2434,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (!this.started || !actor || !item) return null;
         const extraTime = item.findModsByXmlid?.("EXTRATIME");
         if (!extraTime) return null;
-        const combatant = this.combatants.find((c) => c.actorId === actor.id);
+        const combatant = this.combatantForActor(actor);
         if (!combatant) return null;
 
         const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
@@ -2475,7 +2519,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async scheduleDelayedAction(actor, plan, item = null) {
         if (!this.started || !actor || !plan) return null;
-        const combatant = this.combatants.find((c) => c.actorId === actor.id);
+        const combatant = this.combatantForActor(actor);
         if (!combatant) return null;
         const id = foundry.utils.randomID();
         const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
@@ -2833,13 +2877,18 @@ export class HeroSystem6eCombatSingle extends Combat {
             }
         }
 
-        // 4. Seed initiative and the SPD-change baseline
+        // 4. Seed initiative and the SPD-change baseline. knownSpd must be the
+        // OBJECT shape: a scalar normalizes as source=effective, and a combatant
+        // added with an SPD-modifying effect would trip a bogus adjustment lockout
         await this.updateEmbeddedDocuments(
             "Combatant",
             survivors.map((c) => ({
                 _id: c.id,
                 initiative: this.getInitiativePriority(c, this.segment),
-                [`flags.${game.system.id}.knownSpd`]: c.combatSpd,
+                [`flags.${game.system.id}.knownSpd`]: {
+                    effective: c.combatSpd,
+                    source: Number(c.actor?._source?.system?.characteristics?.spd?.value ?? c.combatSpd),
+                },
             })),
         );
 
@@ -2860,7 +2909,9 @@ export class HeroSystem6eCombatSingle extends Combat {
             const index = this.turns.findIndex((t) => t.id === activeId);
             if (index !== -1 && index !== this.turn) payload.turn = index;
         }
-        await this.update(payload);
+        // previousCombatantId marks the index repair as a resync — without it the
+        // active combatant would get a spurious mid-Phase start (movement wipe)
+        await this.update(payload, { direction: 1, previousCombatantId: activeId ?? undefined });
     }
 
     /**
@@ -2920,7 +2971,10 @@ export class HeroSystem6eCombatSingle extends Combat {
                 }
             }
         }
-        await this.update(payload);
+        // A surviving active combatant makes this a pure resync (prev === active,
+        // phase work skipped); when the active was deleted, prev resolves to no
+        // combatant and the successor's Phase start runs normally
+        await this.update(payload, { direction: 1, previousCombatantId: activeId ?? undefined });
     }
 
     /**
@@ -3232,6 +3286,8 @@ export class HeroSystem6eCombatSingle extends Combat {
         );
         await this.logEvent("hold.demote", {
             combatant,
+            // The slot that passed unused, not the boundary the cleanup ran at
+            abs: hold.segmentAbs ?? null,
             data: { segmentAbs: hold.segmentAbs, dex: hold.dex ?? null },
         });
     }
@@ -3296,6 +3352,10 @@ export class HeroSystem6eCombatSingle extends Combat {
         );
         await this.logEvent(used ? "hold.use" : "hold.forfeit", {
             combatant,
+            // Ledger the outcome at the SLOT's segment: cross-segment cleanup runs
+            // at the next boundary, and the default (current) abs would file the
+            // row one segment late — on top of the holder's genuine acted row
+            abs: hold.mode === "position" ? (hold.segmentAbs ?? null) : null,
             data: { mode: hold.mode, segmentAbs: hold.segmentAbs ?? null, dex: hold.dex ?? null },
         });
     }
@@ -3462,6 +3522,7 @@ const LEGACY_COMBATANT_FLAG_KEYS = [
     "initiativeTooltip",
     "lightningReflexes",
     "spentEndOn",
+    "koRecoveredOn",
     "endUsedForMovement",
     "heroHistory",
     "heldSlotTakenAbs",

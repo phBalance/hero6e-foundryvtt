@@ -13,15 +13,17 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             // AppV2 fires renderCombatTracker for every subclass: the legacy tracker's
             // rows lack this tracker's classes, so touching them only strips state
             if (!(app instanceof HeroSystem6eCombatTrackerSingle)) return;
-            // Exit out immediately if combat hasn't formally begun, if the instance is missing,
-            // or if core tracking parameters haven't finished compiling yet.
-            if (!app?.viewed || !app.viewed.started) return;
-
             const element = html instanceof HTMLElement ? html : html;
             if (!element) return;
             // Marks this app's DOM so single-tracker-only CSS (e.g. hiding the core
-            // Roll All / Roll NPCs header buttons) never leaks onto the legacy tracker
+            // Roll All / Roll NPCs header buttons) never leaks onto the legacy
+            // tracker. BEFORE the started-guard: an un-started combat is exactly
+            // when the roll buttons would tempt a GM
             element.classList.add("hero-single-tracker");
+
+            // Exit out immediately if combat hasn't formally begun, if the instance is missing,
+            // or if core tracking parameters haven't finished compiling yet.
+            if (!app?.viewed || !app.viewed.started) return;
 
             // Update header titles using standard Hero System nomenclature variables
             const encounterTitle = element.querySelector(".combat-tracker-header .encounter-title");
@@ -282,13 +284,15 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * @param {number} round
      * @private
      */
-    _dropStaleSegmentOverrides(combatId, currentAbs, round) {
+    _dropStaleSegmentOverrides(combatId, currentAbs) {
         const overrides = this._getSegmentExpansion(combatId);
         let dirty = false;
         for (const key of Object.keys(overrides)) {
-            const segmentNumber = Number(key);
-            if (!Number.isFinite(segmentNumber)) continue;
-            if (round * 12 + segmentNumber < currentAbs) {
+            const abs = Number(key);
+            if (!Number.isFinite(abs)) continue; // "held" panel key
+            // Keys are absolute segments (legacy bare-segment keys are all < 24
+            // and sweep themselves out here on the first pass)
+            if (abs < currentAbs) {
                 delete overrides[key];
                 dirty = true;
             }
@@ -347,7 +351,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 ) {
                     result.push(effect);
                 }
-            } else if (effect.isTemporary && !effect.disabled) {
+            } else if (effect.isTemporary && !effect.disabled && effect.img) {
+                // V13 core only renders icons for effects WITH an image — an
+                // img-less effect must not shift the DOM-index mapping
                 result.push(effect);
             }
         }
@@ -356,8 +362,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
     /**
      * Click-to-toggle for row condition icons (feedback + #4546: standing up from
-     * prone should be one click). Owners only; statusless effects are left alone
-     * so a misclick cannot delete a maneuver effect.
+     * prone should be one click). Owners only; only simple single-status actor
+     * conditions toggle — maneuver/item effects and hold/abort statuses are owned
+     * by their own flows.
      * @param {MouseEvent} event
      * @private
      */
@@ -374,10 +381,16 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const icons = this._rowEffectsFor(actor);
         const index = [...(img.parentElement?.querySelectorAll("img.token-effect") ?? [])].indexOf(img);
         const effect = icons[index];
-        if (!effect || effect.statuses.size === 0) return;
-        for (const status of effect.statuses) {
-            await actor.toggleStatusEffect(status);
-        }
+        // Toggle only simple actor-level conditions (prone, stunned…):
+        // - item effects (maneuvers) store their localized NAME in statuses and
+        //   belong to their item's toggle, not toggleStatusEffect
+        // - multi-status effects would be deleted then partially re-created
+        // - holds/aborts carry bookkeeping the tracker flows own
+        if (!effect || effect.statuses.size !== 1 || effect.parent !== actor) return;
+        const [status] = effect.statuses;
+        if (["holding", "aborted"].includes(status)) return;
+        if (!CONFIG.statusEffects?.some((s) => s.id === status)) return;
+        await actor.toggleStatusEffect(status);
     }
 
     /**
@@ -440,7 +453,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 if (c.heldAction?.mode === "position") {
                     return !isPast && (c.holdsPositionAtAbs(abs) || c.spentHoldAtAbs(abs));
                 }
-                if (c.hasPhaseInSegment(segment)) return true;
+                // queryAbs matters: the SPD-lockout window is an absolute range,
+                // and a bare segment number aliases across Turns
+                if (c.hasPhaseInSegment(segment, abs)) return true;
                 // A spent hold keeps displaying at the acted position until the
                 // segment ends; event/generic holds render in the panel instead
                 return !isPast && c.spentHoldAtAbs(abs);
@@ -490,8 +505,11 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             }
         }
 
-        // A delayed action's landing segment always renders, even if otherwise empty
+        // A delayed action's landing segment always renders, even if otherwise
+        // empty — but a GM-hidden combatant's landing must not leak an otherwise
+        // empty segment header to players
         for (const combatant of combat.combatants) {
+            if (combatant.hidden && !game.user.isGM) continue;
             for (const [, record] of combat.delayedActionsFor?.(combatant) ?? []) {
                 if (record.resolveAbs >= currentAbs && record.resolveAbs <= currentAbs + 24) {
                     positions.add(record.resolveAbs);
@@ -513,7 +531,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         // the segment-number key aliasing across Turns (#4556/#4562)
         if (this._lastSeenAbs !== currentAbs) {
             if (this._lastSeenAbs !== undefined && currentAbs > this._lastSeenAbs) {
-                this._dropStaleSegmentOverrides(combat.id, currentAbs, combat.round);
+                this._dropStaleSegmentOverrides(combat.id, currentAbs);
             }
             this._lastSeenAbs = currentAbs;
         }
@@ -590,7 +608,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             const isCurrent = abs === currentAbs;
             const isPast = abs < currentAbs;
             const isNextTurn = round > combat.round;
-            const expanded = isCurrent || (expansionOverrides[segment] ?? windowAbs.has(abs));
+            const expanded = isCurrent || (expansionOverrides[abs] ?? windowAbs.has(abs));
 
             // _comparePriority breaks priority ties by combatant id, keeping the order stable;
             // the exact position matters because segment numbers alias across Turns
@@ -601,7 +619,15 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
             const roundLabel = round === combat.round ? "" : ` (Turn ${round})`;
             const stateLabel = isCurrent ? " — Current" : isPast ? " — Passed" : "";
-            const countLabel = ` (${historyRows?.length ?? members.length})`;
+            // Delayed-action markers count as rows — a segment rendered solely for
+            // a landing would otherwise read "(0)" above a visible marker
+            const delayedCount = isPast
+                ? 0
+                : combat.combatants.reduce((n, c) => {
+                      if (c.hidden && !game.user.isGM) return n;
+                      return n + (combat.delayedActionsFor?.(c) ?? []).filter(([, r]) => r.resolveAbs === abs).length;
+                  }, 0);
+            const countLabel = ` (${(historyRows?.length ?? members.length) + delayedCount})`;
 
             const headerId = `seg-header-${round}-${segment}`;
             const headerTurn = {
@@ -976,10 +1002,12 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             const round = parseInt(parts.at(-2));
             if (Number.isNaN(segment) || Number.isNaN(round)) return;
             const expand = row.classList.contains("segment-collapsed");
-            this._setSegmentExpansion(this.viewed.id, segment, expand);
+            const abs = round * 12 + segment;
+            // Keyed by ABSOLUTE segment: a bare number would alias this Turn's
+            // passed header with next Turn's future one
+            this._setSegmentExpansion(this.viewed.id, abs, expand);
             row.classList.toggle("segment-collapsed", !expand);
             row.classList.toggle("segment-expanded", expand);
-            const abs = round * 12 + segment;
             row.closest(".combat-tracker")
                 ?.querySelectorAll(`.hero-seg-abs-${abs}`)
                 .forEach((li) => li.classList.toggle("segment-member-hidden", !expand));
@@ -1455,12 +1483,13 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             id: foundry.utils.randomID(),
             combatantId: combatant.id,
         };
-        // Replace the flag wholesale: setFlag merges, which would keep stale
-        // position keys when converting to an event/generic hold
+        // Replace the flag wholesale in ONE write: setFlag merges (stale position
+        // keys would survive a conversion to event/generic), and a delete-then-set
+        // pair leaves a window where every client reads a bare generic hold
         await effect.update({
             [`flags.${game.system.id}.-=hold`]: null,
+            [`flags.${game.system.id}.hold`]: hold,
         });
-        await effect.setFlag(game.system.id, "hold", hold);
 
         const description =
             hold.mode === "position"
@@ -1501,6 +1530,14 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             await actor.toggleStatusEffect(statusId, { active: true });
             return actor.effects.find((e) => e.statuses.has(statusId)) ?? null;
         }
+        // Adopt a bare same-status effect nobody owns (a token-HUD toggle carries
+        // no combatantId) — a parallel duplicate could never be consumed by any
+        // tracker flow and would orphan the status on the actor forever
+        const flagKey = { holding: "hold", aborted: "abort" }[statusId];
+        const orphan = flagKey
+            ? actor.effects.find((e) => e.statuses.has(statusId) && !e.getFlag(game.system.id, flagKey)?.combatantId)
+            : null;
+        if (orphan) return orphan;
         const effectData = await ActiveEffect.implementation.fromStatusEffect(statusId);
         return (await ActiveEffect.implementation.create(effectData.toObject(), { parent: actor })) ?? null;
     }

@@ -48,6 +48,15 @@ export class HeroSocketHandler {
                     await combat?.logEvents?.(data.events ?? []);
                     break;
                 }
+                case "markDelayedCardResolved": {
+                    if (game.user !== game.users.activeGM) return;
+                    const message = ChatMessage.get(data.messageId);
+                    if (message?.getFlag(game.system.id, "delayedAttack")) {
+                        await message.setFlag(game.system.id, "delayedAttack.resolved", true);
+                    }
+                    break;
+                }
+
                 case "updateChatMessage": {
                     if (game.user !== game.users.activeGM) return;
 
