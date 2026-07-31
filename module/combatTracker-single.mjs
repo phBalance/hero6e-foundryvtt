@@ -40,7 +40,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             const activeId = app.viewed.combatant?.id;
             if (activeId) {
                 const activeRow = element.querySelector(
-                    `.current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow)[data-combatant-id="${activeId}"], .current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow)[data-id="${activeId}"]`,
+                    `.current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)[data-combatant-id="${activeId}"], .current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)[data-id="${activeId}"]`,
                 );
                 if (activeRow) {
                     activeRow.classList.add("active");
@@ -153,7 +153,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             // Lightning Reflexes: owners of scoped-LR combatants get an act-early
             // toggle on their current-segment row while the position is reachable
             element
-                .querySelectorAll("li.combatant.current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow)")
+                .querySelectorAll(
+                    "li.combatant.current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)",
+                )
                 .forEach((li) => {
                     const combatant = app.viewed.combatants.get(li.dataset.combatantId);
                     const state = app._lrElevationState?.(combatant);
@@ -653,6 +655,12 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         entries.push({ combatant, priority: priority - scopedLevels, lrShadow: true });
                     }
                 }
+                // A completed LR stop stays visible at the elevated position for the
+                // rest of the segment (the natural row above is the Phase remainder)
+                const spentLr = combatant.getFlag(game.system.id, "spentLrPosition");
+                if (spentLr?.segmentAbs === abs) {
+                    entries.push({ combatant, priority: spentLr.priority, lrShadow: false, lrSpent: true });
+                }
             }
             // A Haymaker lands at the END of its resolution segment: marker row last
             if (!isPast) {
@@ -674,9 +682,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             // member when the group contains it so click/hover target the acting token.
             const groups = [];
             for (const entry of entries) {
-                const key = `${entry.combatant.actorId || entry.combatant.id}${entry.lrShadow ? ":lr-shadow" : ""}${entry.haymaker ? ":haymaker" : ""}`;
+                const key = `${entry.combatant.actorId || entry.combatant.id}${entry.lrShadow ? ":lr-shadow" : ""}${entry.haymaker ? ":haymaker" : ""}${entry.lrSpent ? ":lr-spent" : ""}`;
                 const prev = groups.at(-1);
-                if (prev && prev.key === key && prev.priority === entry.priority && !entry.haymaker) {
+                if (prev && prev.key === key && prev.priority === entry.priority && !entry.haymaker && !entry.lrSpent) {
                     prev.combatants.push(entry.combatant);
                 } else {
                     groups.push({
@@ -685,6 +693,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         combatants: [entry.combatant],
                         lrShadow: entry.lrShadow,
                         haymaker: !!entry.haymaker,
+                        lrSpent: !!entry.lrSpent,
                     });
                 }
             }
@@ -756,6 +765,17 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         row.name = `▶ ${row.name} ×${group.combatants.length}`;
                         row.effects = { icons: [], tooltip: "" };
                         row.css = `${row.css} hero-group-row hero-group-collapsed`.trim();
+                    }
+
+                    if (group.lrSpent) {
+                        // The acted LR stop: inert display of where the scoped action
+                        // happened; the combatant's live row is the Phase remainder
+                        row.name = `↯ ${row.name} (acted early)`;
+                        row.effects = { icons: [], tooltip: "" };
+                        row.active = false;
+                        row.css = `${row.css} hero-lr-row hero-lr-spent ${stateCss} ${memberClasses}`.trim();
+                        timelineTurns.push(row);
+                        continue;
                     }
 
                     if (group.haymaker) {

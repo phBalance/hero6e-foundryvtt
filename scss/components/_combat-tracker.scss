@@ -363,6 +363,20 @@ ol.combat-tracker.plain {
     color: var(--hero-lr-accent);
 }
 
+/* Completed LR stop: inert record of where the scoped action happened */
+.combat-tracker li.combatant.hero-lr-spent {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.combat-tracker li.combatant.hero-lr-spent .name {
+    font-style: italic;
+}
+
+.combat-tracker li.combatant.hero-lr-spent .combatant-controls {
+    display: none;
+}
+
 /* Shadow row: where the rest of the Phase lands once the LR stop is done */
 .combat-tracker li.combatant.hero-lr-shadow {
     opacity: 0.55;

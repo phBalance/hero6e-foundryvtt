@@ -889,7 +889,23 @@ export class HeroSystem6eCombatSingle extends Combat {
         // is consumed up front so every selection below sees the natural priority.
         let lrRemainderId = null;
         if (this.started && ending?.lrElevatedAbs === currentAbsNow) {
-            await ending.unsetFlag(game.system.id, "lrElevatedAbs");
+            // Captured while the flag still applies: the spent stop keeps displaying
+            // at the elevated position for the rest of the segment
+            const elevatedPriority = this.getInitiativePriority(ending, activeSegment);
+            // render: false — this intermediate write re-sorts the turns array under
+            // the still-stale index; letting it render made the tracker (and the
+            // auto-scroll) hop to the combatant's natural row for a frame before the
+            // real turn update landed
+            await ending.update(
+                {
+                    [`flags.${game.system.id}.lrElevatedAbs`]: null,
+                    [`flags.${game.system.id}.spentLrPosition`]: {
+                        segmentAbs: currentAbsNow,
+                        priority: elevatedPriority,
+                    },
+                },
+                { render: false },
+            );
             lrRemainderId = ending.id;
         }
 
@@ -1568,6 +1584,10 @@ export class HeroSystem6eCombatSingle extends Combat {
             if ((combatant.lrElevatedAbs ?? -1) >= targetAbs) {
                 update[`flags.${game.system.id}.lrElevatedAbs`] = null;
             }
+            // The replay can re-elevate, so the display record resets with it
+            if ((combatant.getFlag(game.system.id, "spentLrPosition")?.segmentAbs ?? -1) >= targetAbs) {
+                update[`flags.${game.system.id}.spentLrPosition`] = null;
+            }
             // A SPD change detected at or after the rewind target is un-detected: the
             // baseline reverts so the replay re-fires the lockout from its own position.
             // Lockouts recorded before the target stand — the change already happened.
@@ -1609,6 +1629,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 [`flags.${game.system.id}.heldSlotTakenAbs`]: null,
                 [`flags.${game.system.id}.spentHoldPosition`]: null,
                 [`flags.${game.system.id}.lrElevatedAbs`]: null,
+                [`flags.${game.system.id}.spentLrPosition`]: null,
                 // A fresh combat re-seeds the SPD baseline; out-of-combat changes are
                 // free (6E2 17 only restricts mid-Turn changes) and stale lockouts
                 // reference the previous run's absolute positions
@@ -2768,6 +2789,10 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (lrAbs !== null && lrAbs < currentAbs) {
                 await combatant.unsetFlag(game.system.id, "lrElevatedAbs");
             }
+            const spentLr = combatant.getFlag(game.system.id, "spentLrPosition");
+            if (spentLr && spentLr.segmentAbs < currentAbs) {
+                await combatant.unsetFlag(game.system.id, "spentLrPosition");
+            }
         }
     }
 
@@ -2978,6 +3003,7 @@ const LEGACY_COMBATANT_FLAG_KEYS = [
     "heldSlotTakenAbs",
     "spentHoldPosition",
     "lrElevatedAbs",
+    "spentLrPosition",
     "spdLockout",
     "knownSpd",
     "pendingSpd",
