@@ -108,10 +108,9 @@ export class HEROSYS {
     }
 
     static get isSingleCombatantTrackerEnabled() {
-        return (
-            game.settings.get(game.system.id, "alphaTesting") &&
-            game.settings.get(game.system.id, "singleCombatantTracker")
-        );
+        // World-scoped only: the combat document classes must match on every client (#4553).
+        // The client-scoped alphaTesting setting merely reveals the config option.
+        return game.settings.get(game.system.id, "singleCombatantTracker");
     }
 }
 
@@ -407,6 +406,17 @@ Hooks.once("ready", async function () {
     if (game.settings.get(game.system.id, "alphaTesting")) {
         CONFIG.compatibility.mode = 0;
         CONFIG.debug.combat = true;
+    }
+
+    // The tracker choice is world-scoped (#4553); remind GMs it now applies to every client.
+    if (HEROSYS.isSingleCombatantTrackerEnabled && game.user.isGM) {
+        const noticeKey = "singleTrackerWorldNoticeShown";
+        if (!game.settings.get(game.system.id, noticeKey)) {
+            ui.notifications.info(
+                "The Single Combatant Tracker is a world setting: all connected players now use it too.",
+            );
+            await game.settings.set(game.system.id, noticeKey, true);
+        }
     }
 
     // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to

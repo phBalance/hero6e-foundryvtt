@@ -3,16 +3,13 @@ import { HeroCompatibility } from "./utility/compatibility.mjs";
 
 const { CombatTracker } = foundry.applications.sidebar.tabs;
 
-// Last combatant auto-scrolled to, so re-renders don't yank the list back while the user browses
-let lastScrolledCombatantId = null;
-
 export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     static {
         /**
          * Updates the header and handles real-time active row highlighting fixes.
          * Enforces complete null guards to accommodate unlinked V14 Quench test models.
          */
-        const onRenderTracker = (app, html) => {
+        const onRenderTracker = (app, html, _context, options) => {
             // AppV2 fires renderCombatTracker for every subclass: the legacy tracker's
             // rows lack this tracker's classes, so touching them only strips state
             if (!(app instanceof HeroSystem6eCombatTrackerSingle)) return;
@@ -44,8 +41,15 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 );
                 if (activeRow) {
                     activeRow.classList.add("active");
-                    if (lastScrolledCombatantId !== activeId) {
-                        lastScrolledCombatantId = activeId;
+                    // Per-app guard: the sidebar and a popout are separate instances and
+                    // must each follow the fight (a shared module-level guard let whichever
+                    // rendered first consume the change and froze the other). Scroll only
+                    // on real combat updates — or a window's very first render — never on
+                    // cosmetic re-renders like expansion toggles.
+                    const isCombatUpdate = options?.renderContext === "updateCombat";
+                    const firstRender = app._lastAutoScrolledId === undefined;
+                    if ((isCombatUpdate || firstRender) && app._lastAutoScrolledId !== activeId) {
+                        app._lastAutoScrolledId = activeId;
                         activeRow.scrollIntoView({ block: "center", behavior: "smooth" });
                     }
                 }
@@ -69,7 +73,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             // owners, a passive label otherwise); positional timeline rows get a plain ⚡
             element.querySelectorAll("li.combatant.hero-held-row").forEach((li) => {
                 const combatant = app.viewed.combatants.get(li.dataset.combatantId);
-                if (!combatant?.actor?.statuses.has("holding")) return;
+                if (!combatant?.heldAction) return;
                 const controls = li.querySelector(".combatant-controls");
                 if (!controls || controls.querySelector(".hero-use-held, .hero-held-condition")) return;
 
@@ -198,26 +202,19 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * @protected
      */
     async _onRender(context, options) {
-        let safeContext = context || {};
-        let safeOptions = options;
+        const safeContext = context || {};
 
-        // Direct fix for 'Cannot use in operator to search for turn in undefined' inside programmatic tests
-        if (!safeOptions || typeof safeOptions !== "object" || Array.isArray(safeOptions)) {
-            safeOptions = {};
-        }
-        if (!safeOptions.renderContext || typeof safeOptions.renderContext !== "object") {
-            safeOptions.renderContext = {};
-        }
+        // Fortify a CLONE for core: programmatic renders (Quench) reach core's
+        // `"turn" in renderData.find(...)` probe with no matching entry and crash.
+        // The original options must stay untouched — core passes renderContext as a
+        // STRING ("updateCombat") and the render hooks rely on it to tell combat
+        // updates apart from cosmetic re-renders.
+        const invalid = !options || typeof options !== "object" || Array.isArray(options);
+        const safeOptions = invalid ? {} : { ...options };
+        // This tracker owns auto-scrolling (segment timeline + sticky held panel make
+        // core's offset math wrong anyway), so skip core's scroll block entirely.
+        safeOptions.parts = [];
 
-        // Inoculate mandatory core property objects scanned by the core engine with the 'in' operator
-        const mandatoryKeys = ["turn", "round", "activity", "history", "combatant"];
-        mandatoryKeys.forEach((key) => {
-            if (!safeOptions.renderContext[key] || typeof safeOptions.renderContext[key] !== "object") {
-                safeOptions.renderContext[key] = { update: [] };
-            }
-        });
-
-        // Pass the safely fortified parameter dictionaries down to the native parent framework
         await super._onRender(safeContext, safeOptions);
     }
 
@@ -740,7 +737,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     return (
                         !!combatant?.isOwner &&
                         !!this.viewed?.started &&
-                        !combatant.actor?.statuses.has("holding") &&
+                        !combatant.heldAction &&
                         (game.user.isGM || this.viewed?.combatant?.id === combatant.id)
                     );
                 },
@@ -751,7 +748,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 icon: "fa-solid fa-bolt",
                 visible: (li) => {
                     const combatant = getCombatant(li);
-                    return !!combatant?.isOwner && !!combatant.actor?.statuses.has("holding");
+                    return !!combatant?.isOwner && !!combatant.heldAction;
                 },
                 onClick: (event, li) => this._onUseHeldAction(li.dataset.combatantId),
             },
@@ -760,7 +757,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 icon: "fa-solid fa-hand",
                 visible: (li) => {
                     const combatant = getCombatant(li);
-                    return !!combatant?.isOwner && !!combatant.actor?.statuses.has("holding");
+                    return !!combatant?.isOwner && !!combatant.heldAction;
                 },
                 onClick: (event, li) => this._onReleaseHeldAction(li.dataset.combatantId),
             },
@@ -781,7 +778,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 icon: "fa-solid fa-shield-halved",
                 visible: (li) => {
                     const combatant = getCombatant(li);
-                    return !!combatant?.isOwner && !!this.viewed?.started && !combatant.actor?.statuses.has("aborted");
+                    return !!combatant?.isOwner && !!this.viewed?.started && !combatant.abortEffect;
                 },
                 onClick: (event, li) => this._onAbortAction(li.dataset.combatantId),
             },
@@ -790,7 +787,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 icon: "fa-solid fa-rotate-left",
                 visible: (li) => {
                     const combatant = getCombatant(li);
-                    return !!combatant?.isOwner && !!combatant.actor?.statuses.has("aborted");
+                    return !!combatant?.isOwner && !!combatant.abortEffect;
                 },
                 onClick: (event, li) => this._onCancelAbort(li.dataset.combatantId),
             },
@@ -834,7 +831,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const combatant = combat?.combatants.get(combatantId);
         const actor = combatant?.actor;
         if (!combat?.started || !combatant?.isOwner || !actor) return;
-        if (actor.statuses.has("holding")) return;
+        if (combatant.heldAction) return;
         const blocked = this._blockedActionReason(combatant);
         if (blocked) return void ui.notifications.warn(blocked);
         // Holds are declared on the character's own Phase (6E2 20); the GM may backfill
@@ -911,6 +908,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
         let hold;
         let description;
+        const identity = { id: foundry.utils.randomID(), combatantId: combatant.id };
         if (result.mode === "position") {
             const segmentAbs = Number.isFinite(result.segmentAbs) ? result.segmentAbs : currentAbs;
             const dex = Number.isFinite(result.dex) ? result.dex : ownDex;
@@ -918,22 +916,21 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 ui.notifications.warn(`A same-segment hold must target a DEX below ${actingDex}.`);
                 return;
             }
-            hold = { mode: "position", segmentAbs, dex, declaredAbs: currentAbs };
-            const segment = ((segmentAbs - 1) % 12) + 1;
-            const round = Math.floor((segmentAbs - 1) / 12);
-            description = `until DEX ${dex} in Segment ${segment}${round === combat.round ? "" : ` (Turn ${round})`}`;
+            hold = { mode: "position", segmentAbs, dex, declaredAbs: currentAbs, ...identity };
+            description = `until DEX ${dex} in ${HeroSystem6eCombatantSingle.phaseLabel(segmentAbs)}`;
         } else if (result.mode === "event") {
-            hold = { mode: "event", trigger: result.trigger, declaredAbs: currentAbs };
+            hold = { mode: "event", trigger: result.trigger, declaredAbs: currentAbs, ...identity };
             description = result.trigger ? `— until: ${result.trigger}` : "until a declared event";
         } else {
-            hold = { mode: "generic", declaredAbs: currentAbs };
+            hold = { mode: "generic", declaredAbs: currentAbs, ...identity };
             description = "with no declared condition";
         }
 
-        await actor.toggleStatusEffect("holding", { active: true });
-        const effect = actor.effects.find((e) => e.statuses.has("holding"));
-        if (effect) await effect.setFlag(game.system.id, "hold", hold);
-        await this._holdCard(combatant, `${actor.name} holds their action ${description}.`);
+        await this._applyHoldingEffect(combatant, hold);
+        await this._holdCard(
+            combatant,
+            `${actor.name} holds their action ${description} (declared in ${HeroSystem6eCombatantSingle.phaseLabel(currentAbs)}).`,
+        );
 
         // Declaring a hold IS the combatant's Phase: end their turn
         if (combat.combatant?.id === combatant.id) {
@@ -946,6 +943,38 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     }
 
     /**
+     * Creates a status effect for one combatant of the actor. toggleStatusEffect
+     * cannot be used when a sibling combatant of the same (linked) actor already
+     * carries the status — it would reuse (and the caller would overwrite) the
+     * sibling's effect — so a parallel effect is created from the status definition.
+     * @param {Actor} actor
+     * @param {string} statusId
+     * @returns {Promise<ActiveEffect|null>}
+     * @private
+     */
+    async _createStatusEffectFor(actor, statusId) {
+        if (!actor.statuses.has(statusId)) {
+            await actor.toggleStatusEffect(statusId, { active: true });
+            return actor.effects.find((e) => e.statuses.has(statusId)) ?? null;
+        }
+        const effectData = await ActiveEffect.implementation.fromStatusEffect(statusId);
+        return (await ActiveEffect.implementation.create(effectData.toObject(), { parent: actor })) ?? null;
+    }
+
+    /**
+     * Creates the holding effect that carries a hold declaration.
+     * @param {Combatant} combatant
+     * @param {object} hold
+     * @returns {Promise<ActiveEffect|null>}
+     * @private
+     */
+    async _applyHoldingEffect(combatant, hold) {
+        const effect = await this._createStatusEffectFor(combatant.actor, "holding");
+        if (effect) await effect.setFlag(game.system.id, "hold", hold);
+        return effect;
+    }
+
+    /**
      * Consumes a Held Action: the holder acts right now, at whatever point in the
      * order the table has reached. The turn pointer is deliberately not moved.
      * @param {string} combatantId
@@ -955,14 +984,14 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const combat = this.viewed;
         const combatant = combat?.combatants.get(combatantId);
         const actor = combatant?.actor;
-        const effect = actor?.effects.find((e) => e.statuses.has("holding"));
+        const effect = combatant?.heldActionEffect;
         if (!combatant?.isOwner || !effect) return;
         const blocked = this._blockedActionReason(combatant);
         if (blocked) return void ui.notifications.warn(blocked);
         const hold = combatant.heldAction;
         await effect.delete();
         await this._recordSpentAction(combatant, hold);
-        await this._holdCard(combatant, `${actor.name} uses their Held Action.`);
+        await this._holdCard(combatant, `${actor.name} uses their Held Action in ${combat.currentPhaseLabel}.`);
     }
 
     /**
@@ -993,14 +1022,17 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     async _onReleaseHeldAction(combatantId) {
         const combatant = this.viewed?.combatants.get(combatantId);
         const actor = combatant?.actor;
-        const effect = actor?.effects.find((e) => e.statuses.has("holding"));
+        const effect = combatant?.heldActionEffect;
         if (!combatant?.isOwner || !effect) return;
         const hold = combatant.heldAction;
         await effect.delete();
         // Releasing at the held slot still forfeits that position (the banked Phase is
         // gone); releasing an event/generic hold costs nothing — the natural Phase stays
         if (hold?.mode === "position") await this._recordSpentAction(combatant, hold);
-        await this._holdCard(combatant, `${actor.name} releases their Held Action without acting.`);
+        await this._holdCard(
+            combatant,
+            `${actor.name} releases their Held Action without acting in ${this.viewed.currentPhaseLabel}.`,
+        );
     }
 
     /**
@@ -1034,7 +1066,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         // (the segment high-water mark) — the current actor merely being up has not
         // passed it; elevating above them preempts the pointer instead.
         if (!combatant.hasPhaseInSegment(combat.segment)) return null;
-        if (combatant.actor.statuses.has("holding")) return null;
+        if (combatant.heldAction) return null;
         if (combatant.spentHoldInSegment?.(combat.segment)) return null;
         if (reached) return null;
         const elevatedPriority = combat.getInitiativePriority(combatant, combat.segment) + scoped.levels;
@@ -1132,7 +1164,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         if (actor.statuses.has("stunned")) {
             return `${actor.name} is Stunned and can take no Actions — not even Aborting.`;
         }
-        if (combat?.started && actor.statuses.has("aborted")) {
+        if (combat?.started) {
             const currentAbs = combat.round * 12 + combat.segment;
             if (combatant.abortAppliesAtAbs?.(currentAbs)) {
                 const spentAbs = combatant.abortSpentAbs;
@@ -1212,7 +1244,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const combat = this.viewed;
         const actor = combatant?.actor;
         if (!combat?.started || !combatant?.isOwner || !actor) return false;
-        if (actor.statuses.has("aborted")) return false;
+        if (combatant.abortEffect) return false;
 
         if (!force) {
             const reason = this._blockedAbortReason(combatant);
@@ -1225,39 +1257,41 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         if (statusId) await this._applyAbortDefense(actor, statusId);
 
         // A held Phase absorbs the abort — no further Phases are lost (6E2 22; 5ER 361)
-        const holdingEffect = actor.effects.find((e) => e.statuses.has("holding"));
+        const holdingEffect = combatant.heldActionEffect;
         if (holdingEffect) {
             const hold = combatant.heldAction;
             await holdingEffect.delete();
             await this._recordSpentAction(combatant, hold);
             await this._holdCard(
                 combatant,
-                `${actor.name} Aborts to ${toAction} using their Held Action — no further Phase is lost.`,
+                `${actor.name} Aborts to ${toAction} using their Held Action in ${combat.currentPhaseLabel} — no further Phase is lost.`,
             );
             return true;
         }
 
-        await actor.toggleStatusEffect("aborted", { active: true });
+        const abortEffect = await this._createStatusEffectFor(actor, "aborted");
 
-        // SPD 0 has no Phase to consume; leave the bare status for the GM to adjudicate
+        // SPD 0 has no Phase to consume; bind the record (spentAbs null = until removed)
+        // and leave the cost for the GM to adjudicate
         if (combatant.combatSpd <= 0) {
-            await this._holdCard(combatant, `${actor.name} Aborts to ${toAction}.`);
+            if (abortEffect)
+                await abortEffect.setFlag(game.system.id, "abort", { spentAbs: null, combatantId: combatant.id });
+            await this._holdCard(combatant, `${actor.name} Aborts to ${toAction} in ${combat.currentPhaseLabel}.`);
             return true;
         }
 
         const { isActive, firstAbs, spentAbs, nextActAbs } = this._abortCost(combatant, { extraPhase });
-        const abortEffect = actor.effects.find((e) => e.statuses.has("aborted"));
-        if (abortEffect) await abortEffect.setFlag(game.system.id, "abort", { spentAbs });
+        if (abortEffect) await abortEffect.setFlag(game.system.id, "abort", { spentAbs, combatantId: combatant.id });
 
-        const { segmentOf } = HeroSystem6eCombatantSingle;
+        const { phaseLabel } = HeroSystem6eCombatantSingle;
         const costText = extraPhase
-            ? `their Phases in Segments ${segmentOf(firstAbs)} and ${segmentOf(spentAbs)} (Extra Phase)`
+            ? `their Phases in ${phaseLabel(firstAbs)} and ${phaseLabel(spentAbs)} (Extra Phase)`
             : isActive
-              ? "their current Phase"
-              : `their Phase in Segment ${segmentOf(spentAbs)}`;
+              ? `their current Phase (${phaseLabel(spentAbs)})`
+              : `their Phase in ${phaseLabel(spentAbs)}`;
         await this._holdCard(
             combatant,
-            `${actor.name} Aborts to ${toAction} — this consumes ${costText}; they cannot act again until Segment ${segmentOf(nextActAbs)}.`,
+            `${actor.name} Aborts to ${toAction} — this consumes ${costText}; they cannot act again until ${phaseLabel(nextActAbs)}.`,
         );
 
         if (isActive) {
@@ -1304,7 +1338,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const combatant = combat?.combatants.get(combatantId);
         const actor = combatant?.actor;
         if (!combat?.started || !combatant?.isOwner || !actor) return;
-        if (actor.statuses.has("aborted")) return;
+        if (combatant.abortEffect) return;
 
         const reason = this._blockedAbortReason(combatant);
         if (reason && !game.user.isGM) return void ui.notifications.warn(reason);
@@ -1318,7 +1352,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         }
 
         const { segmentOf, roundOf } = HeroSystem6eCombatantSingle;
-        const holding = actor.statuses.has("holding");
+        const holding = !!combatant.heldAction;
         let costLine;
         if (holding) {
             costLine = "The Held Action will be spent — no further Phase is lost.";
@@ -1393,8 +1427,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      */
     async _onCancelAbort(combatantId) {
         const combatant = this.viewed?.combatants.get(combatantId);
-        const actor = combatant?.actor;
-        if (!combatant?.isOwner || !actor?.statuses.has("aborted")) return;
-        await actor.toggleStatusEffect("aborted", { active: false });
+        const effect = combatant?.abortEffect;
+        if (!combatant?.isOwner || !effect) return;
+        await effect.delete();
     }
 }

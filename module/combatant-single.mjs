@@ -48,6 +48,15 @@ export class HeroSystem6eCombatantSingle extends Combatant {
     }
 
     /**
+     * Human-readable combat position for chat cards.
+     * @param {number} abs
+     * @returns {string} e.g. "Segment 4 of Turn 2"
+     */
+    static phaseLabel(abs) {
+        return `Segment ${HeroSystem6eCombatantSingle.segmentOf(abs)} of Turn ${HeroSystem6eCombatantSingle.roundOf(abs)}`;
+    }
+
+    /**
      * The first absolute segment at or after fromAbs in which the given SPD has a Phase.
      * @param {number} spd
      * @param {number} fromAbs
@@ -63,14 +72,43 @@ export class HeroSystem6eCombatantSingle extends Combatant {
     }
 
     /**
+     * Holding/aborted effects live on the actor, which linked tokens share; records
+     * without a combatant binding are only trustworthy when this actor fields a
+     * single combatant in this combat.
+     * @returns {boolean}
+     */
+    get isSoleCombatantForActor() {
+        const siblings = this.combat?.combatants.filter((c) => c.actorId === this.actorId) ?? [];
+        return siblings.length <= 1;
+    }
+
+    /**
+     * The ActiveEffect carrying THIS combatant's Held Action, or null. Declarations
+     * record the declaring combatant's id on the hold flag; effects without one
+     * (legacy declarations, bare token-HUD toggles) count only when unambiguous.
+     * @type {ActiveEffect|null}
+     */
+    get heldActionEffect() {
+        let unbound = null;
+        for (const effect of this.actor?.effects ?? []) {
+            if (!effect.statuses.has("holding")) continue;
+            const hold = effect.getFlag(game.system.id, "hold");
+            if (hold?.combatantId === this.id) return effect;
+            if (!hold?.combatantId) unbound ??= effect;
+        }
+        return unbound && this.isSoleCombatantForActor ? unbound : null;
+    }
+
+    /**
      * Details of this combatant's Held Action (6E2 20-21; 5ER 360-361), or null when
      * not holding. Declared via the tracker's Hold Action dialog, which stores the
      * declaration on the holding effect; a bare holding status (e.g. token HUD toggle)
      * counts as a generic hold.
-     * @type {{mode: "position"|"event"|"generic", segmentAbs?: number, dex?: number, trigger?: string}|null}
+     * @type {{mode: "position"|"event"|"generic", segmentAbs?: number, dex?: number, trigger?: string,
+     *         fraction?: number, declaredAbs?: number, id?: string, combatantId?: string}|null}
      */
     get heldAction() {
-        const effect = this.actor?.effects.find((e) => e.statuses.has("holding"));
+        const effect = this.heldActionEffect;
         if (!effect) return null;
         return effect.getFlag(game.system.id, "hold") ?? { mode: "generic" };
     }
@@ -170,14 +208,30 @@ export class HeroSystem6eCombatantSingle extends Combatant {
     }
 
     /**
+     * The ActiveEffect carrying THIS combatant's abort, or null. Same binding rules
+     * as {@link heldActionEffect}: unbound records only count when this actor fields
+     * a single combatant in this combat.
+     * @type {ActiveEffect|null}
+     */
+    get abortEffect() {
+        let unbound = null;
+        for (const effect of this.actor?.effects ?? []) {
+            if (!effect.statuses.has("aborted")) continue;
+            const abort = effect.getFlag(game.system.id, "abort");
+            if (abort?.combatantId === this.id) return effect;
+            if (!abort?.combatantId) unbound ??= effect;
+        }
+        return unbound && this.isSoleCombatantForActor ? unbound : null;
+    }
+
+    /**
      * The absolute segment of the Phase this combatant's abort consumes, recorded at
      * declaration (6E2 22: aborting uses the NEXT full Phase). Null for aborts applied
      * without the tracker (bare status toggles), which fall back to segment matching.
      * @type {number|null}
      */
     get abortSpentAbs() {
-        const effect = this.actor?.effects.find((e) => e.statuses.has("aborted"));
-        return effect?.getFlag(game.system.id, "abort")?.spentAbs ?? null;
+        return this.abortEffect?.getFlag(game.system.id, "abort")?.spentAbs ?? null;
     }
 
     /**
@@ -190,8 +244,9 @@ export class HeroSystem6eCombatantSingle extends Combatant {
      * @returns {boolean}
      */
     abortAppliesAtAbs(abs) {
-        if (!this.actor?.statuses.has("aborted")) return false;
-        const spentAbs = this.abortSpentAbs;
+        const effect = this.abortEffect;
+        if (!effect) return false;
+        const spentAbs = effect.getFlag(game.system.id, "abort")?.spentAbs ?? null;
         return spentAbs === null || abs <= spentAbs;
     }
 

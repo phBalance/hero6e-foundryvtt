@@ -16,6 +16,16 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
+     * The current combat position for chat cards, e.g. "Segment 4 of Turn 2".
+     * @type {string}
+     */
+    get currentPhaseLabel() {
+        return HeroSystem6eCombatantSingle.phaseLabel(
+            HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment),
+        );
+    }
+
+    /**
      * Rolls a fresh 0-99 initiative tie-breaker for every combatant. Rolls are keyed by
      * root actor id so every token of the same base actor shares one roll and therefore
      * ties on the same DEX, letting the tracker group them.
@@ -234,9 +244,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         if ((this.settings?.skipDefeated ?? false) && combatant.isOutOfCombat) return false;
         const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
         const abs = queryAbs ?? currentAbs + ((segment - this.segment + 12) % 12);
-        if (!ignoreAbort && actor.statuses.has("aborted")) {
-            if (combatant.abortAppliesAtAbs?.(abs) ?? true) return false;
-        }
+        if (!ignoreAbort && (combatant.abortAppliesAtAbs?.(abs) ?? actor.statuses.has("aborted"))) return false;
         // A spent hold already consumed this segment's action (using a Held Action
         // replaces the Phase: he cannot have two Phases in one Segment, 6E2 20)
         if (combatant.spentHoldAtAbs?.(abs)) return false;
@@ -340,10 +348,10 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (c.id === activeId) return false;
             if (c.lrElevatedAbs === currentAbs) return false;
             if (!c.hasPhaseInSegment(this.segment)) return false;
-            if (actor.statuses.has("holding")) return false;
+            if (c.heldAction) return false;
             if (c.spentHoldInSegment?.(this.segment)) return false;
             if (actor.statuses.has("stunned")) return false;
-            if (actor.statuses.has("aborted") && (c.abortAppliesAtAbs?.(currentAbs) ?? true)) return false;
+            if (c.abortAppliesAtAbs?.(currentAbs) ?? actor.statuses.has("aborted")) return false;
             if ((this.settings?.skipDefeated ?? false) && c.isOutOfCombat) return false;
             return true;
         });
@@ -623,7 +631,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const abortSpentIds = new Set(
             allCombatants
                 .filter((c) => {
-                    if (!(c.actor?.statuses.has("aborted") ?? false)) return false;
+                    if (!c.abortEffect) return false;
                     // Declared aborts record the exact Phase they consume; bare statuses
                     // fall back to matching the ending segment
                     const spentAbs = c.abortSpentAbs;
@@ -645,7 +653,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
             const scanAbs = nextRoundCycle * 12 + nextSegment;
             const foundActors = allCombatants.filter((c) => {
-                if ((c.actor?.statuses.has("aborted") ?? false) && !abortSpentIds.has(c.id)) {
+                if (c.abortEffect && !abortSpentIds.has(c.id)) {
                     const spentAbs = c.abortSpentAbs;
                     const spendsHere =
                         spentAbs !== null ? spentAbs <= scanAbs : c.hasPhaseInSegment(nextSegment, scanAbs);
@@ -1392,23 +1400,24 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (!this.started) return;
         const combatant = this.combatant;
         const actor = combatant?.actor;
-        if (!actor?.statuses.has("holding")) return;
+        const hold = combatant?.heldAction;
+        if (!actor || !hold) return;
         if (combatant.id === previousCombatantId) {
-            const declaredAbs = combatant.heldAction?.declaredAbs;
+            const declaredAbs = hold.declaredAbs;
             const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
             if (declaredAbs === undefined || declaredAbs >= currentAbs) return;
         }
         if (!combatant.hasPhaseInSegment(this.segment)) return;
         // Positional holds expire with their slot, never at a natural Phase
-        if (combatant.heldAction?.mode === "position") return;
+        if (hold.mode === "position") return;
 
-        const holdingEffect = actor.effects.find((e) => e.statuses.has("holding"));
+        const holdingEffect = combatant.heldActionEffect;
         if (!holdingEffect) return;
         await holdingEffect.delete();
 
         await this._combatCard(
             combatant,
-            `${actor.name}'s Held Action was replaced by their natural Phase in Segment ${this.segment}.`,
+            `${actor.name}'s Held Action was replaced by their natural Phase in ${this.currentPhaseLabel}.`,
         );
     }
 
@@ -1524,9 +1533,9 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async _spendHold(combatant, { used = false, retainPosition = true } = {}) {
         const actor = combatant.actor;
-        const effect = actor?.effects.find((e) => e.statuses.has("holding"));
+        const effect = combatant.heldActionEffect;
         const hold = combatant.heldAction;
-        if (!effect || !hold) return;
+        if (!actor || !effect || !hold) return;
         await effect.delete();
         if (retainPosition && hold.mode === "position") {
             await combatant.setFlag(game.system.id, "spentHoldPosition", {
@@ -1537,8 +1546,8 @@ export class HeroSystem6eCombatSingle extends Combat {
         await this._combatCard(
             combatant,
             used
-                ? `${actor.name} used their Held Action.`
-                : `${actor.name}'s held turn passed without being used; the Held Action is spent.`,
+                ? `${actor.name} used their Held Action in ${this.currentPhaseLabel}.`
+                : `${actor.name}'s held turn passed without being used; the Held Action is spent (${this.currentPhaseLabel}).`,
         );
     }
 
@@ -1554,11 +1563,11 @@ export class HeroSystem6eCombatSingle extends Combat {
     async _consumeExpiredHeldActions(segment) {
         for (const combatant of this.combatants) {
             const actor = combatant.actor;
-            if (!actor?.statuses.has("holding")) continue;
+            if (!actor || !combatant.heldAction) continue;
             // segment === null: a full Turn elapsed, so every SPD 1-12 had a Phase
             if (segment !== null && !combatant.hasPhaseInSegment(segment)) continue;
 
-            const holdingEffect = actor.effects.find((e) => e.statuses.has("holding"));
+            const holdingEffect = combatant.heldActionEffect;
             if (!holdingEffect) continue;
 
             // The hold is consumed by the rule, not by a duration, so delete it explicitly
@@ -1566,7 +1575,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
             await this._combatCard(
                 combatant,
-                `${actor.name}'s Held Action was consumed by their natural Phase${segment !== null ? ` in Segment ${segment}` : ""}.`,
+                `${actor.name}'s Held Action was consumed by their natural Phase${segment !== null ? ` in ${this.currentPhaseLabel}` : ""}.`,
             );
         }
     }
@@ -1585,7 +1594,8 @@ export class HeroSystem6eCombatSingle extends Combat {
         const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
         for (const combatant of this.combatants) {
             const actor = combatant.actor;
-            if (!actor?.statuses.has("aborted")) continue;
+            const abortedEffect = combatant.abortEffect;
+            if (!actor || !abortedEffect) continue;
             const spentAbs = combatant.abortSpentAbs;
             if (spentAbs !== null) {
                 // The spent Phase's segment must have fully passed
@@ -1594,14 +1604,11 @@ export class HeroSystem6eCombatSingle extends Combat {
                 continue;
             }
 
-            const abortedEffect = actor.effects.find((e) => e.statuses.has("aborted"));
-            if (!abortedEffect) continue;
-
             await abortedEffect.delete();
 
             await this._combatCard(
                 combatant,
-                `${actor.name}'s aborted Phase has passed; they may act again on their next Phase.`,
+                `${actor.name}'s aborted Phase has passed (now ${this.currentPhaseLabel}); they may act again on their next Phase.`,
             );
         }
     }
@@ -1745,9 +1752,7 @@ export async function migrateCombatsToSingleCombatantTracker({ dryRun = false, f
     }
     let singleTrackerActive = false;
     try {
-        singleTrackerActive =
-            game.settings.get(game.system.id, "alphaTesting") &&
-            game.settings.get(game.system.id, "singleCombatantTracker");
+        singleTrackerActive = game.settings.get(game.system.id, "singleCombatantTracker");
     } catch (e) {
         console.warn(`Unable to read the single combatant tracker settings`, e);
     }

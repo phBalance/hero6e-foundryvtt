@@ -586,6 +586,14 @@ export default class SettingsHelpers {
             requiresReload: true,
         });
 
+        // One-time GM reminder that singleCombatantTracker applies world-wide (#4553)
+        game.settings.register(module, "singleTrackerWorldNoticeShown", {
+            scope: "world",
+            config: false,
+            type: Boolean,
+            default: false,
+        });
+
         // All-In-One: combined ToHit/Damage/ApplyDamage into a single chatcard
         // game.settings.register(module, "allInOneToHitDamageApply", {
         //     name: "All In One",
