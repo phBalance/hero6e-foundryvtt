@@ -98,6 +98,14 @@ body.theme-light .combat-tracker,
     display: none;
 }
 
+/* Core indents any list that reaches 100 entries (ol:has(> li:nth-of-type(100))
+   in the base sheet styles); the timeline renders every member row even while
+   collapsed, so long combats cross that threshold and pick up stray left
+   padding. Higher specificity, no !important needed. */
+ol.combat-tracker.plain {
+    padding-left: 0;
+}
+
 /* 1. SHARED STRUCTURAL HEADER ROW LAYOUT */
 .combat-tracker .combatant.hero-timeline-header-row {
     min-height: 26px !important;
