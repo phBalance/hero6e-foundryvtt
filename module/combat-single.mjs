@@ -35,9 +35,9 @@ export class HeroSystem6eCombatSingle extends Combat {
     /**
      * Append-only audit log of what happened in this combat, stored as an object
      * flag keyed by zero-padded sequence (`e000042`) so each append writes a single
-     * flag path (tiny socket diffs) and pruning uses deletion keys — a flag ARRAY
-     * would be replaced wholesale on every write. Events are generic envelopes so
-     * the log can grow into a full audit record (actions, damage, resources):
+     * flag path (tiny socket diffs) — a flag ARRAY would be replaced wholesale on
+     * every write. Events are generic envelopes so the log can grow into a full
+     * audit record (actions, damage, resources):
      *
      *   { t, abs, round, segment, ts, userId,
      *     combatantId?, actorId?, name?, img?, priority?,   // denormalized snapshot
@@ -45,7 +45,8 @@ export class HeroSystem6eCombatSingle extends Combat {
      *
      * The name/img/priority snapshot lets the tracker render history rows for
      * combatants that have since been removed. Rewinds APPEND a `rewind` event;
-     * history is never deleted by turn flow (only by combat reset and pruning).
+     * history is never deleted by turn flow — the log lives and dies with the
+     * combat document (End Combat deletes it; a rewind past the start purges it).
      */
 
     /**
@@ -129,9 +130,9 @@ export class HeroSystem6eCombatSingle extends Combat {
 
     /**
      * Appends events to the combat ledger. Non-GM clients relay through the GM
-     * (players cannot write combat flags); the GM path also prunes the oldest
-     * events once the log exceeds its cap — but never inside the tracker's
-     * two-Turn history window.
+     * (players cannot write combat flags). The log is never pruned — it lives
+     * and dies with the combat document (deleted on End Combat; purged by a
+     * rewind past the start).
      * @param {object[]} events
      * @returns {Promise<void>}
      */
@@ -141,25 +142,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             this._requestGmTurnAction("logCombatEvent", { events });
             return;
         }
-        const payload = this.eventLogAppendPayload(events);
-
-        let cap = 1000;
-        try {
-            cap = game.settings.get(game.system.id, "combatLogMaxEvents") ?? 1000;
-        } catch (e) {
-            console.warn(`Unable to read the combat log cap setting`, e);
-        }
-        const log = this.getFlag(game.system.id, "eventLog") ?? {};
-        const keys = Object.keys(log);
-        if (cap > 0 && keys.length + events.length > cap * 1.1) {
-            const protectedAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment) - 24;
-            const prunable = keys.filter((key) => (log[key]?.abs ?? 0) < protectedAbs).sort();
-            const excess = keys.length + events.length - cap;
-            for (const key of prunable.slice(0, Math.max(0, excess))) {
-                payload[`flags.${game.system.id}.eventLog.-=${key}`] = null;
-            }
-        }
-        await this.update(payload);
+        await this.update(this.eventLogAppendPayload(events));
     }
 
     /**
