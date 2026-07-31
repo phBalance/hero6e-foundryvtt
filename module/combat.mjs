@@ -1669,18 +1669,25 @@ export class HeroSystem6eCombat extends Combat {
  * single-combatant trackers. V14 only (viewedDocuments does not exist earlier).
  * @returns {Promise<void>}
  */
+// Regions already offered for deletion this session. Marked BEFORE each prompt
+// awaits: the single tracker asks at every Phase start, and rapid advances
+// (quench loops, End Turn spam) would otherwise queue an unbounded stack of
+// modal dialogs for the same region. A declined region stays deletable by hand.
+const promptedAoeRegionUuids = new Set();
+
 export async function promptToDeleteAoeInstantRegions() {
     if (!HeroCompatibility.isV14) return;
 
     // We only care about AoEs
     const regionsToPrompt = Array.from(canvas.regions.viewedDocuments()).filter(
-        (template) => template.flags[game.system.id]?.purpose === "AoE",
+        (template) => template.flags[game.system.id]?.purpose === "AoE" && !promptedAoeRegionUuids.has(template.uuid),
     );
     for (const region of regionsToPrompt) {
         // Make sure item the region is associated with an INSTANT effectiveItem
         const effectiveItem = rehydrateAttackItem(region.flags[game.system.id].effectiveItemJson).item;
         const duration = effectiveItem.system.duration;
         if (duration === CONFIG.HERO.DURATION_TYPES.INSTANT) {
+            promptedAoeRegionUuids.add(region.uuid);
             const proceed = await foundry.applications.api.DialogV2.confirm({
                 window: {
                     title: `Delete region ${region.name}?`,
