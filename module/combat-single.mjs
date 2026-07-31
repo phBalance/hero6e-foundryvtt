@@ -434,11 +434,12 @@ export class HeroSystem6eCombatSingle extends Combat {
         const tieBreakerFraction = tieBreakerRoll * 0.01;
 
         if (positionalHold) {
-            // The declared DEX is the exact acting position: LR and maneuver offsets don't move it
-            return (positionalHold.dex ?? baseScore) + tieBreakerFraction;
+            // The declared DEX is the exact acting position: LR and maneuver offsets
+            // don't move it, and an explicitly declared decimal pins the tie-break
+            return (positionalHold.dex ?? baseScore) + (positionalHold.fraction ?? tieBreakerFraction);
         }
         if (spentHold) {
-            return (spentHold.dex ?? baseScore) + tieBreakerFraction;
+            return (spentHold.dex ?? baseScore) + (spentHold.fraction ?? tieBreakerFraction);
         }
 
         let maneuverOffset = 0;
@@ -1652,7 +1653,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 // spent positional holds are never re-carded
                 await this._maintainSpdChanges();
                 await this._clearSpentHoldPositions();
-                await this._clearPassedPositionalHolds();
+                await this._demotePassedPositionalHolds();
                 if (turnAdvance) await this._consumeExpiredHeldActions(null);
                 await this._clearExpiredAborts(elapsedSegments);
                 await this._consumeActiveCombatantHold(prevId);
@@ -1675,7 +1676,8 @@ export class HeroSystem6eCombatSingle extends Combat {
 
             // A positional hold is spent the moment its held turn ends within the same
             // segment — used if the pointer actually took the slot, forfeit if it was
-            // passed over; cross-segment endings go through _clearPassedPositionalHolds.
+            // passed over it demotes to a generic hold; cross-segment endings go through
+            // _demotePassedPositionalHolds.
             // A hold declared THIS segment hasn't had its slot yet (the ending turn was
             // the declarer's natural Phase), so declaredAbs === currentAbs is exempt
             // unless the slot was taken.
@@ -1687,7 +1689,9 @@ export class HeroSystem6eCombatSingle extends Combat {
                     if (slotTaken) {
                         this._spendHold(previousCombatant, { used: true }).catch((e) => console.error(e));
                     } else if (hold.declaredAbs !== currentAbs) {
-                        this._spendHold(previousCombatant).catch((e) => console.error(e));
+                        // The slot passed unused: the banked Phase persists as a
+                        // generic hold until the null zone
+                        this._demoteHold(previousCombatant).catch((e) => console.error(e));
                     }
                 }
             }
@@ -1823,22 +1827,59 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
-     * Clears positional Held Actions whose declared segment has been left behind:
-     * the held turn came and went without the holder acting, so the hold is spent.
-     * Within-segment passes are caught by the previous-combatant check in _onUpdate;
-     * event/generic holds are unaffected (they expire at the null zone instead).
+     * Handles positional Held Actions whose declared segment has been left behind.
+     * A slot the pointer actually took is spent; a slot that passed UNUSED demotes
+     * to a generic hold — the banked Phase persists until the null zone (6E2 20-21:
+     * the hold is only lost when the segment of the holder's next natural Phase
+     * begins, handled by _consumeActiveCombatantHold / _consumeExpiredHeldActions).
+     * Within-segment passes are caught by the previous-combatant check in _onUpdate.
      * @private
      */
-    async _clearPassedPositionalHolds() {
+    async _demotePassedPositionalHolds() {
         if (!this.started) return;
         const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
         for (const combatant of this.combatants) {
             const hold = combatant.heldAction;
             if (hold?.mode !== "position" || hold.segmentAbs >= currentAbs) continue;
             const used = combatant.getFlag(game.system.id, "heldSlotTakenAbs") === hold.segmentAbs;
-            // The segment moved on, so there is no acted position left to display
-            await this._spendHold(combatant, { used, retainPosition: false });
+            if (used) {
+                // The segment moved on, so there is no acted position left to display
+                await this._spendHold(combatant, { used: true, retainPosition: false });
+            } else {
+                await this._demoteHold(combatant);
+            }
         }
+    }
+
+    /**
+     * Converts an unused positional hold into a generic one: the declared slot
+     * passed, but the banked Phase survives to the null zone.
+     * @param {Combatant} combatant
+     * @private
+     */
+    async _demoteHold(combatant) {
+        const effect = combatant.heldActionEffect;
+        const hold = combatant.heldAction;
+        if (!effect || hold?.mode !== "position") return;
+        await effect.update({
+            [`flags.${game.system.id}.hold`]: {
+                mode: "generic",
+                "-=segmentAbs": null,
+                "-=dex": null,
+                "-=fraction": null,
+                demotedFrom: { segmentAbs: hold.segmentAbs, dex: hold.dex },
+            },
+        });
+        await combatant.update({ [`flags.${game.system.id}.heldSlotTakenAbs`]: null });
+        const actor = combatant.actor;
+        await this._combatCard(
+            combatant,
+            `${actor?.name}'s held position (DEX ${hold.dex} in ${HeroSystem6eCombatantSingle.phaseLabel(hold.segmentAbs)}) passed without being used; the Held Action is banked until their next Phase.`,
+        );
+        await this.logEvent("hold.demote", {
+            combatant,
+            data: { segmentAbs: hold.segmentAbs, dex: hold.dex ?? null },
+        });
     }
 
     /**
@@ -1877,12 +1918,18 @@ export class HeroSystem6eCombatSingle extends Combat {
         const hold = combatant.heldAction;
         if (!actor || !effect || !hold) return;
         await effect.delete();
+        const spendUpdate = {
+            // A stale slot-taken marker would spend the NEXT hold declared this segment
+            [`flags.${game.system.id}.heldSlotTakenAbs`]: null,
+        };
         if (retainPosition && hold.mode === "position") {
-            await combatant.setFlag(game.system.id, "spentHoldPosition", {
+            spendUpdate[`flags.${game.system.id}.spentHoldPosition`] = {
                 segmentAbs: hold.segmentAbs,
                 dex: hold.dex,
-            });
+                ...(hold.fraction !== undefined ? { fraction: hold.fraction } : {}),
+            };
         }
+        await combatant.update(spendUpdate);
         await this._combatCard(
             combatant,
             used

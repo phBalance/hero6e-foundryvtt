@@ -250,11 +250,16 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 if (!c.actor) return false;
                 // Core filters hidden combatants out of player-facing turns; match it here
                 if (c.hidden && !game.user.isGM) return false;
+                // A positional Held Action commits the banked Phase to exactly its
+                // declared slot — natural Phases don't render while one is pending
+                // (mirrors occupiesSegment; also stops double rows feeding #4557)
+                if (c.heldAction?.mode === "position") {
+                    return !isPast && (c.holdsPositionAtAbs(abs) || c.spentHoldAtAbs(abs));
+                }
                 if (c.hasPhaseInSegment(segment)) return true;
-                // A positional Held Action occupies exactly its declared slot, and a spent
-                // hold keeps displaying at the acted position until the segment ends;
-                // event/generic holds render in the Held Actions panel instead
-                return !isPast && (c.holdsPositionAtAbs(abs) || c.spentHoldAtAbs(abs));
+                // A spent hold keeps displaying at the acted position until the
+                // segment ends; event/generic holds render in the panel instead
+                return !isPast && c.spentHoldAtAbs(abs);
             });
         };
 
@@ -816,6 +821,20 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 onClick: (event, li) => this._onUseHeldAction(li.dataset.combatantId),
             },
             {
+                label: "Re-declare Hold…",
+                icon: "fa-solid fa-hourglass-half",
+                visible: (li) => {
+                    const combatant = getCombatant(li);
+                    if (!combatant?.isOwner || !combatant.heldAction) return false;
+                    // The banked Phase can be re-pointed when its moment arrives: the
+                    // pointer is on the holder (held-slot interrupt) or the hold waits
+                    // in the panel; the GM may re-point at any time
+                    if (game.user.isGM) return true;
+                    return this.viewed?.combatant?.id === combatant.id || combatant.heldAction.mode !== "position";
+                },
+                onClick: (event, li) => this._onRedeclareHoldAction(li.dataset.combatantId),
+            },
+            {
                 label: "Release Hold",
                 icon: "fa-solid fa-hand",
                 visible: (li) => {
@@ -883,31 +902,46 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     }
 
     /**
-     * Opens the Hold Action declaration dialog (6E2 20-21; 5ER 360-361) and applies the
-     * chosen hold: a position (segment + DEX, validated against the null zone by only
-     * offering legal segments), an event trigger, or a generic hold.
-     * @param {string} combatantId
-     * @protected
+     * Whether the combatant has already used their action this Segment: they spent
+     * a Held Action here, or their turn in the sorted order has already passed.
+     * @param {Combatant} combatant
+     * @returns {boolean}
+     * @private
      */
-    async _onDeclareHoldAction(combatantId) {
+    _actedThisSegment(combatant) {
         const combat = this.viewed;
-        const combatant = combat?.combatants.get(combatantId);
-        const actor = combatant?.actor;
-        if (!combat?.started || !combatant?.isOwner || !actor) return;
-        if (combatant.heldAction) return;
-        const blocked = this._blockedActionReason(combatant);
-        if (blocked) return void ui.notifications.warn(blocked);
-        // Holds are declared on the character's own Phase (6E2 20); the GM may backfill
-        if (!game.user.isGM && combat.combatant?.id !== combatant.id) {
-            return void ui.notifications.warn(`Held Actions are declared on the character's own Phase.`);
-        }
+        if (!combat?.started) return false;
+        const turnIndex = combat.turns?.findIndex((t) => t.id === combatant.id) ?? -1;
+        return (
+            combatant.spentHoldInSegment(combat.segment) ||
+            (combatant.occupiesSegment?.(combat.segment) && turnIndex !== -1 && turnIndex < (combat.turn ?? 0))
+        );
+    }
 
+    /**
+     * The shared Hold Action dialog (6E2 20-21; 5ER 360-361): a position (segment +
+     * DEX, only legal segments offered per the null zone), an event trigger, or a
+     * generic hold. A decimal DEX (e.g. 13.12) pins the exact tie-break position;
+     * whole numbers keep the segment's random tie-break roll.
+     * @param {Combatant} combatant
+     * @param {object} [options]
+     * @param {string} [options.title] - Dialog title prefix
+     * @param {object} [options.initial] - Existing hold to prefill (re-declare)
+     * @returns {Promise<{mode: string, segmentAbs?: number, dex?: number, fraction?: number,
+     *                    trigger?: string}|null>}
+     * @private
+     */
+    async _holdDeclarationDialog(combatant, { title = "Hold Action", initial = null } = {}) {
+        const combat = this.viewed;
+        const actor = combatant.actor;
         const currentAbs = combat.round * 12 + combat.segment;
         const characteristicKey = actor.system?.initiativeCharacteristic ?? "dex";
         const ownDex = actor.system?.characteristics?.[characteristicKey]?.value ?? 10;
         // Only unrestricted All Actions LR raises the holding position — holding is
         // not the scoped action a restricted purchase was bought for
         const actingDex = ownDex + (combatant.lightningReflexes?.always ?? 0);
+        // Same-segment holds must slot below the position the count has reached
+        const actingThreshold = combat.getFlag(game.system.id, "actingPriority") ?? actingDex;
 
         // Legal window: from now up to (not including) the segment of the next natural
         // Phase — a Held Action is lost the moment that segment begins (null zone)
@@ -923,30 +957,44 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             });
         }
 
+        const defaultDexValue =
+            initial?.mode === "position" && initial.dex !== undefined
+                ? initial.fraction !== undefined
+                    ? (initial.dex + initial.fraction).toFixed(2)
+                    : String(initial.dex)
+                : String(Math.max(0, ownDex - 1));
+        const initialSegmentAbs = initial?.mode === "position" ? initial.segmentAbs : null;
+        const checkedMode = initial?.mode ?? (segmentChoices.length ? "position" : "event");
+
         const positionOption = segmentChoices.length
-            ? `<label><input type="radio" name="hold-mode" value="position" checked> Until a position</label>
+            ? `<label><input type="radio" name="hold-mode" value="position" ${checkedMode === "position" ? "checked" : ""}> Until a position</label>
                <div class="form-group">
                    <label>Segment</label>
                    <select name="hold-segment">${segmentChoices
-                       .map((choice) => `<option value="${choice.abs}">${choice.label}</option>`)
+                       .map(
+                           (choice) =>
+                               `<option value="${choice.abs}" ${choice.abs === initialSegmentAbs ? "selected" : ""}>${choice.label}</option>`,
+                       )
                        .join("")}</select>
                    <label>DEX</label>
-                   <input type="number" name="hold-dex" value="${ownDex}" min="0" max="99" step="1">
-               </div>`
+                   <input type="number" name="hold-dex" value="${defaultDexValue}" min="0" max="99.99" step="0.01">
+               </div>
+               <p class="hint">Decimals pin the exact tie-break position (e.g. 13.12); whole numbers get a random tie-break.</p>`
             : "";
 
+        const escapeHTML = foundry.utils.escapeHTML ?? ((value) => Handlebars.escapeExpression(value));
         const content = `<fieldset class="hero-hold-dialog">
             <legend>Hold until</legend>
             ${positionOption}
-            <label><input type="radio" name="hold-mode" value="event" ${positionOption ? "" : "checked"}> An event</label>
+            <label><input type="radio" name="hold-mode" value="event" ${checkedMode === "event" || (!positionOption && checkedMode !== "generic") ? "checked" : ""}> An event</label>
             <div class="form-group">
-                <input type="text" name="hold-trigger" placeholder="e.g. if the guard turns around">
+                <input type="text" name="hold-trigger" placeholder="e.g. if the guard turns around" value="${escapeHTML(initial?.trigger ?? "")}">
             </div>
-            <label><input type="radio" name="hold-mode" value="generic"> Generic (no precondition — GM discretion)</label>
+            <label><input type="radio" name="hold-mode" value="generic" ${checkedMode === "generic" ? "checked" : ""}> Generic (no precondition — GM discretion)</label>
         </fieldset>`;
 
         const result = await foundry.applications.api.DialogV2.wait({
-            window: { title: `Hold Action — ${actor.name}` },
+            window: { title: `${title} — ${actor.name}` },
             content,
             buttons: [
                 {
@@ -958,7 +1006,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         return {
                             mode: form["hold-mode"].value,
                             segmentAbs: parseInt(form["hold-segment"]?.value),
-                            dex: parseInt(form["hold-dex"]?.value),
+                            dexRaw: parseFloat(form["hold-dex"]?.value),
                             trigger: form["hold-trigger"]?.value.trim() ?? "",
                         };
                     },
@@ -967,27 +1015,79 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             ],
             rejectClose: false,
         });
-        if (!result || result === "cancel") return;
+        if (!result || result === "cancel") return null;
 
-        let hold;
-        let description;
-        const identity = { id: foundry.utils.randomID(), combatantId: combatant.id };
         if (result.mode === "position") {
             const segmentAbs = Number.isFinite(result.segmentAbs) ? result.segmentAbs : currentAbs;
-            const dex = Number.isFinite(result.dex) ? result.dex : ownDex;
-            if (segmentAbs === currentAbs && dex >= actingDex) {
-                ui.notifications.warn(`A same-segment hold must target a DEX below ${actingDex}.`);
-                return;
+            const dexRaw = Number.isFinite(result.dexRaw) ? result.dexRaw : Math.max(0, ownDex - 1);
+            const dex = Math.floor(dexRaw);
+            const fraction = Number.isInteger(dexRaw) ? undefined : Math.round((dexRaw - dex) * 100) / 100;
+            // An integer entry is judged pessimistically: its random fraction could
+            // land anywhere below the next whole DEX
+            const effective = dex + (fraction ?? 1);
+            if (segmentAbs === currentAbs && effective >= actingThreshold) {
+                ui.notifications.warn(
+                    `A same-segment hold must slot below the current acting position (${actingThreshold.toFixed(2)}).`,
+                );
+                return null;
             }
-            hold = { mode: "position", segmentAbs, dex, declaredAbs: currentAbs, ...identity };
-            description = `until DEX ${dex} in ${HeroSystem6eCombatantSingle.phaseLabel(segmentAbs)}`;
-        } else if (result.mode === "event") {
-            hold = { mode: "event", trigger: result.trigger, declaredAbs: currentAbs, ...identity };
-            description = result.trigger ? `— until: ${result.trigger}` : "until a declared event";
-        } else {
-            hold = { mode: "generic", declaredAbs: currentAbs, ...identity };
-            description = "with no declared condition";
+            return { mode: "position", segmentAbs, dex, ...(fraction !== undefined ? { fraction } : {}) };
         }
+        if (result.mode === "event") return { mode: "event", trigger: result.trigger };
+        return { mode: "generic" };
+    }
+
+    /**
+     * Declares a fresh Held Action for the combatant and ends their turn.
+     * @param {string} combatantId
+     * @protected
+     */
+    async _onDeclareHoldAction(combatantId) {
+        const combat = this.viewed;
+        const combatant = combat?.combatants.get(combatantId);
+        const actor = combatant?.actor;
+        if (!combat?.started || !combatant?.isOwner || !actor) return;
+        if (combatant.heldAction) return;
+        const blocked = this._blockedActionReason(combatant);
+        if (blocked) return void ui.notifications.warn(blocked);
+        // Holds are declared on the character's own Phase (6E2 20); the GM may backfill
+        if (!game.user.isGM && combat.combatant?.id !== combatant.id) {
+            return void ui.notifications.warn(`Held Actions are declared on the character's own Phase.`);
+        }
+        // One banked Phase, ever (6E2 20): a combatant who already used this Segment's
+        // action cannot bank another
+        if (this._actedThisSegment(combatant)) {
+            if (!game.user.isGM) {
+                return void ui.notifications.warn(
+                    `${actor.name} has already acted this Segment and cannot declare a Held Action.`,
+                );
+            }
+            const proceed = await foundry.applications.api.DialogV2.confirm({
+                window: { title: `Hold Action — ${actor.name}` },
+                content: `<p>${actor.name} has already acted this Segment. Declare a Held Action anyway?</p>`,
+                rejectClose: false,
+            });
+            if (!proceed) return;
+        }
+
+        const currentAbs = combat.round * 12 + combat.segment;
+        const choice = await this._holdDeclarationDialog(combatant);
+        if (!choice) return;
+
+        const hold = {
+            ...choice,
+            declaredAbs: currentAbs,
+            id: foundry.utils.randomID(),
+            combatantId: combatant.id,
+        };
+        const description =
+            hold.mode === "position"
+                ? `until DEX ${hold.fraction !== undefined ? (hold.dex + hold.fraction).toFixed(2) : hold.dex} in ${HeroSystem6eCombatantSingle.phaseLabel(hold.segmentAbs)}`
+                : hold.mode === "event"
+                  ? hold.trigger
+                      ? `— until: ${hold.trigger}`
+                      : "until a declared event"
+                  : "with no declared condition";
 
         await this._applyHoldingEffect(combatant, hold);
         await this._holdCard(
@@ -1000,6 +1100,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 mode: hold.mode,
                 segmentAbs: hold.segmentAbs ?? null,
                 dex: hold.dex ?? null,
+                fraction: hold.fraction ?? null,
                 trigger: hold.trigger ?? null,
             },
         });
@@ -1012,6 +1113,67 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 console.warn(`Unable to advance the turn after declaring a hold`, e);
             }
         }
+    }
+
+    /**
+     * Re-declares an existing Held Action in place — the banked Phase moves to a new
+     * position/condition without being spent and without granting a new Phase. The
+     * null-zone window is recomputed from the current position; declaredAbs is
+     * refreshed so the hold expires relative to the re-declaration.
+     * @param {string} combatantId
+     * @protected
+     */
+    async _onRedeclareHoldAction(combatantId) {
+        const combat = this.viewed;
+        const combatant = combat?.combatants.get(combatantId);
+        const effect = combatant?.heldActionEffect;
+        if (!combat?.started || !combatant?.isOwner || !effect) return;
+        const blocked = this._blockedActionReason(combatant);
+        if (blocked) return void ui.notifications.warn(blocked);
+
+        const currentAbs = combat.round * 12 + combat.segment;
+        const existing = combatant.heldAction;
+        const choice = await this._holdDeclarationDialog(combatant, {
+            title: "Re-declare Hold",
+            initial: existing,
+        });
+        if (!choice) return;
+
+        const hold = {
+            ...choice,
+            declaredAbs: currentAbs,
+            id: foundry.utils.randomID(),
+            combatantId: combatant.id,
+        };
+        // Replace the flag wholesale: setFlag merges, which would keep stale
+        // position keys when converting to an event/generic hold
+        await effect.update({
+            [`flags.${game.system.id}.-=hold`]: null,
+        });
+        await effect.setFlag(game.system.id, "hold", hold);
+
+        const description =
+            hold.mode === "position"
+                ? `until DEX ${hold.fraction !== undefined ? (hold.dex + hold.fraction).toFixed(2) : hold.dex} in ${HeroSystem6eCombatantSingle.phaseLabel(hold.segmentAbs)}`
+                : hold.mode === "event"
+                  ? hold.trigger
+                      ? `— until: ${hold.trigger}`
+                      : "until a declared event"
+                  : "with no declared condition";
+        await this._holdCard(
+            combatant,
+            `${combatant.actor.name} re-declares their Held Action ${description} (in ${HeroSystem6eCombatantSingle.phaseLabel(currentAbs)}).`,
+        );
+        await combat.logEvent("hold.redeclare", {
+            combatant,
+            data: {
+                mode: hold.mode,
+                segmentAbs: hold.segmentAbs ?? null,
+                dex: hold.dex ?? null,
+                fraction: hold.fraction ?? null,
+                trigger: hold.trigger ?? null,
+            },
+        });
     }
 
     /**
@@ -1084,7 +1246,13 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const replacesNaturalPhase = hold.mode !== "position" && combatant.hasPhaseInSegment(combat.segment);
         if (!atOwnSlot && !replacesNaturalPhase) return;
         const dex = atOwnSlot ? hold.dex : Math.floor(combat.getInitiativePriority(combatant, combat.segment));
-        await combatant.setFlag(game.system.id, "spentHoldPosition", { segmentAbs: currentAbs, dex });
+        const spent = { segmentAbs: currentAbs, dex };
+        if (atOwnSlot && hold.fraction !== undefined) spent.fraction = hold.fraction;
+        await combatant.update({
+            [`flags.${game.system.id}.spentHoldPosition`]: spent,
+            // A stale slot-taken marker would spend the NEXT hold declared this segment
+            [`flags.${game.system.id}.heldSlotTakenAbs`]: null,
+        });
     }
 
     /**
