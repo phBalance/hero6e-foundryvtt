@@ -2341,12 +2341,13 @@ export function registerCombatTests(quench) {
 
                     const scheduled = await combat.scheduleHaymaker(bruiser);
                     expect(scheduled).to.be.true;
-                    expect(combatant.getFlag(game.system.id, "haymaker")?.resolveAbs).to.equal(currentAbs + 1);
+                    const [, record] = combat.delayedActionsFor(combatant, "haymaker")[0] ?? [];
+                    expect(record?.resolveAbs, "lands at the very end of the NEXT segment").to.equal(currentAbs + 1);
 
                     // Advance past the landing segment; boundary maintenance resolves it
                     await combat.nextTurn(); // into the landing segment
                     await combat.nextTurn(); // past it
-                    const resolved = await waitUntil(() => !combatant.getFlag(game.system.id, "haymaker"));
+                    const resolved = await waitUntil(() => !combat.hasDelayedAction(combatant, "haymaker"));
                     expect(resolved, "wind-up resolved once its segment fully passed").to.be.true;
                 });
 

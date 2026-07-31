@@ -366,23 +366,6 @@ export async function getTargetArray(formData) {
 }
 
 /**
- * Under the single-combatant tracker, a declared Haymaker resolves at the end of
- * the NEXT segment: schedule that resolution instead of ending the maneuver now.
- * @param {Actor} actor
- * @param {Item} [item]
- * @returns {Promise<boolean>} True when a delayed resolution was scheduled
- */
-async function scheduleHaymakerViaCombat(actor, item = null) {
-    if (!actor) return false;
-    const combat = game.combats.find(
-        (c) =>
-            c.started && typeof c.scheduleHaymaker === "function" && c.combatants.some((ct) => ct.actorId === actor.id),
-    );
-    if (!combat) return false;
-    return combat.scheduleHaymaker(actor, item);
-}
-
-/**
  * Whether the actor has a Haymaker resolution pending in a single-tracker combat —
  * its -5 DCV effect must persist until the landing segment ends.
  * @param {Actor} actor
@@ -396,6 +379,64 @@ function hasScheduledHaymaker(actor) {
             typeof c.hasDelayedAction === "function" &&
             c.combatants.some((ct) => ct.actorId === actor.id && c.hasDelayedAction(ct, "haymaker")),
     );
+}
+
+/**
+ * Under the single tracker, a declared Haymaker doesn't launch until the very
+ * end of the NEXT Segment (6E2 68-69; 5ER 389): nothing is rolled now. The
+ * declaration is stored on the schedule and the landing card offers the actual
+ * attack roll — with the maneuver still active, so its +4 DC and -5 DCV apply.
+ * Unlike Extra Time, END is paid in the segment the attack LAUNCHES, so the
+ * replay spends resources normally.
+ * @param {Item} item
+ * @param {object} formData - The attack dialog's inputs
+ * @returns {Promise<boolean>} True when the attack was intercepted and scheduled
+ */
+async function scheduleHaymakerDeclaration(item, formData) {
+    const actor = item?.actor;
+    if (!actor) return false;
+    const combat = game.combats.find(
+        (c) =>
+            c.started &&
+            typeof c.scheduleDelayedAction === "function" &&
+            c.combatants.some((ct) => ct.actorId === actor.id),
+    );
+    if (!combat) return false;
+
+    const sanitizedFormData = {};
+    for (const [key, value] of Object.entries(formData ?? {})) {
+        if (value === null || ["string", "number", "boolean"].includes(typeof value)) {
+            sanitizedFormData[key] = value;
+        }
+    }
+    let itemJson = null;
+    try {
+        itemJson = JSON.stringify(dehydrateAttackItem(item));
+    } catch (e) {
+        console.error(`Unable to dehydrate ${item.name} for the Haymaker landing`, e);
+    }
+    const currentAbs = combat.round * 12 + combat.segment;
+    await combat.scheduleDelayedAction(
+        actor,
+        {
+            kind: "haymaker",
+            label: "their Haymaker",
+            resolveAbs: currentAbs + 1,
+            priority: null,
+            commit: false,
+            actionData: {
+                formData: sanitizedFormData,
+                targetTokenIds: Array.from(game.user.targets).map((t) => t.id),
+                userId: game.user.id,
+                itemJson,
+                originalItemUuid: item.system?._active?.__originalUuid ?? null,
+                actorUuid: actor.uuid ?? null,
+                prepaid: false,
+            },
+        },
+        item,
+    );
+    return true;
 }
 
 /**
@@ -460,6 +501,7 @@ async function scheduleExtraTimeAttackDeclaration(item, formData) {
                 itemJson,
                 originalItemUuid: item.system?._active?.__originalUuid ?? null,
                 actorUuid: actor.uuid ?? null,
+                prepaid: true,
             },
         },
         item,
@@ -488,10 +530,20 @@ export async function processActionToHit(item, formData, options = {}) {
 
     // PH: FIXME: Need to not pass in formData and move the interesting stuff into action
 
-    // Extra Time attacks (6E1 377-378): the activation begins now — resources and
-    // activation rolls are paid up front — but the attack itself is rolled when
-    // the power goes off (the scheduled resolution card offers the roll)
+    // A Haymaker launches at the very end of the NEXT Segment (6E2 68-69):
+    // nothing is rolled now — the landing card offers the attack roll while the
+    // maneuver (and its +4 DC / -5 DCV) stays active
     if (!formData?.delayedResolution && !options?.delayedResolution) {
+        if (haymakerManeuverActive) {
+            try {
+                if (await scheduleHaymakerDeclaration(item, formData)) return;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        // Extra Time attacks (6E1 377-378): the activation begins now — resources
+        // and activation rolls are paid up front — but the attack itself is rolled
+        // when the power goes off
         try {
             if (await scheduleExtraTimeAttackDeclaration(item, formData)) return;
         } catch (e) {
@@ -506,8 +558,11 @@ export async function processActionToHit(item, formData, options = {}) {
         await doSingleTargetActionToHit(action, formData, options);
     }
 
-    // turn off haymaker — unless the single tracker scheduled its delayed resolution
-    if (!(haymakerManeuverActive && (await scheduleHaymakerViaCombat(item?.actor, item)))) {
+    // turn off haymaker — the wind-up is over once the attack has rolled. A still-
+    // SCHEDULED landing keeps its maneuver active (this path is the mid-wait case
+    // of some other attack being fired, or the landing replay after its record
+    // was consumed).
+    if (!hasScheduledHaymaker(item?.actor)) {
         await item?.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
             active: false,
         });
@@ -1010,7 +1065,8 @@ async function doSingleTargetActionToHit(action, options) {
     } = await userInteractiveVerifyOptionallyPromptThenSpendResources(item, {
         ...options,
         // A delayed Extra Time resolution paid its resources at declaration
-        ...{ noResourceUse: overrideCanAct || !!options.delayedResolution },
+        // (prepaid); a delayed Haymaker pays HERE — in the segment it launches
+        ...{ noResourceUse: overrideCanAct || !!options.prepaid },
     });
     if (resourceError) {
         return ui.notifications.error(`${item.name} ${resourceError}`);
@@ -1021,7 +1077,7 @@ async function doSingleTargetActionToHit(action, options) {
     // Does base item Requires A Rolls — a delayed Extra Time resolution already
     // rolled this when the activation began
     const attackItemRSR =
-        options.delayedResolution ||
+        options.prepaid ||
         (await isActivatedForThisUse(item, {
             resourcesUsedDescription: `${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`,
         }));
@@ -1034,7 +1090,7 @@ async function doSingleTargetActionToHit(action, options) {
         item.system._active?.__originalUuid === item.effectiveAttackItem.system._active?.__originalUuid;
     const effectiveAttackItemRSR =
         !attackItemAndEffectiveItemAreSame &&
-        (options.delayedResolution ||
+        (options.prepaid ||
             (await isActivatedForThisUse(item.effectiveAttackItem, {
                 resourcesUsedDescription: `${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}`,
             })));

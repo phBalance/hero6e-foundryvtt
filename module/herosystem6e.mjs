@@ -530,8 +530,14 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
                 }
                 await processActionToHit(
                     item,
-                    // Resources and activation rolls were paid at declaration
-                    { ...(payload.formData ?? {}), userId: game.user.id, delayedResolution: true, noResourceUse: true },
+                    // prepaid (Extra Time): resources/rolls were paid at declaration.
+                    // A Haymaker instead pays its END with THIS roll (6E2 69).
+                    {
+                        ...(payload.formData ?? {}),
+                        userId: game.user.id,
+                        delayedResolution: true,
+                        ...(payload.prepaid ? { prepaid: true, noResourceUse: true } : {}),
+                    },
                     { delayedResolution: true },
                 );
             } finally {

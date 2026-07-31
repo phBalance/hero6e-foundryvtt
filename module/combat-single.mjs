@@ -2637,7 +2637,11 @@ export class HeroSystem6eCombatSingle extends Combat {
             await combatant.update({ [`flags.${game.system.id}.delayedActions.-=${id}`]: null });
         }
 
-        if (record.kind === "haymaker") {
+        // A cancelled Haymaker (or a legacy declare-now record) ends the maneuver
+        // here; a roll-at-landing Haymaker keeps it ACTIVE — its +4 DC / -5 DCV
+        // must still apply to the roll, and the attack flow's own tail turns the
+        // maneuver off once the attack has rolled
+        if (record.kind === "haymaker" && (cancelled || !record.actionData)) {
             const haymakerEffect = actor?.effects.find((e) => e.statuses.has("haymaker"));
             if (haymakerEffect) await haymakerEffect.delete();
             const haymakerItem = actor?.items.find((i) => i.system?.XMLID === "HAYMAKER" && i.isActive);
@@ -2657,17 +2661,19 @@ export class HeroSystem6eCombatSingle extends Combat {
             outcome = item?.isActive
                 ? `${actor?.name}'s ${record.label} activates now (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}).`
                 : `${actor?.name}'s ${record.label} finished its Extra Time but could not activate — adjudicate (interrupted? Stunned?).`;
-        } else if (record.kind === "haymaker") {
-            outcome = `${actor?.name}'s ${record.label} resolves now — apply its damage (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}).`;
-        } else if (record.kind === "attack" && record.actionData) {
-            // The attack is ROLLED now (6E1 377: the roll happens when the power
-            // goes off); the stored declaration rides on the message flag
+        } else if ((record.kind === "attack" || record.kind === "haymaker") && record.actionData) {
+            // The attack is ROLLED now (6E1 377 / 6E2 68: it happens when it goes
+            // off); the stored declaration rides on the message flag
             outcome = null;
+            const hint =
+                record.kind === "haymaker"
+                    ? "+4 Damage Classes; END is paid with this roll. If the target moved 1m+ or the attacker took Knockback, was Stunned, or Knocked Out, use Cancel on the wind-up card instead — the Phase is wasted."
+                    : "A target that moved since the declaration is missed automatically; resources were already spent when the activation began.";
             const rollCard = {
                 speaker: ChatMessage.getSpeaker({ actor }),
-                content: `${actor?.name}'s ${record.label} goes off now (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}) — roll the attack.
+                content: `${actor?.name}'s ${record.label} ${record.kind === "haymaker" ? "lands" : "goes off"} now (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}) — roll the attack.
                     <button type="button" class="hero-delayed-roll">Roll the attack now</button>
-                    <p class="hint">A target that moved since the declaration is missed automatically; resources were already spent when the activation began.</p>`,
+                    <p class="hint">${hint}</p>`,
                 flags: {
                     [game.system.id]: {
                         delayedAttack: { itemUuid: record.itemUuid, ...record.actionData },
@@ -2676,6 +2682,8 @@ export class HeroSystem6eCombatSingle extends Combat {
             };
             if (combatant.hidden) rollCard.whisper = ChatMessage.getWhisperRecipients("GM");
             await ChatMessage.create(rollCard);
+        } else if (record.kind === "haymaker") {
+            outcome = `${actor?.name}'s ${record.label} resolves now — apply its damage (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}).`;
         } else {
             outcome = `${actor?.name}'s ${record.label} goes off now (${HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs)}) — resolve its effect. A target that moved since the declaration is missed automatically.`;
         }
