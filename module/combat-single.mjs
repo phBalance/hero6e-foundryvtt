@@ -1,7 +1,10 @@
 import { HeroCompatibility } from "./utility/compatibility.mjs";
 import { HeroSystem6eCombatantSingle } from "./combatant-single.mjs";
+import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 import { expireManeuverNextPhaseEffects } from "./item/maneuver.mjs";
-import { gmActive, whisperUserTargetsForActor } from "./utility/util.mjs";
+import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-resources.mjs";
+import { promptToDeleteAoeInstantRegions } from "./combat.mjs";
+import { expireEffects, gmActive, toHHMMSS, whisperUserTargetsForActor } from "./utility/util.mjs";
 
 export class HeroSystem6eCombatSingle extends Combat {
     /**
@@ -1642,6 +1645,17 @@ export class HeroSystem6eCombatSingle extends Combat {
                     }
                 }
 
+                // A character recovered above 0 STUN is no longer knocked out (#4567)
+                if (actor.statuses.has("knockedOut") && (actor.getCharacteristic("stun")?.value ?? 0) > 0) {
+                    await actor.toggleStatusEffect(
+                        HeroSystem6eActorActiveEffects.statusEffectsObj.knockedOutEffect.id,
+                        {
+                            active: false,
+                        },
+                    );
+                    recoveryText += `${recoveryText ? " " : ""}${actor.name} regains consciousness.`;
+                }
+
                 if (recoveryText) {
                     const showToAll = !combatant.hidden && (combatant.hasPlayerOwner || actor.type === "pc");
                     if (showToAll) {
@@ -1706,11 +1720,17 @@ export class HeroSystem6eCombatSingle extends Combat {
         // wrap, where the currentSegment flag value is unchanged.
         const turnAdvance = foundry.utils.getProperty(options, "turnAdvance") === true;
         const newSegment = foundry.utils.getProperty(changed, `${systemFlagKey}.currentSegment`);
-        if (newSegment !== undefined || roundChanged || turnAdvance) {
+        const boundary = newSegment !== undefined || roundChanged || turnAdvance;
+
+        // Only pointer movement starts a new Phase: flag-only bookkeeping updates
+        // (event-log appends, the recovery ledger) must not run turn side effects
+        if (!turnChanged && !boundary) return;
+
+        let elapsedSegments;
+        if (boundary) {
             // Segments that just ended, oldest first; empty segments count because an
             // aborted combatant's spent Phase may fall in a segment nobody acted in
             const previousSegment = turnAdvance ? null : foundry.utils.getProperty(options, "previousSegment");
-            let elapsedSegments;
             if (turnAdvance) {
                 elapsedSegments = null; // A full Turn elapsed: every SPD 1-12 had a Phase
             } else if (previousSegment !== undefined && previousSegment !== null) {
@@ -1719,7 +1739,11 @@ export class HeroSystem6eCombatSingle extends Combat {
                 else
                     elapsedSegments = Array.fromRange(segmentsElapsed).map((i) => ((previousSegment - 1 + i) % 12) + 1);
             }
-            (async () => {
+        }
+
+        // One ordered chain so every step sees its predecessors' writes
+        (async () => {
+            if (boundary) {
                 // SPD-change lockouts first so the hold/abort checks see updated phase
                 // eligibility; passed-hold cleanup before the natural-turn clear so
                 // spent positional holds are never re-carded
@@ -1728,68 +1752,315 @@ export class HeroSystem6eCombatSingle extends Combat {
                 await this._demotePassedPositionalHolds();
                 if (turnAdvance) await this._consumeExpiredHeldActions(null);
                 await this._clearExpiredAborts(elapsedSegments);
-                await this._consumeActiveCombatantHold(prevId);
-                await this._segmentStartLightningReflexes();
-            })().catch((e) => console.error(e));
-        } else if (turnChanged) {
-            // Turn advance within a segment: the natural-turn clear still applies.
-            // Flag-only updates (e.g. the recovery bookkeeping written mid-advance)
-            // move no pointer and must not consume holds.
-            this._consumeActiveCombatantHold(prevId).catch((e) => console.error(e));
+            }
+
+            const previousCombatant = prevId ? this.combatants.get(prevId) : null;
+            if (previousCombatant?.actor) {
+                await this._expireCustomSystemEffects(previousCombatant.actor);
+
+                // A positional hold is spent the moment its held turn ends within the
+                // same segment — used if the pointer actually took the slot; passed
+                // over unused it demotes to a generic hold (cross-segment endings go
+                // through _demotePassedPositionalHolds). A hold declared THIS segment
+                // hasn't had its slot yet (the ending turn was the declarer's natural
+                // Phase), so declaredAbs === currentAbs is exempt unless the slot was
+                // taken.
+                const hold = previousCombatant.heldAction;
+                if (hold?.mode === "position") {
+                    const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+                    if (hold.segmentAbs === currentAbs) {
+                        const slotTaken = previousCombatant.getFlag(game.system.id, "heldSlotTakenAbs") === currentAbs;
+                        if (slotTaken) {
+                            await this._spendHold(previousCombatant, { used: true });
+                        } else if (hold.declaredAbs !== currentAbs) {
+                            await this._demoteHold(previousCombatant);
+                        }
+                    }
+                }
+            }
+
+            await this._consumeActiveCombatantHold(prevId);
+            if (boundary) await this._segmentStartLightningReflexes();
+
+            // Phase end/start work skips pure pointer resyncs — within-segment
+            // updates that land back on the same combatant (LR preempts, mid-segment
+            // re-sorts) are not a Phase transition
+            const activeCombatant = this.combatant;
+            const isResync = !boundary && prevId !== undefined && prevId === activeCombatant?.id;
+            if (!isResync && previousCombatant?.actor) {
+                await this._onPhaseEnd(previousCombatant, { segmentChanged: boundary });
+            }
+
+            // Backfill the slot-taken marker when the update that landed here couldn't
+            // write it (player-initiated advances only persist combatants they own)
+            const activeHold = activeCombatant?.heldAction;
+            if (activeHold?.mode === "position") {
+                const nowAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+                if (
+                    activeHold.segmentAbs === nowAbs &&
+                    activeCombatant.getFlag(game.system.id, "heldSlotTakenAbs") !== nowAbs
+                ) {
+                    await activeCombatant.setFlag(game.system.id, "heldSlotTakenAbs", nowAbs);
+                }
+            }
+
+            // The incoming combatant's Phase begins: maneuver effects that last "until
+            // your next Phase" (Dodge, Block, Brace…) expire now. Effects created at
+            // the current world time survive — they were declared this instant.
+            // Because aborted Phases are skipped outright, an abort's modifiers
+            // naturally persist to the Phase after the spent one (6E2 22).
+            if (activeCombatant?.actor) {
+                await expireManeuverNextPhaseEffects(activeCombatant.actor);
+            }
+            if (!isResync && activeCombatant?.actor) {
+                await this._onPhaseStart(activeCombatant);
+            }
+        })().catch((e) => console.error(e));
+    }
+
+    /**
+     * End-of-Phase work for the combatant whose turn just ended (port of the legacy
+     * tracker's _onEndTurn): END-for-movement reporting, Stunned recovery at the end
+     * of the character's own Phase (#4565), the KO'd per-Phase free Recovery that
+     * wakes characters above STUN -10 (#4567), and — at segment boundaries — turning
+     * off non-persistent constant items for Stunned/KO'd actors.
+     * @param {Combatant} combatant
+     * @param {object} [options]
+     * @param {boolean} [options.segmentChanged]
+     * @private
+     */
+    async _onPhaseEnd(combatant, { segmentChanged = false } = {}) {
+        if (!this.started) return;
+        const actor = combatant?.actor;
+        if (!actor) return;
+
+        // Show END spent for movement this Phase (spent realtime by the token's
+        // movement recording); the counter resets at the next Phase start
+        const endUsedForMovement = combatant.getFlag(game.system.id, "endUsedForMovement") || 0;
+        if (endUsedForMovement > 0) {
+            await ChatMessage.create({
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                author: game.user._id,
+                speaker: ChatMessage.getSpeaker({ actor, token: combatant.token }),
+                content: `${combatant.name} spent ${endUsedForMovement} END for movement this Phase.`,
+                whisper: whisperUserTargetsForActor(actor),
+            });
         }
 
-        // Only pointer movement starts a new Phase: flag-only bookkeeping updates
-        // must not run spend/expiry side effects against the still-active combatant
-        if (!turnChanged && !roundChanged && newSegment === undefined && !turnAdvance) return;
-
-        const previousCombatant = prevId ? this.combatants.get(prevId) : null;
-        if (previousCombatant?.actor) {
-            this._expireCustomSystemEffects(previousCombatant.actor);
-
-            // A positional hold is spent the moment its held turn ends within the same
-            // segment — used if the pointer actually took the slot, forfeit if it was
-            // passed over it demotes to a generic hold; cross-segment endings go through
-            // _demotePassedPositionalHolds.
-            // A hold declared THIS segment hasn't had its slot yet (the ending turn was
-            // the declarer's natural Phase), so declaredAbs === currentAbs is exempt
-            // unless the slot was taken.
-            const hold = previousCombatant.heldAction;
-            if (hold?.mode === "position") {
-                const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
-                if (hold.segmentAbs === currentAbs) {
-                    const slotTaken = previousCombatant.getFlag(game.system.id, "heldSlotTakenAbs") === currentAbs;
-                    if (slotTaken) {
-                        this._spendHold(previousCombatant, { used: true }).catch((e) => console.error(e));
-                    } else if (hold.declaredAbs !== currentAbs) {
-                        // The slot passed unused: the banked Phase persists as a
-                        // generic hold until the null zone
-                        this._demoteHold(previousCombatant).catch((e) => console.error(e));
+        // At the end of the Segment, non-Persistent powers and skill levels turn
+        // off for Stunned/KO'd actors
+        if (segmentChanged) {
+            for (const other of this.combatants) {
+                const otherActor = other.actor;
+                if (!otherActor) continue;
+                if (otherActor.statuses.has("stunned") || otherActor.statuses.has("knockedOut")) {
+                    for (const item of otherActor.getActiveConstantItems?.() ?? []) {
+                        if (item.isActivatable?.()) await item.turnOff();
                     }
                 }
             }
         }
 
-        // Backfill the slot-taken marker when the update that landed here couldn't
-        // write it (player-initiated advances only persist combatants the player owns)
-        const activeCombatant = this.combatant;
-        const activeHold = activeCombatant?.heldAction;
-        if (activeHold?.mode === "position") {
-            const nowAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        // Stunned clears at the end of the character's own Phase (6E2 105); KO'd
+        // characters take a free Recovery each of their Phases while STUN >= -10 —
+        // that recovery (without preventRecoverFromStun) is what wakes them up
+        if (actor.statuses.has("stunned")) {
+            await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id, {
+                active: false,
+            });
+            await this._combatCard(combatant, `${combatant.name} recovers from being stunned.`);
+        } else if (actor.statuses.has("knockedOut")) {
+            if ((actor.getCharacteristic("stun")?.value ?? 0) >= -10) {
+                await actor.TakeRecovery({ asAction: false, token: combatant.token });
+            }
+        }
+    }
+
+    /**
+     * Start-of-Phase work for the incoming combatant (port of the legacy tracker's
+     * _onStartTurn): movement-history reset, turnStart effect expiry (adjustment
+     * fades — without it drains never fade during combat), non-combat movement
+     * shutoff, the resource-upkeep chat card with its Breakfall button (#4559),
+     * next-Phase DCV-penalty cleanup, and the instant-AoE region prompt (#4554).
+     * Idempotent across re-fires and rewind replays via the spentEndOn key.
+     * @param {Combatant} combatant
+     * @private
+     */
+    async _onPhaseStart(combatant) {
+        if (!this.started) return;
+        const actor = combatant?.actor;
+        if (!actor) return;
+        const segmentNumber = this.segment;
+
+        // Clear movement history and the END-for-movement counter
+        try {
+            if (combatant.token?.clearMovementHistory) {
+                await combatant.setFlag(game.system.id, "endUsedForMovement", 0);
+                await combatant.token.clearMovementHistory();
+            }
+        } catch (e) {
+            console.error(e);
+        }
+
+        // Effects that expire at the start of the character's own Phase
+        try {
+            await expireEffects(actor, "turnStart");
+        } catch (e) {
+            console.error(e);
+        }
+
+        // Stop nonCombatMovement
+        if (actor.statuses.has("nonCombatMovement")) {
+            await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.nonCombatMovementEffect.id, {
+                active: false,
+            });
+        }
+
+        // Spend resources for all active powers — but only once per Phase (the key
+        // survives rewind-and-replay)
+        const roundSegmentKey = this.round + segmentNumber / 100;
+        if ((combatant.getFlag(game.system.id, "spentEndOn") || 0) < roundSegmentKey) {
+            await combatant.update({ [`flags.${game.system.id}.spentEndOn`]: roundSegmentKey });
+
+            let content = "";
+            let tempContent = "";
+            let startContent = "";
+
+            if (actor.statuses.size > 0) {
+                startContent += `Has the following statuses: ${Array.from(actor.statuses).join(", ")}<br>`;
+            }
+
+            for (const ae of actor.temporaryEffects) {
+                const remaining = ae._prepareDuration().remaining;
+                const remainingText = remaining > 0 ? `in ${toHHMMSS(remaining)}` : "0s";
+                tempContent += `<li>${ae.name} fades ${remainingText} ${ae.flags[game.system.id]?.expiresOn ?? ""}</li>`;
+            }
+            if (tempContent) {
+                startContent += `Has the following temporary effects: <ul>${tempContent}</ul>`;
+            }
+
+            /**
+             * @type {HeroSystemItemResourcesToUse}
+             */
+            const spentResources = {
+                totalEnd: 0,
+                totalReserveEnd: 0,
+                totalCharges: 0,
+            };
+
+            for (const powerUsingResourcesToContinue of actor.items.filter(
+                (item) =>
+                    item.isActive === true && // Is the power active?
+                    item.type !== "skill" && // Natural skills are always on, but only use resources when used/rolled
+                    item.system.duration !== CONFIG.HERO.DURATION_TYPES.INSTANT && // Is the power non instant
+                    (!item.system.MODIFIER?.find(
+                        (o) =>
+                            (o.XMLID === "COSTSEND" && o.OPTIONID === "ACTIVATE") ||
+                            o.XMLID === "COSTSENDONLYTOACTIVATE",
+                    ) || // Does the power use END continuously?
+                        (item.system.chargeModifier && !item.system.chargeModifier.CONTINUING)), // Does the power use charges but is not continuous (as that is tracked by an effect when made active)?
+            )) {
+                const {
+                    error,
+                    warning,
+                    resourcesUsedDescription,
+                    resourcesUsedDescriptionRenderedRoll,
+                    resourcesRequired,
+                } = await userInteractiveVerifyOptionallyPromptThenSpendResources(powerUsingResourcesToContinue, {});
+
+                if (error || warning) {
+                    content += `<li>(${powerUsingResourcesToContinue.name} ${error || warning}: power turned off)</li>`;
+                    await powerUsingResourcesToContinue.toggle();
+                } else if (
+                    !(
+                        resourcesRequired.totalCharges === 0 &&
+                        resourcesRequired.totalEnd === 0 &&
+                        resourcesRequired.totalReserveEnd === 0
+                    )
+                ) {
+                    content += resourcesUsedDescription
+                        ? `<li>${powerUsingResourcesToContinue.detailedName()} spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}</li>`
+                        : "";
+
+                    spentResources.totalEnd += resourcesRequired.totalEnd;
+                    spentResources.totalReserveEnd += resourcesRequired.totalReserveEnd;
+                    spentResources.totalCharges += resourcesRequired.totalCharges;
+                }
+            }
+
+            // Encumbrance END upkeep
+            const encumbered = actor.effects.find((effect) => effect.flags?.[game.system.id]?.encumbrance);
+            if (encumbered) {
+                const endCostPerTurn = Math.abs(parseInt(encumbered.flags?.[game.system.id]?.dcvDex)) - 1;
+                if (endCostPerTurn > 0) {
+                    spentResources.totalEnd += endCostPerTurn;
+                    content += `<li>${encumbered.name} (${endCostPerTurn})</li>`;
+
+                    const value = parseInt(actor.getCharacteristic("end").value);
+                    await actor.updateCharacteristics([["end", { value: value - endCostPerTurn }]], {});
+                }
+            }
+
             if (
-                activeHold.segmentAbs === nowAbs &&
-                activeCombatant.getFlag(game.system.id, "heldSlotTakenAbs") !== nowAbs
+                startContent !== "" ||
+                content !== "" ||
+                spentResources.totalEnd > 0 ||
+                spentResources.totalReserveEnd > 0 ||
+                spentResources.totalCharges > 0
             ) {
-                activeCombatant.setFlag(game.system.id, "heldSlotTakenAbs", nowAbs).catch((e) => console.error(e));
+                if (
+                    spentResources.totalEnd > 0 ||
+                    spentResources.totalReserveEnd > 0 ||
+                    spentResources.totalCharges > 0
+                ) {
+                    content = `${startContent}Spent ${spentResources.totalEnd} END, ${spentResources.totalReserveEnd} reserve END, and ${
+                        spentResources.totalCharges
+                    } charge${spentResources.totalCharges > 1 ? "s" : ""} on turn ${
+                        this.round
+                    } segment ${segmentNumber}:<ul>${content}</ul>`;
+                } else {
+                    content = startContent;
+                }
+
+                // BREAKFALL from prone?
+                if (actor.statuses.has("prone")) {
+                    const breakFallItem = actor.items.find((o) => o.system.XMLID === "BREAKFALL" && o.isActive);
+                    if (breakFallItem) {
+                        content += `
+                            <button class="roll-breakfall"
+                                data-actor-uuid="${actor.uuid}"
+                                data-target-token-id="${combatant.tokenId}"
+                                title="You can use BREAKFALL to regain control from being prone without the need to take a Half Phase action.">
+                                Roll Breakfall
+                            </button>
+                        `;
+                    }
+                }
+
+                await ChatMessage.create({
+                    author: game.user._id,
+                    style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                    content,
+                    whisper: whisperUserTargetsForActor(actor),
+                    speaker: ChatMessage.getSpeaker({ actor, token: combatant.token }),
+                });
             }
         }
 
-        // The incoming combatant's Phase begins: maneuver effects that last "until your
-        // next Phase" (Dodge, Block, Brace…) expire now. Effects created at the current
-        // world time survive — they were declared this instant. Because aborted Phases
-        // are skipped outright, an abort's modifiers naturally persist to the Phase
-        // after the spent one (6E2 22).
-        if (activeCombatant?.actor) {
-            expireManeuverNextPhaseEffects(activeCombatant.actor).catch((e) => console.error(e));
+        // Some attacks include a DCV penalty applied as an ActiveEffect flagged
+        // nextPhase; it goes away at the start of our Phase
+        const removeOnNextPhase = actor.effects.filter(
+            (o) => o.flags[game.system.id]?.nextPhase && o.duration.startTime < game.time.worldTime,
+        );
+        for (const ae of removeOnNextPhase) {
+            await ae.delete();
+        }
+
+        // Instant AoE templates have done their work once the Phase moves on (#4554)
+        try {
+            await promptToDeleteAoeInstantRegions();
+        } catch (e) {
+            console.error(e);
         }
     }
 

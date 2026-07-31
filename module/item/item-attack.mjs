@@ -3875,7 +3875,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
     // TODO: Add drian body support for entangles
     if (attackItem.isAdjustment) {
         ui.notifications.error(
-            `An entangle (${fromUuidSync(entangleAE.origin).name || entangleAE.name}) is not a supported target for an adjustment power (${attackItem.name}).`,
+            `An entangle (${fromUuidSync(entangleAE.origin)?.name || entangleAE.name}) is not a supported target for an adjustment power (${attackItem.name}).`,
         );
         return;
     }

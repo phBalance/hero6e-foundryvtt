@@ -1473,32 +1473,7 @@ export class HeroSystem6eCombat extends Combat {
     }
 
     async promptToDeleteAoeInstantRegions() {
-        // This only works for V14. canvas.regions.viewedDocuments is an invalid V14 function.
-        if (!HeroCompatibility.isV14) return;
-
-        // We only care about AoEs
-        const regionsToPrompt = Array.from(canvas.regions.viewedDocuments()).filter(
-            (template) => template.flags[game.system.id]?.purpose === "AoE",
-        );
-        for (const region of regionsToPrompt) {
-            // Make sure item the region is associated with an INSTANT effectiveItem
-            const effectiveItem = rehydrateAttackItem(region.flags[game.system.id].effectiveItemJson).item;
-            const duration = effectiveItem.system.duration;
-            if (duration === CONFIG.HERO.DURATION_TYPES.INSTANT) {
-                const proceed = await foundry.applications.api.DialogV2.confirm({
-                    window: {
-                        title: `Delete region ${region.name}?`,
-                    },
-                    content: `<p>The region <b>${region.name}</b> is likely no longer needed. Would you like to delete it?</p>`,
-                    rejectClose: false,
-                    modal: true,
-                });
-
-                if (proceed) {
-                    await region.delete();
-                }
-            }
-        }
+        return promptToDeleteAoeInstantRegions();
     }
 
     async previousRound() {
@@ -1683,6 +1658,40 @@ export class HeroSystem6eCombat extends Combat {
                 const next = this.combatant;
                 if (prior) await this.onEndTurn(prior, { round: current.round, turn: current.turn, skipped: false });
                 if (next) await this.onStartTurn(next, { round: current.round, turn: current.turn, skipped: false });
+            }
+        }
+    }
+}
+
+/**
+ * Offers to delete AoE regions whose effective item is INSTANT — once the phase
+ * moves on, an instant AoE template has done its work. Shared by the legacy and
+ * single-combatant trackers. V14 only (viewedDocuments does not exist earlier).
+ * @returns {Promise<void>}
+ */
+export async function promptToDeleteAoeInstantRegions() {
+    if (!HeroCompatibility.isV14) return;
+
+    // We only care about AoEs
+    const regionsToPrompt = Array.from(canvas.regions.viewedDocuments()).filter(
+        (template) => template.flags[game.system.id]?.purpose === "AoE",
+    );
+    for (const region of regionsToPrompt) {
+        // Make sure item the region is associated with an INSTANT effectiveItem
+        const effectiveItem = rehydrateAttackItem(region.flags[game.system.id].effectiveItemJson).item;
+        const duration = effectiveItem.system.duration;
+        if (duration === CONFIG.HERO.DURATION_TYPES.INSTANT) {
+            const proceed = await foundry.applications.api.DialogV2.confirm({
+                window: {
+                    title: `Delete region ${region.name}?`,
+                },
+                content: `<p>The region <b>${region.name}</b> is likely no longer needed. Would you like to delete it?</p>`,
+                rejectClose: false,
+                modal: true,
+            });
+
+            if (proceed) {
+                await region.delete();
             }
         }
     }
