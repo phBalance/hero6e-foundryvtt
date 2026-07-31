@@ -42,6 +42,12 @@ export class HeroSocketHandler {
                     await combat?.lrPreemptPointer?.(data.combatantId, data.activeId ?? null);
                     break;
                 }
+                case "logCombatEvent": {
+                    if (game.user !== game.users.activeGM) return;
+                    const combat = game.combats.get(data.combatId) ?? game.combat;
+                    await combat?.logEvents?.(data.events ?? []);
+                    break;
+                }
                 case "updateChatMessage": {
                     if (game.user !== game.users.activeGM) return;
 

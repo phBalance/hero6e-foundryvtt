@@ -594,6 +594,16 @@ export default class SettingsHelpers {
             default: false,
         });
 
+        // Cap on the single tracker's per-combat event ledger (~120 bytes/event)
+        game.settings.register(module, "combatLogMaxEvents", {
+            name: game.i18n.localize("Settings.AlphaTesting.combatLogMaxEvents.Name"),
+            hint: game.i18n.localize("Settings.AlphaTesting.combatLogMaxEvents.Hint"),
+            scope: "world",
+            config: game.settings.get(game.system.id, "alphaTesting"),
+            type: Number,
+            default: 1000,
+        });
+
         // All-In-One: combined ToHit/Damage/ApplyDamage into a single chatcard
         // game.settings.register(module, "allInOneToHitDamageApply", {
         //     name: "All In One",

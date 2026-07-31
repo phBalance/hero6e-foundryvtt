@@ -256,6 +256,25 @@ $combat-tracker-hero-dispositions: (
     text-decoration: line-through;
 }
 
+/* 2j. LEDGER HISTORY: past segments render what actually happened */
+.combat-tracker li.combatant.hero-history-row {
+    cursor: default;
+}
+
+.combat-tracker li.combatant.hero-history-row .combatant-controls {
+    display: none;
+}
+
+.combat-tracker li.combatant.hero-history-removed {
+    opacity: 0.4;
+    filter: grayscale(90%);
+    pointer-events: none;
+}
+
+.combat-tracker li.combatant.hero-history-removed .name {
+    font-style: italic;
+}
+
 /* Hold/abort declaration dialogs: keep the select's dropdown arrow clear of the text */
 .hero-hold-dialog select[name="hold-segment"],
 .hero-hold-dialog select[name="abort-action"] {

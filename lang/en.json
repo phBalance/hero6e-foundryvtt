@@ -205,6 +205,11 @@
                 "Name": "Last Migration"
             },
 
+            "combatLogMaxEvents": {
+                "Name": "Combat Log Size",
+                "Hint": "Maximum events kept in each combat's audit ledger (holds, aborts, turn flow, removed combatants). Older events are pruned first; recent Turns are always kept. 0 disables pruning."
+            },
+
             "singleCombatantTracker": {
                 "Name": "Single Combatant Tracker",
                 "Hint": "World setting: when enabled, EVERY client uses the new single-combatant tracker after a reload (one combatant entity per token; supports holds, aborts, Lightning Reflexes, and a combat event log). When disabled, every client uses the legacy per-phase tracker. Changing this setting may require you to delete and re-create existing combats."

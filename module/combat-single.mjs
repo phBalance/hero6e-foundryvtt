@@ -25,6 +25,231 @@ export class HeroSystem6eCombatSingle extends Combat {
         );
     }
 
+    /* -------------------------------------------- */
+    /*  Combat event ledger                         */
+    /* -------------------------------------------- */
+
+    /**
+     * Append-only audit log of what happened in this combat, stored as an object
+     * flag keyed by zero-padded sequence (`e000042`) so each append writes a single
+     * flag path (tiny socket diffs) and pruning uses deletion keys — a flag ARRAY
+     * would be replaced wholesale on every write. Events are generic envelopes so
+     * the log can grow into a full audit record (actions, damage, resources):
+     *
+     *   { t, abs, round, segment, ts, userId,
+     *     combatantId?, actorId?, name?, img?, priority?,   // denormalized snapshot
+     *     data? }
+     *
+     * The name/img/priority snapshot lets the tracker render history rows for
+     * combatants that have since been removed. Rewinds APPEND a `rewind` event;
+     * history is never deleted by turn flow (only by combat reset and pruning).
+     */
+
+    /**
+     * Whether this combat has recorded any ledger events.
+     * @type {boolean}
+     */
+    get hasLedger() {
+        const log = this.getFlag(game.system.id, "eventLog");
+        return !!log && Object.keys(log).length > 0;
+    }
+
+    /**
+     * Assembles a ledger event envelope at the current combat position.
+     * @param {string} type - Namespaced event type, e.g. "hold.use"
+     * @param {object} [options]
+     * @param {Combatant} [options.combatant] - Subject; snapshots id/name/img/priority
+     * @param {number} [options.priority] - Overrides the snapshotted priority
+     * @param {object} [options.data] - Type-specific payload
+     * @returns {object}
+     */
+    buildEvent(type, { combatant = null, priority = null, data = undefined, abs = null } = {}) {
+        // Events describing a position being committed (pointer moves) pass the
+        // TARGET abs; the document still reads the pre-update position here
+        const eventAbs = abs ?? HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const event = {
+            t: type,
+            abs: eventAbs,
+            round: HeroSystem6eCombatantSingle.roundOf(eventAbs),
+            segment: HeroSystem6eCombatantSingle.segmentOf(eventAbs),
+            ts: game.time.worldTime,
+            userId: game.user.id,
+        };
+        if (combatant) {
+            event.combatantId = combatant.id;
+            event.actorId = combatant.actorId ?? null;
+            event.name = combatant.name ?? combatant.actor?.name ?? null;
+            event.img = combatant.img ?? combatant.actor?.img ?? null;
+            if (combatant.hidden) event.hidden = true;
+            event.priority = priority ?? this.getInitiativePriority(combatant, event.segment, { queryAbs: event.abs });
+        } else if (priority !== null) {
+            event.priority = priority;
+        }
+        if (data !== undefined) event.data = data;
+        return event;
+    }
+
+    /**
+     * Allocates monotonic event sequence numbers. The cursor rides ahead of the
+     * persisted eventLogSeq flag so several payloads built before any of them
+     * commit still get distinct keys (only the GM client writes the log).
+     * @param {number} count
+     * @returns {number} First allocated sequence number
+     * @private
+     */
+    _allocateEventSeqs(count) {
+        const persistedNext = this.getFlag(game.system.id, "eventLogSeq") ?? 0;
+        this._eventSeqCursor = Math.max(this._eventSeqCursor ?? 0, persistedNext);
+        const start = this._eventSeqCursor;
+        this._eventSeqCursor += count;
+        return start;
+    }
+
+    /**
+     * Builds the flag-path fragment that appends the given events, for inlining
+     * into an update payload that is being committed anyway (pointer moves) —
+     * atomic with the move and no extra round-trips.
+     * @param {object[]} events
+     * @returns {Record<string, object|number>}
+     */
+    eventLogAppendPayload(events) {
+        if (!events?.length) return {};
+        const start = this._allocateEventSeqs(events.length);
+        const payload = {};
+        events.forEach((event, i) => {
+            const seq = start + i;
+            payload[`flags.${game.system.id}.eventLog.e${String(seq).padStart(6, "0")}`] = { seq, ...event };
+        });
+        payload[`flags.${game.system.id}.eventLogSeq`] = start + events.length;
+        return payload;
+    }
+
+    /**
+     * Appends events to the combat ledger. Non-GM clients relay through the GM
+     * (players cannot write combat flags); the GM path also prunes the oldest
+     * events once the log exceeds its cap — but never inside the tracker's
+     * two-Turn history window.
+     * @param {object[]} events
+     * @returns {Promise<void>}
+     */
+    async logEvents(events) {
+        if (!events?.length) return;
+        if (!game.user.isGM) {
+            this._requestGmTurnAction("logCombatEvent", { events });
+            return;
+        }
+        const payload = this.eventLogAppendPayload(events);
+
+        let cap = 1000;
+        try {
+            cap = game.settings.get(game.system.id, "combatLogMaxEvents") ?? 1000;
+        } catch (e) {
+            console.warn(`Unable to read the combat log cap setting`, e);
+        }
+        const log = this.getFlag(game.system.id, "eventLog") ?? {};
+        const keys = Object.keys(log);
+        if (cap > 0 && keys.length + events.length > cap * 1.1) {
+            const protectedAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment) - 24;
+            const prunable = keys.filter((key) => (log[key]?.abs ?? 0) < protectedAbs).sort();
+            const excess = keys.length + events.length - cap;
+            for (const key of prunable.slice(0, Math.max(0, excess))) {
+                payload[`flags.${game.system.id}.eventLog.-=${key}`] = null;
+            }
+        }
+        await this.update(payload);
+    }
+
+    /**
+     * Appends a single event to the combat ledger.
+     * @param {string} type
+     * @param {object} [options] - See {@link buildEvent}
+     * @returns {Promise<void>}
+     */
+    async logEvent(type, options = {}) {
+        return this.logEvents([this.buildEvent(type, options)]);
+    }
+
+    /**
+     * Reads ledger events, oldest first.
+     * @param {object} [options]
+     * @param {number} [options.fromAbs] - Only events at or after this absolute segment
+     * @param {number} [options.toAbs] - Only events at or before this absolute segment
+     * @param {string[]} [options.types] - Only these event types
+     * @returns {object[]}
+     */
+    getEventLog({ fromAbs = null, toAbs = null, types = null } = {}) {
+        const log = this.getFlag(game.system.id, "eventLog") ?? {};
+        return Object.values(log)
+            .filter((event) => {
+                if (fromAbs !== null && (event.abs ?? 0) < fromAbs) return false;
+                if (toAbs !== null && (event.abs ?? 0) > toAbs) return false;
+                if (types && !types.includes(event.t)) return false;
+                return true;
+            })
+            .sort((a, b) => (a.seq ?? 0) - (b.seq ?? 0));
+    }
+
+    /**
+     * What actually happened in a past segment, assembled from the ledger: one row
+     * per acting combatant with the position they acted at, using the denormalized
+     * snapshot so rows survive combatant deletion. Returns null when the ledger has
+     * nothing for that segment (pre-ledger combats fall back to live computation).
+     * @param {number} abs
+     * @returns {{combatantId: string|null, actorId: string|null, name: string, img: string|null,
+     *            priority: number, kind: string, detail: string|null}[]|null}
+     */
+    historyRowsForSegment(abs) {
+        if (!this.hasLedger) return null;
+        const rows = new Map();
+        const kindRank = { acted: 0, haymaker: 1, "held-forfeit": 2, "held-used": 3, aborted: 4 };
+        const addRow = (event, kind, { priority = null, detail = null } = {}) => {
+            if (!event.combatantId && !event.actorId) return;
+            const key = event.combatantId ?? event.actorId;
+            const row = {
+                combatantId: event.combatantId ?? null,
+                actorId: event.actorId ?? null,
+                name: event.name ?? "Unknown",
+                img: event.img ?? null,
+                hidden: !!event.hidden,
+                priority: priority ?? event.priority ?? 0,
+                kind,
+                detail,
+            };
+            const existing = rows.get(key);
+            if (!existing || (kindRank[kind] ?? 0) >= (kindRank[existing.kind] ?? 0)) rows.set(key, row);
+        };
+
+        let sawSegment = false;
+        for (const event of this.getEventLog()) {
+            const atAbs = event.abs === abs;
+            if (atAbs) sawSegment = sawSegment || ["turn.start", "segment.start", "round.start"].includes(event.t);
+            switch (event.t) {
+                case "turn.start":
+                    if (atAbs) addRow(event, "acted");
+                    break;
+                case "hold.use":
+                    if (atAbs) addRow(event, "held-used");
+                    break;
+                case "hold.demote":
+                case "hold.forfeit":
+                case "hold.release":
+                    if (atAbs) addRow(event, "held-forfeit");
+                    break;
+                case "abort.declare":
+                    // The consumed Phase renders in the segment it was spent from
+                    if (event.data?.spentAbs === abs) {
+                        addRow(event, "aborted", { detail: event.data?.toAction ?? null });
+                    }
+                    break;
+                case "haymaker.resolve":
+                    if (atAbs) addRow(event, "haymaker");
+                    break;
+            }
+        }
+        if (!sawSegment && rows.size === 0) return null;
+        return [...rows.values()].sort((a, b) => b.priority - a.priority);
+    }
+
     /**
      * Rolls a fresh 0-99 initiative tie-breaker for every combatant. Rolls are keyed by
      * root actor id so every token of the same base actor shares one roll and therefore
@@ -63,8 +288,17 @@ export class HeroSystem6eCombatSingle extends Combat {
         // 3. Update the local master reference before writing back to the database flag tree
         masterRollsCache[targetSegment] = newSegmentMap;
 
-        // 4. Update the flag array on the document to persist the history
-        await this.setFlag(game.system.id, "segmentRolls", masterRollsCache);
+        // 4. Persist, with a ledger record of the fresh tie-break rolls
+        const payload = { [`flags.${game.system.id}.segmentRolls`]: masterRollsCache };
+        if (this.started && game.user.isGM) {
+            Object.assign(
+                payload,
+                this.eventLogAppendPayload([
+                    this.buildEvent("tie.roll", { data: { segment: targetSegment, rolls: newSegmentMap } }),
+                ]),
+            );
+        }
+        await this.update(payload);
 
         return newSegmentMap;
     }
@@ -322,6 +556,19 @@ export class HeroSystem6eCombatSingle extends Combat {
             ? this.getInitiativePriority(targetActorDoc, 12)
             : null;
 
+        const startAbs = HeroSystem6eCombatantSingle.absoluteSegment(1, 12);
+        const startEvents = [this.buildEvent("segment.start", { abs: startAbs })];
+        if (targetActorDoc) {
+            startEvents.push(
+                this.buildEvent("turn.start", {
+                    combatant: targetActorDoc,
+                    abs: startAbs,
+                    data: { turnIndex: startPayload.turn, storedActingPriority: null },
+                }),
+            );
+        }
+        Object.assign(startPayload, this.eventLogAppendPayload(startEvents));
+
         const result = await HeroCompatibility.updateEmbedded(this, "combatants", combatantUpdates, startPayload);
         if (!HeroCompatibility.isV14) this._turns = null;
 
@@ -421,6 +668,10 @@ export class HeroSystem6eCombatSingle extends Combat {
             ChatMessage.getWhisperRecipients("GM"),
         );
 
+        await this.logEvents(
+            candidates.map((c) => this.buildEvent("lr.elevate", { combatant: c, data: { auto: true } })),
+        );
+
         // A stop that outranks the incoming actor preempts the pointer, exactly as a
         // manual elevation would
         const sorted = [...candidates].sort((a, b) => this._comparePriority(a, b, this, this.segment));
@@ -463,10 +714,26 @@ export class HeroSystem6eCombatSingle extends Combat {
         }
         const index = this.turns.findIndex((t) => t.id === combatantId);
         if (index === -1) return;
-        await this.update(
-            { turn: index, [`flags.${game.system.id}.actingPriority`]: elevatedPriority },
-            { direction: 1, previousCombatantId: combatantId },
+        const preemptPayload = { turn: index, [`flags.${game.system.id}.actingPriority`]: elevatedPriority };
+        Object.assign(
+            preemptPayload,
+            this.eventLogAppendPayload([
+                this.buildEvent("lr.preempt", {
+                    combatant,
+                    priority: elevatedPriority,
+                    data: {
+                        displacedId: activeId,
+                        actingPriority: Number.isFinite(actingPriority) ? actingPriority : null,
+                    },
+                }),
+                this.buildEvent("turn.start", {
+                    combatant,
+                    priority: elevatedPriority,
+                    data: { turnIndex: index, storedActingPriority: null, viaLrPreempt: true },
+                }),
+            ]),
         );
+        await this.update(preemptPayload, { direction: 1, previousCombatantId: combatantId });
     }
 
     /**
@@ -597,17 +864,30 @@ export class HeroSystem6eCombatSingle extends Combat {
                 const segmentHighWater = ending
                     ? Math.max(priorHighWater ?? -Infinity, endingPriority)
                     : priorHighWater;
+                const withinSegmentPayload = {
+                    turn: targetIndex,
+                    [`flags.${game.system.id}.actingPriority`]: this.getInitiativePriority(target, activeSegment),
+                    [`flags.${game.system.id}.segmentHighWater`]: Number.isFinite(segmentHighWater)
+                        ? segmentHighWater
+                        : null,
+                };
+                if (game.user.isGM) {
+                    Object.assign(
+                        withinSegmentPayload,
+                        this.eventLogAppendPayload([
+                            this.buildEvent("turn.start", {
+                                combatant: target,
+                                abs: currentAbsNow,
+                                data: { turnIndex: targetIndex, storedActingPriority: storedActingPriority ?? null },
+                            }),
+                        ]),
+                    );
+                }
                 const result = await HeroCompatibility.updateEmbedded(
                     this,
                     "combatants",
                     inlineCombatantUpdates,
-                    {
-                        turn: targetIndex,
-                        [`flags.${game.system.id}.actingPriority`]: this.getInitiativePriority(target, activeSegment),
-                        [`flags.${game.system.id}.segmentHighWater`]: Number.isFinite(segmentHighWater)
-                            ? segmentHighWater
-                            : null,
-                    },
+                    withinSegmentPayload,
                     { direction: 1, previousCombatantId: ending?.id },
                 );
                 if (!HeroCompatibility.isV14) {
@@ -683,9 +963,11 @@ export class HeroSystem6eCombatSingle extends Combat {
         const masterRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
         let updatedRollsCache = masterRollsCache[nextSegment];
 
+        let freshRollMap = null;
         if (!updatedRollsCache) {
             updatedRollsCache = this._buildSegmentRollMap();
             masterRollsCache[nextSegment] = updatedRollsCache;
+            freshRollMap = updatedRollsCache;
         }
         updateData[`flags.${game.system.id}.segmentRolls`] = masterRollsCache;
 
@@ -767,6 +1049,27 @@ export class HeroSystem6eCombatSingle extends Combat {
         // A fresh segment has no completed turns yet
         updateData[`flags.${game.system.id}.segmentHighWater`] = null;
 
+        if (game.user.isGM) {
+            const crossEvents = [];
+            if (nextRoundCycle !== this.round) crossEvents.push(this.buildEvent("round.start", { abs: nextAbs }));
+            crossEvents.push(this.buildEvent("segment.start", { abs: nextAbs }));
+            if (freshRollMap) {
+                crossEvents.push(
+                    this.buildEvent("tie.roll", { abs: nextAbs, data: { segment: nextSegment, rolls: freshRollMap } }),
+                );
+            }
+            if (incomingCombatant) {
+                crossEvents.push(
+                    this.buildEvent("turn.start", {
+                        combatant: incomingCombatant,
+                        abs: nextAbs,
+                        data: { turnIndex: updateData.turn, storedActingPriority: storedActingPriority ?? null },
+                    }),
+                );
+            }
+            Object.assign(updateData, this.eventLogAppendPayload(crossEvents));
+        }
+
         const updateOptions = {
             direction: 1,
             previousCombatantId: this.combatant?.id,
@@ -846,6 +1149,15 @@ export class HeroSystem6eCombatSingle extends Combat {
                 // Rewinds forget completed turns; lenient for re-declared elevations
                 [`flags.${game.system.id}.segmentHighWater`]: null,
             };
+            Object.assign(
+                inlineUpdateData,
+                this.eventLogAppendPayload([
+                    this.buildEvent("rewind", {
+                        combatant: targetCombatant,
+                        data: { targetAbs: this.round * 12 + activeSegment },
+                    }),
+                ]),
+            );
             const rewindResets = this._rewindHoldFlagResets(this.round * 12 + activeSegment);
 
             const result = await HeroCompatibility.updateEmbedded(this, "combatants", rewindResets, inlineUpdateData, {
@@ -961,6 +1273,10 @@ export class HeroSystem6eCombatSingle extends Combat {
             ? this.getInitiativePriority(rewindTarget, prevSegment, { queryAbs: prevAbs })
             : null;
         updateData[`flags.${game.system.id}.segmentHighWater`] = null;
+        Object.assign(
+            updateData,
+            this.eventLogAppendPayload([this.buildEvent("rewind", { data: { targetAbs: prevAbs } })]),
+        );
 
         const updateOptions = { direction: -1, previousCombatantId: this.combatant?.id };
         if (segmentDeltaCount < 0) {
@@ -1002,6 +1318,15 @@ export class HeroSystem6eCombatSingle extends Combat {
         updateData[`flags.${game.system.id}.currentSegment`] = this.segment;
         updateData[`flags.${game.system.id}.actingPriority`] = null;
         updateData[`flags.${game.system.id}.segmentHighWater`] = null;
+        Object.assign(
+            updateData,
+            this.eventLogAppendPayload([
+                this.buildEvent("round.start", {
+                    abs: (this.round + 1) * 12 + this.segment,
+                    data: { skippedTurn: true },
+                }),
+            ]),
+        );
 
         // Skipping a full Turn crosses Post-Segment 12 exactly once
         if (this.started && this.round > 0) {
@@ -1043,6 +1368,12 @@ export class HeroSystem6eCombatSingle extends Combat {
         };
         updateData[`flags.${game.system.id}.actingPriority`] = null;
         updateData[`flags.${game.system.id}.segmentHighWater`] = null;
+        Object.assign(
+            updateData,
+            this.eventLogAppendPayload([
+                this.buildEvent("rewind", { data: { targetAbs: targetRound * 12 + this.segment } }),
+            ]),
+        );
 
         // Test 3 requires checking if resetting to turn 0 under an unstarted/rewound
         // boundary should forcefully clamp the timeline back to the initial segment threshold (12).
@@ -1158,6 +1489,8 @@ export class HeroSystem6eCombatSingle extends Combat {
             "recoveredRounds",
             "actingPriority",
             "segmentHighWater",
+            "eventLog",
+            "eventLogSeq",
         ]);
 
         // 4. Update parent properties and children simultaneously through your compatibility bridge
@@ -1191,6 +1524,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         // Persist the guard before any actor is touched: if the caller's advance never
         // commits (no eligible combatant found), recovery must not re-apply on retry
         await this.setFlag(game.system.id, "recoveredRounds", [...recoveredRounds, roundToRecover]);
+        await this.logEvent("recovery.post12", { data: { round: roundToRecover } });
 
         const automation = game.settings.get(game.system.id, "automation");
 
@@ -1419,6 +1753,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             combatant,
             `${actor.name}'s Held Action was replaced by their natural Phase in ${this.currentPhaseLabel}.`,
         );
+        await this.logEvent("hold.consume", { combatant, data: { mode: hold.mode } });
     }
 
     /**
@@ -1466,6 +1801,10 @@ export class HeroSystem6eCombatSingle extends Combat {
                             combatant,
                             `${combatant.actor.name}'s SPD changed from ${knownSpd} to ${spd}. They cannot act until both SPDs would have had a Phase (Segment ${((lockoutEndAbs - 1) % 12) + 1}).`,
                         );
+                        await this.logEvent("spd.lockout", {
+                            combatant,
+                            data: { previousSpd: knownSpd, newSpd: spd, lockoutEndAbs },
+                        });
                     }
                 }
                 combatantUpdates.push(update);
@@ -1474,6 +1813,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
             if (lockout?.lockoutEndAbs && currentAbs >= lockout.lockoutEndAbs) {
                 await combatant.unsetFlag(game.system.id, "spdLockout");
+                await this.logEvent("spd.clear", { combatant, data: { previousSpd: lockout.previousSpd } });
             }
         }
 
@@ -1549,6 +1889,10 @@ export class HeroSystem6eCombatSingle extends Combat {
                 ? `${actor.name} used their Held Action in ${this.currentPhaseLabel}.`
                 : `${actor.name}'s held turn passed without being used; the Held Action is spent (${this.currentPhaseLabel}).`,
         );
+        await this.logEvent(used ? "hold.use" : "hold.forfeit", {
+            combatant,
+            data: { mode: hold.mode, segmentAbs: hold.segmentAbs ?? null, dex: hold.dex ?? null },
+        });
     }
 
     /**
@@ -1563,7 +1907,8 @@ export class HeroSystem6eCombatSingle extends Combat {
     async _consumeExpiredHeldActions(segment) {
         for (const combatant of this.combatants) {
             const actor = combatant.actor;
-            if (!actor || !combatant.heldAction) continue;
+            const hold = combatant.heldAction;
+            if (!actor || !hold) continue;
             // segment === null: a full Turn elapsed, so every SPD 1-12 had a Phase
             if (segment !== null && !combatant.hasPhaseInSegment(segment)) continue;
 
@@ -1577,6 +1922,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 combatant,
                 `${actor.name}'s Held Action was consumed by their natural Phase${segment !== null ? ` in ${this.currentPhaseLabel}` : ""}.`,
             );
+            await this.logEvent("hold.consume", { combatant, data: { mode: hold.mode ?? null } });
         }
     }
 
@@ -1610,6 +1956,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 combatant,
                 `${actor.name}'s aborted Phase has passed (now ${this.currentPhaseLabel}); they may act again on their next Phase.`,
             );
+            await this.logEvent("abort.expire", { combatant, data: { spentAbs } });
         }
     }
 
@@ -1727,6 +2074,8 @@ const LEGACY_COMBAT_FLAG_KEYS = [
     "recoveredRounds",
     "actingPriority",
     "segmentHighWater",
+    "eventLog",
+    "eventLogSeq",
 ];
 
 /**
