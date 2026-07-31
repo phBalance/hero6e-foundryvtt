@@ -300,8 +300,11 @@ export class HeroSystem6eCombatSingle extends Combat {
     _buildSegmentRollMap() {
         const newSegmentMap = {};
         for (const combatant of this.combatants) {
-            const rollKey = combatant.actorId || combatant.id;
+            const rollKey = this._tieRollKey(combatant);
             newSegmentMap[rollKey] ??= this._rollTieBreak(combatant);
+            // Per-member sub-roll: members of a shared entry shuffle within the
+            // group's position each segment (6E2 18)
+            (newSegmentMap[rollKey].m ??= {})[combatant.tokenId || combatant.id] ??= Math.floor(Math.random() * 100);
         }
         return newSegmentMap;
     }
@@ -360,6 +363,139 @@ export class HeroSystem6eCombatSingle extends Combat {
         const keyA = a.tokenId || a.actorId || a.id;
         const keyB = b.tokenId || b.actorId || b.id;
         return keyA.localeCompare(keyB) || a.id.localeCompare(b.id);
+    }
+
+    /**
+     * The key a combatant's tie-break roll is stored under. Tokens of the same
+     * base actor share one roll (and therefore group in the tracker) unless the
+     * combatant has been split out of its group with the soloTieRoll flag.
+     * @param {Combatant} combatant
+     * @returns {string}
+     */
+    _tieRollKey(combatant) {
+        if (game.system?.id && combatant.getFlag?.(game.system.id, "soloTieRoll")) {
+            return `solo:${combatant.tokenId || combatant.id}`;
+        }
+        return combatant.actorId || combatant.id;
+    }
+
+    /**
+     * The combatant's per-member sub-roll within its shared roll entry, or null.
+     * @param {Combatant} combatant
+     * @param {object} rollsMap - One absolute segment's roll map
+     * @returns {number|null}
+     * @private
+     */
+    _memberSubRoll(combatant, rollsMap) {
+        const entry = rollsMap?.[this._tieRollKey(combatant)];
+        if (!entry || typeof entry === "number") return null;
+        return entry.m?.[combatant.tokenId || combatant.id] ?? null;
+    }
+
+    /**
+     * Equal-priority ordering. Members sharing a roll entry (a ×N group) shuffle
+     * per segment via their sub-rolls — the same 6E2 18 roll-off ungrouped tied
+     * combatants get — highest first; everything else (and missing rolls) falls
+     * back to the re-add-stable identity compare.
+     * @param {Combatant} a
+     * @param {Combatant} b
+     * @param {number|null} [queryAbs] - Position being ordered; defaults to current
+     * @returns {number}
+     */
+    tieBreakOrder(a, b, queryAbs = null) {
+        const keyA = this._tieRollKey(a);
+        const keyB = this._tieRollKey(b);
+        if (keyA === keyB) {
+            const abs = queryAbs ?? HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+            const rollsFlag = this.getFlag(game.system.id, "segmentRolls") ?? {};
+            const rollsMap = rollsFlag[abs] ?? rollsFlag[HeroSystem6eCombatantSingle.segmentOf(abs)] ?? {};
+            const subA = this._memberSubRoll(a, rollsMap);
+            const subB = this._memberSubRoll(b, rollsMap);
+            if (subA !== null && subB !== null && subA !== subB) return subB - subA;
+        }
+        return HeroSystem6eCombatSingle.stableTiebreak(a, b);
+    }
+
+    /**
+     * Ensures every combatant has a roll entry (and a member sub-roll) in every
+     * recorded map — newcomers, split/rejoined members, and re-adds otherwise
+     * sort at defaults. Mutates the passed cache.
+     * @param {object} masterRollsCache
+     * @param {Combatant[]|Collection} [combatants]
+     * @returns {boolean} Whether anything was added
+     * @private
+     */
+    _backfillTieRolls(masterRollsCache, combatants = this.combatants) {
+        let dirty = false;
+        for (const rollsMap of Object.values(masterRollsCache)) {
+            if (typeof rollsMap !== "object" || rollsMap === null) continue;
+            for (const combatant of combatants) {
+                const rollKey = this._tieRollKey(combatant);
+                let entry = rollsMap[rollKey];
+                if (typeof entry === "number") continue; // legacy scalar: leave as-is
+                if (entry === undefined) {
+                    rollsMap[rollKey] = entry = this._rollTieBreak(combatant);
+                    dirty = true;
+                }
+                const memberKey = combatant.tokenId || combatant.id;
+                entry.m ??= {};
+                if (entry.m[memberKey] === undefined) {
+                    entry.m[memberKey] = Math.floor(Math.random() * 100);
+                    dirty = true;
+                }
+            }
+        }
+        return dirty;
+    }
+
+    /**
+     * Splits a combatant out of (or rejoins it to) its same-actor ×N group by
+     * giving it an independent tie-break roll. GM bookkeeping: the backfill and
+     * ledger writes are combat-flag updates players cannot commit.
+     * @param {string} combatantId
+     * @param {boolean} solo
+     * @returns {Promise<void>}
+     */
+    async setCombatantSoloTieRoll(combatantId, solo) {
+        if (!game.user.isGM) return;
+        const combatant = this.combatants.get(combatantId);
+        if (!combatant) return;
+
+        if (solo) await combatant.setFlag(game.system.id, "soloTieRoll", true);
+        else await combatant.unsetFlag(game.system.id, "soloTieRoll");
+
+        if (!this.started) {
+            this.collection.render();
+            return;
+        }
+
+        // Backfill the member's (new) roll key into every recorded map so it
+        // doesn't sort at the +0.50 default
+        const masterRollsCache = foundry.utils.deepClone(this.getFlag(game.system.id, "segmentRolls") ?? {});
+        const activeId = this.combatant?.id ?? null;
+        const payload = {};
+        if (this._backfillTieRolls(masterRollsCache, [combatant])) {
+            payload[`flags.${game.system.id}.segmentRolls`] = masterRollsCache;
+        }
+        Object.assign(
+            payload,
+            this.eventLogAppendPayload([this.buildEvent(solo ? "group.split" : "group.rejoin", { combatant })]),
+        );
+        await this.update(payload);
+
+        // Mid-segment priority change: refresh changed initiatives and keep the
+        // pointer on the active combatant (actingPriority deliberately untouched)
+        const updates = this.combatants
+            .map((c) => ({ _id: c.id, initiative: this.getInitiativePriority(c, this.segment) }))
+            .filter((u) => this.combatants.get(u._id)?.initiative !== u.initiative);
+        if (updates.length > 0) await this.updateEmbeddedDocuments("Combatant", updates);
+        await this.resyncTurnPointer(activeId);
+        await this._combatCard(
+            combatant,
+            solo
+                ? `${combatant.name} acts separately from their group (own tie-break rolls).`
+                : `${combatant.name} rejoins their group.`,
+        );
     }
 
     /**
@@ -443,7 +579,9 @@ export class HeroSystem6eCombatSingle extends Combat {
             return priorityB - priorityA; // Descending order (highest score acts first)
         }
 
-        return HeroSystem6eCombatSingle.stableTiebreak(a, b);
+        return parentCombat.tieBreakOrder
+            ? parentCombat.tieBreakOrder(a, b, queryAbs)
+            : HeroSystem6eCombatSingle.stableTiebreak(a, b);
     }
 
     /**
@@ -508,8 +646,11 @@ export class HeroSystem6eCombatSingle extends Combat {
         // shape from in-flight combats and read as a fallback
         const rollsFlag = (parentCombat ? parentCombat.getFlag(game.system.id, "segmentRolls") : null) ?? {};
         const segmentRolls = rollsFlag[scoredAbs] ?? rollsFlag[activeSegment] ?? {};
-        // Rolls are keyed by root actor id; fall back to combatant id for pre-existing combats
-        const tieBreakerEntry = segmentRolls[combatant.actorId || combatant.id] ?? segmentRolls[combatant.id];
+        // Rolls are keyed by root actor id (or a solo key for split members); fall
+        // back to combatant id for pre-existing combats
+        const rollKey = (parentCombat ?? this)._tieRollKey?.(combatant) ?? (combatant.actorId || combatant.id);
+        const tieBreakerEntry =
+            segmentRolls[rollKey] ?? segmentRolls[combatant.actorId || combatant.id] ?? segmentRolls[combatant.id];
         const tieBreakerFraction = this._tieBreakerFraction(tieBreakerEntry);
 
         if (positionalHold) {
@@ -941,7 +1082,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 priority === endingPriority &&
                 !!ending &&
                 c.id !== ending.id &&
-                HeroSystem6eCombatSingle.stableTiebreak(c, ending) > 0
+                this.tieBreakOrder(c, ending, currentAbsNow) > 0
             );
         });
 
@@ -2395,18 +2536,9 @@ export class HeroSystem6eCombatSingle extends Combat {
         const survivors = created.filter((c) => this.combatants.has(c.id));
         if (survivors.length === 0) return;
 
-        // 2. Backfill tie-break rolls for every recorded position
+        // 2. Backfill tie-break rolls (and member sub-rolls) for every recorded position
         const masterRollsCache = foundry.utils.deepClone(this.getFlag(game.system.id, "segmentRolls") ?? {});
-        let rollsDirty = false;
-        for (const map of Object.values(masterRollsCache)) {
-            for (const combatant of survivors) {
-                const rollKey = combatant.actorId || combatant.id;
-                if (map[rollKey] === undefined) {
-                    map[rollKey] = this._rollTieBreak(combatant);
-                    rollsDirty = true;
-                }
-            }
-        }
+        const rollsDirty = this._backfillTieRolls(masterRollsCache, survivors);
 
         // 3. Stale effect reconciliation: hold/abort records bound to a combatant
         // no longer in this combat are meaningless on re-add
@@ -3065,6 +3197,7 @@ const LEGACY_COMBATANT_FLAG_KEYS = [
     "knownSpd",
     "pendingSpd",
     "haymaker",
+    "soloTieRoll",
 ];
 const LEGACY_COMBAT_FLAG_KEYS = [
     "segment",

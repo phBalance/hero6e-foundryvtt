@@ -672,9 +672,14 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     }
                 }
             }
-            // Same order _comparePriority produces: priority descending, id tiebreak
+            // Same order _comparePriority produces: priority descending, then the
+            // per-segment sub-roll shuffle within a shared roll group
             entries.sort(
-                (a, b) => b.priority - a.priority || HeroSystem6eCombatSingle.stableTiebreak(a.combatant, b.combatant),
+                (a, b) =>
+                    b.priority - a.priority ||
+                    (combat.tieBreakOrder
+                        ? combat.tieBreakOrder(a.combatant, b.combatant, abs)
+                        : HeroSystem6eCombatSingle.stableTiebreak(a.combatant, b.combatant)),
             );
 
             // Tokens of the same root actor tied on the same priority act back to back;
@@ -682,7 +687,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             // member when the group contains it so click/hover target the acting token.
             const groups = [];
             for (const entry of entries) {
-                const key = `${entry.combatant.actorId || entry.combatant.id}${entry.lrShadow ? ":lr-shadow" : ""}${entry.haymaker ? ":haymaker" : ""}${entry.lrSpent ? ":lr-spent" : ""}`;
+                const rollKey =
+                    combat._tieRollKey?.(entry.combatant) ?? (entry.combatant.actorId || entry.combatant.id);
+                const key = `${rollKey}${entry.lrShadow ? ":lr-shadow" : ""}${entry.haymaker ? ":haymaker" : ""}${entry.lrSpent ? ":lr-spent" : ""}`;
                 const prev = groups.at(-1);
                 if (prev && prev.key === key && prev.priority === entry.priority && !entry.haymaker && !entry.lrSpent) {
                     prev.combatants.push(entry.combatant);
@@ -1072,6 +1079,29 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     return !!combatant?.isOwner && !!combatant.heldAction;
                 },
                 onClick: (event, li) => this._onReleaseHeldAction(li.dataset.combatantId),
+            },
+            {
+                label: "Split from Group",
+                icon: "fa-solid fa-arrow-right-from-bracket",
+                visible: (li) => {
+                    if (!game.user.isGM) return false;
+                    const combatant = getCombatant(li);
+                    if (!combatant || combatant.getFlag(game.system.id, "soloTieRoll")) return false;
+                    // Only meaningful when a same-actor sibling exists to group with
+                    return this.viewed.combatants.some(
+                        (c) => c.id !== combatant.id && c.actorId && c.actorId === combatant.actorId,
+                    );
+                },
+                onClick: (event, li) => this.viewed?.setCombatantSoloTieRoll?.(li.dataset.combatantId, true),
+            },
+            {
+                label: "Rejoin Group",
+                icon: "fa-solid fa-arrow-right-to-bracket",
+                visible: (li) => {
+                    if (!game.user.isGM) return false;
+                    return !!getCombatant(li)?.getFlag(game.system.id, "soloTieRoll");
+                },
+                onClick: (event, li) => this.viewed?.setCombatantSoloTieRoll?.(li.dataset.combatantId, false),
             },
             {
                 label: "Act Early (Lightning Reflexes)",

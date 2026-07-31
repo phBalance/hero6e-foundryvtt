@@ -2350,6 +2350,39 @@ export function registerCombatTests(quench) {
                     expect(resolved, "wind-up resolved once its segment fully passed").to.be.true;
                 });
 
+                it("Should shuffle group members per segment and split one out on demand", async function () {
+                    const boss = await makeActor("_Quench Group Boss", { dex: 14, spd: 2 });
+                    const combat = await makeCombat([boss]);
+                    // Two more combatants of the same actor: a ×3 group
+                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: boss.id }, { actorId: boss.id }]);
+                    const members = combat.combatants.filter((c) => c.actorId === boss.id);
+                    await combat.startCombat();
+
+                    // One shared roll entry with a per-member sub-roll for each token
+                    const rolls = combat.getFlag(game.system.id, "segmentRolls")["24"];
+                    const entry = rolls[boss.id];
+                    expect(Object.keys(entry.m ?? {}).length, "one sub-roll per member").to.equal(3);
+
+                    // Order within the group follows the sub-rolls, highest first
+                    const sorted = [...members].sort((a, b) => combat.tieBreakOrder(a, b, 24));
+                    const subs = sorted.map((c) => entry.m[c.tokenId || c.id]);
+                    const descending = subs.every((v, i) => i === 0 || subs[i - 1] >= v);
+                    expect(descending, "sub-rolls order the group, highest first").to.be.true;
+
+                    // Split one member out: own roll key, backfilled into recorded maps
+                    const split = members[0];
+                    await combat.setCombatantSoloTieRoll(split.id, true);
+                    expect(split.getFlag(game.system.id, "soloTieRoll")).to.be.true;
+                    const soloKey = `solo:${split.tokenId || split.id}`;
+                    const rollsAfter = combat.getFlag(game.system.id, "segmentRolls")["24"];
+                    expect(rollsAfter[soloKey], "solo roll backfilled for the visited segment").to.not.equal(undefined);
+                    expect(combat._tieRollKey(split)).to.equal(soloKey);
+
+                    // Rejoining restores the shared key (and with it, the grouping)
+                    await combat.setCombatantSoloTieRoll(split.id, false);
+                    expect(combat._tieRollKey(split)).to.equal(boss.id);
+                });
+
                 it("Should refuse initiative rolls entirely (HERO has none)", async function () {
                     const actor = await makeActor("_Quench No Init", { dex: 12, spd: 2 });
                     const combat = await makeCombat([actor]);
