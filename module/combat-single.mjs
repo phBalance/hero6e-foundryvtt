@@ -800,6 +800,29 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
+     * Points the turn index back at the given combatant after a mid-segment
+     * priority change re-sorted the turns array. previousCombatantId is the active
+     * combatant itself so the natural-turn hold consumption's self-advance guard
+     * (and the Phase start/end work) skip this pointer-only update.
+     * @param {string|null} activeId
+     * @returns {Promise<void>}
+     */
+    async resyncTurnPointer(activeId) {
+        if (!this.started || !activeId) return;
+        if (!HeroCompatibility.isV14) {
+            this._turns = null;
+            this.setupTurns();
+        }
+        const index = this.turns.findIndex((t) => t.id === activeId);
+        if (index === -1 || index === this.turn) return;
+        try {
+            await this.update({ turn: index }, { direction: 1, previousCombatantId: activeId });
+        } catch (e) {
+            console.warn(`Unable to re-sync the turn pointer`, e);
+        }
+    }
+
+    /**
      * Relays a turn-flow operation to the active GM over the system socket. Core
      * permits non-GM Combat updates only on round/turn/combatants, and every
      * advance here carries system flags (segment, acting priority, tie-breaker
@@ -1518,7 +1541,12 @@ export class HeroSystem6eCombatSingle extends Combat {
             const lockout = combatant.getFlag(game.system.id, "spdLockout");
             if (lockout && (lockout.lockoutStartAbs ?? Infinity) >= targetAbs) {
                 update[`flags.${game.system.id}.spdLockout`] = null;
-                update[`flags.${game.system.id}.knownSpd`] = lockout.previousSpd;
+                update[`flags.${game.system.id}.knownSpd`] = lockout.previousKnown ?? lockout.previousSpd;
+            }
+            // A deferred voluntary change declared at or after the target is re-detected on replay
+            const pendingSpd = combatant.getFlag(game.system.id, "pendingSpd");
+            if (pendingSpd && (pendingSpd.declaredAbs ?? Infinity) >= targetAbs) {
+                update[`flags.${game.system.id}.pendingSpd`] = null;
             }
             if (Object.keys(update).length > 0) resets.push({ _id: combatant.id, ...update });
         }
@@ -1548,6 +1576,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 // reference the previous run's absolute positions
                 [`flags.${game.system.id}.spdLockout`]: null,
                 [`flags.${game.system.id}.knownSpd`]: null,
+                [`flags.${game.system.id}.pendingSpd`]: null,
             });
         });
 
@@ -2332,42 +2361,94 @@ export class HeroSystem6eCombatSingle extends Combat {
         const combatantUpdates = [];
 
         for (const combatant of this.combatants) {
-            if (!combatant.actor) continue;
+            const actor = combatant.actor;
+            if (!actor) continue;
 
-            const spd = combatant.combatSpd;
-            const knownSpd = combatant.getFlag(game.system.id, "knownSpd");
+            // The baseline tracks both the effective SPD (with active effects) and
+            // the sheet's source value: an effective-only change is adjustment-driven
+            // (Aid/Drain — the mandatory lockout applies); a source change is a
+            // voluntary edit, which only takes effect at Post-Segment 12
+            const sourceSpd = Number(actor._source?.system?.characteristics?.spd?.value);
+            const pending = combatant.getFlag(game.system.id, "pendingSpd");
+            const rawKnown = combatant.getFlag(game.system.id, "knownSpd");
+            const known =
+                rawKnown === undefined || rawKnown === null
+                    ? undefined
+                    : typeof rawKnown === "object"
+                      ? rawKnown
+                      : { effective: rawKnown, source: rawKnown };
             const lockout = combatant.getFlag(game.system.id, "spdLockout");
 
-            if (knownSpd === undefined) {
-                combatantUpdates.push({ _id: combatant.id, [`flags.${game.system.id}.knownSpd`]: spd });
+            if (known === undefined) {
+                combatantUpdates.push({
+                    _id: combatant.id,
+                    [`flags.${game.system.id}.knownSpd`]: { effective: combatant.combatSpd, source: sourceSpd },
+                });
                 continue;
             }
 
-            if (spd !== knownSpd) {
-                const update = { _id: combatant.id, [`flags.${game.system.id}.knownSpd`]: spd };
-
-                // A change from or to SPD 0 has no pending old/new Phase to wait for
-                if (knownSpd > 0 && spd > 0) {
-                    const oldNext = HeroSystem6eCombatantSingle.nextPhaseAbs(knownSpd, currentAbs);
-                    const newNext = HeroSystem6eCombatantSingle.nextPhaseAbs(spd, currentAbs);
-                    const lockoutEndAbs = Math.max(oldNext, newNext);
-                    if (lockoutEndAbs > currentAbs) {
-                        update[`flags.${game.system.id}.spdLockout`] = {
-                            previousSpd: knownSpd,
-                            lockoutEndAbs,
-                            // Rewinds behind this position un-detect the change entirely
-                            lockoutStartAbs: currentAbs,
-                        };
-                        await this._combatCard(
-                            combatant,
-                            `${combatant.actor.name}'s SPD changed from ${knownSpd} to ${spd}. They cannot act until both SPDs would have had a Phase (Segment ${((lockoutEndAbs - 1) % 12) + 1}).`,
-                        );
-                        await this.logEvent("spd.lockout", {
-                            combatant,
-                            data: { previousSpd: knownSpd, newSpd: spd, lockoutEndAbs },
-                        });
-                    }
+            // A deferred voluntary change applies once Post-Segment 12 has passed
+            // since it was declared — the change is free at that point
+            if (pending) {
+                const declaredRound = HeroSystem6eCombatantSingle.roundOf(pending.declaredAbs ?? currentAbs);
+                if (currentAbs > declaredRound * 12 + 12) {
+                    combatantUpdates.push({
+                        _id: combatant.id,
+                        [`flags.${game.system.id}.pendingSpd`]: null,
+                        [`flags.${game.system.id}.knownSpd`]: { effective: pending.newSpd, source: sourceSpd },
+                    });
+                    await this._combatCard(
+                        combatant,
+                        `${actor.name}'s SPD change to ${pending.newSpd} takes effect (Post-Segment 12 has passed).`,
+                    );
+                    await this.logEvent("spd.clear", {
+                        combatant,
+                        data: { previousSpd: known.effective, newSpd: pending.newSpd, deferred: true },
+                    });
                 }
+                continue;
+            }
+
+            // combatant.combatSpd would report the OLD value while a pendingSpd flag
+            // exists, so read the live effective SPD directly here
+            const spd = combatant.combatSpd;
+
+            if (spd !== known.effective || (Number.isFinite(sourceSpd) && sourceSpd !== known.source)) {
+                const sourceChanged = Number.isFinite(sourceSpd) && sourceSpd !== known.source;
+                const effectiveChanged = spd !== known.effective;
+
+                // Purely voluntary (sheet edit): defer to Post-Segment 12 (6E2 17;
+                // 5ER 357 — voluntary changes wait for the end of the Turn)
+                if (sourceChanged && !effectiveChangedBeyondSource(spd, known, sourceSpd)) {
+                    combatantUpdates.push({
+                        _id: combatant.id,
+                        [`flags.${game.system.id}.pendingSpd`]: { newSpd: spd, declaredAbs: currentAbs },
+                    });
+                    await this._combatCard(
+                        combatant,
+                        `${actor.name}'s SPD was changed from ${known.effective} to ${spd}. A voluntary SPD change takes effect at Post-Segment 12; until then they act at SPD ${known.effective}.`,
+                    );
+                    await this._whisperSpdOverridePrompt(combatant, known.effective, spd);
+                    await this.logEvent("spd.deferred", {
+                        combatant,
+                        data: { previousSpd: known.effective, newSpd: spd },
+                    });
+                    continue;
+                }
+
+                // Adjustment-driven (or mixed): the mandatory lockout applies now
+                const update = {
+                    _id: combatant.id,
+                    [`flags.${game.system.id}.knownSpd`]: { effective: spd, source: sourceSpd },
+                };
+                if (sourceChanged && effectiveChanged) {
+                    // Both moved in one poll window: treat as adjustment, but tell the GM
+                    await ChatMessage.create({
+                        content: `<p>${actor.name}'s SPD changed in both sheet value and active effects at once; treating it as an adjustment-driven change (lockout applies). Use Cancel Abort/rewind tools if this was a voluntary edit.</p>`,
+                        whisper: ChatMessage.getWhisperRecipients("GM"),
+                    });
+                }
+                Object.assign(update, this._spdLockoutUpdate(combatant, known, spd, currentAbs));
                 combatantUpdates.push(update);
                 continue;
             }
@@ -2381,6 +2462,106 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (combatantUpdates.length > 0) {
             await this.updateEmbeddedDocuments("Combatant", combatantUpdates);
         }
+
+        // Helper hoisted for readability: a source-only change means the effective
+        // SPD moved exactly with the sheet (no separate adjustment component)
+        function effectiveChangedBeyondSource(spd, known, sourceSpd) {
+            const sourceDelta = sourceSpd - (known.source ?? sourceSpd);
+            return spd - known.effective !== sourceDelta;
+        }
+    }
+
+    /**
+     * Builds the spdLockout flag entry (and posts the card + ledger event) for an
+     * adjustment-driven SPD change, using the edition-appropriate rule:
+     * 6e (6E2 17) — cannot act until both SPDs would have had a Phase;
+     * 5e (5ER 357) — cannot act until the next Segment that is a Phase for BOTH.
+     * @param {Combatant} combatant
+     * @param {{effective: number, source: number}} known
+     * @param {number} newSpd
+     * @param {number} currentAbs
+     * @returns {object} Flag-path fragment for the combatant update
+     * @private
+     */
+    _spdLockoutUpdate(combatant, known, newSpd, currentAbs) {
+        const oldSpd = known.effective;
+        // A change from or to SPD 0 has no pending old/new Phase to wait for
+        if (!(oldSpd > 0 && newSpd > 0)) return {};
+
+        const is5e = !!combatant.actor?.is5e;
+        const lockoutEndAbs = is5e
+            ? HeroSystem6eCombatantSingle.nextSharedPhaseAbs(oldSpd, newSpd, currentAbs)
+            : Math.max(
+                  HeroSystem6eCombatantSingle.nextPhaseAbs(oldSpd, currentAbs),
+                  HeroSystem6eCombatantSingle.nextPhaseAbs(newSpd, currentAbs),
+              );
+        if (lockoutEndAbs <= currentAbs) return {};
+
+        const ruleText = is5e
+            ? `They cannot act until the next Segment that is a Phase for both SPDs`
+            : `They cannot act until both SPDs would have had a Phase`;
+        this._combatCard(
+            combatant,
+            `${combatant.actor.name}'s SPD changed from ${oldSpd} to ${newSpd}. ${ruleText} (${HeroSystem6eCombatantSingle.phaseLabel(lockoutEndAbs)}).`,
+        ).catch((e) => console.error(e));
+        this.logEvent("spd.lockout", {
+            combatant,
+            data: { previousSpd: oldSpd, newSpd, lockoutEndAbs, is5e },
+        }).catch((e) => console.error(e));
+
+        return {
+            [`flags.${game.system.id}.spdLockout`]: {
+                previousSpd: oldSpd,
+                // Rewinds revert to the full pre-change baseline
+                previousKnown: known,
+                lockoutEndAbs,
+                lockoutStartAbs: currentAbs,
+            },
+        };
+    }
+
+    /**
+     * Whispers the GM an "apply immediately" escape hatch for a deferred voluntary
+     * SPD change (GM fiat: treat it as an immediate change with the normal lockout).
+     * @param {Combatant} combatant
+     * @param {number} oldSpd
+     * @param {number} newSpd
+     * @private
+     */
+    async _whisperSpdOverridePrompt(combatant, oldSpd, newSpd) {
+        const whisper = ChatMessage.getWhisperRecipients("GM");
+        if (whisper.length === 0) return;
+        await ChatMessage.create({
+            speaker: ChatMessage.getSpeaker({ actor: combatant.actor }),
+            whisper,
+            content: `<p>${combatant.actor.name}'s voluntary SPD change (${oldSpd} → ${newSpd}) is deferred to Post-Segment 12.</p>
+                <button type="button" class="hero-spd-apply-now" data-combat-id="${this.id}" data-combatant-id="${combatant.id}">Apply immediately (with SPD-change lockout)</button>`,
+        });
+    }
+
+    /**
+     * GM fiat: applies a deferred voluntary SPD change right now, with the normal
+     * adjustment-style lockout.
+     * @param {string} combatantId
+     * @returns {Promise<void>}
+     */
+    async applyPendingSpdNow(combatantId) {
+        if (!game.user.isGM || !this.started) return;
+        const combatant = this.combatants.get(combatantId);
+        const pending = combatant?.getFlag(game.system.id, "pendingSpd");
+        if (!pending) return;
+        const rawKnown = combatant.getFlag(game.system.id, "knownSpd");
+        const known =
+            typeof rawKnown === "object" && rawKnown !== null ? rawKnown : { effective: rawKnown, source: rawKnown };
+        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const sourceSpd = Number(combatant.actor?._source?.system?.characteristics?.spd?.value);
+        const update = {
+            _id: combatant.id,
+            [`flags.${game.system.id}.pendingSpd`]: null,
+            [`flags.${game.system.id}.knownSpd`]: { effective: pending.newSpd, source: sourceSpd },
+        };
+        Object.assign(update, this._spdLockoutUpdate(combatant, known, pending.newSpd, currentAbs));
+        await this.updateEmbeddedDocuments("Combatant", [update]);
     }
 
     /**
@@ -2668,6 +2849,7 @@ const LEGACY_COMBATANT_FLAG_KEYS = [
     "lrElevatedAbs",
     "spdLockout",
     "knownSpd",
+    "pendingSpd",
 ];
 const LEGACY_COMBAT_FLAG_KEYS = [
     "segment",

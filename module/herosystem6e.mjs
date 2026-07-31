@@ -463,37 +463,69 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
             ui.combat._onToggleLrElevation(combatant.id);
         });
     });
+
+    // Deferred voluntary SPD change: the GM's "apply immediately" escape hatch
+    html.querySelectorAll("button.hero-spd-apply-now").forEach((button) => {
+        button.addEventListener("click", (event) => {
+            event.preventDefault();
+            if (!game.user.isGM) return;
+            const combat = game.combats.get(button.dataset.combatId);
+            combat?.applyPendingSpdNow?.(button.dataset.combatantId);
+        });
+    });
 });
 
 // Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
 // Hooks.on("renderChatPopout", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
 
-// When actor SPD is changed we need to setupTurns again
+// When actor SPD/DEX (or other initiative inputs) change we need to setupTurns again
 Hooks.on("updateActor", async (document, change /*, _options, _userId */) => {
-    if (!HEROSYS.isSingleCombatantTrackerEnabled) {
-        if (
-            change?.system?.characteristics?.spd?.value ||
-            change?.system?.characteristics?.dex?.value ||
-            change?.system?.characteristics?.ego?.value ||
-            change?.system?.characteristics?.int?.value ||
-            change?.system?.initiativeCharacteristic
-        ) {
-            for (const combat of game.combats) {
-                if (combat.active) {
-                    const _combatants = combat.combatants.filter((o) => o.actorId === document.id);
-                    if (_combatants) {
-                        // Reroll Initiative (based on new spd/dex/ego/int changes)
-                        //await combat.rollAll();
-                        await combat.rollInitiative(_combatants.map((o) => o.id));
-                        await combat.extraCombatants();
+    const initiativeRelevant =
+        change?.system?.characteristics?.spd?.value !== undefined ||
+        change?.system?.characteristics?.dex?.value !== undefined ||
+        change?.system?.characteristics?.ego?.value !== undefined ||
+        change?.system?.characteristics?.int?.value !== undefined ||
+        change?.system?.initiativeCharacteristic !== undefined;
+    if (!initiativeRelevant) return;
 
-                        // Setup Turns in combat tracker based on new spd/dex/ego/int changes)
-                        // Should no longer be needed now that SPD is part of initiative (handled via rollAll/combat:rollInitiative)
-                        //await combat.setupTurns();
-                    }
+    if (!HEROSYS.isSingleCombatantTrackerEnabled) {
+        for (const combat of game.combats) {
+            if (combat.active) {
+                const _combatants = combat.combatants.filter((o) => o.actorId === document.id);
+                if (_combatants) {
+                    // Reroll Initiative (based on new spd/dex/ego/int changes)
+                    //await combat.rollAll();
+                    await combat.rollInitiative(_combatants.map((o) => o.id));
+                    await combat.extraCombatants();
+
+                    // Setup Turns in combat tracker based on new spd/dex/ego/int changes)
+                    // Should no longer be needed now that SPD is part of initiative (handled via rollAll/combat:rollInitiative)
+                    //await combat.setupTurns();
                 }
             }
         }
+        return;
+    }
+
+    // Single tracker: re-sort on live priorities and keep the pointer on the active
+    // combatant. The stored actingPriority threshold is deliberately untouched — it
+    // is what stops already-acted combatants from being re-admitted (and unacted
+    // ones from being skipped) when priorities move mid-segment. SPD semantics
+    // (lockouts, voluntary deferral) are owned by the segment-boundary poll.
+    for (const combat of game.combats) {
+        if (!combat.active || !combat.started) continue;
+        const combatants = combat.combatants.filter((o) => o.actorId === document.id);
+        if (combatants.length === 0) continue;
+        if (!game.users.activeGM?.isSelf) {
+            combat.collection.render();
+            continue;
+        }
+        const activeId = combat.combatant?.id ?? null;
+        const updates = combatants
+            .map((c) => ({ _id: c.id, initiative: combat.getInitiativePriority(c, combat.segment) }))
+            .filter((u) => combat.combatants.get(u._id)?.initiative !== u.initiative);
+        if (updates.length > 0) await combat.updateEmbeddedDocuments("Combatant", updates);
+        await combat.resyncTurnPointer?.(activeId);
     }
 });
 

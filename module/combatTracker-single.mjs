@@ -1,6 +1,5 @@
 import { HeroSystem6eCombatantSingle } from "./combatant-single.mjs";
 import { HeroSystem6eCombatSingle } from "./combat-single.mjs";
-import { HeroCompatibility } from "./utility/compatibility.mjs";
 
 const { CombatTracker } = foundry.applications.sidebar.tabs;
 
@@ -1382,18 +1381,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * @private
      */
     async _resyncTurnPointer(combat, activeId) {
-        if (!combat?.started || activeId === null) return;
-        if (!HeroCompatibility.isV14) {
-            combat._turns = null;
-            combat.setupTurns();
-        }
-        const index = combat.turns.findIndex((t) => t.id === activeId);
-        if (index === -1 || index === combat.turn) return;
-        try {
-            await combat.update({ turn: index }, { direction: 1, previousCombatantId: activeId });
-        } catch (e) {
-            console.warn(`Unable to re-sync the turn pointer`, e);
-        }
+        return combat?.resyncTurnPointer?.(activeId);
     }
 
     /**

@@ -48,6 +48,27 @@ export class HeroSystem6eCombatantSingle extends Combatant {
     }
 
     /**
+     * The first absolute segment at or after fromAbs whose segment is a Phase for
+     * BOTH speeds — the 5e optional SPD-change rule (5ER 357: after changing SPD, a
+     * character cannot act until the next Segment that is a Phase for both SPDs).
+     * Bounded: every SPD shares segment 12.
+     * @param {number} spdA
+     * @param {number} spdB
+     * @param {number} fromAbs
+     * @returns {number}
+     */
+    static nextSharedPhaseAbs(spdA, spdB, fromAbs) {
+        const systemSpeedChart = CONFIG.HERO?.speedChart || HeroSystem6eCombatantSingle.speedChart;
+        const phasesA = systemSpeedChart[Math.min(12, Math.max(1, spdA))] || [];
+        const phasesB = systemSpeedChart[Math.min(12, Math.max(1, spdB))] || [];
+        for (let abs = fromAbs; abs < fromAbs + 12; abs++) {
+            const segment = ((abs - 1) % 12) + 1;
+            if (phasesA.includes(segment) && phasesB.includes(segment)) return abs;
+        }
+        return fromAbs;
+    }
+
+    /**
      * Human-readable combat position for chat cards.
      * @param {number} abs
      * @returns {string} e.g. "Segment 4 of Turn 2"
@@ -284,6 +305,20 @@ export class HeroSystem6eCombatantSingle extends Combatant {
      */
     get combatSpd() {
         if (!this.actor) return 0;
+
+        // A voluntarily declared SPD change takes effect only at Post-Segment 12
+        // (6E2 17; 5ER 357): until then the character keeps acting at the old SPD
+        if (game.system?.id && this.combat?.started) {
+            const pending = this.getFlag(game.system.id, "pendingSpd");
+            if (pending) {
+                const known = this.getFlag(game.system.id, "knownSpd");
+                const effective = typeof known === "object" && known !== null ? known.effective : known;
+                if (Number.isFinite(effective)) {
+                    if (effective <= 0) return 0;
+                    return Math.min(12, effective);
+                }
+            }
+        }
 
         const rawSource =
             this.actor._source?.system ||
