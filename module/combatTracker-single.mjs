@@ -1833,6 +1833,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const actor = combatant?.actor;
         if (!combat?.started || !combatant?.isOwner || !actor) return false;
         if (combatant.abortEffect) return false;
+        // The isActive read below must see settled pointer state, or an abort on
+        // the active combatant can silently skip its end-of-turn
+        await combat.settleMaintenance?.();
 
         if (!force) {
             const reason = this._blockedAbortReason(combatant);

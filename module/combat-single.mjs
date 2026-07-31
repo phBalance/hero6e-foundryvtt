@@ -908,6 +908,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             this._requestGmTurnAction("lrPreempt", { combatantId, activeId });
             return;
         }
+        await this.settleMaintenance();
         const combatant = this.combatants.get(combatantId);
         const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
         if (!this.started || combatant?.lrElevatedAbs !== currentAbs) return;
@@ -1013,6 +1014,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async nextTurn() {
         if (!game.user.isGM) return this._requestGmTurnAction("nextTurn");
+        await this.settleMaintenance();
 
         const allCombatants = this.combatants.contents;
         const activeSegment = this.segment;
@@ -1382,6 +1384,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async previousTurn() {
         if (!game.user.isGM) return this._requestGmTurnAction("previousTurn");
+        await this.settleMaintenance();
 
         if (this.round === 1 && this.segment === 12 && (this.turn ?? 0) === 0) {
             console.log(`[${game.system.id}] Rewinding past initial turn boundary. Resetting encounter state...`);
@@ -1635,6 +1638,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async nextRound() {
         if (!game.user.isGM) return this._requestGmTurnAction("nextRound");
+        await this.settleMaintenance();
 
         const updateData = {
             round: this.round + 1,
@@ -1693,6 +1697,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async previousRound() {
         if (!game.user.isGM) return this._requestGmTurnAction("previousRound");
+        await this.settleMaintenance();
 
         let targetRound = this.round - 1;
         if (targetRound < 1) targetRound = 1;
@@ -2125,6 +2130,27 @@ export class HeroSystem6eCombatSingle extends Combat {
         this._maintenanceChain = (this._maintenanceChain ?? Promise.resolve())
             .then(runMaintenance)
             .catch((e) => console.error(e));
+    }
+
+    /**
+     * Awaits all queued segment maintenance. Pointer-reading entry points call
+     * this first: the chains' combatant writes re-sort the turns array under the
+     * numeric turn index, so live reads (this.combatant, isActive checks) taken
+     * mid-flight can catch a transiently drifted pointer. Settled state is
+     * always consistent.
+     * @returns {Promise<void>}
+     */
+    async settleMaintenance({ timeout = 2000 } = {}) {
+        // Bounded: a chain can legitimately stall on a user dialog (STUN-for-END
+        // upkeep confirmation) — degrade to unsettled reads instead of hanging
+        // the pointer controls behind it
+        const deadline = new Promise((resolve) => setTimeout(() => resolve("timeout"), timeout));
+        let chain;
+        while ((chain = this._maintenanceChain)) {
+            const winner = await Promise.race([chain.then(() => "chain"), deadline]);
+            if (winner === "timeout") return;
+            if (this._maintenanceChain === chain) break;
+        }
     }
 
     /**
