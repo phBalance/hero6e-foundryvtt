@@ -1273,6 +1273,54 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         const currentFilteredIndex = currentActiveTurns.findIndex((t) => t.id === this.combatant?.id);
 
+        // A completed scoped-LR stop is not a turns entry, so the standard index
+        // walk would skip straight past it (often into the previous segment) and
+        // the flag resets would erase it. When the most recent completed action
+        // this segment was an LR stop, rewinding steps back ONTO it: the elevation
+        // is restored and the stop becomes the active turn again.
+        const currentAbsWithin = this.round * 12 + activeSegment;
+        const currentPriority =
+            this.getFlag(game.system.id, "actingPriority") ??
+            (this.combatant ? this.getInitiativePriority(this.combatant, activeSegment) : -Infinity);
+        const spentLrStops = allCombatants
+            .map((c) => ({ combatant: c, spent: c.getFlag(game.system.id, "spentLrPosition") }))
+            .filter(({ spent }) => spent?.segmentAbs === currentAbsWithin && spent.priority > currentPriority)
+            .sort((a, b) => a.spent.priority - b.spent.priority);
+        if (spentLrStops.length > 0) {
+            const { combatant: stop, spent } = spentLrStops[0];
+            const regularPrev = currentFilteredIndex > 0 ? currentActiveTurns[currentFilteredIndex - 1] : null;
+            const regularPriority = regularPrev ? this.getInitiativePriority(regularPrev, activeSegment) : Infinity;
+            if (spent.priority < regularPriority) {
+                const previousId = this.combatant?.id;
+                // Restore the elevation render-suppressed: the re-sort under the
+                // still-stale index must not paint before the pointer lands
+                await stop.update(
+                    {
+                        [`flags.${game.system.id}.lrElevatedAbs`]: currentAbsWithin,
+                        [`flags.${game.system.id}.spentLrPosition`]: null,
+                    },
+                    { render: false },
+                );
+                if (!HeroCompatibility.isV14) {
+                    this._turns = null;
+                    this.setupTurns();
+                }
+                const stopIndex = this.turns.findIndex((t) => t.id === stop.id);
+                const payload = {
+                    turn: stopIndex !== -1 ? stopIndex : 0,
+                    [`flags.${game.system.id}.actingPriority`]: spent.priority,
+                    [`flags.${game.system.id}.segmentHighWater`]: null,
+                };
+                Object.assign(
+                    payload,
+                    this.eventLogAppendPayload([
+                        this.buildEvent("rewind", { combatant: stop, data: { targetAbs: currentAbsWithin } }),
+                    ]),
+                );
+                return this.update(payload, { direction: -1, previousCombatantId: previousId });
+            }
+        }
+
         if (currentFilteredIndex > 0) {
             const targetCombatant = currentActiveTurns[currentFilteredIndex - 1];
             const masterTargetIndex = turns.findIndex((t) => t.id === targetCombatant.id);
@@ -1281,9 +1329,10 @@ export class HeroSystem6eCombatSingle extends Combat {
                 this._turns = null;
             }
 
+            const targetPriority = this.getInitiativePriority(targetCombatant, activeSegment);
             const inlineUpdateData = {
                 turn: masterTargetIndex !== -1 ? masterTargetIndex : 0,
-                [`flags.${game.system.id}.actingPriority`]: this.getInitiativePriority(targetCombatant, activeSegment),
+                [`flags.${game.system.id}.actingPriority`]: targetPriority,
                 // Rewinds forget completed turns; lenient for re-declared elevations
                 [`flags.${game.system.id}.segmentHighWater`]: null,
             };
@@ -1296,7 +1345,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                     }),
                 ]),
             );
-            const rewindResets = this._rewindHoldFlagResets(this.round * 12 + activeSegment);
+            const rewindResets = this._rewindHoldFlagResets(this.round * 12 + activeSegment, { targetPriority });
 
             const result = await HeroCompatibility.updateEmbedded(this, "combatants", rewindResets, inlineUpdateData, {
                 direction: -1,
@@ -1571,7 +1620,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @returns {object[]} Combatant update payloads keyed by _id
      * @private
      */
-    _rewindHoldFlagResets(targetAbs) {
+    _rewindHoldFlagResets(targetAbs, { targetPriority = null } = {}) {
         const resets = [];
         for (const combatant of this.combatants) {
             const update = {};
@@ -1584,9 +1633,21 @@ export class HeroSystem6eCombatSingle extends Combat {
             if ((combatant.lrElevatedAbs ?? -1) >= targetAbs) {
                 update[`flags.${game.system.id}.lrElevatedAbs`] = null;
             }
-            // The replay can re-elevate, so the display record resets with it
-            if ((combatant.getFlag(game.system.id, "spentLrPosition")?.segmentAbs ?? -1) >= targetAbs) {
-                update[`flags.${game.system.id}.spentLrPosition`] = null;
+            // A completed LR stop within the rewind's own segment stays acted when it
+            // happened BEFORE the rewind target; a stop below the target is being
+            // un-acted, so its elevation comes back as pending. Cross-segment rewinds
+            // (no targetPriority) replay the whole segment: the record simply clears
+            // and candidates re-elevate during the replay.
+            const spentLr = combatant.getFlag(game.system.id, "spentLrPosition");
+            if (spentLr && spentLr.segmentAbs >= targetAbs) {
+                const staysActed =
+                    spentLr.segmentAbs === targetAbs && targetPriority !== null && spentLr.priority > targetPriority;
+                if (!staysActed) {
+                    update[`flags.${game.system.id}.spentLrPosition`] = null;
+                    if (spentLr.segmentAbs === targetAbs && targetPriority !== null) {
+                        update[`flags.${game.system.id}.lrElevatedAbs`] = spentLr.segmentAbs;
+                    }
+                }
             }
             // A SPD change detected at or after the rewind target is un-detected: the
             // baseline reverts so the replay re-fires the lockout from its own position.
