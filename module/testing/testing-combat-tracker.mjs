@@ -961,7 +961,7 @@ export function registerCombatTests(quench) {
                     // Abort again until the next Segment
                     ui.combat.viewed = combat;
                     const bruiserCombatant = combatantFor(combat, bruiser);
-                    const refused = await ui.combat._declareAbort(bruiserCombatant);
+                    const refused = await combat.declareAbort(bruiserCombatant);
                     expect(refused, "abort refused after acting this Segment").to.be.false;
                     expect(bruiser.statuses.has("aborted")).to.be.false;
 
@@ -969,7 +969,7 @@ export function registerCombatTests(quench) {
                     // Action interrupt shape): the abort replaces the CURRENT Phase and
                     // ends the turn
                     const dodgerCombatant = combatantFor(combat, dodger);
-                    const applied = await ui.combat._declareAbort(dodgerCombatant);
+                    const applied = await combat.declareAbort(dodgerCombatant);
                     expect(applied).to.be.true;
                     expect(combat.segment, "turn ended by the abort").to.equal(12);
                     expect(combat.combatant.actorId).to.equal(bruiser.id);
@@ -1003,7 +1003,7 @@ export function registerCombatTests(quench) {
                     // Phase: the abort consumes their Segment 3 Phase
                     ui.combat.viewed = combat;
                     const reactorCombatant = combatantFor(combat, reactor);
-                    await ui.combat._declareAbort(reactorCombatant);
+                    await combat.declareAbort(reactorCombatant);
                     expect(reactorCombatant.abortSpentAbs, "abort consumes the Segment 3 Phase").to.equal(27);
 
                     // Segment 3 (reactor's spent Phase, nobody else) is passed over entirely
@@ -1038,7 +1038,7 @@ export function registerCombatTests(quench) {
                     //
                     ui.combat.viewed = combat;
                     const holderCombatant = combatantFor(combat, holder);
-                    const applied = await ui.combat._declareAbort(holderCombatant, {
+                    const applied = await combat.declareAbort(holderCombatant, {
                         toAction: "Dodge",
                         statusId: "dodge",
                     });
@@ -1080,18 +1080,18 @@ export function registerCombatTests(quench) {
                     const stunnyCombatant = combatantFor(combat, stunny);
 
                     // A Stunned character can take no Action — not even Aborting
-                    const refused = await ui.combat._declareAbort(stunnyCombatant);
+                    const refused = await combat.declareAbort(stunnyCombatant);
                     expect(refused, "abort refused while Stunned").to.be.false;
                     expect(stunny.statuses.has("aborted")).to.be.false;
-                    expect(ui.combat._blockedActionReason(stunnyCombatant)).to.include("Stunned");
+                    expect(combat.blockedActionReason(stunnyCombatant)).to.include("Stunned");
 
                     // Recovered from being Stunned, the abort goes through and locks out
                     // all other actions until the spent Phase passes
                     await stunny.effects.find((e) => e.statuses.has("stunned")).delete();
-                    const applied = await ui.combat._declareAbort(stunnyCombatant);
+                    const applied = await combat.declareAbort(stunnyCombatant);
                     expect(applied).to.be.true;
                     expect(stunny.statuses.has("aborted")).to.be.true;
-                    expect(ui.combat._blockedActionReason(stunnyCombatant)).to.include("Aborted");
+                    expect(combat.blockedActionReason(stunnyCombatant)).to.include("Aborted");
 
                     // Even a (bare-status) Held Action cannot be used during the lockout
                     await stunny.createEmbeddedDocuments("ActiveEffect", [
@@ -1113,7 +1113,7 @@ export function registerCombatTests(quench) {
                     //: the Segment 12 Phase not yet used plus the Segment 3 one.
                     // The recorded spentAbs is the later Phase, so the lockout spans both.
                     const burnerCombatant = combatantFor(combat, burner);
-                    const applied = await ui.combat._declareAbort(burnerCombatant, { extraPhase: true });
+                    const applied = await combat.declareAbort(burnerCombatant, { extraPhase: true });
                     expect(applied).to.be.true;
                     expect(burnerCombatant.abortSpentAbs, "lockout extends to the second Phase").to.equal(27);
                     expect(burnerCombatant.abortAppliesAtAbs(24), "first consumed Phase covered").to.be.true;
@@ -1273,8 +1273,8 @@ export function registerCombatTests(quench) {
                     // acting early is on offer; taking it re-sorts without moving the
                     // pointer off the active combatant
                     const mikaCombatant = combatantFor(combat, mika);
-                    expect(ui.combat._lrElevationState(mikaCombatant)).to.equal("available");
-                    await ui.combat._onToggleLrElevation(mikaCombatant.id);
+                    expect(combat.lrElevationState(mikaCombatant)).to.equal("available");
+                    await combat.toggleLrElevation(mikaCombatant.id);
                     expect(mikaCombatant.lrElevatedAbs).to.equal(24);
                     expect(Math.floor(combat.getInitiativePriority(mikaCombatant, 12))).to.equal(25);
                     expect(combat.combatant.actorId, "pointer stays on the active combatant").to.equal(alpha.id);
@@ -1324,13 +1324,13 @@ export function registerCombatTests(quench) {
                     // Cancelling before the stop arrives removes it; the position is
                     // still ahead of the count, so it can be re-declared
                     const mikaCombatant = combatantFor(combat, mika);
-                    await ui.combat._onToggleLrElevation(mikaCombatant.id);
-                    await ui.combat._onToggleLrElevation(mikaCombatant.id);
+                    await combat.toggleLrElevation(mikaCombatant.id);
+                    await combat.toggleLrElevation(mikaCombatant.id);
                     expect(mikaCombatant.lrElevatedAbs, "cancelled before arrival").to.equal(null);
-                    expect(ui.combat._lrElevationState(mikaCombatant)).to.equal("available");
+                    expect(combat.lrElevationState(mikaCombatant)).to.equal("available");
 
                     // Mika elevates above Beta (25 vs 22) and her stop arrives second
-                    await ui.combat._onToggleLrElevation(mikaCombatant.id);
+                    await combat.toggleLrElevation(mikaCombatant.id);
                     await combat.nextTurn();
                     expect(combat.combatant.actorId, "elevated above Beta").to.equal(mika.id);
 
@@ -1373,8 +1373,8 @@ export function registerCombatTests(quench) {
                     // Nothing has completed a turn yet, so an elevated position ABOVE
                     // the (unacted) first actor is reachable and preempts the pointer
                     const mikaCombatant = combatantFor(combat, mika);
-                    expect(ui.combat._lrElevationState(mikaCombatant)).to.equal("available");
-                    await ui.combat._onToggleLrElevation(mikaCombatant.id);
+                    expect(combat.lrElevationState(mikaCombatant)).to.equal("available");
+                    await combat.toggleLrElevation(mikaCombatant.id);
                     expect(combat.combatant.actorId, "LR stop preempts the first actor").to.equal(mika.id);
                     expect(Math.floor(combat.getInitiativePriority(mikaCombatant, 12))).to.equal(28);
 
@@ -1382,9 +1382,7 @@ export function registerCombatTests(quench) {
                     // stop raises the high-water mark so re-elevating is off the table
                     await combat.nextTurn();
                     expect(combat.combatant.actorId, "displaced actor re-enters").to.equal(fast.id);
-                    expect(ui.combat._lrElevationState(mikaCombatant), "no second elevation this segment").to.equal(
-                        null,
-                    );
+                    expect(combat.lrElevationState(mikaCombatant), "no second elevation this segment").to.equal(null);
 
                     await combat.nextTurn();
                     expect(combat.combatant.actorId).to.equal(delta.id);
@@ -1395,9 +1393,7 @@ export function registerCombatTests(quench) {
                     await combat.nextTurn();
                     expect(combat.segment).to.equal(6);
                     expect(combat.combatant.actorId).to.equal(fast.id);
-                    expect(ui.combat._lrElevationState(mikaCombatant), "fresh segment, fresh Phase").to.equal(
-                        "available",
-                    );
+                    expect(combat.lrElevationState(mikaCombatant), "fresh segment, fresh Phase").to.equal("available");
                 });
 
                 it("Should auto-elevate scoped Lightning Reflexes at segment start when enabled", async function () {
@@ -1792,10 +1788,10 @@ export function registerCombatTests(quench) {
                         expect(combat.combatant.actorId).to.equal(alpha.id);
 
                         // Dodger aborts out of turn (the dodge-toggle prompt path calls
-                        // _declareAbort exactly like this). SPD 2 at T1S12: the spent
+                        // declareAbort exactly like this). SPD 2 at T1S12: the spent
                         // Phase is THIS segment's
                         const dodgerCombatant = combatantFor(combat, dodger);
-                        const applied = await ui.combat._declareAbort(dodgerCombatant, { toAction: "Dodge" });
+                        const applied = await combat.declareAbort(dodgerCombatant, { toAction: "Dodge" });
                         expect(applied, "abort declared").to.be.true;
                         expect(dodger.statuses.has("aborted")).to.be.true;
                         expect(dodgerCombatant.abortSpentAbs, "spent Phase is this segment's").to.equal(abs(1, 12));
@@ -1883,7 +1879,7 @@ export function registerCombatTests(quench) {
                         const markedCombatant = combatantFor(combat, marked);
                         expect(markedCombatant.abortEffect?.getFlag(game.system.id, "abort")).to.not.exist;
 
-                        const applied = await ui.combat._declareAbort(markedCombatant, { toAction: "Dodge" });
+                        const applied = await combat.declareAbort(markedCombatant, { toAction: "Dodge" });
                         expect(applied, "declaration adopts the bare status").to.be.true;
                         const abortedEffects = marked.effects.filter((e) => e.statuses.has("aborted"));
                         expect(abortedEffects.length, "adopted, not duplicated").to.equal(1);
@@ -2207,11 +2203,11 @@ export function registerCombatTests(quench) {
 
                     // Commit blocks other tracker-mediated actions until it goes off
                     const commitId = await combat.scheduleDelayedAction(caster, extraPhasePlan);
-                    expect(ui.combat._blockedActionReason(combatant), "committed: no other Actions").to.include(
+                    expect(combat.blockedActionReason(combatant), "committed: no other Actions").to.include(
                         "no other Actions",
                     );
                     await combat.cancelDelayedAction(combatant.id, commitId);
-                    expect(ui.combat._blockedActionReason(combatant), "cancel releases the commitment").to.equal(null);
+                    expect(combat.blockedActionReason(combatant), "cancel releases the commitment").to.equal(null);
 
                     // An Extra Segment record resolves once its segment fully passes
                     await combat.scheduleDelayedAction(caster, segmentPlan);
@@ -2252,7 +2248,7 @@ export function registerCombatTests(quench) {
                             },
                         },
                     ]);
-                    const applied = await ui.combat._declareAbort(holderCombatant, { toAction: "Dodge" });
+                    const applied = await combat.declareAbort(holderCombatant, { toAction: "Dodge" });
                     expect(applied).to.be.true;
                     expect(holder.statuses.has("holding"), "hold consumed by the abort").to.be.false;
                     expect(holder.statuses.has("aborted"), "held Phase absorbs the abort").to.be.false;

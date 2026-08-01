@@ -1,6 +1,11 @@
 import { HeroSystem6eCombatantSingle } from "./combatant-single.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
-import { endHaymakerManeuver, expireManeuverNextPhaseEffects } from "./item/maneuver.mjs";
+import {
+    endHaymakerManeuver,
+    expireManeuverNextPhaseEffects,
+    maneuverHasBlockTrait,
+    maneuverHasDodgeTrait,
+} from "./item/maneuver.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-resources.mjs";
 import { promptToDeleteAoeInstantRegions } from "./combat.mjs";
 import { expireEffects, forceDeleteKeys, gmActive, toHHMMSS, whisperUserTargetsForActor } from "./utility/util.mjs";
@@ -28,6 +33,9 @@ function _getSetting(key, fallback) {
 }
 
 export class HeroSystem6eCombatSingle extends Combat {
+    /** Latch: an abort declaration is in flight; read by the tracker's bare-status hook and maneuver.mjs. */
+    static _abortFlowActive = false;
+
     /**
      * Current active Segment, read from database flags so every client agrees.
      * @type {number}
@@ -3476,33 +3484,8 @@ export class HeroSystem6eCombatSingle extends Combat {
         const hold = combatant.heldAction;
         if (!actor || !effect || !hold) return;
         await effect.delete();
-        const spendUpdate = {
-            // A stale slot-taken marker would spend the NEXT hold declared this segment
-            [`flags.${game.system.id}.heldSlotTakenAbs`]: null,
-        };
-        if (retainPosition && hold.mode === "position") {
-            // An anchored slot resolves to concrete numbers as it is spent — the
-            // display record must not drift if the anchor later moves or leaves.
-            // The anchor itself is retained: the spent row shares the anchor's
-            // exact scalar, so ordering still needs the adjacency side.
-            const anchored = hold.anchor ? this.resolveHoldAnchorPriority(hold, hold.segmentAbs) : null;
-            const dex = anchored !== null ? Math.floor(anchored) : hold.dex;
-            const fraction = anchored !== null ? anchored - Math.floor(anchored) : hold.fraction;
-            spendUpdate[`flags.${game.system.id}.spentHoldPosition`] = {
-                segmentAbs: hold.segmentAbs,
-                dex,
-                ...(fraction !== undefined ? { fraction } : {}),
-                ...(anchored !== null
-                    ? {
-                          anchor: {
-                              combatantId: hold.anchor.combatantId,
-                              relation: hold.anchor.relation === "before" ? "before" : "after",
-                          },
-                      }
-                    : {}),
-            };
-        }
-        await combatant.update(spendUpdate);
+        const spent = retainPosition && hold.mode === "position" ? this.#spentRecordForSlot(hold) : null;
+        await combatant.update(this.#holdSpendUpdate(spent));
         await this._combatCard(
             combatant,
             used
@@ -3522,6 +3505,427 @@ export class HeroSystem6eCombatSingle extends Combat {
                 anchor: hold.anchor ?? null,
             },
         });
+    }
+
+    /**
+     * The display record for a positional hold spent at its declared slot.
+     * An anchored slot resolves to concrete numbers as it is spent — the
+     * display record must not drift if the anchor later moves or leaves.
+     * The anchor itself is retained: the spent row shares the anchor's
+     * exact scalar, so ordering still needs the adjacency side.
+     * @param {object} hold
+     * @returns {{segmentAbs: number, dex: number, fraction?: number, anchor?: object}}
+     */
+    #spentRecordForSlot(hold) {
+        const anchored = hold.anchor ? this.resolveHoldAnchorPriority(hold, hold.segmentAbs) : null;
+        const dex = anchored !== null ? Math.floor(anchored) : hold.dex;
+        const fraction = anchored !== null ? anchored - Math.floor(anchored) : hold.fraction;
+        return {
+            segmentAbs: hold.segmentAbs,
+            dex,
+            ...(fraction !== undefined ? { fraction } : {}),
+            ...(anchored !== null
+                ? {
+                      anchor: {
+                          combatantId: hold.anchor.combatantId,
+                          relation: hold.anchor.relation === "before" ? "before" : "after",
+                      },
+                  }
+                : {}),
+        };
+    }
+
+    /**
+     * Combatant update payload for spending a hold.
+     * @param {object|null} spent - Display-position record to retain, if any
+     * @returns {object}
+     */
+    #holdSpendUpdate(spent) {
+        return {
+            // A stale slot-taken marker would spend the NEXT hold declared this segment
+            [`flags.${game.system.id}.heldSlotTakenAbs`]: null,
+            ...(spent ? { [`flags.${game.system.id}.spentHoldPosition`]: spent } : {}),
+        };
+    }
+
+    /**
+     * Using (or aborting with) a Held Action consumes this segment's action: it takes
+     * the place of the Phase — a character cannot have two Phases in one Segment.
+     * Records the acted position so turn flow skips the natural Phase and the
+     * tracker keeps the row where they acted.
+     * @param {Combatant} combatant
+     * @param {{mode: string, segmentAbs?: number, dex?: number}|null} hold - The hold as it was before deletion
+     */
+    async recordSpentAction(combatant, hold) {
+        if (!this.started || !hold) return;
+        const currentAbs = this.currentAbs;
+        const atOwnSlot = hold.mode === "position" && hold.segmentAbs === currentAbs;
+        // A positional hold consumed away from its declared slot (abort, early
+        // interrupt) still uses up this segment's action like any other hold
+        const replacesNaturalPhase = !atOwnSlot && combatant.hasPhaseInSegment(this.segment);
+        if (!atOwnSlot && !replacesNaturalPhase) return;
+        const spent = atOwnSlot
+            ? this.#spentRecordForSlot(hold)
+            : { segmentAbs: currentAbs, dex: Math.floor(this.getInitiativePriority(combatant, this.segment)) };
+        await combatant.update(this.#holdSpendUpdate(spent));
+    }
+
+    /**
+     * Whether the combatant has already used their action this Segment: they spent
+     * a Held Action here, or their turn in the sorted order has already passed.
+     * @param {Combatant} combatant
+     * @returns {boolean}
+     */
+    actedThisSegment(combatant) {
+        if (!this.started) return false;
+        const turnIndex = this.turns?.findIndex((t) => t.id === combatant.id) ?? -1;
+        return (
+            combatant.spentHoldInSegment(this.segment) ||
+            (combatant.occupiesSegment?.(this.segment) && turnIndex !== -1 && turnIndex < (this.turn ?? 0))
+        );
+    }
+
+    /**
+     * Why the combatant cannot take a voluntary action right now, or null when
+     * unblocked. A Stunned character can take no Action at all — not even Aborting;
+     * an aborted character cannot act again until the Phase they aborted has passed.
+     * @param {Combatant} combatant
+     * @returns {string|null}
+     */
+    blockedActionReason(combatant) {
+        const actor = combatant?.actor;
+        if (!actor) return null;
+        if (actor.statuses.has("stunned")) {
+            return `${actor.name} is Stunned and can take no Actions — not even Aborting.`;
+        }
+        if (this.started) {
+            const currentAbs = this.currentAbs;
+            // Extra Phase (and kin): no other Actions while the activation runs
+            const committed = (this.delayedActionsFor?.(combatant) ?? []).find(
+                ([, record]) =>
+                    record.commit && (record.declaredAbs ?? 0) <= currentAbs && currentAbs <= (record.resolveAbs ?? 0),
+            );
+            if (committed) {
+                return `${actor.name} is activating ${committed[1].label} and can take no other Actions until it goes off.`;
+            }
+            if (combatant.abortAppliesAtAbs?.(currentAbs)) {
+                const spentAbs = combatant.abortSpentAbs;
+                const until =
+                    spentAbs === null
+                        ? "their aborted Phase has passed"
+                        : `Segment ${HeroSystem6eCombatantSingle.segmentOf(spentAbs)} has passed`;
+                return `${actor.name} has Aborted and cannot act again until ${until}.`;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Why a fresh abort is illegal right now, or null. Beyond the shared action
+     * guards, a character who already used their Phase this Segment cannot Abort
+     * until the next Segment.
+     * @param {Combatant} combatant
+     * @returns {string|null}
+     */
+    blockedAbortReason(combatant) {
+        const shared = this.blockedActionReason(combatant);
+        if (shared) return shared;
+        if (!this.started) return null;
+        if (this.actedThisSegment(combatant)) {
+            return `${combatant.actor.name} has already acted this Segment and cannot Abort until the next Segment.`;
+        }
+        return null;
+    }
+
+    /**
+     * The Phases a fresh abort would consume from the current combat position: the
+     * current Phase when the pointer is on the combatant (their DEX came up without
+     * acting — e.g. a Held Action interrupt), otherwise the next full Phase; an
+     * Extra Phase power consumes the one after as well.
+     * @param {Combatant} combatant
+     * @param {{extraPhase?: boolean}} [options]
+     * @returns {{isActive: boolean, firstAbs: number, spentAbs: number, nextActAbs: number}}
+     */
+    abortCost(combatant, { extraPhase = false } = {}) {
+        const currentAbs = this.currentAbs;
+        const isActive = this.combatant?.id === combatant.id;
+        const spd = combatant.combatSpd;
+        const firstAbs = isActive ? currentAbs : HeroSystem6eCombatantSingle.nextPhaseAbs(spd, currentAbs);
+        const spentAbs = extraPhase ? HeroSystem6eCombatantSingle.nextPhaseAbs(spd, firstAbs + 1) : firstAbs;
+        const nextActAbs = HeroSystem6eCombatantSingle.nextPhaseAbs(spd, spentAbs + 1);
+        return { isActive, firstAbs, spentAbs, nextActAbs };
+    }
+
+    /**
+     * Creates a status effect for one combatant of the actor. toggleStatusEffect
+     * cannot be used when a sibling combatant of the same (linked) actor already
+     * carries the status — it would reuse (and the caller would overwrite) the
+     * sibling's effect — so a parallel effect is created from the status definition.
+     * @param {Actor} actor
+     * @param {string} statusId
+     * @returns {Promise<ActiveEffect|null>}
+     */
+    async createStatusEffectFor(actor, statusId) {
+        if (!actor.statuses.has(statusId)) {
+            await actor.toggleStatusEffect(statusId, { active: true });
+            return actor.effects.find((e) => e.statuses.has(statusId)) ?? null;
+        }
+        // Adopt a bare same-status effect nobody owns (a token-HUD toggle carries
+        // no combatantId) — a parallel duplicate could never be consumed by any
+        // tracker flow and would orphan the status on the actor forever
+        const flagKey = { holding: "hold", aborted: "abort" }[statusId];
+        const orphan = flagKey
+            ? actor.effects.find((e) => e.statuses.has(statusId) && !e.getFlag(game.system.id, flagKey)?.combatantId)
+            : null;
+        if (orphan) return orphan;
+        const effectData = await ActiveEffect.implementation.fromStatusEffect(statusId);
+        return (await ActiveEffect.implementation.create(effectData.toObject(), { parent: actor })) ?? null;
+    }
+
+    /**
+     * Applies the defensive maneuver chosen in the abort dialog through the actor's
+     * real maneuver item, so the effect carries its CV changes and the standard
+     * next-Phase expiry flags. Falls back to the bare status icon for actors without
+     * the item (e.g. tokens that never went through upload).
+     * @param {Actor} actor
+     * @param {string} statusId - dodge or block
+     */
+    async applyAbortDefense(actor, statusId) {
+        // Match by maneuver trait, not exact XMLID: uploaded dodge/block items can
+        // carry XMLID "MANEUVER" (custom maneuvers); a bare-status fallback would
+        // add a second "Dodging" effect alongside the maneuver's own
+        const trait = { dodge: maneuverHasDodgeTrait, block: maneuverHasBlockTrait }[statusId];
+        const maneuverItem = trait
+            ? actor.items.find((i) => ["maneuver", "martialart"].includes(i.type) && trait(i))
+            : null;
+        if (maneuverItem) {
+            if (!maneuverItem.isActive) await maneuverItem.toggle();
+            return;
+        }
+        await actor.toggleStatusEffect(statusId, { active: true });
+    }
+
+    /**
+     * Applies an abort to a defensive Action. A held Phase is spent instead
+     * when the combatant is holding — no further Phase is lost;
+     * otherwise the consumed Phase is recorded and the aborted status enforces the
+     * lockout until it passes. When the abort replaces the current Phase, the turn
+     * advances.
+     * @param {Combatant} combatant
+     * @param {object} [options]
+     * @param {string} [options.toAction] - Defensive action label for the chat card
+     * @param {string} [options.statusId] - Maneuver status to apply alongside (e.g. dodge, block)
+     * @param {boolean} [options.extraPhase] - The power takes an Extra Phase: two Phases are consumed
+     * @param {boolean} [options.force] - Skip the legality guards (GM override)
+     * @returns {Promise<boolean>} Whether the abort was applied
+     */
+    async declareAbort(combatant, options = {}) {
+        // Latched for the whole declaration: the defense toggle re-enters
+        // promptOutOfTurnAbortForManeuver, and creating the aborted status fires
+        // the bare-status-toggle hook — neither may re-prompt for the abort this
+        // very flow is declaring. STATIC: the hook and prompt read the latch
+        // through the class (via the combat instance's constructor).
+        HeroSystem6eCombatSingle._abortFlowActive = true;
+        try {
+            return await this.#declareAbortInner(combatant, options);
+        } finally {
+            HeroSystem6eCombatSingle._abortFlowActive = false;
+        }
+    }
+
+    /**
+     * @see declareAbort
+     */
+    async #declareAbortInner(
+        combatant,
+        { toAction = "a defensive Action", statusId = null, extraPhase = false, force = false } = {},
+    ) {
+        const actor = combatant?.actor;
+        if (!this.started || !combatant?.isOwner || !actor) return false;
+        // A RECORDED abort is final; a bare aborted status (token-HUD toggle,
+        // stale effect from an interrupted flow) is ADOPTED below — otherwise
+        // the unrecorded effect binds at every segment and never clears
+        const existingAbortEffect = combatant.abortEffect;
+        if (existingAbortEffect?.getFlag(game.system.id, "abort")) {
+            ui.notifications.warn(`${actor.name} has already Aborted.`);
+            return false;
+        }
+        const adoptingBareStatus = !!existingAbortEffect;
+        // The isActive read below must see settled pointer state, or an abort on
+        // the active combatant can silently skip its end-of-turn
+        await this.settleMaintenance?.();
+
+        if (!force) {
+            if (adoptingBareStatus) {
+                // The bare status itself reads as an abort lockout — only the
+                // guards that are NOT the effect being adopted apply
+                if (actor.statuses.has("stunned")) {
+                    ui.notifications.warn(`${actor.name} is Stunned and can take no Actions — not even Aborting.`);
+                    return false;
+                }
+            } else {
+                const reason = this.blockedAbortReason(combatant);
+                if (reason) {
+                    ui.notifications.warn(reason);
+                    return false;
+                }
+            }
+        }
+
+        if (statusId) await this.applyAbortDefense(actor, statusId);
+
+        // A held Phase absorbs the abort — no further Phases are lost
+        const holdingEffect = combatant.heldActionEffect;
+        if (holdingEffect) {
+            const hold = combatant.heldAction;
+            await holdingEffect.delete();
+            await this.recordSpentAction(combatant, hold);
+            await this._combatCard(
+                combatant,
+                `${actor.name} Aborts to ${toAction} using their Held Action in ${this.currentPhaseLabel} — no further Phase is lost.`,
+            );
+            await this.logEvent("abort.declare", {
+                combatant,
+                // The acted position: a holder often has no natural Phase here, so
+                // the default event priority would compute 0 and the ledger row
+                // would sort to the segment bottom
+                priority: this.getFlag(game.system.id, "actingPriority") ?? undefined,
+                data: { toAction, viaHold: true, spentAbs: this.currentAbs },
+            });
+            return true;
+        }
+
+        const abortEffect = await this.createStatusEffectFor(actor, "aborted");
+
+        // SPD 0 has no Phase to consume; bind the record (spentAbs null = until removed)
+        // and leave the cost for the GM to adjudicate
+        if (combatant.combatSpd <= 0) {
+            if (abortEffect)
+                await abortEffect.setFlag(game.system.id, "abort", { spentAbs: null, combatantId: combatant.id });
+            await this._combatCard(combatant, `${actor.name} Aborts to ${toAction} in ${this.currentPhaseLabel}.`);
+            await this.logEvent("abort.declare", { combatant, data: { toAction, spentAbs: null } });
+            return true;
+        }
+
+        const { isActive, firstAbs, spentAbs, nextActAbs } = this.abortCost(combatant, { extraPhase });
+        if (abortEffect) await abortEffect.setFlag(game.system.id, "abort", { spentAbs, combatantId: combatant.id });
+
+        const { phaseLabel } = HeroSystem6eCombatantSingle;
+        const costText = extraPhase
+            ? `their Phases in ${phaseLabel(firstAbs)} and ${phaseLabel(spentAbs)} (Extra Phase)`
+            : isActive
+              ? `their current Phase (${phaseLabel(spentAbs)})`
+              : `their Phase in ${phaseLabel(spentAbs)}`;
+        await this._combatCard(
+            combatant,
+            `${actor.name} Aborts to ${toAction} — this consumes ${costText}; they cannot act again until ${phaseLabel(nextActAbs)}.`,
+        );
+        // Log the ledger row at the consumed Phase's natural priority — the
+        // default declaration-position priority is 0 out of turn
+        await this.logEvent("abort.declare", {
+            combatant,
+            priority: this.getInitiativePriority(combatant, HeroSystem6eCombatantSingle.segmentOf(spentAbs), {
+                queryAbs: spentAbs,
+            }),
+            data: { toAction, spentAbs, extraPhase },
+        });
+
+        if (isActive) {
+            try {
+                await this.nextTurn();
+            } catch (e) {
+                console.warn(`Unable to advance the turn after an abort`, e);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Whether a scoped Lightning Reflexes elevation is possible for this combatant
+     * right now: "available" while the elevated position is still ahead of the
+     * segment's count, "elevated" while an elevation can still be cancelled (its
+     * turn has not arrived), null otherwise.
+     * @param {Combatant|null} combatant
+     * @returns {"available"|"elevated"|null}
+     */
+    lrElevationState(combatant) {
+        if (!this.started || !combatant?.isOwner || !combatant.actor) return null;
+        const scoped = combatant.lightningReflexes?.scoped;
+        if (!scoped) return null;
+
+        const currentAbs = this.currentAbs;
+        const turnIndex = this.turns?.findIndex((t) => t.id === combatant.id) ?? -1;
+        const reached = turnIndex !== -1 && turnIndex <= (this.turn ?? 0);
+
+        if (combatant.lrElevatedAbs === currentAbs) {
+            // Cancellable until the elevated stop arrives; ending that stop returns
+            // the rest of the Phase at natural DEX automatically (nextTurn)
+            return reached ? null : "elevated";
+        }
+
+        // Elevation moves this segment's natural Phase earlier: it needs a Phase here,
+        // an action still unspent, and an elevated position the count has not passed.
+        // A position only counts as passed once someone has COMPLETED a turn above it
+        // (the segment high-water mark) — the current actor merely being up has not
+        // passed it; elevating above them preempts the pointer instead.
+        if (!combatant.hasPhaseInSegment(this.segment)) return null;
+        if (combatant.heldAction) return null;
+        if (combatant.spentHoldInSegment?.(this.segment)) return null;
+        if (reached) return null;
+        const elevatedPriority = this.getInitiativePriority(combatant, this.segment) + scoped.levels;
+        const highWater = this.getFlag(game.system.id, "segmentHighWater") ?? null;
+        if (highWater !== null && elevatedPriority >= highWater) return null;
+        return "available";
+    }
+
+    /**
+     * Toggles a scoped Lightning Reflexes elevation for the current segment. The
+     * elevated character acts at DEX + LR but may only execute the scoped action;
+     * cancelling before the elevated turn arrives restores the natural position.
+     * The pointer is re-synced to the same active combatant, since the flag write
+     * re-sorts the turns array under the stored index.
+     * @param {string} combatantId
+     */
+    async toggleLrElevation(combatantId) {
+        const combatant = this.combatants.get(combatantId);
+        const actor = combatant?.actor;
+        if (!this.started || !combatant?.isOwner || !actor) return;
+
+        const state = this.lrElevationState(combatant);
+        if (!state) return;
+        const activeId = this.combatant?.id ?? null;
+
+        if (state === "elevated") {
+            await combatant.unsetFlag(game.system.id, "lrElevatedAbs");
+            await this._combatCard(combatant, `${actor.name} stands down to their natural DEX.`);
+            await this.logEvent("lr.cancel", { combatant });
+        } else {
+            const blocked = this.blockedActionReason(combatant);
+            if (blocked) return void ui.notifications.warn(blocked);
+            await combatant.setFlag(game.system.id, "lrElevatedAbs", this.currentAbs);
+            const elevatedPriority = this.getInitiativePriority(combatant, this.segment);
+            await this._combatCard(
+                combatant,
+                `${actor.name} acts early at effective DEX ${Math.floor(elevatedPriority)} (Lightning Reflexes — only: ${combatant.lightningReflexes.scoped.label}); the rest of their Phase follows at their natural DEX.`,
+            );
+            await this.logEvent("lr.elevate", { combatant, priority: elevatedPriority, data: { auto: false } });
+
+            // Elevating above the unacted current actor preempts the pointer: the
+            // count has not reached that position, so the LR stop goes first and the
+            // displaced actor re-enters via the acting-priority threshold afterwards.
+            // lrPreemptPointer re-checks and, for players, relays through the GM.
+            const actingPriority =
+                this.getFlag(game.system.id, "actingPriority") ??
+                (activeId ? this.getInitiativePriority(this.combatants.get(activeId), this.segment) : -Infinity);
+            if (activeId && activeId !== combatant.id && elevatedPriority > actingPriority) {
+                await this.lrPreemptPointer(combatant.id, activeId);
+                return;
+            }
+        }
+
+        // Re-point the turn index at the same active combatant: the flag write
+        // re-sorted the turns array under the stored index
+        await this.resyncTurnPointer?.(activeId);
     }
 
     /**

@@ -1,6 +1,6 @@
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { HeroCompatibility } from "../utility/compatibility.mjs";
-import { isQuenchTestRunning } from "../utility/util.mjs";
+import { activeSingleTrackerCombatFor, isQuenchTestRunning } from "../utility/util.mjs";
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { calculateVelocityInSystemUnits } from "../utility/units.mjs";
 import { dehydrateAttackItem, rehydrateAttackItem } from "./item-attack.mjs";
@@ -151,7 +151,7 @@ export function maneuverCanBeAbortedTo(item) {
 /**
  * Toggling an abortable maneuver (Dodge, Martial Dodge, …) outside the actor's
  * own Phase in a live combat IS Aborting — offer to declare it through the
- * tracker so the Phase cost and lockout are recorded. Confirm
+ * combat engine so the Phase cost and lockout are recorded. Confirm
  * first: an out-of-turn toggle may just be pre-staging, and Cancel keeps the
  * maneuver active without an Abort.
  * @param {HeroSystem6eItem} item - The maneuver that was just activated
@@ -162,16 +162,15 @@ export async function promptOutOfTurnAbortForManeuver(item) {
         if (!actor || !maneuverCanBeAbortedTo(item)) return;
         if (isQuenchTestRunning()) return;
 
-        const tracker = ui.combat;
-        const combat = tracker?.viewed;
-        // Single-tracker combats only, live, and outside this actor's own turn
-        if (!combat?.started || typeof tracker._declareAbort !== "function") return;
-        // The tracker's own abort flow toggles the defense maneuver as part of
-        // declaring — that toggle must not re-prompt
-        if (tracker.constructor?._abortFlowActive) return;
+        // Live single-tracker combats only, and outside this actor's own turn
+        const active = activeSingleTrackerCombatFor(actor);
+        if (!active) return;
+        const { combat, combatant } = active;
+        // The abort flow toggles the defense maneuver as part of declaring —
+        // that toggle must not re-prompt. Read the latch off the combat's
+        // constructor: importing combat-single here would create a cycle.
+        if (combat.constructor?._abortFlowActive) return;
         if (combat.combatant?.actor === actor) return;
-        const combatant =
-            combat.combatants.find((c) => c.actor === actor) ?? combat.combatants.find((c) => c.actorId === actor.id);
         if (!combatant?.isOwner || combatant.abortEffect) return;
 
         const proceed = await foundry.applications.api.DialogV2.confirm({
@@ -183,8 +182,8 @@ export async function promptOutOfTurnAbortForManeuver(item) {
         if (!proceed) return;
 
         // The maneuver is already active, so no statusId — the item carries its
-        // own CV effects; _declareAbort records the cost, card, and ledger entry
-        await tracker._declareAbort(combatant, { toAction: item.name, statusId: null });
+        // own CV effects; declareAbort records the cost, card, and ledger entry
+        await combat.declareAbort(combatant, { toAction: item.name, statusId: null });
     } catch (e) {
         console.error(`Out-of-turn abort prompt failed`, e);
     }
