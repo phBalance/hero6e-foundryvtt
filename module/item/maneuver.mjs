@@ -379,7 +379,9 @@ export async function activateManeuver(item) {
         });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
-        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect.name];
+        // The status ID, not the localized name — the condition system only
+        // recognizes registered ids, so the dodging condition never set
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect.id];
         activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     }
 
@@ -394,7 +396,8 @@ export async function activateManeuver(item) {
         });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
-        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect.name];
+        // Status ID, not localized name (see the Dodge branch)
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.blockEffect.id];
         activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     }
 
