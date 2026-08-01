@@ -7,8 +7,7 @@ import { expireEffects, forceDeleteKeys, gmActive, toHHMMSS, whisperUserTargetsF
 
 export class HeroSystem6eCombatSingle extends Combat {
     /**
-     * Safe getter for the current active Segment.
-     * Pulls strictly from database flags to guarantee multi-client synchronization.
+     * Current active Segment, read from database flags so every client agrees.
      * @type {number}
      */
     get segment() {
@@ -221,10 +220,9 @@ export class HeroSystem6eCombatSingle extends Combat {
                     if (atAbs) addRow(event, "held-forfeit");
                     break;
                 case "abort.declare":
-                    // The consumed Phase renders in the segment it was spent from.
-                    // Events logged before the priority fix carry the DECLARATION
-                    // position's priority (0 out of turn); recompute at the spent
-                    // slot so the row keeps its DEX position instead of 0.00
+                    // The consumed Phase renders in the segment it was spent from;
+                    // recompute a missing priority at the spent slot so the row
+                    // keeps its DEX position
                     if (event.data?.spentAbs === abs) {
                         let priority = event.priority || null;
                         const live = priority ? null : this.combatants.get(event.combatantId);
@@ -247,7 +245,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
     /**
      * Rolls a tie-break entry for one combatant: a 0-99 roll. With the Fast Draw
-     * GM option on (6E2 19), the roll is dealt in bands — FAST_DRAW owners roll
+     * GM option on, the roll is dealt in bands — FAST_DRAW owners roll
      * 50-99, everyone else 0-49 — so owners always outrank non-owners at the same
      * DEX while still rolling off among themselves. Banding at roll time keeps
      * every fraction a plain two-decimal value; flipping the setting mid-combat
@@ -308,7 +306,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             const rollKey = this._tieRollKey(combatant);
             newSegmentMap[rollKey] ??= this._rollTieBreak(combatant);
             // Per-member sub-roll: members of a shared entry shuffle within the
-            // group's position each segment (6E2 18)
+            // group's position each segment
             (newSegmentMap[rollKey].m ??= {})[combatant.tokenId || combatant.id] ??= Math.floor(Math.random() * 100);
         }
         return newSegmentMap;
@@ -316,28 +314,25 @@ export class HeroSystem6eCombatSingle extends Combat {
 
     /**
      * Generates or fetches the tie-breaker roll map for an absolute segment. Maps
-     * are keyed by ABSOLUTE segment so ties re-roll every Turn (6E2 18: tied
-     * characters roll off per Segment) while rewinds within recorded history
-     * reuse the original rolls.
+     * are keyed by ABSOLUTE segment so ties re-roll every Turn (tied characters
+     * roll off per Segment) while rewinds within recorded history reuse the
+     * original rolls.
      * @param {number|string} targetAbs - Absolute segment (round*12+segment)
      * @returns {Promise<Record<string, {r: number, fd: number|null}>>}
      * @protected
      */
     async _generateSegmentRollCache(targetAbs) {
-        // 1. Fetch the multi-segment master data map from flags safely
         const masterRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
 
-        // 2. If rolls already exist for this position, preserve them to allow rewinding safely
+        // Recorded rolls are reused so rewinds keep their original order
         if (masterRollsCache[targetAbs]) {
             return masterRollsCache[targetAbs];
         }
 
         const newSegmentMap = this._buildSegmentRollMap();
 
-        // 3. Update the local master reference before writing back to the database flag tree
         masterRollsCache[targetAbs] = newSegmentMap;
 
-        // 4. Persist, with a ledger record of the fresh tie-break rolls
         const payload = { [`flags.${game.system.id}.segmentRolls`]: masterRollsCache };
         if (this.started && game.user.isGM) {
             Object.assign(
@@ -412,8 +407,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      * pairs order by their offset chains ("before" sorts above the anchor,
      * "after" below). Projection keeps the comparator TRANSITIVE — every
      * combatant maps to one (root, offsets) key and keys compare
-     * lexicographically, never mixing per-pair regimes (the old group/outsider
-     * cycling bug).
+     * lexicographically, never mixing per-pair regimes.
      * @param {Combatant} a
      * @param {Combatant} b
      * @param {number|null} [queryAbs] - Position being ordered; defaults to current
@@ -456,8 +450,8 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (!anchor?.combatantId || seen.has(anchor.combatantId)) break;
             const target = this.combatants.get(anchor.combatantId);
             if (!target?.actor) break;
-            // An unresolvable live anchor means the holder fell back to its
-            // snapshot scalar — it no longer sits adjacent to anyone
+            // An unresolvable live anchor means the holder falls back to its
+            // snapshot scalar — there is no adjacency to project
             if (hold && this.resolveHoldAnchorPriority(hold, abs) === null) break;
             offsets.push(anchor.relation === "before" ? 1 : -1);
             seen.add(anchor.combatantId);
@@ -469,7 +463,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     /**
      * Equal-priority ordering between unanchored roots. Members sharing a roll
      * entry (a ×N group) shuffle per segment via their sub-rolls — the same
-     * 6E2 18 roll-off ungrouped tied combatants get — highest first; everything
+     * roll-off ungrouped tied combatants get — highest first; everything
      * else (and missing rolls) falls back to the re-add-stable identity compare.
      * @param {Combatant} a
      * @param {Combatant} b
@@ -480,12 +474,10 @@ export class HeroSystem6eCombatSingle extends Combat {
     _rootTieBreakOrder(a, b, abs) {
         const keyA = this._tieRollKey(a);
         const keyB = this._tieRollKey(b);
-        // Different roll groups tied on the same priority order by GROUP first.
-        // This keeps the comparator TRANSITIVE: mixing per-member sub-roll order
-        // (inside a group) with identity order (against outsiders) allowed
-        // m2 < m1 < U < m2 cycles when an outsider's fraction collided with a
-        // group's — Array.sort went unstable and nextTurn's tie re-admission
-        // bounced the pointer between the group and the outsider forever.
+        // Different roll groups tied on the same priority order by GROUP first,
+        // keeping the comparator TRANSITIVE: mixing per-member sub-roll order
+        // (inside a group) with identity order (against outsiders) would allow
+        // sort cycles and bounce nextTurn's tie re-admission.
         if (keyA !== keyB) {
             return keyA.localeCompare(keyB) || HeroSystem6eCombatSingle.stableTiebreak(a, b);
         }
@@ -493,8 +485,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const rollsMap = rollsFlag[abs] ?? rollsFlag[HeroSystem6eCombatantSingle.segmentOf(abs)] ?? {};
         // A missing sub-roll compares as -1 (below every real roll): comparing
         // rolls for some pairs but identity for others is intransitive — an
-        // unbackfilled member could cycle the sort exactly like the old
-        // group-vs-outsider bug
+        // unbackfilled member could cycle the sort
         const subA = this._memberSubRoll(a, rollsMap) ?? -1;
         const subB = this._memberSubRoll(b, rollsMap) ?? -1;
         if (subA !== subB) return subB - subA;
@@ -630,7 +621,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
-     * Modern Foundry V14 comparison anchor method.
+     * V14 combatant comparison hook.
      * @override
      */
     compareCombatants(a, b) {
@@ -655,15 +646,13 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         if (!parentCombat) return 0;
 
-        // ✅ THE STRUCTURAL MULTIPLAYER ALIGNMENT:
-        // Force active segment phase capability evaluation directly into the core sorting block.
-        // Inactive combatants are pushed to the bottom of the array configuration loop natively.
-        // This perfectly matches the true array layout order across all connected player clients.
+        // Segment eligibility sorts before priority so inactive combatants sink to
+        // the bottom, keeping the turns array identical on every client
         const aEligible = a.occupiesSegment?.(currentSegment) ?? false;
         const bEligible = b.occupiesSegment?.(currentSegment) ?? false;
 
         if (aEligible !== bEligible) {
-            return aEligible ? -1 : 1; // Eligible participants always sort BEFORE inactive ones
+            return aEligible ? -1 : 1;
         }
 
         return parentCombat._comparePriority(a, b, parentCombat, currentSegment);
@@ -696,7 +685,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
-     * Evaluates a combatant's precise initiative value including characteristic scores and offsets.
+     * Computes a combatant's decimal initiative priority.
      * @param {Combatant} combatant - The participant document to calculate priority for
      * @param {number} [targetSegment] - Optional segment window context (defaults to active segment)
      * @param {object} [options]
@@ -720,10 +709,9 @@ export class HeroSystem6eCombatSingle extends Combat {
         const combatAbs = HeroSystem6eCombatantSingle.absoluteSegment(parentCombat?.round ?? 0, combatSegment);
         const scoredAbs = queryAbs ?? combatAbs + ((activeSegment - combatSegment + 12) % 12);
 
-        // Aborted combatants keep their natural priority: the skip lives entirely in
-        // _takesTurnInSegment. Zeroing here re-sorted them mid-segment (turn is an
-        // index into the sorted array) and rendered the consumed Phase at 0.00 instead
-        // of struck through at its DEX position.
+        // Aborted combatants keep their natural priority — the skip lives entirely in
+        // _takesTurnInSegment. Turn is an index into the sorted array, and the
+        // consumed Phase must render at its DEX position.
 
         const actorDoc = combatant.actor;
         const characteristicKey = actorDoc.system?.initiativeCharacteristic ?? "dex";
@@ -731,7 +719,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         const baseScore = characteristicObj?.value ?? 10;
 
-        // Lightning Reflexes raises effective DEX for acting order only (6E1 116; 5ER 96).
+        // Lightning Reflexes raises effective DEX for acting order only.
         // Unrestricted All Actions levels always apply; scoped purchases (single action,
         // group, HTH/ranged — the character may only execute that action when acting
         // early) apply only while the combatant elevated themselves this segment.
@@ -782,14 +770,14 @@ export class HeroSystem6eCombatSingle extends Combat {
             return (spentHold.dex ?? baseScore) + (spentHold.fraction ?? tieBreakerFraction);
         }
 
-        // A Haymaker does not move the character's DEX position (6E2 — the wind-up
+        // A Haymaker does not move the character's DEX position (the wind-up
         // resolves at the end of the next Segment; see the haymaker combatant flag)
         return baseScore + lightningReflexesLevels + tieBreakerFraction;
     }
 
     /**
-     * Resolves a positional hold anchored to another combatant ("act right after X",
-     * 6E2 20: a holding character chooses their reentry point exactly) to the
+     * Resolves a positional hold anchored to another combatant ("act right after X"
+     * — a holding character chooses their reentry point exactly) to the
      * anchor's own live priority in the scored segment. The holder shares the
      * anchor's EXACT scalar — which side of the anchor they act on is an ordering
      * fact, decided by {@link tieBreakOrder}'s anchor projection, not a sub-decimal
@@ -841,7 +829,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const abs = queryAbs ?? currentAbs + ((segment - this.segment + 12) % 12);
         if (!ignoreAbort && (combatant.abortAppliesAtAbs?.(abs) ?? actor.statuses.has("aborted"))) return false;
         // A spent hold already consumed this segment's action (using a Held Action
-        // replaces the Phase: he cannot have two Phases in one Segment, 6E2 20)
+        // replaces the Phase: no character gets two Phases in one Segment)
         if (combatant.spentHoldAtAbs?.(abs)) return false;
         const hold = ignoreHold ? null : combatant.heldAction;
         // A positional hold commits the banked Phase to its declared slot
@@ -865,8 +853,8 @@ export class HeroSystem6eCombatSingle extends Combat {
         startPayload[`flags.${game.system.id}.currentSegment`] = 12;
         startPayload[`flags.${game.system.id}.recoveredRounds`] = [];
 
-        // Combat opens at Turn 1 Segment 12 (abs 24); nest under the abs key — the
-        // old code wrote the flat roll map over the whole flag, corrupting its shape
+        // Combat opens at Turn 1 Segment 12 (abs 24); the roll map nests under its
+        // abs key to preserve the multi-segment flag shape
         const startAbs = HeroSystem6eCombatantSingle.absoluteSegment(1, 12);
         const initialRolls = (await this._generateSegmentRollCache(startAbs)) || {};
         startPayload[`flags.${game.system.id}.segmentRolls`] = { [startAbs]: initialRolls };
@@ -893,7 +881,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             return clone;
         });
 
-        // Sort using our hardened segment eligibility check logic rules
+        // Eligibility first, then priority — mirrors _sortCombatants
         startTurns.sort((a, b) => {
             const aActs = a.occupiesSegment ? a.occupiesSegment(12) : false;
             const bActs = b.occupiesSegment ? b.occupiesSegment(12) : false;
@@ -1146,7 +1134,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
-     * Advance down the turn index loop, checking for fresh-phase held action overwrites.
+     * Advances to the next turn: within-segment selection first, then a segment scan.
      * @override
      */
     async nextTurn() {
@@ -1160,8 +1148,8 @@ export class HeroSystem6eCombatSingle extends Combat {
         // Captured before any writes below re-sort the turns array under the index
         const ending = this.combatant ?? null;
 
-        // Scoped Lightning Reflexes is played as Phase-splitting (table ruling on
-        // 6E1 116): the elevated stop covers only the scoped action, and ending it
+        // Scoped Lightning Reflexes is played as Phase-splitting (table ruling):
+        // the elevated stop covers only the scoped action, and ending it
         // returns the rest of the Phase to the segment at natural DEX. The elevation
         // is consumed up front so every selection below sees the natural priority.
         let lrRemainderId = null;
@@ -1170,9 +1158,8 @@ export class HeroSystem6eCombatSingle extends Combat {
             // at the elevated position for the rest of the segment
             const elevatedPriority = this.getInitiativePriority(ending, activeSegment);
             // render: false — this intermediate write re-sorts the turns array under
-            // the still-stale index; letting it render made the tracker (and the
-            // auto-scroll) hop to the combatant's natural row for a frame before the
-            // real turn update landed
+            // the still-stale index; rendering now would flash the combatant's
+            // natural row before the real turn update lands
             await ending.update(
                 {
                     [`flags.${game.system.id}.lrElevatedAbs`]: null,
@@ -1382,8 +1369,8 @@ export class HeroSystem6eCombatSingle extends Combat {
             this._takesTurnInSegment(c, nextSegment, {
                 // Only a STRICTLY-PAST spent Phase re-admits the aborter: an abort
                 // spending exactly at the landing segment is being consumed here —
-                // re-admitting handed the aborter a stop at the very Phase the
-                // abort consumed (and phase-start work expired their defenses)
+                // re-admitting would hand the aborter a stop at the very Phase the
+                // abort consumed (and phase-start work would expire their defenses)
                 ignoreAbort: abortSpentIds.has(c.id) && c.abortSpentAbs !== null && c.abortSpentAbs < nextAbs,
                 queryAbs: nextAbs,
                 ignoreHold: c.id === ending?.id && endingAtHeldSlot,
@@ -1493,7 +1480,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
-     * Step backwards up the turn index loop, checking for start-of-combat resets.
+     * Steps back one turn; rewinding past the start resets the encounter.
      * @override
      */
     async previousTurn() {
@@ -1772,8 +1759,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             ]),
         );
 
-        // Test 3 requires checking if resetting to turn 0 under an unstarted/rewound
-        // boundary should forcefully clamp the timeline back to the initial segment threshold (12).
+        // Rewinding into round 1 clamps the timeline back to the starting segment (12)
         const isUnstartedBoundary = targetRound === 1;
         updateData[`flags.${game.system.id}.currentSegment`] = isUnstartedBoundary ? 12 : this.segment;
 
@@ -1871,7 +1857,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     async _handleCombatStartReset({ notify = true } = {}) {
         if (notify) ui.notifications.info(`[${game.system.id}] Resetting combat encounter to default startup state.`);
 
-        // 1. Prepare child collection updates to reset initiatives back to null (dice icons)
+        // Null initiative restores the dice icon
         const combatantUpdates = [];
         this.combatants.forEach((combatant) => {
             combatantUpdates.push({
@@ -1882,7 +1868,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 [`flags.${game.system.id}.lrElevatedAbs`]: null,
                 [`flags.${game.system.id}.spentLrPosition`]: null,
                 // A fresh combat re-seeds the SPD baseline; out-of-combat changes are
-                // free (6E2 17 only restricts mid-Turn changes) and stale lockouts
+                // free (only mid-Turn changes are restricted) and stale lockouts
                 // reference the previous run's absolute positions
                 [`flags.${game.system.id}.spdLockout`]: null,
                 [`flags.${game.system.id}.knownSpd`]: null,
@@ -1894,14 +1880,12 @@ export class HeroSystem6eCombatSingle extends Combat {
             });
         });
 
-        // 2. Prepare the clean top-level metadata values
         const resetData = {
             started: false,
             round: 0,
             turn: null,
         };
 
-        // 3. Purge the dynamic system flags via forced deletion
         resetData[`flags.${game.system.id}`] = forceDeleteKeys([
             "currentSegment",
             "segmentRolls",
@@ -1912,7 +1896,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             "eventLogSeq",
         ]);
 
-        // 4. Update parent properties and children in one commit
         return this.update({ ...resetData, combatants: combatantUpdates });
     }
 
@@ -1964,7 +1947,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             ) {
                 // TakeRecovery works on synthetic token actors (unlinked tokens) and applies the
                 // recovery exclusions: KO'd below -10 STUN, holding breath, dead NPCs, bases,
-                // negative REC (6E2 129; 5ER 368).
+                // negative REC.
                 let recoveryText =
                     (await actor.TakeRecovery({
                         asAction: false,
@@ -2163,7 +2146,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             // your next Phase" (Dodge, Block, Brace…) expire now. Effects created at
             // the current world time survive — they were declared this instant.
             // Because aborted Phases are skipped outright, an abort's modifiers
-            // naturally persist to the Phase after the spent one (6E2 22).
+            // naturally persist to the Phase after the spent one.
             if (activeCombatant?.actor) {
                 await expireManeuverNextPhaseEffects(activeCombatant.actor);
             }
@@ -2172,7 +2155,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             }
 
             // Auto-skip option (#3280): a Stunned character's Phase is spent
-            // recovering (6E2 105) — the stop advances itself, and _onPhaseEnd
+            // recovering — the stop advances itself, and _onPhaseEnd
             // clears the stun and cards the recovery as the turn ends. Deferred
             // OUT of the chain: nextTurn settles maintenance and would self-
             // deadlock awaiting the very chain running it (cf. LR auto-elevate).
@@ -2264,7 +2247,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             }
         }
 
-        // Stunned clears at the end of the character's own Phase (6E2 105); KO'd
+        // Stunned clears at the end of the character's own Phase; KO'd
         // characters take a free Recovery each of their Phases while STUN >= -10 —
         // that recovery (without preventRecoverFromStun) is what wakes them up
         if (actor.statuses.has("stunned")) {
@@ -2483,8 +2466,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
     /**
      * Delayed actions are things declared now that land later: a Haymaker (end of
-     * the next Segment, 6E2), or a power/attack with the Extra Time Limitation
-     * (6E1 376-378; 5ER 290-291 — the two editions are word-for-word identical).
+     * the next Segment), or a power/attack with the Extra Time Limitation.
      * Stored on the combatant flag `delayedActions` keyed by id:
      *
      *   { kind: "haymaker"|"attack"|"activation",
@@ -2518,7 +2500,6 @@ export class HeroSystem6eCombatSingle extends Combat {
      * Classifies an item's Extra Time Limitation into a delayed-action plan, or
      * null when the item has none that needs scheduling (Full Phase is pure action
      * economy; durations resolve on the character's DEX N segments later).
-     * Option semantics verified against 6E1 377-378 / 5ER 290-291.
      * @param {Actor} actor
      * @param {Item} item
      * @returns {{kind: string, label: string, resolveAbs: number, priority: number|null,
@@ -2575,9 +2556,9 @@ export class HeroSystem6eCombatSingle extends Combat {
                 commit: true,
             };
         }
-        // Durations: activates on the character's DEX N segments later (Andarra,
-        // 6E1 377); they may act in the meantime unless the power needs an Attack
-        // Roll — table-adjudicated, noted on the card
+        // Durations: activates on the character's DEX N segments later; they may
+        // act in the meantime unless the power needs an Attack Roll —
+        // table-adjudicated, noted on the card
         const durations = [
             { id: "TURN", text: "1 turn", segments: 12 },
             { id: "MINUTE", text: "1 minute", segments: 60 },
@@ -2648,7 +2629,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
     /**
      * Schedules a declared Haymaker's delayed landing: the attack resolves at the
-     * end of the NEXT Segment (6E2), with the -5 DCV effect persisting until then.
+     * end of the NEXT Segment, with the -5 DCV effect persisting until then.
      * Called from the attack workflow instead of ending the maneuver immediately.
      * @param {Actor} actor
      * @param {Item} [item] - The attack the Haymaker boosts
@@ -2820,12 +2801,12 @@ export class HeroSystem6eCombatSingle extends Combat {
                 ? `${actor?.name}'s ${record.label} activates now (${momentLabel}).`
                 : `${actor?.name}'s ${record.label} finished its Extra Time but could not activate — adjudicate (interrupted? Stunned?).`;
         } else if ((record.kind === "attack" || record.kind === "haymaker") && record.actionData) {
-            // The attack is ROLLED now (6E1 377 / 6E2 68: it happens when it goes
-            // off); the stored declaration rides on the message flag
+            // The attack is ROLLED now (it happens when it goes off); the stored
+            // declaration rides on the message flag
             outcome = null;
             const hint =
                 record.kind === "haymaker"
-                    ? "+4 Damage Classes; END is paid with this roll. If the target moved 1m+ or the attacker took Knockback, was Stunned, or Knocked Out, the Haymaker fails — use the failure button instead: the Phase is wasted but the END is still owed (6E2 69)."
+                    ? "+4 Damage Classes; END is paid with this roll. If the target moved 1m+ or the attacker took Knockback, was Stunned, or Knocked Out, the Haymaker fails — use the failure button instead: the Phase is wasted but the END is still owed."
                     : "A target that moved since the declaration is missed automatically; resources were already spent when the activation began.";
             const failButton =
                 record.kind === "haymaker"
@@ -3104,7 +3085,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     /**
      * Detects SPD changes (Aid/Drain, form switches) since the previous segment boundary and
      * applies the SPD-change lockout: the character cannot act until both the old and the new
-     * SPD would have had a Phase (6E2 17; 5ER 357). Also clears lockouts once they have passed.
+     * SPD would have had a Phase. Also clears lockouts once they have passed.
      * Detection polls at segment boundaries so ActiveEffect-driven changes are caught without
      * actor-update hooks; a change made and reverted within one segment is intentionally ignored.
      * @private
@@ -3172,8 +3153,8 @@ export class HeroSystem6eCombatSingle extends Combat {
                 const sourceChanged = Number.isFinite(sourceSpd) && sourceSpd !== known.source;
                 const effectiveChanged = spd !== known.effective;
 
-                // Purely voluntary (sheet edit): defer to Post-Segment 12 (6E2 17;
-                // 5ER 357 — voluntary changes wait for the end of the Turn)
+                // Purely voluntary (sheet edit): defer to Post-Segment 12 —
+                // voluntary changes wait for the end of the Turn
                 if (sourceChanged && !effectiveChangedBeyondSource(spd, known, sourceSpd)) {
                     combatantUpdates.push({
                         _id: combatant.id,
@@ -3229,8 +3210,8 @@ export class HeroSystem6eCombatSingle extends Combat {
     /**
      * Builds the spdLockout flag entry (and posts the card + ledger event) for an
      * adjustment-driven SPD change, using the edition-appropriate rule:
-     * 6e (6E2 17) — cannot act until both SPDs would have had a Phase;
-     * 5e (5ER 357) — cannot act until the next Segment that is a Phase for BOTH.
+     * 6e — cannot act until both SPDs would have had a Phase;
+     * 5e — cannot act until the next Segment that is a Phase for BOTH.
      * @param {Combatant} combatant
      * @param {{effective: number, source: number}} known
      * @param {number} newSpd
@@ -3322,9 +3303,9 @@ export class HeroSystem6eCombatSingle extends Combat {
     /**
      * Handles positional Held Actions whose declared segment has been left behind.
      * A slot the pointer actually took is spent; a slot that passed UNUSED demotes
-     * to a generic hold — the banked Phase persists until the null zone (6E2 20-21:
-     * the hold is only lost when the segment of the holder's next natural Phase
-     * begins, handled by _consumeActiveCombatantHold / _consumeExpiredHeldActions).
+     * to a generic hold — the banked Phase persists until the null zone (the hold
+     * is only lost when the segment of the holder's next natural Phase begins,
+     * handled by _consumeActiveCombatantHold / _consumeExpiredHeldActions).
      * Within-segment passes are caught by the previous-combatant check in _onUpdate.
      * @private
      */
@@ -3503,7 +3484,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     /**
      * Clears the aborted status from combatants whose spent Phase has now passed.
      * Aborting uses the character's next full Phase; once the Segment containing that
-     * Phase ends they may act again on their following Phase (6E2 22; 5ER 361).
+     * Phase ends they may act again on their following Phase.
      * @param {number[]|null|undefined} elapsedSegments - Segments that just ended, oldest
      *   first; null when a full Turn elapsed, undefined when unknown (skip)
      * @private
@@ -3543,12 +3524,10 @@ export class HeroSystem6eCombatSingle extends Combat {
     async _expireCustomSystemEffects(actor) {
         if (!actor) return;
 
-        // 1. CONFIG CHECK: Gather your custom keys directly out of the configuration definition object
         const expiryEvents = CONFIG.HERO?.activeEffectExpiryEvents;
         if (!expiryEvents) return;
         const customSystemKeys = Object.keys(expiryEvents);
 
-        // 2. FILTER PASS: Locate any active effects currently matching your system keys
         const matchingEffects = actor.effects.filter((effect) => {
             const activeExpiryKey = effect.duration?.expiry;
             return customSystemKeys.includes(activeExpiryKey);
@@ -3556,13 +3535,12 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         if (matchingEffects.length === 0) return;
 
-        // 3. Resolve the configured expiry action, defaulting to V14's disable behavior
+        // Default to V14's disable behavior
         const expiryAction = foundry.utils.getProperty(CONFIG, "ActiveEffect.expiryAction") ?? "disable";
 
         const effectsToDelete = [];
         const updatesToApply = [];
 
-        // 4. GROUP SEGMENT MATRIX: Group effects based on your global settings matrix
         for (const effect of matchingEffects) {
             const activeExpiryKey = effect.duration?.expiry;
 
@@ -3570,9 +3548,8 @@ export class HeroSystem6eCombatSingle extends Combat {
                 if (expiryAction === "delete") {
                     effectsToDelete.push(effect.id);
                 } else {
-                    // If the action is disable, change its core disabled property boolean value to true
                     if (effect.statuses?.size > 0) {
-                        // Aborted or marked actions get forced deletion rules
+                        // Status-carrying effects must not linger disabled
                         effectsToDelete.push(effect.id);
                     } else {
                         updatesToApply.push({
@@ -3584,7 +3561,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             }
         }
 
-        // 5. Atomic batch commits
         if (effectsToDelete.length > 0) {
             await actor.deleteEmbeddedDocuments("ActiveEffect", effectsToDelete);
         }
@@ -3601,7 +3577,6 @@ export class HeroSystem6eCombatSingle extends Combat {
     async updateCodeInitiatives() {
         const combatantUpdates = [];
 
-        // 1. Scoped iteration to build clean child document delta data structures
         this.combatants.forEach((combatant) => {
             combatantUpdates.push({
                 _id: combatant.id,

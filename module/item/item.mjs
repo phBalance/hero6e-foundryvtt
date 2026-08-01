@@ -1491,9 +1491,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // Maneuvers that only apply their active effect (Dodge — behaviors
         // "ae-only"): there is no to-hit and no effect dice, so activating IS
         // the roll. Routing through toggle also lands in activateManeuver,
-        // where the out-of-turn Abort offer lives. Previously this fell through
-        // to the dice branch: an "effect roll is not fully supported" warning
-        // and a bogus 0-effect roll.
+        // where the out-of-turn Abort offer lives.
         if (this.baseInfo.behaviors.includes("ae-only")) {
             return this.toggle({ token: options.token });
         }
@@ -1911,9 +1909,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return;
         }
 
-        // Extra Time (6E1 377-378; 5ER 290-291): the activation BEGINS now — the
-        // resources and rolls above are paid up front per RAW — but the power only
-        // turns on at the scheduled moment. The single tracker owns the schedule;
+        // Extra Time: the activation BEGINS now — the resources and rolls above are
+        // paid up front per RAW — but the power only turns on at the scheduled moment. The single tracker owns the schedule;
         // without one (legacy tracker, out of combat) activation proceeds normally.
         if (!options.delayedResolution) {
             const extraTimeCombat = game.combats.find(

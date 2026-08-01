@@ -498,7 +498,6 @@ export function registerCombatTests(quench) {
                 }
 
                 it("Should give SPD 1-12 characters their book speed chart phases", async function () {
-                    // 6E1 17; 5ER 20
                     const bookSpeedChart = {
                         1: [7],
                         2: [6, 12],
@@ -754,7 +753,7 @@ export function registerCombatTests(quench) {
                         expect(holder.statuses.has("holding"), "hold persists at its declared slot").to.be.true;
 
                         // Segment 3 is empty; Segment 4 is the rusher's natural SPD 3 Phase, which
-                        // replaces their generic hold (6E2 20; 5ER 360)
+                        // replaces their generic hold
                         await combat.nextTurn();
                         expect(combat.segment).to.equal(4);
                         expect(combat.combatant.actorId).to.equal(rusher.id);
@@ -948,7 +947,7 @@ export function registerCombatTests(quench) {
                     expect(combat.combatant.actorId).to.equal(alpha.id);
 
                     // Using the hold out of turn consumes this segment's action: it takes
-                    // the place of the Phase (6E2 20; 5ER 360). Tracker handlers resolve
+                    // the place of the Phase. Tracker handlers resolve
                     // through ui.combat.viewed, which lags the freshly created combat in
                     // headless runs — pin it first.
                     ui.combat.viewed = combat;
@@ -1051,7 +1050,7 @@ export function registerCombatTests(quench) {
                         declaredAbs,
                     });
 
-                    // The arriving Segment 6 Phase replaces the banked one (6E2 20)
+                    // The arriving Segment 6 Phase replaces the banked one
                     await combat.nextTurn();
                     expect(combat.round).to.equal(2);
                     expect(combat.segment).to.equal(6);
@@ -1161,7 +1160,7 @@ export function registerCombatTests(quench) {
                     expect(combat.combatant.actorId).to.equal(dodger.id);
 
                     // The bruiser already used their Segment 6 Phase: a character cannot
-                    // Abort again until the next Segment (6E2 22; 5ER 361)
+                    // Abort again until the next Segment
                     ui.combat.viewed = combat;
                     const bruiserCombatant = combat.combatants.find((c) => c.actorId === bruiser.id);
                     const refused = await ui.combat._declareAbort(bruiserCombatant);
@@ -1280,7 +1279,7 @@ export function registerCombatTests(quench) {
 
                     // Aborting while holding spends the held Phase: no aborted lockout, and
                     // the replaced natural Phase is recorded so it cannot be used again
-                    // (6E2 22; 5ER 361)
+                    //
                     ui.combat.viewed = combat;
                     const holderCombatant = combat.combatants.find((c) => c.actorId === holder.id);
                     const applied = await ui.combat._declareAbort(holderCombatant, {
@@ -1345,14 +1344,14 @@ export function registerCombatTests(quench) {
                     ui.combat.viewed = combat;
                     const stunnyCombatant = combat.combatants.find((c) => c.actorId === stunny.id);
 
-                    // A Stunned character can take no Action — not even Aborting (6E2 105)
+                    // A Stunned character can take no Action — not even Aborting
                     const refused = await ui.combat._declareAbort(stunnyCombatant);
                     expect(refused, "abort refused while Stunned").to.be.false;
                     expect(stunny.statuses.has("aborted")).to.be.false;
                     expect(ui.combat._blockedActionReason(stunnyCombatant)).to.include("Stunned");
 
                     // Recovered from being Stunned, the abort goes through and locks out
-                    // all other actions until the spent Phase passes (6E2 22)
+                    // all other actions until the spent Phase passes
                     await stunny.effects.find((e) => e.statuses.has("stunned")).delete();
                     const applied = await ui.combat._declareAbort(stunnyCombatant);
                     expect(applied).to.be.true;
@@ -1397,7 +1396,7 @@ export function registerCombatTests(quench) {
                     ui.combat.viewed = combat;
 
                     // Aborting to an Extra Phase power consumes the next TWO Phases
-                    // (6E2 22): the Segment 12 Phase not yet used plus the Segment 3 one.
+                    //: the Segment 12 Phase not yet used plus the Segment 3 one.
                     // The recorded spentAbs is the later Phase, so the lockout spans both.
                     const burnerCombatant = combat.combatants.find((c) => c.actorId === burner.id);
                     const applied = await ui.combat._declareAbort(burnerCombatant, { extraPhase: true });
@@ -1453,7 +1452,7 @@ export function registerCombatTests(quench) {
                     expect(hasManeuverAe(), "dodge effect active after declaring").to.be.true;
 
                     // Someone else's Phase starting must not expire it: the Dodge lasts
-                    // until the weaver's own next Phase (6E2 22)
+                    // until the weaver's own next Phase
                     await combat.nextTurn();
                     expect(combat.segment).to.equal(6);
                     expect(combat.combatant.actorId).to.equal(alpha.id);
@@ -1611,7 +1610,7 @@ export function registerCombatTests(quench) {
                     await combat.startCombat();
 
                     // Scoped purchases restrict the character to the scoped action when
-                    // acting early, so they only apply on demand (6E1 116; 5ER 96)
+                    // acting early, so they only apply on demand
                     const sniperCombatant = combat.combatants.find((c) => c.actorId === sniper.id);
                     const fiverCombatant = combat.combatants.find((c) => c.actorId === fiver.id);
                     expect(Math.floor(combat.getInitiativePriority(sniperCombatant, 12))).to.equal(20);
@@ -2039,7 +2038,7 @@ export function registerCombatTests(quench) {
 
                     // Aborting spends Alpha's Phase: advancing skips their turn entirely and
                     // crosses into Segment 12; once the Segment containing the spent Phase
-                    // passes they may act again on their next Phase (6E2 22)
+                    // passes they may act again on their next Phase
                     await combat.nextTurn();
                     expect(combat.segment).to.equal(12);
                     expect(combat.combatant.actorId, "aborted combatant's turn is skipped").to.equal(bravo.id);
@@ -2155,7 +2154,7 @@ export function registerCombatTests(quench) {
                     // Change the SPD mid-Turn: SPD 2 (Phases 6, 12) becomes SPD 4 (Phases 3, 6, 9, 12).
                     // A sheet edit is a VOLUNTARY change and defers to Post-Segment 12; the GM's
                     // apply-immediately override converts it into the adjustment-style lockout,
-                    // which is what the rest of this test exercises (6E2 17).
+                    // which is what the rest of this test exercises.
                     await slow.update({ "system.characteristics.spd.value": 4 });
 
                     await combat.nextTurn(); // Crosses into Segment 2; boundary detects the change
@@ -2169,7 +2168,7 @@ export function registerCombatTests(quench) {
                     expect(detected, "GM override applies the change with the SPD-change lockout").to.be.true;
 
                     // Old SPD 2 would next act in Segment 6, new SPD 4 in Segment 3, so no actions
-                    // until Segment 6 (6E2 17)
+                    // until Segment 6
                     expect(slowCombatant.hasPhaseInSegment(3), "locked out of the new SPD Segment 3 Phase").to.be.false;
                     expect(slowCombatant.hasPhaseInSegment(6), "acts once both SPDs would have had a Phase").to.be.true;
 
@@ -2272,7 +2271,7 @@ export function registerCombatTests(quench) {
 
                 it("Should compute the 5e shared-Phase lockout and phase labels from the statics", async function () {
                     const { HeroSystem6eCombatantSingle } = await import("../combatant-single.mjs");
-                    // 5ER 357: SPD 2 {6,12} and SPD 4 {3,6,9,12} first share Segment 6.
+                    // SPD 2 {6,12} and SPD 4 {3,6,9,12} first share Segment 6.
                     // From Turn 2 Segment 1 (abs 25) the next shared Phase is abs 30.
                     expect(HeroSystem6eCombatantSingle.nextSharedPhaseAbs(2, 4, 25)).to.equal(30);
                     // SPD 2 {6,12} and SPD 3 {4,8,12} only share Segment 12 (abs 36)
@@ -2430,8 +2429,8 @@ export function registerCombatTests(quench) {
                         await combat.startCombat();
 
                         // A raw status toggle (stale effect / token HUD without the hook)
-                        // used to make every later declaration bail silently — an
-                        // unrecorded abort that binds at every segment and never clears
+                        // leaves an unrecorded abort that binds at every segment and never
+                        // clears — declaration must adopt it, not bail
                         await marked.toggleStatusEffect("aborted", { active: true });
                         const markedCombatant = combat.combatants.find((c) => c.actorId === marked.id);
                         expect(markedCombatant.abortEffect?.getFlag(game.system.id, "abort")).to.not.exist;
@@ -2733,8 +2732,8 @@ export function registerCombatTests(quench) {
                     const combatant = combat.combatants.find((c) => c.actorId === caster.id);
                     const currentAbs = combat.round * 12 + combat.segment;
 
-                    // Classification reads the item's EXTRATIME modifier (6E1 377-378;
-                    // 5ER 290-291 — identical): a duck item suffices for the plan
+                    // Classification reads the item's EXTRATIME modifier: a duck item
+                    // suffices for the plan
                     const et = (OPTIONID, OPTION_ALIAS) => ({
                         name: "Delayed Blast",
                         findModsByXmlid: (x) => (x === "EXTRATIME" ? { OPTIONID, OPTION_ALIAS } : null),
@@ -2785,10 +2784,10 @@ export function registerCombatTests(quench) {
                     const outsiderCombatant = combat.combatants.find((c) => c.actorId === outsider.id);
 
                     // Rig an EXACT fraction collision (both roll groups r=50) with
-                    // adversarial sub-rolls — the historical failure: sub-roll order
-                    // inside the group vs identity order against the outsider made the
-                    // comparator non-transitive, and nextTurn's tie re-admission
-                    // bounced the pointer between the group and the outsider forever
+                    // adversarial sub-rolls: mixing sub-roll order inside the group
+                    // with identity order against the outsider can make the comparator
+                    // non-transitive, and nextTurn's tie re-admission then bounces the
+                    // pointer between the group and the outsider forever
                     const [m1, m2] = members;
                     await combat.setFlag(game.system.id, "segmentRolls", {
                         24: {

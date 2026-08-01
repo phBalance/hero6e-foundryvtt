@@ -133,8 +133,8 @@ export function maneuverCanBeAbortedTo(item) {
 
 /**
  * Toggling an abortable maneuver (Dodge, Martial Dodge, …) outside the actor's
- * own Phase in a live combat IS Aborting (6E2 21-22; 5ER 361) — offer to declare
- * it through the tracker so the Phase cost and lockout are recorded. Confirm
+ * own Phase in a live combat IS Aborting — offer to declare it through the
+ * tracker so the Phase cost and lockout are recorded. Confirm
  * first: an out-of-turn toggle may just be pre-staging, and Cancel keeps the
  * maneuver active without an Abort.
  * @param {HeroSystem6eItem} item - The maneuver that was just activated
@@ -160,7 +160,7 @@ export async function promptOutOfTurnAbortForManeuver(item) {
         const proceed = await foundry.applications.api.DialogV2.confirm({
             window: { title: `Abort — ${actor.name}` },
             content: `<p>${actor.name} is activating <b>${item.name}</b> outside their Phase. Abort to it?</p>
-                <p class="hint">Aborting consumes their next Phase (6E2 22) — or their Held Action, if holding. Cancel keeps ${item.name} active without declaring an Abort (e.g. pre-staging).</p>`,
+                <p class="hint">Aborting consumes their next Phase — or their Held Action, if holding. Cancel keeps ${item.name} active without declaring an Abort (e.g. pre-staging).</p>`,
             rejectClose: false,
         });
         if (!proceed) return;
@@ -379,8 +379,7 @@ export async function activateManeuver(item) {
         });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
-        // The status ID, not the localized name — the condition system only
-        // recognizes registered ids, so the dodging condition never set
+        // The status ID, not the localized name — the condition system only recognizes registered ids
         activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.dodgeEffect.id];
         activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     }

@@ -212,17 +212,17 @@
 
             "combatTrackerGrouping": {
                 "Name": "Group Same-Actor Combatants",
-                "Hint": "Tokens of the same base actor share one tie-break roll and collapse into a single ×N tracker row (shuffling among themselves each Segment). Disable to give every token its own roll and row. A mid-combat change takes full effect with the next Segment's tie-break rolls."
+                "Hint": "Tokens of the same base actor share one tie-break roll and collapse into a single ×N tracker row. Disable to give every token its own roll and row. Mid-combat changes take effect with the next Segment's tie-break rolls."
             },
 
             "fastDrawTieBreak": {
                 "Name": "Fast Draw Breaks DEX Ties",
-                "Hint": "Optional rule (6E2 19): characters with the Fast Draw skill act before others at the same DEX; two Fast Draw characters compare their Fast Draw tie-break rolls. Off = pure random tie-breaks."
+                "Hint": "Optional rule: characters with the Fast Draw skill act before others at the same DEX; two Fast Draw characters compare their Fast Draw tie-break rolls. Off = pure random tie-breaks."
             },
 
             "stunnedAutoSkip": {
                 "Name": "Auto-Skip Stunned Phases",
-                "Hint": "When a Stunned character's Phase arrives, spend it recovering automatically and advance the tracker (6E2 105). Off = the tracker stops on them so the table can narrate the recovery before ending the turn."
+                "Hint": "When a Stunned character's Phase arrives, spend it recovering automatically and advance the tracker. Off = the tracker stops on them so the table can narrate the recovery before ending the turn."
             },
 
             "singleCombatantTracker": {

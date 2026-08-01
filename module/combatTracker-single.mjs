@@ -8,8 +8,8 @@ const { CombatTracker } = foundry.applications.sidebar.tabs;
 export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     static {
         /**
-         * Updates the header and handles real-time active row highlighting fixes.
-         * Enforces complete null guards to accommodate unlinked V14 Quench test models.
+         * Post-render decoration: header title, active-row highlight, injected controls.
+         * Null-guarded throughout for unlinked V14 Quench test models.
          */
         const onRenderTracker = (app, html, _context, options) => {
             // AppV2 fires renderCombatTracker for every subclass: the legacy tracker's
@@ -17,10 +17,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             if (!(app instanceof HeroSystem6eCombatTrackerSingle)) return;
             const element = html;
             if (!element) return;
-            // Marks this app's DOM so single-tracker-only CSS (e.g. hiding the core
-            // Roll All / Roll NPCs header buttons) never leaks onto the legacy
-            // tracker. BEFORE the started-guard: an un-started combat is exactly
-            // when the roll buttons would tempt a GM
+            // Scopes single-tracker-only CSS (e.g. hiding core's Roll All / Roll NPCs
+            // buttons) to this app so it never leaks onto the legacy tracker.
+            // BEFORE the started-guard: the buttons must stay hidden on an
+            // un-started combat too
             element.classList.add("hero-single-tracker");
 
             // Per-client density preference (#3157); non-active rows shrink via CSS
@@ -32,24 +32,20 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             }
             element.classList.toggle("hero-compact", compact);
 
-            // Exit out immediately if combat hasn't formally begun, if the instance is missing,
-            // or if core tracking parameters haven't finished compiling yet.
             if (!app?.viewed || !app.viewed.started) return;
 
-            // Update header titles using standard Hero System nomenclature variables
             const encounterTitle = element.querySelector(".combat-tracker-header .encounter-title");
             if (encounterTitle) {
                 encounterTitle.textContent = `Turn=${app.viewed.round} Segment=${app.viewed.segment}.${app.viewed.turn}`;
             }
 
-            // Strip any false active highlights that the core template engine miscalculated
+            // Clear core's active highlights; the correct row is re-marked below
             element.querySelectorAll(".combatant.active").forEach((el) => {
                 el.classList.remove("active");
             });
 
-            // Safely check the true active combatant ID string straight from the source database.
-            // The active combatant row only carries the highlight inside the current segment group.
-            // Exclude the exploded-group summary row, which reuses the active member's id
+            // Highlight only inside the current segment group; the exploded-group
+            // summary row reuses the active member's id and must not match
             const activeId = app.viewed.combatant?.id;
             if (activeId) {
                 const activeRow = element.querySelector(
@@ -58,10 +54,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 if (activeRow) {
                     activeRow.classList.add("active");
                     // Per-app guard: the sidebar and a popout are separate instances and
-                    // must each follow the fight (a shared module-level guard let whichever
-                    // rendered first consume the change and froze the other). Scroll only
-                    // on real combat updates — or a window's very first render — never on
-                    // cosmetic re-renders like expansion toggles.
+                    // must each follow the fight. Scroll only on real combat updates —
+                    // or a window's very first render — never on cosmetic re-renders.
                     const isCombatUpdate = options?.renderContext === "updateCombat";
                     const firstRender = app._lastAutoScrolledId === undefined;
                     if ((isCombatUpdate || firstRender) && app._lastAutoScrolledId !== activeId) {
@@ -231,8 +225,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 });
 
             // The row template's Delay button has no handler in core or the
-            // system — in HERO, "delaying" IS declaring a Held Action (6E2 20),
-            // so route it to the hold dialog
+            // system — in HERO, "delaying" IS declaring a Held Action, so
+            // route it to the hold dialog
             element.querySelectorAll('button[data-action="delayCombatant"]').forEach((button) => {
                 button.addEventListener("click", (clickEvent) => {
                     clickEvent.preventDefault();
@@ -246,8 +240,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         Hooks.on("renderCombatTracker", onRenderTracker);
 
         /**
-         * Timing-contest button on Held Action use cards (6E2 21; 5ER 361):
-         * simultaneous Actions are resolved by opposed characteristic rolls.
+         * Timing-contest button on Held Action use cards: simultaneous Actions
+         * are resolved by opposed characteristic rolls.
          */
         Hooks.on("renderChatMessageHTML", (_message, html) => {
             const button = html?.querySelector?.("button.hero-timing-contest");
@@ -289,13 +283,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         });
 
         /**
-         * Foundry builds Combat#turns during world document initialization,
-         * BEFORE token actors exist: every combatant's priority computes
-         * against a null actor (0), the cached sort degenerates to document
-         * order, and the stored turn index then points at the wrong row after
-         * a reload — the pointer lands on a combatant outside the current
-         * segment and the advance dead-ends. Rebuild the cached turns once
-         * everything is ready, on every client.
+         * Foundry builds Combat#turns during world init, BEFORE token actors
+         * exist: priorities compute against null actors, the sort degenerates to
+         * document order, and the stored turn index points at the wrong row
+         * after a reload. Rebuild the cached turns once ready, on every client.
          */
         Hooks.once("ready", () => {
             try {
@@ -314,10 +305,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
         /**
          * Injects the Hero System client preferences into core's Combat Tracker
-         * Settings dialog (#3157). The inputs persist immediately on change —
-         * core's submit handler writes only core.combatTheme and
-         * core.combatTrackerConfig and silently discards unknown form fields,
-         * so riding the Save button is not an option.
+         * Settings dialog (#3157). The inputs persist immediately on change:
+         * core's submit handler discards unknown form fields.
          */
         const onRenderTrackerConfig = (_app, html) => {
             try {
@@ -356,8 +345,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     }
 
     /**
-     * Opposed timing contest for a simultaneous Held Action (6E2 21; 5ER 361):
-     * the holder contests the CURRENT combat actor — the one whose Action the
+     * Opposed timing contest for a simultaneous Held Action: the holder
+     * contests the CURRENT combat actor — the one whose Action the
      * held interrupt collides with. Both sides make their characteristic roll
      * (DEX, or EGO for Mental Powers); the larger success margin acts first and
      * equal margins are simultaneous.
@@ -438,11 +427,11 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         await ChatMessage.create({
             speaker: ChatMessage.getSpeaker({ actor: holder.actor }),
             rolls: [holderSide.roll, opponentSide.roll].map((r) => r.toJSON()),
-            content: `<p><b>Timing contest</b> (6E2 21; 5ER 361)</p>
+            content: `<p><b>Timing contest</b></p>
                 <p>${line(holderSide)}</p>
                 <p>${line(opponentSide)}</p>
                 <p>${verdict}</p>
-                <p class="hint">The roll-off loser cannot then Abort (5ER 361).</p>`,
+                <p class="hint">The roll-off loser cannot then Abort.</p>`,
         });
     }
 
@@ -504,7 +493,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * the collapsed default for passed segments.
      * @param {string} combatId
      * @param {number} currentAbs
-     * @param {number} round
      * @private
      */
     _dropStaleSegmentOverrides(combatId, currentAbs) {
@@ -524,19 +512,17 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     }
 
     /**
-     * Overrides the modern ApplicationV2 rendering lifecycle handler.
-     * ✅ FIX: Enforces deep object sanitation on options to stop the 'turn in undefined' core crash.
+     * Sanitizes render options before core sees them.
      * @override
      * @protected
      */
     async _onRender(context, options) {
         const safeContext = context || {};
 
-        // Fortify a CLONE for core: programmatic renders (Quench) reach core's
+        // Hand core a CLONE: programmatic renders (Quench) reach core's
         // `"turn" in renderData.find(...)` probe with no matching entry and crash.
-        // The original options must stay untouched — core passes renderContext as a
-        // STRING ("updateCombat") and the render hooks rely on it to tell combat
-        // updates apart from cosmetic re-renders.
+        // The original options must stay untouched — renderContext is a STRING
+        // ("updateCombat") the render hooks use to spot real combat updates.
         const invalid = !options || typeof options !== "object" || Array.isArray(options);
         const safeOptions = invalid ? {} : { ...options };
         // This tracker owns auto-scrolling (segment timeline + sticky held panel make
@@ -621,7 +607,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * @override
      */
     async _prepareTrackerContext(context, options) {
-        // 1. Let Foundry assemble the core combatant turns layout dataset natively
         await super._prepareTrackerContext(context, options);
         const combat = this.viewed;
         if (!combat?.started) {
@@ -652,9 +637,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const masterById = new Map(masterTurns.map((t) => [t.id, t]));
         const activeCombatantId = combat.combatant?.id || null;
 
-        // Aborted rows: surface WHEN the lockout clears in the icon tooltip.
-        // The status only deletes once the spent Phase's segment has fully
-        // passed, which reads as "stuck" at the table otherwise.
+        // Aborted rows: surface WHEN the lockout clears in the icon tooltip
+        // (the status only deletes once the spent Phase's segment has passed)
         for (const turn of masterTurns) {
             try {
                 const combatant = combat.combatants.get(turn.id);
@@ -1047,8 +1031,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     // otherwise render as a broken <img> showing its alt text (#2657)
                     row.img = row.img || combatant.img || combatant.actor?.img || "icons/svg/mystery-man.svg";
 
-                    // Pull the calculated priority score from the source-of-truth document method so
-                    // Handlebars draws the number instead of the d20 roll button
+                    // A rolled numeric initiative keeps core's d20 roll button away
                     row.initiative = group.priority.toFixed(2);
                     row.hasRolled = true;
                     if (dispositionTint) row.css = `${row.css || ""} ${this._dispositionClass(combatant)}`.trim();
@@ -1134,8 +1117,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                             (combatant.abortSpentAbs === null && combatant.abortAppliesAtAbs?.(abs)))
                     ) {
                         // The Phase an abort consumed stays visible but greyed, so the
-                        // table can see where the cost lands (6E2 22). Unrecorded aborts
-                        // (bare status toggles) grey every Phase while the status binds.
+                        // table can see where the cost lands. Unrecorded aborts (bare
+                        // status toggles) grey every Phase while the status binds.
                         row.css = `${row.css} hero-aborted-row`.trim();
                         row.name = `${row.name} (aborted)`;
                     }
@@ -1207,7 +1190,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     /** @override */
     _onCombatantHoverIn(event) {
         const row = this._combatantRowFromEvent(event);
-        // GUARD: Short-circuit fake layout rows and missing document references
+        // Skip fake layout rows and missing documents
         if (!row || !this.viewed?.combatants?.has(row.dataset.combatantId)) return;
         return super._onCombatantHoverIn(event);
     }
@@ -1261,7 +1244,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             return;
         }
 
-        // GUARD: Prevent clicking, panning, or pinging rows without a real combatant
+        // Synthetic rows have no combatant to click, pan, or ping
         if (!this.viewed?.combatants?.has(combatantId)) return;
 
         // Group headers toggle their explosion; the active group cannot be collapsed
@@ -1338,11 +1321,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     }
 
     /**
-     * Adds Hold/Abort entries to the row context menu and guards every entry against
-     * the tracker's synthetic rows (segment headers, group summaries, the held panel).
-     * @override
-     */
-    /**
      * Whether same-actor grouping is enabled world-wide; the split/rejoin
      * context options are meaningless (and hidden) without it.
      * @returns {boolean}
@@ -1357,6 +1335,11 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         }
     }
 
+    /**
+     * Adds Hold/Abort entries to the row context menu and guards every entry against
+     * the tracker's synthetic rows (segment headers, group summaries, the held panel).
+     * @override
+     */
     _getEntryContextOptions() {
         // HERO rolls no initiative in this tracker (priorities derive from DEX +
         // the per-segment tie rolls), so core's Clear/Reroll Initiative entries
@@ -1377,8 +1360,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 icon: "fa-solid fa-hourglass-half",
                 visible: (li) => {
                     const combatant = getCombatant(li);
-                    // Holds are declared on the character's own Phase (6E2 20); declaring
-                    // out of turn would let the banked Phase land earlier than it should.
+                    // Holds are declared on the character's own Phase; declaring out
+                    // of turn would let the banked Phase land earlier than it should.
                     // The GM is exempt for NPC bookkeeping.
                     return (
                         !!combatant?.isOwner &&
@@ -1583,8 +1566,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     }
 
     /**
-     * The shared Hold Action dialog (6E2 20-21; 5ER 360-361): a position (segment +
-     * DEX, only legal segments offered per the null zone), an event trigger, or a
+     * The shared Hold Action dialog: a position (segment + DEX, only legal
+     * segments offered per the null zone), an event trigger, or a
      * generic hold. A decimal DEX (e.g. 13.12) pins the exact tie-break position;
      * whole numbers keep the segment's random tie-break roll.
      * @param {Combatant} combatant
@@ -1846,11 +1829,11 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         if (combatant.heldAction) return;
         const blocked = this._blockedActionReason(combatant);
         if (blocked) return void ui.notifications.warn(blocked);
-        // Holds are declared on the character's own Phase (6E2 20); the GM may backfill
+        // Holds are declared on the character's own Phase; the GM may backfill
         if (!game.user.isGM && combat.combatant?.id !== combatant.id) {
             return void ui.notifications.warn(`Held Actions are declared on the character's own Phase.`);
         }
-        // One banked Phase, ever (6E2 20): a combatant who already used this Segment's
+        // One banked Phase, ever: a combatant who already used this Segment's
         // action cannot bank another
         if (this._actedThisSegment(combatant)) {
             if (!game.user.isGM) {
@@ -2033,9 +2016,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
     /**
      * Using (or aborting with) a Held Action consumes this segment's action: it takes
-     * the place of the Phase — a character cannot have two Phases in one Segment
-     * (6E2 20; 5ER 360). Records the acted position so turn flow skips the natural
-     * Phase and the tracker keeps the row where they acted.
+     * the place of the Phase — a character cannot have two Phases in one Segment.
+     * Records the acted position so turn flow skips the natural Phase and the
+     * tracker keeps the row where they acted.
      * @param {Combatant} combatant
      * @param {{mode: string, segmentAbs?: number, dex?: number}|null} hold - The hold as it was before deletion
      * @private
@@ -2137,9 +2120,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
     /**
      * Toggles a scoped Lightning Reflexes elevation for the current segment. The
-     * elevated character acts at DEX + LR but may only execute the scoped action
-     * (6E1 116; 5ER 96); cancelling before the elevated turn arrives restores the
-     * natural position. The pointer is re-synced to the same active combatant, since
+     * elevated character acts at DEX + LR but may only execute the scoped action;
+     * cancelling before the elevated turn arrives restores the natural position. The pointer is re-synced to the same active combatant, since
      * the flag write re-sorts the turns array under the stored index.
      * @param {string} combatantId
      * @protected
@@ -2201,9 +2183,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
     /**
      * Why the combatant cannot take a voluntary action right now, or null when
-     * unblocked. A Stunned character can take no Action at all — not even Aborting
-     * (6E2 105); an aborted character cannot act again until the Phase they aborted
-     * has passed (6E2 22; 5ER 361).
+     * unblocked. A Stunned character can take no Action at all — not even Aborting;
+     * an aborted character cannot act again until the Phase they aborted has passed.
      * @param {Combatant} combatant
      * @returns {string|null}
      * @private
@@ -2240,7 +2221,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     /**
      * Why a fresh abort is illegal right now, or null. Beyond the shared action
      * guards, a character who already used their Phase this Segment cannot Abort
-     * until the next Segment (6E2 22; 5ER 361).
+     * until the next Segment.
      * @param {Combatant} combatant
      * @returns {string|null}
      * @private
@@ -2264,7 +2245,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * The Phases a fresh abort would consume from the current combat position: the
      * current Phase when the pointer is on the combatant (their DEX came up without
      * acting — e.g. a Held Action interrupt), otherwise the next full Phase; an
-     * Extra Phase power consumes the one after as well (6E2 22).
+     * Extra Phase power consumes the one after as well.
      * @param {Combatant} combatant
      * @param {{extraPhase?: boolean}} [options]
      * @returns {{isActive: boolean, firstAbs: number, spentAbs: number, nextActAbs: number}}
@@ -2282,8 +2263,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     }
 
     /**
-     * Applies an abort to a defensive Action (6E2 21-22; 5ER 361). A held Phase is
-     * spent instead when the combatant is holding — no further Phase is lost;
+     * Applies an abort to a defensive Action. A held Phase is spent instead
+     * when the combatant is holding — no further Phase is lost;
      * otherwise the consumed Phase is recorded and the aborted status enforces the
      * lockout until it passes. When the abort replaces the current Phase, the turn
      * advances.
@@ -2320,8 +2301,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const actor = combatant?.actor;
         if (!combat?.started || !combatant?.isOwner || !actor) return false;
         // A RECORDED abort is final; a bare aborted status (token-HUD toggle,
-        // stale effect from an interrupted flow) is ADOPTED below — bailing on it
-        // left an unrecorded effect that binds at every segment and never clears
+        // stale effect from an interrupted flow) is ADOPTED below — otherwise
+        // the unrecorded effect binds at every segment and never clears
         const existingAbortEffect = combatant.abortEffect;
         if (existingAbortEffect?.getFlag(game.system.id, "abort")) {
             ui.notifications.warn(`${actor.name} has already Aborted.`);
@@ -2351,7 +2332,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
         if (statusId) await this._applyAbortDefense(actor, statusId);
 
-        // A held Phase absorbs the abort — no further Phases are lost (6E2 22; 5ER 361)
+        // A held Phase absorbs the abort — no further Phases are lost
         const holdingEffect = combatant.heldActionEffect;
         if (holdingEffect) {
             const hold = combatant.heldAction;
@@ -2394,8 +2375,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             `${actor.name} Aborts to ${toAction} — this consumes ${costText}; they cannot act again until ${phaseLabel(nextActAbs)}.`,
         );
         // Log the ledger row at the consumed Phase's natural priority — the
-        // default computes at the DECLARATION position, which is 0 out of turn
-        // and rendered the spent Phase at "0.00" once its segment passed
+        // default declaration-position priority is 0 out of turn
         await combat.logEvent("abort.declare", {
             combatant,
             priority: combat.getInitiativePriority(combatant, HeroSystem6eCombatantSingle.segmentOf(spentAbs), {
@@ -2425,8 +2405,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      */
     async _applyAbortDefense(actor, statusId) {
         // Match by maneuver trait, not exact XMLID: uploaded dodge/block items can
-        // carry XMLID "MANEUVER" (custom maneuvers), and the missed match fell back
-        // to a bare status — a SECOND "Dodging" effect alongside the maneuver's own
+        // carry XMLID "MANEUVER" (custom maneuvers); a bare-status fallback would
+        // add a second "Dodging" effect alongside the maneuver's own
         const trait = { dodge: maneuverHasDodgeTrait, block: maneuverHasBlockTrait }[statusId];
         const maneuverItem = trait
             ? actor.items.find((i) => ["maneuver", "martialart"].includes(i.type) && trait(i))

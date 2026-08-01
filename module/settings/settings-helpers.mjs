@@ -619,7 +619,7 @@ export default class SettingsHelpers {
             onChange: () => ui.combat?.render(),
         });
 
-        // GM-option tie-break: Fast Draw wins exact-DEX ties (6E2 19)
+        // GM-option tie-break: Fast Draw wins exact-DEX ties
         game.settings.register(module, "fastDrawTieBreak", {
             name: game.i18n.localize("Settings.AlphaTesting.fastDrawTieBreak.Name"),
             hint: game.i18n.localize("Settings.AlphaTesting.fastDrawTieBreak.Hint"),

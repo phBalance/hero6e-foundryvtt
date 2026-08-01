@@ -18,8 +18,7 @@ export class HeroSystem6eCombatantSingle extends Combatant {
     }
 
     /**
-     * Speed Chart (6E1 17; 5ER 20). SPD 0 or below has no Phases
-     * (Post-Segment 12 Recovery only).
+     * Speed Chart. SPD 0 or below has no Phases (Post-Segment 12 Recovery only).
      * @type {Record<number, number[]>}
      */
     static speedChart = {
@@ -67,8 +66,8 @@ export class HeroSystem6eCombatantSingle extends Combatant {
 
     /**
      * The first absolute segment at or after fromAbs whose segment is a Phase for
-     * BOTH speeds — the 5e optional SPD-change rule (5ER 357: after changing SPD, a
-     * character cannot act until the next Segment that is a Phase for both SPDs).
+     * BOTH speeds — the 5e optional SPD-change rule: after changing SPD, a character
+     * cannot act until the next Segment that is a Phase for both SPDs.
      * Bounded: every SPD shares segment 12.
      * @param {number} spdA
      * @param {number} spdB
@@ -139,8 +138,8 @@ export class HeroSystem6eCombatantSingle extends Combatant {
     }
 
     /**
-     * Details of this combatant's Held Action (6E2 20-21; 5ER 360-361), or null when
-     * not holding. Declared via the tracker's Hold Action dialog, which stores the
+     * Details of this combatant's Held Action, or null when not holding.
+     * Declared via the tracker's Hold Action dialog, which stores the
      * declaration on the holding effect; a bare holding status (e.g. token HUD toggle)
      * counts as a generic hold.
      * @type {{mode: "position"|"event"|"generic", segmentAbs?: number, dex?: number, trigger?: string,
@@ -164,7 +163,7 @@ export class HeroSystem6eCombatantSingle extends Combatant {
 
     /**
      * Segment-number variant for turn-flow checks. Unambiguous despite the modulo because
-     * the hold window is always shorter than a full Turn (null zone, 6E2 21).
+     * the hold window is always shorter than a full Turn (null zone).
      * @param {number} segmentNumber - 1-12
      * @returns {boolean}
      */
@@ -202,7 +201,7 @@ export class HeroSystem6eCombatantSingle extends Combatant {
     }
 
     /**
-     * Lightning Reflexes raises effective DEX for acting order only (6E1 116; 5ER 96).
+     * Lightning Reflexes raises effective DEX for acting order only.
      * HD encodes every 6e scope under LIGHTNING_REFLEXES_ALL, distinguished by
      * OPTIONID; 5e single-action LR is its own XMLID. Only the unrestricted All
      * Actions scope applies automatically — scoped purchases restrict the character
@@ -265,7 +264,7 @@ export class HeroSystem6eCombatantSingle extends Combatant {
 
     /**
      * The absolute segment of the Phase this combatant's abort consumes, recorded at
-     * declaration (6E2 22: aborting uses the NEXT full Phase). Null for aborts applied
+     * declaration (aborting uses the NEXT full Phase). Null for aborts applied
      * without the tracker (bare status toggles), which fall back to segment matching.
      * @type {number|null}
      */
@@ -324,8 +323,8 @@ export class HeroSystem6eCombatantSingle extends Combatant {
     get combatSpd() {
         if (!this.actor) return 0;
 
-        // A voluntarily declared SPD change takes effect only at Post-Segment 12
-        // (6E2 17; 5ER 357): until then the character keeps acting at the old SPD
+        // A voluntarily declared SPD change takes effect only at Post-Segment 12;
+        // until then the character keeps acting at the old SPD
         if (game.system?.id && this.combat?.started) {
             const pending = this.getFlag(game.system.id, "pendingSpd");
             if (pending) {
@@ -357,8 +356,7 @@ export class HeroSystem6eCombatantSingle extends Combatant {
     }
 
     /**
-     * Evaluates if this participant possesses an active action phase
-     * in the specified speed chart calendar segment index.
+     * Whether this combatant has a Phase in the given Speed Chart segment.
      * @param {number} segmentIndex - Speed Chart segment column to examine (1-12)
      * @param {number} [queryAbs] - Exact absolute segment being probed; segment numbers
      *   alias across Turns, so scans reaching into the next round pass the position.
@@ -374,8 +372,8 @@ export class HeroSystem6eCombatantSingle extends Combatant {
         if (!activePhases.includes(segmentIndex)) return false;
 
         // A character whose SPD changed mid-Turn cannot act until both the old and the
-        // new SPD would have had a Phase (6E2 17; 5ER 357). The lockout flag is written
-        // and cleared by the combat's segment-boundary maintenance.
+        // new SPD would have had a Phase. The lockout flag is written and cleared by
+        // the combat's segment-boundary maintenance.
         const lockout = game.system?.id ? this.getFlag(game.system.id, "spdLockout") : null;
         const combat = this.combat;
         if (lockout?.lockoutEndAbs && combat?.started) {

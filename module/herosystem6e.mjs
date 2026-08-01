@@ -556,7 +556,7 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
         });
     }
 
-    // Failed Haymaker: the Phase is wasted but the END is still owed (6E2 69) —
+    // Failed Haymaker: the Phase is wasted but the END is still owed —
     // charge the attack's resources without rolling anything
     html.querySelectorAll("button.hero-delayed-fail").forEach((button) => {
         button.addEventListener("click", async (event) => {
@@ -588,7 +588,7 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
                     speaker: ChatMessage.getSpeaker({ actor }),
                     content: `${actor?.name}'s Haymaker fails — the Phase is wasted${
                         resourcesUsedDescription
-                            ? `, and ${resourcesUsedDescription} is spent anyway (6E2 69)${resourcesUsedDescriptionRenderedRoll ?? ""}`
+                            ? `, and ${resourcesUsedDescription} is spent anyway${resourcesUsedDescriptionRenderedRoll ?? ""}`
                             : ""
                     }.`,
                 });
@@ -636,7 +636,7 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
                 await processActionToHit(
                     item,
                     // prepaid (Extra Time): resources/rolls were paid at declaration.
-                    // A Haymaker instead pays its END with THIS roll (6E2 69).
+                    // A Haymaker instead pays its END with THIS roll.
                     {
                         ...(payload.formData ?? {}),
                         userId: game.user.id,

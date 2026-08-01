@@ -8,7 +8,6 @@
             style="display:none1"
                 {{/if}} data-segment-id="{{@index}}">
 
-                {{!-- loop thru each turn/combatant --}}
                 {{#each this}}
 
                 <li class="combatant directory-item {{this.css}} {{#if (and this.active (eq this.segment (getScopedFlagValue @root/combat @root/gameSystemId "segment")))}}active{{/if}}" 

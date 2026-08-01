@@ -601,9 +601,9 @@ export function getTokenUuid(token) {
 }
 
 /**
- * Forced-deletion update payload for the given keys (V14's replacement for the
- * pre-V14 "-=key" syntax): each key maps to a ForcedDeletion operator so a
- * document update removes it outright instead of merging.
+ * Forced-deletion update payload for the given keys: each key maps to a
+ * ForcedDeletion operator so a document update removes it outright instead
+ * of merging.
  *
  * @param {string[]} keys - Field names (unprefixed) to delete
  * @returns {Record<string, object>}
