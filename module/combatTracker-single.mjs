@@ -2393,7 +2393,16 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             combatant,
             `${actor.name} Aborts to ${toAction} — this consumes ${costText}; they cannot act again until ${phaseLabel(nextActAbs)}.`,
         );
-        await combat.logEvent("abort.declare", { combatant, data: { toAction, spentAbs, extraPhase } });
+        // Log the ledger row at the consumed Phase's natural priority — the
+        // default computes at the DECLARATION position, which is 0 out of turn
+        // and rendered the spent Phase at "0.00" once its segment passed
+        await combat.logEvent("abort.declare", {
+            combatant,
+            priority: combat.getInitiativePriority(combatant, HeroSystem6eCombatantSingle.segmentOf(spentAbs), {
+                queryAbs: spentAbs,
+            }),
+            data: { toAction, spentAbs, extraPhase },
+        });
 
         if (isActive) {
             try {

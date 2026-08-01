@@ -221,9 +221,19 @@ export class HeroSystem6eCombatSingle extends Combat {
                     if (atAbs) addRow(event, "held-forfeit");
                     break;
                 case "abort.declare":
-                    // The consumed Phase renders in the segment it was spent from
+                    // The consumed Phase renders in the segment it was spent from.
+                    // Events logged before the priority fix carry the DECLARATION
+                    // position's priority (0 out of turn); recompute at the spent
+                    // slot so the row keeps its DEX position instead of 0.00
                     if (event.data?.spentAbs === abs) {
-                        addRow(event, "aborted", { detail: event.data?.toAction ?? null });
+                        let priority = event.priority || null;
+                        const live = priority ? null : this.combatants.get(event.combatantId);
+                        if (live) {
+                            priority = this.getInitiativePriority(live, HeroSystem6eCombatantSingle.segmentOf(abs), {
+                                queryAbs: abs,
+                            });
+                        }
+                        addRow(event, "aborted", { priority, detail: event.data?.toAction ?? null });
                     }
                     break;
                 case "haymaker.resolve":
