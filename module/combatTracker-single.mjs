@@ -289,6 +289,30 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         });
 
         /**
+         * Foundry builds Combat#turns during world document initialization,
+         * BEFORE token actors exist: every combatant's priority computes
+         * against a null actor (0), the cached sort degenerates to document
+         * order, and the stored turn index then points at the wrong row after
+         * a reload — the pointer lands on a combatant outside the current
+         * segment and the advance dead-ends. Rebuild the cached turns once
+         * everything is ready, on every client.
+         */
+        Hooks.once("ready", () => {
+            try {
+                let rebuilt = false;
+                for (const combat of game.combats ?? []) {
+                    if (combat instanceof HeroSystem6eCombatSingle && combat.started) {
+                        combat.setupTurns();
+                        rebuilt = true;
+                    }
+                }
+                if (rebuilt) ui.combat?.render();
+            } catch (e) {
+                console.error(`Post-ready combat turn rebuild failed`, e);
+            }
+        });
+
+        /**
          * Injects the Hero System client preferences into core's Combat Tracker
          * Settings dialog (#3157). The inputs persist immediately on change —
          * core's submit handler writes only core.combatTheme and
