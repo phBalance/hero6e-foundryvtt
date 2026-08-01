@@ -1,4 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
+import { setQuenchTimeout } from "./quench-helper.mjs";
 
 const { Actor } = foundry.documents;
 
@@ -13,6 +14,10 @@ export function registerCombatTests(quench) {
 
             // This has to be the top level so isSingleCombatTracker can be changed
             describe(`Hero System 6e Speed Chart Turn Progression Matrix (Foundry Gen: ${generationLabel})`, function () {
+                // Pointer moves now settle pending segment maintenance first, so the
+                // long multi-Turn marches legitimately exceed mocha's 2s default —
+                // and one march timing out mid-run corrupts the next test's clock
+                setQuenchTimeout(this);
                 const actorDocuments = [];
                 const combatDocuments = [];
                 let savedLrAutoElevate;
@@ -2050,6 +2055,7 @@ export function registerCombatTests(quench) {
             const { after, before, describe, expect, it } = context;
 
             describe(`Hero System 6e Alpha Tracker Fix Validation`, function () {
+                setQuenchTimeout(this);
                 const actorDocuments = [];
                 const combatDocuments = [];
 
