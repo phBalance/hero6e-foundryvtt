@@ -652,6 +652,28 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const masterById = new Map(masterTurns.map((t) => [t.id, t]));
         const activeCombatantId = combat.combatant?.id || null;
 
+        // Aborted rows: surface WHEN the lockout clears in the icon tooltip.
+        // The status only deletes once the spent Phase's segment has fully
+        // passed, which reads as "stuck" at the table otherwise.
+        for (const turn of masterTurns) {
+            try {
+                const combatant = combat.combatants.get(turn.id);
+                const abortEffect = combatant?.abortEffect;
+                if (!abortEffect?.getFlag(game.system.id, "abort")) continue;
+                const spentAbs = combatant.abortSpentAbs;
+                const clearsText =
+                    spentAbs === null
+                        ? `${abortEffect.name} — lasts until removed (GM adjudicates)`
+                        : `${abortEffect.name} — clears after ${HeroSystem6eCombatantSingle.phaseLabel(spentAbs)} ends`;
+                const entries = Array.isArray(turn.effects) ? turn.effects : (turn.effects?.icons ?? []);
+                for (const entry of entries) {
+                    if (entry?.name === abortEffect.name) entry.name = clearsText;
+                }
+            } catch (e) {
+                console.warn(`Abort tooltip decoration failed`, e);
+            }
+        }
+
         // Absolute segment indices are monotonic across Turns; combat begins at Turn 1, Segment 12
         const currentAbs = combat.round * 12 + combat.segment;
         const startAbs = 1 * 12 + 12;
