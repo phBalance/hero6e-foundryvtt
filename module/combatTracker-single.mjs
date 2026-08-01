@@ -21,6 +21,15 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             // when the roll buttons would tempt a GM
             element.classList.add("hero-single-tracker");
 
+            // Per-client density preference (#3157); non-active rows shrink via CSS
+            let compact = false;
+            try {
+                compact = !!game.settings.get(game.system.id, "combatTrackerCompact");
+            } catch (e) {
+                console.warn(`Unable to read the compact tracker setting`, e);
+            }
+            element.classList.toggle("hero-compact", compact);
+
             // Exit out immediately if combat hasn't formally begun, if the instance is missing,
             // or if core tracking parameters haven't finished compiling yet.
             if (!app?.viewed || !app.viewed.started) return;
@@ -388,7 +397,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         // - holds/aborts carry bookkeeping the tracker flows own
         if (!effect || effect.statuses.size !== 1 || effect.parent !== actor) return;
         const [status] = effect.statuses;
-        if (["holding", "aborted"].includes(status)) return;
+        // encumbered is weight-derived: a click-toggle would be recreated by the
+        // next encumbrance recalc (or orphan the penalties)
+        if (["holding", "aborted", "encumbered"].includes(status)) return;
         if (!CONFIG.statusEffects?.some((s) => s.id === status)) return;
         await actor.toggleStatusEffect(status);
     }

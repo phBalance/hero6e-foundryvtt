@@ -492,6 +492,39 @@ ol.combat-tracker.plain {
     gap: 1em;
 }
 
+/* Compact mode (#3157): non-active combatant rows shrink to a single tight line —
+   no portrait, smaller name and icons. The active combatant, segment headers, and
+   the held panel keep their full-size treatment. */
+.hero-single-tracker.hero-compact li.combatant:not(.active):not(.hero-timeline-header-row) {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    min-height: 0;
+
+    img.token-image {
+        display: none;
+    }
+
+    .token-name {
+        font-size: var(--font-size-12);
+
+        h4,
+        strong {
+            margin: 0;
+            line-height: 1.5;
+            font-size: var(--font-size-12);
+        }
+    }
+
+    .token-initiative {
+        font-size: var(--font-size-11);
+    }
+
+    .token-effects img.token-effect {
+        width: 12px;
+        height: 12px;
+    }
+}
+
 /* Injected "Use Held Action" controls */
 .combat-tracker li.combatant .hero-use-held {
     color: var(--hero-held-text);

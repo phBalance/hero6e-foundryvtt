@@ -594,10 +594,32 @@ export default class SettingsHelpers {
             default: false,
         });
 
+        // Per-client density toggle for the single tracker (#3157)
+        game.settings.register(module, "combatTrackerCompact", {
+            name: game.i18n.localize("Settings.AlphaTesting.combatTrackerCompact.Name"),
+            hint: game.i18n.localize("Settings.AlphaTesting.combatTrackerCompact.Hint"),
+            scope: "client",
+            config: game.settings.get(game.system.id, "alphaTesting"),
+            type: Boolean,
+            default: false,
+            onChange: () => ui.combat?.render(),
+        });
+
         // GM-option tie-break: Fast Draw wins exact-DEX ties (6E2 19)
         game.settings.register(module, "fastDrawTieBreak", {
             name: game.i18n.localize("Settings.AlphaTesting.fastDrawTieBreak.Name"),
             hint: game.i18n.localize("Settings.AlphaTesting.fastDrawTieBreak.Hint"),
+            scope: "world",
+            config: game.settings.get(game.system.id, "alphaTesting"),
+            type: Boolean,
+            default: false,
+        });
+
+        // Pacing option (#3280): spend a Stunned character's Phase recovering
+        // automatically instead of stopping the tracker on them
+        game.settings.register(module, "stunnedAutoSkip", {
+            name: game.i18n.localize("Settings.AlphaTesting.stunnedAutoSkip.Name"),
+            hint: game.i18n.localize("Settings.AlphaTesting.stunnedAutoSkip.Hint"),
             scope: "world",
             config: game.settings.get(game.system.id, "alphaTesting"),
             type: Boolean,

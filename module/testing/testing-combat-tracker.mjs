@@ -2328,6 +2328,56 @@ export function registerCombatTests(quench) {
                     }
                 });
 
+                it("Should auto-skip a Stunned combatant's Phase when the option is on (#3280)", async function () {
+                    const savedSkip = game.settings.get(game.system.id, "stunnedAutoSkip");
+                    const savedAutomation = game.settings.get(game.system.id, "automation");
+                    const alpha = await makeActor("_Quench Stun Alpha", { dex: 20, spd: 2 });
+                    const stunned = await makeActor("_Quench Stunned", { dex: 10, spd: 2 });
+                    try {
+                        await game.settings.set(game.system.id, "automation", "none");
+                        await game.settings.set(game.system.id, "stunnedAutoSkip", true);
+                        const combat = await makeCombat([alpha, stunned]);
+                        await combat.startCombat();
+                        expect(combat.segment).to.equal(12);
+                        expect(combat.combatant.actorId).to.equal(alpha.id);
+
+                        await stunned.toggleStatusEffect("stunned", { active: true });
+                        expect(stunned.statuses.has("stunned")).to.be.true;
+
+                        // Alpha ends their turn; the pointer lands on the Stunned
+                        // combatant and the auto-skip spends that Phase recovering
+                        await combat.nextTurn();
+                        const recovered = await waitUntil(() => !stunned.statuses.has("stunned"));
+                        expect(recovered, "stun cleared by the auto-skipped recovery Phase").to.be.true;
+                        const advanced = await waitUntil(
+                            () => combat.combatant?.actorId === alpha.id && combat.segment === 6,
+                        );
+                        expect(advanced, "pointer advanced past the recovery stop to T2S6").to.be.true;
+                        expect(combat.round).to.equal(2);
+                    } finally {
+                        await game.settings.set(game.system.id, "stunnedAutoSkip", savedSkip);
+                        await game.settings.set(game.system.id, "automation", savedAutomation);
+                    }
+                });
+
+                it("Should create combatants hidden for invisible actors, explicit hidden wins (#4466)", async function () {
+                    const ghost = await makeActor("_Quench Ghost", { dex: 10, spd: 2 });
+                    await ghost.toggleStatusEffect("invisible", { active: true });
+                    try {
+                        const combat = await makeCombat([ghost]);
+                        const auto = combat.combatants.find((c) => c.actorId === ghost.id);
+                        expect(auto.hidden, "invisible actor's combatant starts hidden").to.be.true;
+
+                        // An explicit hidden value in the creation data wins
+                        const [explicit] = await combat.createEmbeddedDocuments("Combatant", [
+                            { actorId: ghost.id, hidden: false },
+                        ]);
+                        expect(explicit.hidden, "explicit hidden:false is respected").to.be.false;
+                    } finally {
+                        await ghost.toggleStatusEffect("invisible", { active: false });
+                    }
+                });
+
                 it("Should key tie-break rolls by absolute segment and re-roll them for a new Turn", async function () {
                     const one = await makeActor("_Quench Tie One", { dex: 15, spd: 2 });
                     const two = await makeActor("_Quench Tie Two", { dex: 15, spd: 2 });

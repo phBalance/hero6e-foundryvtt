@@ -2091,6 +2091,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 name: name,
                 id: "encumbered",
                 img: `systems/${HEROSYS.module}/icons/encumbered.svg`,
+                statuses: ["encumbered"],
 
                 origin: this.uuid,
                 flags: {
@@ -2164,6 +2165,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     [HeroCompatibility.isV14 ? `system.changes` : `changes`]:
                         activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`],
                     origin: activeEffect.origin,
+                    statuses: activeEffect.statuses,
                     flags: activeEffect.flags,
                 });
             } else {

@@ -1,5 +1,23 @@
 export class HeroSystem6eCombatantSingle extends Combatant {
     /**
+     * GM-hidden and invisible tokens enter combat hidden from the player-facing
+     * tracker (#4466). An explicit hidden value in the creation data wins — the
+     * GM can still add them visibly on purpose.
+     * @override
+     */
+    async _preCreate(data, options, user) {
+        const allowed = await super._preCreate(data, options, user);
+        if (allowed === false) return false;
+        if (data.hidden === undefined) {
+            const token = this.token ?? this.parent?.scene?.tokens?.get(data.tokenId);
+            if (token?.hidden || this.actor?.statuses?.has("invisible")) {
+                this.updateSource({ hidden: true });
+            }
+        }
+        return allowed;
+    }
+
+    /**
      * Speed Chart (6E1 17; 5ER 20). SPD 0 or below has no Phases
      * (Post-Segment 12 Recovery only).
      * @type {Record<number, number[]>}

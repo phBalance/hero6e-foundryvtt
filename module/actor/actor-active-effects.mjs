@@ -480,6 +480,15 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 img: `systems/${module}/icons/senses/touchSenseDisabled.svg`,
                 showIcon: 2, // always
             },
+            // Weight-derived condition (#2319): the AE carrying the actual DCV/
+            // movement penalties is managed by the encumbrance recalc; registering
+            // the status surfaces it on the token HUD and tracker rows. The
+            // equipment weight percentage setting at 0 disables the penalties.
+            encumberedEffect: {
+                id: "encumbered",
+                name: "Encumbered",
+                img: `systems/${module}/icons/encumbered.svg`,
+            },
         });
 
         // Return an array of status effects sorted by property in alphabetical order

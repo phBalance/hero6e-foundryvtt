@@ -2245,6 +2245,30 @@ export class HeroSystem6eCombatSingle extends Combat {
             if ((!isResync || lrPreempt) && activeCombatant?.actor) {
                 await this._onPhaseStart(activeCombatant);
             }
+
+            // Auto-skip option (#3280): a Stunned character's Phase is spent
+            // recovering (6E2 105) — the stop advances itself, and _onPhaseEnd
+            // clears the stun and cards the recovery as the turn ends. Deferred
+            // OUT of the chain: nextTurn settles maintenance and would self-
+            // deadlock awaiting the very chain running it (cf. LR auto-elevate).
+            if (!isResync && activeCombatant?.actor?.statuses.has("stunned")) {
+                let stunnedAutoSkip = false;
+                try {
+                    stunnedAutoSkip = !!game.settings.get(game.system.id, "stunnedAutoSkip");
+                } catch (e) {
+                    console.warn(`Unable to read the stunned auto-skip setting`, e);
+                }
+                if (stunnedAutoSkip) {
+                    const stunnedId = activeCombatant.id;
+                    setTimeout(() => {
+                        // Re-validate at fire time: the pointer may have moved, the
+                        // stun may have been removed, or the combat ended
+                        if (!this.started || this.combatant?.id !== stunnedId) return;
+                        if (!this.combatant.actor?.statuses.has("stunned")) return;
+                        this.nextTurn().catch((e) => console.error(e));
+                    }, 0);
+                }
+            }
         };
         this._maintenanceChain = (this._maintenanceChain ?? Promise.resolve())
             .then(runMaintenance)
