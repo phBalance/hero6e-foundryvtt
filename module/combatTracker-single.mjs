@@ -19,421 +19,11 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     _lastSeenAbs;
 
     static {
-        /**
-         * Post-render decoration: header title, active-row highlight, injected controls.
-         * Null-guarded throughout for unlinked V14 Quench test models.
-         */
-        const onRenderTracker = (app, html, _context, options) => {
-            // AppV2 fires renderCombatTracker for every subclass: the legacy tracker's
-            // rows lack this tracker's classes, so touching them only strips state
-            if (!(app instanceof HeroSystem6eCombatTrackerSingle)) return;
-            const element = html;
-            if (!element) return;
-            // Scopes single-tracker-only CSS (e.g. hiding core's Roll All / Roll NPCs
-            // buttons) to this app so it never leaks onto the legacy tracker.
-            // BEFORE the started-guard: the buttons must stay hidden on an
-            // un-started combat too
-            element.classList.add("hero-single-tracker");
-
-            // Per-client density preference (#3157); non-active rows shrink via CSS
-            let compact = false;
-            try {
-                compact = !!game.settings.get(game.system.id, "combatTrackerCompact");
-            } catch (e) {
-                console.warn(`Unable to read the compact tracker setting`, e);
-            }
-            element.classList.toggle("hero-compact", compact);
-
-            if (!app?.viewed || !app.viewed.started) return;
-
-            const encounterTitle = element.querySelector(".combat-tracker-header .encounter-title");
-            if (encounterTitle) {
-                encounterTitle.textContent = `Turn=${app.viewed.round} Segment=${app.viewed.segment}.${app.viewed.turn}`;
-            }
-
-            // Clear core's active highlights; the correct row is re-marked below
-            element.querySelectorAll(".combatant.active").forEach((el) => {
-                el.classList.remove("active");
-            });
-
-            // Highlight only inside the current segment group; the exploded-group
-            // summary row reuses the active member's id and must not match
-            const activeId = app.viewed.combatant?.id;
-            if (activeId) {
-                const activeRow = element.querySelector(
-                    `.current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)[data-combatant-id="${activeId}"], .current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)[data-id="${activeId}"]`,
-                );
-                if (activeRow) {
-                    activeRow.classList.add("active");
-                    // Per-app guard: the sidebar and a popout are separate instances and
-                    // must each follow the fight. Scroll only on real combat updates —
-                    // or a window's very first render — never on cosmetic re-renders.
-                    const isCombatUpdate = options?.renderContext === "updateCombat";
-                    const firstRender = app._lastAutoScrolledId === undefined;
-                    if ((isCombatUpdate || firstRender) && app._lastAutoScrolledId !== activeId) {
-                        app._lastAutoScrolledId = activeId;
-                        // Pin the current segment header near the top of the viewport
-                        // (below the sticky held panel), keeping the acting row visible;
-                        // deep segments fall back to centering the acting row (#4556)
-                        const tracker = activeRow.closest(".combat-tracker");
-                        const headerRow = tracker?.querySelector(".active-segment-header-slot");
-                        if (tracker && headerRow) {
-                            const stickyOffset =
-                                (tracker.querySelector(".combatant.hero-held-panel-header")?.offsetHeight ?? 0) +
-                                (tracker.querySelector(".hero-held-scroll-wrapper:not(.hero-held-collapsed)")
-                                    ?.offsetHeight ?? 0);
-                            const trackerRect = tracker.getBoundingClientRect();
-                            const headerRect = headerRow.getBoundingClientRect();
-                            const activeRect = activeRow.getBoundingClientRect();
-                            if (activeRect.top - headerRect.top > tracker.clientHeight / 2) {
-                                activeRow.scrollIntoView({ block: "center", behavior: "smooth" });
-                            } else {
-                                const delta = headerRect.top - trackerRect.top - stickyOffset - 4;
-                                tracker.scrollTo({ top: Math.max(0, tracker.scrollTop + delta), behavior: "smooth" });
-                            }
-                        } else {
-                            activeRow.scrollIntoView({ block: "center", behavior: "smooth" });
-                        }
-                    }
-                }
-            }
-
-            // Gather panel member rows into a pinned container beneath the header; the
-            // container caps at 20vh and scrolls when more holders than that pile up
-            const panelHeaderRow = element.querySelector(".combatant.hero-held-panel-header");
-            const panelMemberRows = element.querySelectorAll("li.combatant.hero-held-panel-member");
-            if (panelHeaderRow && panelMemberRows.length > 0 && !element.querySelector(".hero-held-scroll-wrapper")) {
-                const wrapper = document.createElement("li");
-                wrapper.className = `hero-held-scroll-wrapper${
-                    panelHeaderRow.classList.contains("segment-collapsed") ? " hero-held-collapsed" : ""
-                }`;
-                const list = document.createElement("ol");
-                list.className = "hero-held-scroll plain";
-                wrapper.appendChild(list);
-                panelHeaderRow.after(wrapper);
-                panelMemberRows.forEach((li) => list.appendChild(li));
-            }
-
-            // Delayed-action markers: owners get inline Resolve-now / Cancel controls
-            element.querySelectorAll("li.combatant.hero-delayed-row[data-combatant-id]").forEach((li) => {
-                if (li.querySelector(".hero-delayed-controls")) return;
-                const combatant = app.viewed.combatants.get(li.dataset.combatantId);
-                if (!combatant?.isOwner) return;
-                const delayedId = [...li.classList]
-                    .find((cls) => cls.startsWith("hero-delayed-id-"))
-                    ?.slice("hero-delayed-id-".length);
-                if (!delayedId) return;
-                const wrap = document.createElement("span");
-                wrap.className = "hero-delayed-controls";
-                const makeControl = (icon, tooltip, onClick) => {
-                    const control = document.createElement("button");
-                    control.type = "button";
-                    control.className = `inline-control combatant-control icon fa-solid ${icon}`;
-                    control.dataset.tooltip = tooltip;
-                    control.setAttribute("aria-label", tooltip);
-                    control.addEventListener("click", (clickEvent) => {
-                        clickEvent.preventDefault();
-                        clickEvent.stopPropagation();
-                        onClick();
-                    });
-                    return control;
-                };
-                wrap.append(
-                    makeControl("fa-bolt", "Resolve now", () =>
-                        app.viewed.resolveDelayedActionNow?.(combatant.id, delayedId),
-                    ),
-                    makeControl("fa-xmark", "Cancel (interrupted)", () =>
-                        app.viewed.cancelDelayedAction?.(combatant.id, delayedId),
-                    ),
-                );
-                li.appendChild(wrap);
-            });
-
-            // Owners can click condition icons to toggle them (prone → stand up, etc.)
-            element.querySelectorAll("li.combatant[data-combatant-id] .token-effects").forEach((container) => {
-                const li = container.closest("li.combatant");
-                const combatant = app.viewed.combatants.get(li?.dataset.combatantId);
-                if (combatant?.isOwner && container.querySelector("img.token-effect")) {
-                    container.classList.add("hero-effects-clickable");
-                }
-            });
-
-            // Compact hold controls: panel rows show "⚡ <condition>" (the use control for
-            // owners, a passive label otherwise); positional timeline rows get a plain ⚡
-            element.querySelectorAll("li.combatant.hero-held-row").forEach((li) => {
-                const combatant = app.viewed.combatants.get(li.dataset.combatantId);
-                if (!combatant?.heldAction) return;
-                const controls = li.querySelector(".combatant-controls");
-                if (!controls || controls.querySelector(".hero-use-held, .hero-held-condition")) return;
-
-                const isPanelRow = li.classList.contains("hero-held-panel-member");
-                const hold = combatant.heldAction;
-                const conditionLabel = (hold?.mode === "event" && hold.trigger) || "Held Action";
-
-                if (!combatant.isOwner) {
-                    if (isPanelRow) {
-                        const label = document.createElement("span");
-                        label.className = "hero-held-condition";
-                        const icon = document.createElement("i");
-                        icon.className = "fa-solid fa-hourglass-half";
-                        label.append(icon, ` ${conditionLabel}`);
-                        controls.prepend(label);
-                    }
-                    return;
-                }
-
-                const button = document.createElement("button");
-                button.type = "button";
-                button.setAttribute("aria-label", "Use Held Action");
-                button.dataset.tooltip = "Use Held Action";
-                button.addEventListener("click", (clickEvent) => {
-                    clickEvent.preventDefault();
-                    clickEvent.stopPropagation();
-                    app._onUseHeldAction(li.dataset.combatantId);
-                });
-                if (isPanelRow) {
-                    button.className = "inline-control combatant-control hero-use-held hero-use-held-compact";
-                    const icon = document.createElement("i");
-                    icon.className = "fa-solid fa-bolt";
-                    const label = document.createElement("span");
-                    label.textContent = conditionLabel;
-                    button.append(icon, label);
-                } else {
-                    button.className = "inline-control combatant-control icon fa-solid fa-bolt hero-use-held";
-                }
-                controls.prepend(button);
-            });
-
-            // Lightning Reflexes: owners of scoped-LR combatants get an act-early
-            // toggle on their current-segment row while the position is reachable
-            element
-                .querySelectorAll(
-                    "li.combatant.current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)",
-                )
-                .forEach((li) => {
-                    const combatant = app.viewed.combatants.get(li.dataset.combatantId);
-                    const state = app.viewed.lrElevationState?.(combatant);
-                    if (!state) return;
-                    const controls = li.querySelector(".combatant-controls");
-                    if (!controls || controls.querySelector(".hero-lr-elevate")) return;
-
-                    const button = document.createElement("button");
-                    button.type = "button";
-                    const label =
-                        state === "elevated"
-                            ? "Cancel Act Early (Lightning Reflexes)"
-                            : "Act Early (Lightning Reflexes)";
-                    button.setAttribute("aria-label", label);
-                    button.dataset.tooltip = label;
-                    button.className = `inline-control combatant-control icon fa-solid fa-bolt-lightning hero-lr-elevate${
-                        state === "elevated" ? " hero-lr-elevated" : ""
-                    }`;
-                    button.addEventListener("click", (clickEvent) => {
-                        clickEvent.preventDefault();
-                        clickEvent.stopPropagation();
-                        app._onToggleLrElevation(li.dataset.combatantId);
-                    });
-                    controls.prepend(button);
-                });
-        };
-
-        Hooks.on("renderCombatTracker", onRenderTracker);
-
-        /**
-         * Timing-contest button on Held Action use cards: simultaneous Actions
-         * are resolved by opposed characteristic rolls.
-         */
-        Hooks.on("renderChatMessageHTML", (_message, html) => {
-            const button = html?.querySelector?.("button.hero-timing-contest");
-            if (!button || button.dataset.heroContestWired) return;
-            button.dataset.heroContestWired = "true";
-            button.addEventListener("click", () => HeroSystem6eCombatTrackerSingle.#onTimingContest(button));
-        });
-
-        /**
-         * A bare "aborted" status toggle (token HUD) routes into the real Abort
-         * flow: the raw status is removed and the declaration dialog opens, so
-         * the Phase cost, chat card, and ledger entry are all recorded.
-         * Cancelling leaves the status off — the dialog IS the declaration.
-         */
-        Hooks.on("createActiveEffect", (effect, _options, userId) => {
-            try {
-                if (userId !== game.user.id) return;
-                if (!effect.statuses?.has("aborted")) return;
-                // Tracker-declared aborts carry the record; only raw toggles route
-                if (effect.getFlag(game.system.id, "abort")) return;
-                if (isQuenchTestRunning()) return;
-                const tracker = ui.combat;
-                if (!(tracker instanceof HeroSystem6eCombatTrackerSingle)) return;
-                if (HeroSystem6eCombatSingle._abortFlowActive) return;
-                const combat = tracker.viewed;
-                if (!combat?.started) return;
-                const actor = effect.parent;
-                if (actor?.documentName !== "Actor") return;
-                const combatant =
-                    combat.combatants.find((c) => c.actor === actor) ??
-                    combat.combatants.find((c) => c.actorId === actor.id);
-                if (!combatant?.isOwner) return;
-                effect
-                    .delete()
-                    .then(() => tracker._onAbortAction(combatant.id))
-                    .catch((e) => console.error(e));
-            } catch (e) {
-                console.error(`Aborted-status toggle routing failed`, e);
-            }
-        });
-
-        /**
-         * Foundry builds Combat#turns during world init, BEFORE token actors
-         * exist: priorities compute against null actors, the sort degenerates to
-         * document order, and the stored turn index points at the wrong row
-         * after a reload. Rebuild the cached turns once ready, on every client.
-         */
-        Hooks.once("ready", () => {
-            try {
-                let rebuilt = false;
-                for (const combat of game.combats ?? []) {
-                    if (combat instanceof HeroSystem6eCombatSingle && combat.started) {
-                        combat.setupTurns();
-                        rebuilt = true;
-                    }
-                }
-                if (rebuilt) ui.combat?.render();
-            } catch (e) {
-                console.error(`Post-ready combat turn rebuild failed`, e);
-            }
-        });
-
-        /**
-         * Injects the Hero System client preferences into core's Combat Tracker
-         * Settings dialog (#3157). The inputs persist immediately on change:
-         * core's submit handler discards unknown form fields.
-         */
-        const onRenderTrackerConfig = (_app, html) => {
-            try {
-                if (!(ui.combat instanceof HeroSystem6eCombatTrackerSingle)) return;
-                const root = html;
-                if (!root || root.querySelector(".hero-tracker-config")) return;
-
-                const compact = !!game.settings.get(game.system.id, "combatTrackerCompact");
-                const fieldset = document.createElement("fieldset");
-                fieldset.className = "hero-tracker-config";
-                fieldset.innerHTML = `
-                    <legend>Hero System</legend>
-                    <div class="form-group">
-                        <label for="hero-tracker-compact">${game.i18n.localize("Settings.AlphaTesting.combatTrackerCompact.Name")}</label>
-                        <div class="form-fields">
-                            <input type="checkbox" id="hero-tracker-compact" ${compact ? "checked" : ""}>
-                        </div>
-                        <p class="hint">${game.i18n.localize("Settings.AlphaTesting.combatTrackerCompact.Hint")}</p>
-                    </div>`;
-                fieldset.querySelector("input").addEventListener("change", (event) => {
-                    // Applies live: the setting's onChange re-renders the tracker
-                    game.settings
-                        .set(game.system.id, "combatTrackerCompact", event.target.checked)
-                        .catch((e) => console.error(e));
-                });
-
-                const footer = root.querySelector("footer.form-footer, .form-footer");
-                if (footer) footer.before(fieldset);
-                else (root.querySelector("form") ?? root).append(fieldset);
-            } catch (e) {
-                console.error(`Unable to inject tracker preferences into the settings dialog`, e);
-            }
-        };
-
-        Hooks.on("renderCombatTrackerConfig", onRenderTrackerConfig);
-    }
-
-    /**
-     * Opposed timing contest for a simultaneous Held Action: the holder
-     * contests the CURRENT combat actor — the one whose Action the
-     * held interrupt collides with. Both sides make their characteristic roll
-     * (DEX, or EGO for Mental Powers); the larger success margin acts first and
-     * equal margins are simultaneous.
-     * @param {HTMLButtonElement} button - The card button carrying combat/combatant ids
-     */
-    static async #onTimingContest(button) {
-        const combat = game.combats.get(button.dataset.combatId);
-        const holder = combat?.combatants.get(button.dataset.combatantId);
-        if (!combat || !holder?.actor) {
-            return void ui.notifications.warn(`The combat or the holding combatant no longer exists.`);
-        }
-        if (!game.user.isGM && !holder.isOwner) return;
-
-        // The contest is against whoever is acting NOW; a held action used on the
-        // holder's own turn collides with nobody
-        const opponent = combat.combatant;
-        if (!opponent?.actor || opponent.id === holder.id) {
-            return void ui.notifications.warn(
-                `No opposing current actor to contest — the timing contest applies when a Held Action collides with another combatant's Action.`,
-            );
-        }
-
-        const { escapeHTML } = foundry.utils;
-        const charOptions = ["dex", "ego"]
-            .map((key) => `<option value="${key}">${key.toUpperCase()}</option>`)
-            .join("");
-        const content = `<fieldset>
-            <legend>Simultaneous Actions — vs ${escapeHTML(opponent.name)}</legend>
-            <div class="form-group">
-                <label>${escapeHTML(holder.name)} rolls</label>
-                <select name="holder-char">${charOptions}</select>
-            </div>
-            <div class="form-group">
-                <label>${escapeHTML(opponent.name)} rolls</label>
-                <select name="opponent-char">${charOptions}</select>
-            </div>
-            <p class="hint">Mental Powers contest EGO instead of DEX.</p>
-        </fieldset>`;
-
-        const choice = await foundry.applications.api.DialogV2.wait({
-            window: { title: `Timing Contest — ${holder.name} vs ${opponent.name}` },
-            content,
-            buttons: [
-                {
-                    action: "roll",
-                    label: "Roll",
-                    default: true,
-                    callback: (event, btn) => ({
-                        holderChar: btn.form.elements["holder-char"].value,
-                        opponentChar: btn.form.elements["opponent-char"].value,
-                    }),
-                },
-                { action: "cancel", label: "Cancel" },
-            ],
-            rejectClose: false,
-        });
-        if (!choice || choice === "cancel") return;
-
-        const rollSide = async (combatant, key) => {
-            const characteristic = combatant.actor.system?.characteristics?.[key];
-            const target = characteristic?.roll ?? Math.round(9 + (characteristic?.value ?? 10) / 5);
-            const roll = await new Roll("3d6").evaluate();
-            return { combatant, key, target, roll, margin: target - roll.total };
-        };
-        const holderSide = await rollSide(holder, choice.holderChar);
-        const opponentSide = await rollSide(opponent, choice.opponentChar);
-
-        const line = (side) =>
-            `${escapeHTML(side.combatant.name)}: ${side.key.toUpperCase()} roll ${side.target}-, rolled ${side.roll.total} (${
-                side.margin >= 0 ? `made it by ${side.margin}` : `missed by ${-side.margin}`
-            })`;
-        const verdict =
-            holderSide.margin === opponentSide.margin
-                ? `The Actions occur <b>simultaneously</b>.`
-                : `<b>${escapeHTML(
-                      (holderSide.margin > opponentSide.margin ? holderSide : opponentSide).combatant.name,
-                  )}</b> acts first.`;
-        await ChatMessage.create({
-            speaker: ChatMessage.getSpeaker({ actor: holder.actor }),
-            rolls: [holderSide.roll, opponentSide.roll].map((r) => r.toJSON()),
-            content: `<p><b>Timing contest</b></p>
-                <p>${line(holderSide)}</p>
-                <p>${line(opponentSide)}</p>
-                <p>${verdict}</p>
-                <p class="hint">The roll-off loser cannot then Abort.</p>`,
-        });
+        Hooks.on("renderCombatTracker", decorateTrackerRender);
+        Hooks.on("renderChatMessageHTML", wireTimingContestButton);
+        Hooks.on("createActiveEffect", routeBareStatusToggle);
+        Hooks.once("ready", rebuildTurnsAtReady);
+        Hooks.on("renderCombatTrackerConfig", injectTrackerConfigFields);
     }
 
     /**
@@ -610,36 +200,96 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     async _prepareTrackerContext(context, options) {
         await super._prepareTrackerContext(context, options);
         const combat = this.viewed;
-        if (!combat?.started) {
-            // HERO rolls no initiative: unstarted rows preview DEX (+ always-on LR)
-            // instead of the core d20 button. hasDecimals forces the plain-span
-            // branch of the core template, which also removes the GM-editable input.
-            for (const turn of context.turns ?? []) {
-                const combatant = combat?.combatants.get(turn.id);
-                const actor = combatant?.actor;
-                if (!actor) {
-                    turn.initiative = "\u2014";
-                    turn.hasRolled = true;
-                    continue;
-                }
-                const characteristicKey = actor.system?.initiativeCharacteristic ?? "dex";
-                const dex = actor.system?.characteristics?.[characteristicKey]?.value ?? 10;
-                const preview = dex + (combatant.lightningReflexes?.always ?? 0);
-                turn.initiative = String(preview);
-                turn.hasRolled = true;
-                turn._heroPreview = preview;
-            }
-            context.turns?.sort((a, b) => (b._heroPreview ?? -1) - (a._heroPreview ?? -1));
-            context.hasDecimals = true;
-            return context;
-        }
+        if (!combat?.started) return this._previewUnstartedTurns(context, combat);
 
         const masterTurns = context.turns || [];
         const masterById = new Map(masterTurns.map((t) => [t.id, t]));
         const activeCombatantId = combat.combatant?.id || null;
 
-        // Aborted rows: surface WHEN the lockout clears in the icon tooltip
-        // (the status only deletes once the spent Phase's segment has passed)
+        this._decorateAbortTooltips(combat, masterTurns);
+
+        const currentAbs = absoluteSegment(combat.round, combat.segment);
+        const startAbs = absoluteSegment(1, 12);
+
+        const { membersAt, historyAt, segmentPopulation } = this._segmentQueryHelpers(combat, currentAbs);
+        const { positions, windowAbs } = this._selectTimelinePositions(combat, {
+            currentAbs,
+            startAbs,
+            membersAt,
+            segmentPopulation,
+        });
+
+        // The single tracker follows only Foundry's own disposition setting; the legacy
+        // combatTrackerDispositionHighlighting system setting applies to the old tracker
+        let dispositionTint = false;
+        try {
+            dispositionTint = !!game.settings.get("core", Combat.CONFIG_SETTING)?.turnMarker?.disposition;
+        } catch (e) {
+            console.warn(`Unable to read combat tracker disposition setting`, e);
+        }
+
+        // Once the fight moves past a segment, its manual expansion override is
+        // dropped so the past-default (collapsed) applies again; this also clears
+        // the segment-number key aliasing across Turns (#4556/#4562)
+        if (this._lastSeenAbs !== currentAbs) {
+            if (this._lastSeenAbs !== undefined && currentAbs > this._lastSeenAbs) {
+                this._dropStaleSegmentOverrides(combat.id, currentAbs);
+            }
+            this._lastSeenAbs = currentAbs;
+        }
+
+        const state = {
+            combat,
+            currentAbs,
+            activeCombatantId,
+            masterById,
+            dispositionTint,
+            expansionOverrides: this._getSegmentExpansion(combat.id),
+            membersAt,
+            historyAt,
+            windowAbs,
+            timelineTurns: [],
+        };
+        this._buildHeldPanel(state);
+        this._buildSegmentRows(state, positions);
+
+        context.turns = state.timelineTurns;
+        // Forces core's plain-span initiative branch: if every stored initiative
+        // happened to be integral, core would otherwise render editable inputs
+        context.hasDecimals = true;
+        return context;
+    }
+
+    /** Unstarted combat: DEX (+ always-on LR) previews replace core's d20 initiative. */
+    _previewUnstartedTurns(context, combat) {
+        // HERO rolls no initiative: unstarted rows preview DEX (+ always-on LR)
+        // instead of the core d20 button. hasDecimals forces the plain-span
+        // branch of the core template, which also removes the GM-editable input.
+        for (const turn of context.turns ?? []) {
+            const combatant = combat?.combatants.get(turn.id);
+            const actor = combatant?.actor;
+            if (!actor) {
+                turn.initiative = "\u2014";
+                turn.hasRolled = true;
+                continue;
+            }
+            const characteristicKey = actor.system?.initiativeCharacteristic ?? "dex";
+            const dex = actor.system?.characteristics?.[characteristicKey]?.value ?? 10;
+            const preview = dex + (combatant.lightningReflexes?.always ?? 0);
+            turn.initiative = String(preview);
+            turn.hasRolled = true;
+            turn._heroPreview = preview;
+        }
+        context.turns?.sort((a, b) => (b._heroPreview ?? -1) - (a._heroPreview ?? -1));
+        context.hasDecimals = true;
+        return context;
+    }
+
+    /**
+     * Aborted rows: surface WHEN the lockout clears in the icon tooltip
+     * (the status only deletes once the spent Phase's segment has passed).
+     */
+    _decorateAbortTooltips(combat, masterTurns) {
         for (const turn of masterTurns) {
             try {
                 const combatant = combat.combatants.get(turn.id);
@@ -663,10 +313,13 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 console.warn(`Abort tooltip decoration failed`, e);
             }
         }
+    }
 
-        const currentAbs = absoluteSegment(combat.round, combat.segment);
-        const startAbs = absoluteSegment(1, 12);
-
+    /**
+     * Per-render segment queries: live members at an absolute position, ledger
+     * history for passed segments (cached), and combined population.
+     */
+    _segmentQueryHelpers(combat, currentAbs) {
         const membersAt = (abs) => {
             const segment = segmentOf(abs);
             const isPast = abs < currentAbs;
@@ -704,6 +357,15 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         };
         const segmentPopulation = (abs) => historyAt(abs)?.length ?? membersAt(abs).length;
 
+        return { membersAt, historyAt, segmentPopulation };
+    }
+
+    /**
+     * Chooses which absolute segments render: the current Turn's non-empty
+     * segments, the previous/next-2 non-empty window (nearest future one
+     * auto-expands), and delayed-action landing segments.
+     */
+    _selectTimelinePositions(combat, { currentAbs, startAbs, membersAt, segmentPopulation }) {
         // Candidate positions: every non-empty segment of the current Turn, clamped to combat start
         const positions = new Set([currentAbs]);
         for (let segment = 1; segment <= 12; segment++) {
@@ -744,28 +406,12 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             }
         }
 
-        // The single tracker follows only Foundry's own disposition setting; the legacy
-        // combatTrackerDispositionHighlighting system setting applies to the old tracker
-        let dispositionTint = false;
-        try {
-            dispositionTint = !!game.settings.get("core", Combat.CONFIG_SETTING)?.turnMarker?.disposition;
-        } catch (e) {
-            console.warn(`Unable to read combat tracker disposition setting`, e);
-        }
+        return { positions, windowAbs };
+    }
 
-        // Once the fight moves past a segment, its manual expansion override is
-        // dropped so the past-default (collapsed) applies again; this also clears
-        // the segment-number key aliasing across Turns (#4556/#4562)
-        if (this._lastSeenAbs !== currentAbs) {
-            if (this._lastSeenAbs !== undefined && currentAbs > this._lastSeenAbs) {
-                this._dropStaleSegmentOverrides(combat.id, currentAbs);
-            }
-            this._lastSeenAbs = currentAbs;
-        }
-
-        const expansionOverrides = this._getSegmentExpansion(combat.id);
-        const timelineTurns = [];
-
+    /** Pushes the Held Actions panel (event/generic holders) onto the timeline. */
+    _buildHeldPanel(state) {
+        const { combat, masterById, dispositionTint, expansionOverrides, timelineTurns } = state;
         // Event/generic holders occupy no initiative slot; they wait in a panel above the
         // timeline until activated (⚡), released, or expired by their natural Phase
         const panelHolders = combat.combatants
@@ -813,7 +459,11 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 timelineTurns.push(row);
             }
         }
+    }
 
+    /** Renders each selected segment: a header row plus member/history/marker rows. */
+    _buildSegmentRows(state, positions) {
+        const { combat, currentAbs, expansionOverrides, windowAbs, membersAt, historyAt, timelineTurns } = state;
         for (const abs of [...positions].sort((a, b) => a - b)) {
             const segment = segmentOf(abs);
             const round = roundOf(abs);
@@ -866,252 +516,276 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             // Member rows always render; a collapsed segment hides them via class so
             // expansion toggles animate in place without a re-render
             const memberClasses = `timeline-member hero-seg-abs-${abs}${expanded ? "" : " segment-member-hidden"}`;
+            const seg = { abs, segment, isCurrent, isPast, isNextTurn, memberClasses, members };
 
             if (historyRows) {
-                for (const [idx, h] of historyRows.entries()) {
-                    const live = h.combatantId ? combat.combatants.get(h.combatantId) : null;
-                    const rowId = live ? live.id : `ledger-${abs}-${idx}`;
-                    const kindLabel =
-                        {
-                            "held-used": " (held)",
-                            "held-forfeit": " (hold spent)",
-                            aborted: " (aborted)",
-                            haymaker: " (haymaker)",
-                        }[h.kind] ?? "";
-                    const row = this._baseRowFor(live, live ? masterById.get(live.id) : null, {
-                        overrides: { id: rowId, _id: rowId, hidden: false, defeated: false },
-                        imgFallback: false,
-                    });
-                    row.id = rowId;
-                    row._id = rowId;
-                    row.name = `${h.name}${kindLabel}`;
-                    row.img = h.img || row.img || "icons/svg/mystery-man.svg";
-                    row.initiative = (h.priority ?? 0).toFixed(2);
-                    row.hasRolled = true;
-                    row.active = false;
-                    row.effects = { icons: [], tooltip: "" };
-                    row.css = [
-                        (row.css || "").replace(/\bactive\b/g, "").trim(),
-                        "past-segment-preview",
-                        "hero-history-row",
-                        memberClasses,
-                        live ? "" : "hero-history-removed",
-                    ]
-                        .filter(Boolean)
-                        .join(" ");
-                    if (live && dispositionTint) row.css = `${row.css} ${this._dispositionClass(live)}`.trim();
-                    if (!live) this._markActorless(row);
-                    timelineTurns.push(row);
-                }
+                this._buildHistoryRows(state, seg, historyRows);
                 continue;
             }
 
-            // An elevated scoped-LR combatant occupies two visible positions: the LR
-            // stop, and a shadow row where the rest of the Phase lands at natural DEX
-            const entries = [];
-            for (const combatant of members) {
-                const priority = combat.getInitiativePriority(combatant, segment, { queryAbs: abs });
-                entries.push({ combatant, priority, lrShadow: false });
-                if (combatant.lrElevatedAbs === abs) {
-                    const scopedLevels = combatant.lightningReflexes?.scoped?.levels ?? 0;
-                    if (scopedLevels > 0) {
-                        entries.push({ combatant, priority: priority - scopedLevels, lrShadow: true });
-                    }
-                }
-                // A completed LR stop stays visible at the elevated position for the
-                // rest of the segment (the natural row above is the Phase remainder)
-                const spentLr = combatant.getFlag(game.system.id, "spentLrPosition");
-                if (spentLr?.segmentAbs === abs) {
-                    entries.push({ combatant, priority: spentLr.priority, lrShadow: false, lrSpent: true });
-                }
+            const entries = this._collectSegmentEntries(state, seg);
+            const groups = this._groupSegmentEntries(combat, entries);
+            for (const group of groups) {
+                this._pushGroupRows(state, seg, group);
             }
-            // Delayed actions land at their scheduled position (declared DEX, or the
-            // very end of the segment when none): inert marker rows
-            if (!isPast) {
-                for (const combatant of combat.combatants) {
-                    if (combatant.hidden && !game.user.isGM) continue;
-                    for (const [delayedId, record] of combat.delayedActionsFor?.(combatant) ?? []) {
-                        if (record.resolveAbs !== abs) continue;
-                        entries.push({
-                            combatant,
-                            priority: record.priority ?? -1,
-                            lrShadow: false,
-                            delayed: record,
-                            delayedId,
-                        });
-                    }
-                }
-            }
-            // Same order _comparePriority produces: priority descending, then the
-            // per-segment sub-roll shuffle within a shared roll group
-            entries.sort(
-                (a, b) =>
-                    b.priority - a.priority ||
-                    (combat.tieBreakOrder
-                        ? combat.tieBreakOrder(a.combatant, b.combatant, abs)
-                        : HeroSystem6eCombatSingle.stableTiebreak(a.combatant, b.combatant)),
-            );
+        }
+    }
 
-            // Tokens of the same root actor tied on the same priority act back to back;
-            // collapse them into a single row with a count. The row represents the active
-            // member when the group contains it so click/hover target the acting token.
-            const groups = [];
-            for (const entry of entries) {
-                const rollKey =
-                    combat._tieRollKey?.(entry.combatant) ?? (entry.combatant.actorId || entry.combatant.id);
-                const key = `${rollKey}${entry.lrShadow ? ":lr-shadow" : ""}${entry.delayed ? `:delayed:${entry.delayedId}` : ""}${entry.lrSpent ? ":lr-spent" : ""}`;
-                const prev = groups.at(-1);
-                if (prev && prev.key === key && prev.priority === entry.priority && !entry.delayed && !entry.lrSpent) {
-                    prev.combatants.push(entry.combatant);
-                } else {
-                    groups.push({
-                        key,
-                        priority: entry.priority,
-                        combatants: [entry.combatant],
-                        lrShadow: entry.lrShadow,
-                        delayed: entry.delayed ?? null,
-                        delayedId: entry.delayedId ?? null,
-                        lrSpent: !!entry.lrSpent,
+    /** Renders a passed segment's rows from the combat ledger (including since-removed combatants). */
+    _buildHistoryRows(state, seg, historyRows) {
+        const { combat, masterById, dispositionTint, timelineTurns } = state;
+        const { abs, memberClasses } = seg;
+        for (const [idx, h] of historyRows.entries()) {
+            const live = h.combatantId ? combat.combatants.get(h.combatantId) : null;
+            const rowId = live ? live.id : `ledger-${abs}-${idx}`;
+            const kindLabel =
+                {
+                    "held-used": " (held)",
+                    "held-forfeit": " (hold spent)",
+                    aborted: " (aborted)",
+                    haymaker: " (haymaker)",
+                }[h.kind] ?? "";
+            const row = this._baseRowFor(live, live ? masterById.get(live.id) : null, {
+                overrides: { id: rowId, _id: rowId, hidden: false, defeated: false },
+                imgFallback: false,
+            });
+            row.id = rowId;
+            row._id = rowId;
+            row.name = `${h.name}${kindLabel}`;
+            row.img = h.img || row.img || "icons/svg/mystery-man.svg";
+            row.initiative = (h.priority ?? 0).toFixed(2);
+            row.hasRolled = true;
+            row.active = false;
+            row.effects = { icons: [], tooltip: "" };
+            row.css = [
+                (row.css || "").replace(/\bactive\b/g, "").trim(),
+                "past-segment-preview",
+                "hero-history-row",
+                memberClasses,
+                live ? "" : "hero-history-removed",
+            ]
+                .filter(Boolean)
+                .join(" ");
+            if (live && dispositionTint) row.css = `${row.css} ${this._dispositionClass(live)}`.trim();
+            if (!live) this._markActorless(row);
+            timelineTurns.push(row);
+        }
+    }
+
+    /**
+     * Assembles a live segment's sorted acting entries: members plus LR
+     * shadows/spent stops and delayed-action markers.
+     */
+    _collectSegmentEntries(state, seg) {
+        const { combat } = state;
+        const { abs, segment, isPast, members } = seg;
+        // An elevated scoped-LR combatant occupies two visible positions: the LR
+        // stop, and a shadow row where the rest of the Phase lands at natural DEX
+        const entries = [];
+        for (const combatant of members) {
+            const priority = combat.getInitiativePriority(combatant, segment, { queryAbs: abs });
+            entries.push({ combatant, priority, lrShadow: false });
+            if (combatant.lrElevatedAbs === abs) {
+                const scopedLevels = combatant.lightningReflexes?.scoped?.levels ?? 0;
+                if (scopedLevels > 0) {
+                    entries.push({ combatant, priority: priority - scopedLevels, lrShadow: true });
+                }
+            }
+            // A completed LR stop stays visible at the elevated position for the
+            // rest of the segment (the natural row above is the Phase remainder)
+            const spentLr = combatant.getFlag(game.system.id, "spentLrPosition");
+            if (spentLr?.segmentAbs === abs) {
+                entries.push({ combatant, priority: spentLr.priority, lrShadow: false, lrSpent: true });
+            }
+        }
+        // Delayed actions land at their scheduled position (declared DEX, or the
+        // very end of the segment when none): inert marker rows
+        if (!isPast) {
+            for (const combatant of combat.combatants) {
+                if (combatant.hidden && !game.user.isGM) continue;
+                for (const [delayedId, record] of combat.delayedActionsFor?.(combatant) ?? []) {
+                    if (record.resolveAbs !== abs) continue;
+                    entries.push({
+                        combatant,
+                        priority: record.priority ?? -1,
+                        lrShadow: false,
+                        delayed: record,
+                        delayedId,
                     });
                 }
             }
+        }
+        // Same order _comparePriority produces: priority descending, then the
+        // per-segment sub-roll shuffle within a shared roll group
+        entries.sort(
+            (a, b) =>
+                b.priority - a.priority ||
+                (combat.tieBreakOrder
+                    ? combat.tieBreakOrder(a.combatant, b.combatant, abs)
+                    : HeroSystem6eCombatSingle.stableTiebreak(a.combatant, b.combatant)),
+        );
+        return entries;
+    }
 
-            for (const group of groups) {
-                // Multi-member groups explode into their individual members beneath the ×N
-                // header row, indented so the hierarchy is clear. The group holding the
-                // active combatant is always exploded; others explode on demand.
-                const isGroup = group.combatants.length > 1;
-                const isActiveGroup = isGroup && isCurrent && group.combatants.some((c) => c.id === activeCombatantId);
-                const exploded = isActiveGroup || (isGroup && this._getExplodedGroups(combat.id).has(group.key));
-                const representative = group.combatants.find((c) => c.id === activeCombatantId) ?? group.combatants[0];
-                const stateCss = isPast
-                    ? "past-segment-preview"
-                    : !isCurrent
-                      ? `future-segment-preview${isNextTurn ? " next-turn-preview" : ""}`
-                      : "current-segment-member";
-
-                const buildRow = (combatant) => {
-                    const row = this._baseRowFor(combatant, masterById.get(combatant.id));
-
-                    // A rolled numeric initiative keeps core's d20 roll button away
-                    row.initiative = group.priority.toFixed(2);
-                    row.hasRolled = true;
-                    if (dispositionTint) row.css = `${row.css || ""} ${this._dispositionClass(combatant)}`.trim();
-                    row.active = false;
-                    row.css = (row.css || "").replace(/\bactive\b/g, "").trim();
-                    return row;
-                };
-
-                if (exploded) {
-                    // Summary header above the members; it carries the representative's id
-                    // (never the active highlight) so hover still targets a real token.
-                    // Clicking it collapses the group unless the group is the active one.
-                    const parentRow = buildRow(representative);
-                    parentRow.name = `▼ ${parentRow.name} ×${group.combatants.length}`;
-                    parentRow.effects = { icons: [], tooltip: "" };
-                    parentRow.css = [
-                        parentRow.css,
-                        stateCss,
-                        memberClasses,
-                        "hero-group-row hero-group-parent",
-                        isActiveGroup ? "hero-group-locked" : "",
-                    ]
-                        .filter(Boolean)
-                        .join(" ")
-                        .trim();
-                    timelineTurns.push(parentRow);
-                }
-
-                for (const combatant of exploded ? group.combatants : [representative]) {
-                    const row = buildRow(combatant);
-                    if (exploded) {
-                        row.css = `${row.css} hero-group-exploded`.trim();
-                    } else if (isGroup) {
-                        // Collapsed group header: clicking explodes it into its members
-                        row.name = `▶ ${row.name} ×${group.combatants.length}`;
-                        row.effects = { icons: [], tooltip: "" };
-                        row.css = `${row.css} hero-group-row hero-group-collapsed`.trim();
-                    }
-
-                    if (group.lrSpent) {
-                        // The acted LR stop: inert display of where the scoped action
-                        // happened; the combatant's live row is the Phase remainder
-                        row.name = `↯ ${row.name} (acted early)`;
-                        row.effects = { icons: [], tooltip: "" };
-                        row.active = false;
-                        row.css = `${row.css} hero-lr-row hero-lr-spent ${stateCss} ${memberClasses}`.trim();
-                        timelineTurns.push(row);
-                        continue;
-                    }
-
-                    if (group.delayed) {
-                        // Delayed-action landing: informational marker, no controls
-                        // (a truthy initiative keeps core's d20 roll button away)
-                        const record = group.delayed;
-                        row.name =
-                            record.kind === "haymaker"
-                                ? `💥 ${row.name} — Haymaker resolves`
-                                : `⏳ ${row.name} — ${record.label}`;
-                        row.initiative =
-                            record.priority !== null && record.priority !== undefined ? String(record.priority) : "—";
-                        row.effects = { icons: [], tooltip: "" };
-                        row.css =
-                            `${row.css} hero-haymaker-row hero-delayed-row hero-delayed-id-${group.delayedId} ${stateCss} ${memberClasses}`.trim();
-                        timelineTurns.push(row);
-                        continue;
-                    }
-
-                    // Positional holds render at their declared slot with the held marker;
-                    // spent holds keep the row at the acted position; the holder's
-                    // natural-Phase rows stay unmarked
-                    if (!isPast && combatant.holdsPositionAtAbs(abs)) {
-                        row.css = `${row.css} is-holding-action hero-held-row`.trim();
-                        row.name = `⏳ ${row.name} (held)`;
-                    } else if (!isPast && combatant.spentHoldAtAbs(abs)) {
-                        row.css = `${row.css} is-holding-action`.trim();
-                        // Present tense while the used Held Action is still the active
-                        // turn; past tense once the pointer has moved on (#4603)
-                        const acting = combatant.id === activeCombatantId && abs === currentAbs;
-                        row.name = `${row.name} (${acting ? "acting" : "acted"})`;
-                    } else if (
-                        !isPast &&
-                        (combatant.abortSpentAbs === abs ||
-                            (combatant.abortSpentAbs === null && combatant.abortAppliesAtAbs?.(abs)))
-                    ) {
-                        // The Phase an abort consumed stays visible but greyed, so the
-                        // table can see where the cost lands. Unrecorded aborts (bare
-                        // status toggles) grey every Phase while the status binds.
-                        row.css = `${row.css} hero-aborted-row`.trim();
-                        row.name = `${row.name} (aborted)`;
-                    }
-
-                    // An elevated scoped-LR combatant acts early this segment only; the
-                    // shadow row marks where the rest of the Phase lands afterwards
-                    if (!group.lrShadow && combatant.lrElevatedAbs === abs) {
-                        row.css = `${row.css} hero-lr-row`.trim();
-                        row.name = `↯ ${row.name} (LR)`;
-                    } else if (group.lrShadow) {
-                        row.css = `${row.css} hero-lr-shadow`.trim();
-                        row.name = `${row.name} (rest of Phase)`;
-                        row.effects = { icons: [], tooltip: "" };
-                    }
-
-                    row.css = `${row.css} ${stateCss} ${memberClasses}`.trim();
-                    if (isCurrent && combatant.id === activeCombatantId && !group.lrShadow) {
-                        row.active = true;
-                        row.css = `${row.css} active`.trim();
-                    }
-
-                    timelineTurns.push(row);
-                }
+    /**
+     * Tokens of the same root actor tied on the same priority act back to back;
+     * collapse them into a single row with a count. The row represents the active
+     * member when the group contains it so click/hover target the acting token.
+     */
+    _groupSegmentEntries(combat, entries) {
+        const groups = [];
+        for (const entry of entries) {
+            const rollKey = combat._tieRollKey?.(entry.combatant) ?? (entry.combatant.actorId || entry.combatant.id);
+            const key = `${rollKey}${entry.lrShadow ? ":lr-shadow" : ""}${entry.delayed ? `:delayed:${entry.delayedId}` : ""}${entry.lrSpent ? ":lr-spent" : ""}`;
+            const prev = groups.at(-1);
+            if (prev && prev.key === key && prev.priority === entry.priority && !entry.delayed && !entry.lrSpent) {
+                prev.combatants.push(entry.combatant);
+            } else {
+                groups.push({
+                    key,
+                    priority: entry.priority,
+                    combatants: [entry.combatant],
+                    lrShadow: entry.lrShadow,
+                    delayed: entry.delayed ?? null,
+                    delayedId: entry.delayedId ?? null,
+                    lrSpent: !!entry.lrSpent,
+                });
             }
         }
+        return groups;
+    }
 
-        context.turns = timelineTurns;
-        // Forces core's plain-span initiative branch: if every stored initiative
-        // happened to be integral, core would otherwise render editable inputs
-        context.hasDecimals = true;
-        return context;
+    /** Renders one display group: an optional exploded ×N summary header plus its member rows. */
+    _pushGroupRows(state, seg, group) {
+        const { combat, currentAbs, activeCombatantId, masterById, dispositionTint, timelineTurns } = state;
+        const { abs, isCurrent, isPast, isNextTurn, memberClasses } = seg;
+        // Multi-member groups explode into their individual members beneath the ×N
+        // header row, indented so the hierarchy is clear. The group holding the
+        // active combatant is always exploded; others explode on demand.
+        const isGroup = group.combatants.length > 1;
+        const isActiveGroup = isGroup && isCurrent && group.combatants.some((c) => c.id === activeCombatantId);
+        const exploded = isActiveGroup || (isGroup && this._getExplodedGroups(combat.id).has(group.key));
+        const representative = group.combatants.find((c) => c.id === activeCombatantId) ?? group.combatants[0];
+        const stateCss = isPast
+            ? "past-segment-preview"
+            : !isCurrent
+              ? `future-segment-preview${isNextTurn ? " next-turn-preview" : ""}`
+              : "current-segment-member";
+
+        const buildRow = (combatant) => {
+            const row = this._baseRowFor(combatant, masterById.get(combatant.id));
+
+            // A rolled numeric initiative keeps core's d20 roll button away
+            row.initiative = group.priority.toFixed(2);
+            row.hasRolled = true;
+            if (dispositionTint) row.css = `${row.css || ""} ${this._dispositionClass(combatant)}`.trim();
+            row.active = false;
+            row.css = (row.css || "").replace(/\bactive\b/g, "").trim();
+            return row;
+        };
+
+        if (exploded) {
+            // Summary header above the members; it carries the representative's id
+            // (never the active highlight) so hover still targets a real token.
+            // Clicking it collapses the group unless the group is the active one.
+            const parentRow = buildRow(representative);
+            parentRow.name = `▼ ${parentRow.name} ×${group.combatants.length}`;
+            parentRow.effects = { icons: [], tooltip: "" };
+            parentRow.css = [
+                parentRow.css,
+                stateCss,
+                memberClasses,
+                "hero-group-row hero-group-parent",
+                isActiveGroup ? "hero-group-locked" : "",
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .trim();
+            timelineTurns.push(parentRow);
+        }
+
+        for (const combatant of exploded ? group.combatants : [representative]) {
+            const row = buildRow(combatant);
+            if (exploded) {
+                row.css = `${row.css} hero-group-exploded`.trim();
+            } else if (isGroup) {
+                // Collapsed group header: clicking explodes it into its members
+                row.name = `▶ ${row.name} ×${group.combatants.length}`;
+                row.effects = { icons: [], tooltip: "" };
+                row.css = `${row.css} hero-group-row hero-group-collapsed`.trim();
+            }
+
+            if (group.lrSpent) {
+                // The acted LR stop: inert display of where the scoped action
+                // happened; the combatant's live row is the Phase remainder
+                row.name = `↯ ${row.name} (acted early)`;
+                row.effects = { icons: [], tooltip: "" };
+                row.active = false;
+                row.css = `${row.css} hero-lr-row hero-lr-spent ${stateCss} ${memberClasses}`.trim();
+                timelineTurns.push(row);
+                continue;
+            }
+
+            if (group.delayed) {
+                // Delayed-action landing: informational marker, no controls
+                // (a truthy initiative keeps core's d20 roll button away)
+                const record = group.delayed;
+                row.name =
+                    record.kind === "haymaker"
+                        ? `💥 ${row.name} — Haymaker resolves`
+                        : `⏳ ${row.name} — ${record.label}`;
+                row.initiative =
+                    record.priority !== null && record.priority !== undefined ? String(record.priority) : "—";
+                row.effects = { icons: [], tooltip: "" };
+                row.css =
+                    `${row.css} hero-haymaker-row hero-delayed-row hero-delayed-id-${group.delayedId} ${stateCss} ${memberClasses}`.trim();
+                timelineTurns.push(row);
+                continue;
+            }
+
+            // Positional holds render at their declared slot with the held marker;
+            // spent holds keep the row at the acted position; the holder's
+            // natural-Phase rows stay unmarked
+            if (!isPast && combatant.holdsPositionAtAbs(abs)) {
+                row.css = `${row.css} is-holding-action hero-held-row`.trim();
+                row.name = `⏳ ${row.name} (held)`;
+            } else if (!isPast && combatant.spentHoldAtAbs(abs)) {
+                row.css = `${row.css} is-holding-action`.trim();
+                // Present tense while the used Held Action is still the active
+                // turn; past tense once the pointer has moved on (#4603)
+                const acting = combatant.id === activeCombatantId && abs === currentAbs;
+                row.name = `${row.name} (${acting ? "acting" : "acted"})`;
+            } else if (
+                !isPast &&
+                (combatant.abortSpentAbs === abs ||
+                    (combatant.abortSpentAbs === null && combatant.abortAppliesAtAbs?.(abs)))
+            ) {
+                // The Phase an abort consumed stays visible but greyed, so the
+                // table can see where the cost lands. Unrecorded aborts (bare
+                // status toggles) grey every Phase while the status binds.
+                row.css = `${row.css} hero-aborted-row`.trim();
+                row.name = `${row.name} (aborted)`;
+            }
+
+            // An elevated scoped-LR combatant acts early this segment only; the
+            // shadow row marks where the rest of the Phase lands afterwards
+            if (!group.lrShadow && combatant.lrElevatedAbs === abs) {
+                row.css = `${row.css} hero-lr-row`.trim();
+                row.name = `↯ ${row.name} (LR)`;
+            } else if (group.lrShadow) {
+                row.css = `${row.css} hero-lr-shadow`.trim();
+                row.name = `${row.name} (rest of Phase)`;
+                row.effects = { icons: [], tooltip: "" };
+            }
+
+            row.css = `${row.css} ${stateCss} ${memberClasses}`.trim();
+            if (isCurrent && combatant.id === activeCombatantId && !group.lrShadow) {
+                row.active = true;
+                row.css = `${row.css} active`.trim();
+            }
+
+            timelineTurns.push(row);
+        }
     }
 
     /**
@@ -2158,5 +1832,440 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const { combatant, effect } = resolved;
         await effect.delete();
         await this.viewed.logEvent("abort.cancel", { combatant });
+    }
+}
+
+/**
+ * Post-render decoration: header title, active-row highlight, injected controls.
+ * Null-guarded throughout for unlinked V14 Quench test models.
+ */
+function decorateTrackerRender(app, html, _context, options) {
+    // AppV2 fires renderCombatTracker for every subclass: the legacy tracker's
+    // rows lack this tracker's classes, so touching them only strips state
+    if (!(app instanceof HeroSystem6eCombatTrackerSingle)) return;
+    const element = html;
+    if (!element) return;
+    // Scopes single-tracker-only CSS (e.g. hiding core's Roll All / Roll NPCs
+    // buttons) to this app so it never leaks onto the legacy tracker.
+    // BEFORE the started-guard: the buttons must stay hidden on an
+    // un-started combat too
+    element.classList.add("hero-single-tracker");
+
+    // Per-client density preference (#3157); non-active rows shrink via CSS
+    let compact = false;
+    try {
+        compact = !!game.settings.get(game.system.id, "combatTrackerCompact");
+    } catch (e) {
+        console.warn(`Unable to read the compact tracker setting`, e);
+    }
+    element.classList.toggle("hero-compact", compact);
+
+    if (!app?.viewed || !app.viewed.started) return;
+
+    const encounterTitle = element.querySelector(".combat-tracker-header .encounter-title");
+    if (encounterTitle) {
+        encounterTitle.textContent = `Turn=${app.viewed.round} Segment=${app.viewed.segment}.${app.viewed.turn}`;
+    }
+
+    autoScrollToActive(app, element, options);
+    gatherHeldPanel(element);
+    injectDelayedControls(app, element);
+    markEffectIconsClickable(app, element);
+    injectHoldControls(app, element);
+    injectLrControls(app, element);
+}
+
+/** Clears core's active highlights, re-marks the acting row, and auto-scrolls it into view. */
+function autoScrollToActive(app, element, options) {
+    // Clear core's active highlights; the correct row is re-marked below
+    element.querySelectorAll(".combatant.active").forEach((el) => {
+        el.classList.remove("active");
+    });
+
+    // Highlight only inside the current segment group; the exploded-group
+    // summary row reuses the active member's id and must not match
+    const activeId = app.viewed.combatant?.id;
+    if (activeId) {
+        const activeRow = element.querySelector(
+            `.current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)[data-combatant-id="${activeId}"], .current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)[data-id="${activeId}"]`,
+        );
+        if (activeRow) {
+            activeRow.classList.add("active");
+            // Per-app guard: the sidebar and a popout are separate instances and
+            // must each follow the fight. Scroll only on real combat updates —
+            // or a window's very first render — never on cosmetic re-renders.
+            const isCombatUpdate = options?.renderContext === "updateCombat";
+            const firstRender = app._lastAutoScrolledId === undefined;
+            if ((isCombatUpdate || firstRender) && app._lastAutoScrolledId !== activeId) {
+                app._lastAutoScrolledId = activeId;
+                // Pin the current segment header near the top of the viewport
+                // (below the sticky held panel), keeping the acting row visible;
+                // deep segments fall back to centering the acting row (#4556)
+                const tracker = activeRow.closest(".combat-tracker");
+                const headerRow = tracker?.querySelector(".active-segment-header-slot");
+                if (tracker && headerRow) {
+                    const stickyOffset =
+                        (tracker.querySelector(".combatant.hero-held-panel-header")?.offsetHeight ?? 0) +
+                        (tracker.querySelector(".hero-held-scroll-wrapper:not(.hero-held-collapsed)")?.offsetHeight ??
+                            0);
+                    const trackerRect = tracker.getBoundingClientRect();
+                    const headerRect = headerRow.getBoundingClientRect();
+                    const activeRect = activeRow.getBoundingClientRect();
+                    if (activeRect.top - headerRect.top > tracker.clientHeight / 2) {
+                        activeRow.scrollIntoView({ block: "center", behavior: "smooth" });
+                    } else {
+                        const delta = headerRect.top - trackerRect.top - stickyOffset - 4;
+                        tracker.scrollTo({ top: Math.max(0, tracker.scrollTop + delta), behavior: "smooth" });
+                    }
+                } else {
+                    activeRow.scrollIntoView({ block: "center", behavior: "smooth" });
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Gathers panel member rows into a pinned container beneath the header; the
+ * container caps at 20vh and scrolls when more holders than that pile up.
+ */
+function gatherHeldPanel(element) {
+    const panelHeaderRow = element.querySelector(".combatant.hero-held-panel-header");
+    const panelMemberRows = element.querySelectorAll("li.combatant.hero-held-panel-member");
+    if (panelHeaderRow && panelMemberRows.length > 0 && !element.querySelector(".hero-held-scroll-wrapper")) {
+        const wrapper = document.createElement("li");
+        wrapper.className = `hero-held-scroll-wrapper${
+            panelHeaderRow.classList.contains("segment-collapsed") ? " hero-held-collapsed" : ""
+        }`;
+        const list = document.createElement("ol");
+        list.className = "hero-held-scroll plain";
+        wrapper.appendChild(list);
+        panelHeaderRow.after(wrapper);
+        panelMemberRows.forEach((li) => list.appendChild(li));
+    }
+}
+
+/** Inline icon-button factory for injected row controls. */
+function makeInlineControl(icon, tooltip, onClick) {
+    const control = document.createElement("button");
+    control.type = "button";
+    control.className = `inline-control combatant-control icon fa-solid ${icon}`;
+    control.dataset.tooltip = tooltip;
+    control.setAttribute("aria-label", tooltip);
+    control.addEventListener("click", (clickEvent) => {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+        onClick();
+    });
+    return control;
+}
+
+/** Delayed-action markers: owners get inline Resolve-now / Cancel controls. */
+function injectDelayedControls(app, element) {
+    element.querySelectorAll("li.combatant.hero-delayed-row[data-combatant-id]").forEach((li) => {
+        if (li.querySelector(".hero-delayed-controls")) return;
+        const combatant = app.viewed.combatants.get(li.dataset.combatantId);
+        if (!combatant?.isOwner) return;
+        const delayedId = [...li.classList]
+            .find((cls) => cls.startsWith("hero-delayed-id-"))
+            ?.slice("hero-delayed-id-".length);
+        if (!delayedId) return;
+        const wrap = document.createElement("span");
+        wrap.className = "hero-delayed-controls";
+        wrap.append(
+            makeInlineControl("fa-bolt", "Resolve now", () =>
+                app.viewed.resolveDelayedActionNow?.(combatant.id, delayedId),
+            ),
+            makeInlineControl("fa-xmark", "Cancel (interrupted)", () =>
+                app.viewed.cancelDelayedAction?.(combatant.id, delayedId),
+            ),
+        );
+        li.appendChild(wrap);
+    });
+}
+
+/** Owners can click condition icons to toggle them (prone → stand up, etc.). */
+function markEffectIconsClickable(app, element) {
+    element.querySelectorAll("li.combatant[data-combatant-id] .token-effects").forEach((container) => {
+        const li = container.closest("li.combatant");
+        const combatant = app.viewed.combatants.get(li?.dataset.combatantId);
+        if (combatant?.isOwner && container.querySelector("img.token-effect")) {
+            container.classList.add("hero-effects-clickable");
+        }
+    });
+}
+
+/**
+ * Compact hold controls: panel rows show "⚡ <condition>" (the use control for
+ * owners, a passive label otherwise); positional timeline rows get a plain ⚡.
+ */
+function injectHoldControls(app, element) {
+    element.querySelectorAll("li.combatant.hero-held-row").forEach((li) => {
+        const combatant = app.viewed.combatants.get(li.dataset.combatantId);
+        if (!combatant?.heldAction) return;
+        const controls = li.querySelector(".combatant-controls");
+        if (!controls || controls.querySelector(".hero-use-held, .hero-held-condition")) return;
+
+        const isPanelRow = li.classList.contains("hero-held-panel-member");
+        const hold = combatant.heldAction;
+        const conditionLabel = (hold?.mode === "event" && hold.trigger) || "Held Action";
+
+        if (!combatant.isOwner) {
+            if (isPanelRow) {
+                const label = document.createElement("span");
+                label.className = "hero-held-condition";
+                const icon = document.createElement("i");
+                icon.className = "fa-solid fa-hourglass-half";
+                label.append(icon, ` ${conditionLabel}`);
+                controls.prepend(label);
+            }
+            return;
+        }
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.setAttribute("aria-label", "Use Held Action");
+        button.dataset.tooltip = "Use Held Action";
+        button.addEventListener("click", (clickEvent) => {
+            clickEvent.preventDefault();
+            clickEvent.stopPropagation();
+            app._onUseHeldAction(li.dataset.combatantId);
+        });
+        if (isPanelRow) {
+            button.className = "inline-control combatant-control hero-use-held hero-use-held-compact";
+            const icon = document.createElement("i");
+            icon.className = "fa-solid fa-bolt";
+            const label = document.createElement("span");
+            label.textContent = conditionLabel;
+            button.append(icon, label);
+        } else {
+            button.className = "inline-control combatant-control icon fa-solid fa-bolt hero-use-held";
+        }
+        controls.prepend(button);
+    });
+}
+
+/**
+ * Lightning Reflexes: owners of scoped-LR combatants get an act-early
+ * toggle on their current-segment row while the position is reachable.
+ */
+function injectLrControls(app, element) {
+    element
+        .querySelectorAll(
+            "li.combatant.current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)",
+        )
+        .forEach((li) => {
+            const combatant = app.viewed.combatants.get(li.dataset.combatantId);
+            const state = app.viewed.lrElevationState?.(combatant);
+            if (!state) return;
+            const controls = li.querySelector(".combatant-controls");
+            if (!controls || controls.querySelector(".hero-lr-elevate")) return;
+
+            const button = document.createElement("button");
+            button.type = "button";
+            const label =
+                state === "elevated" ? "Cancel Act Early (Lightning Reflexes)" : "Act Early (Lightning Reflexes)";
+            button.setAttribute("aria-label", label);
+            button.dataset.tooltip = label;
+            button.className = `inline-control combatant-control icon fa-solid fa-bolt-lightning hero-lr-elevate${
+                state === "elevated" ? " hero-lr-elevated" : ""
+            }`;
+            button.addEventListener("click", (clickEvent) => {
+                clickEvent.preventDefault();
+                clickEvent.stopPropagation();
+                app._onToggleLrElevation(li.dataset.combatantId);
+            });
+            controls.prepend(button);
+        });
+}
+
+/**
+ * Timing-contest button on Held Action use cards: simultaneous Actions
+ * are resolved by opposed characteristic rolls.
+ */
+function wireTimingContestButton(_message, html) {
+    const button = html?.querySelector?.("button.hero-timing-contest");
+    if (!button || button.dataset.heroContestWired) return;
+    button.dataset.heroContestWired = "true";
+    button.addEventListener("click", () => onTimingContest(button));
+}
+
+/**
+ * Opposed timing contest for a simultaneous Held Action: the holder
+ * contests the CURRENT combat actor — the one whose Action the
+ * held interrupt collides with. Both sides make their characteristic roll
+ * (DEX, or EGO for Mental Powers); the larger success margin acts first and
+ * equal margins are simultaneous.
+ * @param {HTMLButtonElement} button - The card button carrying combat/combatant ids
+ */
+async function onTimingContest(button) {
+    const combat = game.combats.get(button.dataset.combatId);
+    const holder = combat?.combatants.get(button.dataset.combatantId);
+    if (!combat || !holder?.actor) {
+        return void ui.notifications.warn(`The combat or the holding combatant no longer exists.`);
+    }
+    if (!game.user.isGM && !holder.isOwner) return;
+
+    // The contest is against whoever is acting NOW; a held action used on the
+    // holder's own turn collides with nobody
+    const opponent = combat.combatant;
+    if (!opponent?.actor || opponent.id === holder.id) {
+        return void ui.notifications.warn(
+            `No opposing current actor to contest — the timing contest applies when a Held Action collides with another combatant's Action.`,
+        );
+    }
+
+    const { escapeHTML } = foundry.utils;
+    const charOptions = ["dex", "ego"].map((key) => `<option value="${key}">${key.toUpperCase()}</option>`).join("");
+    const content = `<fieldset>
+            <legend>Simultaneous Actions — vs ${escapeHTML(opponent.name)}</legend>
+            <div class="form-group">
+                <label>${escapeHTML(holder.name)} rolls</label>
+                <select name="holder-char">${charOptions}</select>
+            </div>
+            <div class="form-group">
+                <label>${escapeHTML(opponent.name)} rolls</label>
+                <select name="opponent-char">${charOptions}</select>
+            </div>
+            <p class="hint">Mental Powers contest EGO instead of DEX.</p>
+        </fieldset>`;
+
+    const choice = await foundry.applications.api.DialogV2.wait({
+        window: { title: `Timing Contest — ${holder.name} vs ${opponent.name}` },
+        content,
+        buttons: [
+            {
+                action: "roll",
+                label: "Roll",
+                default: true,
+                callback: (event, btn) => ({
+                    holderChar: btn.form.elements["holder-char"].value,
+                    opponentChar: btn.form.elements["opponent-char"].value,
+                }),
+            },
+            { action: "cancel", label: "Cancel" },
+        ],
+        rejectClose: false,
+    });
+    if (!choice || choice === "cancel") return;
+
+    const rollSide = async (combatant, key) => {
+        const characteristic = combatant.actor.system?.characteristics?.[key];
+        const target = characteristic?.roll ?? Math.round(9 + (characteristic?.value ?? 10) / 5);
+        const roll = await new Roll("3d6").evaluate();
+        return { combatant, key, target, roll, margin: target - roll.total };
+    };
+    const holderSide = await rollSide(holder, choice.holderChar);
+    const opponentSide = await rollSide(opponent, choice.opponentChar);
+
+    const line = (side) =>
+        `${escapeHTML(side.combatant.name)}: ${side.key.toUpperCase()} roll ${side.target}-, rolled ${side.roll.total} (${
+            side.margin >= 0 ? `made it by ${side.margin}` : `missed by ${-side.margin}`
+        })`;
+    const verdict =
+        holderSide.margin === opponentSide.margin
+            ? `The Actions occur <b>simultaneously</b>.`
+            : `<b>${escapeHTML(
+                  (holderSide.margin > opponentSide.margin ? holderSide : opponentSide).combatant.name,
+              )}</b> acts first.`;
+    await ChatMessage.create({
+        speaker: ChatMessage.getSpeaker({ actor: holder.actor }),
+        rolls: [holderSide.roll, opponentSide.roll].map((r) => r.toJSON()),
+        content: `<p><b>Timing contest</b></p>
+                <p>${line(holderSide)}</p>
+                <p>${line(opponentSide)}</p>
+                <p>${verdict}</p>
+                <p class="hint">The roll-off loser cannot then Abort.</p>`,
+    });
+}
+
+/**
+ * A bare "aborted" status toggle (token HUD) routes into the real Abort
+ * flow: the raw status is removed and the declaration dialog opens, so
+ * the Phase cost, chat card, and ledger entry are all recorded.
+ * Cancelling leaves the status off — the dialog IS the declaration.
+ */
+function routeBareStatusToggle(effect, _options, userId) {
+    try {
+        if (userId !== game.user.id) return;
+        if (!effect.statuses?.has("aborted")) return;
+        // Tracker-declared aborts carry the record; only raw toggles route
+        if (effect.getFlag(game.system.id, "abort")) return;
+        if (isQuenchTestRunning()) return;
+        const tracker = ui.combat;
+        if (!(tracker instanceof HeroSystem6eCombatTrackerSingle)) return;
+        if (HeroSystem6eCombatSingle._abortFlowActive) return;
+        const combat = tracker.viewed;
+        if (!combat?.started) return;
+        const actor = effect.parent;
+        if (actor?.documentName !== "Actor") return;
+        const combatant =
+            combat.combatants.find((c) => c.actor === actor) ?? combat.combatants.find((c) => c.actorId === actor.id);
+        if (!combatant?.isOwner) return;
+        effect
+            .delete()
+            .then(() => tracker._onAbortAction(combatant.id))
+            .catch((e) => console.error(e));
+    } catch (e) {
+        console.error(`Aborted-status toggle routing failed`, e);
+    }
+}
+
+/**
+ * Foundry builds Combat#turns during world init, BEFORE token actors
+ * exist: priorities compute against null actors, the sort degenerates to
+ * document order, and the stored turn index points at the wrong row
+ * after a reload. Rebuild the cached turns once ready, on every client.
+ */
+function rebuildTurnsAtReady() {
+    try {
+        let rebuilt = false;
+        for (const combat of game.combats ?? []) {
+            if (combat instanceof HeroSystem6eCombatSingle && combat.started) {
+                combat.setupTurns();
+                rebuilt = true;
+            }
+        }
+        if (rebuilt) ui.combat?.render();
+    } catch (e) {
+        console.error(`Post-ready combat turn rebuild failed`, e);
+    }
+}
+
+/**
+ * Injects the Hero System client preferences into core's Combat Tracker
+ * Settings dialog (#3157). The inputs persist immediately on change:
+ * core's submit handler discards unknown form fields.
+ */
+function injectTrackerConfigFields(_app, html) {
+    try {
+        if (!(ui.combat instanceof HeroSystem6eCombatTrackerSingle)) return;
+        const root = html;
+        if (!root || root.querySelector(".hero-tracker-config")) return;
+
+        const compact = !!game.settings.get(game.system.id, "combatTrackerCompact");
+        const fieldset = document.createElement("fieldset");
+        fieldset.className = "hero-tracker-config";
+        fieldset.innerHTML = `
+                    <legend>Hero System</legend>
+                    <div class="form-group">
+                        <label for="hero-tracker-compact">${game.i18n.localize("Settings.AlphaTesting.combatTrackerCompact.Name")}</label>
+                        <div class="form-fields">
+                            <input type="checkbox" id="hero-tracker-compact" ${compact ? "checked" : ""}>
+                        </div>
+                        <p class="hint">${game.i18n.localize("Settings.AlphaTesting.combatTrackerCompact.Hint")}</p>
+                    </div>`;
+        fieldset.querySelector("input").addEventListener("change", (event) => {
+            // Applies live: the setting's onChange re-renders the tracker
+            game.settings
+                .set(game.system.id, "combatTrackerCompact", event.target.checked)
+                .catch((e) => console.error(e));
+        });
+
+        const footer = root.querySelector("footer.form-footer, .form-footer");
+        if (footer) footer.before(fieldset);
+        else (root.querySelector("form") ?? root).append(fieldset);
+    } catch (e) {
+        console.error(`Unable to inject tracker preferences into the settings dialog`, e);
     }
 }
