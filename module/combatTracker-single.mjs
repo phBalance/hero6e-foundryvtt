@@ -2040,7 +2040,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         if (!combat?.started || !hold) return;
         const currentAbs = combat.round * 12 + combat.segment;
         const atOwnSlot = hold.mode === "position" && hold.segmentAbs === currentAbs;
-        const replacesNaturalPhase = hold.mode !== "position" && combatant.hasPhaseInSegment(combat.segment);
+        // A positional hold consumed away from its declared slot (abort, early
+        // interrupt) still uses up this segment's action like any other hold
+        const replacesNaturalPhase = !atOwnSlot && combatant.hasPhaseInSegment(combat.segment);
         if (!atOwnSlot && !replacesNaturalPhase) return;
         // An anchored slot resolves to concrete numbers as it is spent — the display
         // record must not drift if the anchor later moves or leaves
@@ -2081,8 +2083,12 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const hold = combatant.heldAction;
         await effect.delete();
         // Releasing at the held slot still forfeits that position (the banked Phase is
-        // gone); releasing an event/generic hold costs nothing — the natural Phase stays
-        if (hold?.mode === "position") await this._recordSpentAction(combatant, hold);
+        // gone); releasing anywhere else costs nothing — the natural Phase stays
+        const combat = this.viewed;
+        const releaseAbs = combat ? combat.round * 12 + combat.segment : null;
+        if (hold?.mode === "position" && hold.segmentAbs === releaseAbs) {
+            await this._recordSpentAction(combatant, hold);
+        }
         await this._holdCard(
             combatant,
             `${actor.name} releases their Held Action without acting in ${this.viewed.currentPhaseLabel}.`,
