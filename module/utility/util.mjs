@@ -768,3 +768,20 @@ export function hdcTextNumberToNumeric(textNumber) {
             return 0;
     }
 }
+
+/**
+ * The started single-tracker combat this actor fights in, with its combatant.
+ * Capability-probed on one sentinel method to avoid importing combat-single
+ * (util is loaded before the combat classes register).
+ * @param {Actor} actor
+ * @returns {{combat: Combat, combatant: Combatant}|null}
+ */
+export function activeSingleTrackerCombatFor(actor) {
+    if (!actor) return null;
+    for (const combat of game.combats ?? []) {
+        if (!combat.started || typeof combat.scheduleDelayedAction !== "function") continue;
+        const combatant = combat.combatantForActor?.(actor);
+        if (combatant) return { combat, combatant };
+    }
+    return null;
+}
