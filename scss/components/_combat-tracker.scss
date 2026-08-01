@@ -492,12 +492,13 @@ ol.combat-tracker.plain {
     gap: 1em;
 }
 
-/* Compact mode (#3157): non-active combatant rows shrink to a single tight line —
-   no portrait, smaller name and icons. The active combatant, segment headers, and
-   the held panel keep their full-size treatment. */
-.hero-single-tracker.hero-compact li.combatant:not(.active):not(.hero-timeline-header-row) {
-    padding-top: 1px;
-    padding-bottom: 1px;
+/* Compact mode (#3157): non-active timeline rows collapse to a single tight line.
+   The row is normally a two-line stack (name over controls + effects) beside a
+   portrait — compact drops the portrait, flows name/effects/initiative onto one
+   line, and reveals the control buttons only on hover. The active combatant,
+   segment headers, and the held panel keep their full-size treatment. */
+.hero-single-tracker.hero-compact li.combatant.timeline-member:not(.active) {
+    padding-block: 1px;
     min-height: 0;
 
     img.token-image {
@@ -505,23 +506,48 @@ ol.combat-tracker.plain {
     }
 
     .token-name {
+        display: flex;
+        flex-flow: row wrap;
+        align-items: center;
+        column-gap: 6px;
         font-size: var(--font-size-12);
 
-        h4,
         strong {
-            margin: 0;
-            line-height: 1.5;
             font-size: var(--font-size-12);
+            line-height: 1.5;
+        }
+    }
+
+    /* Promote the controls' children onto the name line instead of a second row */
+    .combatant-controls {
+        display: contents;
+    }
+
+    /* Buttons (hide/defeat/ping/delay, injected hold and LR controls) appear on
+       hover only — "mouse over for full details" */
+    .combatant-controls > :not(.token-effects) {
+        display: none;
+    }
+
+    &:hover .combatant-controls > :not(.token-effects) {
+        display: inline-flex;
+        font-size: var(--font-size-10);
+    }
+
+    /* Status icons stay glanceable inline */
+    .token-effects {
+        display: flex;
+        align-items: center;
+        gap: 1px;
+
+        img.token-effect {
+            width: 12px;
+            height: 12px;
         }
     }
 
     .token-initiative {
         font-size: var(--font-size-11);
-    }
-
-    .token-effects img.token-effect {
-        width: 12px;
-        height: 12px;
     }
 }
 
