@@ -479,9 +479,17 @@ ol.combat-tracker.plain {
 
 /* Hold/abort declaration dialogs: keep the select's dropdown arrow clear of the text */
 .hero-hold-dialog select[name="hold-segment"],
+.hero-hold-dialog select[name="hold-anchor"],
 .hero-hold-dialog select[name="abort-action"] {
     min-width: 11em;
     padding-right: 1.75em;
+}
+
+/* Anchored-hold relation radios nest under their "Next to a combatant" parent */
+.hero-hold-dialog .hero-hold-relation {
+    margin-left: 1.75em;
+    justify-content: flex-start;
+    gap: 1em;
 }
 
 /* Injected "Use Held Action" controls */

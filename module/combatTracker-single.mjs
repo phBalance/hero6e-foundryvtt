@@ -1306,30 +1306,38 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
         const escapeHTML = foundry.utils.escapeHTML ?? ((value) => Handlebars.escapeExpression(value));
 
-        // Anchored reentry ("act right after X") tracks the anchor's live position;
-        // a numeric DEX cannot, because tie-break fractions re-roll every segment (#4602)
-        const anchorChoices = combat.combatants.contents
-            .filter((c) => c.id !== combatant.id && c.actor && (!c.hidden || game.user.isGM))
-            .sort((a, b) => a.name.localeCompare(b.name));
-        const initialAnchor =
-            initial?.mode === "position" && initial.anchor
-                ? `${initial.anchor.relation === "before" ? "before" : "after"}:${initial.anchor.combatantId}`
-                : "";
-        const anchorOptionsHTML = (relation) =>
-            anchorChoices
-                .map((c) => {
-                    const value = `${relation}:${c.id}`;
-                    return `<option value="${value}" ${value === initialAnchor ? "selected" : ""}>${escapeHTML(c.name)}</option>`;
-                })
+        // Anchored reentry ("act right after X") tracks the anchor's live position; a
+        // numeric DEX cannot, because tie-break fractions re-roll every segment (#4602).
+        // Eligible anchors per candidate segment: only combatants who actually receive
+        // a stop there (natural Phase or held slot; defeated/aborted/spent excluded),
+        // ordered by acting position.
+        const anchorChoicesByAbs = {};
+        for (const choice of segmentChoices) {
+            const segment = ((choice.abs - 1) % 12) + 1;
+            anchorChoicesByAbs[choice.abs] = combat.combatants.contents
+                .filter((c) => c.id !== combatant.id && c.actor && (!c.hidden || game.user.isGM))
+                .filter((c) => combat._takesTurnInSegment(c, segment, { queryAbs: choice.abs }))
+                .map((c) => ({
+                    id: c.id,
+                    name: c.name,
+                    priority: combat.getInitiativePriority(c, segment, { queryAbs: choice.abs }),
+                }))
+                .sort((a, b) => b.priority - a.priority);
+        }
+        const anchorOptionsHTML = (abs, selectedId) =>
+            (anchorChoicesByAbs[abs] ?? [])
+                .map(
+                    (entry) =>
+                        `<option value="${entry.id}" ${entry.id === selectedId ? "selected" : ""}>${escapeHTML(entry.name)} (DEX ${Math.floor(entry.priority)})</option>`,
+                )
                 .join("");
-        const anchorSelect = anchorChoices.length
-            ? `<label>Position</label>
-               <select name="hold-anchor">
-                   <option value="">At a DEX count (below)</option>
-                   <optgroup label="Right after…">${anchorOptionsHTML("after")}</optgroup>
-                   <optgroup label="Right before…">${anchorOptionsHTML("before")}</optgroup>
-               </select>`
-            : "";
+
+        const selectedSegmentAbs = segmentChoices.some((c) => c.abs === initialSegmentAbs)
+            ? initialSegmentAbs
+            : (segmentChoices[0]?.abs ?? null);
+        const initialAnchorId = initial?.mode === "position" ? (initial.anchor?.combatantId ?? null) : null;
+        const initialRelation = initial?.anchor?.relation === "before" ? "before" : "after";
+        const initialKind = initialAnchorId ? "anchor" : "dex";
 
         const positionOption = segmentChoices.length
             ? `<label><input type="radio" name="hold-mode" value="position" ${checkedMode === "position" ? "checked" : ""}> Until a position</label>
@@ -1341,11 +1349,20 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                                `<option value="${choice.abs}" ${choice.abs === initialSegmentAbs ? "selected" : ""}>${choice.label}</option>`,
                        )
                        .join("")}</select>
-                   ${anchorSelect}
-                   <label>DEX</label>
+               </div>
+               <div class="form-group">
+                   <label><input type="radio" name="hold-position-kind" value="dex" ${initialKind === "dex" ? "checked" : ""}> At a DEX count</label>
                    <input type="number" name="hold-dex" value="${defaultDexValue}" min="0" max="99.99" step="0.01">
                </div>
-               <p class="hint">Anchoring to a combatant re-enters exactly adjacent to wherever they act. For a DEX count, decimals pin the exact tie-break position (e.g. 13.12); whole numbers get a random tie-break.</p>`
+               <div class="form-group">
+                   <label><input type="radio" name="hold-position-kind" value="anchor" ${initialKind === "anchor" ? "checked" : ""}> Next to a combatant</label>
+                   <select name="hold-anchor">${anchorOptionsHTML(selectedSegmentAbs, initialAnchorId)}</select>
+               </div>
+               <div class="form-group hero-hold-relation">
+                   <label><input type="radio" name="hold-anchor-relation" value="after" ${initialRelation === "after" ? "checked" : ""}> Right after</label>
+                   <label><input type="radio" name="hold-anchor-relation" value="before" ${initialRelation === "before" ? "checked" : ""}> Right before</label>
+               </div>
+               <p class="hint">Next to a combatant re-enters exactly adjacent to wherever they act. At a DEX count, decimals pin the exact tie-break position (e.g. 13.12); whole numbers get a random tie-break.</p>`
             : "";
         const content = `<fieldset class="hero-hold-dialog">
             <legend>Hold until</legend>
@@ -1360,6 +1377,38 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const result = await foundry.applications.api.DialogV2.wait({
             window: { title: `${title} — ${actor.name}` },
             content,
+            // DEX count and anchor are mutually exclusive: the unchecked branch's
+            // controls grey out, and the anchor list re-filters per segment
+            render: (event, dialog) => {
+                const root = dialog?.element ?? dialog;
+                const segmentSelect = root?.querySelector?.('select[name="hold-segment"]');
+                const anchorSelect = root?.querySelector?.('select[name="hold-anchor"]');
+                if (!segmentSelect || !anchorSelect) return;
+                const dexInput = root.querySelector('input[name="hold-dex"]');
+                const kindRadios = [...root.querySelectorAll('input[name="hold-position-kind"]')];
+                const relationRadios = [...root.querySelectorAll('input[name="hold-anchor-relation"]')];
+                const syncControls = () => {
+                    const kind = kindRadios.find((r) => r.checked)?.value ?? "dex";
+                    if (dexInput) dexInput.disabled = kind !== "dex";
+                    anchorSelect.disabled = kind !== "anchor";
+                    for (const r of relationRadios) r.disabled = kind !== "anchor";
+                };
+                const rebuildAnchors = () => {
+                    const prior = anchorSelect.value;
+                    anchorSelect.innerHTML = anchorOptionsHTML(parseInt(segmentSelect.value), prior || initialAnchorId);
+                    // A segment nobody acts in cannot be anchored
+                    const anchorKind = kindRadios.find((r) => r.value === "anchor");
+                    const dexKind = kindRadios.find((r) => r.value === "dex");
+                    if (anchorKind) {
+                        anchorKind.disabled = !anchorSelect.options.length;
+                        if (anchorKind.disabled && anchorKind.checked && dexKind) dexKind.checked = true;
+                    }
+                    syncControls();
+                };
+                segmentSelect.addEventListener("change", rebuildAnchors);
+                for (const r of kindRadios) r.addEventListener("change", syncControls);
+                rebuildAnchors();
+            },
             buttons: [
                 {
                     action: "hold",
@@ -1370,8 +1419,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         return {
                             mode: form["hold-mode"].value,
                             segmentAbs: parseInt(form["hold-segment"]?.value),
+                            positionKind: form["hold-position-kind"]?.value ?? "dex",
                             dexRaw: parseFloat(form["hold-dex"]?.value),
-                            anchorRaw: form["hold-anchor"]?.value ?? "",
+                            anchorId: form["hold-anchor"]?.value || null,
+                            relation: form["hold-anchor-relation"]?.value ?? "after",
                             trigger: form["hold-trigger"]?.value.trim() ?? "",
                         };
                     },
@@ -1384,9 +1435,12 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
         if (result.mode === "position") {
             const segmentAbs = Number.isFinite(result.segmentAbs) ? result.segmentAbs : currentAbs;
-            const [anchorRelation, anchorCombatantId] = (result.anchorRaw || "").split(":");
-            const anchorTarget = anchorCombatantId ? combat.combatants.get(anchorCombatantId) : null;
-            if (anchorTarget) {
+            if (result.positionKind === "anchor") {
+                const anchorTarget = result.anchorId ? combat.combatants.get(result.anchorId) : null;
+                if (!anchorTarget) {
+                    ui.notifications.warn(`Select a combatant to hold next to.`);
+                    return null;
+                }
                 const segment = ((segmentAbs - 1) % 12) + 1;
                 const targetPriority = combat.getInitiativePriority(anchorTarget, segment, { queryAbs: segmentAbs });
                 if (!(targetPriority > 0)) {
@@ -1395,7 +1449,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     );
                     return null;
                 }
-                const relation = anchorRelation === "before" ? "before" : "after";
+                const relation = result.relation === "before" ? "before" : "after";
                 const epsilon = HeroSystem6eCombatSingle.ANCHOR_EPSILON;
                 const effective = relation === "before" ? targetPriority + epsilon : targetPriority - epsilon;
                 if (segmentAbs === currentAbs && effective >= actingThreshold) {
