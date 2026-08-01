@@ -589,9 +589,11 @@ export class HeroSystem6eCombatSingle extends Combat {
      *   numbers alias across Turns (the same number recurs every 12 segments), so
      *   callers scoring a position outside the current Turn must pass it; the default
      *   resolves to the first occurrence at or after the current combat position.
+     * @param {Set<string>} [options._anchorSeen] - Internal: anchor ids already being
+     *   resolved in this call chain (anchored-hold cycle guard)
      * @returns {number} Comprehensive decimal initiative priority score
      */
-    getInitiativePriority(combatant, targetSegment, { ignoreHold = false, queryAbs = null } = {}) {
+    getInitiativePriority(combatant, targetSegment, { ignoreHold = false, queryAbs = null, _anchorSeen = null } = {}) {
         if (!combatant?.actor) return 0;
 
         const parentCombat = combatant.combat ?? this;
@@ -648,6 +650,13 @@ export class HeroSystem6eCombatSingle extends Combat {
         const tieBreakerFraction = this._tieBreakerFraction(tieBreakerEntry);
 
         if (positionalHold) {
+            // An anchored hold tracks its anchor's LIVE position — whatever tie-break
+            // roll, LR elevation, or hold of their own the anchor ends up with —
+            // instead of a number guessed at declaration (#4602)
+            if (positionalHold.anchor) {
+                const anchored = this.resolveHoldAnchorPriority(positionalHold, scoredAbs, _anchorSeen ?? new Set());
+                if (anchored !== null) return anchored;
+            }
             // The declared DEX is the exact acting position: LR and maneuver offsets
             // don't move it, and an explicitly declared decimal pins the tie-break
             return (positionalHold.dex ?? baseScore) + (positionalHold.fraction ?? tieBreakerFraction);
@@ -659,6 +668,39 @@ export class HeroSystem6eCombatSingle extends Combat {
         // A Haymaker does not move the character's DEX position (6E2 — the wind-up
         // resolves at the end of the next Segment; see the haymaker combatant flag)
         return baseScore + lightningReflexesLevels + tieBreakerFraction;
+    }
+
+    /**
+     * Sub-tie-break offset for anchored holds. Every other priority is a multiple
+     * of 1e-4 (integer DEX, 2-decimal declared pins, 0.01-step tie fractions,
+     * 0.0049-step Fast Draw fractions), so ±1e-6 slots strictly between the anchor
+     * and its neighbours, with headroom for chained anchors.
+     */
+    static ANCHOR_EPSILON = 1e-6;
+
+    /**
+     * Resolves a positional hold anchored to another combatant ("act right after X",
+     * 6E2 20: a holding character chooses their reentry point exactly) to a priority
+     * immediately adjacent to the anchor's live position in the scored segment.
+     * Returns null when the anchor cannot be resolved — combatant gone, no Phase or
+     * held slot in that segment, or an anchor cycle — and the caller falls back to
+     * the declaration-time DEX snapshot.
+     * @param {{anchor?: {combatantId: string, relation?: string}}} hold
+     * @param {number} scoredAbs - Absolute segment the hold is being scored at
+     * @param {Set<string>} [seen] - Anchor ids already being resolved (cycle guard)
+     * @returns {number|null}
+     */
+    resolveHoldAnchorPriority(hold, scoredAbs, seen = new Set()) {
+        const anchorId = hold?.anchor?.combatantId;
+        if (!anchorId || seen.has(anchorId)) return null;
+        const target = this.combatants.get(anchorId);
+        if (!target?.actor) return null;
+        seen.add(anchorId);
+        const segment = HeroSystem6eCombatantSingle.segmentOf(scoredAbs);
+        const priority = this.getInitiativePriority(target, segment, { queryAbs: scoredAbs, _anchorSeen: seen });
+        if (!(priority > 0)) return null;
+        const epsilon = HeroSystem6eCombatSingle.ANCHOR_EPSILON;
+        return hold.anchor.relation === "before" ? priority + epsilon : priority - epsilon;
     }
 
     /**
@@ -3304,20 +3346,24 @@ export class HeroSystem6eCombatSingle extends Combat {
                 "-=segmentAbs": null,
                 "-=dex": null,
                 "-=fraction": null,
+                "-=anchor": null,
                 demotedFrom: { segmentAbs: hold.segmentAbs, dex: hold.dex },
             },
         });
         await combatant.update({ [`flags.${game.system.id}.heldSlotTakenAbs`]: null });
         const actor = combatant.actor;
+        const positionLabel = hold.anchor
+            ? `right ${hold.anchor.relation === "before" ? "before" : "after"} ${hold.anchor.name ?? "their anchor"}`
+            : `DEX ${hold.dex}`;
         await this._combatCard(
             combatant,
-            `${actor?.name}'s held position (DEX ${hold.dex} in ${HeroSystem6eCombatantSingle.phaseLabel(hold.segmentAbs)}) passed without being used; the Held Action is banked until their next Phase.`,
+            `${actor?.name}'s held position (${positionLabel} in ${HeroSystem6eCombatantSingle.phaseLabel(hold.segmentAbs)}) passed without being used; the Held Action is banked until their next Phase.`,
         );
         await this.logEvent("hold.demote", {
             combatant,
             // The slot that passed unused, not the boundary the cleanup ran at
             abs: hold.segmentAbs ?? null,
-            data: { segmentAbs: hold.segmentAbs, dex: hold.dex ?? null },
+            data: { segmentAbs: hold.segmentAbs, dex: hold.dex ?? null, anchor: hold.anchor ?? null },
         });
     }
 
@@ -3366,10 +3412,15 @@ export class HeroSystem6eCombatSingle extends Combat {
             [`flags.${game.system.id}.heldSlotTakenAbs`]: null,
         };
         if (retainPosition && hold.mode === "position") {
+            // An anchored slot resolves to concrete numbers as it is spent — the
+            // display record must not drift if the anchor later moves or leaves
+            const anchored = hold.anchor ? this.resolveHoldAnchorPriority(hold, hold.segmentAbs) : null;
+            const dex = anchored !== null ? Math.floor(anchored) : hold.dex;
+            const fraction = anchored !== null ? anchored - Math.floor(anchored) : hold.fraction;
             spendUpdate[`flags.${game.system.id}.spentHoldPosition`] = {
                 segmentAbs: hold.segmentAbs,
-                dex: hold.dex,
-                ...(hold.fraction !== undefined ? { fraction: hold.fraction } : {}),
+                dex,
+                ...(fraction !== undefined ? { fraction } : {}),
             };
         }
         await combatant.update(spendUpdate);
@@ -3385,7 +3436,12 @@ export class HeroSystem6eCombatSingle extends Combat {
             // at the next boundary, and the default (current) abs would file the
             // row one segment late — on top of the holder's genuine acted row
             abs: hold.mode === "position" ? (hold.segmentAbs ?? null) : null,
-            data: { mode: hold.mode, segmentAbs: hold.segmentAbs ?? null, dex: hold.dex ?? null },
+            data: {
+                mode: hold.mode,
+                segmentAbs: hold.segmentAbs ?? null,
+                dex: hold.dex ?? null,
+                anchor: hold.anchor ?? null,
+            },
         });
     }
 

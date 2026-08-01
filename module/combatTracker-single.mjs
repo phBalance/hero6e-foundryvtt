@@ -1304,6 +1304,33 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const initialSegmentAbs = initial?.mode === "position" ? initial.segmentAbs : null;
         const checkedMode = initial?.mode ?? (segmentChoices.length ? "position" : "event");
 
+        const escapeHTML = foundry.utils.escapeHTML ?? ((value) => Handlebars.escapeExpression(value));
+
+        // Anchored reentry ("act right after X") tracks the anchor's live position;
+        // a numeric DEX cannot, because tie-break fractions re-roll every segment (#4602)
+        const anchorChoices = combat.combatants.contents
+            .filter((c) => c.id !== combatant.id && c.actor && (!c.hidden || game.user.isGM))
+            .sort((a, b) => a.name.localeCompare(b.name));
+        const initialAnchor =
+            initial?.mode === "position" && initial.anchor
+                ? `${initial.anchor.relation === "before" ? "before" : "after"}:${initial.anchor.combatantId}`
+                : "";
+        const anchorOptionsHTML = (relation) =>
+            anchorChoices
+                .map((c) => {
+                    const value = `${relation}:${c.id}`;
+                    return `<option value="${value}" ${value === initialAnchor ? "selected" : ""}>${escapeHTML(c.name)}</option>`;
+                })
+                .join("");
+        const anchorSelect = anchorChoices.length
+            ? `<label>Position</label>
+               <select name="hold-anchor">
+                   <option value="">At a DEX count (below)</option>
+                   <optgroup label="Right after…">${anchorOptionsHTML("after")}</optgroup>
+                   <optgroup label="Right before…">${anchorOptionsHTML("before")}</optgroup>
+               </select>`
+            : "";
+
         const positionOption = segmentChoices.length
             ? `<label><input type="radio" name="hold-mode" value="position" ${checkedMode === "position" ? "checked" : ""}> Until a position</label>
                <div class="form-group">
@@ -1314,13 +1341,12 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                                `<option value="${choice.abs}" ${choice.abs === initialSegmentAbs ? "selected" : ""}>${choice.label}</option>`,
                        )
                        .join("")}</select>
+                   ${anchorSelect}
                    <label>DEX</label>
                    <input type="number" name="hold-dex" value="${defaultDexValue}" min="0" max="99.99" step="0.01">
                </div>
-               <p class="hint">Decimals pin the exact tie-break position (e.g. 13.12); whole numbers get a random tie-break.</p>`
+               <p class="hint">Anchoring to a combatant re-enters exactly adjacent to wherever they act. For a DEX count, decimals pin the exact tie-break position (e.g. 13.12); whole numbers get a random tie-break.</p>`
             : "";
-
-        const escapeHTML = foundry.utils.escapeHTML ?? ((value) => Handlebars.escapeExpression(value));
         const content = `<fieldset class="hero-hold-dialog">
             <legend>Hold until</legend>
             ${positionOption}
@@ -1345,6 +1371,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                             mode: form["hold-mode"].value,
                             segmentAbs: parseInt(form["hold-segment"]?.value),
                             dexRaw: parseFloat(form["hold-dex"]?.value),
+                            anchorRaw: form["hold-anchor"]?.value ?? "",
                             trigger: form["hold-trigger"]?.value.trim() ?? "",
                         };
                     },
@@ -1357,6 +1384,35 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
         if (result.mode === "position") {
             const segmentAbs = Number.isFinite(result.segmentAbs) ? result.segmentAbs : currentAbs;
+            const [anchorRelation, anchorCombatantId] = (result.anchorRaw || "").split(":");
+            const anchorTarget = anchorCombatantId ? combat.combatants.get(anchorCombatantId) : null;
+            if (anchorTarget) {
+                const segment = ((segmentAbs - 1) % 12) + 1;
+                const targetPriority = combat.getInitiativePriority(anchorTarget, segment, { queryAbs: segmentAbs });
+                if (!(targetPriority > 0)) {
+                    ui.notifications.warn(
+                        `${anchorTarget.name} has no Phase or held position in ${HeroSystem6eCombatantSingle.phaseLabel(segmentAbs)}.`,
+                    );
+                    return null;
+                }
+                const relation = anchorRelation === "before" ? "before" : "after";
+                const epsilon = HeroSystem6eCombatSingle.ANCHOR_EPSILON;
+                const effective = relation === "before" ? targetPriority + epsilon : targetPriority - epsilon;
+                if (segmentAbs === currentAbs && effective >= actingThreshold) {
+                    ui.notifications.warn(
+                        `A same-segment hold must slot below the current acting position (${actingThreshold.toFixed(2)}).`,
+                    );
+                    return null;
+                }
+                return {
+                    mode: "position",
+                    segmentAbs,
+                    // Declaration-time snapshot: the fallback acting position should
+                    // the anchor later vanish from the segment
+                    dex: Math.floor(targetPriority),
+                    anchor: { combatantId: anchorTarget.id, relation, name: anchorTarget.name },
+                };
+            }
             const dexRaw = Number.isFinite(result.dexRaw) ? result.dexRaw : Math.max(0, ownDex - 1);
             const dex = Math.floor(dexRaw);
             const fraction = Number.isInteger(dexRaw) ? undefined : Math.round((dexRaw - dex) * 100) / 100;
@@ -1373,6 +1429,27 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         }
         if (result.mode === "event") return { mode: "event", trigger: result.trigger };
         return { mode: "generic" };
+    }
+
+    /**
+     * Human-readable clause for a hold declaration's target ("until DEX 13.12 in
+     * Segment 4", "until right after Grond in Segment 4", "— until: the guard
+     * turns around").
+     * @param {object} hold
+     * @returns {string}
+     * @private
+     */
+    _holdDescription(hold) {
+        if (hold.mode === "position") {
+            const where = HeroSystem6eCombatantSingle.phaseLabel(hold.segmentAbs);
+            if (hold.anchor) {
+                const relation = hold.anchor.relation === "before" ? "before" : "after";
+                return `until right ${relation} ${hold.anchor.name ?? "their anchor"} in ${where}`;
+            }
+            return `until DEX ${hold.fraction !== undefined ? (hold.dex + hold.fraction).toFixed(2) : hold.dex} in ${where}`;
+        }
+        if (hold.mode === "event") return hold.trigger ? `— until: ${hold.trigger}` : "until a declared event";
+        return "with no declared condition";
     }
 
     /**
@@ -1418,14 +1495,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             id: foundry.utils.randomID(),
             combatantId: combatant.id,
         };
-        const description =
-            hold.mode === "position"
-                ? `until DEX ${hold.fraction !== undefined ? (hold.dex + hold.fraction).toFixed(2) : hold.dex} in ${HeroSystem6eCombatantSingle.phaseLabel(hold.segmentAbs)}`
-                : hold.mode === "event"
-                  ? hold.trigger
-                      ? `— until: ${hold.trigger}`
-                      : "until a declared event"
-                  : "with no declared condition";
+        const description = this._holdDescription(hold);
 
         await this._applyHoldingEffect(combatant, hold);
         await this._holdCard(
@@ -1439,6 +1509,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 segmentAbs: hold.segmentAbs ?? null,
                 dex: hold.dex ?? null,
                 fraction: hold.fraction ?? null,
+                anchor: hold.anchor ?? null,
                 trigger: hold.trigger ?? null,
             },
         });
@@ -1491,14 +1562,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             [`flags.${game.system.id}.hold`]: hold,
         });
 
-        const description =
-            hold.mode === "position"
-                ? `until DEX ${hold.fraction !== undefined ? (hold.dex + hold.fraction).toFixed(2) : hold.dex} in ${HeroSystem6eCombatantSingle.phaseLabel(hold.segmentAbs)}`
-                : hold.mode === "event"
-                  ? hold.trigger
-                      ? `— until: ${hold.trigger}`
-                      : "until a declared event"
-                  : "with no declared condition";
+        const description = this._holdDescription(hold);
         await this._holdCard(
             combatant,
             `${combatant.actor.name} re-declares their Held Action ${description} (in ${HeroSystem6eCombatantSingle.phaseLabel(currentAbs)}).`,
@@ -1510,6 +1574,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 segmentAbs: hold.segmentAbs ?? null,
                 dex: hold.dex ?? null,
                 fraction: hold.fraction ?? null,
+                anchor: hold.anchor ?? null,
                 trigger: hold.trigger ?? null,
             },
         });
@@ -1592,9 +1657,18 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const atOwnSlot = hold.mode === "position" && hold.segmentAbs === currentAbs;
         const replacesNaturalPhase = hold.mode !== "position" && combatant.hasPhaseInSegment(combat.segment);
         if (!atOwnSlot && !replacesNaturalPhase) return;
-        const dex = atOwnSlot ? hold.dex : Math.floor(combat.getInitiativePriority(combatant, combat.segment));
+        // An anchored slot resolves to concrete numbers as it is spent — the display
+        // record must not drift if the anchor later moves or leaves
+        const anchored = atOwnSlot && hold.anchor ? combat.resolveHoldAnchorPriority(hold, currentAbs) : null;
+        const dex =
+            anchored !== null
+                ? Math.floor(anchored)
+                : atOwnSlot
+                  ? hold.dex
+                  : Math.floor(combat.getInitiativePriority(combatant, combat.segment));
         const spent = { segmentAbs: currentAbs, dex };
-        if (atOwnSlot && hold.fraction !== undefined) spent.fraction = hold.fraction;
+        if (anchored !== null) spent.fraction = anchored - Math.floor(anchored);
+        else if (atOwnSlot && hold.fraction !== undefined) spent.fraction = hold.fraction;
         await combatant.update({
             [`flags.${game.system.id}.spentHoldPosition`]: spent,
             // A stale slot-taken marker would spend the NEXT hold declared this segment

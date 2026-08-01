@@ -770,6 +770,147 @@ export function registerCombatTests(quench) {
                     }
                 });
 
+                it("Should resolve anchored Held Actions adjacent to the anchor's live position (#4602)", async function () {
+                    const automationSetting = game.settings.get(game.system.id, "automation");
+                    await game.settings.set(game.system.id, "automation", "none");
+
+                    try {
+                        const makeActor = (name, dex, spd) =>
+                            Actor.create({
+                                name,
+                                type: "pc",
+                                system: {
+                                    initiativeCharacteristic: "dex",
+                                    characteristics: {
+                                        dex: { value: dex, max: dex },
+                                        spd: { value: spd, max: spd },
+                                    },
+                                },
+                            });
+                        // Anchor and rival tie on DEX 20 so only the random tie-break
+                        // separates them; the holder must land adjacent to the ANCHOR
+                        // regardless of how those rolls fall
+                        const anchorActor = await makeActor("_Quench Anchor", 20, 3);
+                        const rival = await makeActor("_Quench Rival", 20, 3);
+                        const holder = await makeActor("_Quench Anchored Holder", 15, 2);
+                        actorDocuments.push(anchorActor, rival, holder);
+
+                        const combat = await Combat.create({
+                            name: "_Quench Combat",
+                            scene: canvas.scene?.id || null,
+                            active: true,
+                        });
+                        combatDocuments.push(combat);
+                        await combat.createEmbeddedDocuments("Combatant", [
+                            { actorId: anchorActor.id },
+                            { actorId: rival.id },
+                            { actorId: holder.id },
+                        ]);
+                        await combat.startCombat();
+                        expect(combat.segment).to.equal(12);
+
+                        const anchorCombatant = combat.combatants.find((c) => c.actorId === anchorActor.id);
+                        const holderCombatant = combat.combatants.find((c) => c.actorId === holder.id);
+                        const epsilon = combat.constructor.ANCHOR_EPSILON;
+
+                        // Holder (SPD 2 at T1S12) banks a Phase for Segment 4 of Turn 2
+                        // (abs 28), right after the anchor; the DEX snapshot is set to a
+                        // deliberately wrong 7 to prove live resolution wins
+                        const slotAbs = 2 * 12 + 4;
+                        const [holdEffect] = await holder.createEmbeddedDocuments("ActiveEffect", [
+                            {
+                                name: "Holding An Action",
+                                img: "icons/svg/clockwork.svg",
+                                statuses: ["holding"],
+                                flags: {
+                                    [game.system.id]: {
+                                        hold: {
+                                            mode: "position",
+                                            segmentAbs: slotAbs,
+                                            dex: 7,
+                                            combatantId: holderCombatant.id,
+                                            anchor: {
+                                                combatantId: anchorCombatant.id,
+                                                relation: "after",
+                                                name: anchorCombatant.name,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        ]);
+
+                        const anchorPriority = combat.getInitiativePriority(anchorCombatant, 4, { queryAbs: slotAbs });
+                        expect(anchorPriority, "anchor has a live position in the slot segment").to.be.greaterThan(0);
+                        const afterPriority = combat.getInitiativePriority(holderCombatant, 4, { queryAbs: slotAbs });
+                        expect(
+                            anchorPriority - afterPriority,
+                            "'after' slots immediately below the anchor",
+                        ).to.be.closeTo(epsilon, 1e-9);
+
+                        // 'Before' slots immediately above, still tracking the anchor
+                        await holdEffect.setFlag(game.system.id, "hold", {
+                            anchor: { relation: "before" },
+                        });
+                        const beforePriority = combat.getInitiativePriority(holderCombatant, 4, { queryAbs: slotAbs });
+                        expect(
+                            beforePriority - anchorPriority,
+                            "'before' slots immediately above the anchor",
+                        ).to.be.closeTo(epsilon, 1e-9);
+
+                        // An anchor with no Phase in the slot's segment (SPD 3 has none in
+                        // Segment 2) falls back to the declaration-time DEX snapshot
+                        await holdEffect.setFlag(game.system.id, "hold", {
+                            segmentAbs: 2 * 12 + 2,
+                            anchor: { relation: "after" },
+                        });
+                        const fallbackPriority = combat.getInitiativePriority(holderCombatant, 2, {
+                            queryAbs: 2 * 12 + 2,
+                        });
+                        expect(Math.floor(fallbackPriority), "unresolvable anchor falls back to the snapshot").to.equal(
+                            7,
+                        );
+
+                        // A→B→A anchor cycles must terminate: the inner lookup falls back
+                        // to its snapshot instead of recursing
+                        await holdEffect.setFlag(game.system.id, "hold", {
+                            segmentAbs: slotAbs,
+                            anchor: { relation: "after" },
+                        });
+                        await anchorActor.createEmbeddedDocuments("ActiveEffect", [
+                            {
+                                name: "Holding An Action",
+                                img: "icons/svg/clockwork.svg",
+                                statuses: ["holding"],
+                                flags: {
+                                    [game.system.id]: {
+                                        hold: {
+                                            mode: "position",
+                                            segmentAbs: slotAbs,
+                                            dex: 20,
+                                            combatantId: anchorCombatant.id,
+                                            anchor: {
+                                                combatantId: holderCombatant.id,
+                                                relation: "after",
+                                                name: holderCombatant.name,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        ]);
+                        const cycledHolder = combat.getInitiativePriority(holderCombatant, 4, { queryAbs: slotAbs });
+                        const cycledAnchor = combat.getInitiativePriority(anchorCombatant, 4, { queryAbs: slotAbs });
+                        expect(Number.isFinite(cycledHolder), "cycled holder priority resolves finitely").to.be.true;
+                        expect(Number.isFinite(cycledAnchor), "cycled anchor priority resolves finitely").to.be.true;
+                        expect(cycledHolder, "cycle unwinds from the snapshot, holder below anchor").to.be.lessThan(
+                            cycledAnchor,
+                        );
+                    } finally {
+                        await game.settings.set(game.system.id, "automation", automationSetting);
+                    }
+                });
+
                 it("Should replace the natural Phase when a Held Action is used in its segment", async function () {
                     const alpha = await Actor.create({
                         name: "_Quench Replace Alpha",
