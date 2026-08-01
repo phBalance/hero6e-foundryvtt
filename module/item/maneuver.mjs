@@ -1,5 +1,6 @@
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
 import { HeroCompatibility } from "../utility/compatibility.mjs";
+import { isQuenchTestRunning } from "../utility/util.mjs";
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { calculateVelocityInSystemUnits } from "../utility/units.mjs";
 import { dehydrateAttackItem, rehydrateAttackItem } from "./item-attack.mjs";
@@ -128,6 +129,48 @@ export async function expireManeuverNextPhaseEffects(actor) {
 export function maneuverCanBeAbortedTo(item) {
     const maneuverHasAbortTrait = item.system.EFFECT?.toLowerCase().indexOf("abort") > -1;
     return !!maneuverHasAbortTrait;
+}
+
+/**
+ * Toggling an abortable maneuver (Dodge, Martial Dodge, …) outside the actor's
+ * own Phase in a live combat IS Aborting (6E2 21-22; 5ER 361) — offer to declare
+ * it through the tracker so the Phase cost and lockout are recorded. Confirm
+ * first: an out-of-turn toggle may just be pre-staging, and Cancel keeps the
+ * maneuver active without an Abort.
+ * @param {HeroSystem6eItem} item - The maneuver that was just activated
+ */
+export async function promptOutOfTurnAbortForManeuver(item) {
+    try {
+        const actor = item.actor;
+        if (!actor || !maneuverCanBeAbortedTo(item)) return;
+        if (isQuenchTestRunning()) return;
+
+        const tracker = ui.combat;
+        const combat = tracker?.viewed;
+        // Single-tracker combats only, live, and outside this actor's own turn
+        if (!combat?.started || typeof tracker._declareAbort !== "function") return;
+        // The tracker's own abort flow toggles the defense maneuver as part of
+        // declaring — that toggle must not re-prompt
+        if (tracker._abortFlowActive) return;
+        if (combat.combatant?.actor === actor) return;
+        const combatant =
+            combat.combatants.find((c) => c.actor === actor) ?? combat.combatants.find((c) => c.actorId === actor.id);
+        if (!combatant?.isOwner || combatant.abortEffect) return;
+
+        const proceed = await foundry.applications.api.DialogV2.confirm({
+            window: { title: `Abort — ${actor.name}` },
+            content: `<p>${actor.name} is activating <b>${item.name}</b> outside their Phase. Abort to it?</p>
+                <p class="hint">Aborting consumes their next Phase (6E2 22) — or their Held Action, if holding. Cancel keeps ${item.name} active without declaring an Abort (e.g. pre-staging).</p>`,
+            rejectClose: false,
+        });
+        if (!proceed) return;
+
+        // The maneuver is already active, so no statusId — the item carries its
+        // own CV effects; _declareAbort records the cost, card, and ledger entry
+        await tracker._declareAbort(combatant, { toAction: item.name, statusId: null });
+    } catch (e) {
+        console.error(`Out-of-turn abort prompt failed`, e);
+    }
 }
 
 /**

@@ -40,7 +40,13 @@ import {
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
-import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
+import {
+    activateManeuver,
+    enforceManeuverLimits,
+    maneuverCanBeAbortedTo,
+    maneuverHasBlockTrait,
+    promptOutOfTurnAbortForManeuver,
+} from "./maneuver.mjs";
 
 const { Item } = foundry.documents;
 const { FilePicker } = foundry.applications.apps;
@@ -1942,6 +1948,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         if (["maneuver", "martialart"].includes(item.type)) {
             await activateManeuver(this);
+            // Toggling an abortable maneuver (Dodge…) outside the actor's own
+            // Phase in a live combat offers to declare the Abort (6E2 21-22)
+            await promptOutOfTurnAbortForManeuver(this);
         }
 
         return this.setActive(true);

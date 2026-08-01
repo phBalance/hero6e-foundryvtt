@@ -2236,7 +2236,17 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             }
         }
 
-        if (statusId) await this._applyAbortDefense(actor, statusId);
+        if (statusId) {
+            // The defense toggle below runs through the maneuver item; latch so
+            // promptOutOfTurnAbortForManeuver doesn't re-prompt for an abort
+            // this very flow is declaring
+            this._abortFlowActive = true;
+            try {
+                await this._applyAbortDefense(actor, statusId);
+            } finally {
+                this._abortFlowActive = false;
+            }
+        }
 
         // A held Phase absorbs the abort — no further Phases are lost (6E2 22; 5ER 361)
         const holdingEffect = combatant.heldActionEffect;
