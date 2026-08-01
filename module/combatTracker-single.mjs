@@ -1171,7 +1171,18 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     }
 
     _getEntryContextOptions() {
-        const options = super._getEntryContextOptions();
+        // HERO rolls no initiative in this tracker (priorities derive from DEX +
+        // the per-segment tie rolls), so core's Clear/Reroll Initiative entries
+        // could only corrupt the derived values. Key sets cover V14 and V13.
+        const coreInitiativeOptions = new Set([
+            "COMBATANT.ACTIONS.Clear",
+            "COMBATANT.ACTIONS.Reroll",
+            "COMBAT.CombatantClear",
+            "COMBAT.CombatantReroll",
+        ]);
+        const options = super
+            ._getEntryContextOptions()
+            .filter((option) => !coreInitiativeOptions.has(option.label ?? option.name));
         const getCombatant = (li) => this.viewed?.combatants.get(li.dataset?.combatantId) ?? null;
 
         for (const option of options) {
