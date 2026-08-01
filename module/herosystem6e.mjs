@@ -454,8 +454,12 @@ async function resolveDelayedAttackItem(payload) {
     if (payload.itemJson) {
         const owner = payload.actorUuid ? fromUuidSync(payload.actorUuid) : null;
         try {
+            // Earlier alpha builds double-stringified the snapshot; unwrap it
+            let itemJsonStr = payload.itemJson;
+            const parsed = JSON.parse(itemJsonStr);
+            if (typeof parsed === "string") itemJsonStr = parsed;
             const { rehydrateAttackItem } = await import("./item/item-attack.mjs");
-            item = rehydrateAttackItem(payload.itemJson, owner)?.item ?? null;
+            item = rehydrateAttackItem(itemJsonStr, owner)?.item ?? null;
         } catch (e) {
             console.error(`Unable to rehydrate the delayed attack item`, e);
         }

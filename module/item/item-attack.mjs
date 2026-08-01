@@ -417,7 +417,8 @@ async function scheduleHaymakerDeclaration(item, formData) {
     }
     let itemJson = null;
     try {
-        itemJson = JSON.stringify(dehydrateAttackItem(item));
+        // dehydrateAttackItem already returns a JSON string
+        itemJson = dehydrateAttackItem(item);
     } catch (e) {
         console.error(`Unable to dehydrate ${item.name} for the Haymaker landing`, e);
     }
@@ -499,7 +500,8 @@ async function scheduleExtraTimeAttackDeclaration(item, formData) {
     // rebuild it, and keep the original DB item's uuid as a fallback
     let itemJson = null;
     try {
-        itemJson = JSON.stringify(dehydrateAttackItem(item));
+        // dehydrateAttackItem already returns a JSON string
+        itemJson = dehydrateAttackItem(item);
     } catch (e) {
         console.error(`Unable to dehydrate ${item.name} for its delayed resolution`, e);
     }
