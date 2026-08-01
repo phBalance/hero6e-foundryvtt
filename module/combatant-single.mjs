@@ -136,6 +136,7 @@ export class HeroSystem6eCombatantSingle extends Combatant {
      * @type {ActiveEffect|null}
      */
     get heldActionEffect() {
+        if (!game.system?.id) return null;
         let unbound = null;
         for (const effect of this.actor?.effects ?? []) {
             if (!effect.statuses.has("holding")) continue;
@@ -255,12 +256,32 @@ export class HeroSystem6eCombatantSingle extends Combatant {
     }
 
     /**
+     * The absolute segment this combatant's positional held slot was taken in,
+     * or null. Written when the pointer lands on the declared slot; a taken slot
+     * never comes up again in that segment.
+     * @type {number|null}
+     */
+    get heldSlotTakenAbs() {
+        if (!game.system?.id) return null;
+        return this.getFlag(game.system.id, "heldSlotTakenAbs") ?? null;
+    }
+
+    /**
+     * @param {number} abs
+     * @returns {boolean}
+     */
+    heldSlotTakenAt(abs) {
+        return this.heldSlotTakenAbs === abs;
+    }
+
+    /**
      * The ActiveEffect carrying THIS combatant's abort, or null. Same binding rules
      * as {@link heldActionEffect}: unbound records only count when this actor fields
      * a single combatant in this combat.
      * @type {ActiveEffect|null}
      */
     get abortEffect() {
+        if (!game.system?.id) return null;
         let unbound = null;
         for (const effect of this.actor?.effects ?? []) {
             if (!effect.statuses.has("aborted")) continue;
@@ -326,7 +347,6 @@ export class HeroSystem6eCombatantSingle extends Combatant {
     /**
      * Effective Speed for phase purposes: 0 when drained below 1, otherwise clamped
      * to the 1-12 speed chart range since characters cannot act more than once per segment.
-     * Traverses cross-generation document data layers to find the true Speed score.
      * @type {number}
      */
     get combatSpd() {
@@ -346,19 +366,12 @@ export class HeroSystem6eCombatantSingle extends Combatant {
             }
         }
 
-        const rawSource =
-            this.actor._source?.system ||
-            this.actor.system?._source ||
-            this.actor.data?._source?.system ||
-            this.actor.data?.system ||
-            {};
-        const spdObj =
-            this.actor.system?.characteristics?.spd ||
-            this.actor.data?.system?.characteristics?.spd ||
-            rawSource.characteristics?.spd ||
-            rawSource.data?.characteristics?.spd;
+        // Prepared system data carries active-effect adjustments (Aid/Drain);
+        // the raw _source only covers documents read before preparation
+        const rawSource = this.actor._source?.system || this.actor.system?._source || {};
+        const spdObj = this.actor.system?.characteristics?.spd || rawSource.characteristics?.spd;
 
-        const rawSpd = spdObj?.value ?? spdObj?.total ?? spdObj?.base ?? spdObj?.current ?? 2;
+        const rawSpd = spdObj?.value ?? 2;
 
         if (rawSpd <= 0) return 0;
         return Math.min(12, rawSpd);

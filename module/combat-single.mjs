@@ -1,9 +1,31 @@
 import { HeroSystem6eCombatantSingle } from "./combatant-single.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
-import { expireManeuverNextPhaseEffects } from "./item/maneuver.mjs";
+import { endHaymakerManeuver, expireManeuverNextPhaseEffects } from "./item/maneuver.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-resources.mjs";
 import { promptToDeleteAoeInstantRegions } from "./combat.mjs";
 import { expireEffects, forceDeleteKeys, gmActive, toHHMMSS, whisperUserTargetsForActor } from "./utility/util.mjs";
+
+const ROLL_RETENTION_SEGMENTS = 24; // two full Turns
+
+const warnedSettingKeys = new Set();
+/**
+ * Reads a world setting, degrading to the fallback when it is not registered
+ * (early init, isolated tests). Warns once per key so hot paths stay quiet.
+ * @param {string} key
+ * @param {*} fallback
+ * @returns {*}
+ */
+function _getSetting(key, fallback) {
+    try {
+        return game.settings.get(game.system.id, key);
+    } catch (e) {
+        if (!warnedSettingKeys.has(key)) {
+            warnedSettingKeys.add(key);
+            console.warn(`Unable to read the "${key}" setting`, e);
+        }
+        return fallback;
+    }
+}
 
 export class HeroSystem6eCombatSingle extends Combat {
     /**
@@ -17,13 +39,19 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
+     * Absolute segment of the current combat position (round * 12 + segment).
+     * @type {number}
+     */
+    get currentAbs() {
+        return HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+    }
+
+    /**
      * The current combat position for chat cards, e.g. "Segment 4 of Turn 2".
      * @type {string}
      */
     get currentPhaseLabel() {
-        return HeroSystem6eCombatantSingle.phaseLabel(
-            HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment),
-        );
+        return HeroSystem6eCombatantSingle.phaseLabel(this.currentAbs);
     }
 
     /* -------------------------------------------- */
@@ -68,7 +96,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     buildEvent(type, { combatant = null, priority = null, data = undefined, abs = null } = {}) {
         // Events describing a position being committed (pointer moves) pass the
         // TARGET abs; the document still reads the pre-update position here
-        const eventAbs = abs ?? HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const eventAbs = abs ?? this.currentAbs;
         const event = {
             t: type,
             abs: eventAbs,
@@ -255,12 +283,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @protected
      */
     _rollTieBreak(combatant) {
-        let fastDraw = false;
-        try {
-            fastDraw = !!game.settings.get(game.system.id, "fastDrawTieBreak");
-        } catch (e) {
-            console.warn(`Unable to read the Fast Draw tie-break setting`, e);
-        }
+        const fastDraw = !!_getSetting("fastDrawTieBreak", false);
         if (!fastDraw) return { r: Math.floor(Math.random() * 100) };
         const hasFastDraw = !!combatant.actor?.items.find((i) => i.system?.XMLID === "FAST_DRAW");
         return { r: (hasFastDraw ? 50 : 0) + Math.floor(Math.random() * 50) };
@@ -279,12 +302,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     _tieBreakerFraction(rollEntry) {
         const entry = typeof rollEntry === "number" ? { r: rollEntry } : (rollEntry ?? { r: 50 });
         if (entry.fd !== undefined) {
-            let fastDraw = false;
-            try {
-                fastDraw = !!game.settings.get(game.system.id, "fastDrawTieBreak");
-            } catch (e) {
-                console.warn(`Unable to read the Fast Draw tie-break setting`, e);
-            }
+            const fastDraw = !!_getSetting("fastDrawTieBreak", false);
             if (fastDraw) {
                 if (entry.fd !== null) return 0.5 + entry.fd * 0.0049;
                 return (entry.r ?? 50) * 0.0049;
@@ -313,6 +331,17 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
+     * A mutation-safe copy of the segmentRolls flag. Callers mutate and write
+     * back; editing the live getFlag return in place corrupts Foundry's update
+     * diffing.
+     * @returns {object}
+     * @private
+     */
+    _segmentRollsClone() {
+        return foundry.utils.deepClone(this.getFlag(game.system.id, "segmentRolls") ?? {});
+    }
+
+    /**
      * Generates or fetches the tie-breaker roll map for an absolute segment. Maps
      * are keyed by ABSOLUTE segment so ties re-roll every Turn (tied characters
      * roll off per Segment) while rewinds within recorded history reuse the
@@ -322,7 +351,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @protected
      */
     async _generateSegmentRollCache(targetAbs) {
-        const masterRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
+        const masterRollsCache = this._segmentRollsClone();
 
         // Recorded rolls are reused so rewinds keep their original order
         if (masterRollsCache[targetAbs]) {
@@ -377,12 +406,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (game.system?.id && combatant.getFlag?.(game.system.id, "soloTieRoll")) {
             return `solo:${combatant.tokenId || combatant.id}`;
         }
-        let grouping = true;
-        try {
-            grouping = !!game.settings.get(game.system.id, "combatTrackerGrouping");
-        } catch (e) {
-            void e; // setting not registered yet (early init, isolated tests)
-        }
+        const grouping = !!_getSetting("combatTrackerGrouping", true);
         if (!grouping) return `solo:${combatant.tokenId || combatant.id}`;
         return combatant.actorId || combatant.id;
     }
@@ -414,7 +438,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @returns {number}
      */
     tieBreakOrder(a, b, queryAbs = null) {
-        const abs = queryAbs ?? HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const abs = queryAbs ?? this.currentAbs;
         const projA = this._anchorProjection(a, abs);
         const projB = this._anchorProjection(b, abs);
         if (projA.root.id !== projB.root.id) return this._rootTieBreakOrder(projA.root, projB.root, abs);
@@ -565,7 +589,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         // Backfill the members' (new) roll keys into every recorded map so they
         // don't sort at the +0.50 default
-        const masterRollsCache = foundry.utils.deepClone(this.getFlag(game.system.id, "segmentRolls") ?? {});
+        const masterRollsCache = this._segmentRollsClone();
         const activeId = this.combatant?.id ?? null;
         const payload = {};
         if (this._backfillTieRolls(masterRollsCache, combatants)) {
@@ -825,7 +849,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const actor = combatant?.actor;
         if (!actor) return false;
         if ((this.settings?.skipDefeated ?? false) && combatant.isOutOfCombat) return false;
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const currentAbs = this.currentAbs;
         const abs = queryAbs ?? currentAbs + ((segment - this.segment + 12) % 12);
         if (!ignoreAbort && (combatant.abortAppliesAtAbs?.(abs) ?? actor.statuses.has("aborted"))) return false;
         // A spent hold already consumed this segment's action (using a Held Action
@@ -930,7 +954,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @private
      */
     _lrElevationCandidates() {
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const currentAbs = this.currentAbs;
         const activeId = this.combatant?.id;
         return this.combatants.filter((c) => {
             const actor = c.actor;
@@ -961,15 +985,9 @@ export class HeroSystem6eCombatSingle extends Combat {
         const candidates = this._lrElevationCandidates();
         if (candidates.length === 0) return;
 
-        let autoElevate = false;
-        try {
-            autoElevate = !!game.settings.get(game.system.id, "lrAutoElevate");
-        } catch (e) {
-            console.warn(`Unable to read the Lightning Reflexes auto setting`, e);
-        }
+        const autoElevate = !!_getSetting("lrAutoElevate", false);
 
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
-        const escapeHTML = foundry.utils.escapeHTML ?? ((value) => Handlebars.escapeExpression(value));
+        const currentAbs = this.currentAbs;
 
         if (!autoElevate) {
             for (const combatant of candidates) {
@@ -980,7 +998,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 await ChatMessage.create({
                     speaker: ChatMessage.getSpeaker({ actor: combatant.actor }),
                     whisper,
-                    content: `<p><b>Segment ${this.segment}</b>: ${escapeHTML(combatant.actor.name)} can act early at effective DEX ${effectiveDex} with Lightning Reflexes (only: ${escapeHTML(scoped.label)}).</p>
+                    content: `<p><b>Segment ${this.segment}</b>: ${foundry.utils.escapeHTML(combatant.actor.name)} can act early at effective DEX ${effectiveDex} with Lightning Reflexes (only: ${foundry.utils.escapeHTML(scoped.label)}).</p>
                         <button type="button" class="hero-lr-act-early" data-combat-id="${this.id}" data-combatant-id="${combatant.id}">⚡ Act Early (DEX ${effectiveDex})</button>`,
                 });
             }
@@ -999,7 +1017,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             list.length > 0
                 ? ChatMessage.create({
                       speaker: { alias: "Lightning Reflexes" },
-                      content: `${escapeHTML(list.map((c) => c.actor.name).join(", "))} act${list.length === 1 ? "s" : ""} early this Segment (Lightning Reflexes).`,
+                      content: `${foundry.utils.escapeHTML(list.map((c) => c.actor.name).join(", "))} act${list.length === 1 ? "s" : ""} early this Segment (Lightning Reflexes).`,
                       ...(whisper ? { whisper } : {}),
                   })
                 : Promise.resolve();
@@ -1045,8 +1063,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         }
         if (!fromMaintenance) await this.settleMaintenance();
         const combatant = this.combatants.get(combatantId);
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
-        if (!this.started || combatant?.lrElevatedAbs !== currentAbs) return;
+        if (!this.started || combatant?.lrElevatedAbs !== this.currentAbs) return;
         if (!activeId || activeId === combatantId) return;
         // Reached via the async maintenance chain, chat buttons, and the socket
         // relay — staleness guards (#4558): the displaced combatant must still
@@ -1145,7 +1162,8 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         const allCombatants = this.combatants.contents;
         const activeSegment = this.segment;
-        const currentAbsNow = this.round * 12 + activeSegment;
+        // Captured before the writes below move the combat position
+        const currentAbs = this.currentAbs;
 
         // Captured before any writes below re-sort the turns array under the index
         const ending = this.combatant ?? null;
@@ -1155,7 +1173,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         // returns the rest of the Phase to the segment at natural DEX. The elevation
         // is consumed up front so every selection below sees the natural priority.
         let lrRemainderId = null;
-        if (this.started && ending?.lrElevatedAbs === currentAbsNow) {
+        if (this.started && ending?.lrElevatedAbs === currentAbs) {
             // Captured while the flag still applies: the spent stop keeps displaying
             // at the elevated position for the rest of the segment
             const elevatedPriority = this.getInitiativePriority(ending, activeSegment);
@@ -1166,7 +1184,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 {
                     [`flags.${game.system.id}.lrElevatedAbs`]: null,
                     [`flags.${game.system.id}.spentLrPosition`]: {
-                        segmentAbs: currentAbsNow,
+                        segmentAbs: currentAbs,
                         priority: elevatedPriority,
                     },
                 },
@@ -1182,8 +1200,8 @@ export class HeroSystem6eCombatSingle extends Combat {
         const endingHold = ending?.heldAction;
         const endingAtHeldSlot =
             endingHold?.mode === "position" &&
-            endingHold.segmentAbs === currentAbsNow &&
-            ending.getFlag(game.system.id, "heldSlotTakenAbs") === currentAbsNow;
+            endingHold.segmentAbs === currentAbs &&
+            ending.heldSlotTakenAt(currentAbs);
         // The threshold is the position the ending combatant ACTED at, recorded when
         // their turn began — live priorities move mid-segment (Aid/Drain) and would
         // re-admit combatants who already acted or skip ones who have not
@@ -1193,11 +1211,11 @@ export class HeroSystem6eCombatSingle extends Combat {
             (ending ? this.getInitiativePriority(ending, activeSegment, { ignoreHold: !endingAtHeldSlot }) : Infinity);
 
         const stillToAct = allCombatants.filter((c) => {
-            if (!this._takesTurnInSegment(c, activeSegment, { queryAbs: currentAbsNow })) return false;
+            if (!this._takesTurnInSegment(c, activeSegment, { queryAbs: currentAbs })) return false;
             const cHold = c.heldAction;
-            const cHeldHere = cHold?.mode === "position" && cHold.segmentAbs === currentAbsNow;
+            const cHeldHere = cHold?.mode === "position" && cHold.segmentAbs === currentAbs;
             // A held slot only comes up once
-            if (cHeldHere && c.getFlag(game.system.id, "heldSlotTakenAbs") === currentAbsNow) return false;
+            if (cHeldHere && c.heldSlotTakenAt(currentAbs)) return false;
             // The ending combatant re-enters the segment only via an unused held slot
             // or as the natural-DEX remainder of a just-ended Lightning Reflexes stop
             if (c.id === ending?.id && !cHeldHere && c.id !== lrRemainderId) return false;
@@ -1207,7 +1225,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 priority === endingPriority &&
                 !!ending &&
                 c.id !== ending.id &&
-                this.tieBreakOrder(c, ending, currentAbsNow) > 0
+                this.tieBreakOrder(c, ending, currentAbs) > 0
             );
         });
 
@@ -1229,13 +1247,13 @@ export class HeroSystem6eCombatSingle extends Combat {
             // Landing on a positional holder's declared slot marks it taken in the
             // same update, so ending that turn consumes the hold race-free
             const targetHold = target.heldAction;
-            if (targetHold?.mode === "position" && targetHold.segmentAbs === currentAbsNow) {
+            if (targetHold?.mode === "position" && targetHold.segmentAbs === currentAbs) {
                 const targetUpdate = inlineCombatantUpdates.find((u) => u._id === target.id);
-                if (targetUpdate) targetUpdate[`flags.${game.system.id}.heldSlotTakenAbs`] = currentAbsNow;
+                if (targetUpdate) targetUpdate[`flags.${game.system.id}.heldSlotTakenAbs`] = currentAbs;
                 else
                     inlineCombatantUpdates.push({
                         _id: target.id,
-                        [`flags.${game.system.id}.heldSlotTakenAbs`]: currentAbsNow,
+                        [`flags.${game.system.id}.heldSlotTakenAbs`]: currentAbs,
                     });
             }
 
@@ -1271,7 +1289,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                         this.eventLogAppendPayload([
                             this.buildEvent("turn.start", {
                                 combatant: target,
-                                abs: currentAbsNow,
+                                abs: currentAbs,
                                 data: { turnIndex: targetIndex, storedActingPriority: storedActingPriority ?? null },
                             }),
                         ]),
@@ -1302,10 +1320,10 @@ export class HeroSystem6eCombatSingle extends Combat {
                     // Declared aborts record the exact Phase they consume; bare statuses
                     // fall back to matching the ending segment
                     const spentAbs = c.abortSpentAbs;
-                    if (spentAbs !== null) return spentAbs <= currentAbsNow;
+                    if (spentAbs !== null) return spentAbs <= currentAbs;
                     return c.hasPhaseInSegment(activeSegment);
                 })
-                .map((c) => [c.id, c.abortSpentAbs ?? currentAbsNow]),
+                .map((c) => [c.id, c.abortSpentAbs ?? currentAbs]),
         );
 
         for (let check = 1; check <= 12; check++) {
@@ -1348,6 +1366,11 @@ export class HeroSystem6eCombatSingle extends Combat {
         }
 
         const nextAbs = nextRoundCycle * 12 + nextSegment;
+        // LIVE flag object, not _segmentRollsClone(): the fresh map written below
+        // must be visible to this call's own priority reads (getInitiativePriority
+        // re-reads the flag) before the update commits. The persisted payload is
+        // the explicit rollsDelta, so the clone helper's diff hazard does not
+        // apply here.
         const masterRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
         let updatedRollsCache = masterRollsCache[nextAbs];
 
@@ -1366,7 +1389,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (freshRollMap) rollsDelta[nextAbs] = freshRollMap;
         for (const key of Object.keys(masterRollsCache)) {
             const keyAbs = Number(key);
-            if (Number.isFinite(keyAbs) && keyAbs < currentAbsNow - 24) {
+            if (Number.isFinite(keyAbs) && keyAbs < currentAbs - ROLL_RETENTION_SEGMENTS) {
                 delete masterRollsCache[key];
                 rollsDelta[key] = foundry.data.operators.ForcedDeletion.create();
             }
@@ -1504,9 +1527,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (this.round === 1 && this.segment === 12 && (this.turn ?? 0) === 0) {
             console.log(`[${game.system.id}] Rewinding past initial turn boundary. Resetting encounter state...`);
 
-            if (typeof this._handleCombatStartReset === "function") {
-                await this._handleCombatStartReset();
-            }
+            await this._handleCombatStartReset();
 
             const resetPayload = { started: false, round: 0, turn: 0 };
             resetPayload[`flags.${game.system.id}.currentSegment`] = 12;
@@ -1526,13 +1547,14 @@ export class HeroSystem6eCombatSingle extends Combat {
         // the flag resets would erase it. When the most recent completed action
         // this segment was an LR stop, rewinding steps back ONTO it: the elevation
         // is restored and the stop becomes the active turn again.
-        const currentAbsWithin = this.round * 12 + activeSegment;
+        // Captured before the writes below move the combat position
+        const currentAbs = this.currentAbs;
         const currentPriority =
             this.getFlag(game.system.id, "actingPriority") ??
             (this.combatant ? this.getInitiativePriority(this.combatant, activeSegment) : -Infinity);
         const spentLrStops = allCombatants
             .map((c) => ({ combatant: c, spent: c.getFlag(game.system.id, "spentLrPosition") }))
-            .filter(({ spent }) => spent?.segmentAbs === currentAbsWithin && spent.priority > currentPriority)
+            .filter(({ spent }) => spent?.segmentAbs === currentAbs && spent.priority > currentPriority)
             .sort((a, b) => a.spent.priority - b.spent.priority);
         if (spentLrStops.length > 0) {
             const { combatant: stop, spent } = spentLrStops[0];
@@ -1544,7 +1566,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 // still-stale index must not paint before the pointer lands
                 await stop.update(
                     {
-                        [`flags.${game.system.id}.lrElevatedAbs`]: currentAbsWithin,
+                        [`flags.${game.system.id}.lrElevatedAbs`]: currentAbs,
                         [`flags.${game.system.id}.spentLrPosition`]: null,
                     },
                     { render: false },
@@ -1558,7 +1580,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 Object.assign(
                     payload,
                     this.eventLogAppendPayload([
-                        this.buildEvent("rewind", { combatant: stop, data: { targetAbs: currentAbsWithin } }),
+                        this.buildEvent("rewind", { combatant: stop, data: { targetAbs: currentAbs } }),
                     ]),
                 );
                 return this.update(payload, { direction: -1, previousCombatantId: previousId });
@@ -1581,11 +1603,11 @@ export class HeroSystem6eCombatSingle extends Combat {
                 this.eventLogAppendPayload([
                     this.buildEvent("rewind", {
                         combatant: targetCombatant,
-                        data: { targetAbs: this.round * 12 + activeSegment },
+                        data: { targetAbs: currentAbs },
                     }),
                 ]),
             );
-            const rewindResets = this._rewindHoldFlagResets(this.round * 12 + activeSegment, { targetPriority });
+            const rewindResets = this._rewindHoldFlagResets(currentAbs, { targetPriority });
 
             return this.update(
                 { ...inlineUpdateData, combatants: rewindResets },
@@ -1607,9 +1629,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 prevRoundCycle -= 1;
 
                 if (prevRoundCycle < 1) {
-                    if (typeof this._handleCombatStartReset === "function") {
-                        await this._handleCombatStartReset();
-                    }
+                    await this._handleCombatStartReset();
 
                     const resetPayload = { started: false, round: 0, turn: 0 };
                     resetPayload[`flags.${game.system.id}.currentSegment`] = 12;
@@ -1722,7 +1742,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         // The landing position is a fresh absolute segment: roll its tie-breaks
         // (nextTurn's cross-segment block never runs on a full-Turn skip)
         const landingAbs = (this.round + 1) * 12 + this.segment;
-        const roundRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
+        const roundRollsCache = this._segmentRollsClone();
         if (!roundRollsCache[landingAbs]) {
             roundRollsCache[landingAbs] = this._buildSegmentRollMap();
             // Flag updates merge: sending only the new entry avoids re-writing the map
@@ -1812,10 +1832,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const resets = [];
         for (const combatant of this.combatants) {
             const update = {};
-            if (
-                combatant.heldAction?.mode === "position" &&
-                (combatant.getFlag(game.system.id, "heldSlotTakenAbs") ?? -1) >= targetAbs
-            ) {
+            if (combatant.heldAction?.mode === "position" && (combatant.heldSlotTakenAbs ?? -1) >= targetAbs) {
                 update[`flags.${game.system.id}.heldSlotTakenAbs`] = null;
             }
             // Declared LR elevations survive rewinds outright: the flag is bound to
@@ -1943,7 +1960,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         await this.setFlag(game.system.id, "recoveredRounds", [...recoveredRounds, roundToRecover]);
         await this.logEvent("recovery.post12", { data: { round: roundToRecover } });
 
-        const automation = game.settings.get(game.system.id, "automation");
+        const automation = _getSetting("automation", "none");
 
         let content = `Post-Segment 12 (Turn ${roundToRecover})<ul>`;
         let contentHidden = `Post-Segment 12 (Turn ${roundToRecover})<ul>`;
@@ -2095,7 +2112,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 await this._maintainSpdChanges();
                 await this._clearSpentHoldPositions();
                 await this._demotePassedPositionalHolds();
-                if (turnAdvance) await this._consumeExpiredHeldActions(null);
+                if (turnAdvance) await this._consumeExpiredHeldActions();
                 await this._clearExpiredAborts(elapsedSegments);
             }
 
@@ -2117,9 +2134,9 @@ export class HeroSystem6eCombatSingle extends Combat {
                 // taken.
                 const hold = previousCombatant.heldAction;
                 if (hold?.mode === "position") {
-                    const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+                    const currentAbs = this.currentAbs;
                     if (hold.segmentAbs === currentAbs) {
-                        const slotTaken = previousCombatant.getFlag(game.system.id, "heldSlotTakenAbs") === currentAbs;
+                        const slotTaken = previousCombatant.heldSlotTakenAt(currentAbs);
                         if (slotTaken) {
                             await this._spendHold(previousCombatant, { used: true });
                         } else if (hold.declaredAbs !== currentAbs) {
@@ -2148,11 +2165,8 @@ export class HeroSystem6eCombatSingle extends Combat {
             // write it (player-initiated advances only persist combatants they own)
             const activeHold = activeCombatant?.heldAction;
             if (activeHold?.mode === "position") {
-                const nowAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
-                if (
-                    activeHold.segmentAbs === nowAbs &&
-                    activeCombatant.getFlag(game.system.id, "heldSlotTakenAbs") !== nowAbs
-                ) {
+                const nowAbs = this.currentAbs;
+                if (activeHold.segmentAbs === nowAbs && !activeCombatant.heldSlotTakenAt(nowAbs)) {
                     await activeCombatant.setFlag(game.system.id, "heldSlotTakenAbs", nowAbs);
                 }
             }
@@ -2175,12 +2189,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             // OUT of the chain: nextTurn settles maintenance and would self-
             // deadlock awaiting the very chain running it (cf. LR auto-elevate).
             if (!isResync && activeCombatant?.actor?.statuses.has("stunned")) {
-                let stunnedAutoSkip = false;
-                try {
-                    stunnedAutoSkip = !!game.settings.get(game.system.id, "stunnedAutoSkip");
-                } catch (e) {
-                    console.warn(`Unable to read the stunned auto-skip setting`, e);
-                }
+                const stunnedAutoSkip = !!_getSetting("stunnedAutoSkip", false);
                 if (stunnedAutoSkip) {
                     const stunnedId = activeCombatant.id;
                     setTimeout(() => {
@@ -2488,7 +2497,19 @@ export class HeroSystem6eCombatSingle extends Combat {
      *     label, itemUuid, declaredAbs, resolveAbs,
      *     priority,          // marker position in the landing segment; null = very end
      *     commit,            // true = no other Actions until it resolves (Extra Phase)
-     *     targetTokenIds? }
+     *     targetTokenIds,    // live targets at declaration
+     *     actionData? }      // roll-at-landing attacks only; rides to the landing card
+     *
+     * actionData (built by buildDelayedActionData in item-attack.mjs) is the replay
+     * contract the landing card's roll/fail buttons consume:
+     *
+     *   { formData,          // sanitized dialog inputs (primitives only)
+     *     targetTokenIds, userId,
+     *     itemJson,          // dehydrateAttackItem snapshot — stringified ONCE
+     *     originalItemUuid, actorUuid,
+     *     prepaid }          // Extra Time paid resources at declaration; the replay
+     *                        // passes prepaid+noResourceUse so nothing is re-charged.
+     *                        // Haymakers set false — END is paid with the landing roll.
      *
      * The timeline shows a marker row in the landing segment; resolution happens in
      * the pointer-move maintenance chain; a chat Cancel button covers interruption
@@ -2527,7 +2548,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const combatant = this.combatantForActor(actor);
         if (!combatant) return null;
 
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const currentAbs = this.currentAbs;
         const characteristicKey = actor.system?.initiativeCharacteristic ?? "dex";
         const dex = actor.system?.characteristics?.[characteristicKey]?.value ?? 10;
         const optionId = extraTime.OPTIONID ?? "";
@@ -2622,7 +2643,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             return null;
         }
         const id = foundry.utils.randomID();
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const currentAbs = this.currentAbs;
         const record = {
             kind: plan.kind,
             label: plan.label,
@@ -2662,7 +2683,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async scheduleHaymaker(actor, item = null) {
         if (!this.started || !actor) return false;
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const currentAbs = this.currentAbs;
         const id = await this.scheduleDelayedAction(
             actor,
             {
@@ -2758,7 +2779,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async _resolveDelayedActions() {
         if (!this.started) return;
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const currentAbs = this.currentAbs;
         const actingPriority = this.getFlag(game.system.id, "actingPriority");
         const activeId = this.combatant?.id ?? null;
         for (const combatant of this.combatants) {
@@ -2813,10 +2834,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         // must still apply to the roll, and the attack flow's own tail turns the
         // maneuver off once the attack has rolled
         if (record.kind === "haymaker" && (cancelled || !record.actionData)) {
-            const haymakerEffect = actor?.effects.find((e) => e.statuses.has("haymaker"));
-            if (haymakerEffect) await haymakerEffect.delete();
-            const haymakerItem = actor?.items.find((i) => i.system?.XMLID === "HAYMAKER" && i.isActive);
-            if (haymakerItem) await haymakerItem.toggle({ token: combatant.token });
+            await endHaymakerManeuver(actor, { token: combatant.token });
         }
 
         let outcome;
@@ -2988,7 +3006,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (survivors.length === 0) return;
 
         // 2. Backfill tie-break rolls (and member sub-rolls) for every recorded position
-        const masterRollsCache = foundry.utils.deepClone(this.getFlag(game.system.id, "segmentRolls") ?? {});
+        const masterRollsCache = this._segmentRollsClone();
         const rollsDirty = this._backfillTieRolls(masterRollsCache, survivors);
 
         // 3. Stale effect reconciliation: hold/abort records bound to a combatant
@@ -3073,14 +3091,14 @@ export class HeroSystem6eCombatSingle extends Combat {
             // The active combatant was deleted: select the next actor below the
             // recorded acting position, exactly as nextTurn's threshold does
             const segment = this.segment;
-            const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, segment);
+            const currentAbs = this.currentAbs;
             const priorPriority = this.getFlag(game.system.id, "actingPriority");
             const candidates = this.combatants.contents
                 .filter((c) => {
                     if (!this._takesTurnInSegment(c, segment, { queryAbs: currentAbs })) return false;
                     const hold = c.heldAction;
                     const heldHere = hold?.mode === "position" && hold.segmentAbs === currentAbs;
-                    if (heldHere && c.getFlag(game.system.id, "heldSlotTakenAbs") === currentAbs) return false;
+                    if (heldHere && c.heldSlotTakenAt(currentAbs)) return false;
                     if (priorPriority === null || priorPriority === undefined) return true;
                     return this.getInitiativePriority(c, segment) < priorPriority;
                 })
@@ -3121,8 +3139,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (!actor || !hold) return;
         if (combatant.id === previousCombatantId) {
             const declaredAbs = hold.declaredAbs;
-            const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
-            if (declaredAbs === undefined || declaredAbs >= currentAbs) return;
+            if (declaredAbs === undefined || declaredAbs >= this.currentAbs) return;
         }
         if (!combatant.hasPhaseInSegment(this.segment)) return;
         // Positional holds expire with their slot, never at a natural Phase
@@ -3150,7 +3167,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     async _maintainSpdChanges() {
         if (!this.started) return;
 
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const currentAbs = this.currentAbs;
         const combatantUpdates = [];
 
         for (const combatant of this.combatants) {
@@ -3346,7 +3363,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const rawKnown = combatant.getFlag(game.system.id, "knownSpd");
         const known =
             typeof rawKnown === "object" && rawKnown !== null ? rawKnown : { effective: rawKnown, source: rawKnown };
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const currentAbs = this.currentAbs;
         const sourceSpd = Number(combatant.actor?._source?.system?.characteristics?.spd?.value);
         const update = {
             _id: combatant.id,
@@ -3368,11 +3385,11 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async _demotePassedPositionalHolds() {
         if (!this.started) return;
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const currentAbs = this.currentAbs;
         for (const combatant of this.combatants) {
             const hold = combatant.heldAction;
             if (hold?.mode !== "position" || hold.segmentAbs >= currentAbs) continue;
-            const used = combatant.getFlag(game.system.id, "heldSlotTakenAbs") === hold.segmentAbs;
+            const used = combatant.heldSlotTakenAt(hold.segmentAbs);
             if (used) {
                 // The segment moved on, so there is no acted position left to display
                 await this._spendHold(combatant, { used: true, retainPosition: false });
@@ -3425,7 +3442,7 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async _clearSpentHoldPositions() {
         if (!this.started) return;
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const currentAbs = this.currentAbs;
         for (const combatant of this.combatants) {
             const spent = combatant.spentHoldPosition;
             if (spent && spent.segmentAbs < currentAbs) {
@@ -3508,21 +3525,16 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
-     * Removes the held-action status from every combatant whose natural speed-chart
-     * Phase falls in the segment that just began; their Phase replaces the hold.
-     * Only invoked for full-Turn skips (segment === null); per-turn clearing lives in
-     * _consumeActiveCombatantHold. The segment parameter is kept for the strict-RAW
-     * null zone should it return as a setting.
-     * @param {number|null} segment - Segment that just began, or null when a full Turn elapsed
+     * Removes the held-action status from every combatant: only invoked for
+     * full-Turn skips, where every SPD 1-12 had a Phase that replaces the hold.
+     * Per-turn clearing lives in _consumeActiveCombatantHold.
      * @private
      */
-    async _consumeExpiredHeldActions(segment) {
+    async _consumeExpiredHeldActions() {
         for (const combatant of this.combatants) {
             const actor = combatant.actor;
             const hold = combatant.heldAction;
             if (!actor || !hold) continue;
-            // segment === null: a full Turn elapsed, so every SPD 1-12 had a Phase
-            if (segment !== null && !combatant.hasPhaseInSegment(segment)) continue;
 
             const holdingEffect = combatant.heldActionEffect;
             if (!holdingEffect) continue;
@@ -3530,10 +3542,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             // The hold is consumed by the rule, not by a duration, so delete it explicitly
             await holdingEffect.delete();
 
-            await this._combatCard(
-                combatant,
-                `${actor.name}'s Held Action was consumed by their natural Phase${segment !== null ? ` in ${this.currentPhaseLabel}` : ""}.`,
-            );
+            await this._combatCard(combatant, `${actor.name}'s Held Action was consumed by their natural Phase.`);
             await this.logEvent("hold.consume", { combatant, data: { mode: hold.mode ?? null } });
         }
     }
@@ -3549,7 +3558,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     async _clearExpiredAborts(elapsedSegments) {
         if (elapsedSegments === undefined) return;
 
-        const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const currentAbs = this.currentAbs;
         for (const combatant of this.combatants) {
             const actor = combatant.actor;
             const abortedEffect = combatant.abortEffect;
@@ -3625,24 +3634,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             await actor.updateEmbeddedDocuments("ActiveEffect", updatesToApply);
         }
     }
-
-    /**
-     * Recalculates and flushes initiative values for all combatants.
-     * Commits the refresh as one canonical embedded-array update.
-     * @returns {Promise<Document>} The updated parent Combat document instance
-     */
-    async updateCodeInitiatives() {
-        const combatantUpdates = [];
-
-        this.combatants.forEach((combatant) => {
-            combatantUpdates.push({
-                _id: combatant.id,
-                initiative: this.getInitiativePriority(combatant),
-            });
-        });
-
-        return this.update({ combatants: combatantUpdates });
-    }
 }
 
 // Legacy combatant/combat bookkeeping keys the single-combatant model does not use,
@@ -3703,12 +3694,7 @@ export async function migrateCombatsToSingleCombatantTracker({ dryRun = false, f
         ui.notifications.warn(`Only a GM can migrate combats.`);
         return [];
     }
-    let singleTrackerActive = false;
-    try {
-        singleTrackerActive = game.settings.get(game.system.id, "singleCombatantTracker");
-    } catch (e) {
-        console.warn(`Unable to read the single combatant tracker settings`, e);
-    }
+    const singleTrackerActive = _getSetting("singleCombatantTracker", false);
     if (!singleTrackerActive && !force) {
         ui.notifications.warn(
             `Enable the Single Combatant Tracker (alpha) setting and reload before migrating, or pass { force: true }.`,
