@@ -497,7 +497,10 @@ ol.combat-tracker.plain {
    portrait — compact drops the portrait, flows name/effects/initiative onto one
    line, and reveals the control buttons only on hover. The active combatant,
    segment headers, and the held panel keep their full-size treatment. */
-.hero-single-tracker.hero-compact li.combatant.timeline-member:not(.active) {
+/* :not(.segment-member-hidden): collapsed segments zero their members' padding
+   (max-height animation); re-applying the compact padding at higher specificity
+   leaked spacing under every collapsed header */
+.hero-single-tracker.hero-compact li.combatant.timeline-member:not(.active):not(.segment-member-hidden) {
     padding-block: 1px;
     min-height: 0;
 
@@ -512,7 +515,12 @@ ol.combat-tracker.plain {
         column-gap: 6px;
         font-size: var(--font-size-12);
 
-        strong {
+        /* The name owns the line: it grows into free space and only ellipsizes
+           when genuinely out of room — icons must never squeeze it out */
+        strong,
+        .name {
+            flex: 1 1 auto;
+            min-width: 0;
             font-size: var(--font-size-12);
             line-height: 1.5;
         }
@@ -534,10 +542,12 @@ ol.combat-tracker.plain {
         font-size: var(--font-size-10);
     }
 
-    /* Status icons stay glanceable inline */
+    /* Status icons stay glanceable inline, sized to content — never growing at
+       the name's expense */
     .token-effects {
         display: flex;
         align-items: center;
+        flex: 0 0 auto;
         gap: 1px;
 
         img.token-effect {
