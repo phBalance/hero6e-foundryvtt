@@ -1337,7 +1337,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             : (segmentChoices[0]?.abs ?? null);
         const initialAnchorId = initial?.mode === "position" ? (initial.anchor?.combatantId ?? null) : null;
         const initialRelation = initial?.anchor?.relation === "before" ? "before" : "after";
-        const initialKind = initialAnchorId ? "anchor" : "dex";
+        // Anchoring is the friendlier default; only a redeclared numeric hold opens
+        // on the DEX branch. An unanchorable segment flips to DEX at render time.
+        const initialKind = initialAnchorId || initial?.mode !== "position" ? "anchor" : "dex";
 
         const positionOption = segmentChoices.length
             ? `<label><input type="radio" name="hold-mode" value="position" ${checkedMode === "position" ? "checked" : ""}> Until a position</label>
@@ -1351,10 +1353,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                        .join("")}</select>
                </div>
                <div class="form-group">
-                   <label><input type="radio" name="hold-position-kind" value="dex" ${initialKind === "dex" ? "checked" : ""}> At a DEX count</label>
-                   <input type="number" name="hold-dex" value="${defaultDexValue}" min="0" max="99.99" step="0.01">
-               </div>
-               <div class="form-group">
                    <label><input type="radio" name="hold-position-kind" value="anchor" ${initialKind === "anchor" ? "checked" : ""}> Next to a combatant</label>
                    <select name="hold-anchor">${anchorOptionsHTML(selectedSegmentAbs, initialAnchorId)}</select>
                </div>
@@ -1362,7 +1360,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                    <label><input type="radio" name="hold-anchor-relation" value="after" ${initialRelation === "after" ? "checked" : ""}> Right after</label>
                    <label><input type="radio" name="hold-anchor-relation" value="before" ${initialRelation === "before" ? "checked" : ""}> Right before</label>
                </div>
-               <p class="hint">Next to a combatant re-enters exactly adjacent to wherever they act. At a DEX count, decimals pin the exact tie-break position (e.g. 13.12); whole numbers get a random tie-break.</p>`
+               <div class="form-group">
+                   <label><input type="radio" name="hold-position-kind" value="dex" ${initialKind === "dex" ? "checked" : ""}> At a DEX count</label>
+                   <input type="number" name="hold-dex" value="${defaultDexValue}" min="0" max="99.99" step="0.01">
+               </div>`
             : "";
         const content = `<fieldset class="hero-hold-dialog">
             <legend>Hold until</legend>
