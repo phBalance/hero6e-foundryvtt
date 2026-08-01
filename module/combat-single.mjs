@@ -3,11 +3,7 @@ import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs
 import { expireManeuverNextPhaseEffects } from "./item/maneuver.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-resources.mjs";
 import { promptToDeleteAoeInstantRegions } from "./combat.mjs";
-import { expireEffects, gmActive, toHHMMSS, whisperUserTargetsForActor } from "./utility/util.mjs";
-
-/** Forced-deletion payload for the given flag keys (replaces the pre-V14 "-=key" syntax). */
-const forceDeleteKeys = (keys) =>
-    Object.fromEntries(keys.map((key) => [key, foundry.data.operators.ForcedDeletion.create()]));
+import { expireEffects, forceDeleteKeys, gmActive, toHHMMSS, whisperUserTargetsForActor } from "./utility/util.mjs";
 
 export class HeroSystem6eCombatSingle extends Combat {
     /**

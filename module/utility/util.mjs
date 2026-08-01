@@ -601,6 +601,18 @@ export function getTokenUuid(token) {
 }
 
 /**
+ * Forced-deletion update payload for the given keys (V14's replacement for the
+ * pre-V14 "-=key" syntax): each key maps to a ForcedDeletion operator so a
+ * document update removes it outright instead of merging.
+ *
+ * @param {string[]} keys - Field names (unprefixed) to delete
+ * @returns {Record<string, object>}
+ */
+export function forceDeleteKeys(keys) {
+    return Object.fromEntries(keys.map((key) => [key, foundry.data.operators.ForcedDeletion.create()]));
+}
+
+/**
  * Given information, find the best guess for the token in the scene which we should use.
  *
  * NOTE: Typically we want the token that is making an attack or receiving the attack so that we can
