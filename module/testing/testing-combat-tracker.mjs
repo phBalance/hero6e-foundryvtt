@@ -2383,6 +2383,43 @@ export function registerCombatTests(quench) {
                     }
                 });
 
+                it("Should skip an out-of-turn abort's spent Phase and clear the status after it passes", async function () {
+                    const savedAutomation = game.settings.get(game.system.id, "automation");
+                    const alpha = await makeActor("_Quench Abort Alpha", { dex: 20, spd: 2 });
+                    const dodger = await makeActor("_Quench Dodger", { dex: 10, spd: 2 });
+                    try {
+                        await game.settings.set(game.system.id, "automation", "none");
+                        const combat = await makeCombat([alpha, dodger]);
+                        await combat.startCombat();
+                        expect(combat.segment).to.equal(12);
+                        expect(combat.combatant.actorId).to.equal(alpha.id);
+
+                        // Dodger aborts out of turn (the dodge-toggle prompt path calls
+                        // _declareAbort exactly like this). SPD 2 at T1S12: the spent
+                        // Phase is THIS segment's (abs 24)
+                        const dodgerCombatant = combat.combatants.find((c) => c.actorId === dodger.id);
+                        const applied = await ui.combat._declareAbort(dodgerCombatant, { toAction: "Dodge" });
+                        expect(applied, "abort declared").to.be.true;
+                        expect(dodger.statuses.has("aborted")).to.be.true;
+                        expect(dodgerCombatant.abortSpentAbs, "spent Phase is this segment's").to.equal(24);
+
+                        // Alpha ends their turn: the dodger's Phase this segment is the
+                        // spent one — the pointer must NOT land on them
+                        await combat.nextTurn();
+                        const skipped = await waitUntil(
+                            () => combat.combatant?.actorId === alpha.id && combat.segment === 6,
+                        );
+                        expect(skipped, "advance skipped the aborted Phase to T2S6").to.be.true;
+                        expect(combat.round).to.equal(2);
+
+                        // The spent segment has passed: boundary maintenance clears the status
+                        const cleared = await waitUntil(() => !dodger.statuses.has("aborted"));
+                        expect(cleared, "aborted status cleared once the spent Phase passed").to.be.true;
+                    } finally {
+                        await game.settings.set(game.system.id, "automation", savedAutomation);
+                    }
+                });
+
                 it("Should create combatants hidden for invisible actors, explicit hidden wins (#4466)", async function () {
                     const ghost = await makeActor("_Quench Ghost", { dex: 10, spd: 2 });
                     await ghost.toggleStatusEffect("invisible", { active: true });
