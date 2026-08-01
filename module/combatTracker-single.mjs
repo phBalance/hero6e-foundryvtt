@@ -880,7 +880,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         row.name = `⏳ ${row.name} (held)`;
                     } else if (!isPast && combatant.spentHoldAtAbs(abs)) {
                         row.css = `${row.css} is-holding-action`.trim();
-                        row.name = `${row.name} (acted)`;
+                        // Present tense while the used Held Action is still the active
+                        // turn; past tense once the pointer has moved on (#4603)
+                        const acting = combatant.id === activeCombatantId && abs === currentAbs;
+                        row.name = `${row.name} (${acting ? "acting" : "acted"})`;
                     } else if (
                         !isPast &&
                         (combatant.abortSpentAbs === abs ||
