@@ -264,7 +264,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 if (effect.getFlag(game.system.id, "abort")) return;
                 if (isQuenchTestRunning()) return;
                 const tracker = ui.combat;
-                if (!(tracker instanceof HeroSystem6eCombatTrackerSingle) || tracker._abortFlowActive) return;
+                if (!(tracker instanceof HeroSystem6eCombatTrackerSingle)) return;
+                if (HeroSystem6eCombatTrackerSingle._abortFlowActive) return;
                 const combat = tracker.viewed;
                 if (!combat?.started) return;
                 const actor = effect.parent;
@@ -2281,12 +2282,13 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         // Latched for the whole declaration: the defense toggle re-enters
         // promptOutOfTurnAbortForManeuver, and creating the aborted status fires
         // the bare-status-toggle hook — neither may re-prompt for the abort this
-        // very flow is declaring
-        this._abortFlowActive = true;
+        // very flow is declaring. STATIC: popouts are separate instances of this
+        // class, but the hook and prompt read the latch through the class.
+        HeroSystem6eCombatTrackerSingle._abortFlowActive = true;
         try {
             return await this.#declareAbortInner(combatant, options);
         } finally {
-            this._abortFlowActive = false;
+            HeroSystem6eCombatTrackerSingle._abortFlowActive = false;
         }
     }
 

@@ -1292,9 +1292,10 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         // An abort spends the combatant's next Phase: the scan passes over that Phase's
         // segment, after which they count as able to act again (the status itself is
-        // cleared by _clearExpiredAborts once those segments have elapsed). Aborted
-        // combatants with a Phase in the segment now ending have already spent it.
-        const abortSpentIds = new Set(
+        // cleared by _clearExpiredAborts once those segments have elapsed). Keyed
+        // id → the abs the Phase was consumed at, so target selection can re-admit
+        // strictly past it — including bare statuses, which record no spentAbs.
+        const abortSpentIds = new Map(
             allCombatants
                 .filter((c) => {
                     if (!c.abortEffect) return false;
@@ -1304,7 +1305,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                     if (spentAbs !== null) return spentAbs <= currentAbsNow;
                     return c.hasPhaseInSegment(activeSegment);
                 })
-                .map((c) => c.id),
+                .map((c) => [c.id, c.abortSpentAbs ?? currentAbsNow]),
         );
 
         for (let check = 1; check <= 12; check++) {
@@ -1323,7 +1324,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                     const spentAbs = c.abortSpentAbs;
                     const spendsHere =
                         spentAbs !== null ? spentAbs <= scanAbs : c.hasPhaseInSegment(nextSegment, scanAbs);
-                    if (spendsHere) abortSpentIds.add(c.id);
+                    if (spendsHere) abortSpentIds.set(c.id, spentAbs ?? scanAbs);
                     return false;
                 }
                 // The ending combatant's taken held slot is spent by the post-update
@@ -1376,11 +1377,12 @@ export class HeroSystem6eCombatSingle extends Combat {
         let targetCombatantId = null;
         const upcomingActors = allCombatants.filter((c) =>
             this._takesTurnInSegment(c, nextSegment, {
-                // Only a STRICTLY-PAST spent Phase re-admits the aborter: an abort
+                // Only a STRICTLY-PAST consumed Phase re-admits the aborter: an abort
                 // spending exactly at the landing segment is being consumed here —
                 // re-admitting would hand the aborter a stop at the very Phase the
-                // abort consumed (and phase-start work would expire their defenses)
-                ignoreAbort: abortSpentIds.has(c.id) && c.abortSpentAbs !== null && c.abortSpentAbs < nextAbs,
+                // abort consumed (and phase-start work would expire their defenses).
+                // The Map value covers bare statuses too, which record no spentAbs.
+                ignoreAbort: (abortSpentIds.get(c.id) ?? Infinity) < nextAbs,
                 queryAbs: nextAbs,
                 ignoreHold: c.id === ending?.id && endingAtHeldSlot,
             }),

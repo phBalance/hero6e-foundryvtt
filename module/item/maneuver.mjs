@@ -151,7 +151,7 @@ export async function promptOutOfTurnAbortForManeuver(item) {
         if (!combat?.started || typeof tracker._declareAbort !== "function") return;
         // The tracker's own abort flow toggles the defense maneuver as part of
         // declaring — that toggle must not re-prompt
-        if (tracker._abortFlowActive) return;
+        if (tracker.constructor?._abortFlowActive) return;
         if (combat.combatant?.actor === actor) return;
         const combatant =
             combat.combatants.find((c) => c.actor === actor) ?? combat.combatants.find((c) => c.actorId === actor.id);
