@@ -2419,6 +2419,57 @@ export function registerCombatTests(quench) {
                     }
                 });
 
+                it("Should honor the opening tie rolls: startCombat's pointer and threshold match live scoring", async function () {
+                    const a = await makeActor("_Quench Open Tie A", { dex: 20, spd: 2 });
+                    const b = await makeActor("_Quench Open Tie B", { dex: 20, spd: 2 });
+                    const combat = await makeCombat([a, b]);
+                    await combat.startCombat();
+
+                    const startAbs = 1 * 12 + 12;
+                    // The committed pointer must be the live-sorted leader, and the
+                    // stored threshold must equal the leader's live priority — a
+                    // rolls-blind start scores both at the 0.50 default instead
+                    const active = combat.combatant;
+                    expect(active, "an active combatant was selected").to.exist;
+                    for (const c of combat.combatants) {
+                        const live = combat.getInitiativePriority(c, 12, { queryAbs: startAbs });
+                        expect(c.initiative, `${c.name} persisted initiative matches live scoring`).to.equal(live);
+                    }
+                    const leader = [...combat.combatants].sort(
+                        (x, y) =>
+                            combat.getInitiativePriority(y, 12, { queryAbs: startAbs }) -
+                            combat.getInitiativePriority(x, 12, { queryAbs: startAbs }),
+                    )[0];
+                    expect(active.id, "pointer sits on the tie-roll leader").to.equal(leader.id);
+                    expect(combat.getFlag(game.system.id, "actingPriority"), "threshold matches the leader").to.equal(
+                        combat.getInitiativePriority(leader, 12, { queryAbs: startAbs }),
+                    );
+                });
+
+                it("Should prune segment-roll maps outside the two-Turn rewind window", async function () {
+                    const a = await makeActor("_Quench Prune A", { dex: 20, spd: 2 });
+                    const b = await makeActor("_Quench Prune B", { dex: 10, spd: 2 });
+                    const combat = await makeCombat([a, b]);
+                    await combat.startCombat();
+                    expect(combat.getFlag(game.system.id, "segmentRolls")?.[24], "opening map exists").to.exist;
+
+                    // Jump three full Turns (abs 24 → 60), then one cross-segment
+                    // advance so the prune runs with the opening map far outside
+                    // the currentAbs - 24 window
+                    await combat.nextRound();
+                    await combat.nextRound();
+                    await combat.nextRound();
+                    // Both actors act in Segment 12: the first advance is within the
+                    // segment, the second crosses out of it and runs the prune
+                    await combat.nextTurn();
+                    await combat.nextTurn();
+                    const pruned = await waitUntil(() => {
+                        const rolls = combat.getFlag(game.system.id, "segmentRolls") ?? {};
+                        return rolls["24"] === undefined && rolls[24] === undefined;
+                    });
+                    expect(pruned, "the opening abs-24 roll map was deleted from the flag").to.be.true;
+                });
+
                 it("Should adopt a bare aborted status into the declaration instead of bailing", async function () {
                     const savedAutomation = game.settings.get(game.system.id, "automation");
                     const alpha = await makeActor("_Quench Adopt Alpha", { dex: 20, spd: 2 });
