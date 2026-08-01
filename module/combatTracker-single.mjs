@@ -586,11 +586,13 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                               id: combatant.id,
                               _id: combatant.id,
                               name: combatant.name,
-                              img: combatant.img ?? combatant.actor?.img ?? "icons/svg/mystery-man.svg",
                               hidden: combatant.hidden,
                               defeated: combatant.isDefeated,
                               css: "",
                           };
+                    // || not ??: an import without an image stores "" which would
+                    // otherwise render as a broken <img> showing its alt text (#2657)
+                    row.img = row.img || combatant.img || combatant.actor?.img || "icons/svg/mystery-man.svg";
                     row.initiative = null;
                     row.hasRolled = true;
                     row.active = false;
@@ -681,7 +683,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     row.id = rowId;
                     row._id = rowId;
                     row.name = `${h.name}${kindLabel}`;
-                    row.img = h.img ?? row.img ?? "icons/svg/mystery-man.svg";
+                    row.img = h.img || row.img || "icons/svg/mystery-man.svg";
                     row.initiative = (h.priority ?? 0).toFixed(2);
                     row.hasRolled = true;
                     row.active = false;
@@ -797,11 +799,13 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                               id: combatant.id,
                               _id: combatant.id,
                               name: combatant.name,
-                              img: combatant.img ?? combatant.actor?.img ?? "icons/svg/mystery-man.svg",
                               hidden: combatant.hidden,
                               defeated: combatant.isDefeated,
                               css: "",
                           };
+                    // || not ??: an import without an image stores "" which would
+                    // otherwise render as a broken <img> showing its alt text (#2657)
+                    row.img = row.img || combatant.img || combatant.actor?.img || "icons/svg/mystery-man.svg";
 
                     // Pull the calculated priority score from the source-of-truth document method so
                     // Handlebars draws the number instead of the d20 roll button
@@ -1183,6 +1187,28 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     return !!getCombatant(li)?.getFlag(game.system.id, "soloTieRoll");
                 },
                 onClick: (event, li) => this.viewed?.setCombatantSoloTieRoll?.(li.dataset.combatantId, false),
+            },
+            {
+                label: "Remove Group from Combat",
+                icon: "fa-solid fa-users-slash",
+                visible: (li) => {
+                    if (!game.user.isGM) return false;
+                    const combatant = getCombatant(li);
+                    const combat = this.viewed;
+                    if (!combatant || !combat?._tieRollKey) return false;
+                    // Same membership rule the ×N display grouping uses; split-out
+                    // (solo) members are their own group and keep the single remove
+                    const key = combat._tieRollKey(combatant);
+                    return combat.combatants.filter((c) => combat._tieRollKey(c) === key).length > 1;
+                },
+                onClick: async (event, li) => {
+                    const combat = this.viewed;
+                    const combatant = combat?.combatants.get(li.dataset.combatantId);
+                    if (!combatant || !game.user.isGM) return;
+                    const key = combat._tieRollKey(combatant);
+                    const ids = combat.combatants.filter((c) => combat._tieRollKey(c) === key).map((c) => c.id);
+                    await combat.deleteEmbeddedDocuments("Combatant", ids);
+                },
             },
             {
                 label: "Act Early (Lightning Reflexes)",

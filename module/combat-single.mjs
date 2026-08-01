@@ -824,6 +824,14 @@ export class HeroSystem6eCombatSingle extends Combat {
     async startCombat() {
         console.log(`[${game.system.id}] Initializing Hero System Turn 1 at Segment 12...`);
 
+        // A reused Combat document (core Reset, prior run) still carries the last
+        // run's flags — holds, ledger, SPD baselines — and the fresh ledger events
+        // below would append onto the old log's history (#2669)
+        const priorRun =
+            this.getFlag(game.system.id, "currentSegment") !== undefined ||
+            this.getFlag(game.system.id, "eventLog") !== undefined;
+        if (priorRun) await this._handleCombatStartReset({ notify: false });
+
         const startPayload = { round: 1, started: true };
         startPayload[`flags.${game.system.id}.currentSegment`] = 12;
         startPayload[`flags.${game.system.id}.recoveredRounds`] = [];
@@ -1935,8 +1943,8 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @returns {Promise<HeroCombat>}
      * @private
      */
-    async _handleCombatStartReset() {
-        ui.notifications.info(`[${game.system.id}] Resetting combat encounter to default startup state.`);
+    async _handleCombatStartReset({ notify = true } = {}) {
+        if (notify) ui.notifications.info(`[${game.system.id}] Resetting combat encounter to default startup state.`);
 
         // 1. Prepare child collection updates to reset initiatives back to null (dice icons)
         const combatantUpdates = [];

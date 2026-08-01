@@ -987,6 +987,15 @@ function actorHasTemporaryEffects(actor) {
     return false;
 }
 
+// The tracker derives row names and images live from the token, but core only
+// re-renders it on combat/actor updates — a token rename or art swap otherwise
+// waits for the next unrelated render (#3319, #3727)
+Hooks.on("updateToken", (tokenDoc, change) => {
+    if (!("name" in change) && !foundry.utils.hasProperty(change, "texture.src")) return;
+    if (!ui.combat?.viewed?.combatants.some((c) => c.tokenId === tokenDoc.id)) return;
+    ui.combat.render();
+});
+
 // Foundry does not await async hook callbacks, so rapid time advances (combat clicking,
 // large calendar jumps) can otherwise overlap and double-process the same effects.
 let worldTimeWorkChain = Promise.resolve();
