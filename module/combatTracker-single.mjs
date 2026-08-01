@@ -227,9 +227,33 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     });
                     controls.prepend(button);
                 });
+
+            // The row template's Delay button has no handler in core or the
+            // system — in HERO, "delaying" IS declaring a Held Action (6E2 20),
+            // so route it to the hold dialog
+            element.querySelectorAll('button[data-action="delayCombatant"]').forEach((button) => {
+                button.addEventListener("click", (clickEvent) => {
+                    clickEvent.preventDefault();
+                    clickEvent.stopPropagation();
+                    const li = button.closest("[data-combatant-id]");
+                    if (li?.dataset.combatantId) app._onDeclareHoldAction(li.dataset.combatantId);
+                });
+            });
         };
 
         Hooks.on("renderCombatTracker", onRenderTracker);
+
+        /**
+         * Timing-contest button on Held Action use cards (6E2 21; 5ER 361):
+         * simultaneous Actions are resolved by opposed characteristic rolls.
+         */
+        Hooks.on("renderChatMessageHTML", (_message, html) => {
+            const root = html instanceof HTMLElement ? html : html?.[0];
+            const button = root?.querySelector?.("button.hero-timing-contest");
+            if (!button || button.dataset.heroContestWired) return;
+            button.dataset.heroContestWired = "true";
+            button.addEventListener("click", () => HeroSystem6eCombatTrackerSingle.#onTimingContest(button));
+        });
 
         /**
          * Injects the Hero System client preferences into core's Combat Tracker
@@ -272,6 +296,107 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         };
 
         Hooks.on("renderCombatTrackerConfig", onRenderTrackerConfig);
+    }
+
+    /**
+     * Opposed timing contest for a simultaneous Held Action (6E2 21; 5ER 361):
+     * both sides make their characteristic roll (DEX, or EGO for Mental Powers);
+     * the larger success margin acts first and equal margins are simultaneous.
+     * Defensive (abortable-to) Actions go first without any roll, and the
+     * roll-off loser cannot then Abort (5ER 361).
+     * @param {HTMLButtonElement} button - The card button carrying combat/combatant ids
+     */
+    static async #onTimingContest(button) {
+        const combat = game.combats.get(button.dataset.combatId);
+        const holder = combat?.combatants.get(button.dataset.combatantId);
+        if (!combat || !holder?.actor) {
+            return void ui.notifications.warn(`The combat or the holding combatant no longer exists.`);
+        }
+        if (!game.user.isGM && !holder.isOwner) return;
+
+        const escapeHTML = foundry.utils.escapeHTML ?? ((value) => Handlebars.escapeExpression(value));
+        const opponents = combat.combatants
+            .filter((c) => c.id !== holder.id && c.actor)
+            .sort((a, b) => a.name.localeCompare(b.name));
+        if (opponents.length === 0) return void ui.notifications.warn(`No opposing combatant is available.`);
+        const targetedIds = new Set([...game.user.targets].map((t) => t.document?.combatant?.id));
+        const defaultOpponent = opponents.find((c) => targetedIds.has(c.id)) ?? opponents[0];
+
+        const charOptions = ["dex", "ego"]
+            .map((key) => `<option value="${key}">${key.toUpperCase()}</option>`)
+            .join("");
+        const content = `<fieldset>
+            <legend>Simultaneous Actions</legend>
+            <div class="form-group">
+                <label>Opponent</label>
+                <select name="opponent">${opponents
+                    .map(
+                        (c) =>
+                            `<option value="${c.id}" ${c.id === defaultOpponent.id ? "selected" : ""}>${escapeHTML(c.name)}</option>`,
+                    )
+                    .join("")}</select>
+            </div>
+            <div class="form-group">
+                <label>${escapeHTML(holder.name)} rolls</label>
+                <select name="holder-char">${charOptions}</select>
+            </div>
+            <div class="form-group">
+                <label>Opponent rolls</label>
+                <select name="opponent-char">${charOptions}</select>
+            </div>
+            <p class="hint">Mental Powers contest EGO instead of DEX. Defensive (abortable-to) Actions simply go first — no roll needed.</p>
+        </fieldset>`;
+
+        const choice = await foundry.applications.api.DialogV2.wait({
+            window: { title: `Timing Contest — ${holder.name}` },
+            content,
+            buttons: [
+                {
+                    action: "roll",
+                    label: "Roll",
+                    default: true,
+                    callback: (event, btn) => ({
+                        opponentId: btn.form.elements["opponent"].value,
+                        holderChar: btn.form.elements["holder-char"].value,
+                        opponentChar: btn.form.elements["opponent-char"].value,
+                    }),
+                },
+                { action: "cancel", label: "Cancel" },
+            ],
+            rejectClose: false,
+        });
+        if (!choice || choice === "cancel") return;
+        const opponent = combat.combatants.get(choice.opponentId);
+        if (!opponent?.actor) return;
+
+        const rollSide = async (combatant, key) => {
+            const characteristic = combatant.actor.system?.characteristics?.[key];
+            const target = characteristic?.roll ?? Math.round(9 + (characteristic?.value ?? 10) / 5);
+            const roll = await new Roll("3d6").evaluate();
+            return { combatant, key, target, roll, margin: target - roll.total };
+        };
+        const holderSide = await rollSide(holder, choice.holderChar);
+        const opponentSide = await rollSide(opponent, choice.opponentChar);
+
+        const line = (side) =>
+            `${escapeHTML(side.combatant.name)}: ${side.key.toUpperCase()} roll ${side.target}-, rolled ${side.roll.total} (${
+                side.margin >= 0 ? `made it by ${side.margin}` : `missed by ${-side.margin}`
+            })`;
+        const verdict =
+            holderSide.margin === opponentSide.margin
+                ? `The Actions occur <b>simultaneously</b>.`
+                : `<b>${escapeHTML(
+                      (holderSide.margin > opponentSide.margin ? holderSide : opponentSide).combatant.name,
+                  )}</b> acts first.`;
+        await ChatMessage.create({
+            speaker: ChatMessage.getSpeaker({ actor: holder.actor }),
+            rolls: [holderSide.roll, opponentSide.roll].map((r) => r.toJSON()),
+            content: `<p><b>Timing contest</b> (6E2 21; 5ER 361)</p>
+                <p>${line(holderSide)}</p>
+                <p>${line(opponentSide)}</p>
+                <p>${verdict}</p>
+                <p class="hint">Defensive (abortable-to) Actions go first without a roll; the roll-off loser cannot then Abort.</p>`,
+        });
     }
 
     /**
@@ -1852,7 +1977,15 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const hold = combatant.heldAction;
         await effect.delete();
         await this._recordSpentAction(combatant, hold);
-        await this._holdCard(combatant, `${actor.name} uses their Held Action in ${combat.currentPhaseLabel}.`);
+        await this._holdCard(
+            combatant,
+            `${actor.name} uses their Held Action in ${combat.currentPhaseLabel}.
+            <div class="card-buttons">
+                <button type="button" class="hero-timing-contest" data-combat-id="${combat.id}" data-combatant-id="${combatant.id}">
+                    <i class="fa-solid fa-stopwatch"></i> Timing contest (simultaneous Actions)
+                </button>
+            </div>`,
+        );
         await combat.logEvent("hold.use", { combatant, data: { mode: hold?.mode ?? null } });
     }
 
