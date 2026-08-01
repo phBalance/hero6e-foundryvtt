@@ -198,6 +198,11 @@ export function rehydrateAttackItem(itemJsonStr, actor) {
         parent: actor,
     });
 
+    // fromSource can come up without the transient _active state; restore the
+    // dehydrated copy (it carries __originalUuid/effectiveStr) so the effective-
+    // item getters and resource math see the declared state
+    item.system._active ??= obj.item.system?._active ?? {};
+
     // If there is a base attack item, then we need to rehydrate it.
     if (obj.__baseAttackItem) {
         item.system._active.__baseAttackItem = HeroSystem6eItem.fromSource(obj.__baseAttackItem, {

@@ -6256,7 +6256,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
      * If the item is not a maneuver of some kind then it's the effective attack item.
      */
     get effectiveAttackItem() {
-        return this.system._active.maWeaponItem || this.system._active.__baseAttackItem || this;
+        // _active can be absent on items rebuilt from serialized sources (delayed
+        // attack snapshots); no active state means no maneuver/weapon override
+        return this.system._active?.maWeaponItem || this.system._active?.__baseAttackItem || this;
     }
 
     /**

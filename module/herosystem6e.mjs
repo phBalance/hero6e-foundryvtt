@@ -579,7 +579,7 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
                 const haymakerEffect = actor?.effects.find((e) => e.statuses.has("haymaker"));
                 if (haymakerEffect) await haymakerEffect.delete();
                 const haymakerItem = actor?.items.find((i) => i.system?.XMLID === "HAYMAKER" && i.isActive);
-                if (haymakerItem) await haymakerItem.toggle();
+                if (haymakerItem) await haymakerItem.toggle({ token: actor?.getActiveTokens()[0]?.document });
                 await ChatMessage.create({
                     speaker: ChatMessage.getSpeaker({ actor }),
                     content: `${actor?.name}'s Haymaker fails — the Phase is wasted${

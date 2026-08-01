@@ -114,7 +114,7 @@ export async function expireManeuverNextPhaseEffects(actor) {
             } catch (e) {
                 console.warn(`Unable to resolve maneuver item for expiring effect ${ae.name}`, e);
             }
-            if (maneuver?.isActive) return maneuver.toggle();
+            if (maneuver?.isActive) return maneuver.toggle({ token: actor?.getActiveTokens()[0]?.document });
         }
         return ae.delete();
     });

@@ -2738,7 +2738,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             const haymakerEffect = actor?.effects.find((e) => e.statuses.has("haymaker"));
             if (haymakerEffect) await haymakerEffect.delete();
             const haymakerItem = actor?.items.find((i) => i.system?.XMLID === "HAYMAKER" && i.isActive);
-            if (haymakerItem) await haymakerItem.toggle();
+            if (haymakerItem) await haymakerItem.toggle({ token: combatant.token });
         }
 
         let outcome;
