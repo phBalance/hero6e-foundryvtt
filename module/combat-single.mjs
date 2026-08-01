@@ -888,7 +888,10 @@ export class HeroSystem6eCombatSingle extends Combat {
         // manual elevation would
         const sorted = [...candidates].sort((a, b) => this._comparePriority(a, b, this, this.segment));
         const top = sorted[0];
-        if (top) await this.lrPreemptPointer(top.id, activeId);
+        // fromMaintenance: this runs INSIDE the maintenance chain — settling
+        // would await the chain currently executing (a self-deadlock that only
+        // the settle timeout unwinds)
+        if (top) await this.lrPreemptPointer(top.id, activeId, { fromMaintenance: true });
     }
 
     /**
@@ -903,12 +906,12 @@ export class HeroSystem6eCombatSingle extends Combat {
      *   stored index, so the live lookup can drift)
      * @returns {Promise<void>}
      */
-    async lrPreemptPointer(combatantId, activeId = this.combatant?.id ?? null) {
+    async lrPreemptPointer(combatantId, activeId = this.combatant?.id ?? null, { fromMaintenance = false } = {}) {
         if (!game.user.isGM) {
             this._requestGmTurnAction("lrPreempt", { combatantId, activeId });
             return;
         }
-        await this.settleMaintenance();
+        if (!fromMaintenance) await this.settleMaintenance();
         const combatant = this.combatants.get(combatantId);
         const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
         if (!this.started || combatant?.lrElevatedAbs !== currentAbs) return;
