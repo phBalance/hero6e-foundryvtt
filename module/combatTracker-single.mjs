@@ -1451,9 +1451,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     return null;
                 }
                 const relation = result.relation === "before" ? "before" : "after";
-                const epsilon = HeroSystem6eCombatSingle.ANCHOR_EPSILON;
-                const effective = relation === "before" ? targetPriority + epsilon : targetPriority - epsilon;
-                if (segmentAbs === currentAbs && effective >= actingThreshold) {
+                // The holder shares the anchor's exact scalar, so the anchor itself
+                // must sit below the count for a same-segment hold
+                if (segmentAbs === currentAbs && targetPriority >= actingThreshold) {
                     ui.notifications.warn(
                         `A same-segment hold must slot below the current acting position (${actingThreshold.toFixed(2)}).`,
                     );
@@ -1722,8 +1722,15 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                   ? hold.dex
                   : Math.floor(combat.getInitiativePriority(combatant, combat.segment));
         const spent = { segmentAbs: currentAbs, dex };
-        if (anchored !== null) spent.fraction = anchored - Math.floor(anchored);
-        else if (atOwnSlot && hold.fraction !== undefined) spent.fraction = hold.fraction;
+        if (anchored !== null) {
+            spent.fraction = anchored - Math.floor(anchored);
+            // The spent row shares the anchor's exact scalar; ordering still
+            // needs the adjacency side for the rest of the segment
+            spent.anchor = {
+                combatantId: hold.anchor.combatantId,
+                relation: hold.anchor.relation === "before" ? "before" : "after",
+            };
+        } else if (atOwnSlot && hold.fraction !== undefined) spent.fraction = hold.fraction;
         await combatant.update({
             [`flags.${game.system.id}.spentHoldPosition`]: spent,
             // A stale slot-taken marker would spend the NEXT hold declared this segment

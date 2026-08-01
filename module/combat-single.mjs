@@ -237,40 +237,53 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
-     * Rolls a tie-break entry for one combatant: a 0-99 roll, plus a Fast Draw
-     * roll when the actor owns the FAST_DRAW skill (the GM-option tie-break, 6E2 19).
+     * Rolls a tie-break entry for one combatant: a 0-99 roll. With the Fast Draw
+     * GM option on (6E2 19), the roll is dealt in bands — FAST_DRAW owners roll
+     * 50-99, everyone else 0-49 — so owners always outrank non-owners at the same
+     * DEX while still rolling off among themselves. Banding at roll time keeps
+     * every fraction a plain two-decimal value; flipping the setting mid-combat
+     * takes effect with the next segment's rolls.
      * @param {Combatant} combatant
-     * @returns {{r: number, fd: number|null}}
+     * @returns {{r: number}}
      * @protected
      */
     _rollTieBreak(combatant) {
-        const hasFastDraw = !!combatant.actor?.items.find((i) => i.system?.XMLID === "FAST_DRAW");
-        return {
-            r: Math.floor(Math.random() * 100),
-            fd: hasFastDraw ? Math.floor(Math.random() * 100) : null,
-        };
-    }
-
-    /**
-     * Resolves a stored tie-break entry to the initiative fraction. With the
-     * fastDrawTieBreak setting on, Fast Draw owners always outrank non-owners at
-     * the same DEX (their fraction lives in the upper half) and compare fd rolls
-     * among themselves. Scalar entries from older combats read as plain rolls.
-     * @param {{r: number, fd: number|null}|number|undefined} rollEntry
-     * @returns {number} 0..0.99
-     * @protected
-     */
-    _tieBreakerFraction(rollEntry) {
-        const entry = typeof rollEntry === "number" ? { r: rollEntry, fd: null } : (rollEntry ?? { r: 50, fd: null });
         let fastDraw = false;
         try {
             fastDraw = !!game.settings.get(game.system.id, "fastDrawTieBreak");
         } catch (e) {
             console.warn(`Unable to read the Fast Draw tie-break setting`, e);
         }
-        if (!fastDraw) return (entry.r ?? 50) * 0.01;
-        if (entry.fd !== null && entry.fd !== undefined) return 0.5 + entry.fd * 0.0049;
-        return (entry.r ?? 50) * 0.0049;
+        if (!fastDraw) return { r: Math.floor(Math.random() * 100) };
+        const hasFastDraw = !!combatant.actor?.items.find((i) => i.system?.XMLID === "FAST_DRAW");
+        return { r: (hasFastDraw ? 50 : 0) + Math.floor(Math.random() * 50) };
+    }
+
+    /**
+     * Resolves a stored tie-break entry to the initiative fraction: r * 0.01, a
+     * plain two-decimal value (Fast Draw banding happens at roll time). Legacy
+     * entries carrying a packed fd sub-roll keep the original read-time
+     * interpretation so in-flight combats preserve their recorded order; scalar
+     * entries from even older combats read as plain rolls.
+     * @param {{r: number, fd?: number|null}|number|undefined} rollEntry
+     * @returns {number} 0..0.99
+     * @protected
+     */
+    _tieBreakerFraction(rollEntry) {
+        const entry = typeof rollEntry === "number" ? { r: rollEntry } : (rollEntry ?? { r: 50 });
+        if (entry.fd !== undefined) {
+            let fastDraw = false;
+            try {
+                fastDraw = !!game.settings.get(game.system.id, "fastDrawTieBreak");
+            } catch (e) {
+                console.warn(`Unable to read the Fast Draw tie-break setting`, e);
+            }
+            if (fastDraw) {
+                if (entry.fd !== null) return 0.5 + entry.fd * 0.0049;
+                return (entry.r ?? 50) * 0.0049;
+            }
+        }
+        return (entry.r ?? 50) * 0.01;
     }
 
     /**
@@ -376,16 +389,78 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
-     * Equal-priority ordering. Members sharing a roll entry (a ×N group) shuffle
-     * per segment via their sub-rolls — the same 6E2 18 roll-off ungrouped tied
-     * combatants get — highest first; everything else (and missing rolls) falls
-     * back to the re-add-stable identity compare.
+     * Equal-priority ordering. An anchored hold shares its anchor's exact scalar,
+     * so adjacency is decided HERE: each side projects through its anchor chain
+     * to an unanchored root, roots order by the normal tie rules, and same-root
+     * pairs order by their offset chains ("before" sorts above the anchor,
+     * "after" below). Projection keeps the comparator TRANSITIVE — every
+     * combatant maps to one (root, offsets) key and keys compare
+     * lexicographically, never mixing per-pair regimes (the old group/outsider
+     * cycling bug).
      * @param {Combatant} a
      * @param {Combatant} b
      * @param {number|null} [queryAbs] - Position being ordered; defaults to current
      * @returns {number}
      */
     tieBreakOrder(a, b, queryAbs = null) {
+        const abs = queryAbs ?? HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
+        const projA = this._anchorProjection(a, abs);
+        const projB = this._anchorProjection(b, abs);
+        if (projA.root.id !== projB.root.id) return this._rootTieBreakOrder(projA.root, projB.root, abs);
+        const depth = Math.max(projA.offsets.length, projB.offsets.length);
+        for (let i = 0; i < depth; i++) {
+            const offA = projA.offsets[i] ?? 0;
+            const offB = projB.offsets[i] ?? 0;
+            // Larger offsets act earlier: +1 = before the anchor, -1 = after
+            if (offA !== offB) return offB - offA;
+        }
+        return HeroSystem6eCombatSingle.stableTiebreak(a, b);
+    }
+
+    /**
+     * Projects a combatant to its adjacency root: while it carries an anchored
+     * positional hold (live, or spent this segment) that genuinely resolves, it
+     * compares AS its anchor, offset one step to the declared side. Offsets are
+     * returned root-first so chains compare lexicographically — the anchor's
+     * own position within ITS neighbourhood dominates the holder's.
+     * @param {Combatant} combatant
+     * @param {number} abs - Absolute segment being ordered
+     * @returns {{root: Combatant, offsets: number[]}}
+     * @private
+     */
+    _anchorProjection(combatant, abs) {
+        const offsets = [];
+        let current = combatant;
+        const seen = new Set([current.id]);
+        for (;;) {
+            const hold = current.holdsPositionAtAbs?.(abs) ? current.heldAction : null;
+            const spent = !hold && current.spentHoldAtAbs?.(abs) ? current.spentHoldPosition : null;
+            const anchor = hold?.anchor ?? spent?.anchor ?? null;
+            if (!anchor?.combatantId || seen.has(anchor.combatantId)) break;
+            const target = this.combatants.get(anchor.combatantId);
+            if (!target?.actor) break;
+            // An unresolvable live anchor means the holder fell back to its
+            // snapshot scalar — it no longer sits adjacent to anyone
+            if (hold && this.resolveHoldAnchorPriority(hold, abs) === null) break;
+            offsets.push(anchor.relation === "before" ? 1 : -1);
+            seen.add(anchor.combatantId);
+            current = target;
+        }
+        return { root: current, offsets: offsets.reverse() };
+    }
+
+    /**
+     * Equal-priority ordering between unanchored roots. Members sharing a roll
+     * entry (a ×N group) shuffle per segment via their sub-rolls — the same
+     * 6E2 18 roll-off ungrouped tied combatants get — highest first; everything
+     * else (and missing rolls) falls back to the re-add-stable identity compare.
+     * @param {Combatant} a
+     * @param {Combatant} b
+     * @param {number} abs - Absolute segment being ordered
+     * @returns {number}
+     * @private
+     */
+    _rootTieBreakOrder(a, b, abs) {
         const keyA = this._tieRollKey(a);
         const keyB = this._tieRollKey(b);
         // Different roll groups tied on the same priority order by GROUP first.
@@ -397,7 +472,6 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (keyA !== keyB) {
             return keyA.localeCompare(keyB) || HeroSystem6eCombatSingle.stableTiebreak(a, b);
         }
-        const abs = queryAbs ?? HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
         const rollsFlag = this.getFlag(game.system.id, "segmentRolls") ?? {};
         const rollsMap = rollsFlag[abs] ?? rollsFlag[HeroSystem6eCombatantSingle.segmentOf(abs)] ?? {};
         // A missing sub-roll compares as -1 (below every real roll): comparing
@@ -671,20 +745,14 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
-     * Sub-tie-break offset for anchored holds. Every other priority is a multiple
-     * of 1e-4 (integer DEX, 2-decimal declared pins, 0.01-step tie fractions,
-     * 0.0049-step Fast Draw fractions), so ±1e-6 slots strictly between the anchor
-     * and its neighbours, with headroom for chained anchors.
-     */
-    static ANCHOR_EPSILON = 1e-6;
-
-    /**
      * Resolves a positional hold anchored to another combatant ("act right after X",
-     * 6E2 20: a holding character chooses their reentry point exactly) to a priority
-     * immediately adjacent to the anchor's live position in the scored segment.
-     * Returns null when the anchor cannot be resolved — combatant gone, no Phase or
-     * held slot in that segment, or an anchor cycle — and the caller falls back to
-     * the declaration-time DEX snapshot.
+     * 6E2 20: a holding character chooses their reentry point exactly) to the
+     * anchor's own live priority in the scored segment. The holder shares the
+     * anchor's EXACT scalar — which side of the anchor they act on is an ordering
+     * fact, decided by {@link tieBreakOrder}'s anchor projection, not a sub-decimal
+     * offset. Returns null when the anchor cannot be resolved — combatant gone, no
+     * Phase or held slot in that segment, or an anchor cycle — and the caller falls
+     * back to the declaration-time DEX snapshot.
      * @param {{anchor?: {combatantId: string, relation?: string}}} hold
      * @param {number} scoredAbs - Absolute segment the hold is being scored at
      * @param {Set<string>} [seen] - Anchor ids already being resolved (cycle guard)
@@ -698,9 +766,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         seen.add(anchorId);
         const segment = HeroSystem6eCombatantSingle.segmentOf(scoredAbs);
         const priority = this.getInitiativePriority(target, segment, { queryAbs: scoredAbs, _anchorSeen: seen });
-        if (!(priority > 0)) return null;
-        const epsilon = HeroSystem6eCombatSingle.ANCHOR_EPSILON;
-        return hold.anchor.relation === "before" ? priority + epsilon : priority - epsilon;
+        return priority > 0 ? priority : null;
     }
 
     /**
@@ -3413,7 +3479,9 @@ export class HeroSystem6eCombatSingle extends Combat {
         };
         if (retainPosition && hold.mode === "position") {
             // An anchored slot resolves to concrete numbers as it is spent — the
-            // display record must not drift if the anchor later moves or leaves
+            // display record must not drift if the anchor later moves or leaves.
+            // The anchor itself is retained: the spent row shares the anchor's
+            // exact scalar, so ordering still needs the adjacency side.
             const anchored = hold.anchor ? this.resolveHoldAnchorPriority(hold, hold.segmentAbs) : null;
             const dex = anchored !== null ? Math.floor(anchored) : hold.dex;
             const fraction = anchored !== null ? anchored - Math.floor(anchored) : hold.fraction;
@@ -3421,6 +3489,14 @@ export class HeroSystem6eCombatSingle extends Combat {
                 segmentAbs: hold.segmentAbs,
                 dex,
                 ...(fraction !== undefined ? { fraction } : {}),
+                ...(anchored !== null
+                    ? {
+                          anchor: {
+                              combatantId: hold.anchor.combatantId,
+                              relation: hold.anchor.relation === "before" ? "before" : "after",
+                          },
+                      }
+                    : {}),
             };
         }
         await combatant.update(spendUpdate);

@@ -811,7 +811,6 @@ export function registerCombatTests(quench) {
 
                         const anchorCombatant = combat.combatants.find((c) => c.actorId === anchorActor.id);
                         const holderCombatant = combat.combatants.find((c) => c.actorId === holder.id);
-                        const epsilon = combat.constructor.ANCHOR_EPSILON;
 
                         // Holder (SPD 2 at T1S12) banks a Phase for Segment 4 of Turn 2
                         // (abs 28), right after the anchor; the DEX snapshot is set to a
@@ -843,20 +842,22 @@ export function registerCombatTests(quench) {
                         const anchorPriority = combat.getInitiativePriority(anchorCombatant, 4, { queryAbs: slotAbs });
                         expect(anchorPriority, "anchor has a live position in the slot segment").to.be.greaterThan(0);
                         const afterPriority = combat.getInitiativePriority(holderCombatant, 4, { queryAbs: slotAbs });
+                        expect(afterPriority, "the holder shares the anchor's exact scalar").to.equal(anchorPriority);
                         expect(
-                            anchorPriority - afterPriority,
-                            "'after' slots immediately below the anchor",
-                        ).to.be.closeTo(epsilon, 1e-9);
+                            combat.tieBreakOrder(holderCombatant, anchorCombatant, slotAbs),
+                            "'after' orders immediately below the anchor",
+                        ).to.be.greaterThan(0);
 
-                        // 'Before' slots immediately above, still tracking the anchor
+                        // 'Before' shares the scalar too but orders above the anchor
                         await holdEffect.setFlag(game.system.id, "hold", {
                             anchor: { relation: "before" },
                         });
                         const beforePriority = combat.getInitiativePriority(holderCombatant, 4, { queryAbs: slotAbs });
+                        expect(beforePriority, "'before' also shares the anchor's scalar").to.equal(anchorPriority);
                         expect(
-                            beforePriority - anchorPriority,
-                            "'before' slots immediately above the anchor",
-                        ).to.be.closeTo(epsilon, 1e-9);
+                            combat.tieBreakOrder(holderCombatant, anchorCombatant, slotAbs),
+                            "'before' orders immediately above the anchor",
+                        ).to.be.lessThan(0);
 
                         // An anchor with no Phase in the slot's segment (SPD 3 has none in
                         // Segment 2) falls back to the declaration-time DEX snapshot
@@ -2299,11 +2300,29 @@ export function registerCombatTests(quench) {
                         expect(combat._tieBreakerFraction({ r: 80, fd: null })).to.be.closeTo(0.8, 0.0001);
                         expect(combat._tieBreakerFraction(80)).to.be.closeTo(0.8, 0.0001); // legacy scalar
                         await game.settings.set(game.system.id, "fastDrawTieBreak", true);
-                        // A Fast Draw owner always lands in the upper half of the fraction range
+                        // Legacy packed entries (fd key present) keep their read-time
+                        // interpretation: a Fast Draw owner lands in the upper half
                         expect(combat._tieBreakerFraction({ r: 99, fd: 0 })).to.be.greaterThan(
                             combat._tieBreakerFraction({ r: 99, fd: null }),
                         );
                         expect(combat._tieBreakerFraction({ r: 10, fd: 90 })).to.be.closeTo(0.941, 0.001);
+
+                        // Banded entries (no fd key) read as plain two-decimal rolls
+                        // regardless of the setting — Fast Draw lives in the roll bands
+                        expect(combat._tieBreakerFraction({ r: 72 })).to.be.closeTo(0.72, 0.0001);
+                        const fdOwner = { actor: { items: [{ system: { XMLID: "FAST_DRAW" } }] } };
+                        const mundane = { actor: { items: [] } };
+                        for (let i = 0; i < 20; i++) {
+                            const owner = combat._rollTieBreak(fdOwner);
+                            const other = combat._rollTieBreak(mundane);
+                            expect(owner.r, "FD owners roll the upper band").to.be.within(50, 99);
+                            expect(other.r, "non-owners roll the lower band").to.be.within(0, 49);
+                            expect(owner.fd, "banded entries carry no packed fd sub-roll").to.not.exist;
+                        }
+                        await game.settings.set(game.system.id, "fastDrawTieBreak", false);
+                        for (let i = 0; i < 20; i++) {
+                            expect(combat._rollTieBreak(fdOwner).r, "setting off: uniform 0-99").to.be.within(0, 99);
+                        }
                     } finally {
                         await game.settings.set(game.system.id, "fastDrawTieBreak", saved);
                     }
@@ -2318,8 +2337,8 @@ export function registerCombatTests(quench) {
                     const startRolls = combat.getFlag(game.system.id, "segmentRolls");
                     expect(startRolls, "rolls keyed by combat-start abs 24").to.have.property("24");
                     const entry = startRolls["24"][one.id];
-                    expect(entry, "entry carries the {r, fd} shape").to.have.property("r");
-                    expect(entry.fd, "no FAST_DRAW skill -> fd null").to.equal(null);
+                    expect(entry, "entry carries the banded {r} shape").to.have.property("r");
+                    expect(entry.fd, "banded entries carry no packed fd sub-roll").to.not.exist;
 
                     // A full-Turn skip lands on a NEW absolute segment with fresh rolls
                     await combat.nextRound();
