@@ -67,8 +67,8 @@ export class HeroSystem6eCombatantSingle extends Combatant {
     /**
      * The first absolute segment at or after fromAbs whose segment is a Phase for
      * BOTH speeds — the 5e optional SPD-change rule: after changing SPD, a character
-     * cannot act until the next Segment that is a Phase for both SPDs.
-     * Bounded: every SPD shares segment 12.
+     * cannot act until the next Segment that is a Phase for both SPDs
+     * (SPD 1 shares no segment with other SPDs; see the fallback below).
      * @param {number} spdA
      * @param {number} spdB
      * @param {number} fromAbs
@@ -82,7 +82,13 @@ export class HeroSystem6eCombatantSingle extends Combatant {
             const segment = ((abs - 1) % 12) + 1;
             if (phasesA.includes(segment) && phasesB.includes(segment)) return abs;
         }
-        return fromAbs;
+        // No shared segment exists (SPD 1's only Phase is Segment 7). Fall back to
+        // the later of the two SPDs' next Phases — returning fromAbs would dissolve
+        // the lockout entirely.
+        return Math.max(
+            HeroSystem6eCombatantSingle.nextPhaseAbs(spdA, fromAbs),
+            HeroSystem6eCombatantSingle.nextPhaseAbs(spdB, fromAbs),
+        );
     }
 
     /**
@@ -116,6 +122,9 @@ export class HeroSystem6eCombatantSingle extends Combatant {
      * @returns {boolean}
      */
     get isSoleCombatantForActor() {
+        // Unlinked tokens carry their own synthetic actor: effects on it can only
+        // belong to this combatant, however many siblings share the base actorId
+        if (this.actor?.isToken) return true;
         const siblings = this.combat?.combatants.filter((c) => c.actorId === this.actorId) ?? [];
         return siblings.length <= 1;
     }

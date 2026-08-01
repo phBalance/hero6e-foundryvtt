@@ -1477,7 +1477,10 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         const updateOptions = {
             direction: 1,
-            previousCombatantId: this.combatant?.id,
+            // The CAPTURED ending combatant, not the live pointer: intermediate
+            // combatant updates (LR de-elevation) re-sort turns under the stored
+            // index and this.combatant can drift to a different row
+            previousCombatantId: ending?.id ?? null,
             previousSegment: activeSegment,
             segmentsElapsed: segmentDeltaCount,
         };
@@ -2758,7 +2761,14 @@ export class HeroSystem6eCombatSingle extends Combat {
                     actingPriority !== null &&
                     actingPriority !== undefined &&
                     actingPriority < record.priority;
-                const ownPhase = currentAbs === record.resolveAbs && combatant.id === activeId;
+                // priority-null records resolve at the very END of the segment —
+                // the declarer's own natural Phase in the landing segment must not
+                // pull the landing forward to their Phase start
+                const ownPhase =
+                    currentAbs === record.resolveAbs &&
+                    record.priority !== null &&
+                    record.priority !== undefined &&
+                    combatant.id === activeId;
                 if (segmentPassed || countPassed || ownPhase) {
                     await this._finishDelayedAction(combatant, id, record, { cancelled: false });
                 }
@@ -2891,6 +2901,31 @@ export class HeroSystem6eCombatSingle extends Combat {
                     })
                     .filter(Boolean),
             };
+        }
+    }
+
+    /**
+     * Deleting the combat clears hold/abort effects bound to its combatants —
+     * no maintenance path matches a dead combatant id, so they would orphan on
+     * the actors (stuck icon, hidden Release/Use entries).
+     * @override
+     */
+    _onDelete(options, userId) {
+        super._onDelete(options, userId);
+        if (userId !== game.user.id) return;
+        const combatantIds = new Set(this.combatants.map((c) => c.id));
+        for (const combatant of this.combatants) {
+            for (const effect of combatant.actor?.effects ?? []) {
+                const isHold = effect.statuses.has("holding");
+                const isAbort = effect.statuses.has("aborted");
+                if (!isHold && !isAbort) continue;
+                const record = effect.getFlag(game.system.id, isHold ? "hold" : "abort");
+                // Unbound records and records bound to THIS combat are dead;
+                // records bound to another combat stay untouched
+                if (!record?.combatantId || combatantIds.has(record.combatantId)) {
+                    effect.delete().catch((e) => console.warn(`Combat-delete effect cleanup failed`, e));
+                }
+            }
         }
     }
 
