@@ -196,6 +196,24 @@ export async function waitForTokenDrawn(tokenDoc, timeoutMs = 5000) {
     return tokenDoc.object ?? canvas.tokens?.get(tokenDoc.id) ?? null;
 }
 
+/**
+ * Poll until a condition becomes true. Some combat side effects (held-action
+ * consumption, boundary maintenance) run async after the update commits.
+ *
+ * @param {() => boolean} condition
+ * @param {number} timeoutMs
+ * @param {number} intervalMs
+ * @returns {Promise<boolean>} The condition's final value.
+ */
+export async function waitUntil(condition, timeoutMs = 3000, intervalMs = 50) {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+        if (condition()) return true;
+        await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+    return condition();
+}
+
 export async function waitForNotificationQueueToClear(timeout = 5000) {
     // Clear any existing chat rendering backlog to protect Quench execution time limits
     const isQueueActive = () => {

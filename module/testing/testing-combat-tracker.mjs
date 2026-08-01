@@ -1,7 +1,52 @@
 import { HEROSYS } from "../herosystem6e.mjs";
-import { setQuenchTimeout } from "./quench-helper.mjs";
+import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
+import { setQuenchTimeout, waitUntil } from "./quench-helper.mjs";
 
 const { Actor } = foundry.documents;
+
+// Absolute position on the Turn/Segment clock
+const abs = (turn, segment) => turn * 12 + segment;
+
+// Shared actor/combat factories. Each describe passes its own tracking arrays
+// so its after() hook tears down only its own documents.
+function makeHarness({ actorDocuments, combatDocuments }) {
+    async function makeActor(name, { dex = 10, spd = 2, extra = {} } = {}) {
+        const actor = await Actor.create({
+            name,
+            type: "pc",
+            system: {
+                initiativeCharacteristic: "dex",
+                characteristics: {
+                    dex: { value: dex, max: dex },
+                    spd: { value: spd, max: spd },
+                },
+                ...extra,
+            },
+        });
+        actor.prepareData();
+        actorDocuments.push(actor);
+        return actor;
+    }
+
+    async function makeCombat(actors) {
+        const combat = await Combat.create({
+            name: "_Quench Combat",
+            scene: canvas.scene?.id || null,
+            active: true,
+        });
+        combatDocuments.push(combat);
+        await combat.createEmbeddedDocuments(
+            "Combatant",
+            actors.map((a) => ({ actorId: a.id })),
+        );
+        ui.combat.viewed = combat;
+        return combat;
+    }
+
+    const combatantFor = (combat, actor) => combat.combatants.find((c) => c.actorId === actor.id);
+
+    return { makeActor, makeCombat, combatantFor };
+}
 
 export function registerCombatTests(quench) {
     quench.registerBatch(
@@ -20,9 +65,13 @@ export function registerCombatTests(quench) {
                 setQuenchTimeout(this);
                 const actorDocuments = [];
                 const combatDocuments = [];
+                const { makeActor, makeCombat, combatantFor } = makeHarness({ actorDocuments, combatDocuments });
                 let savedLrAutoElevate;
+                let preexistingMessageIds;
 
                 before(async function () {
+                    preexistingMessageIds = new Set(game.messages.contents.map((m) => m.id));
+
                     const isSingleTracker =
                         typeof HEROSYS !== "undefined"
                             ? HEROSYS.isSingleCombatantTrackerEnabled
@@ -36,17 +85,12 @@ export function registerCombatTests(quench) {
 
                     // The tests assume the prompt-mode default; a world with the
                     // auto-elevate setting on would pre-elevate every scoped LR combatant
-                    savedLrAutoElevate = game.settings.get(game.system.id, "lrAutoElevate");
-                    if (savedLrAutoElevate) await game.settings.set(game.system.id, "lrAutoElevate", false);
+                    savedLrAutoElevate = await getAndSetGameSetting("lrAutoElevate", false);
 
                     console.log(
                         `[${game.system.id}] QUENCH | Platform Version: ${foundryVersion} (Gen ${generationLabel})`,
                     );
                     console.log(`[${game.system.id}] QUENCH | Spawning tactical speed chart test entities...`);
-
-                    // const isSingleCombatantTracker = game.settings.get(game.system.id, "singleCombatantTracker");
-                    // game.settings.set(game.system.id, "singleCombatantTracker", true);
-                    // getAndSetGameSetting
 
                     // The _Quench prefix keeps these visible to the global cleanup batch
                     // (quench-helper deletes _Quench-prefixed actors), so an aborted run
@@ -61,33 +105,20 @@ export function registerCombatTests(quench) {
                     ];
 
                     for (const config of roster) {
-                        const actor = await Actor.create({
-                            name: config.name,
-                            type: "pc",
-                            system: {
-                                initiativeCharacteristic: "dex",
-                                characteristics: {
-                                    dex: { value: config.dex, max: config.dex },
-                                    spd: { value: config.spd, max: config.spd },
-                                },
-                            },
-                        });
-
-                        actor.prepareData();
-                        actorDocuments.push(actor);
+                        await makeActor(config.name, { dex: config.dex, spd: config.spd });
                     }
                 });
 
                 after(async function () {
                     console.log(`[${game.system.id}] QUENCH | Cleaning up test documents...`);
 
-                    if (savedLrAutoElevate) await game.settings.set(game.system.id, "lrAutoElevate", true);
-
-                    for (const actor of actorDocuments) {
-                        if (typeof actor?.delete === "function") await actor.delete();
+                    // The suite may have been skipped before the setting was saved
+                    if (savedLrAutoElevate !== undefined) {
+                        await game.settings.set(game.system.id, "lrAutoElevate", savedLrAutoElevate);
                     }
 
-                    // Loop through and explicitly delete EVERY combat document generated by the tests
+                    // Combats FIRST, mirroring quench-helper's teardown order: deleting
+                    // the actors first mutates the combats mid-teardown
                     for (const combatDoc of combatDocuments) {
                         if (typeof combatDoc?.delete === "function") {
                             const combatId = combatDoc.id;
@@ -100,6 +131,21 @@ export function registerCombatTests(quench) {
                         }
                     }
 
+                    for (const actor of actorDocuments) {
+                        if (typeof actor?.delete === "function") await actor.delete();
+                    }
+
+                    // Sweep chat messages the tests produced
+                    if (preexistingMessageIds) {
+                        for (const message of game.messages.contents.filter((m) => !preexistingMessageIds.has(m.id))) {
+                            try {
+                                await message.delete();
+                            } catch (err) {
+                                console.error(err);
+                            }
+                        }
+                    }
+
                     // Force a final single layout redraw pass to reset the sidebar interface panel
                     if (ui.combat) ui.combat.render(true);
                 });
@@ -107,25 +153,9 @@ export function registerCombatTests(quench) {
                 it("Should execute an exhaustive 2-round progression verifying dynamic worldTime clock increments", async function () {
                     const { HeroCompatibility } = await import("../utility/compatibility.mjs");
 
-                    // ⏳ CORE CLOCK SPY RESOLUTION:
-                    // Capture a pristine reference snapshot of the true world clock.
-                    // We wrap the advance method to let the core update its database layers uniformly across both platforms.
-                    const originalAdvance = game.time.advance;
                     const startTimeStamp = game.time.worldTime;
 
-                    game.time.advance = async function (seconds) {
-                        if (typeof originalAdvance === "function") {
-                            return originalAdvance.call(game.time, seconds);
-                        }
-                        return seconds;
-                    };
-
-                    const testCombatDocument = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(testCombatDocument);
+                    const testCombatDocument = await makeCombat([]);
 
                     const combatantData = actorDocuments.map((actor) => {
                         const isGuard = actor.name.includes("Guard");
@@ -287,31 +317,14 @@ export function registerCombatTests(quench) {
                     expect(testCombatDocument.segment).to.equal(1);
                     expect(game.time.worldTime).to.equal(startTimeStamp + 13);
                     expect(testCombatDocument.combatant.name).to.include("Speedster");
-
-                    // 🔓 TEARDOWN CLEANUP LAYER: Restore core engine properties to pristine states post-execution
-                    game.time.advance = originalAdvance;
                 });
 
                 it("Should execute a bidirectional sequence verifying nextTurn, nextRound, previousTurn, and previousRound", async function () {
                     const { HeroCompatibility } = await import("../utility/compatibility.mjs");
 
-                    // ⏳ TIME MACHINE SPY SNAPSHOT
-                    const originalAdvance = game.time.advance;
                     const startTimeStamp = game.time.worldTime;
 
-                    game.time.advance = async function (seconds) {
-                        if (typeof originalAdvance === "function") {
-                            return originalAdvance.call(game.time, seconds);
-                        }
-                        return seconds;
-                    };
-
-                    const testCombatDocument = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(testCombatDocument);
+                    const testCombatDocument = await makeCombat([]);
 
                     // Filter our roster down to standard operational characters to preserve gaps
                     const bidirectionalRoster = actorDocuments.filter(
@@ -403,20 +416,12 @@ export function registerCombatTests(quench) {
                     await testCombatDocument.previousTurn();
                     expect(testCombatDocument.segment).to.equal(12);
                     expect(testCombatDocument.combatant.name).to.include("Overcapped");
-
-                    // 🔓 TIMELINE RESTORATION
-                    game.time.advance = originalAdvance;
                 });
 
                 it("Should execute backward rollbacks via previousRound and previousTurn to verify unstarted reset thresholds", async function () {
                     const { HeroCompatibility } = await import("../utility/compatibility.mjs");
 
-                    const testCombatDocument = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(testCombatDocument);
+                    const testCombatDocument = await makeCombat([]);
 
                     // Streamline the collection map for a fast reset execution sweep
                     const resetRoster = actorDocuments.filter(
@@ -487,16 +492,6 @@ export function registerCombatTests(quench) {
                     expect(testCombatDocument.segment).to.equal(12);
                 });
 
-                // Some combat side effects (held-action consumption) run async after the update commits
-                async function waitUntil(condition, timeoutMs = 3000, intervalMs = 50) {
-                    const start = Date.now();
-                    while (Date.now() - start < timeoutMs) {
-                        if (condition()) return true;
-                        await new Promise((resolve) => setTimeout(resolve, intervalMs));
-                    }
-                    return condition();
-                }
-
                 it("Should give SPD 1-12 characters their book speed chart phases", async function () {
                     const bookSpeedChart = {
                         1: [7],
@@ -515,34 +510,14 @@ export function registerCombatTests(quench) {
 
                     const chartActors = [];
                     for (let spd = 1; spd <= 12; spd++) {
-                        const actor = await Actor.create({
-                            name: `_Quench Chart SPD ${spd}`,
-                            type: "pc",
-                            system: {
-                                initiativeCharacteristic: "dex",
-                                characteristics: {
-                                    dex: { value: 10, max: 10 },
-                                    spd: { value: spd, max: spd },
-                                },
-                            },
-                        });
-                        actorDocuments.push(actor);
+                        const actor = await makeActor(`_Quench Chart SPD ${spd}`, { dex: 10, spd });
                         chartActors.push(actor);
                     }
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments(
-                        "Combatant",
-                        chartActors.map((a) => ({ actorId: a.id })),
-                    );
+                    const combat = await makeCombat(chartActors);
 
                     for (let spd = 1; spd <= 12; spd++) {
-                        const combatant = combat.combatants.find((c) => c.actorId === chartActors[spd - 1].id);
+                        const combatant = combatantFor(combat, chartActors[spd - 1]);
                         const phases = [];
                         for (let segment = 1; segment <= 12; segment++) {
                             if (combatant.hasPhaseInSegment(segment)) phases.push(segment);
@@ -552,22 +527,10 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should apply Post-Segment 12 Recovery through TakeRecovery exactly once per turn boundary", async function () {
-                    const automationSetting = game.settings.get(game.system.id, "automation");
-                    await game.settings.set(game.system.id, "automation", "all");
+                    const automationSetting = await getAndSetGameSetting("automation", "all");
 
                     try {
-                        const actor = await Actor.create({
-                            name: "_Quench Recovery PC",
-                            type: "pc",
-                            system: {
-                                initiativeCharacteristic: "dex",
-                                characteristics: {
-                                    dex: { value: 10, max: 10 },
-                                    spd: { value: 2, max: 2 },
-                                },
-                            },
-                        });
-                        actorDocuments.push(actor);
+                        const actor = await makeActor("_Quench Recovery PC", { dex: 10, spd: 2 });
 
                         const rec = actor.system.characteristics.rec.value;
                         const stunMax = actor.system.characteristics.stun.max;
@@ -580,13 +543,7 @@ export function registerCombatTests(quench) {
                             "system.characteristics.end.value": endMax - rec - 3,
                         });
 
-                        const combat = await Combat.create({
-                            name: "_Quench Combat",
-                            scene: canvas.scene?.id || null,
-                            active: true,
-                        });
-                        combatDocuments.push(combat);
-                        await combat.createEmbeddedDocuments("Combatant", [{ actorId: actor.id }]);
+                        const combat = await makeCombat([actor]);
                         await combat.startCombat();
                         expect(combat.segment).to.equal(12);
 
@@ -613,8 +570,7 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should apply Post-Segment 12 Recovery to unlinked token actors", async function () {
-                    const automationSetting = game.settings.get(game.system.id, "automation");
-                    await game.settings.set(game.system.id, "automation", "all");
+                    const automationSetting = await getAndSetGameSetting("automation", "all");
 
                     let tokenDoc = null;
                     try {
@@ -674,44 +630,13 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should slot positional Held Actions, bench generic holds, and spend both when passed", async function () {
-                    const automationSetting = game.settings.get(game.system.id, "automation");
-                    await game.settings.set(game.system.id, "automation", "none");
+                    const automationSetting = await getAndSetGameSetting("automation", "none");
 
                     try {
-                        const holder = await Actor.create({
-                            name: "_Quench Holder",
-                            type: "pc",
-                            system: {
-                                initiativeCharacteristic: "dex",
-                                characteristics: {
-                                    dex: { value: 20, max: 20 },
-                                    spd: { value: 2, max: 2 },
-                                },
-                            },
-                        });
-                        const rusher = await Actor.create({
-                            name: "_Quench Rusher",
-                            type: "pc",
-                            system: {
-                                initiativeCharacteristic: "dex",
-                                characteristics: {
-                                    dex: { value: 25, max: 25 },
-                                    spd: { value: 3, max: 3 },
-                                },
-                            },
-                        });
-                        actorDocuments.push(holder, rusher);
+                        const holder = await makeActor("_Quench Holder", { dex: 20, spd: 2 });
+                        const rusher = await makeActor("_Quench Rusher", { dex: 25, spd: 3 });
 
-                        const combat = await Combat.create({
-                            name: "_Quench Combat",
-                            scene: canvas.scene?.id || null,
-                            active: true,
-                        });
-                        combatDocuments.push(combat);
-                        await combat.createEmbeddedDocuments("Combatant", [
-                            { actorId: holder.id },
-                            { actorId: rusher.id },
-                        ]);
+                        const combat = await makeCombat([holder, rusher]);
                         await combat.startCombat();
 
                         // Segment 12: Rusher (DEX 25) acts before Holder (DEX 20)
@@ -728,7 +653,9 @@ export function registerCombatTests(quench) {
                                 name: "Holding An Action",
                                 img: "icons/svg/clockwork.svg",
                                 statuses: ["holding"],
-                                flags: { [game.system.id]: { hold: { mode: "position", segmentAbs: 26, dex: 12 } } },
+                                flags: {
+                                    [game.system.id]: { hold: { mode: "position", segmentAbs: abs(2, 2), dex: 12 } },
+                                },
                             },
                         ]);
                         // Rusher banks a generic hold (bare status): no initiative slot at all
@@ -736,8 +663,8 @@ export function registerCombatTests(quench) {
                             { name: "Holding An Action", img: "icons/svg/clockwork.svg", statuses: ["holding"] },
                         ]);
 
-                        const holderCombatant = combat.combatants.find((c) => c.actorId === holder.id);
-                        const rusherCombatant = combat.combatants.find((c) => c.actorId === rusher.id);
+                        const holderCombatant = combatantFor(combat, holder);
+                        const rusherCombatant = combatantFor(combat, rusher);
 
                         // The positional hold slots at the declared DEX in the declared segment only
                         expect(Math.floor(combat.getInitiativePriority(holderCombatant, 2))).to.equal(12);
@@ -770,51 +697,27 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should resolve anchored Held Actions adjacent to the anchor's live position (#4602)", async function () {
-                    const automationSetting = game.settings.get(game.system.id, "automation");
-                    await game.settings.set(game.system.id, "automation", "none");
+                    const automationSetting = await getAndSetGameSetting("automation", "none");
 
                     try {
-                        const makeActor = (name, dex, spd) =>
-                            Actor.create({
-                                name,
-                                type: "pc",
-                                system: {
-                                    initiativeCharacteristic: "dex",
-                                    characteristics: {
-                                        dex: { value: dex, max: dex },
-                                        spd: { value: spd, max: spd },
-                                    },
-                                },
-                            });
                         // Anchor and rival tie on DEX 20 so only the random tie-break
                         // separates them; the holder must land adjacent to the ANCHOR
                         // regardless of how those rolls fall
-                        const anchorActor = await makeActor("_Quench Anchor", 20, 3);
-                        const rival = await makeActor("_Quench Rival", 20, 3);
-                        const holder = await makeActor("_Quench Anchored Holder", 15, 2);
-                        actorDocuments.push(anchorActor, rival, holder);
+                        const anchorActor = await makeActor("_Quench Anchor", { dex: 20, spd: 3 });
+                        const rival = await makeActor("_Quench Rival", { dex: 20, spd: 3 });
+                        const holder = await makeActor("_Quench Anchored Holder", { dex: 15, spd: 2 });
 
-                        const combat = await Combat.create({
-                            name: "_Quench Combat",
-                            scene: canvas.scene?.id || null,
-                            active: true,
-                        });
-                        combatDocuments.push(combat);
-                        await combat.createEmbeddedDocuments("Combatant", [
-                            { actorId: anchorActor.id },
-                            { actorId: rival.id },
-                            { actorId: holder.id },
-                        ]);
+                        const combat = await makeCombat([anchorActor, rival, holder]);
                         await combat.startCombat();
                         expect(combat.segment).to.equal(12);
 
-                        const anchorCombatant = combat.combatants.find((c) => c.actorId === anchorActor.id);
-                        const holderCombatant = combat.combatants.find((c) => c.actorId === holder.id);
+                        const anchorCombatant = combatantFor(combat, anchorActor);
+                        const holderCombatant = combatantFor(combat, holder);
 
                         // Holder (SPD 2 at T1S12) banks a Phase for Segment 4 of Turn 2
                         // (abs 28), right after the anchor; the DEX snapshot is set to a
                         // deliberately wrong 7 to prove live resolution wins
-                        const slotAbs = 2 * 12 + 4;
+                        const slotAbs = abs(2, 4);
                         const [holdEffect] = await holder.createEmbeddedDocuments("ActiveEffect", [
                             {
                                 name: "Holding An Action",
@@ -861,11 +764,11 @@ export function registerCombatTests(quench) {
                         // An anchor with no Phase in the slot's segment (SPD 3 has none in
                         // Segment 2) falls back to the declaration-time DEX snapshot
                         await holdEffect.setFlag(game.system.id, "hold", {
-                            segmentAbs: 2 * 12 + 2,
+                            segmentAbs: abs(2, 2),
                             anchor: { relation: "after" },
                         });
                         const fallbackPriority = combat.getInitiativePriority(holderCombatant, 2, {
-                            queryAbs: 2 * 12 + 2,
+                            queryAbs: abs(2, 2),
                         });
                         expect(Math.floor(fallbackPriority), "unresolvable anchor falls back to the snapshot").to.equal(
                             7,
@@ -912,23 +815,8 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should replace the natural Phase when a Held Action is used in its segment", async function () {
-                    const alpha = await Actor.create({
-                        name: "_Quench Replace Alpha",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 30, max: 30 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const holder = await Actor.create({
-                        name: "_Quench Replace Holder",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    actorDocuments.push(alpha, holder);
+                    const alpha = await makeActor("_Quench Replace Alpha", { dex: 30, spd: 2 });
+                    const holder = await makeActor("_Quench Replace Holder", { dex: 20, spd: 2 });
 
                     // Generic hold banked before combat; the holder also has a natural
                     // Phase in Segment 12
@@ -936,13 +824,7 @@ export function registerCombatTests(quench) {
                         { name: "Holding An Action", img: "icons/svg/clockwork.svg", statuses: ["holding"] },
                     ]);
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: alpha.id }, { actorId: holder.id }]);
+                    const combat = await makeCombat([alpha, holder]);
                     await combat.startCombat();
                     expect(combat.combatant.actorId).to.equal(alpha.id);
 
@@ -951,7 +833,7 @@ export function registerCombatTests(quench) {
                     // through ui.combat.viewed, which lags the freshly created combat in
                     // headless runs — pin it first.
                     ui.combat.viewed = combat;
-                    const holderCombatant = combat.combatants.find((c) => c.actorId === holder.id);
+                    const holderCombatant = combatantFor(combat, holder);
                     await ui.combat._onUseHeldAction(holderCombatant.id);
 
                     expect(holder.statuses.has("holding"), "hold consumed by use").to.be.false;
@@ -966,30 +848,16 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should advance past a spent same-segment hold into the next Turn's matching segment", async function () {
-                    const slug = await Actor.create({
-                        name: "_Quench Freeze Slug",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 1, max: 1 } },
-                        },
-                    });
-                    actorDocuments.push(slug);
+                    const slug = await makeActor("_Quench Freeze Slug", { dex: 20, spd: 1 });
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: slug.id }]);
+                    const combat = await makeCombat([slug]);
                     await combat.startCombat();
 
                     // SPD 1 phases only in Segment 7: the first advance crosses into Turn 2
                     await combat.nextTurn();
                     expect(combat.round).to.equal(2);
                     expect(combat.segment).to.equal(7);
-                    const combatant = combat.combatants.find((c) => c.actorId === slug.id);
+                    const combatant = combatantFor(combat, slug);
                     expect(combat.combatant?.id).to.equal(combatant.id);
 
                     // Same-segment positional hold to a lower DEX; ending the turn re-enters
@@ -1018,23 +886,9 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should consume a solo combatant's event hold at their next natural Phase", async function () {
-                    const loner = await Actor.create({
-                        name: "_Quench Solo Holder",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    actorDocuments.push(loner);
+                    const loner = await makeActor("_Quench Solo Holder", { dex: 20, spd: 2 });
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: loner.id }]);
+                    const combat = await makeCombat([loner]);
                     await combat.startCombat();
                     expect(combat.combatant?.actorId).to.equal(loner.id);
 
@@ -1059,43 +913,11 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should preserve a just-declared hold when the turn is rewound within the segment", async function () {
-                    const alpha = await Actor.create({
-                        name: "_Quench Rewind Alpha",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 30, max: 30 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const holder = await Actor.create({
-                        name: "_Quench Rewind Holder",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const gamma = await Actor.create({
-                        name: "_Quench Rewind Gamma",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 10, max: 10 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    actorDocuments.push(alpha, holder, gamma);
+                    const alpha = await makeActor("_Quench Rewind Alpha", { dex: 30, spd: 2 });
+                    const holder = await makeActor("_Quench Rewind Holder", { dex: 20, spd: 2 });
+                    const gamma = await makeActor("_Quench Rewind Gamma", { dex: 10, spd: 2 });
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [
-                        { actorId: alpha.id },
-                        { actorId: holder.id },
-                        { actorId: gamma.id },
-                    ]);
+                    const combat = await makeCombat([alpha, holder, gamma]);
                     await combat.startCombat();
                     await combat.nextTurn();
                     expect(combat.combatant?.actorId).to.equal(holder.id);
@@ -1122,34 +944,10 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should refuse an abort after acting and spend the current Phase when active", async function () {
-                    const bruiser = await Actor.create({
-                        name: "_Quench Abort Bruiser",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 30, max: 30 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const dodger = await Actor.create({
-                        name: "_Quench Abort Dodger",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    actorDocuments.push(bruiser, dodger);
+                    const bruiser = await makeActor("_Quench Abort Bruiser", { dex: 30, spd: 2 });
+                    const dodger = await makeActor("_Quench Abort Dodger", { dex: 20, spd: 2 });
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [
-                        { actorId: bruiser.id },
-                        { actorId: dodger.id },
-                    ]);
+                    const combat = await makeCombat([bruiser, dodger]);
                     await combat.startCombat();
 
                     // March to Segment 6 and let the dodger act on their Phase
@@ -1162,7 +960,7 @@ export function registerCombatTests(quench) {
                     // The bruiser already used their Segment 6 Phase: a character cannot
                     // Abort again until the next Segment
                     ui.combat.viewed = combat;
-                    const bruiserCombatant = combat.combatants.find((c) => c.actorId === bruiser.id);
+                    const bruiserCombatant = combatantFor(combat, bruiser);
                     const refused = await ui.combat._declareAbort(bruiserCombatant);
                     expect(refused, "abort refused after acting this Segment").to.be.false;
                     expect(bruiser.statuses.has("aborted")).to.be.false;
@@ -1170,7 +968,7 @@ export function registerCombatTests(quench) {
                     // The pointer sits on the dodger without them having acted (a Held
                     // Action interrupt shape): the abort replaces the CURRENT Phase and
                     // ends the turn
-                    const dodgerCombatant = combat.combatants.find((c) => c.actorId === dodger.id);
+                    const dodgerCombatant = combatantFor(combat, dodger);
                     const applied = await ui.combat._declareAbort(dodgerCombatant);
                     expect(applied).to.be.true;
                     expect(combat.segment, "turn ended by the abort").to.equal(12);
@@ -1189,31 +987,10 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should not skip the Phase after an abort's spent Phase for a top-DEX combatant", async function () {
-                    const reactor = await Actor.create({
-                        name: "_Quench Abort Reactor",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 30, max: 30 }, spd: { value: 4, max: 4 } },
-                        },
-                    });
-                    const pacer = await Actor.create({
-                        name: "_Quench Abort Pacer",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 6, max: 6 } },
-                        },
-                    });
-                    actorDocuments.push(reactor, pacer);
+                    const reactor = await makeActor("_Quench Abort Reactor", { dex: 30, spd: 4 });
+                    const pacer = await makeActor("_Quench Abort Pacer", { dex: 20, spd: 6 });
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: reactor.id }, { actorId: pacer.id }]);
+                    const combat = await makeCombat([reactor, pacer]);
                     await combat.startCombat();
 
                     // Segment 12: reactor (30) then pacer (20); Segment 2 is the pacer's alone
@@ -1225,7 +1002,7 @@ export function registerCombatTests(quench) {
                     // Reactor (SPD 4: 3/6/9/12) aborts during Segment 2, where they have no
                     // Phase: the abort consumes their Segment 3 Phase
                     ui.combat.viewed = combat;
-                    const reactorCombatant = combat.combatants.find((c) => c.actorId === reactor.id);
+                    const reactorCombatant = combatantFor(combat, reactor);
                     await ui.combat._declareAbort(reactorCombatant);
                     expect(reactorCombatant.abortSpentAbs, "abort consumes the Segment 3 Phase").to.equal(27);
 
@@ -1245,35 +1022,14 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should spend the Held Action when aborting while holding, losing no Phase", async function () {
-                    const alpha = await Actor.create({
-                        name: "_Quench AbortHold Alpha",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 30, max: 30 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const holder = await Actor.create({
-                        name: "_Quench AbortHold Holder",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    actorDocuments.push(alpha, holder);
+                    const alpha = await makeActor("_Quench AbortHold Alpha", { dex: 30, spd: 2 });
+                    const holder = await makeActor("_Quench AbortHold Holder", { dex: 20, spd: 2 });
 
                     await holder.createEmbeddedDocuments("ActiveEffect", [
                         { name: "Holding An Action", img: "icons/svg/clockwork.svg", statuses: ["holding"] },
                     ]);
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: alpha.id }, { actorId: holder.id }]);
+                    const combat = await makeCombat([alpha, holder]);
                     await combat.startCombat();
                     expect(combat.combatant.actorId).to.equal(alpha.id);
 
@@ -1281,7 +1037,7 @@ export function registerCombatTests(quench) {
                     // the replaced natural Phase is recorded so it cannot be used again
                     //
                     ui.combat.viewed = combat;
-                    const holderCombatant = combat.combatants.find((c) => c.actorId === holder.id);
+                    const holderCombatant = combatantFor(combat, holder);
                     const applied = await ui.combat._declareAbort(holderCombatant, {
                         toAction: "Dodge",
                         statusId: "dodge",
@@ -1311,38 +1067,17 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should block aborts and Held Action use while Stunned or abort-locked", async function () {
-                    const guard = await Actor.create({
-                        name: "_Quench Guard",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 25, max: 25 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const stunny = await Actor.create({
-                        name: "_Quench Stunny",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    actorDocuments.push(guard, stunny);
+                    const guard = await makeActor("_Quench Guard", { dex: 25, spd: 2 });
+                    const stunny = await makeActor("_Quench Stunny", { dex: 20, spd: 2 });
 
                     await stunny.createEmbeddedDocuments("ActiveEffect", [
                         { name: "Stunned", img: "icons/svg/daze.svg", statuses: ["stunned"] },
                     ]);
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: guard.id }, { actorId: stunny.id }]);
+                    const combat = await makeCombat([guard, stunny]);
                     await combat.startCombat();
                     ui.combat.viewed = combat;
-                    const stunnyCombatant = combat.combatants.find((c) => c.actorId === stunny.id);
+                    const stunnyCombatant = combatantFor(combat, stunny);
 
                     // A Stunned character can take no Action — not even Aborting
                     const refused = await ui.combat._declareAbort(stunnyCombatant);
@@ -1367,38 +1102,17 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should consume two Phases when aborting to an Extra Phase power", async function () {
-                    const alpha = await Actor.create({
-                        name: "_Quench ExtraPhase Alpha",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 30, max: 30 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const burner = await Actor.create({
-                        name: "_Quench ExtraPhase Burner",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 4, max: 4 } },
-                        },
-                    });
-                    actorDocuments.push(alpha, burner);
+                    const alpha = await makeActor("_Quench ExtraPhase Alpha", { dex: 30, spd: 2 });
+                    const burner = await makeActor("_Quench ExtraPhase Burner", { dex: 20, spd: 4 });
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: alpha.id }, { actorId: burner.id }]);
+                    const combat = await makeCombat([alpha, burner]);
                     await combat.startCombat();
                     ui.combat.viewed = combat;
 
                     // Aborting to an Extra Phase power consumes the next TWO Phases
                     //: the Segment 12 Phase not yet used plus the Segment 3 one.
                     // The recorded spentAbs is the later Phase, so the lockout spans both.
-                    const burnerCombatant = combat.combatants.find((c) => c.actorId === burner.id);
+                    const burnerCombatant = combatantFor(combat, burner);
                     const applied = await ui.combat._declareAbort(burnerCombatant, { extraPhase: true });
                     expect(applied).to.be.true;
                     expect(burnerCombatant.abortSpentAbs, "lockout extends to the second Phase").to.equal(27);
@@ -1408,34 +1122,13 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should expire a Dodge maneuver at the start of the actor's next Phase", async function () {
-                    const alpha = await Actor.create({
-                        name: "_Quench Expiry Alpha",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 30, max: 30 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const weaver = await Actor.create({
-                        name: "_Quench Expiry Weaver",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    actorDocuments.push(alpha, weaver);
+                    const alpha = await makeActor("_Quench Expiry Alpha", { dex: 30, spd: 2 });
+                    const weaver = await makeActor("_Quench Expiry Weaver", { dex: 20, spd: 2 });
                     if (!weaver.items.find((i) => i.system?.XMLID === "DODGE")) {
                         await weaver.addHeroSystemManeuvers();
                     }
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: alpha.id }, { actorId: weaver.id }]);
+                    const combat = await makeCombat([alpha, weaver]);
                     await combat.startCombat();
                     // Maneuver activation checks actor.inCombat, which reads the viewed combat
                     ui.combat.viewed = combat;
@@ -1467,29 +1160,15 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should mark knocked out combatants defeated via the tracker toggle", async function () {
-                    const sleeper = await Actor.create({
-                        name: "_Quench KO Sleeper",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 10, max: 10 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    actorDocuments.push(sleeper);
+                    const sleeper = await makeActor("_Quench KO Sleeper", { dex: 10, spd: 2 });
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: sleeper.id }]);
+                    const combat = await makeCombat([sleeper]);
 
                     await sleeper.createEmbeddedDocuments("ActiveEffect", [
                         { name: "Knocked Out", img: "icons/svg/unconscious.svg", statuses: ["knockedOut"] },
                     ]);
 
-                    const combatant = combat.combatants.find((c) => c.actorId === sleeper.id);
+                    const combatant = combatantFor(combat, sleeper);
                     expect(combatant.isDefeated, "KO alone is not core-defeated").to.be.false;
                     expect(combatant.isOutOfCombat, "KO skips turns").to.be.true;
 
@@ -1505,29 +1184,8 @@ export function registerCombatTests(quench) {
                 it("Should apply LIGHTNING_REFLEXES_ALL to initiative order", async function () {
                     const { HeroSystem6eItem } = await import("../item/item.mjs");
 
-                    const lrActor = await Actor.create({
-                        name: "_Quench Lightning Reflexes",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: {
-                                dex: { value: 15, max: 15 },
-                                spd: { value: 2, max: 2 },
-                            },
-                        },
-                    });
-                    const opponent = await Actor.create({
-                        name: "_Quench LR Opponent",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: {
-                                dex: { value: 20, max: 20 },
-                                spd: { value: 2, max: 2 },
-                            },
-                        },
-                    });
-                    actorDocuments.push(lrActor, opponent);
+                    const lrActor = await makeActor("_Quench Lightning Reflexes", { dex: 15, spd: 2 });
+                    const opponent = await makeActor("_Quench LR Opponent", { dex: 20, spd: 2 });
 
                     await HeroSystem6eItem.create(
                         HeroSystem6eItem.itemDataFromXml(
@@ -1537,20 +1195,11 @@ export function registerCombatTests(quench) {
                         { parent: lrActor },
                     );
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [
-                        { actorId: lrActor.id },
-                        { actorId: opponent.id },
-                    ]);
+                    const combat = await makeCombat([lrActor, opponent]);
 
                     // Effective DEX 15 + 10 beats DEX 20 for action order only
-                    const lrCombatant = combat.combatants.find((c) => c.actorId === lrActor.id);
-                    const oppCombatant = combat.combatants.find((c) => c.actorId === opponent.id);
+                    const lrCombatant = combatantFor(combat, lrActor);
+                    const oppCombatant = combatantFor(combat, opponent);
                     expect(Math.floor(combat.getInitiativePriority(lrCombatant, 12))).to.equal(25);
                     expect(combat.getInitiativePriority(lrCombatant, 12)).to.be.greaterThan(
                         combat.getInitiativePriority(oppCombatant, 12),
@@ -1563,25 +1212,9 @@ export function registerCombatTests(quench) {
                 it("Should not auto-apply scoped Lightning Reflexes purchases", async function () {
                     const { HeroSystem6eItem } = await import("../item/item.mjs");
 
-                    const sniper = await Actor.create({
-                        name: "_Quench LR Sniper",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
+                    const sniper = await makeActor("_Quench LR Sniper", { dex: 20, spd: 2 });
                     // LIGHTNING_REFLEXES_SINGLE is a 5e-only power, so its holder is 5e
-                    const fiver = await Actor.create({
-                        name: "_Quench LR Fiver",
-                        type: "pc",
-                        system: {
-                            is5e: true,
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    actorDocuments.push(sniper, fiver);
+                    const fiver = await makeActor("_Quench LR Fiver", { dex: 20, spd: 2, extra: { is5e: true } });
 
                     // 6e scoped LR shares XMLID LIGHTNING_REFLEXES_ALL, distinguished by OPTIONID
                     await HeroSystem6eItem.create(
@@ -1600,19 +1233,13 @@ export function registerCombatTests(quench) {
                         { parent: fiver },
                     );
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: sniper.id }, { actorId: fiver.id }]);
+                    const combat = await makeCombat([sniper, fiver]);
                     await combat.startCombat();
 
                     // Scoped purchases restrict the character to the scoped action when
                     // acting early, so they only apply on demand
-                    const sniperCombatant = combat.combatants.find((c) => c.actorId === sniper.id);
-                    const fiverCombatant = combat.combatants.find((c) => c.actorId === fiver.id);
+                    const sniperCombatant = combatantFor(combat, sniper);
+                    const fiverCombatant = combatantFor(combat, fiver);
                     expect(Math.floor(combat.getInitiativePriority(sniperCombatant, 12))).to.equal(20);
                     expect(Math.floor(combat.getInitiativePriority(fiverCombatant, 12))).to.equal(20);
                     expect(sniperCombatant.lightningReflexes.always).to.equal(0);
@@ -1626,23 +1253,8 @@ export function registerCombatTests(quench) {
                 it("Should elevate a scoped Lightning Reflexes combatant for one segment on demand", async function () {
                     const { HeroSystem6eItem } = await import("../item/item.mjs");
 
-                    const alpha = await Actor.create({
-                        name: "_Quench LR Elev Alpha",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 30, max: 30 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const mika = await Actor.create({
-                        name: "_Quench LR Elev Mika",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    actorDocuments.push(alpha, mika);
+                    const alpha = await makeActor("_Quench LR Elev Alpha", { dex: 30, spd: 2 });
+                    const mika = await makeActor("_Quench LR Elev Mika", { dex: 20, spd: 2 });
 
                     await HeroSystem6eItem.create(
                         HeroSystem6eItem.itemDataFromXml(
@@ -1652,13 +1264,7 @@ export function registerCombatTests(quench) {
                         { parent: mika },
                     );
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: alpha.id }, { actorId: mika.id }]);
+                    const combat = await makeCombat([alpha, mika]);
                     await combat.startCombat();
                     ui.combat.viewed = combat;
                     expect(combat.combatant.actorId).to.equal(alpha.id);
@@ -1666,7 +1272,7 @@ export function registerCombatTests(quench) {
                     // The elevated position (25) is still below the acting DEX 30, so
                     // acting early is on offer; taking it re-sorts without moving the
                     // pointer off the active combatant
-                    const mikaCombatant = combat.combatants.find((c) => c.actorId === mika.id);
+                    const mikaCombatant = combatantFor(combat, mika);
                     expect(ui.combat._lrElevationState(mikaCombatant)).to.equal("available");
                     await ui.combat._onToggleLrElevation(mikaCombatant.id);
                     expect(mikaCombatant.lrElevatedAbs).to.equal(24);
@@ -1698,31 +1304,9 @@ export function registerCombatTests(quench) {
                 it("Should slot the Phase remainder below intermediates after an elevated LR stop", async function () {
                     const { HeroSystem6eItem } = await import("../item/item.mjs");
 
-                    const alpha = await Actor.create({
-                        name: "_Quench LR SD Alpha",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 30, max: 30 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const beta = await Actor.create({
-                        name: "_Quench LR SD Beta",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 22, max: 22 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const mika = await Actor.create({
-                        name: "_Quench LR SD Mika",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    actorDocuments.push(alpha, beta, mika);
+                    const alpha = await makeActor("_Quench LR SD Alpha", { dex: 30, spd: 2 });
+                    const beta = await makeActor("_Quench LR SD Beta", { dex: 22, spd: 2 });
+                    const mika = await makeActor("_Quench LR SD Mika", { dex: 20, spd: 2 });
 
                     await HeroSystem6eItem.create(
                         HeroSystem6eItem.itemDataFromXml(
@@ -1732,24 +1316,14 @@ export function registerCombatTests(quench) {
                         { parent: mika },
                     );
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [
-                        { actorId: alpha.id },
-                        { actorId: beta.id },
-                        { actorId: mika.id },
-                    ]);
+                    const combat = await makeCombat([alpha, beta, mika]);
                     await combat.startCombat();
                     ui.combat.viewed = combat;
                     expect(combat.combatant.actorId).to.equal(alpha.id);
 
                     // Cancelling before the stop arrives removes it; the position is
                     // still ahead of the count, so it can be re-declared
-                    const mikaCombatant = combat.combatants.find((c) => c.actorId === mika.id);
+                    const mikaCombatant = combatantFor(combat, mika);
                     await ui.combat._onToggleLrElevation(mikaCombatant.id);
                     await ui.combat._onToggleLrElevation(mikaCombatant.id);
                     expect(mikaCombatant.lrElevatedAbs, "cancelled before arrival").to.equal(null);
@@ -1779,31 +1353,9 @@ export function registerCombatTests(quench) {
                 it("Should preempt the segment's first actor when elevating above them", async function () {
                     const { HeroSystem6eItem } = await import("../item/item.mjs");
 
-                    const fast = await Actor.create({
-                        name: "_Quench LR Pre Fast",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 25, max: 25 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const delta = await Actor.create({
-                        name: "_Quench LR Pre Delta",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 22, max: 22 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    const mika = await Actor.create({
-                        name: "_Quench LR Pre Mika",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                        },
-                    });
-                    actorDocuments.push(fast, delta, mika);
+                    const fast = await makeActor("_Quench LR Pre Fast", { dex: 25, spd: 2 });
+                    const delta = await makeActor("_Quench LR Pre Delta", { dex: 22, spd: 2 });
+                    const mika = await makeActor("_Quench LR Pre Mika", { dex: 20, spd: 2 });
 
                     await HeroSystem6eItem.create(
                         HeroSystem6eItem.itemDataFromXml(
@@ -1813,24 +1365,14 @@ export function registerCombatTests(quench) {
                         { parent: mika },
                     );
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [
-                        { actorId: fast.id },
-                        { actorId: delta.id },
-                        { actorId: mika.id },
-                    ]);
+                    const combat = await makeCombat([fast, delta, mika]);
                     await combat.startCombat();
                     ui.combat.viewed = combat;
                     expect(combat.combatant.actorId).to.equal(fast.id);
 
                     // Nothing has completed a turn yet, so an elevated position ABOVE
                     // the (unacted) first actor is reachable and preempts the pointer
-                    const mikaCombatant = combat.combatants.find((c) => c.actorId === mika.id);
+                    const mikaCombatant = combatantFor(combat, mika);
                     expect(ui.combat._lrElevationState(mikaCombatant)).to.equal("available");
                     await ui.combat._onToggleLrElevation(mikaCombatant.id);
                     expect(combat.combatant.actorId, "LR stop preempts the first actor").to.equal(mika.id);
@@ -1860,27 +1402,11 @@ export function registerCombatTests(quench) {
 
                 it("Should auto-elevate scoped Lightning Reflexes at segment start when enabled", async function () {
                     const { HeroSystem6eItem } = await import("../item/item.mjs");
-                    const autoSetting = game.settings.get(game.system.id, "lrAutoElevate");
-                    await game.settings.set(game.system.id, "lrAutoElevate", true);
+                    const autoSetting = await getAndSetGameSetting("lrAutoElevate", true);
 
                     try {
-                        const fast = await Actor.create({
-                            name: "_Quench LR Auto Fast",
-                            type: "pc",
-                            system: {
-                                initiativeCharacteristic: "dex",
-                                characteristics: { dex: { value: 25, max: 25 }, spd: { value: 2, max: 2 } },
-                            },
-                        });
-                        const mika = await Actor.create({
-                            name: "_Quench LR Auto Mika",
-                            type: "pc",
-                            system: {
-                                initiativeCharacteristic: "dex",
-                                characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                            },
-                        });
-                        actorDocuments.push(fast, mika);
+                        const fast = await makeActor("_Quench LR Auto Fast", { dex: 25, spd: 2 });
+                        const mika = await makeActor("_Quench LR Auto Mika", { dex: 20, spd: 2 });
 
                         await HeroSystem6eItem.create(
                             HeroSystem6eItem.itemDataFromXml(
@@ -1890,18 +1416,12 @@ export function registerCombatTests(quench) {
                             { parent: mika },
                         );
 
-                        const combat = await Combat.create({
-                            name: "_Quench Combat",
-                            scene: canvas.scene?.id || null,
-                            active: true,
-                        });
-                        combatDocuments.push(combat);
-                        await combat.createEmbeddedDocuments("Combatant", [{ actorId: fast.id }, { actorId: mika.id }]);
+                        const combat = await makeCombat([fast, mika]);
                         await combat.startCombat();
                         ui.combat.viewed = combat;
 
                         // Combat opens with the elevation applied and the LR stop preempting
-                        const mikaCombatant = combat.combatants.find((c) => c.actorId === mika.id);
+                        const mikaCombatant = combatantFor(combat, mika);
                         expect(mikaCombatant.lrElevatedAbs, "auto-elevated at combat start").to.equal(24);
                         expect(combat.combatant.actorId, "LR stop goes first").to.equal(mika.id);
                         expect(Math.floor(combat.getInitiativePriority(mikaCombatant, 12))).to.equal(28);
@@ -1925,27 +1445,11 @@ export function registerCombatTests(quench) {
 
                 it("Should whisper an Act Early prompt to scoped LR owners at segment start", async function () {
                     const { HeroSystem6eItem } = await import("../item/item.mjs");
-                    const autoSetting = game.settings.get(game.system.id, "lrAutoElevate");
-                    await game.settings.set(game.system.id, "lrAutoElevate", false);
+                    const autoSetting = await getAndSetGameSetting("lrAutoElevate", false);
 
                     try {
-                        const fast = await Actor.create({
-                            name: "_Quench LR Prompt Fast",
-                            type: "pc",
-                            system: {
-                                initiativeCharacteristic: "dex",
-                                characteristics: { dex: { value: 25, max: 25 }, spd: { value: 2, max: 2 } },
-                            },
-                        });
-                        const mika = await Actor.create({
-                            name: "_Quench LR Prompt Mika",
-                            type: "pc",
-                            system: {
-                                initiativeCharacteristic: "dex",
-                                characteristics: { dex: { value: 20, max: 20 }, spd: { value: 2, max: 2 } },
-                            },
-                        });
-                        actorDocuments.push(fast, mika);
+                        const fast = await makeActor("_Quench LR Prompt Fast", { dex: 25, spd: 2 });
+                        const mika = await makeActor("_Quench LR Prompt Mika", { dex: 20, spd: 2 });
 
                         await HeroSystem6eItem.create(
                             HeroSystem6eItem.itemDataFromXml(
@@ -1955,18 +1459,12 @@ export function registerCombatTests(quench) {
                             { parent: mika },
                         );
 
-                        const combat = await Combat.create({
-                            name: "_Quench Combat",
-                            scene: canvas.scene?.id || null,
-                            active: true,
-                        });
-                        combatDocuments.push(combat);
-                        await combat.createEmbeddedDocuments("Combatant", [{ actorId: fast.id }, { actorId: mika.id }]);
+                        const combat = await makeCombat([fast, mika]);
                         await combat.startCombat();
 
                         // startCombat awaits the prompt pass: a whispered card with the
                         // Act Early button exists for the LR holder
-                        const mikaCombatant = combat.combatants.find((c) => c.actorId === mika.id);
+                        const mikaCombatant = combatantFor(combat, mika);
                         const prompt = game.messages.contents
                             .slice(-5)
                             .find((m) => m.content?.includes(`data-combatant-id="${mikaCombatant.id}"`));
@@ -1980,37 +1478,10 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should re-evaluate initiative order when DEX changes mid-combat and skip aborted combatants", async function () {
-                    const alpha = await Actor.create({
-                        name: "_Quench Dex Alpha",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: {
-                                dex: { value: 20, max: 20 },
-                                spd: { value: 2, max: 2 },
-                            },
-                        },
-                    });
-                    const bravo = await Actor.create({
-                        name: "_Quench Dex Bravo",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: {
-                                dex: { value: 15, max: 15 },
-                                spd: { value: 2, max: 2 },
-                            },
-                        },
-                    });
-                    actorDocuments.push(alpha, bravo);
+                    const alpha = await makeActor("_Quench Dex Alpha", { dex: 20, spd: 2 });
+                    const bravo = await makeActor("_Quench Dex Bravo", { dex: 15, spd: 2 });
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: alpha.id }, { actorId: bravo.id }]);
+                    const combat = await makeCombat([alpha, bravo]);
                     await combat.startCombat();
 
                     expect(combat.combatant.actorId).to.equal(alpha.id);
@@ -2030,7 +1501,7 @@ export function registerCombatTests(quench) {
                     await alpha.createEmbeddedDocuments("ActiveEffect", [
                         { name: "Aborted", img: "icons/svg/downgrade.svg", statuses: ["aborted"] },
                     ]);
-                    const alphaCombatant = combat.combatants.find((c) => c.actorId === alpha.id);
+                    const alphaCombatant = combatantFor(combat, alpha);
                     expect(Math.floor(combat.getInitiativePriority(alphaCombatant, 6)), "priority unchanged").to.equal(
                         20,
                     );
@@ -2051,22 +1522,10 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should apply Post-Segment 12 Recovery when nextRound skips a full Turn", async function () {
-                    const automationSetting = game.settings.get(game.system.id, "automation");
-                    await game.settings.set(game.system.id, "automation", "all");
+                    const automationSetting = await getAndSetGameSetting("automation", "all");
 
                     try {
-                        const actor = await Actor.create({
-                            name: "_Quench Round Recovery PC",
-                            type: "pc",
-                            system: {
-                                initiativeCharacteristic: "dex",
-                                characteristics: {
-                                    dex: { value: 10, max: 10 },
-                                    spd: { value: 2, max: 2 },
-                                },
-                            },
-                        });
-                        actorDocuments.push(actor);
+                        const actor = await makeActor("_Quench Round Recovery PC", { dex: 10, spd: 2 });
 
                         const rec = actor.system.characteristics.rec.value;
                         const stunMax = actor.system.characteristics.stun.max;
@@ -2076,13 +1535,7 @@ export function registerCombatTests(quench) {
                             "system.characteristics.stun.value": stunMax - rec - 3,
                         });
 
-                        const combat = await Combat.create({
-                            name: "_Quench Combat",
-                            scene: canvas.scene?.id || null,
-                            active: true,
-                        });
-                        combatDocuments.push(combat);
-                        await combat.createEmbeddedDocuments("Combatant", [{ actorId: actor.id }]);
+                        const combat = await makeCombat([actor]);
                         await combat.startCombat();
 
                         // Skipping a full Turn crosses Post-Segment 12 exactly once
@@ -2104,37 +1557,10 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should lock out a combatant whose SPD changes until both SPDs would have had a Phase", async function () {
-                    const slow = await Actor.create({
-                        name: "_Quench SPD Change",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: {
-                                dex: { value: 20, max: 20 },
-                                spd: { value: 2, max: 2 },
-                            },
-                        },
-                    });
-                    const pacer = await Actor.create({
-                        name: "_Quench SPD Pacer",
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: {
-                                dex: { value: 10, max: 10 },
-                                spd: { value: 12, max: 12 },
-                            },
-                        },
-                    });
-                    actorDocuments.push(slow, pacer);
+                    const slow = await makeActor("_Quench SPD Change", { dex: 20, spd: 2 });
+                    const pacer = await makeActor("_Quench SPD Pacer", { dex: 10, spd: 12 });
 
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: slow.id }, { actorId: pacer.id }]);
+                    const combat = await makeCombat([slow, pacer]);
                     await combat.startCombat();
 
                     expect(combat.segment).to.equal(12);
@@ -2145,7 +1571,7 @@ export function registerCombatTests(quench) {
 
                     // SPD bookkeeping is seeded at the first segment boundary; wait for it so the
                     // change below is detected against the old SPD
-                    const slowCombatant = combat.combatants.find((c) => c.actorId === slow.id);
+                    const slowCombatant = combatantFor(combat, slow);
                     const seeded = await waitUntil(
                         () => slowCombatant.getFlag(game.system.id, "knownSpd") !== undefined,
                     );
@@ -2199,8 +1625,12 @@ export function registerCombatTests(quench) {
                 setQuenchTimeout(this);
                 const actorDocuments = [];
                 const combatDocuments = [];
+                const { makeActor, makeCombat, combatantFor } = makeHarness({ actorDocuments, combatDocuments });
+                let preexistingMessageIds;
 
                 before(async function () {
+                    preexistingMessageIds = new Set(game.messages.contents.map((m) => m.id));
+
                     const isSingleTracker =
                         typeof HEROSYS !== "undefined"
                             ? HEROSYS.isSingleCombatantTrackerEnabled
@@ -2214,9 +1644,8 @@ export function registerCombatTests(quench) {
                 });
 
                 after(async function () {
-                    for (const actor of actorDocuments) {
-                        if (typeof actor?.delete === "function") await actor.delete();
-                    }
+                    // Combats FIRST, mirroring quench-helper's teardown order: deleting
+                    // the actors first mutates the combats mid-teardown
                     for (const combatDoc of combatDocuments) {
                         if (typeof combatDoc?.delete === "function") {
                             const combatId = combatDoc.id;
@@ -2224,59 +1653,32 @@ export function registerCombatTests(quench) {
                             if (ui.combat?.viewed?.id === combatId) ui.combat.viewed = null;
                         }
                     }
+                    for (const actor of actorDocuments) {
+                        if (typeof actor?.delete === "function") await actor.delete();
+                    }
+
+                    // Sweep chat messages the tests produced
+                    if (preexistingMessageIds) {
+                        for (const message of game.messages.contents.filter((m) => !preexistingMessageIds.has(m.id))) {
+                            try {
+                                await message.delete();
+                            } catch (err) {
+                                console.error(err);
+                            }
+                        }
+                    }
+
                     if (ui.combat) ui.combat.render(true);
                 });
-
-                async function waitUntil(condition, timeoutMs = 3000, intervalMs = 50) {
-                    const start = Date.now();
-                    while (Date.now() - start < timeoutMs) {
-                        if (condition()) return true;
-                        await new Promise((resolve) => setTimeout(resolve, intervalMs));
-                    }
-                    return condition();
-                }
-
-                async function makeActor(name, { dex = 10, spd = 2, extra = {} } = {}) {
-                    const actor = await Actor.create({
-                        name,
-                        type: "pc",
-                        system: {
-                            initiativeCharacteristic: "dex",
-                            characteristics: {
-                                dex: { value: dex, max: dex },
-                                spd: { value: spd, max: spd },
-                            },
-                            ...extra,
-                        },
-                    });
-                    actor.prepareData();
-                    actorDocuments.push(actor);
-                    return actor;
-                }
-
-                async function makeCombat(actors) {
-                    const combat = await Combat.create({
-                        name: "_Quench Combat",
-                        scene: canvas.scene?.id || null,
-                        active: true,
-                    });
-                    combatDocuments.push(combat);
-                    await combat.createEmbeddedDocuments(
-                        "Combatant",
-                        actors.map((a) => ({ actorId: a.id })),
-                    );
-                    ui.combat.viewed = combat;
-                    return combat;
-                }
 
                 it("Should compute the 5e shared-Phase lockout and phase labels from the statics", async function () {
                     const { HeroSystem6eCombatantSingle } = await import("../combatant-single.mjs");
                     // SPD 2 {6,12} and SPD 4 {3,6,9,12} first share Segment 6.
-                    // From Turn 2 Segment 1 (abs 25) the next shared Phase is abs 30.
-                    expect(HeroSystem6eCombatantSingle.nextSharedPhaseAbs(2, 4, 25)).to.equal(30);
-                    // SPD 2 {6,12} and SPD 3 {4,8,12} only share Segment 12 (abs 36)
-                    expect(HeroSystem6eCombatantSingle.nextSharedPhaseAbs(2, 3, 25)).to.equal(36);
-                    expect(HeroSystem6eCombatantSingle.phaseLabel(30)).to.equal("Segment 6 of Turn 2");
+                    // From Turn 2 Segment 1 the next shared Phase is Turn 2 Segment 6.
+                    expect(HeroSystem6eCombatantSingle.nextSharedPhaseAbs(2, 4, abs(2, 1))).to.equal(abs(2, 6));
+                    // SPD 2 {6,12} and SPD 3 {4,8,12} only share Segment 12
+                    expect(HeroSystem6eCombatantSingle.nextSharedPhaseAbs(2, 3, abs(2, 1))).to.equal(abs(2, 12));
+                    expect(HeroSystem6eCombatantSingle.phaseLabel(abs(2, 6))).to.equal("Segment 6 of Turn 2");
                 });
 
                 it("Should keep equal-priority ordering stable across combatant re-creation (stableTiebreak)", async function () {
@@ -2293,9 +1695,8 @@ export function registerCombatTests(quench) {
 
                 it("Should resolve tie-break entries per the Fast Draw setting", async function () {
                     const combat = await makeCombat([await makeActor("_Quench FD Resolver")]);
-                    const saved = game.settings.get(game.system.id, "fastDrawTieBreak");
+                    const saved = await getAndSetGameSetting("fastDrawTieBreak", false);
                     try {
-                        await game.settings.set(game.system.id, "fastDrawTieBreak", false);
                         expect(combat._tieBreakerFraction({ r: 80, fd: null })).to.be.closeTo(0.8, 0.0001);
                         expect(combat._tieBreakerFraction(80)).to.be.closeTo(0.8, 0.0001); // legacy scalar
                         await game.settings.set(game.system.id, "fastDrawTieBreak", true);
@@ -2328,13 +1729,11 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should auto-skip a Stunned combatant's Phase when the option is on (#3280)", async function () {
-                    const savedSkip = game.settings.get(game.system.id, "stunnedAutoSkip");
-                    const savedAutomation = game.settings.get(game.system.id, "automation");
                     const alpha = await makeActor("_Quench Stun Alpha", { dex: 20, spd: 2 });
                     const stunned = await makeActor("_Quench Stunned", { dex: 10, spd: 2 });
+                    const savedAutomation = await getAndSetGameSetting("automation", "none");
+                    const savedSkip = await getAndSetGameSetting("stunnedAutoSkip", true);
                     try {
-                        await game.settings.set(game.system.id, "automation", "none");
-                        await game.settings.set(game.system.id, "stunnedAutoSkip", true);
                         const combat = await makeCombat([alpha, stunned]);
                         await combat.startCombat();
                         expect(combat.segment).to.equal(12);
@@ -2383,11 +1782,10 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should skip an out-of-turn abort's spent Phase and clear the status after it passes", async function () {
-                    const savedAutomation = game.settings.get(game.system.id, "automation");
                     const alpha = await makeActor("_Quench Abort Alpha", { dex: 20, spd: 2 });
                     const dodger = await makeActor("_Quench Dodger", { dex: 10, spd: 2 });
+                    const savedAutomation = await getAndSetGameSetting("automation", "none");
                     try {
-                        await game.settings.set(game.system.id, "automation", "none");
                         const combat = await makeCombat([alpha, dodger]);
                         await combat.startCombat();
                         expect(combat.segment).to.equal(12);
@@ -2395,12 +1793,12 @@ export function registerCombatTests(quench) {
 
                         // Dodger aborts out of turn (the dodge-toggle prompt path calls
                         // _declareAbort exactly like this). SPD 2 at T1S12: the spent
-                        // Phase is THIS segment's (abs 24)
-                        const dodgerCombatant = combat.combatants.find((c) => c.actorId === dodger.id);
+                        // Phase is THIS segment's
+                        const dodgerCombatant = combatantFor(combat, dodger);
                         const applied = await ui.combat._declareAbort(dodgerCombatant, { toAction: "Dodge" });
                         expect(applied, "abort declared").to.be.true;
                         expect(dodger.statuses.has("aborted")).to.be.true;
-                        expect(dodgerCombatant.abortSpentAbs, "spent Phase is this segment's").to.equal(24);
+                        expect(dodgerCombatant.abortSpentAbs, "spent Phase is this segment's").to.equal(abs(1, 12));
 
                         // Alpha ends their turn: the dodger's Phase this segment is the
                         // spent one — the pointer must NOT land on them
@@ -2425,7 +1823,7 @@ export function registerCombatTests(quench) {
                     const combat = await makeCombat([a, b]);
                     await combat.startCombat();
 
-                    const startAbs = 1 * 12 + 12;
+                    const startAbs = abs(1, 12);
                     // The committed pointer must be the live-sorted leader, and the
                     // stored threshold must equal the leader's live priority — a
                     // rolls-blind start scores both at the 0.50 default instead
@@ -2471,11 +1869,10 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should adopt a bare aborted status into the declaration instead of bailing", async function () {
-                    const savedAutomation = game.settings.get(game.system.id, "automation");
                     const alpha = await makeActor("_Quench Adopt Alpha", { dex: 20, spd: 2 });
                     const marked = await makeActor("_Quench Bare Aborted", { dex: 10, spd: 2 });
+                    const savedAutomation = await getAndSetGameSetting("automation", "none");
                     try {
-                        await game.settings.set(game.system.id, "automation", "none");
                         const combat = await makeCombat([alpha, marked]);
                         await combat.startCombat();
 
@@ -2483,7 +1880,7 @@ export function registerCombatTests(quench) {
                         // leaves an unrecorded abort that binds at every segment and never
                         // clears — declaration must adopt it, not bail
                         await marked.toggleStatusEffect("aborted", { active: true });
-                        const markedCombatant = combat.combatants.find((c) => c.actorId === marked.id);
+                        const markedCombatant = combatantFor(combat, marked);
                         expect(markedCombatant.abortEffect?.getFlag(game.system.id, "abort")).to.not.exist;
 
                         const applied = await ui.combat._declareAbort(markedCombatant, { toAction: "Dodge" });
@@ -2506,7 +1903,7 @@ export function registerCombatTests(quench) {
                     await ghost.toggleStatusEffect("invisible", { active: true });
                     try {
                         const combat = await makeCombat([ghost]);
-                        const auto = combat.combatants.find((c) => c.actorId === ghost.id);
+                        const auto = combatantFor(combat, ghost);
                         expect(auto.hidden, "invisible actor's combatant starts hidden").to.be.true;
 
                         // An explicit hidden value in the creation data wins
@@ -2569,7 +1966,7 @@ export function registerCombatTests(quench) {
                     const pacer = await makeActor("_Quench Pacer", { dex: 10, spd: 2 });
                     const combat = await makeCombat([holder, pacer]);
                     await combat.startCombat();
-                    const combatant = combat.combatants.find((c) => c.actorId === holder.id);
+                    const combatant = combatantFor(combat, holder);
                     const currentAbs = combat.round * 12 + combat.segment;
 
                     await holder.toggleStatusEffect("holding", { active: true });
@@ -2600,7 +1997,7 @@ export function registerCombatTests(quench) {
                     const pacer = await makeActor("_Quench Demote Pacer", { dex: 10, spd: 12 });
                     const combat = await makeCombat([holder, pacer]);
                     await combat.startCombat();
-                    const combatant = combat.combatants.find((c) => c.actorId === holder.id);
+                    const combatant = combatantFor(combat, holder);
                     const currentAbs = combat.round * 12 + combat.segment;
 
                     await holder.toggleStatusEffect("holding", { active: true });
@@ -2626,7 +2023,7 @@ export function registerCombatTests(quench) {
                     const actor = await makeActor("_Quench Chronicler", { dex: 12, spd: 2 });
                     const combat = await makeCombat([actor]);
                     await combat.startCombat();
-                    const combatant = combat.combatants.find((c) => c.actorId === actor.id);
+                    const combatant = combatantFor(combat, actor);
 
                     // startCombat itself ledgers segment.start + turn.start at abs 24
                     const log = combat.getEventLog();
@@ -2666,7 +2063,7 @@ export function registerCombatTests(quench) {
 
                     // The seeded SPD baseline is the OBJECT shape: a scalar would
                     // normalize source=effective and trip a bogus adjustment lockout
-                    const newcomer = combat.combatants.find((c) => c.actorId === three.id);
+                    const newcomer = combatantFor(combat, three);
                     const seeded = await waitUntil(() => newcomer.getFlag(game.system.id, "knownSpd") !== undefined);
                     expect(seeded).to.be.true;
                     const known = newcomer.getFlag(game.system.id, "knownSpd");
@@ -2678,7 +2075,7 @@ export function registerCombatTests(quench) {
                     const holder = await makeActor("_Quench Hold Adopter", { dex: 12, spd: 2 });
                     const combat = await makeCombat([holder]);
                     await combat.startCombat();
-                    const combatant = combat.combatants.find((c) => c.actorId === holder.id);
+                    const combatant = combatantFor(combat, holder);
 
                     // A bare token-HUD toggle: holding status with no combatantId binding
                     await holder.toggleStatusEffect("holding", { active: true });
@@ -2701,7 +2098,7 @@ export function registerCombatTests(quench) {
                     const pacer = await makeActor("_Quench SPD Pacer", { dex: 20, spd: 12 });
                     const combat = await makeCombat([changer, pacer]);
                     await combat.startCombat();
-                    const combatant = combat.combatants.find((c) => c.actorId === changer.id);
+                    const combatant = combatantFor(combat, changer);
 
                     // First boundary seeds the {effective, source} baseline
                     await combat.nextTurn();
@@ -2726,7 +2123,7 @@ export function registerCombatTests(quench) {
                     const bruiser = await makeActor("_Quench Haymaker", { dex: 12, spd: 12 });
                     const combat = await makeCombat([bruiser]);
                     await combat.startCombat();
-                    const combatant = combat.combatants.find((c) => c.actorId === bruiser.id);
+                    const combatant = combatantFor(combat, bruiser);
                     const currentAbs = combat.round * 12 + combat.segment;
 
                     const scheduled = await combat.scheduleHaymaker(bruiser);
@@ -2780,7 +2177,7 @@ export function registerCombatTests(quench) {
                     const pacer = await makeActor("_Quench ET Pacer", { dex: 10, spd: 12 });
                     const combat = await makeCombat([caster, pacer]);
                     await combat.startCombat();
-                    const combatant = combat.combatants.find((c) => c.actorId === caster.id);
+                    const combatant = combatantFor(combat, caster);
                     const currentAbs = combat.round * 12 + combat.segment;
 
                     // Classification reads the item's EXTRATIME modifier: a duck item
@@ -2833,8 +2230,8 @@ export function registerCombatTests(quench) {
                     await combat.startCombat();
                     expect(combat.segment).to.equal(12);
                     expect(combat.combatant.actorId).to.equal(pacer.id);
-                    const holderCombatant = combat.combatants.find((c) => c.actorId === holder.id);
-                    const pacerCombatant = combat.combatants.find((c) => c.actorId === pacer.id);
+                    const holderCombatant = combatantFor(combat, holder);
+                    const pacerCombatant = combatantFor(combat, pacer);
 
                     // The holder banked a Phase for Turn 2 Segment 3, then aborts NOW
                     // (T1S12, before their natural DEX 8 Phase comes up)
@@ -2847,7 +2244,7 @@ export function registerCombatTests(quench) {
                                 [game.system.id]: {
                                     hold: {
                                         mode: "position",
-                                        segmentAbs: 27,
+                                        segmentAbs: abs(2, 3),
                                         dex: 12,
                                         combatantId: holderCombatant.id,
                                     },
@@ -2937,7 +2334,7 @@ export function registerCombatTests(quench) {
                     expect(strike, "PC actors carry the Strike maneuver").to.exist;
                     const combat = await makeCombat([striker]);
                     await combat.startCombat();
-                    const combatant = combat.combatants.find((c) => c.actorId === striker.id);
+                    const combatant = combatantFor(combat, striker);
                     const currentAbs = combat.round * 12 + combat.segment;
 
                     strike.system._active ??= {};
@@ -3004,7 +2401,7 @@ export function registerCombatTests(quench) {
                     const combat = await makeCombat([boss, outsider]);
                     await combat.createEmbeddedDocuments("Combatant", [{ actorId: boss.id }]);
                     const members = combat.combatants.filter((c) => c.actorId === boss.id);
-                    const outsiderCombatant = combat.combatants.find((c) => c.actorId === outsider.id);
+                    const outsiderCombatant = combatantFor(combat, outsider);
 
                     // Rig an EXACT fraction collision (both roll groups r=50) with
                     // adversarial sub-rolls: mixing sub-roll order inside the group
@@ -3055,7 +2452,7 @@ export function registerCombatTests(quench) {
                 it("Should refuse initiative rolls entirely (HERO has none)", async function () {
                     const actor = await makeActor("_Quench No Init", { dex: 12, spd: 2 });
                     const combat = await makeCombat([actor]);
-                    const combatant = combat.combatants.find((c) => c.actorId === actor.id);
+                    const combatant = combatantFor(combat, actor);
                     await combat.rollInitiative([combatant.id]);
                     await combat.rollAll();
                     expect(combatant.initiative, "no core formula written").to.equal(null);
