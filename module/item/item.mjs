@@ -1488,6 +1488,16 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             await ui.notifications.warn(`${this.actor.name} is not the active combatant`);
         }
 
+        // Maneuvers that only apply their active effect (Dodge — behaviors
+        // "ae-only"): there is no to-hit and no effect dice, so activating IS
+        // the roll. Routing through toggle also lands in activateManeuver,
+        // where the out-of-turn Abort offer lives. Previously this fell through
+        // to the dice branch: an "effect roll is not fully supported" warning
+        // and a bogus 0-effect roll.
+        if (this.baseInfo.behaviors.includes("ae-only")) {
+            return this.toggle({ token: options.token });
+        }
+
         if (this.baseInfo.behaviors.includes("to-hit")) {
             // FIXME: Martial maneuvers all share the MANEUVER XMLID. Need to extract out things from that (and fix the broken things).
             switch (this.system.XMLID) {
