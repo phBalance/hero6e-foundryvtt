@@ -1,5 +1,6 @@
 import { HeroSystem6eCombatantSingle } from "./combatant-single.mjs";
 import { HeroSystem6eCombatSingle } from "./combat-single.mjs";
+import { maneuverHasBlockTrait, maneuverHasDodgeTrait } from "./item/maneuver.mjs";
 import { isQuenchTestRunning } from "./utility/util.mjs";
 
 const { CombatTracker } = foundry.applications.sidebar.tabs;
@@ -2351,9 +2352,12 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * @private
      */
     async _applyAbortDefense(actor, statusId) {
-        const xmlid = { dodge: "DODGE", block: "BLOCK" }[statusId];
-        const maneuverItem = xmlid
-            ? actor.items.find((i) => ["maneuver", "martialart"].includes(i.type) && i.system?.XMLID === xmlid)
+        // Match by maneuver trait, not exact XMLID: uploaded dodge/block items can
+        // carry XMLID "MANEUVER" (custom maneuvers), and the missed match fell back
+        // to a bare status — a SECOND "Dodging" effect alongside the maneuver's own
+        const trait = { dodge: maneuverHasDodgeTrait, block: maneuverHasBlockTrait }[statusId];
+        const maneuverItem = trait
+            ? actor.items.find((i) => ["maneuver", "martialart"].includes(i.type) && trait(i))
             : null;
         if (maneuverItem) {
             if (!maneuverItem.isActive) await maneuverItem.toggle();

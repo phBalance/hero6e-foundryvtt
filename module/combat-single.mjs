@@ -1370,7 +1370,11 @@ export class HeroSystem6eCombatSingle extends Combat {
         let targetCombatantId = null;
         const upcomingActors = allCombatants.filter((c) =>
             this._takesTurnInSegment(c, nextSegment, {
-                ignoreAbort: abortSpentIds.has(c.id),
+                // Only a STRICTLY-PAST spent Phase re-admits the aborter: an abort
+                // spending exactly at the landing segment is being consumed here —
+                // re-admitting handed the aborter a stop at the very Phase the
+                // abort consumed (and phase-start work expired their defenses)
+                ignoreAbort: abortSpentIds.has(c.id) && c.abortSpentAbs !== null && c.abortSpentAbs < nextAbs,
                 queryAbs: nextAbs,
                 ignoreHold: c.id === ending?.id && endingAtHeldSlot,
             }),
