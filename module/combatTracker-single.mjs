@@ -2273,16 +2273,33 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const combat = this.viewed;
         const actor = combatant?.actor;
         if (!combat?.started || !combatant?.isOwner || !actor) return false;
-        if (combatant.abortEffect) return false;
+        // A RECORDED abort is final; a bare aborted status (token-HUD toggle,
+        // stale effect from an interrupted flow) is ADOPTED below — bailing on it
+        // left an unrecorded effect that binds at every segment and never clears
+        const existingAbortEffect = combatant.abortEffect;
+        if (existingAbortEffect?.getFlag(game.system.id, "abort")) {
+            ui.notifications.warn(`${actor.name} has already Aborted.`);
+            return false;
+        }
+        const adoptingBareStatus = !!existingAbortEffect;
         // The isActive read below must see settled pointer state, or an abort on
         // the active combatant can silently skip its end-of-turn
         await combat.settleMaintenance?.();
 
         if (!force) {
-            const reason = this._blockedAbortReason(combatant);
-            if (reason) {
-                ui.notifications.warn(reason);
-                return false;
+            if (adoptingBareStatus) {
+                // The bare status itself reads as an abort lockout — only the
+                // guards that are NOT the effect being adopted apply
+                if (actor.statuses.has("stunned")) {
+                    ui.notifications.warn(`${actor.name} is Stunned and can take no Actions — not even Aborting.`);
+                    return false;
+                }
+            } else {
+                const reason = this._blockedAbortReason(combatant);
+                if (reason) {
+                    ui.notifications.warn(reason);
+                    return false;
+                }
             }
         }
 
@@ -2379,7 +2396,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const combatant = combat?.combatants.get(combatantId);
         const actor = combatant?.actor;
         if (!combat?.started || !combatant?.isOwner || !actor) return;
-        if (combatant.abortEffect) return;
+        // Only a RECORDED abort blocks; a bare status gets adopted by the flow
+        if (combatant.abortEffect?.getFlag(game.system.id, "abort")) return;
 
         const reason = this._blockedAbortReason(combatant);
         if (reason && !game.user.isGM) return void ui.notifications.warn(reason);

@@ -2420,6 +2420,37 @@ export function registerCombatTests(quench) {
                     }
                 });
 
+                it("Should adopt a bare aborted status into the declaration instead of bailing", async function () {
+                    const savedAutomation = game.settings.get(game.system.id, "automation");
+                    const alpha = await makeActor("_Quench Adopt Alpha", { dex: 20, spd: 2 });
+                    const marked = await makeActor("_Quench Bare Aborted", { dex: 10, spd: 2 });
+                    try {
+                        await game.settings.set(game.system.id, "automation", "none");
+                        const combat = await makeCombat([alpha, marked]);
+                        await combat.startCombat();
+
+                        // A raw status toggle (stale effect / token HUD without the hook)
+                        // used to make every later declaration bail silently — an
+                        // unrecorded abort that binds at every segment and never clears
+                        await marked.toggleStatusEffect("aborted", { active: true });
+                        const markedCombatant = combat.combatants.find((c) => c.actorId === marked.id);
+                        expect(markedCombatant.abortEffect?.getFlag(game.system.id, "abort")).to.not.exist;
+
+                        const applied = await ui.combat._declareAbort(markedCombatant, { toAction: "Dodge" });
+                        expect(applied, "declaration adopts the bare status").to.be.true;
+                        const abortedEffects = marked.effects.filter((e) => e.statuses.has("aborted"));
+                        expect(abortedEffects.length, "adopted, not duplicated").to.equal(1);
+                        expect(abortedEffects[0].getFlag(game.system.id, "abort")?.spentAbs).to.equal(24);
+
+                        // And the normal lifecycle completes: skip, then clear
+                        await combat.nextTurn();
+                        const cleared = await waitUntil(() => !marked.statuses.has("aborted"));
+                        expect(cleared, "adopted abort cleared once its spent Phase passed").to.be.true;
+                    } finally {
+                        await game.settings.set(game.system.id, "automation", savedAutomation);
+                    }
+                });
+
                 it("Should create combatants hidden for invisible actors, explicit hidden wins (#4466)", async function () {
                     const ghost = await makeActor("_Quench Ghost", { dex: 10, spd: 2 });
                     await ghost.toggleStatusEffect("invisible", { active: true });
