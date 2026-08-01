@@ -1238,6 +1238,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 icon: "fa-solid fa-arrow-right-from-bracket",
                 visible: (li) => {
                     if (!game.user.isGM || !this._groupingEnabled()) return false;
+                    // The ×N summary row represents the whole group — splitting "it"
+                    // would really split whichever member's id the row carries.
+                    // Explode the group and split individual members instead.
+                    if (li.classList?.contains("hero-group-row")) return false;
                     const combatant = getCombatant(li);
                     if (!combatant || combatant.getFlag(game.system.id, "soloTieRoll")) return false;
                     // Only meaningful when a same-actor sibling exists to group with
