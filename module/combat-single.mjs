@@ -2611,6 +2611,16 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (!this.started || !actor || !plan) return null;
         const combatant = this.combatantForActor(actor);
         if (!combatant) return null;
+        // Dedupe: a pending record for the same item/label means this activation
+        // is already underway (the item shows no active state until it lands)
+        const planItemUuid = item?.uuid ?? plan.itemUuid ?? null;
+        const duplicate = [...this.delayedActionsFor(combatant)].some(
+            ([, r]) => (planItemUuid && r.itemUuid === planItemUuid) || r.label === plan.label,
+        );
+        if (duplicate) {
+            ui.notifications.warn(`${plan.label} is already underway for ${actor.name}.`);
+            return null;
+        }
         const id = foundry.utils.randomID();
         const currentAbs = HeroSystem6eCombatantSingle.absoluteSegment(this.round, this.segment);
         const record = {

@@ -488,6 +488,9 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
                 id: "encumbered",
                 name: "Encumbered",
                 img: `systems/${module}/icons/encumbered.svg`,
+                // Weight-derived: the encumbrance recalc owns it, so keep the HUD
+                // from offering a manual toggle that would orphan or strip penalties
+                hud: false,
             },
         });
 

@@ -1140,6 +1140,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         }
 
         context.turns = timelineTurns;
+        // Forces core's plain-span initiative branch: if every stored initiative
+        // happened to be integral, core would otherwise render editable inputs
+        context.hasDecimals = true;
         return context;
     }
 
@@ -1264,8 +1267,15 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     _groupMembers(combatantId) {
         const representative = this.viewed?.combatants.get(combatantId);
         if (!representative) return [];
+        // Key on the tie-roll key, not the raw actorId: combatants deliberately
+        // split out of the group carry a solo key and must not be swept along
+        const combat = this.viewed;
+        if (typeof combat._tieRollKey === "function") {
+            const key = combat._tieRollKey(representative);
+            return combat.combatants.filter((c) => combat._tieRollKey(c) === key);
+        }
         const key = representative.actorId || representative.id;
-        return this.viewed.combatants.filter((c) => (c.actorId || c.id) === key);
+        return combat.combatants.filter((c) => (c.actorId || c.id) === key);
     }
 
     /**
@@ -1344,8 +1354,12 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
         for (const option of options) {
             const visible = option.visible;
+            // Core entries (Update, Remove…) act on the representative only, which
+            // is misleading on a ×N group summary row — hide them there
             option.visible = (li) =>
-                !!getCombatant(li) && (typeof visible === "function" ? visible.call(this, li) : (visible ?? true));
+                !li.classList.contains("hero-group-row") &&
+                !!getCombatant(li) &&
+                (typeof visible === "function" ? visible.call(this, li) : (visible ?? true));
         }
 
         options.push(
@@ -1754,9 +1768,13 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     return null;
                 }
                 const relation = result.relation === "before" ? "before" : "after";
-                // The holder shares the anchor's exact scalar, so the anchor itself
-                // must sit below the count for a same-segment hold
-                if (segmentAbs === currentAbs && targetPriority >= actingThreshold) {
+                // The holder shares the anchor's exact scalar. "Before" an anchor at
+                // or above the count would land above it; "after" the CURRENT acting
+                // position is the canonical re-entry and sequences via equal-priority
+                // re-admission, so only strictly-above anchors are illegal there.
+                const anchorAboveCount =
+                    relation === "before" ? targetPriority >= actingThreshold : targetPriority > actingThreshold;
+                if (segmentAbs === currentAbs && anchorAboveCount) {
                     ui.notifications.warn(
                         `A same-segment hold must slot below the current acting position (${actingThreshold.toFixed(2)}).`,
                     );
@@ -2339,6 +2357,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             );
             await combat.logEvent("abort.declare", {
                 combatant,
+                // The acted position: a holder often has no natural Phase here, so
+                // the default event priority would compute 0 and the ledger row
+                // would sort to the segment bottom
+                priority: combat.getFlag(game.system.id, "actingPriority") ?? undefined,
                 data: { toAction, viaHold: true, spentAbs: combat.round * 12 + combat.segment },
             });
             return true;

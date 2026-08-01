@@ -570,11 +570,14 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
                 if (!canActOnDelayedAttack(item, payload)) {
                     return ui.notifications.warn(`Only the attacker (or GM) can resolve this attack.`);
                 }
-                await markDelayedCardResolved(app);
                 const { userInteractiveVerifyOptionallyPromptThenSpendResources } =
                     await import("./item/item-resources.mjs");
-                const { resourcesUsedDescription, resourcesUsedDescriptionRenderedRoll } =
+                const { error, resourcesUsedDescription, resourcesUsedDescriptionRenderedRoll } =
                     await userInteractiveVerifyOptionallyPromptThenSpendResources(item, payload.formData ?? {});
+                if (error) return ui.notifications.error(`${item.name} ${error}`);
+                // Consume the card only once the spend has gone through — marking
+                // first left a cancelled prompt with a dead card and no resolution
+                await markDelayedCardResolved(app);
                 const actor = item.actor ?? (payload.actorUuid ? fromUuidSync(payload.actorUuid) : null);
                 // The Haymaker is over: the roll path's tail would end the maneuver
                 // after the attack rolls, but nothing rolls here — tear it down now
@@ -622,7 +625,6 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
                 if (!canActOnDelayedAttack(item, payload)) {
                     return ui.notifications.warn(`Only the attacker (or GM) rolls this attack.`);
                 }
-                await markDelayedCardResolved(app);
                 // Restore the declaration's targets for the rolling user
                 // (V14 replaced User#updateTokenTargets with TokenLayer#setTargets)
                 if (payload.targetTokenIds?.length) {
@@ -644,6 +646,9 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
                     },
                     { delayedResolution: true },
                 );
+                // Consume the card only after the roll pipeline ran — marking first
+                // left a thrown/cancelled roll with a dead card and a paid, unrollable attack
+                await markDelayedCardResolved(app);
             } finally {
                 button.disabled = false;
             }

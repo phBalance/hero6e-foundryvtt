@@ -467,6 +467,18 @@ async function scheduleExtraTimeAttackDeclaration(item, formData) {
     const plan = combat.extraTimePlan(actor, item) ?? combat.extraTimePlan(actor, item.effectiveAttackItem);
     if (!plan) return false;
 
+    // Dedupe BEFORE paying: the item shows no active state while the schedule is
+    // pending, so a second click would otherwise double-spend and double-schedule
+    const schedulingCombatant = combat.combatantForActor(actor);
+    const itemUuid = item?.uuid ?? null;
+    const pending = [...(combat.delayedActionsFor?.(schedulingCombatant) ?? [])].some(
+        ([, record]) => record.label === plan.label || (itemUuid && record.itemUuid === itemUuid),
+    );
+    if (pending) {
+        ui.notifications.warn(`${item.name} is already being activated.`);
+        return true;
+    }
+
     // RAW: END is committed when the activation begins and stays spent if it is
     // interrupted; activation/RSR rolls happen now too. The dialog's formData
     // carries effective STR / boostable charges — without it the spend undercharges

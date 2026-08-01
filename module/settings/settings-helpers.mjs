@@ -575,12 +575,21 @@ export default class SettingsHelpers {
             precedence: CONST.KEYBINDING_PRECEDENCE.NORMAL,
         });
 
-        // Use new combat tracker
+        // Use new combat tracker. Config visibility: always shown once ENABLED —
+        // the world-scoped effect must never be trapped behind the client-scoped
+        // alphaTesting reveal (a GM who turned alphaTesting off would have no way
+        // to escape the alpha tracker).
+        const storedSingleTracker = game.settings.storage
+            .get("world")
+            ?.getSetting?.(`${module}.singleCombatantTracker`)?.value;
         game.settings.register(module, "singleCombatantTracker", {
             name: game.i18n.localize("Settings.AlphaTesting.singleCombatantTracker.Name"),
             hint: game.i18n.localize("Settings.AlphaTesting.singleCombatantTracker.Hint"),
             scope: "world",
-            config: game.settings.get(game.system.id, "alphaTesting"),
+            config:
+                game.settings.get(game.system.id, "alphaTesting") ||
+                storedSingleTracker === true ||
+                storedSingleTracker === "true",
             type: Boolean,
             default: false,
             requiresReload: true,
@@ -594,14 +603,14 @@ export default class SettingsHelpers {
             default: false,
         });
 
-        // Per-client density toggle for the single tracker (#3157). Lives in
-        // core's Combat Tracker Settings dialog (renderCombatTrackerConfig
-        // injection in the tracker class), not the module settings list.
+        // Per-client density toggle for the single tracker (#3157). Also injected
+        // into core's Combat Tracker Settings dialog, but that dialog's gear is
+        // GM-only — the settings list is the only path players have to it.
         game.settings.register(module, "combatTrackerCompact", {
             name: game.i18n.localize("Settings.AlphaTesting.combatTrackerCompact.Name"),
             hint: game.i18n.localize("Settings.AlphaTesting.combatTrackerCompact.Hint"),
             scope: "client",
-            config: false,
+            config: true,
             type: Boolean,
             default: false,
             onChange: () => ui.combat?.render(),
