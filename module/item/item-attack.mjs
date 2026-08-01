@@ -1,4 +1,4 @@
-import { activateManeuver, doManeuverEffects, maneuverHasBlockTrait } from "./maneuver.mjs";
+import { activateManeuver, doManeuverEffects, endHaymakerManeuver, maneuverHasBlockTrait } from "./maneuver.mjs";
 
 import { HEROSYS } from "../herosystem6e.mjs";
 
@@ -40,7 +40,13 @@ import {
     getRoundedDownDistanceInSystemUnits,
     getSystemDisplayUnits,
 } from "../utility/units.mjs";
-import { getPowerInfo, getTokenUuid, tokenEducatedGuess, whisperUserTargetsForActor } from "../utility/util.mjs";
+import {
+    activeSingleTrackerCombatFor,
+    getPowerInfo,
+    getTokenUuid,
+    tokenEducatedGuess,
+    whisperUserTargetsForActor,
+} from "../utility/util.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
 
 const { renderTemplate } = foundry.applications.handlebars;
@@ -377,17 +383,50 @@ export async function getTargetArray(formData) {
  * @returns {boolean}
  */
 function findScheduledHaymaker(actor) {
-    if (!actor) return null;
-    for (const c of game.combats) {
-        if (!c.started || typeof c.hasDelayedAction !== "function") continue;
-        const combatant = c.combatantForActor?.(actor);
-        if (combatant && c.hasDelayedAction(combatant, "haymaker")) return { combat: c, combatant };
-    }
-    return null;
+    const active = activeSingleTrackerCombatFor(actor);
+    if (!active) return null;
+    return active.combat.hasDelayedAction(active.combatant, "haymaker") ? active : null;
 }
 
 function hasScheduledHaymaker(actor) {
     return findScheduledHaymaker(actor) !== null;
+}
+
+/**
+ * The declaration payload a delayed attack's resolution card replays from.
+ * Only plain values survive the flag round-trip — the replay recomputes the
+ * rest. The attack item is often a TEMPORARY effective clone whose uuid
+ * resolves to nothing later; dehydrate it (the regions' pattern) so the replay
+ * can always rebuild it, and keep the original DB item's uuid as a fallback.
+ * @param {Item} item
+ * @param {object} formData - The attack dialog's inputs
+ * @param {object} options
+ * @param {boolean} options.prepaid - Whether resources and rolls were spent at declaration
+ * @returns {object}
+ */
+function buildDelayedActionData(item, formData, { prepaid }) {
+    const sanitizedFormData = {};
+    for (const [key, value] of Object.entries(formData ?? {})) {
+        if (value === null || ["string", "number", "boolean"].includes(typeof value)) {
+            sanitizedFormData[key] = value;
+        }
+    }
+    let itemJson = null;
+    try {
+        // dehydrateAttackItem already returns a JSON string
+        itemJson = dehydrateAttackItem(item);
+    } catch (e) {
+        console.error(`Unable to dehydrate ${item.name} for its delayed resolution`, e);
+    }
+    return {
+        formData: sanitizedFormData,
+        targetTokenIds: Array.from(game.user.targets).map((t) => t.id),
+        userId: game.user.id,
+        itemJson,
+        originalItemUuid: item.system?._active?.__originalUuid ?? null,
+        actorUuid: item.actor?.uuid ?? null,
+        prepaid,
+    };
 }
 
 /**
@@ -404,24 +443,10 @@ function hasScheduledHaymaker(actor) {
 async function scheduleHaymakerDeclaration(item, formData) {
     const actor = item?.actor;
     if (!actor) return false;
-    const combat = game.combats.find(
-        (c) => c.started && typeof c.scheduleDelayedAction === "function" && c.combatantForActor?.(actor),
-    );
-    if (!combat) return false;
+    const active = activeSingleTrackerCombatFor(actor);
+    if (!active) return false;
+    const { combat } = active;
 
-    const sanitizedFormData = {};
-    for (const [key, value] of Object.entries(formData ?? {})) {
-        if (value === null || ["string", "number", "boolean"].includes(typeof value)) {
-            sanitizedFormData[key] = value;
-        }
-    }
-    let itemJson = null;
-    try {
-        // dehydrateAttackItem already returns a JSON string
-        itemJson = dehydrateAttackItem(item);
-    } catch (e) {
-        console.error(`Unable to dehydrate ${item.name} for the Haymaker landing`, e);
-    }
     const currentAbs = combat.round * 12 + combat.segment;
     await combat.scheduleDelayedAction(
         actor,
@@ -431,15 +456,7 @@ async function scheduleHaymakerDeclaration(item, formData) {
             resolveAbs: currentAbs + 1,
             priority: null,
             commit: false,
-            actionData: {
-                formData: sanitizedFormData,
-                targetTokenIds: Array.from(game.user.targets).map((t) => t.id),
-                userId: game.user.id,
-                itemJson,
-                originalItemUuid: item.system?._active?.__originalUuid ?? null,
-                actorUuid: actor.uuid ?? null,
-                prepaid: false,
-            },
+            actionData: buildDelayedActionData(item, formData, { prepaid: false }),
         },
         item,
     );
@@ -460,16 +477,14 @@ async function scheduleHaymakerDeclaration(item, formData) {
 async function scheduleExtraTimeAttackDeclaration(item, formData) {
     const actor = item?.actor;
     if (!actor) return false;
-    const combat = game.combats.find(
-        (c) => c.started && typeof c.extraTimePlan === "function" && c.combatantForActor?.(actor),
-    );
-    if (!combat) return false;
+    const active = activeSingleTrackerCombatFor(actor);
+    if (!active) return false;
+    const { combat, combatant: schedulingCombatant } = active;
     const plan = combat.extraTimePlan(actor, item) ?? combat.extraTimePlan(actor, item.effectiveAttackItem);
     if (!plan) return false;
 
     // Dedupe BEFORE paying: the item shows no active state while the schedule is
     // pending, so a second click would otherwise double-spend and double-schedule
-    const schedulingCombatant = combat.combatantForActor(actor);
     const itemUuid = item?.uuid ?? null;
     const pending = [...(combat.delayedActionsFor?.(schedulingCombatant) ?? [])].some(
         ([, record]) => record.label === plan.label || (itemUuid && record.itemUuid === itemUuid),
@@ -500,37 +515,12 @@ async function scheduleExtraTimeAttackDeclaration(item, formData) {
         return true; // attempt failed; resources stay spent
     }
 
-    // Only plain values survive the flag round-trip; the replay recomputes the rest
-    const sanitizedFormData = {};
-    for (const [key, value] of Object.entries(formData ?? {})) {
-        if (value === null || ["string", "number", "boolean"].includes(typeof value)) {
-            sanitizedFormData[key] = value;
-        }
-    }
-    // The attack item is often a TEMPORARY effective clone whose uuid resolves to
-    // nothing later; dehydrate it (the regions' pattern) so the replay can always
-    // rebuild it, and keep the original DB item's uuid as a fallback
-    let itemJson = null;
-    try {
-        // dehydrateAttackItem already returns a JSON string
-        itemJson = dehydrateAttackItem(item);
-    } catch (e) {
-        console.error(`Unable to dehydrate ${item.name} for its delayed resolution`, e);
-    }
     await combat.scheduleDelayedAction(
         actor,
         {
             ...plan,
             kind: "attack",
-            actionData: {
-                formData: sanitizedFormData,
-                targetTokenIds: Array.from(game.user.targets).map((t) => t.id),
-                userId: game.user.id,
-                itemJson,
-                originalItemUuid: item.system?._active?.__originalUuid ?? null,
-                actorUuid: actor.uuid ?? null,
-                prepaid: true,
-            },
+            actionData: buildDelayedActionData(item, formData, { prepaid: true }),
         },
         item,
     );
@@ -599,9 +589,7 @@ export async function processActionToHit(item, formData, options = {}) {
     // of some other attack being fired, or the landing replay after its record
     // was consumed).
     if (!hasScheduledHaymaker(item?.actor)) {
-        await item?.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
-            active: false,
-        });
+        await endHaymakerManeuver(item?.actor);
     }
 }
 
@@ -2818,9 +2806,7 @@ export async function _onRollDamage(event) {
 
     // turn off haymaker — a scheduled delayed resolution keeps the -5 DCV until it lands
     if (!hasScheduledHaymaker(actor)) {
-        await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id, {
-            active: false,
-        });
+        await endHaymakerManeuver(actor);
     }
 
     return;
@@ -3345,10 +3331,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // Remove haymaker status — a scheduled delayed resolution keeps it until it lands
     if (!hasScheduledHaymaker(item.actor)) {
-        const haymakerAe = item.actor?.effects.find((effect) => effect.statuses.has("haymaker"));
-        if (haymakerAe) {
-            await item.actor.removeActiveEffect(haymakerAe);
-        }
+        await endHaymakerManeuver(item.actor);
     }
 
     const damageRoller = HeroRoller.fromJSON(damageData.roller);

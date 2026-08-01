@@ -30,6 +30,7 @@ import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "../ut
 import { doSuccessRoll, generateSuccessChatCard } from "../utility/success-card.mjs";
 import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
 import {
+    activeSingleTrackerCombatFor,
     getPowerInfo,
     getTokenUuid,
     hdcTimeOptionIdToSeconds,
@@ -1713,6 +1714,39 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         ChatMessage.create(chatData);
     }
 
+    /**
+     * Under the single tracker, an Extra Time activation is intercepted and put
+     * on the combat's schedule instead of turning the power on now. The delayed
+     * resolution re-enters turnOn with options.delayedResolution set, which
+     * bypasses this. Without a single-tracker combat (legacy tracker, out of
+     * combat) activation proceeds normally.
+     * @param {object} options - turnOn's options
+     * @param {string|null} [resourcesUsedDescription] - When set, a "began activating" chat card is emitted for the up-front spend
+     * @param {string|null} [resourcesUsedDescriptionRenderedRoll]
+     * @returns {Promise<boolean>} True when the activation was scheduled
+     */
+    async _interceptExtraTimeActivation(
+        options,
+        resourcesUsedDescription = null,
+        resourcesUsedDescriptionRenderedRoll = null,
+    ) {
+        if (options.delayedResolution) return false;
+        const active = activeSingleTrackerCombatFor(this.actor);
+        const plan = active?.combat.extraTimePlan(this.actor, this);
+        if (!plan) return false;
+        if (resourcesUsedDescription) {
+            await ChatMessage.create({
+                author: game.user._id,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                content: `Spent ${resourcesUsedDescription} to begin activating ${this.name}${resourcesUsedDescriptionRenderedRoll ?? ""}`,
+                whisper: whisperUserTargetsForActor(this.actor),
+                speaker: ChatMessage.getSpeaker({ actor: this.actor, token: options.token }),
+            });
+        }
+        await active.combat.scheduleDelayedAction(this.actor, { ...plan, kind: "activation" }, this);
+        return true;
+    }
+
     async turnOn(options = {}) {
         if (!options.token && this.actor?.getActiveTokens().length > 0) {
             console.error(`turnOn: missing token`);
@@ -1733,16 +1767,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             // Extra Time defers this activation like any other (the resolution
             // re-enters with delayedResolution); no resources are pre-spent here
             // because this power class pays per Phase instead
-            if (!options.delayedResolution) {
-                const extraTimeCombat = game.combats.find(
-                    (c) => c.started && typeof c.extraTimePlan === "function" && c.combatantForActor?.(item.actor),
-                );
-                const plan = extraTimeCombat?.extraTimePlan(item.actor, item);
-                if (plan) {
-                    await extraTimeCombat.scheduleDelayedAction(item.actor, { ...plan, kind: "activation" }, item);
-                    return;
-                }
-            }
+            if (await this._interceptExtraTimeActivation(options)) return;
             await this.setActive(true);
 
             const speaker = ChatMessage.getSpeaker({ actor: item.actor });
@@ -1910,26 +1935,15 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // Extra Time: the activation BEGINS now — the resources and rolls above are
-        // paid up front per RAW — but the power only turns on at the scheduled moment. The single tracker owns the schedule;
-        // without one (legacy tracker, out of combat) activation proceeds normally.
-        if (!options.delayedResolution) {
-            const extraTimeCombat = game.combats.find(
-                (c) => c.started && typeof c.extraTimePlan === "function" && c.combatantForActor?.(item.actor),
-            );
-            const plan = extraTimeCombat?.extraTimePlan(item.actor, item);
-            if (plan) {
-                if (resourcesUsedDescription) {
-                    await ChatMessage.create({
-                        author: game.user._id,
-                        style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                        content: `Spent ${resourcesUsedDescription} to begin activating ${item.name}${resourcesUsedDescriptionRenderedRoll ?? ""}`,
-                        whisper: whisperUserTargetsForActor(item.actor),
-                        speaker,
-                    });
-                }
-                await extraTimeCombat.scheduleDelayedAction(item.actor, { ...plan, kind: "activation" }, item);
-                return;
-            }
+        // paid up front per RAW — but the power only turns on at the scheduled moment.
+        if (
+            await this._interceptExtraTimeActivation(
+                options,
+                resourcesUsedDescription,
+                resourcesUsedDescriptionRenderedRoll,
+            )
+        ) {
+            return;
         }
 
         const chatData = {

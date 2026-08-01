@@ -1,6 +1,7 @@
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 import { HEROSYS } from "./herosystem6e.mjs";
 import { rehydrateAttackItem } from "./item/item-attack.mjs";
+import { expireManeuverNextPhaseEffects } from "./item/maneuver.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-resources.mjs";
 import { HeroCompatibility } from "./utility/compatibility.mjs";
 import { expireEffects, gmActive, isQuenchTestRunning, toHHMMSS, whisperUserTargetsForActor } from "./utility/util.mjs";
@@ -705,13 +706,6 @@ export class HeroSystem6eCombat extends Combat {
             await combatant.actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.abortEffect.id);
         }
 
-        // Stop dodges and other maneuvers' active effects that expire automatically
-        const maneuverNextPhaseAes = combatant.actor.temporaryEffects.filter(
-            (ae) =>
-                ae.flags?.[game.system.id]?.type === "maneuverNextPhaseEffect" &&
-                ae.duration.startTime !== game.time.worldTime,
-        );
-
         // Sanity check for older maneuver styles.
         // TODO: Perhaps use appliedEffects above
         const sanity1 = combatant.actor.effects.filter(
@@ -723,25 +717,8 @@ export class HeroSystem6eCombat extends Combat {
             console.error(`unexpected maneuver flag.type`, sanity1);
         }
 
-        const maneuverNextPhaseTogglePromises = maneuverNextPhaseAes
-            .filter((ae) => ae.flags[game.system.id]?.toggle)
-            .map((toggleAes) => {
-                const maneuver =
-                    fromUuidSync(toggleAes.flags[game.system.id]?.itemUuid) ||
-                    rehydrateAttackItem(
-                        toggleAes.flags[game.system.id]?.dehydratedManeuverItem,
-                        fromUuidSync(toggleAes.flags[game.system.id]?.dehydratedManeuverActorUuid),
-                    ).item;
-
-                return maneuver.toggle();
-            });
-        const maneuverNextPhaseNonTogglePromises = maneuverNextPhaseAes
-            .filter((ae) => !ae.flags[game.system.id].toggle)
-            .map((maneuverAes) => maneuverAes.delete());
-        const combinedManeuvers = [...maneuverNextPhaseTogglePromises, ...maneuverNextPhaseNonTogglePromises];
-        if (combinedManeuvers.length > 0) {
-            await Promise.all(combinedManeuvers);
-        }
+        // Stop dodges and other maneuvers' active effects that expire automatically
+        await expireManeuverNextPhaseEffects(combatant.actor);
 
         // PH: FIXME: stop abort under certain circumstances
 

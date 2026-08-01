@@ -123,6 +123,23 @@ export async function expireManeuverNextPhaseEffects(actor) {
 }
 
 /**
+ * Ends an active Haymaker wind-up wherever its state lives: the status effect
+ * may sit on the actor directly (token HUD toggles and some attack paths) or
+ * ride on the HAYMAKER maneuver item's phase effect — cover both stores so no
+ * -5 DCV lingers and the item's activation state stays in sync.
+ * @param {Actor} actor
+ * @param {object} [options]
+ * @param {TokenDocument} [options.token] - Token for the item toggle; defaults to the actor's first active token
+ */
+export async function endHaymakerManeuver(actor, { token } = {}) {
+    if (!actor) return;
+    const haymakerEffect = actor.effects.find((e) => e.statuses.has("haymaker"));
+    if (haymakerEffect) await haymakerEffect.delete();
+    const haymakerItem = actor.items.find((i) => i.system?.XMLID === "HAYMAKER" && i.isActive);
+    if (haymakerItem) await haymakerItem.toggle({ token: token ?? actor.getActiveTokens()[0]?.document });
+}
+
+/**
  * Things which have the "abort" trait in their effect can be aborted to.
  * @returns {boolean}
  */
