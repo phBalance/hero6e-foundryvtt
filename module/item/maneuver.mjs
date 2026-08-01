@@ -330,6 +330,12 @@ export async function activateManeuver(item) {
         return;
     }
 
+    // Every activation path funnels through here (toggle, sheet roll, attack
+    // flow), so this is the one reliable spot to offer the out-of-turn Abort.
+    // Deliberately not awaited: cards and effect creation must not block on
+    // the confirmation dialog.
+    promptOutOfTurnAbortForManeuver(item);
+
     // FIXME: These are supposed to be for HTH or ranged combat only except for dodge.
     const dcvTrait = parseInt(item.system.DCV === "--" ? 0 : item.system.DCV || 0);
     let ocvTrait = parseInt(item.system.OCV === "--" ? 0 : item.system.OCV || 0);

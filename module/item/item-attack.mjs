@@ -1,9 +1,4 @@
-import {
-    activateManeuver,
-    doManeuverEffects,
-    maneuverHasBlockTrait,
-    promptOutOfTurnAbortForManeuver,
-} from "./maneuver.mjs";
+import { activateManeuver, doManeuverEffects, maneuverHasBlockTrait } from "./maneuver.mjs";
 
 import { HEROSYS } from "../herosystem6e.mjs";
 
@@ -1430,11 +1425,6 @@ async function doSingleTargetActionToHit(action, options) {
     // PH: FIXME: They are figured into the to-hit modal's ocv and dcv already
     if (["maneuver", "martialart"].includes(item.type)) {
         activateManeuver(item);
-        // Sheet v2 "rolls" Dodge (and Block) through this flow rather than a
-        // toggle: an out-of-turn use of an abortable maneuver offers to declare
-        // the Abort (6E2 21-22). Deliberately not awaited — the attack card must
-        // not wait on the confirmation dialog.
-        promptOutOfTurnAbortForManeuver(item);
     }
 
     // this doesn't work because we create data-item-id="{{item.uuid}}" for the button. However, item is now something that has no uuid.

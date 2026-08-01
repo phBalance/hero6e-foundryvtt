@@ -1,5 +1,6 @@
 import { HeroSystem6eCombatantSingle } from "./combatant-single.mjs";
 import { HeroSystem6eCombatSingle } from "./combat-single.mjs";
+import { isQuenchTestRunning } from "./utility/util.mjs";
 
 const { CombatTracker } = foundry.applications.sidebar.tabs;
 
@@ -252,6 +253,38 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             if (!button || button.dataset.heroContestWired) return;
             button.dataset.heroContestWired = "true";
             button.addEventListener("click", () => HeroSystem6eCombatTrackerSingle.#onTimingContest(button));
+        });
+
+        /**
+         * A bare "aborted" status toggle (token HUD) routes into the real Abort
+         * flow: the raw status is removed and the declaration dialog opens, so
+         * the Phase cost, chat card, and ledger entry are all recorded.
+         * Cancelling leaves the status off — the dialog IS the declaration.
+         */
+        Hooks.on("createActiveEffect", (effect, _options, userId) => {
+            try {
+                if (userId !== game.user.id) return;
+                if (!effect.statuses?.has("aborted")) return;
+                // Tracker-declared aborts carry the record; only raw toggles route
+                if (effect.getFlag(game.system.id, "abort")) return;
+                if (isQuenchTestRunning()) return;
+                const tracker = ui.combat;
+                if (!(tracker instanceof HeroSystem6eCombatTrackerSingle) || tracker._abortFlowActive) return;
+                const combat = tracker.viewed;
+                if (!combat?.started) return;
+                const actor = effect.parent;
+                if (actor?.documentName !== "Actor") return;
+                const combatant =
+                    combat.combatants.find((c) => c.actor === actor) ??
+                    combat.combatants.find((c) => c.actorId === actor.id);
+                if (!combatant?.isOwner) return;
+                effect
+                    .delete()
+                    .then(() => tracker._onAbortAction(combatant.id))
+                    .catch((e) => console.error(e));
+            } catch (e) {
+                console.error(`Aborted-status toggle routing failed`, e);
+            }
         });
 
         /**
@@ -2216,7 +2249,23 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * @returns {Promise<boolean>} Whether the abort was applied
      * @protected
      */
-    async _declareAbort(
+    async _declareAbort(combatant, options = {}) {
+        // Latched for the whole declaration: the defense toggle re-enters
+        // promptOutOfTurnAbortForManeuver, and creating the aborted status fires
+        // the bare-status-toggle hook — neither may re-prompt for the abort this
+        // very flow is declaring
+        this._abortFlowActive = true;
+        try {
+            return await this.#declareAbortInner(combatant, options);
+        } finally {
+            this._abortFlowActive = false;
+        }
+    }
+
+    /**
+     * @see _declareAbort
+     */
+    async #declareAbortInner(
         combatant,
         { toAction = "a defensive Action", statusId = null, extraPhase = false, force = false } = {},
     ) {
@@ -2236,17 +2285,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             }
         }
 
-        if (statusId) {
-            // The defense toggle below runs through the maneuver item; latch so
-            // promptOutOfTurnAbortForManeuver doesn't re-prompt for an abort
-            // this very flow is declaring
-            this._abortFlowActive = true;
-            try {
-                await this._applyAbortDefense(actor, statusId);
-            } finally {
-                this._abortFlowActive = false;
-            }
-        }
+        if (statusId) await this._applyAbortDefense(actor, statusId);
 
         // A held Phase absorbs the abort — no further Phases are lost (6E2 22; 5ER 361)
         const holdingEffect = combatant.heldActionEffect;
