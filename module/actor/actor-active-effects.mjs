@@ -540,6 +540,18 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
         // delete, so this clamp is a no-op there. Only the initiating client writes.
         if (userId === game.user.id) {
             this._clampCharacteristicValuesAfterAdjustmentRemoval();
+
+            // A maneuver phase effect removed outside its item's toggle (effects
+            // panel, scripts) must not leave the item flagged active
+            const flags = this.flags?.[game.system.id];
+            if (flags?.type === "maneuverNextPhaseEffect" && flags.toggle) {
+                const item = this.parent;
+                if (item?.documentName === "Item" && item.system?.active) {
+                    item.update({ "system.active": false }).catch((e) =>
+                        console.error(`Maneuver active-state sync failed`, e),
+                    );
+                }
+            }
         }
     }
 

@@ -724,6 +724,20 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // core immediately recreates it.
         active ??= !this.statuses.has(statusId);
 
+        // A maneuver-driven status (dodge, block…) lives on the ITEM's phase effect;
+        // core's toggle only sees actor-owned effects and would silently no-op.
+        // Route the removal through the item so activation state stays in sync.
+        if (active === false && !this.effects.some((e) => e.statuses.has(statusId))) {
+            const carrier = this.appliedEffects.find(
+                (e) => e.statuses.has(statusId) && e.flags?.[game.system.id]?.type === "maneuverNextPhaseEffect",
+            );
+            const item = carrier?.parent;
+            if (item?.documentName === "Item" && item.isActive) {
+                await item.toggle();
+                return false;
+            }
+        }
+
         // 1. Force overlay status based on config
         if (overlayEffects.includes(statusId)) overlay = true;
 
