@@ -310,7 +310,6 @@ Hooks.once("init", async function () {
 
         `systems/${HEROSYS.module}/templates/combat/header.hbs`,
         `systems/${HEROSYS.module}/templates/combat/tracker.hbs`,
-        `systems/${HEROSYS.module}/templates/combat/tracker-single.hbs`,
         `systems/${HEROSYS.module}/templates/combat/footer.hbs`,
 
         `systems/${HEROSYS.module}/templates/item/item-action-icons-partial.hbs`,

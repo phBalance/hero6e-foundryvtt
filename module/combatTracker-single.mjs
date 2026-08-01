@@ -223,18 +223,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     });
                     controls.prepend(button);
                 });
-
-            // The row template's Delay button has no handler in core or the
-            // system — in HERO, "delaying" IS declaring a Held Action, so
-            // route it to the hold dialog
-            element.querySelectorAll('button[data-action="delayCombatant"]').forEach((button) => {
-                button.addEventListener("click", (clickEvent) => {
-                    clickEvent.preventDefault();
-                    clickEvent.stopPropagation();
-                    const li = button.closest("[data-combatant-id]");
-                    if (li?.dataset.combatantId) app._onDeclareHoldAction(li.dataset.combatantId);
-                });
-            });
         };
 
         Hooks.on("renderCombatTracker", onRenderTracker);
@@ -653,6 +641,11 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 const entries = Array.isArray(turn.effects) ? turn.effects : (turn.effects?.icons ?? []);
                 for (const entry of entries) {
                     if (entry?.name === abortEffect.name) entry.name = clearsText;
+                }
+                // Core builds the row's visible tooltip string before this pass runs;
+                // renaming the icon entries alone only reaches the img alt text
+                if (typeof turn.effects?.tooltip === "string" && turn.effects.tooltip.includes(abortEffect.name)) {
+                    turn.effects.tooltip = turn.effects.tooltip.replace(abortEffect.name, clearsText);
                 }
             } catch (e) {
                 console.warn(`Abort tooltip decoration failed`, e);
