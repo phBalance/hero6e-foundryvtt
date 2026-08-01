@@ -2901,17 +2901,24 @@ export function registerCombatTests(quench) {
                     const third = await makeActor("_Quench Del Third", { dex: 10, spd: 2 });
                     const combat = await makeCombat([first, second, third]);
                     await combat.startCombat();
+                    // The start update's maintenance chain writes combatant flags
+                    // asynchronously — deleting mid-chain races those writes
+                    await combat.settleMaintenance?.();
                     expect(combat.segment).to.equal(12);
                     expect(combat.combatant.actorId).to.equal(first.id);
 
                     // Deleting the active combatant selects the next actor below the
-                    // recorded acting position, exactly as nextTurn's threshold does
+                    // recorded acting position, exactly as nextTurn's threshold does.
+                    // Core shifts the pointer row immediately; the asynchronous
+                    // reconcile commits the acting position — wait for BOTH.
                     await combat.deleteEmbeddedDocuments("Combatant", [combat.combatant.id]);
                     const repointed = await waitUntil(
-                        () => combat.combatant?.actorId === second.id && combat.segment === 12,
+                        () =>
+                            combat.combatant?.actorId === second.id &&
+                            combat.segment === 12 &&
+                            Math.floor(combat.getFlag(game.system.id, "actingPriority") ?? -1) === 15,
                     );
-                    expect(repointed, "pointer lands on the next actor in the same segment").to.be.true;
-                    expect(Math.floor(combat.getFlag(game.system.id, "actingPriority"))).to.equal(15);
+                    expect(repointed, "pointer and acting position land on the next actor").to.be.true;
 
                     // The removal is ledgered and the order continues normally
                     const log = combat.getFlag(game.system.id, "eventLog") ?? {};
@@ -2935,6 +2942,13 @@ export function registerCombatTests(quench) {
 
                     strike.system._active ??= {};
                     const itemJson = dehydrateAttackItem(strike);
+                    // The world chat may hold landing cards from earlier combats —
+                    // only a NEW card proves this record landed
+                    const priorCardIds = new Set(
+                        game.messages.contents
+                            .filter((m) => m.getFlag(game.system.id, "delayedAttack")?.itemJson)
+                            .map((m) => m.id),
+                    );
                     await combat.scheduleDelayedAction(
                         striker,
                         {
@@ -2966,14 +2980,12 @@ export function registerCombatTests(quench) {
                     await combat.nextTurn(); // past it
 
                     // The landing card carries the declaration for the replay
-                    const landed = await waitUntil(() =>
-                        game.messages.contents.some((m) => m.getFlag(game.system.id, "delayedAttack")?.itemJson),
-                    );
+                    const isNewCard = (m) =>
+                        !priorCardIds.has(m.id) && m.getFlag(game.system.id, "delayedAttack")?.itemJson;
+                    const landed = await waitUntil(() => game.messages.contents.some(isNewCard));
                     expect(landed, "landing card offers the roll once the segment fully passed").to.be.true;
                     expect(combat.hasDelayedAction(combatant), "record consumed by the landing").to.be.false;
-                    const message = game.messages.contents
-                        .filter((m) => m.getFlag(game.system.id, "delayedAttack")?.itemJson)
-                        .at(-1);
+                    const message = game.messages.contents.filter(isNewCard).at(-1);
                     const payload = message.getFlag(game.system.id, "delayedAttack");
                     expect(payload.prepaid, "resources were paid at declaration").to.be.true;
                     expect(payload.formData?.effectiveStr, "dialog inputs survive the round-trip").to.equal(10);
