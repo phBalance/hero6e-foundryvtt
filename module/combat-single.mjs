@@ -525,29 +525,49 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @returns {Promise<void>}
      */
     async setCombatantSoloTieRoll(combatantId, solo) {
-        if (!game.user.isGM) return;
-        const combatant = this.combatants.get(combatantId);
-        if (!combatant) return;
+        return this.setCombatantsSoloTieRoll([combatantId], solo);
+    }
 
-        if (solo) await combatant.setFlag(game.system.id, "soloTieRoll", true);
-        else await combatant.unsetFlag(game.system.id, "soloTieRoll");
+    /**
+     * Batched split/rejoin for several members at once (the context menu's
+     * "Split All from Group"): one flag write, one roll backfill, one ledger
+     * append, one pointer resync, and a single summary card instead of N of
+     * everything.
+     * @param {string[]} combatantIds
+     * @param {boolean} solo
+     * @returns {Promise<void>}
+     */
+    async setCombatantsSoloTieRoll(combatantIds, solo) {
+        if (!game.user.isGM) return;
+        const combatants = combatantIds.map((id) => this.combatants.get(id)).filter((c) => !!c);
+        if (combatants.length === 0) return;
+
+        await this.updateEmbeddedDocuments(
+            "Combatant",
+            combatants.map((c) => ({
+                _id: c.id,
+                [`flags.${game.system.id}.${solo ? "soloTieRoll" : "-=soloTieRoll"}`]: solo ? true : null,
+            })),
+        );
 
         if (!this.started) {
             this.collection.render();
             return;
         }
 
-        // Backfill the member's (new) roll key into every recorded map so it
-        // doesn't sort at the +0.50 default
+        // Backfill the members' (new) roll keys into every recorded map so they
+        // don't sort at the +0.50 default
         const masterRollsCache = foundry.utils.deepClone(this.getFlag(game.system.id, "segmentRolls") ?? {});
         const activeId = this.combatant?.id ?? null;
         const payload = {};
-        if (this._backfillTieRolls(masterRollsCache, [combatant])) {
+        if (this._backfillTieRolls(masterRollsCache, combatants)) {
             payload[`flags.${game.system.id}.segmentRolls`] = masterRollsCache;
         }
         Object.assign(
             payload,
-            this.eventLogAppendPayload([this.buildEvent(solo ? "group.split" : "group.rejoin", { combatant })]),
+            this.eventLogAppendPayload(
+                combatants.map((combatant) => this.buildEvent(solo ? "group.split" : "group.rejoin", { combatant })),
+            ),
         );
         await this.update(payload);
 
@@ -558,11 +578,17 @@ export class HeroSystem6eCombatSingle extends Combat {
             .filter((u) => this.combatants.get(u._id)?.initiative !== u.initiative);
         if (updates.length > 0) await this.updateEmbeddedDocuments("Combatant", updates);
         await this.resyncTurnPointer(activeId);
+        const [first] = combatants;
+        const groupLabel = `${first.actor?.name ?? first.name} ×${combatants.length}`;
         await this._combatCard(
-            combatant,
-            solo
-                ? `${combatant.name} acts separately from their group (own tie-break rolls).`
-                : `${combatant.name} rejoins their group.`,
+            first,
+            combatants.length === 1
+                ? solo
+                    ? `${first.name} acts separately from their group (own tie-break rolls).`
+                    : `${first.name} rejoins their group.`
+                : solo
+                  ? `${groupLabel}: every member now acts separately (own tie-break rolls).`
+                  : `${groupLabel}: members rejoin their group.`,
         );
     }
 

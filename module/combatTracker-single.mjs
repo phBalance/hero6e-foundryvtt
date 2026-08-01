@@ -1233,6 +1233,30 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 onClick: (event, li) => this.viewed?.setCombatantSoloTieRoll?.(li.dataset.combatantId, true),
             },
             {
+                label: "Split All from Group",
+                icon: "fa-solid fa-arrows-split-up-and-left",
+                visible: (li) => {
+                    if (!game.user.isGM) return false;
+                    const combatant = getCombatant(li);
+                    if (!combatant?.actorId || combatant.getFlag(game.system.id, "soloTieRoll")) return false;
+                    // Only for a genuine ×N group: two or more non-solo members
+                    return (
+                        this.viewed.combatants.filter(
+                            (c) => c.actorId === combatant.actorId && !c.getFlag(game.system.id, "soloTieRoll"),
+                        ).length > 1
+                    );
+                },
+                onClick: (event, li) => {
+                    const combat = this.viewed;
+                    const combatant = combat?.combatants.get(li.dataset.combatantId);
+                    if (!combatant?.actorId) return;
+                    const ids = combat.combatants
+                        .filter((c) => c.actorId === combatant.actorId && !c.getFlag(game.system.id, "soloTieRoll"))
+                        .map((c) => c.id);
+                    combat.setCombatantsSoloTieRoll?.(ids, true);
+                },
+            },
+            {
                 label: "Rejoin Group",
                 icon: "fa-solid fa-arrow-right-to-bracket",
                 visible: (li) => {
