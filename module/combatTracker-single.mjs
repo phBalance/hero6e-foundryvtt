@@ -13,7 +13,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             // AppV2 fires renderCombatTracker for every subclass: the legacy tracker's
             // rows lack this tracker's classes, so touching them only strips state
             if (!(app instanceof HeroSystem6eCombatTrackerSingle)) return;
-            const element = html instanceof HTMLElement ? html : html;
+            const element = html;
             if (!element) return;
             // Marks this app's DOM so single-tracker-only CSS (e.g. hiding the core
             // Roll All / Roll NPCs header buttons) never leaks onto the legacy
@@ -248,8 +248,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
          * simultaneous Actions are resolved by opposed characteristic rolls.
          */
         Hooks.on("renderChatMessageHTML", (_message, html) => {
-            const root = html instanceof HTMLElement ? html : html?.[0];
-            const button = root?.querySelector?.("button.hero-timing-contest");
+            const button = html?.querySelector?.("button.hero-timing-contest");
             if (!button || button.dataset.heroContestWired) return;
             button.dataset.heroContestWired = "true";
             button.addEventListener("click", () => HeroSystem6eCombatTrackerSingle.#onTimingContest(button));
@@ -265,7 +264,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const onRenderTrackerConfig = (_app, html) => {
             try {
                 if (!(ui.combat instanceof HeroSystem6eCombatTrackerSingle)) return;
-                const root = html instanceof HTMLElement ? html : html?.[0];
+                const root = html;
                 if (!root || root.querySelector(".hero-tracker-config")) return;
 
                 const compact = !!game.settings.get(game.system.id, "combatTrackerCompact");
@@ -498,8 +497,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
     /**
      * The effects core renders as row icons, in render order — the clicked icon's
-     * DOM index maps back into this list. Mirrors core's _prepareTurnContext filter
-     * (V13 cores without showIcon fall back to visible temporary effects).
+     * DOM index maps back into this list. Mirrors core's _prepareTurnContext filter.
      * @param {Actor} actor
      * @returns {ActiveEffect[]}
      * @private
@@ -510,16 +508,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const result = [];
         for (const effect of actor?.appliedEffects ?? []) {
             if (defeatedId && effect.statuses.has(defeatedId)) continue;
-            if (SHOW_ICON) {
-                if (
-                    effect.showIcon === SHOW_ICON.ALWAYS ||
-                    (effect.showIcon === SHOW_ICON.CONDITIONAL && effect.isTemporary)
-                ) {
-                    result.push(effect);
-                }
-            } else if (effect.isTemporary && !effect.disabled && effect.img) {
-                // V13 core only renders icons for effects WITH an image — an
-                // img-less effect must not shift the DOM-index mapping
+            if (
+                effect.showIcon === SHOW_ICON.ALWAYS ||
+                (effect.showIcon === SHOW_ICON.CONDITIONAL && effect.isTemporary)
+            ) {
                 result.push(effect);
             }
         }
@@ -1120,7 +1112,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
     /**
      * Resolves the combatant row element for a delegated tracker event.
-     * Core V13 handlers are delegated from the tracker root, so event.currentTarget
+     * Core handlers are delegated from the tracker root, so event.currentTarget
      * is not the row; walk up from the event target instead.
      * @param {Event} event
      * @param {HTMLElement} [target] - Explicit target element provided by core action dispatch
@@ -1288,25 +1280,15 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     _getEntryContextOptions() {
         // HERO rolls no initiative in this tracker (priorities derive from DEX +
         // the per-segment tie rolls), so core's Clear/Reroll Initiative entries
-        // could only corrupt the derived values. Key sets cover V14 and V13.
-        const coreInitiativeOptions = new Set([
-            "COMBATANT.ACTIONS.Clear",
-            "COMBATANT.ACTIONS.Reroll",
-            "COMBAT.CombatantClear",
-            "COMBAT.CombatantReroll",
-        ]);
-        const options = super
-            ._getEntryContextOptions()
-            .filter((option) => !coreInitiativeOptions.has(option.label ?? option.name));
+        // could only corrupt the derived values
+        const coreInitiativeOptions = new Set(["COMBATANT.ACTIONS.Clear", "COMBATANT.ACTIONS.Reroll"]);
+        const options = super._getEntryContextOptions().filter((option) => !coreInitiativeOptions.has(option.label));
         const getCombatant = (li) => this.viewed?.combatants.get(li.dataset?.combatantId) ?? null;
 
         for (const option of options) {
-            const visible = option.visible ?? option.condition;
-            const guarded = (li) =>
+            const visible = option.visible;
+            option.visible = (li) =>
                 !!getCombatant(li) && (typeof visible === "function" ? visible.call(this, li) : (visible ?? true));
-            // V14 reads visible/onClick/label; real V13 reads condition/callback/name
-            option.visible = guarded;
-            option.condition = guarded;
         }
 
         options.push(
@@ -1488,17 +1470,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             },
         );
 
-        // Mirror the V14 entry fields onto the V13 names so both cores render them.
-        // V13's ContextMenu inserts the icon string as raw markup, so bare Font
-        // Awesome classes must be wrapped; V14 accepts either form.
-        for (const option of options) {
-            option.name ??= option.label;
-            option.condition ??= option.visible;
-            option.callback ??= (li) => option.onClick?.(null, li);
-            if (option.icon && !option.icon.startsWith("<")) {
-                option.icon = `<i class="${option.icon}"></i>`;
-            }
-        }
         return options;
     }
 
@@ -1656,7 +1627,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             // DEX count and anchor are mutually exclusive: the unchecked branch's
             // controls grey out, and the anchor list re-filters per segment
             render: (event, dialog) => {
-                const root = dialog?.element ?? dialog;
+                const root = dialog.element;
                 const segmentSelect = root?.querySelector?.('select[name="hold-segment"]');
                 const anchorSelect = root?.querySelector?.('select[name="hold-anchor"]');
                 if (!segmentSelect || !anchorSelect) return;

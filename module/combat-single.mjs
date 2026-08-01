@@ -1,10 +1,13 @@
-import { HeroCompatibility } from "./utility/compatibility.mjs";
 import { HeroSystem6eCombatantSingle } from "./combatant-single.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 import { expireManeuverNextPhaseEffects } from "./item/maneuver.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item/item-resources.mjs";
 import { promptToDeleteAoeInstantRegions } from "./combat.mjs";
 import { expireEffects, gmActive, toHHMMSS, whisperUserTargetsForActor } from "./utility/util.mjs";
+
+/** Forced-deletion payload for the given flag keys (replaces the pre-V14 "-=key" syntax). */
+const forceDeleteKeys = (keys) =>
+    Object.fromEntries(keys.map((key) => [key, foundry.data.operators.ForcedDeletion.create()]));
 
 export class HeroSystem6eCombatSingle extends Combat {
     /**
@@ -629,8 +632,8 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
-     * Legacy Foundry V13 sorting anchor method.
-     * Coordinates descending initiative priorities uniformly across both environments.
+     * Sorting comparator behind compareCombatants, also used directly for
+     * predicted-turns computations. Descending initiative priorities.
      * @override
      */
     _sortCombatants(a, b, combatDoc) {
@@ -840,20 +843,6 @@ export class HeroSystem6eCombatSingle extends Combat {
         return combatant.hasPhaseInSegment?.(segment, abs) ?? false;
     }
 
-    /**
-     * Re-compiles the internal 'this.turns' array to strictly include ONLY the actors
-     * who possess a valid phase or are holding actions in the active calendar segment.
-     * Implements cache invalidation logic safely for multi-client V13 architectures.
-     * @override
-     */
-    setupTurns() {
-        const compiledTurns = super.setupTurns();
-        if (!HeroCompatibility.isV14) {
-            this._turns = null; // Sync the legacy array cache natively during data-prep passes
-        }
-        return compiledTurns;
-    }
-
     /** @override */
     async startCombat() {
         console.log(`[${game.system.id}] Initializing Hero System Turn 1 at Segment 12...`);
@@ -909,9 +898,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const targetActorDoc = startTurns.find((t) => this._takesTurnInSegment(t, 12));
         const targetCombatantId = targetActorDoc?.id || null;
 
-        const finalTargetTurnsArray = HeroCompatibility.isV14
-            ? startTurns.filter((t) => t.occupiesSegment?.(12) ?? false)
-            : startTurns;
+        const finalTargetTurnsArray = startTurns.filter((t) => t.occupiesSegment?.(12) ?? false);
 
         const absoluteStartTurnIndex = finalTargetTurnsArray.findIndex((t) => t.id === targetCombatantId);
         startPayload.turn = absoluteStartTurnIndex !== -1 ? absoluteStartTurnIndex : 0;
@@ -931,8 +918,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         }
         Object.assign(startPayload, this.eventLogAppendPayload(startEvents));
 
-        const result = await HeroCompatibility.updateEmbedded(this, "combatants", combatantUpdates, startPayload);
-        if (!HeroCompatibility.isV14) this._turns = null;
+        const result = await this.update({ ...startPayload, combatants: combatantUpdates });
 
         // Combat opens on Segment 12: offer/apply Lightning Reflexes right away
         // (the started flag short-circuits _onUpdate's boundary maintenance)
@@ -1006,7 +992,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         }
 
         // Auto mode: elevate every candidate up front. The active id is captured
-        // before the write — the re-sort shifts the stored turn index on V13
+        // before the write — the re-sort can shift the stored turn index
         const activeId = this.combatant?.id ?? null;
         await this.updateEmbeddedDocuments(
             "Combatant",
@@ -1083,10 +1069,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             (active ? this.getInitiativePriority(active, this.segment) : -Infinity);
         if (elevatedPriority <= actingPriority) return;
 
-        if (!HeroCompatibility.isV14) {
-            this._turns = null;
-            this.setupTurns();
-        }
         const index = this.turns.findIndex((t) => t.id === combatantId);
         if (index === -1) return;
         const preemptPayload = { turn: index, [`flags.${game.system.id}.actingPriority`]: elevatedPriority };
@@ -1124,10 +1106,6 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async resyncTurnPointer(activeId) {
         if (!this.started || !activeId) return;
-        if (!HeroCompatibility.isV14) {
-            this._turns = null;
-            this.setupTurns();
-        }
         const index = this.turns.findIndex((t) => t.id === activeId);
         if (index === -1 || index === this.turn) return;
         try {
@@ -1272,14 +1250,12 @@ export class HeroSystem6eCombatSingle extends Combat {
                 inlineCombatantUpdates = inlineCombatantUpdates.filter((u) => this.combatants.get(u._id)?.isOwner);
             }
 
-            let predictedTurns = [...allCombatants].sort((a, b) => this._sortCombatants(a, b, this));
-            if (HeroCompatibility.isV14) {
-                predictedTurns = predictedTurns.filter((t) => t.occupiesSegment?.(activeSegment) ?? false);
-            }
+            const predictedTurns = [...allCombatants]
+                .sort((a, b) => this._sortCombatants(a, b, this))
+                .filter((t) => t.occupiesSegment?.(activeSegment) ?? false);
             const targetIndex = predictedTurns.findIndex((t) => t.id === target.id);
 
             if (targetIndex !== -1) {
-                if (!HeroCompatibility.isV14) this._turns = null;
                 // Completed turns raise the segment's high-water mark: a Lightning
                 // Reflexes elevation may only slot below it — positions above it have
                 // genuinely been passed, while the current actor merely being up has not
@@ -1306,18 +1282,10 @@ export class HeroSystem6eCombatSingle extends Combat {
                         ]),
                     );
                 }
-                const result = await HeroCompatibility.updateEmbedded(
-                    this,
-                    "combatants",
-                    inlineCombatantUpdates,
-                    withinSegmentPayload,
+                return this.update(
+                    { ...withinSegmentPayload, combatants: inlineCombatantUpdates },
                     { direction: 1, previousCombatantId: ending?.id },
                 );
-                if (!HeroCompatibility.isV14) {
-                    this._turns = null;
-                    this.setupTurns();
-                }
-                return result;
             }
         }
 
@@ -1464,9 +1432,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             return this._comparePriority(a, b, this, nextSegment, { queryAbs: nextAbs });
         });
 
-        const finalTargetTurnsArray = HeroCompatibility.isV14
-            ? recompiledTurns.filter((t) => t.occupiesSegment?.(nextSegment) ?? false)
-            : recompiledTurns;
+        const finalTargetTurnsArray = recompiledTurns.filter((t) => t.occupiesSegment?.(nextSegment) ?? false);
 
         const absoluteTargetTurnIndex = finalTargetTurnsArray.findIndex((t) => t.id === targetCombatantId);
 
@@ -1511,22 +1477,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             updateOptions.worldTime = { delta: segmentDeltaCount };
         }
 
-        if (!HeroCompatibility.isV14) {
-            this._turns = null;
-        }
-
-        const result = await HeroCompatibility.updateEmbedded(
-            this,
-            "combatants",
-            persistedCombatantUpdates,
-            updateData,
-            updateOptions,
-        );
-
-        if (!HeroCompatibility.isV14) {
-            this._turns = null;
-            this.setupTurns();
-        }
+        const result = await this.update({ ...updateData, combatants: persistedCombatantUpdates }, updateOptions);
 
         return result;
     }
@@ -1550,10 +1501,6 @@ export class HeroSystem6eCombatSingle extends Combat {
             resetPayload[`flags.${game.system.id}.currentSegment`] = 12;
             resetPayload[`flags.${game.system.id}.recoveredRounds`] = [];
 
-            if (!HeroCompatibility.isV14) {
-                this._turns = null;
-            }
-
             return this.update(resetPayload, { direction: -1 });
         }
 
@@ -1561,11 +1508,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const turns = this.turns;
         const activeSegment = this.segment;
 
-        const currentActiveTurns = HeroCompatibility.isV14
-            ? turns
-            : turns.filter((t) => this._takesTurnInSegment(t, activeSegment));
-
-        const currentFilteredIndex = currentActiveTurns.findIndex((t) => t.id === this.combatant?.id);
+        const currentFilteredIndex = turns.findIndex((t) => t.id === this.combatant?.id);
 
         // A completed scoped-LR stop is not a turns entry, so the standard index
         // walk would skip straight past it (often into the previous segment) and
@@ -1582,7 +1525,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             .sort((a, b) => a.spent.priority - b.spent.priority);
         if (spentLrStops.length > 0) {
             const { combatant: stop, spent } = spentLrStops[0];
-            const regularPrev = currentFilteredIndex > 0 ? currentActiveTurns[currentFilteredIndex - 1] : null;
+            const regularPrev = currentFilteredIndex > 0 ? turns[currentFilteredIndex - 1] : null;
             const regularPriority = regularPrev ? this.getInitiativePriority(regularPrev, activeSegment) : Infinity;
             if (spent.priority < regularPriority) {
                 const previousId = this.combatant?.id;
@@ -1595,10 +1538,6 @@ export class HeroSystem6eCombatSingle extends Combat {
                     },
                     { render: false },
                 );
-                if (!HeroCompatibility.isV14) {
-                    this._turns = null;
-                    this.setupTurns();
-                }
                 const stopIndex = this.turns.findIndex((t) => t.id === stop.id);
                 const payload = {
                     turn: stopIndex !== -1 ? stopIndex : 0,
@@ -1616,12 +1555,8 @@ export class HeroSystem6eCombatSingle extends Combat {
         }
 
         if (currentFilteredIndex > 0) {
-            const targetCombatant = currentActiveTurns[currentFilteredIndex - 1];
+            const targetCombatant = turns[currentFilteredIndex - 1];
             const masterTargetIndex = turns.findIndex((t) => t.id === targetCombatant.id);
-
-            if (!HeroCompatibility.isV14) {
-                this._turns = null;
-            }
 
             const targetPriority = this.getInitiativePriority(targetCombatant, activeSegment);
             const inlineUpdateData = {
@@ -1641,17 +1576,10 @@ export class HeroSystem6eCombatSingle extends Combat {
             );
             const rewindResets = this._rewindHoldFlagResets(this.round * 12 + activeSegment, { targetPriority });
 
-            const result = await HeroCompatibility.updateEmbedded(this, "combatants", rewindResets, inlineUpdateData, {
-                direction: -1,
-                previousCombatantId: this.combatant?.id,
-            });
-
-            if (!HeroCompatibility.isV14) {
-                this._turns = null;
-                this.setupTurns();
-            }
-
-            return result;
+            return this.update(
+                { ...inlineUpdateData, combatants: rewindResets },
+                { direction: -1, previousCombatantId: this.combatant?.id },
+            );
         }
 
         let prevSegment = activeSegment;
@@ -1676,7 +1604,6 @@ export class HeroSystem6eCombatSingle extends Combat {
                     resetPayload[`flags.${game.system.id}.currentSegment`] = 12;
                     resetPayload[`flags.${game.system.id}.recoveredRounds`] = [];
 
-                    if (!HeroCompatibility.isV14) this._turns = null;
                     return this.update(resetPayload, { direction: -1 });
                 }
             }
@@ -1728,9 +1655,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             return this._comparePriority(a, b, this, prevSegment, { queryAbs: prevAbs });
         });
 
-        const finalTargetTurnsArray = HeroCompatibility.isV14
-            ? recompiledTurns.filter((t) => t.occupiesSegment?.(prevSegment) ?? false)
-            : recompiledTurns;
+        const finalTargetTurnsArray = recompiledTurns.filter((t) => t.occupiesSegment?.(prevSegment) ?? false);
 
         let targetCombatantId = null;
         const targetActors = allCombatants.filter((c) =>
@@ -1764,25 +1689,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             updateOptions.worldTime = { delta: segmentDeltaCount };
         }
 
-        if (!HeroCompatibility.isV14) {
-            this._turns = null;
-        }
-
-        // ✅ FIXED SIGNATURE: Injected "combatants" collection name parameter
-        const result = await HeroCompatibility.updateEmbedded(
-            this,
-            "combatants",
-            combatantUpdates,
-            updateData,
-            updateOptions,
-        );
-
-        if (!HeroCompatibility.isV14) {
-            this._turns = null;
-            this.setupTurns();
-        }
-
-        return result;
+        return this.update({ ...updateData, combatants: combatantUpdates }, updateOptions);
     }
 
     /**
@@ -1828,20 +1735,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const updateOptions = { direction: 1, turnAdvance: true };
         updateOptions.worldTime = { delta: 12 };
 
-        // Clear internal turn caches before updating the database to prevent stale reads
-        if (!HeroCompatibility.isV14) {
-            this._turns = null;
-        }
-
-        // ✅ FIXED SIGNATURE: Injected "combatants" collection name parameter with empty updates array
-        const result = await HeroCompatibility.updateEmbedded(this, "combatants", [], updateData, updateOptions);
-
-        if (!HeroCompatibility.isV14) {
-            this._turns = null;
-            this.setupTurns();
-        }
-
-        return result;
+        return this.update({ ...updateData, combatants: [] }, updateOptions);
     }
 
     /**
@@ -1876,20 +1770,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const updateOptions = { direction: -1 };
         updateOptions.worldTime = { delta: -12 };
 
-        // Clear internal turn caches before updating the database to prevent stale reads
-        if (!HeroCompatibility.isV14) {
-            this._turns = null;
-        }
-
-        // ✅ FIXED SIGNATURE: Injected "combatants" collection name parameter with empty updates array
-        const result = await HeroCompatibility.updateEmbedded(this, "combatants", [], updateData, updateOptions);
-
-        if (!HeroCompatibility.isV14) {
-            this._turns = null;
-            this.setupTurns();
-        }
-
-        return result;
+        return this.update({ ...updateData, combatants: [] }, updateOptions);
     }
 
     /**
@@ -2010,8 +1891,8 @@ export class HeroSystem6eCombatSingle extends Combat {
             turn: null,
         };
 
-        // 3. Purge dynamic system flags safely across V13/V14 via the compatibility bridge
-        resetData[`flags.${game.system.id}`] = HeroCompatibility.forceDelete([
+        // 3. Purge the dynamic system flags via forced deletion
+        resetData[`flags.${game.system.id}`] = forceDeleteKeys([
             "currentSegment",
             "segmentRolls",
             "recoveredRounds",
@@ -2021,8 +1902,8 @@ export class HeroSystem6eCombatSingle extends Combat {
             "eventLogSeq",
         ]);
 
-        // 4. Update parent properties and children simultaneously through your compatibility bridge
-        return HeroCompatibility.updateEmbedded(this, "combatants", combatantUpdates, resetData);
+        // 4. Update parent properties and children in one commit
+        return this.update({ ...resetData, combatants: combatantUpdates });
     }
 
     /**
@@ -3097,10 +2978,6 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         // 5. Re-point the turn index at the active combatant (the index addresses a
         // freshly sorted array) and commit rolls + ledger in one update
-        if (!HeroCompatibility.isV14) {
-            this._turns = null;
-            this.setupTurns();
-        }
         const payload = {};
         if (rollsDirty) payload[`flags.${game.system.id}.segmentRolls`] = masterRollsCache;
         Object.assign(
@@ -3139,11 +3016,6 @@ export class HeroSystem6eCombatSingle extends Combat {
                 }),
             );
         const activeId = capture?.activeId ?? this.previous?.combatantId ?? null;
-
-        if (!HeroCompatibility.isV14) {
-            this._turns = null;
-            this.setupTurns();
-        }
         const payload = this.eventLogAppendPayload(events);
 
         if (activeId && this.combatants.has(activeId)) {
@@ -3674,10 +3546,8 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         if (matchingEffects.length === 0) return;
 
-        // 3. SAFE VERSION CONFIGURATION RESOLUTION: Pull V14 data parameters without crashing V13 runtimes
-        // Uses getProperty to safely return undefined on V13 instead of generating a TypeError
-        const defaultExpiryAction = HeroCompatibility.isV14 ? "disable" : "delete";
-        const expiryAction = foundry.utils.getProperty(CONFIG, "ActiveEffect.expiryAction") ?? defaultExpiryAction;
+        // 3. Resolve the configured expiry action, defaulting to V14's disable behavior
+        const expiryAction = foundry.utils.getProperty(CONFIG, "ActiveEffect.expiryAction") ?? "disable";
 
         const effectsToDelete = [];
         const updatesToApply = [];
@@ -3704,22 +3574,18 @@ export class HeroSystem6eCombatSingle extends Combat {
             }
         }
 
-        // 5. ATOMIC BATCH OPERATION COMMITS
-        // Satisfies V14 canonical layout rules while remaining fully backwards compatible
+        // 5. Atomic batch commits
         if (effectsToDelete.length > 0) {
             await actor.deleteEmbeddedDocuments("ActiveEffect", effectsToDelete);
         }
-
         if (updatesToApply.length > 0) {
-            // In V14, updateEmbeddedDocuments accepts the update array natively.
-            // In V13, it flattens standard objects correctly.
             await actor.updateEmbeddedDocuments("ActiveEffect", updatesToApply);
         }
     }
 
     /**
      * Recalculates and flushes initiative values for all combatants.
-     * Employs the HeroCompatibility adapter to bridge V14 array styles safely with V13 clients.
+     * Commits the refresh as one canonical embedded-array update.
      * @returns {Promise<Document>} The updated parent Combat document instance
      */
     async updateCodeInitiatives() {
@@ -3733,9 +3599,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             });
         });
 
-        // 2. Safely commit updates using your compatibility bridge.
-        // This provides clean V14 collection arrays natively and falls back to flat string properties in V13.
-        return HeroCompatibility.updateEmbedded(this, "combatants", combatantUpdates);
+        return this.update({ combatants: combatantUpdates });
     }
 }
 
@@ -3838,10 +3702,10 @@ export async function migrateCombatsToSingleCombatantTracker({ dryRun = false, f
             const flagDeletes = {};
             const systemFlags = combatant.flags?.[game.system.id] ?? {};
             const staleKeys = LEGACY_COMBATANT_FLAG_KEYS.filter((key) => systemFlags[key] !== undefined);
-            if (staleKeys.length > 0) flagDeletes[game.system.id] = HeroCompatibility.forceDelete(staleKeys);
+            if (staleKeys.length > 0) flagDeletes[game.system.id] = forceDeleteKeys(staleKeys);
             // The legacy hold marker lives outside the system scope
             if (combatant.flags?.holdingAnAction !== undefined) {
-                Object.assign(flagDeletes, HeroCompatibility.forceDelete(["holdingAnAction"]));
+                Object.assign(flagDeletes, forceDeleteKeys(["holdingAnAction"]));
             }
             if (Object.keys(flagDeletes).length > 0) update.flags = flagDeletes;
 
@@ -3853,7 +3717,7 @@ export async function migrateCombatsToSingleCombatantTracker({ dryRun = false, f
         const needsReset = combat.started || combat.round !== 0 || staleCombatKeys.length > 0;
         const resetPayload = { started: false, round: 0, turn: null };
         if (staleCombatKeys.length > 0) {
-            resetPayload[`flags.${game.system.id}`] = HeroCompatibility.forceDelete(staleCombatKeys);
+            resetPayload[`flags.${game.system.id}`] = forceDeleteKeys(staleCombatKeys);
         }
 
         const entry = {
