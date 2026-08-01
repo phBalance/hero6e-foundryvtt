@@ -2826,6 +2826,166 @@ export function registerCombatTests(quench) {
                     expect(resolved, "delayed action resolved after its segment ended").to.be.true;
                 });
 
+                it("Should consume the segment's natural Phase when a positional hold is spent off-slot", async function () {
+                    const holder = await makeActor("_Quench OffSlot Holder", { dex: 8, spd: 2 });
+                    const pacer = await makeActor("_Quench OffSlot Pacer", { dex: 25, spd: 12 });
+                    const combat = await makeCombat([holder, pacer]);
+                    await combat.startCombat();
+                    expect(combat.segment).to.equal(12);
+                    expect(combat.combatant.actorId).to.equal(pacer.id);
+                    const holderCombatant = combat.combatants.find((c) => c.actorId === holder.id);
+                    const pacerCombatant = combat.combatants.find((c) => c.actorId === pacer.id);
+
+                    // The holder banked a Phase for Turn 2 Segment 3, then aborts NOW
+                    // (T1S12, before their natural DEX 8 Phase comes up)
+                    await holder.createEmbeddedDocuments("ActiveEffect", [
+                        {
+                            name: "Holding An Action",
+                            img: "icons/svg/clockwork.svg",
+                            statuses: ["holding"],
+                            flags: {
+                                [game.system.id]: {
+                                    hold: {
+                                        mode: "position",
+                                        segmentAbs: 27,
+                                        dex: 12,
+                                        combatantId: holderCombatant.id,
+                                    },
+                                },
+                            },
+                        },
+                    ]);
+                    const applied = await ui.combat._declareAbort(holderCombatant, { toAction: "Dodge" });
+                    expect(applied).to.be.true;
+                    expect(holder.statuses.has("holding"), "hold consumed by the abort").to.be.false;
+                    expect(holder.statuses.has("aborted"), "held Phase absorbs the abort").to.be.false;
+
+                    // Spent OFF the declared slot: the acted position is recorded at the
+                    // natural Phase so the holder cannot act twice this segment
+                    const spent = holderCombatant.spentHoldPosition;
+                    expect(spent?.segmentAbs, "recorded in the segment it was spent").to.equal(24);
+                    expect(spent?.dex, "recorded at the natural Phase position").to.equal(8);
+                    expect(combat._takesTurnInSegment(holderCombatant, 12), "no second action").to.be.false;
+                    await combat.nextTurn();
+                    expect(combat.round, "the natural DEX 8 Phase is skipped").to.equal(2);
+                    expect(combat.segment).to.equal(1);
+                    expect(combat.combatant.actorId).to.equal(pacer.id);
+
+                    // Releasing a positional hold AWAY from its slot costs nothing:
+                    // no spent record, the natural Phase stays
+                    await pacer.createEmbeddedDocuments("ActiveEffect", [
+                        {
+                            name: "Holding An Action",
+                            img: "icons/svg/clockwork.svg",
+                            statuses: ["holding"],
+                            flags: {
+                                [game.system.id]: {
+                                    hold: {
+                                        mode: "position",
+                                        segmentAbs: 30,
+                                        dex: 20,
+                                        combatantId: pacerCombatant.id,
+                                    },
+                                },
+                            },
+                        },
+                    ]);
+                    await ui.combat._onReleaseHeldAction(pacerCombatant.id);
+                    expect(pacer.statuses.has("holding"), "hold released").to.be.false;
+                    expect(pacerCombatant.spentHoldPosition, "off-slot release forfeits nothing").to.equal(null);
+                });
+
+                it("Should re-point the turn at the next actor when the active combatant is deleted", async function () {
+                    const first = await makeActor("_Quench Del First", { dex: 20, spd: 2 });
+                    const second = await makeActor("_Quench Del Second", { dex: 15, spd: 2 });
+                    const third = await makeActor("_Quench Del Third", { dex: 10, spd: 2 });
+                    const combat = await makeCombat([first, second, third]);
+                    await combat.startCombat();
+                    expect(combat.segment).to.equal(12);
+                    expect(combat.combatant.actorId).to.equal(first.id);
+
+                    // Deleting the active combatant selects the next actor below the
+                    // recorded acting position, exactly as nextTurn's threshold does
+                    await combat.deleteEmbeddedDocuments("Combatant", [combat.combatant.id]);
+                    const repointed = await waitUntil(
+                        () => combat.combatant?.actorId === second.id && combat.segment === 12,
+                    );
+                    expect(repointed, "pointer lands on the next actor in the same segment").to.be.true;
+                    expect(Math.floor(combat.getFlag(game.system.id, "actingPriority"))).to.equal(15);
+
+                    // The removal is ledgered and the order continues normally
+                    const log = combat.getFlag(game.system.id, "eventLog") ?? {};
+                    expect(
+                        Object.values(log).some((e) => e.t === "combatant.remove"),
+                        "removal appears in the ledger",
+                    ).to.be.true;
+                    await combat.nextTurn();
+                    expect(combat.combatant.actorId).to.equal(third.id);
+                });
+
+                it("Should carry a rehydratable snapshot through a delayed attack landing", async function () {
+                    const { dehydrateAttackItem, rehydrateAttackItem } = await import("../item/item-attack.mjs");
+                    const striker = await makeActor("_Quench Delayed Replay", { dex: 16, spd: 12 });
+                    const strike = striker.items.find((i) => i.system?.XMLID === "STRIKE");
+                    expect(strike, "PC actors carry the Strike maneuver").to.exist;
+                    const combat = await makeCombat([striker]);
+                    await combat.startCombat();
+                    const combatant = combat.combatants.find((c) => c.actorId === striker.id);
+                    const currentAbs = combat.round * 12 + combat.segment;
+
+                    strike.system._active ??= {};
+                    const itemJson = dehydrateAttackItem(strike);
+                    await combat.scheduleDelayedAction(
+                        striker,
+                        {
+                            kind: "attack",
+                            label: `${strike.name} (Extra Segment)`,
+                            resolveAbs: currentAbs + 1,
+                            priority: null,
+                            commit: false,
+                            actionData: {
+                                formData: { effectiveStr: 10 },
+                                targetTokenIds: [],
+                                userId: game.user.id,
+                                itemJson,
+                                originalItemUuid: strike.uuid,
+                                actorUuid: striker.uuid,
+                                prepaid: true,
+                            },
+                        },
+                        strike,
+                    );
+                    expect(combat.hasDelayedAction(combatant)).to.be.true;
+
+                    // priority-null records land at the very END of their segment: the
+                    // declarer's own Phase there must not pull the landing forward
+                    await combat.nextTurn(); // into the landing segment (the striker's Phase)
+                    await combat.settleMaintenance?.();
+                    expect(combat.hasDelayedAction(combatant), "own Phase does not resolve an end-of-segment landing")
+                        .to.be.true;
+                    await combat.nextTurn(); // past it
+
+                    // The landing card carries the declaration for the replay
+                    const landed = await waitUntil(() =>
+                        game.messages.contents.some((m) => m.getFlag(game.system.id, "delayedAttack")?.itemJson),
+                    );
+                    expect(landed, "landing card offers the roll once the segment fully passed").to.be.true;
+                    expect(combat.hasDelayedAction(combatant), "record consumed by the landing").to.be.false;
+                    const message = game.messages.contents
+                        .filter((m) => m.getFlag(game.system.id, "delayedAttack")?.itemJson)
+                        .at(-1);
+                    const payload = message.getFlag(game.system.id, "delayedAttack");
+                    expect(payload.prepaid, "resources were paid at declaration").to.be.true;
+                    expect(payload.formData?.effectiveStr, "dialog inputs survive the round-trip").to.equal(10);
+
+                    // The snapshot is stringified exactly once and rebuilds the item
+                    expect(typeof JSON.parse(payload.itemJson)).to.equal("object");
+                    const rebuilt = rehydrateAttackItem(payload.itemJson, striker);
+                    expect(rebuilt?.item?.system?.XMLID).to.equal("STRIKE");
+                    expect(rebuilt.item.name).to.equal(strike.name);
+                    await message.delete();
+                });
+
                 it("Should keep tied groups and outsiders in a consistent order (no re-admission cycling)", async function () {
                     const boss = await makeActor("_Quench Cycle Group", { dex: 15, spd: 2 });
                     const outsider = await makeActor("_Quench Cycle Outsider", { dex: 15, spd: 2 });
