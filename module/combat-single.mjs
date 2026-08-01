@@ -859,11 +859,13 @@ export class HeroSystem6eCombatSingle extends Combat {
         const initialRolls = (await this._generateSegmentRollCache(startAbs)) || {};
         startPayload[`flags.${game.system.id}.segmentRolls`] = { [startAbs]: initialRolls };
 
+        // Score at the opening abs explicitly: round is still 0 here, so the
+        // default query would miss the roll map just written under startAbs
         const combatantUpdates = [];
         this.combatants.forEach((combatant) => {
             combatantUpdates.push({
                 _id: combatant.id,
-                initiative: this.getInitiativePriority(combatant, 12),
+                initiative: this.getInitiativePriority(combatant, 12, { queryAbs: startAbs }),
             });
         });
 
@@ -886,10 +888,10 @@ export class HeroSystem6eCombatSingle extends Combat {
             const aActs = a.occupiesSegment ? a.occupiesSegment(12) : false;
             const bActs = b.occupiesSegment ? b.occupiesSegment(12) : false;
             if (aActs !== bActs) return aActs ? -1 : 1;
-            return this._comparePriority(a, b, this, 12);
+            return this._comparePriority(a, b, this, 12, { queryAbs: startAbs });
         });
 
-        const targetActorDoc = startTurns.find((t) => this._takesTurnInSegment(t, 12));
+        const targetActorDoc = startTurns.find((t) => this._takesTurnInSegment(t, 12, { queryAbs: startAbs }));
         const targetCombatantId = targetActorDoc?.id || null;
 
         const finalTargetTurnsArray = startTurns.filter((t) => t.occupiesSegment?.(12) ?? false);
@@ -897,7 +899,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const absoluteStartTurnIndex = finalTargetTurnsArray.findIndex((t) => t.id === targetCombatantId);
         startPayload.turn = absoluteStartTurnIndex !== -1 ? absoluteStartTurnIndex : 0;
         startPayload[`flags.${game.system.id}.actingPriority`] = targetActorDoc
-            ? this.getInitiativePriority(targetActorDoc, 12)
+            ? this.getInitiativePriority(targetActorDoc, 12, { queryAbs: startAbs })
             : null;
 
         const startEvents = [this.buildEvent("segment.start", { abs: startAbs })];
@@ -1354,16 +1356,23 @@ export class HeroSystem6eCombatSingle extends Combat {
             masterRollsCache[nextAbs] = updatedRollsCache;
             freshRollMap = updatedRollsCache;
         }
-        // Prune maps outside the tracker's two-Turn rewind window; this also drops
-        // the legacy segment-number keys (1-12) from in-flight combats over time
+        // Persist only the DELTA: the new abs entry plus forced deletions for maps
+        // outside the two-Turn rewind window (flag updates merge, so assigning the
+        // whole map here would clobber the deletion markers and re-send an
+        // ever-growing payload every advance). Numeric prune also retires legacy
+        // segment-number keys (1-12).
+        const rollsDelta = {};
+        if (freshRollMap) rollsDelta[nextAbs] = freshRollMap;
         for (const key of Object.keys(masterRollsCache)) {
             const keyAbs = Number(key);
             if (Number.isFinite(keyAbs) && keyAbs < currentAbsNow - 24) {
                 delete masterRollsCache[key];
-                updateData[`flags.${game.system.id}.segmentRolls.-=${key}`] = null;
+                rollsDelta[key] = foundry.data.operators.ForcedDeletion.create();
             }
         }
-        updateData[`flags.${game.system.id}.segmentRolls`] = masterRollsCache;
+        if (Object.keys(rollsDelta).length > 0) {
+            updateData[`flags.${game.system.id}.segmentRolls`] = rollsDelta;
+        }
         let targetCombatantId = null;
         const upcomingActors = allCombatants.filter((c) =>
             this._takesTurnInSegment(c, nextSegment, {
@@ -1711,7 +1720,8 @@ export class HeroSystem6eCombatSingle extends Combat {
         const roundRollsCache = this.getFlag(game.system.id, "segmentRolls") ?? {};
         if (!roundRollsCache[landingAbs]) {
             roundRollsCache[landingAbs] = this._buildSegmentRollMap();
-            updateData[`flags.${game.system.id}.segmentRolls`] = roundRollsCache;
+            // Flag updates merge: sending only the new entry avoids re-writing the map
+            updateData[`flags.${game.system.id}.segmentRolls`] = { [landingAbs]: roundRollsCache[landingAbs] };
         }
 
         Object.assign(
