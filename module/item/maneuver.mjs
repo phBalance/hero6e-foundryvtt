@@ -413,7 +413,7 @@ export async function activateManeuver(item) {
         });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
-        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect.name];
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.braceEffect.id];
         activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     } else if (item.system.XMLID === "HAYMAKER") {
         activeEffect.name = HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.name;
@@ -425,7 +425,7 @@ export async function activateManeuver(item) {
         });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
-        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.name];
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.haymakerEffect.id];
         activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     } else if (item.system.XMLID === "CLUBWEAPON") {
         activeEffect.name = HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.name;
@@ -433,7 +433,7 @@ export async function activateManeuver(item) {
         activeEffect.flags = buildManeuverNextPhaseFlags(item);
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
-        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.name];
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.clubWeaponEffect.id];
         activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     } else if (
         item.system.XMLID === "COVER" ||
@@ -455,7 +455,7 @@ export async function activateManeuver(item) {
         });
         activeEffect.duration ??= {};
         activeEffect.duration.startTime = game.time.worldTime;
-        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect.name];
+        activeEffect.statuses = [HeroSystem6eActorActiveEffects.statusEffectsObj.strikeEffect.id];
         activeEffect.duration.expiry = "combatEnd"; // V14 kluge until we implement phaseStart.  Combat:_onStartTurn should expire this.
     }
 
