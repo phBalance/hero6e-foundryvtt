@@ -230,6 +230,48 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         };
 
         Hooks.on("renderCombatTracker", onRenderTracker);
+
+        /**
+         * Injects the Hero System client preferences into core's Combat Tracker
+         * Settings dialog (#3157). The inputs persist immediately on change —
+         * core's submit handler writes only core.combatTheme and
+         * core.combatTrackerConfig and silently discards unknown form fields,
+         * so riding the Save button is not an option.
+         */
+        const onRenderTrackerConfig = (_app, html) => {
+            try {
+                if (!(ui.combat instanceof HeroSystem6eCombatTrackerSingle)) return;
+                const root = html instanceof HTMLElement ? html : html?.[0];
+                if (!root || root.querySelector(".hero-tracker-config")) return;
+
+                const compact = !!game.settings.get(game.system.id, "combatTrackerCompact");
+                const fieldset = document.createElement("fieldset");
+                fieldset.className = "hero-tracker-config";
+                fieldset.innerHTML = `
+                    <legend>Hero System</legend>
+                    <div class="form-group">
+                        <label for="hero-tracker-compact">${game.i18n.localize("Settings.AlphaTesting.combatTrackerCompact.Name")}</label>
+                        <div class="form-fields">
+                            <input type="checkbox" id="hero-tracker-compact" ${compact ? "checked" : ""}>
+                        </div>
+                        <p class="hint">${game.i18n.localize("Settings.AlphaTesting.combatTrackerCompact.Hint")}</p>
+                    </div>`;
+                fieldset.querySelector("input").addEventListener("change", (event) => {
+                    // Applies live: the setting's onChange re-renders the tracker
+                    game.settings
+                        .set(game.system.id, "combatTrackerCompact", event.target.checked)
+                        .catch((e) => console.error(e));
+                });
+
+                const footer = root.querySelector("footer.form-footer, .form-footer");
+                if (footer) footer.before(fieldset);
+                else (root.querySelector("form") ?? root).append(fieldset);
+            } catch (e) {
+                console.error(`Unable to inject tracker preferences into the settings dialog`, e);
+            }
+        };
+
+        Hooks.on("renderCombatTrackerConfig", onRenderTrackerConfig);
     }
 
     /**

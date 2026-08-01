@@ -594,12 +594,14 @@ export default class SettingsHelpers {
             default: false,
         });
 
-        // Per-client density toggle for the single tracker (#3157)
+        // Per-client density toggle for the single tracker (#3157). Lives in
+        // core's Combat Tracker Settings dialog (renderCombatTrackerConfig
+        // injection in the tracker class), not the module settings list.
         game.settings.register(module, "combatTrackerCompact", {
             name: game.i18n.localize("Settings.AlphaTesting.combatTrackerCompact.Name"),
             hint: game.i18n.localize("Settings.AlphaTesting.combatTrackerCompact.Hint"),
             scope: "client",
-            config: game.settings.get(game.system.id, "alphaTesting"),
+            config: false,
             type: Boolean,
             default: false,
             onChange: () => ui.combat?.render(),
