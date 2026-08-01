@@ -663,13 +663,21 @@ export class HeroSystem6eCombatSingle extends Combat {
     /**
      * Sorting comparator behind compareCombatants, also used directly for
      * predicted-turns computations. Descending initiative priorities.
+     * @param {Combatant} a
+     * @param {Combatant} b
+     * @param {Combat} [combatDoc]
+     * @param {object} [options]
+     * @param {number} [options.segment] - Explicit segment to sort under (defaults to the active segment)
+     * @param {number} [options.queryAbs] - Exact absolute segment being scored
      * @override
      */
-    _sortCombatants(a, b, combatDoc) {
+    _sortCombatants(a, b, combatDoc, { segment = null, queryAbs = null } = {}) {
         const parentCombat = combatDoc ?? this ?? a.combat;
         let currentSegment = 12;
 
-        if (game.system?.id && parentCombat) {
+        if (segment !== null) {
+            currentSegment = segment;
+        } else if (game.system?.id && parentCombat) {
             const isStarted = parentCombat.started ?? parentCombat.fields?.started ?? false;
             if (isStarted) {
                 currentSegment = parentCombat.getFlag(game.system.id, "currentSegment") ?? 12;
@@ -687,7 +695,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             return aEligible ? -1 : 1;
         }
 
-        return parentCombat._comparePriority(a, b, parentCombat, currentSegment);
+        return parentCombat._comparePriority(a, b, parentCombat, currentSegment, { queryAbs });
     }
 
     /**
@@ -714,6 +722,37 @@ export class HeroSystem6eCombatSingle extends Combat {
         return parentCombat.tieBreakOrder
             ? parentCombat.tieBreakOrder(a, b, queryAbs)
             : HeroSystem6eCombatSingle.stableTiebreak(a, b);
+    }
+
+    /**
+     * Recompiles the predicted sorted turns for a segment: pending initiative
+     * updates are overlaid on prototype clones (Object.create keeps document
+     * getters live while overriding initiative), then the shared
+     * eligibility-then-priority sort is applied. Returns the sorted clones
+     * unfiltered — callers apply their own occupiesSegment filter and findIndex.
+     * @param {number} segment - Segment number (1-12) to predict for
+     * @param {object} [options]
+     * @param {number} [options.queryAbs] - Exact absolute segment being scored
+     * @param {object[]} [options.initiativeUpdates] - Pending {_id, initiative} combatant updates
+     * @returns {Combatant[]}
+     * @private
+     */
+    _predictTurns(segment, { queryAbs = null, initiativeUpdates = null } = {}) {
+        const initiativeById = new Map((initiativeUpdates ?? []).map((u) => [u._id, u]));
+        const predicted = this.combatants.map((c) => {
+            const match = initiativeById.get(c.id);
+            const clone = Object.create(c);
+            if (match) {
+                Object.defineProperty(clone, "initiative", {
+                    value: match.initiative,
+                    writable: true,
+                    configurable: true,
+                });
+            }
+            return clone;
+        });
+        predicted.sort((a, b) => this._sortCombatants(a, b, this, { segment, queryAbs }));
+        return predicted;
     }
 
     /**
@@ -901,27 +940,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             });
         });
 
-        const startInitiativeById = new Map(combatantUpdates.map((u) => [u._id, u]));
-        const startTurns = this.combatants.map((c) => {
-            const match = startInitiativeById.get(c.id);
-            const clone = Object.create(c);
-            if (match) {
-                Object.defineProperty(clone, "initiative", {
-                    value: match.initiative,
-                    writable: true,
-                    configurable: true,
-                });
-            }
-            return clone;
-        });
-
-        // Eligibility first, then priority — mirrors _sortCombatants
-        startTurns.sort((a, b) => {
-            const aActs = a.occupiesSegment ? a.occupiesSegment(12) : false;
-            const bActs = b.occupiesSegment ? b.occupiesSegment(12) : false;
-            if (aActs !== bActs) return aActs ? -1 : 1;
-            return this._comparePriority(a, b, this, 12, { queryAbs: startAbs });
-        });
+        const startTurns = this._predictTurns(12, { queryAbs: startAbs, initiativeUpdates: combatantUpdates });
 
         const targetActorDoc = startTurns.find((t) => this._takesTurnInSegment(t, 12, { queryAbs: startAbs }));
         const targetCombatantId = targetActorDoc?.id || null;
@@ -1237,79 +1256,121 @@ export class HeroSystem6eCombatSingle extends Combat {
             );
         });
 
-        if (stillToAct.length > 0) {
-            stillToAct.sort((a, b) => this._comparePriority(a, b, this, activeSegment));
-            const target = stillToAct[0];
+        const ctx = {
+            allCombatants,
+            activeSegment,
+            currentAbs,
+            ending,
+            endingAtHeldSlot,
+            storedActingPriority,
+            endingPriority,
+            stillToAct,
+        };
 
-            // A mid-segment hold changes live priorities, and any embedded combatant write
-            // re-sorts the turns array — so the turn index must address the RE-SORTED
-            // order. Only changed initiatives persist: unchanged writes are wasted
-            // round-trips, and any single combatant write re-sorts every client.
-            let inlineCombatantUpdates = this.combatants
-                .map((c) => ({
-                    _id: c.id,
-                    initiative: this.getInitiativePriority(c, activeSegment),
-                }))
-                .filter((u) => this.combatants.get(u._id)?.initiative !== u.initiative);
+        const within = await this._advanceWithinSegment(ctx);
+        if (within) return within.result;
+        return this._advanceToNextSegment(ctx);
+    }
 
-            // Landing on a positional holder's declared slot marks it taken in the
-            // same update, so ending that turn consumes the hold race-free
-            const targetHold = target.heldAction;
-            if (targetHold?.mode === "position" && targetHold.segmentAbs === currentAbs) {
-                const targetUpdate = inlineCombatantUpdates.find((u) => u._id === target.id);
-                if (targetUpdate) targetUpdate[`flags.${game.system.id}.heldSlotTakenAbs`] = currentAbs;
-                else
-                    inlineCombatantUpdates.push({
-                        _id: target.id,
-                        [`flags.${game.system.id}.heldSlotTakenAbs`]: currentAbs,
-                    });
-            }
+    /**
+     * Selects and commits the next actor within the current segment; null when the
+     * segment has no eligible actor left (the caller falls through to the segment scan).
+     * @private
+     */
+    async _advanceWithinSegment({
+        allCombatants,
+        activeSegment,
+        currentAbs,
+        ending,
+        storedActingPriority,
+        endingPriority,
+        stillToAct,
+    }) {
+        if (stillToAct.length === 0) return null;
 
-            // Players may only write combatants they own; the GM-side _onUpdate
-            // backfills any slot-taken marker dropped here
-            if (!game.user.isGM) {
-                inlineCombatantUpdates = inlineCombatantUpdates.filter((u) => this.combatants.get(u._id)?.isOwner);
-            }
+        stillToAct.sort((a, b) => this._comparePriority(a, b, this, activeSegment));
+        const target = stillToAct[0];
 
-            const predictedTurns = [...allCombatants]
-                .sort((a, b) => this._sortCombatants(a, b, this))
-                .filter((t) => t.occupiesSegment?.(activeSegment) ?? false);
-            const targetIndex = predictedTurns.findIndex((t) => t.id === target.id);
+        // A mid-segment hold changes live priorities, and any embedded combatant write
+        // re-sorts the turns array — so the turn index must address the RE-SORTED
+        // order. Only changed initiatives persist: unchanged writes are wasted
+        // round-trips, and any single combatant write re-sorts every client.
+        let inlineCombatantUpdates = this.combatants
+            .map((c) => ({
+                _id: c.id,
+                initiative: this.getInitiativePriority(c, activeSegment),
+            }))
+            .filter((u) => this.combatants.get(u._id)?.initiative !== u.initiative);
 
-            if (targetIndex !== -1) {
-                // Completed turns raise the segment's high-water mark: a Lightning
-                // Reflexes elevation may only slot below it — positions above it have
-                // genuinely been passed, while the current actor merely being up has not
-                const priorHighWater = this.getFlag(game.system.id, "segmentHighWater");
-                const segmentHighWater = ending
-                    ? Math.max(priorHighWater ?? -Infinity, endingPriority)
-                    : priorHighWater;
-                const withinSegmentPayload = {
-                    turn: targetIndex,
-                    [`flags.${game.system.id}.actingPriority`]: this.getInitiativePriority(target, activeSegment),
-                    [`flags.${game.system.id}.segmentHighWater`]: Number.isFinite(segmentHighWater)
-                        ? segmentHighWater
-                        : null,
-                };
-                if (game.user.isGM) {
-                    Object.assign(
-                        withinSegmentPayload,
-                        this.eventLogAppendPayload([
-                            this.buildEvent("turn.start", {
-                                combatant: target,
-                                abs: currentAbs,
-                                data: { turnIndex: targetIndex, storedActingPriority: storedActingPriority ?? null },
-                            }),
-                        ]),
-                    );
-                }
-                return this.update(
-                    { ...withinSegmentPayload, combatants: inlineCombatantUpdates },
-                    { direction: 1, previousCombatantId: ending?.id },
-                );
-            }
+        // Landing on a positional holder's declared slot marks it taken in the
+        // same update, so ending that turn consumes the hold race-free
+        const targetHold = target.heldAction;
+        if (targetHold?.mode === "position" && targetHold.segmentAbs === currentAbs) {
+            const targetUpdate = inlineCombatantUpdates.find((u) => u._id === target.id);
+            if (targetUpdate) targetUpdate[`flags.${game.system.id}.heldSlotTakenAbs`] = currentAbs;
+            else
+                inlineCombatantUpdates.push({
+                    _id: target.id,
+                    [`flags.${game.system.id}.heldSlotTakenAbs`]: currentAbs,
+                });
         }
 
+        // Players may only write combatants they own; the GM-side _onUpdate
+        // backfills any slot-taken marker dropped here
+        if (!game.user.isGM) {
+            inlineCombatantUpdates = inlineCombatantUpdates.filter((u) => this.combatants.get(u._id)?.isOwner);
+        }
+
+        const predictedTurns = [...allCombatants]
+            .sort((a, b) => this._sortCombatants(a, b, this))
+            .filter((t) => t.occupiesSegment?.(activeSegment) ?? false);
+        const targetIndex = predictedTurns.findIndex((t) => t.id === target.id);
+
+        if (targetIndex === -1) return null;
+
+        // Completed turns raise the segment's high-water mark: a Lightning
+        // Reflexes elevation may only slot below it — positions above it have
+        // genuinely been passed, while the current actor merely being up has not
+        const priorHighWater = this.getFlag(game.system.id, "segmentHighWater");
+        const segmentHighWater = ending ? Math.max(priorHighWater ?? -Infinity, endingPriority) : priorHighWater;
+        const withinSegmentPayload = {
+            turn: targetIndex,
+            [`flags.${game.system.id}.actingPriority`]: this.getInitiativePriority(target, activeSegment),
+            [`flags.${game.system.id}.segmentHighWater`]: Number.isFinite(segmentHighWater) ? segmentHighWater : null,
+        };
+        if (game.user.isGM) {
+            Object.assign(
+                withinSegmentPayload,
+                this.eventLogAppendPayload([
+                    this.buildEvent("turn.start", {
+                        combatant: target,
+                        abs: currentAbs,
+                        data: { turnIndex: targetIndex, storedActingPriority: storedActingPriority ?? null },
+                    }),
+                ]),
+            );
+        }
+        return {
+            result: await this.update(
+                { ...withinSegmentPayload, combatants: inlineCombatantUpdates },
+                { direction: 1, previousCombatantId: ending?.id },
+            ),
+        };
+    }
+
+    /**
+     * Scans forward for the next segment with an eligible actor and commits the
+     * cross-segment landing (rolls, initiative refresh, pointer, events).
+     * @private
+     */
+    async _advanceToNextSegment({
+        allCombatants,
+        activeSegment,
+        currentAbs,
+        ending,
+        endingAtHeldSlot,
+        storedActingPriority,
+    }) {
         let nextSegment = activeSegment;
         let nextRoundCycle = this.round;
         let segmentDeltaCount = 0;
@@ -1450,25 +1511,9 @@ export class HeroSystem6eCombatSingle extends Combat {
             persistedCombatantUpdates = persistedCombatantUpdates.filter((u) => this.combatants.get(u._id)?.isOwner);
         }
 
-        const initiativeById = new Map(combatantUpdates.map((u) => [u._id, u]));
-        const recompiledTurns = this.combatants.map((c) => {
-            const match = initiativeById.get(c.id);
-            const clone = Object.create(c);
-            if (match) {
-                Object.defineProperty(clone, "initiative", {
-                    value: match.initiative,
-                    writable: true,
-                    configurable: true,
-                });
-            }
-            return clone;
-        });
-
-        recompiledTurns.sort((a, b) => {
-            const aE = a.occupiesSegment?.(nextSegment) ?? false;
-            const bE = b.occupiesSegment?.(nextSegment) ?? false;
-            if (aE !== bE) return aE ? -1 : 1;
-            return this._comparePriority(a, b, this, nextSegment, { queryAbs: nextAbs });
+        const recompiledTurns = this._predictTurns(nextSegment, {
+            queryAbs: nextAbs,
+            initiativeUpdates: combatantUpdates,
         });
 
         const finalTargetTurnsArray = recompiledTurns.filter((t) => t.occupiesSegment?.(nextSegment) ?? false);
@@ -1535,13 +1580,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (this.round === 1 && this.segment === 12 && (this.turn ?? 0) === 0) {
             console.log(`[${game.system.id}] Rewinding past initial turn boundary. Resetting encounter state...`);
 
-            await this._handleCombatStartReset();
-
-            const resetPayload = { started: false, round: 0, turn: 0 };
-            resetPayload[`flags.${game.system.id}.currentSegment`] = 12;
-            resetPayload[`flags.${game.system.id}.recoveredRounds`] = [];
-
-            return this.update(resetPayload, { direction: -1 });
+            return this._resetToUnstarted();
         }
 
         const allCombatants = this.combatants.contents;
@@ -1550,13 +1589,42 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         const currentFilteredIndex = turns.findIndex((t) => t.id === this.combatant?.id);
 
-        // A completed scoped-LR stop is not a turns entry, so the standard index
-        // walk would skip straight past it (often into the previous segment) and
-        // the flag resets would erase it. When the most recent completed action
-        // this segment was an LR stop, rewinding steps back ONTO it: the elevation
-        // is restored and the stop becomes the active turn again.
         // Captured before the writes below move the combat position
         const currentAbs = this.currentAbs;
+
+        const ctx = { allCombatants, turns, activeSegment, currentFilteredIndex, currentAbs };
+
+        const lrRewind = await this._rewindOntoLrStop(ctx);
+        if (lrRewind) return lrRewind.result;
+
+        if (currentFilteredIndex > 0) return this._rewindWithinSegment(ctx);
+
+        return this._rewindToPreviousSegment(ctx);
+    }
+
+    /**
+     * Resets the encounter to its unstarted pre-combat state after rewinding past the start.
+     * @private
+     */
+    async _resetToUnstarted() {
+        await this._handleCombatStartReset();
+
+        const resetPayload = { started: false, round: 0, turn: 0 };
+        resetPayload[`flags.${game.system.id}.currentSegment`] = 12;
+        resetPayload[`flags.${game.system.id}.recoveredRounds`] = [];
+
+        return this.update(resetPayload, { direction: -1 });
+    }
+
+    /**
+     * Rewinds back ONTO a completed scoped-LR stop this segment, restoring its
+     * elevation; null when no such stop sits between here and the previous turns entry.
+     * A completed scoped-LR stop is not a turns entry, so the standard index
+     * walk would skip straight past it (often into the previous segment) and
+     * the flag resets would erase it.
+     * @private
+     */
+    async _rewindOntoLrStop({ allCombatants, turns, activeSegment, currentFilteredIndex, currentAbs }) {
         const currentPriority =
             this.getFlag(game.system.id, "actingPriority") ??
             (this.combatant ? this.getInitiativePriority(this.combatant, activeSegment) : -Infinity);
@@ -1564,65 +1632,76 @@ export class HeroSystem6eCombatSingle extends Combat {
             .map((c) => ({ combatant: c, spent: c.getFlag(game.system.id, "spentLrPosition") }))
             .filter(({ spent }) => spent?.segmentAbs === currentAbs && spent.priority > currentPriority)
             .sort((a, b) => a.spent.priority - b.spent.priority);
-        if (spentLrStops.length > 0) {
-            const { combatant: stop, spent } = spentLrStops[0];
-            const regularPrev = currentFilteredIndex > 0 ? turns[currentFilteredIndex - 1] : null;
-            const regularPriority = regularPrev ? this.getInitiativePriority(regularPrev, activeSegment) : Infinity;
-            if (spent.priority < regularPriority) {
-                const previousId = this.combatant?.id;
-                // Restore the elevation render-suppressed: the re-sort under the
-                // still-stale index must not paint before the pointer lands
-                await stop.update(
-                    {
-                        [`flags.${game.system.id}.lrElevatedAbs`]: currentAbs,
-                        [`flags.${game.system.id}.spentLrPosition`]: null,
-                    },
-                    { render: false },
-                );
-                const stopIndex = this.turns.findIndex((t) => t.id === stop.id);
-                const payload = {
-                    turn: stopIndex !== -1 ? stopIndex : 0,
-                    [`flags.${game.system.id}.actingPriority`]: spent.priority,
-                    [`flags.${game.system.id}.segmentHighWater`]: null,
-                };
-                Object.assign(
-                    payload,
-                    this.eventLogAppendPayload([
-                        this.buildEvent("rewind", { combatant: stop, data: { targetAbs: currentAbs } }),
-                    ]),
-                );
-                return this.update(payload, { direction: -1, previousCombatantId: previousId });
-            }
-        }
+        if (spentLrStops.length === 0) return null;
 
-        if (currentFilteredIndex > 0) {
-            const targetCombatant = turns[currentFilteredIndex - 1];
-            const masterTargetIndex = turns.findIndex((t) => t.id === targetCombatant.id);
+        const { combatant: stop, spent } = spentLrStops[0];
+        const regularPrev = currentFilteredIndex > 0 ? turns[currentFilteredIndex - 1] : null;
+        const regularPriority = regularPrev ? this.getInitiativePriority(regularPrev, activeSegment) : Infinity;
+        if (!(spent.priority < regularPriority)) return null;
 
-            const targetPriority = this.getInitiativePriority(targetCombatant, activeSegment);
-            const inlineUpdateData = {
-                turn: masterTargetIndex !== -1 ? masterTargetIndex : 0,
-                [`flags.${game.system.id}.actingPriority`]: targetPriority,
-                // Rewinds forget completed turns; lenient for re-declared elevations
-                [`flags.${game.system.id}.segmentHighWater`]: null,
-            };
-            Object.assign(
-                inlineUpdateData,
-                this.eventLogAppendPayload([
-                    this.buildEvent("rewind", {
-                        combatant: targetCombatant,
-                        data: { targetAbs: currentAbs },
-                    }),
-                ]),
-            );
-            const rewindResets = this._rewindHoldFlagResets(currentAbs, { targetPriority });
+        const previousId = this.combatant?.id;
+        // Restore the elevation render-suppressed: the re-sort under the
+        // still-stale index must not paint before the pointer lands
+        await stop.update(
+            {
+                [`flags.${game.system.id}.lrElevatedAbs`]: currentAbs,
+                [`flags.${game.system.id}.spentLrPosition`]: null,
+            },
+            { render: false },
+        );
+        const stopIndex = this.turns.findIndex((t) => t.id === stop.id);
+        const payload = {
+            turn: stopIndex !== -1 ? stopIndex : 0,
+            [`flags.${game.system.id}.actingPriority`]: spent.priority,
+            [`flags.${game.system.id}.segmentHighWater`]: null,
+        };
+        Object.assign(
+            payload,
+            this.eventLogAppendPayload([
+                this.buildEvent("rewind", { combatant: stop, data: { targetAbs: currentAbs } }),
+            ]),
+        );
+        return { result: await this.update(payload, { direction: -1, previousCombatantId: previousId }) };
+    }
 
-            return this.update(
-                { ...inlineUpdateData, combatants: rewindResets },
-                { direction: -1, previousCombatantId: this.combatant?.id },
-            );
-        }
+    /**
+     * Steps the pointer back one entry within the current segment's turns array.
+     * @private
+     */
+    async _rewindWithinSegment({ turns, activeSegment, currentFilteredIndex, currentAbs }) {
+        const targetCombatant = turns[currentFilteredIndex - 1];
+        const masterTargetIndex = turns.findIndex((t) => t.id === targetCombatant.id);
 
+        const targetPriority = this.getInitiativePriority(targetCombatant, activeSegment);
+        const inlineUpdateData = {
+            turn: masterTargetIndex !== -1 ? masterTargetIndex : 0,
+            [`flags.${game.system.id}.actingPriority`]: targetPriority,
+            // Rewinds forget completed turns; lenient for re-declared elevations
+            [`flags.${game.system.id}.segmentHighWater`]: null,
+        };
+        Object.assign(
+            inlineUpdateData,
+            this.eventLogAppendPayload([
+                this.buildEvent("rewind", {
+                    combatant: targetCombatant,
+                    data: { targetAbs: currentAbs },
+                }),
+            ]),
+        );
+        const rewindResets = this._rewindHoldFlagResets(currentAbs, { targetPriority });
+
+        return this.update(
+            { ...inlineUpdateData, combatants: rewindResets },
+            { direction: -1, previousCombatantId: this.combatant?.id },
+        );
+    }
+
+    /**
+     * Scans backward for the previous segment with an eligible actor and commits
+     * the cross-segment rewind landing; resets the encounter past the start.
+     * @private
+     */
+    async _rewindToPreviousSegment({ allCombatants, activeSegment }) {
         let prevSegment = activeSegment;
         let prevRoundCycle = this.round;
         let segmentDeltaCount = 0;
@@ -1637,13 +1716,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 prevRoundCycle -= 1;
 
                 if (prevRoundCycle < 1) {
-                    await this._handleCombatStartReset();
-
-                    const resetPayload = { started: false, round: 0, turn: 0 };
-                    resetPayload[`flags.${game.system.id}.currentSegment`] = 12;
-                    resetPayload[`flags.${game.system.id}.recoveredRounds`] = [];
-
-                    return this.update(resetPayload, { direction: -1 });
+                    return this._resetToUnstarted();
                 }
             }
 
@@ -1673,25 +1746,9 @@ export class HeroSystem6eCombatSingle extends Combat {
             else combatantUpdates.push(reset);
         }
 
-        const initiativeById = new Map(combatantUpdates.map((u) => [u._id, u]));
-        const recompiledTurns = this.combatants.map((c) => {
-            const match = initiativeById.get(c.id);
-            const clone = Object.create(c);
-            if (match) {
-                Object.defineProperty(clone, "initiative", {
-                    value: match.initiative,
-                    writable: true,
-                    configurable: true,
-                });
-            }
-            return clone;
-        });
-
-        recompiledTurns.sort((a, b) => {
-            const aE = a.occupiesSegment?.(prevSegment) ?? false;
-            const bE = b.occupiesSegment?.(prevSegment) ?? false;
-            if (aE !== bE) return aE ? -1 : 1;
-            return this._comparePriority(a, b, this, prevSegment, { queryAbs: prevAbs });
+        const recompiledTurns = this._predictTurns(prevSegment, {
+            queryAbs: prevAbs,
+            initiativeUpdates: combatantUpdates,
         });
 
         const finalTargetTurnsArray = recompiledTurns.filter((t) => t.occupiesSegment?.(prevSegment) ?? false);
@@ -2349,131 +2406,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         // Spend resources for all active powers (the Phase-start stamp above
         // already guarantees once-per-Phase)
-        {
-            let content = "";
-            let tempContent = "";
-            let startContent = "";
-
-            if (actor.statuses.size > 0) {
-                startContent += `Has the following statuses: ${Array.from(actor.statuses).join(", ")}<br>`;
-            }
-
-            for (const ae of actor.temporaryEffects) {
-                const remaining = ae._prepareDuration().remaining;
-                const remainingText = remaining > 0 ? `in ${toHHMMSS(remaining)}` : "0s";
-                tempContent += `<li>${ae.name} fades ${remainingText} ${ae.flags[game.system.id]?.expiresOn ?? ""}</li>`;
-            }
-            if (tempContent) {
-                startContent += `Has the following temporary effects: <ul>${tempContent}</ul>`;
-            }
-
-            /**
-             * @type {HeroSystemItemResourcesToUse}
-             */
-            const spentResources = {
-                totalEnd: 0,
-                totalReserveEnd: 0,
-                totalCharges: 0,
-            };
-
-            for (const powerUsingResourcesToContinue of actor.items.filter(
-                (item) =>
-                    item.isActive === true && // Is the power active?
-                    item.type !== "skill" && // Natural skills are always on, but only use resources when used/rolled
-                    item.system.duration !== CONFIG.HERO.DURATION_TYPES.INSTANT && // Is the power non instant
-                    (!item.system.MODIFIER?.find(
-                        (o) =>
-                            (o.XMLID === "COSTSEND" && o.OPTIONID === "ACTIVATE") ||
-                            o.XMLID === "COSTSENDONLYTOACTIVATE",
-                    ) || // Does the power use END continuously?
-                        (item.system.chargeModifier && !item.system.chargeModifier.CONTINUING)), // Does the power use charges but is not continuous (as that is tracked by an effect when made active)?
-            )) {
-                const {
-                    error,
-                    warning,
-                    resourcesUsedDescription,
-                    resourcesUsedDescriptionRenderedRoll,
-                    resourcesRequired,
-                } = await userInteractiveVerifyOptionallyPromptThenSpendResources(powerUsingResourcesToContinue, {});
-
-                if (error || warning) {
-                    content += `<li>(${powerUsingResourcesToContinue.name} ${error || warning}: power turned off)</li>`;
-                    await powerUsingResourcesToContinue.toggle();
-                } else if (
-                    !(
-                        resourcesRequired.totalCharges === 0 &&
-                        resourcesRequired.totalEnd === 0 &&
-                        resourcesRequired.totalReserveEnd === 0
-                    )
-                ) {
-                    content += resourcesUsedDescription
-                        ? `<li>${powerUsingResourcesToContinue.detailedName()} spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}</li>`
-                        : "";
-
-                    spentResources.totalEnd += resourcesRequired.totalEnd;
-                    spentResources.totalReserveEnd += resourcesRequired.totalReserveEnd;
-                    spentResources.totalCharges += resourcesRequired.totalCharges;
-                }
-            }
-
-            // Encumbrance END upkeep
-            const encumbered = actor.effects.find((effect) => effect.flags?.[game.system.id]?.encumbrance);
-            if (encumbered) {
-                const endCostPerTurn = Math.abs(parseInt(encumbered.flags?.[game.system.id]?.dcvDex)) - 1;
-                if (endCostPerTurn > 0) {
-                    spentResources.totalEnd += endCostPerTurn;
-                    content += `<li>${encumbered.name} (${endCostPerTurn})</li>`;
-
-                    const value = parseInt(actor.getCharacteristic("end").value);
-                    await actor.updateCharacteristics([["end", { value: value - endCostPerTurn }]], {});
-                }
-            }
-
-            if (
-                startContent !== "" ||
-                content !== "" ||
-                spentResources.totalEnd > 0 ||
-                spentResources.totalReserveEnd > 0 ||
-                spentResources.totalCharges > 0
-            ) {
-                if (
-                    spentResources.totalEnd > 0 ||
-                    spentResources.totalReserveEnd > 0 ||
-                    spentResources.totalCharges > 0
-                ) {
-                    content = `${startContent}Spent ${spentResources.totalEnd} END, ${spentResources.totalReserveEnd} reserve END, and ${
-                        spentResources.totalCharges
-                    } charge${spentResources.totalCharges > 1 ? "s" : ""} on turn ${
-                        this.round
-                    } segment ${segmentNumber}:<ul>${content}</ul>`;
-                } else {
-                    content = startContent;
-                }
-
-                // BREAKFALL from prone?
-                if (actor.statuses.has("prone")) {
-                    const breakFallItem = actor.items.find((o) => o.system.XMLID === "BREAKFALL" && o.isActive);
-                    if (breakFallItem) {
-                        content += `
-                            <button class="roll-breakfall"
-                                data-actor-uuid="${actor.uuid}"
-                                data-target-token-id="${combatant.tokenId}"
-                                title="You can use BREAKFALL to regain control from being prone without the need to take a Half Phase action.">
-                                Roll Breakfall
-                            </button>
-                        `;
-                    }
-                }
-
-                await ChatMessage.create({
-                    author: game.user._id,
-                    style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                    content,
-                    whisper: whisperUserTargetsForActor(actor),
-                    speaker: ChatMessage.getSpeaker({ actor, token: combatant.token }),
-                });
-            }
-        }
+        await this._phaseStartUpkeepCard(combatant, segmentNumber);
 
         // Some attacks include a DCV penalty applied as an ActiveEffect flagged
         // nextPhase; it goes away at the start of our Phase
@@ -2489,6 +2422,134 @@ export class HeroSystem6eCombatSingle extends Combat {
             await promptToDeleteAoeInstantRegions();
         } catch (e) {
             console.error(e);
+        }
+    }
+
+    /**
+     * Posts the Phase-start resource-upkeep chat card: statuses, temporary
+     * effects, continuing-power and encumbrance costs, and a Breakfall prompt.
+     * @private
+     */
+    async _phaseStartUpkeepCard(combatant, segmentNumber) {
+        const actor = combatant.actor;
+
+        let content = "";
+        let tempContent = "";
+        let startContent = "";
+
+        if (actor.statuses.size > 0) {
+            startContent += `Has the following statuses: ${Array.from(actor.statuses).join(", ")}<br>`;
+        }
+
+        for (const ae of actor.temporaryEffects) {
+            const remaining = ae._prepareDuration().remaining;
+            const remainingText = remaining > 0 ? `in ${toHHMMSS(remaining)}` : "0s";
+            tempContent += `<li>${ae.name} fades ${remainingText} ${ae.flags[game.system.id]?.expiresOn ?? ""}</li>`;
+        }
+        if (tempContent) {
+            startContent += `Has the following temporary effects: <ul>${tempContent}</ul>`;
+        }
+
+        /**
+         * @type {HeroSystemItemResourcesToUse}
+         */
+        const spentResources = {
+            totalEnd: 0,
+            totalReserveEnd: 0,
+            totalCharges: 0,
+        };
+
+        for (const powerUsingResourcesToContinue of actor.items.filter(
+            (item) =>
+                item.isActive === true && // Is the power active?
+                item.type !== "skill" && // Natural skills are always on, but only use resources when used/rolled
+                item.system.duration !== CONFIG.HERO.DURATION_TYPES.INSTANT && // Is the power non instant
+                (!item.system.MODIFIER?.find(
+                    (o) =>
+                        (o.XMLID === "COSTSEND" && o.OPTIONID === "ACTIVATE") || o.XMLID === "COSTSENDONLYTOACTIVATE",
+                ) || // Does the power use END continuously?
+                    (item.system.chargeModifier && !item.system.chargeModifier.CONTINUING)), // Does the power use charges but is not continuous (as that is tracked by an effect when made active)?
+        )) {
+            const {
+                error,
+                warning,
+                resourcesUsedDescription,
+                resourcesUsedDescriptionRenderedRoll,
+                resourcesRequired,
+            } = await userInteractiveVerifyOptionallyPromptThenSpendResources(powerUsingResourcesToContinue, {});
+
+            if (error || warning) {
+                content += `<li>(${powerUsingResourcesToContinue.name} ${error || warning}: power turned off)</li>`;
+                await powerUsingResourcesToContinue.toggle();
+            } else if (
+                !(
+                    resourcesRequired.totalCharges === 0 &&
+                    resourcesRequired.totalEnd === 0 &&
+                    resourcesRequired.totalReserveEnd === 0
+                )
+            ) {
+                content += resourcesUsedDescription
+                    ? `<li>${powerUsingResourcesToContinue.detailedName()} spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}</li>`
+                    : "";
+
+                spentResources.totalEnd += resourcesRequired.totalEnd;
+                spentResources.totalReserveEnd += resourcesRequired.totalReserveEnd;
+                spentResources.totalCharges += resourcesRequired.totalCharges;
+            }
+        }
+
+        // Encumbrance END upkeep
+        const encumbered = actor.effects.find((effect) => effect.flags?.[game.system.id]?.encumbrance);
+        if (encumbered) {
+            const endCostPerTurn = Math.abs(parseInt(encumbered.flags?.[game.system.id]?.dcvDex)) - 1;
+            if (endCostPerTurn > 0) {
+                spentResources.totalEnd += endCostPerTurn;
+                content += `<li>${encumbered.name} (${endCostPerTurn})</li>`;
+
+                const value = parseInt(actor.getCharacteristic("end").value);
+                await actor.updateCharacteristics([["end", { value: value - endCostPerTurn }]], {});
+            }
+        }
+
+        if (
+            startContent !== "" ||
+            content !== "" ||
+            spentResources.totalEnd > 0 ||
+            spentResources.totalReserveEnd > 0 ||
+            spentResources.totalCharges > 0
+        ) {
+            if (spentResources.totalEnd > 0 || spentResources.totalReserveEnd > 0 || spentResources.totalCharges > 0) {
+                content = `${startContent}Spent ${spentResources.totalEnd} END, ${spentResources.totalReserveEnd} reserve END, and ${
+                    spentResources.totalCharges
+                } charge${spentResources.totalCharges > 1 ? "s" : ""} on turn ${
+                    this.round
+                } segment ${segmentNumber}:<ul>${content}</ul>`;
+            } else {
+                content = startContent;
+            }
+
+            // BREAKFALL from prone?
+            if (actor.statuses.has("prone")) {
+                const breakFallItem = actor.items.find((o) => o.system.XMLID === "BREAKFALL" && o.isActive);
+                if (breakFallItem) {
+                    content += `
+                            <button class="roll-breakfall"
+                                data-actor-uuid="${actor.uuid}"
+                                data-target-token-id="${combatant.tokenId}"
+                                title="You can use BREAKFALL to regain control from being prone without the need to take a Half Phase action.">
+                                Roll Breakfall
+                            </button>
+                        `;
+                }
+            }
+
+            await ChatMessage.create({
+                author: game.user._id,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                content,
+                whisper: whisperUserTargetsForActor(actor),
+                speaker: ChatMessage.getSpeaker({ actor, token: combatant.token }),
+            });
         }
     }
 
