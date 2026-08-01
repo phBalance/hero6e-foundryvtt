@@ -1869,7 +1869,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             token: options.token,
         });
 
-        const success = activationRoll || (await isActivatedForThisUse(this, options.event));
+        const success = activationRoll || (await isActivatedForThisUse(this, { event: options.event }));
         if (!success) {
             const chatData = {
                 author: game.user._id,
