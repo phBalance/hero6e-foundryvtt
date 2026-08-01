@@ -300,10 +300,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
 
     /**
      * Opposed timing contest for a simultaneous Held Action (6E2 21; 5ER 361):
-     * both sides make their characteristic roll (DEX, or EGO for Mental Powers);
-     * the larger success margin acts first and equal margins are simultaneous.
-     * Defensive (abortable-to) Actions go first without any roll, and the
-     * roll-off loser cannot then Abort (5ER 361).
+     * the holder contests the CURRENT combat actor — the one whose Action the
+     * held interrupt collides with. Both sides make their characteristic roll
+     * (DEX, or EGO for Mental Powers); the larger success margin acts first and
+     * equal margins are simultaneous.
      * @param {HTMLButtonElement} button - The card button carrying combat/combatant ids
      */
     static async #onTimingContest(button) {
@@ -314,41 +314,34 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         }
         if (!game.user.isGM && !holder.isOwner) return;
 
-        const escapeHTML = foundry.utils.escapeHTML ?? ((value) => Handlebars.escapeExpression(value));
-        const opponents = combat.combatants
-            .filter((c) => c.id !== holder.id && c.actor)
-            .sort((a, b) => a.name.localeCompare(b.name));
-        if (opponents.length === 0) return void ui.notifications.warn(`No opposing combatant is available.`);
-        const targetedIds = new Set([...game.user.targets].map((t) => t.document?.combatant?.id));
-        const defaultOpponent = opponents.find((c) => targetedIds.has(c.id)) ?? opponents[0];
+        // The contest is against whoever is acting NOW; a held action used on the
+        // holder's own turn collides with nobody
+        const opponent = combat.combatant;
+        if (!opponent?.actor || opponent.id === holder.id) {
+            return void ui.notifications.warn(
+                `No opposing current actor to contest — the timing contest applies when a Held Action collides with another combatant's Action.`,
+            );
+        }
 
+        const escapeHTML = foundry.utils.escapeHTML ?? ((value) => Handlebars.escapeExpression(value));
         const charOptions = ["dex", "ego"]
             .map((key) => `<option value="${key}">${key.toUpperCase()}</option>`)
             .join("");
         const content = `<fieldset>
-            <legend>Simultaneous Actions</legend>
-            <div class="form-group">
-                <label>Opponent</label>
-                <select name="opponent">${opponents
-                    .map(
-                        (c) =>
-                            `<option value="${c.id}" ${c.id === defaultOpponent.id ? "selected" : ""}>${escapeHTML(c.name)}</option>`,
-                    )
-                    .join("")}</select>
-            </div>
+            <legend>Simultaneous Actions — vs ${escapeHTML(opponent.name)}</legend>
             <div class="form-group">
                 <label>${escapeHTML(holder.name)} rolls</label>
                 <select name="holder-char">${charOptions}</select>
             </div>
             <div class="form-group">
-                <label>Opponent rolls</label>
+                <label>${escapeHTML(opponent.name)} rolls</label>
                 <select name="opponent-char">${charOptions}</select>
             </div>
-            <p class="hint">Mental Powers contest EGO instead of DEX. Defensive (abortable-to) Actions simply go first — no roll needed.</p>
+            <p class="hint">Mental Powers contest EGO instead of DEX.</p>
         </fieldset>`;
 
         const choice = await foundry.applications.api.DialogV2.wait({
-            window: { title: `Timing Contest — ${holder.name}` },
+            window: { title: `Timing Contest — ${holder.name} vs ${opponent.name}` },
             content,
             buttons: [
                 {
@@ -356,7 +349,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     label: "Roll",
                     default: true,
                     callback: (event, btn) => ({
-                        opponentId: btn.form.elements["opponent"].value,
                         holderChar: btn.form.elements["holder-char"].value,
                         opponentChar: btn.form.elements["opponent-char"].value,
                     }),
@@ -366,8 +358,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             rejectClose: false,
         });
         if (!choice || choice === "cancel") return;
-        const opponent = combat.combatants.get(choice.opponentId);
-        if (!opponent?.actor) return;
 
         const rollSide = async (combatant, key) => {
             const characteristic = combatant.actor.system?.characteristics?.[key];
@@ -395,7 +385,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 <p>${line(holderSide)}</p>
                 <p>${line(opponentSide)}</p>
                 <p>${verdict}</p>
-                <p class="hint">Defensive (abortable-to) Actions go first without a roll; the roll-off loser cannot then Abort.</p>`,
+                <p class="hint">The roll-off loser cannot then Abort (5ER 361).</p>`,
         });
     }
 
@@ -1982,9 +1972,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             `${actor.name} uses their Held Action in ${combat.currentPhaseLabel}.
             <div class="card-buttons">
                 <button type="button" class="hero-timing-contest" data-combat-id="${combat.id}" data-combatant-id="${combatant.id}">
-                    <i class="fa-solid fa-stopwatch"></i> Timing contest (simultaneous Actions)
+                    <i class="fa-solid fa-stopwatch"></i> Timing contest vs the current actor
                 </button>
-            </div>`,
+            </div>
+            <p class="hint">Only if the Actions collide: defensive (abortable-to) Actions simply go first — no roll needed.</p>`,
         );
         await combat.logEvent("hold.use", { combatant, data: { mode: hold?.mode ?? null } });
     }
