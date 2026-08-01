@@ -5,7 +5,23 @@ import { isQuenchTestRunning } from "./utility/util.mjs";
 
 const { CombatTracker } = foundry.applications.sidebar.tabs;
 
+// Segment-math idioms shared with the combatant model (absolute segments are
+// monotonic across Turns; combat begins at Turn 1, Segment 12)
+const { absoluteSegment, segmentOf, roundOf, phaseLabel } = HeroSystem6eCombatantSingle;
+
 export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
+    /** Latch: an abort declaration is in flight; read by the bare-status hook and maneuver.mjs. */
+    static _abortFlowActive = false;
+
+    /** Combatant id this app instance last auto-scrolled to (sidebar and popout scroll independently). */
+    _lastAutoScrolledId;
+
+    /** Whether the delegated condition-icon click handler is bound to this app's element. */
+    _heroEffectsClickBound = false;
+
+    /** Absolute segment seen by the last context build; stale expansion overrides sweep on change. */
+    _lastSeenAbs;
+
     static {
         /**
          * Post-render decoration: header title, active-row highlight, injected controls.
@@ -358,7 +374,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             );
         }
 
-        const escapeHTML = foundry.utils.escapeHTML ?? ((value) => Handlebars.escapeExpression(value));
+        const { escapeHTML } = foundry.utils;
         const charOptions = ["dex", "ego"]
             .map((key) => `<option value="${key}">${key.toUpperCase()}</option>`)
             .join("");
@@ -637,7 +653,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 const clearsText =
                     spentAbs === null
                         ? `${abortEffect.name} — lasts until removed (GM adjudicates)`
-                        : `${abortEffect.name} — clears after ${HeroSystem6eCombatantSingle.phaseLabel(spentAbs)} ends`;
+                        : `${abortEffect.name} — clears after ${phaseLabel(spentAbs)} ends`;
                 const entries = Array.isArray(turn.effects) ? turn.effects : (turn.effects?.icons ?? []);
                 for (const entry of entries) {
                     if (entry?.name === abortEffect.name) entry.name = clearsText;
@@ -652,11 +668,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             }
         }
 
-        // Absolute segment indices are monotonic across Turns; combat begins at Turn 1, Segment 12
-        const currentAbs = combat.round * 12 + combat.segment;
-        const startAbs = 1 * 12 + 12;
-        const segmentOf = (abs) => ((abs - 1) % 12) + 1;
-        const roundOf = (abs) => Math.floor((abs - 1) / 12);
+        const currentAbs = absoluteSegment(combat.round, combat.segment);
+        const startAbs = absoluteSegment(1, 12);
 
         const membersAt = (abs) => {
             const segment = segmentOf(abs);
@@ -698,7 +711,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         // Candidate positions: every non-empty segment of the current Turn, clamped to combat start
         const positions = new Set([currentAbs]);
         for (let segment = 1; segment <= 12; segment++) {
-            const abs = combat.round * 12 + segment;
+            const abs = absoluteSegment(combat.round, segment);
             if (abs >= startAbs && segmentPopulation(abs) > 0) positions.add(abs);
         }
 
@@ -791,34 +804,17 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 isFakeHeader: true,
                 active: false,
             };
-            Object.defineProperty(panelHeader, "token", { get: () => null, configurable: true, enumerable: true });
-            Object.defineProperty(panelHeader, "actor", { get: () => null, configurable: true, enumerable: true });
-            timelineTurns.push(panelHeader);
+            timelineTurns.push(this._markActorless(panelHeader));
 
-            {
-                for (const combatant of panelHolders) {
-                    const base = masterById.get(combatant.id);
-                    const row = base
-                        ? { ...base }
-                        : {
-                              id: combatant.id,
-                              _id: combatant.id,
-                              name: combatant.name,
-                              hidden: combatant.hidden,
-                              defeated: combatant.isDefeated,
-                              css: "",
-                          };
-                    // || not ??: an import without an image stores "" which would
-                    // otherwise render as a broken <img> showing its alt text (#2657)
-                    row.img = row.img || combatant.img || combatant.actor?.img || "icons/svg/mystery-man.svg";
-                    row.initiative = null;
-                    row.hasRolled = true;
-                    row.active = false;
-                    row.effects = { icons: [], tooltip: "" };
-                    row.css = `${(row.css || "").replace(/\bactive\b/g, "").trim()} hero-held-row hero-held-panel-member`;
-                    if (dispositionTint) row.css = `${row.css} ${this._dispositionClass(combatant)}`.trim();
-                    timelineTurns.push(row);
-                }
+            for (const combatant of panelHolders) {
+                const row = this._baseRowFor(combatant, masterById.get(combatant.id));
+                row.initiative = null;
+                row.hasRolled = true;
+                row.active = false;
+                row.effects = { icons: [], tooltip: "" };
+                row.css = `${(row.css || "").replace(/\bactive\b/g, "").trim()} hero-held-row hero-held-panel-member`;
+                if (dispositionTint) row.css = `${row.css} ${this._dispositionClass(combatant)}`.trim();
+                timelineTurns.push(row);
             }
         }
 
@@ -869,9 +865,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 isFakeHeader: true,
                 active: false,
             };
-            Object.defineProperty(headerTurn, "token", { get: () => null, configurable: true, enumerable: true });
-            Object.defineProperty(headerTurn, "actor", { get: () => null, configurable: true, enumerable: true });
-            timelineTurns.push(headerTurn);
+            timelineTurns.push(this._markActorless(headerTurn));
 
             // Member rows always render; a collapsed segment hides them via class so
             // expansion toggles animate in place without a re-render
@@ -888,16 +882,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                             aborted: " (aborted)",
                             haymaker: " (haymaker)",
                         }[h.kind] ?? "";
-                    const base = live ? masterById.get(live.id) : null;
-                    const row = base
-                        ? { ...base }
-                        : {
-                              id: rowId,
-                              _id: rowId,
-                              hidden: false,
-                              defeated: false,
-                              css: "",
-                          };
+                    const row = this._baseRowFor(live, live ? masterById.get(live.id) : null, {
+                        overrides: { id: rowId, _id: rowId, hidden: false, defeated: false },
+                        imgFallback: false,
+                    });
                     row.id = rowId;
                     row._id = rowId;
                     row.name = `${h.name}${kindLabel}`;
@@ -916,10 +904,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                         .filter(Boolean)
                         .join(" ");
                     if (live && dispositionTint) row.css = `${row.css} ${this._dispositionClass(live)}`.trim();
-                    if (!live) {
-                        Object.defineProperty(row, "token", { get: () => null, configurable: true, enumerable: true });
-                        Object.defineProperty(row, "actor", { get: () => null, configurable: true, enumerable: true });
-                    }
+                    if (!live) this._markActorless(row);
                     timelineTurns.push(row);
                 }
                 continue;
@@ -1010,20 +995,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                       : "current-segment-member";
 
                 const buildRow = (combatant) => {
-                    const base = masterById.get(combatant.id);
-                    const row = base
-                        ? { ...base }
-                        : {
-                              id: combatant.id,
-                              _id: combatant.id,
-                              name: combatant.name,
-                              hidden: combatant.hidden,
-                              defeated: combatant.isDefeated,
-                              css: "",
-                          };
-                    // || not ??: an import without an image stores "" which would
-                    // otherwise render as a broken <img> showing its alt text (#2657)
-                    row.img = row.img || combatant.img || combatant.actor?.img || "icons/svg/mystery-man.svg";
+                    const row = this._baseRowFor(combatant, masterById.get(combatant.id));
 
                     // A rolled numeric initiative keeps core's d20 roll button away
                     row.initiative = group.priority.toFixed(2);
@@ -1147,6 +1119,54 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     }
 
     /**
+     * Fresh mutable context row for a timeline entry: a clone of core's prepared
+     * turn when one exists, else a minimal synthetic stand-in.
+     * @param {Combatant|null} combatant - Live combatant backing the row, if any
+     * @param {object|null|undefined} base - Core's prepared turn entry for the row, if any
+     * @param {object} [options]
+     * @param {object} [options.overrides] - Field overrides for the synthetic fallback
+     * @param {boolean} [options.imgFallback] - Backfill row.img from the combatant
+     * @returns {object}
+     * @private
+     */
+    _baseRowFor(combatant, base, { overrides = {}, imgFallback = true } = {}) {
+        const row = base
+            ? { ...base }
+            : {
+                  ...(combatant
+                      ? {
+                            id: combatant.id,
+                            _id: combatant.id,
+                            name: combatant.name,
+                            hidden: combatant.hidden,
+                            defeated: combatant.isDefeated,
+                        }
+                      : {}),
+                  css: "",
+                  ...overrides,
+              };
+        if (imgFallback) {
+            // || not ??: an import without an image stores "" which would
+            // otherwise render as a broken <img> showing its alt text (#2657)
+            row.img = row.img || combatant.img || combatant.actor?.img || "icons/svg/mystery-man.svg";
+        }
+        return row;
+    }
+
+    /**
+     * Marks a synthetic row actorless: null token/actor getters keep core's
+     * row-decoration helpers from treating it as a real combatant.
+     * @param {object} row
+     * @returns {object} The same row
+     * @private
+     */
+    _markActorless(row) {
+        Object.defineProperty(row, "token", { get: () => null, configurable: true, enumerable: true });
+        Object.defineProperty(row, "actor", { get: () => null, configurable: true, enumerable: true });
+        return row;
+    }
+
+    /**
      * Row tint class for the combatant's token disposition.
      * @param {Combatant} combatant
      * @returns {string}
@@ -1229,7 +1249,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             const round = parseInt(parts.at(-2));
             if (Number.isNaN(segment) || Number.isNaN(round)) return;
             const expand = row.classList.contains("segment-collapsed");
-            const abs = round * 12 + segment;
+            const abs = absoluteSegment(round, segment);
             // Keyed by ABSOLUTE segment: a bare number would alias this Turn's
             // passed header with next Turn's future one
             this._setSegmentExpansion(this.viewed.id, abs, expand);
@@ -1545,15 +1565,36 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     }
 
     /**
-     * Posts a hold-related chat card, whispered to the GM for hidden combatants.
+     * Resolves a handler's target combatant behind the shared ownership guard.
+     * @param {string} combatantId
+     * @param {object} [options]
+     * @param {boolean} [options.requireStarted] - The combat must have started
+     * @param {boolean} [options.requireActor] - The combatant must have an actor
+     * @param {string|null} [options.requireEffect] - Combatant getter (e.g. "heldActionEffect") whose effect must exist
+     * @returns {{combat: Combat, combatant: Combatant, actor: Actor|null, effect: ActiveEffect|null}|null}
+     * @private
+     */
+    _resolveOwnedCombatant(combatantId, { requireStarted = false, requireActor = false, requireEffect = null } = {}) {
+        const combat = this.viewed;
+        const combatant = combat?.combatants.get(combatantId);
+        if (!combatant?.isOwner) return null;
+        if (requireStarted && !combat.started) return null;
+        const actor = combatant.actor;
+        if (requireActor && !actor) return null;
+        const effect = requireEffect ? (combatant[requireEffect] ?? null) : null;
+        if (requireEffect && !effect) return null;
+        return { combat, combatant, actor, effect };
+    }
+
+    /**
+     * Posts a hold-related chat card.
      * @param {Combatant} combatant
      * @param {string} content
      * @private
      */
     _holdCard(combatant, content) {
-        const data = { speaker: ChatMessage.getSpeaker({ actor: combatant.actor }), content };
-        if (combatant.hidden) data.whisper = ChatMessage.getWhisperRecipients("GM");
-        return ChatMessage.create(data);
+        // The engine owns the card policy (speaker, hidden-combatant GM whisper)
+        return this.viewed?._combatCard?.(combatant, content);
     }
 
     /**
@@ -1589,7 +1630,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     async _holdDeclarationDialog(combatant, { title = "Hold Action", initial = null } = {}) {
         const combat = this.viewed;
         const actor = combatant.actor;
-        const currentAbs = combat.round * 12 + combat.segment;
+        const currentAbs = absoluteSegment(combat.round, combat.segment);
         const characteristicKey = actor.system?.initiativeCharacteristic ?? "dex";
         const ownDex = actor.system?.characteristics?.[characteristicKey]?.value ?? 10;
         // Only unrestricted All Actions LR raises the holding position — holding is
@@ -1604,8 +1645,8 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const nextNaturalAbs = spd > 0 ? HeroSystem6eCombatantSingle.nextPhaseAbs(spd, currentAbs + 1) : currentAbs;
         const segmentChoices = [];
         for (let abs = currentAbs; abs < nextNaturalAbs; abs++) {
-            const segment = ((abs - 1) % 12) + 1;
-            const round = Math.floor((abs - 1) / 12);
+            const segment = segmentOf(abs);
+            const round = roundOf(abs);
             segmentChoices.push({
                 abs,
                 label: `Segment ${segment}${round === combat.round ? "" : ` (Turn ${round})`}`,
@@ -1621,7 +1662,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const initialSegmentAbs = initial?.mode === "position" ? initial.segmentAbs : null;
         const checkedMode = initial?.mode ?? (segmentChoices.length ? "position" : "event");
 
-        const escapeHTML = foundry.utils.escapeHTML ?? ((value) => Handlebars.escapeExpression(value));
+        const { escapeHTML } = foundry.utils;
 
         // Anchored reentry ("act right after X") tracks the anchor's live position; a
         // numeric DEX cannot, because tie-break fractions re-roll every segment (#4602).
@@ -1630,7 +1671,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         // ordered by acting position.
         const anchorChoicesByAbs = {};
         for (const choice of segmentChoices) {
-            const segment = ((choice.abs - 1) % 12) + 1;
+            const segment = segmentOf(choice.abs);
             anchorChoicesByAbs[choice.abs] = combat.combatants.contents
                 .filter((c) => c.id !== combatant.id && c.actor && (!c.hidden || game.user.isGM))
                 .filter((c) => combat._takesTurnInSegment(c, segment, { queryAbs: choice.abs }))
@@ -1759,11 +1800,11 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     ui.notifications.warn(`Select a combatant to hold next to.`);
                     return null;
                 }
-                const segment = ((segmentAbs - 1) % 12) + 1;
+                const segment = segmentOf(segmentAbs);
                 const targetPriority = combat.getInitiativePriority(anchorTarget, segment, { queryAbs: segmentAbs });
                 if (!(targetPriority > 0)) {
                     ui.notifications.warn(
-                        `${anchorTarget.name} has no Phase or held position in ${HeroSystem6eCombatantSingle.phaseLabel(segmentAbs)}.`,
+                        `${anchorTarget.name} has no Phase or held position in ${phaseLabel(segmentAbs)}.`,
                     );
                     return null;
                 }
@@ -1817,7 +1858,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      */
     _holdDescription(hold) {
         if (hold.mode === "position") {
-            const where = HeroSystem6eCombatantSingle.phaseLabel(hold.segmentAbs);
+            const where = phaseLabel(hold.segmentAbs);
             if (hold.anchor) {
                 const relation = hold.anchor.relation === "before" ? "before" : "after";
                 return `until right ${relation} ${hold.anchor.name ?? "their anchor"} in ${where}`;
@@ -1834,10 +1875,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * @protected
      */
     async _onDeclareHoldAction(combatantId) {
-        const combat = this.viewed;
-        const combatant = combat?.combatants.get(combatantId);
-        const actor = combatant?.actor;
-        if (!combat?.started || !combatant?.isOwner || !actor) return;
+        const resolved = this._resolveOwnedCombatant(combatantId, { requireStarted: true, requireActor: true });
+        if (!resolved) return;
+        const { combat, combatant, actor } = resolved;
         if (combatant.heldAction) return;
         const blocked = this._blockedActionReason(combatant);
         if (blocked) return void ui.notifications.warn(blocked);
@@ -1861,7 +1901,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             if (!proceed) return;
         }
 
-        const currentAbs = combat.round * 12 + combat.segment;
+        const currentAbs = absoluteSegment(combat.round, combat.segment);
         const choice = await this._holdDeclarationDialog(combatant);
         if (!choice) return;
 
@@ -1876,7 +1916,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         await this._applyHoldingEffect(combatant, hold);
         await this._holdCard(
             combatant,
-            `${actor.name} holds their action ${description} (declared in ${HeroSystem6eCombatantSingle.phaseLabel(currentAbs)}).`,
+            `${actor.name} holds their action ${description} (declared in ${phaseLabel(currentAbs)}).`,
         );
         await combat.logEvent("hold.declare", {
             combatant,
@@ -1909,14 +1949,16 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * @protected
      */
     async _onRedeclareHoldAction(combatantId) {
-        const combat = this.viewed;
-        const combatant = combat?.combatants.get(combatantId);
-        const effect = combatant?.heldActionEffect;
-        if (!combat?.started || !combatant?.isOwner || !effect) return;
+        const resolved = this._resolveOwnedCombatant(combatantId, {
+            requireStarted: true,
+            requireEffect: "heldActionEffect",
+        });
+        if (!resolved) return;
+        const { combat, combatant, effect } = resolved;
         const blocked = this._blockedActionReason(combatant);
         if (blocked) return void ui.notifications.warn(blocked);
 
-        const currentAbs = combat.round * 12 + combat.segment;
+        const currentAbs = absoluteSegment(combat.round, combat.segment);
         const existing = combatant.heldAction;
         const choice = await this._holdDeclarationDialog(combatant, {
             title: "Re-declare Hold",
@@ -1941,7 +1983,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const description = this._holdDescription(hold);
         await this._holdCard(
             combatant,
-            `${combatant.actor.name} re-declares their Held Action ${description} (in ${HeroSystem6eCombatantSingle.phaseLabel(currentAbs)}).`,
+            `${combatant.actor.name} re-declares their Held Action ${description} (in ${phaseLabel(currentAbs)}).`,
         );
         await combat.logEvent("hold.redeclare", {
             combatant,
@@ -2003,11 +2045,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * @protected
      */
     async _onUseHeldAction(combatantId) {
-        const combat = this.viewed;
-        const combatant = combat?.combatants.get(combatantId);
-        const actor = combatant?.actor;
-        const effect = combatant?.heldActionEffect;
-        if (!combatant?.isOwner || !effect) return;
+        const resolved = this._resolveOwnedCombatant(combatantId, { requireEffect: "heldActionEffect" });
+        if (!resolved) return;
+        const { combat, combatant, actor, effect } = resolved;
         const blocked = this._blockedActionReason(combatant);
         if (blocked) return void ui.notifications.warn(blocked);
         const hold = combatant.heldAction;
@@ -2038,7 +2078,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     async _recordSpentAction(combatant, hold) {
         const combat = this.viewed;
         if (!combat?.started || !hold) return;
-        const currentAbs = combat.round * 12 + combat.segment;
+        const currentAbs = absoluteSegment(combat.round, combat.segment);
         const atOwnSlot = hold.mode === "position" && hold.segmentAbs === currentAbs;
         // A positional hold consumed away from its declared slot (abort, early
         // interrupt) still uses up this segment's action like any other hold
@@ -2076,16 +2116,15 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * @protected
      */
     async _onReleaseHeldAction(combatantId) {
-        const combatant = this.viewed?.combatants.get(combatantId);
-        const actor = combatant?.actor;
-        const effect = combatant?.heldActionEffect;
-        if (!combatant?.isOwner || !effect) return;
+        const resolved = this._resolveOwnedCombatant(combatantId, { requireEffect: "heldActionEffect" });
+        if (!resolved) return;
+        const { combatant, actor, effect } = resolved;
         const hold = combatant.heldAction;
         await effect.delete();
         // Releasing at the held slot still forfeits that position (the banked Phase is
         // gone); releasing anywhere else costs nothing — the natural Phase stays
         const combat = this.viewed;
-        const releaseAbs = combat ? combat.round * 12 + combat.segment : null;
+        const releaseAbs = combat ? absoluteSegment(combat.round, combat.segment) : null;
         if (hold?.mode === "position" && hold.segmentAbs === releaseAbs) {
             await this._recordSpentAction(combatant, hold);
         }
@@ -2111,7 +2150,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const scoped = combatant.lightningReflexes?.scoped;
         if (!scoped) return null;
 
-        const currentAbs = combat.round * 12 + combat.segment;
+        const currentAbs = absoluteSegment(combat.round, combat.segment);
         const turnIndex = combat.turns?.findIndex((t) => t.id === combatant.id) ?? -1;
         const reached = turnIndex !== -1 && turnIndex <= (combat.turn ?? 0);
 
@@ -2139,16 +2178,16 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
     /**
      * Toggles a scoped Lightning Reflexes elevation for the current segment. The
      * elevated character acts at DEX + LR but may only execute the scoped action;
-     * cancelling before the elevated turn arrives restores the natural position. The pointer is re-synced to the same active combatant, since
-     * the flag write re-sorts the turns array under the stored index.
+     * cancelling before the elevated turn arrives restores the natural position.
+     * The pointer is re-synced to the same active combatant, since the flag write
+     * re-sorts the turns array under the stored index.
      * @param {string} combatantId
      * @protected
      */
     async _onToggleLrElevation(combatantId) {
-        const combat = this.viewed;
-        const combatant = combat?.combatants.get(combatantId);
-        const actor = combatant?.actor;
-        if (!combat?.started || !combatant?.isOwner || !actor) return;
+        const resolved = this._resolveOwnedCombatant(combatantId, { requireStarted: true, requireActor: true });
+        if (!resolved) return;
+        const { combat, combatant, actor } = resolved;
 
         const state = this._lrElevationState(combatant);
         if (!state) return;
@@ -2161,7 +2200,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         } else {
             const blocked = this._blockedActionReason(combatant);
             if (blocked) return void ui.notifications.warn(blocked);
-            const currentAbs = combat.round * 12 + combat.segment;
+            const currentAbs = absoluteSegment(combat.round, combat.segment);
             await combatant.setFlag(game.system.id, "lrElevatedAbs", currentAbs);
             const elevatedPriority = combat.getInitiativePriority(combatant, combat.segment);
             await this._holdCard(
@@ -2183,20 +2222,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             }
         }
 
-        await this._resyncTurnPointer(combat, activeId);
-    }
-
-    /**
-     * Points the turn index back at the given combatant after a mid-segment priority
-     * change re-sorted the turns array. previousCombatantId is the active combatant
-     * itself so the natural-turn hold consumption's self-advance guard skips this
-     * pointer-only update.
-     * @param {Combat} combat
-     * @param {string|null} activeId
-     * @private
-     */
-    async _resyncTurnPointer(combat, activeId) {
-        return combat?.resyncTurnPointer?.(activeId);
+        // Re-point the turn index at the same active combatant: the flag write
+        // re-sorted the turns array under the stored index
+        await combat?.resyncTurnPointer?.(activeId);
     }
 
     /**
@@ -2215,7 +2243,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             return `${actor.name} is Stunned and can take no Actions — not even Aborting.`;
         }
         if (combat?.started) {
-            const currentAbs = combat.round * 12 + combat.segment;
+            const currentAbs = absoluteSegment(combat.round, combat.segment);
             // Extra Phase (and kin): no other Actions while the activation runs
             const committed = (combat.delayedActionsFor?.(combatant) ?? []).find(
                 ([, record]) =>
@@ -2227,9 +2255,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             if (combatant.abortAppliesAtAbs?.(currentAbs)) {
                 const spentAbs = combatant.abortSpentAbs;
                 const until =
-                    spentAbs === null
-                        ? "their aborted Phase has passed"
-                        : `Segment ${HeroSystem6eCombatantSingle.segmentOf(spentAbs)} has passed`;
+                    spentAbs === null ? "their aborted Phase has passed" : `Segment ${segmentOf(spentAbs)} has passed`;
                 return `${actor.name} has Aborted and cannot act again until ${until}.`;
             }
         }
@@ -2249,11 +2275,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         if (shared) return shared;
         const combat = this.viewed;
         if (!combat?.started) return null;
-        const turnIndex = combat.turns?.findIndex((t) => t.id === combatant.id) ?? -1;
-        const actedThisSegment =
-            combatant.spentHoldInSegment(combat.segment) ||
-            (combatant.occupiesSegment?.(combat.segment) && turnIndex !== -1 && turnIndex < (combat.turn ?? 0));
-        if (actedThisSegment) {
+        if (this._actedThisSegment(combatant)) {
             return `${combatant.actor.name} has already acted this Segment and cannot Abort until the next Segment.`;
         }
         return null;
@@ -2271,7 +2293,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      */
     _abortCost(combatant, { extraPhase = false } = {}) {
         const combat = this.viewed;
-        const currentAbs = combat.round * 12 + combat.segment;
+        const currentAbs = absoluteSegment(combat.round, combat.segment);
         const isActive = combat.combatant?.id === combatant.id;
         const spd = combatant.combatSpd;
         const firstAbs = isActive ? currentAbs : HeroSystem6eCombatantSingle.nextPhaseAbs(spd, currentAbs);
@@ -2367,7 +2389,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 // the default event priority would compute 0 and the ledger row
                 // would sort to the segment bottom
                 priority: combat.getFlag(game.system.id, "actingPriority") ?? undefined,
-                data: { toAction, viaHold: true, spentAbs: combat.round * 12 + combat.segment },
+                data: { toAction, viaHold: true, spentAbs: absoluteSegment(combat.round, combat.segment) },
             });
             return true;
         }
@@ -2387,7 +2409,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const { isActive, firstAbs, spentAbs, nextActAbs } = this._abortCost(combatant, { extraPhase });
         if (abortEffect) await abortEffect.setFlag(game.system.id, "abort", { spentAbs, combatantId: combatant.id });
 
-        const { phaseLabel } = HeroSystem6eCombatantSingle;
         const costText = extraPhase
             ? `their Phases in ${phaseLabel(firstAbs)} and ${phaseLabel(spentAbs)} (Extra Phase)`
             : isActive
@@ -2401,7 +2422,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         // default declaration-position priority is 0 out of turn
         await combat.logEvent("abort.declare", {
             combatant,
-            priority: combat.getInitiativePriority(combatant, HeroSystem6eCombatantSingle.segmentOf(spentAbs), {
+            priority: combat.getInitiativePriority(combatant, segmentOf(spentAbs), {
                 queryAbs: spentAbs,
             }),
             data: { toAction, spentAbs, extraPhase },
@@ -2450,10 +2471,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * @protected
      */
     async _onAbortAction(combatantId) {
-        const combat = this.viewed;
-        const combatant = combat?.combatants.get(combatantId);
-        const actor = combatant?.actor;
-        if (!combat?.started || !combatant?.isOwner || !actor) return;
+        const resolved = this._resolveOwnedCombatant(combatantId, { requireStarted: true, requireActor: true });
+        if (!resolved) return;
+        const { combat, combatant, actor } = resolved;
         // Only a RECORDED abort blocks; a bare status gets adopted by the flow
         if (combatant.abortEffect?.getFlag(game.system.id, "abort")) return;
 
@@ -2468,7 +2488,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             if (!proceed) return;
         }
 
-        const { segmentOf, roundOf } = HeroSystem6eCombatantSingle;
         const holding = !!combatant.heldAction;
         let costLine;
         if (holding) {
@@ -2543,9 +2562,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * @protected
      */
     async _onCancelAbort(combatantId) {
-        const combatant = this.viewed?.combatants.get(combatantId);
-        const effect = combatant?.abortEffect;
-        if (!combatant?.isOwner || !effect) return;
+        const resolved = this._resolveOwnedCombatant(combatantId, { requireEffect: "abortEffect" });
+        if (!resolved) return;
+        const { combatant, effect } = resolved;
         await effect.delete();
         await this.viewed.logEvent("abort.cancel", { combatant });
     }
