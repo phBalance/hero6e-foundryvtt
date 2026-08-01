@@ -408,17 +408,6 @@ Hooks.once("ready", async function () {
         CONFIG.debug.combat = true;
     }
 
-    // The tracker choice is world-scoped (#4553); remind GMs it now applies to every client.
-    if (HEROSYS.isSingleCombatantTrackerEnabled && game.user.isGM) {
-        const noticeKey = "singleTrackerWorldNoticeShown";
-        if (!game.settings.get(game.system.id, noticeKey)) {
-            ui.notifications.info(
-                "The Single Combatant Tracker is a world setting: all connected players now use it too.",
-            );
-            await game.settings.set(game.system.id, noticeKey, true);
-        }
-    }
-
     // Wait to register hotbar drop hook on ready so that modules could register earlier if they want to
     Hooks.on("hotbarDrop", (bar, data, slot) => createHeroSystem6eMacro(bar, data, slot));
 

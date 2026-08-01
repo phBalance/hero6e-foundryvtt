@@ -595,14 +595,6 @@ export default class SettingsHelpers {
             requiresReload: true,
         });
 
-        // One-time GM reminder that singleCombatantTracker applies world-wide (#4553)
-        game.settings.register(module, "singleTrackerWorldNoticeShown", {
-            scope: "world",
-            config: false,
-            type: Boolean,
-            default: false,
-        });
-
         // Per-client density toggle for the single tracker (#3157). Also injected
         // into core's Combat Tracker Settings dialog, but that dialog's gear is
         // GM-only — the settings list is the only path players have to it.
