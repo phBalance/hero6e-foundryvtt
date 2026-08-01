@@ -210,6 +210,11 @@
                 "Hint": "This client only: shrink non-active combatant rows in the single-combatant tracker (no portrait, tighter spacing). The active combatant keeps the full-size row."
             },
 
+            "combatTrackerGrouping": {
+                "Name": "Group Same-Actor Combatants",
+                "Hint": "Tokens of the same base actor share one tie-break roll and collapse into a single ×N tracker row (shuffling among themselves each Segment). Disable to give every token its own roll and row. A mid-combat change takes full effect with the next Segment's tie-break rolls."
+            },
+
             "fastDrawTieBreak": {
                 "Name": "Fast Draw Breaks DEX Ties",
                 "Hint": "Optional rule (6E2 19): characters with the Fast Draw skill act before others at the same DEX; two Fast Draw characters compare their Fast Draw tie-break rolls. Off = pure random tie-breaks."

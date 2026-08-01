@@ -364,7 +364,8 @@ export class HeroSystem6eCombatSingle extends Combat {
     /**
      * The key a combatant's tie-break roll is stored under. Tokens of the same
      * base actor share one roll (and therefore group in the tracker) unless the
-     * combatant has been split out of its group with the soloTieRoll flag.
+     * combatant has been split out of its group with the soloTieRoll flag, or
+     * grouping is disabled world-wide via the combatTrackerGrouping setting.
      * @param {Combatant} combatant
      * @returns {string}
      */
@@ -372,6 +373,13 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (game.system?.id && combatant.getFlag?.(game.system.id, "soloTieRoll")) {
             return `solo:${combatant.tokenId || combatant.id}`;
         }
+        let grouping = true;
+        try {
+            grouping = !!game.settings.get(game.system.id, "combatTrackerGrouping");
+        } catch (e) {
+            void e; // setting not registered yet (early init, isolated tests)
+        }
+        if (!grouping) return `solo:${combatant.tokenId || combatant.id}`;
         return combatant.actorId || combatant.id;
     }
 

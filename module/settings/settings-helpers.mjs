@@ -607,6 +607,18 @@ export default class SettingsHelpers {
             onChange: () => ui.combat?.render(),
         });
 
+        // Same-actor tokens share a tie-break roll and collapse to a ×N row;
+        // off = every token rolls and renders independently
+        game.settings.register(module, "combatTrackerGrouping", {
+            name: game.i18n.localize("Settings.AlphaTesting.combatTrackerGrouping.Name"),
+            hint: game.i18n.localize("Settings.AlphaTesting.combatTrackerGrouping.Hint"),
+            scope: "world",
+            config: game.settings.get(game.system.id, "alphaTesting"),
+            type: Boolean,
+            default: true,
+            onChange: () => ui.combat?.render(),
+        });
+
         // GM-option tie-break: Fast Draw wins exact-DEX ties (6E2 19)
         game.settings.register(module, "fastDrawTieBreak", {
             name: game.i18n.localize("Settings.AlphaTesting.fastDrawTieBreak.Name"),

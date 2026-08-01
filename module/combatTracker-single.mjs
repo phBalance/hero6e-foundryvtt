@@ -1155,6 +1155,21 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
      * the tracker's synthetic rows (segment headers, group summaries, the held panel).
      * @override
      */
+    /**
+     * Whether same-actor grouping is enabled world-wide; the split/rejoin
+     * context options are meaningless (and hidden) without it.
+     * @returns {boolean}
+     * @private
+     */
+    _groupingEnabled() {
+        try {
+            return !!game.settings.get(game.system.id, "combatTrackerGrouping");
+        } catch (e) {
+            void e; // setting not registered yet
+            return true;
+        }
+    }
+
     _getEntryContextOptions() {
         const options = super._getEntryContextOptions();
         const getCombatant = (li) => this.viewed?.combatants.get(li.dataset?.combatantId) ?? null;
@@ -1222,7 +1237,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 label: "Split from Group",
                 icon: "fa-solid fa-arrow-right-from-bracket",
                 visible: (li) => {
-                    if (!game.user.isGM) return false;
+                    if (!game.user.isGM || !this._groupingEnabled()) return false;
                     const combatant = getCombatant(li);
                     if (!combatant || combatant.getFlag(game.system.id, "soloTieRoll")) return false;
                     // Only meaningful when a same-actor sibling exists to group with
@@ -1236,7 +1251,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 label: "Split All from Group",
                 icon: "fa-solid fa-arrows-split-up-and-left",
                 visible: (li) => {
-                    if (!game.user.isGM) return false;
+                    if (!game.user.isGM || !this._groupingEnabled()) return false;
                     const combatant = getCombatant(li);
                     if (!combatant?.actorId || combatant.getFlag(game.system.id, "soloTieRoll")) return false;
                     // Only for a genuine ×N group: two or more non-solo members
@@ -1260,10 +1275,34 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 label: "Rejoin Group",
                 icon: "fa-solid fa-arrow-right-to-bracket",
                 visible: (li) => {
-                    if (!game.user.isGM) return false;
+                    if (!game.user.isGM || !this._groupingEnabled()) return false;
                     return !!getCombatant(li)?.getFlag(game.system.id, "soloTieRoll");
                 },
                 onClick: (event, li) => this.viewed?.setCombatantSoloTieRoll?.(li.dataset.combatantId, false),
+            },
+            {
+                label: "Rejoin All to Group",
+                icon: "fa-solid fa-arrows-to-dot",
+                visible: (li) => {
+                    if (!game.user.isGM || !this._groupingEnabled()) return false;
+                    const combatant = getCombatant(li);
+                    if (!combatant?.actorId) return false;
+                    // Meaningful once two or more members are split out
+                    return (
+                        this.viewed.combatants.filter(
+                            (c) => c.actorId === combatant.actorId && c.getFlag(game.system.id, "soloTieRoll"),
+                        ).length > 1
+                    );
+                },
+                onClick: (event, li) => {
+                    const combat = this.viewed;
+                    const combatant = combat?.combatants.get(li.dataset.combatantId);
+                    if (!combatant?.actorId) return;
+                    const ids = combat.combatants
+                        .filter((c) => c.actorId === combatant.actorId && c.getFlag(game.system.id, "soloTieRoll"))
+                        .map((c) => c.id);
+                    combat.setCombatantsSoloTieRoll?.(ids, false);
+                },
             },
             {
                 label: "Remove Group from Combat",

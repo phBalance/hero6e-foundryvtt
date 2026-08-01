@@ -2360,6 +2360,29 @@ export function registerCombatTests(quench) {
                     }
                 });
 
+                it("Should key every token independently when combat grouping is disabled", async function () {
+                    const saved = game.settings.get(game.system.id, "combatTrackerGrouping");
+                    try {
+                        const actor = await makeActor("_Quench Group Toggle", { dex: 12, spd: 2 });
+                        const combat = await makeCombat([actor]);
+                        await combat.createEmbeddedDocuments("Combatant", [{ actorId: actor.id }]);
+                        const [one, two] = combat.combatants.filter((c) => c.actorId === actor.id);
+
+                        await game.settings.set(game.system.id, "combatTrackerGrouping", true);
+                        expect(combat._tieRollKey(one), "grouping on: members share the actor key").to.equal(
+                            combat._tieRollKey(two),
+                        );
+
+                        await game.settings.set(game.system.id, "combatTrackerGrouping", false);
+                        expect(combat._tieRollKey(one), "grouping off: per-token keys").to.not.equal(
+                            combat._tieRollKey(two),
+                        );
+                        expect(combat._tieRollKey(one)).to.include("solo:");
+                    } finally {
+                        await game.settings.set(game.system.id, "combatTrackerGrouping", saved);
+                    }
+                });
+
                 it("Should create combatants hidden for invisible actors, explicit hidden wins (#4466)", async function () {
                     const ghost = await makeActor("_Quench Ghost", { dex: 10, spd: 2 });
                     await ghost.toggleStatusEffect("invisible", { active: true });
