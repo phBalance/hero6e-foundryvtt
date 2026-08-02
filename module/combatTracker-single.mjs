@@ -416,7 +416,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         // Include the previous 2 and next 2 non-empty segments, across Turn boundaries,
         // but only auto-expand the nearest one in each direction.
         // Past segments default to collapsed headers (#4556/#4562); only the
-        // nearest FUTURE segment auto-expands — and never a placeholder
+        // nearest FUTURE segment auto-expands — and never a placeholder.
+        // Hidden-only positions render (as condensed placeholders) but do NOT
+        // consume the ±2 window budget: a player whose nearest neighbours are
+        // all GM-hidden must still see their own next visible Phases.
         const windowAbs = new Set();
         let found = 0;
         for (let abs = currentAbs - 1; abs >= startAbs && found < 2; abs--) {
@@ -426,7 +429,6 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             } else if (hiddenPopulation(abs) > 0) {
                 positions.add(abs);
                 markHiddenOnly(abs);
-                found++;
             }
         }
         found = 0;
@@ -434,23 +436,29 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         for (let abs = currentAbs + 1; abs <= currentAbs + 24 && found < 2; abs++) {
             const visible = membersAt(abs).length > 0;
             if (!visible && hiddenPopulation(abs) === 0) continue;
-            if (visible && !futureExpanded) {
+            positions.add(abs);
+            if (!visible) {
+                markHiddenOnly(abs);
+                continue;
+            }
+            if (!futureExpanded) {
                 windowAbs.add(abs);
                 futureExpanded = true;
             }
-            positions.add(abs);
-            if (!visible) markHiddenOnly(abs);
             found++;
         }
 
         // A delayed action's landing segment always renders, even if otherwise
         // empty — but a GM-hidden combatant's landing must not leak an otherwise
-        // empty segment header to players
+        // empty segment header to players. A VISIBLE combatant's landing also
+        // un-marks the placeholder: the marker row must render, not be swallowed
+        // by an "Unknown" band covering hidden bystanders
         for (const combatant of combat.combatants) {
             if (combatant.hidden && !game.user.isGM) continue;
             for (const [, record] of combat.delayedActionsFor?.(combatant) ?? []) {
                 if (record.resolveAbs >= currentAbs && record.resolveAbs <= currentAbs + 24) {
                     positions.add(record.resolveAbs);
+                    hiddenOnlyAbs.delete(record.resolveAbs);
                 }
             }
         }
@@ -817,8 +825,10 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 );
                 const vsText = targetNames.length ? ` vs ${targetNames.join(", ")}` : "";
                 // The landing is a REAL pointer stop: when the pointer sits on it,
-                // the marker row is the active turn
-                const landedActive = isCurrent && !!record.landed && !!combat.atDelayedLandingStop;
+                // the marker row is the active turn (only the parked-on declarer's —
+                // two simultaneous landings must not paint two active rows)
+                const landedActive =
+                    isCurrent && !!record.landed && !!combat.atDelayedLandingStop && combatant.id === activeCombatantId;
                 row.name =
                     record.kind === "haymaker"
                         ? `💥 ${row.name} — Haymaker ${record.landed ? "lands NOW" : "resolves"}${vsText}`
@@ -2396,7 +2406,9 @@ function cancelDelayedOnIncapacity(effect, _options, userId) {
                     reason: `${combatant.name} was ${statusLabel} before it landed`,
                 });
             }
-            const discretionary = records.filter(([, r]) => r.kind !== "haymaker");
+            // gmPrompted: an incapacitation arc (Stunned → KO'd → dead) creates a
+            // fresh effect per step — one adjudication prompt per record is enough
+            const discretionary = records.filter(([, r]) => r.kind !== "haymaker" && !r.gmPrompted);
             if (discretionary.length) {
                 const labels = discretionary.map(([, r]) => r.label).join(", ");
                 await ChatMessage.create({
@@ -2406,6 +2418,10 @@ function cancelDelayedOnIncapacity(effect, _options, userId) {
                         interruption is the GM's call (6E1 375) — use the declaration card's Cancel button
                         if it stops (spent resources stay spent).`,
                 });
+                for (const [id] of discretionary) {
+                    if (id === "legacy-haymaker") continue;
+                    await combatant.setFlag(game.system.id, `delayedActions.${id}.gmPrompted`, true);
+                }
             }
         })();
         work.catch((e) => console.error(`Incapacity-driven delayed-action cancel failed`, e));

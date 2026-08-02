@@ -1329,7 +1329,14 @@ export class HeroSystem6eCombatSingle extends Combat {
             ]),
         );
         return {
-            result: await this.update(payload, { direction: 1, previousCombatantId: ending?.id ?? null }),
+            // landingStop: the declarer may already hold the pointed-at row, making
+            // this a flags-only diff — the option tells _onUpdate it is still a
+            // real pointer movement (cards must fire, phase-end must run)
+            result: await this.update(payload, {
+                direction: 1,
+                previousCombatantId: ending?.id ?? null,
+                landingStop: true,
+            }),
         };
     }
 
@@ -1696,9 +1703,10 @@ export class HeroSystem6eCombatSingle extends Combat {
     /**
      * Rewinds OFF an end-of-segment landing stop back onto the segment's last
      * real stop. The landing stop is not a turns entry, so the standard index
-     * walk would jump into the previous segment; landed records un-land so the
-     * stop re-fires on replay. Null (after un-landing) when the landing segment
-     * had no real stops — the caller falls through to the cross-segment rewind.
+     * walk would step through rows that hold no turn in this segment; landed
+     * records un-land so the stop re-fires on replay. A landing-only segment
+     * (no real stops) delegates straight to the cross-segment rewind — falling
+     * through to the index walk would create phantom stops.
      * @private
      */
     async _rewindOffLandingStop({ allCombatants, activeSegment, currentAbs }) {
@@ -1716,14 +1724,15 @@ export class HeroSystem6eCombatSingle extends Combat {
         const target = stops.at(-1) ?? null;
         if (!target) {
             if (combatantUpdates.length) await this.updateEmbeddedDocuments("Combatant", combatantUpdates);
-            return null;
+            return { result: await this._rewindToPreviousSegment({ allCombatants, activeSegment }) };
         }
-        const index = this.turns.findIndex((t) => t.id === target.id);
+        const targetPriority = this.getInitiativePriority(target, activeSegment, { queryAbs: currentAbs });
         const payload = {
-            turn: index !== -1 ? index : 0,
-            [`flags.${game.system.id}.actingPriority`]: this.getInitiativePriority(target, activeSegment, {
-                queryAbs: currentAbs,
-            }),
+            turn: Math.max(
+                this.turns.findIndex((t) => t.id === target.id),
+                0,
+            ),
+            [`flags.${game.system.id}.actingPriority`]: targetPriority,
             [`flags.${game.system.id}.segmentHighWater`]: null,
         };
         Object.assign(
@@ -1732,12 +1741,20 @@ export class HeroSystem6eCombatSingle extends Combat {
                 this.buildEvent("rewind", { combatant: target, data: { targetAbs: currentAbs } }),
             ]),
         );
-        return {
-            result: await this.update(
-                { ...payload, combatants: combatantUpdates },
-                { direction: -1, previousCombatantId: this.combatant?.id },
-            ),
-        };
+        // Same undo semantics as _rewindWithinSegment: the landed-on stop
+        // re-opens, so declarations made at or after it come undone with it
+        const { resets, haymakerTeardowns } = this._rewindHoldFlagResets(currentAbs, { targetPriority });
+        for (const reset of resets) {
+            const existing = combatantUpdates.find((u) => u._id === reset._id);
+            if (existing) Object.assign(existing, reset);
+            else combatantUpdates.push(reset);
+        }
+        const result = await this.update(
+            { ...payload, combatants: combatantUpdates },
+            { direction: -1, previousCombatantId: this.combatant?.id },
+        );
+        await this._teardownRewoundHaymakers(haymakerTeardowns);
+        return { result };
     }
 
     /**
@@ -2013,10 +2030,26 @@ export class HeroSystem6eCombatSingle extends Combat {
         const isUnstartedBoundary = targetRound === 1;
         updateData[`flags.${game.system.id}.currentSegment`] = isUnstartedBoundary ? 12 : this.segment;
 
+        // Landed records whose stop is now at/ahead of the target un-land so the
+        // stop re-fires on replay — otherwise pendingLandingsAt excludes them
+        // forever and the landing degrades to a silent record delete
+        const targetAbs = targetRound * 12 + this.segment;
+        const combatantUpdates = [];
+        for (const combatant of this.combatants) {
+            const update = {};
+            for (const [delayedId, record] of this.delayedActionsFor(combatant)) {
+                if (delayedId === "legacy-haymaker") continue;
+                if (record?.landed && (record.resolveAbs ?? -Infinity) >= targetAbs) {
+                    update[`flags.${game.system.id}.delayedActions.${delayedId}.landed`] = false;
+                }
+            }
+            if (Object.keys(update).length > 0) combatantUpdates.push({ _id: combatant.id, ...update });
+        }
+
         const updateOptions = { direction: -1 };
         updateOptions.worldTime = { delta: -12 };
 
-        return this.update({ ...updateData, combatants: [] }, updateOptions);
+        return this.update({ ...updateData, combatants: combatantUpdates }, updateOptions);
     }
 
     /**
@@ -2098,7 +2131,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             // Records predating declaredPriority fall back to the declarer's own
             // natural stop in the declaration segment
             const naturalPriorityAt = (abs) =>
-                this.getInitiativePriority(combatant, ((abs - 1) % 12) + 1, { queryAbs: abs });
+                this.getInitiativePriority(combatant, HeroSystem6eCombatantSingle.segmentOf(abs), { queryAbs: abs });
             // A Haymaker wound up at or after the rewind's landing stop is undone
             const haymaker = combatant.getFlag(game.system.id, "haymaker");
             if (
@@ -2351,8 +2384,12 @@ export class HeroSystem6eCombatSingle extends Combat {
         const boundary = newSegment !== undefined || roundChanged || turnAdvance;
 
         // Only pointer movement starts a new Phase: flag-only bookkeeping updates
-        // (event-log appends, the recovery ledger) must not run turn side effects
-        if (!turnChanged && !boundary) return;
+        // (event-log appends, the recovery ledger) must not run turn side effects.
+        // A landing stop is real pointer movement even when the declarer already
+        // holds the pointed-at row — the diff drops the identical turn index and
+        // the update arrives flags-only, so the explicit option carries it through
+        const landingStopMove = foundry.utils.getProperty(options, "landingStop") === true;
+        if (!turnChanged && !boundary && !landingStopMove) return;
 
         let elapsedSegments;
         if (boundary) {
@@ -2417,7 +2454,14 @@ export class HeroSystem6eCombatSingle extends Combat {
                 }
             }
 
-            await this._consumeActiveCombatantHold(prevId);
+            // A landing stop parks the pointer on the declarer without granting
+            // them a Phase: none of the "the active combatant's Phase begins"
+            // work below may run — hold consumption, maneuver expiry (the
+            // Haymaker's own +4 DC / -5 DCV wind-up is a maneuverNextPhaseEffect
+            // and MUST survive to the roll), phase start, or the stunned skip
+            const atLandingStop = this.atDelayedLandingStop;
+
+            if (!atLandingStop) await this._consumeActiveCombatantHold(prevId);
             if (boundary) await this._segmentStartLightningReflexes();
 
             // Phase end/start work skips pure pointer resyncs — within-segment
@@ -2426,7 +2470,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             // passes prev=self (the interrupted combatant's Phase is NOT ending),
             // but the elevated combatant's own Phase genuinely BEGINS with it.
             const activeCombatant = this.combatant;
-            const isResync = !boundary && prevId !== undefined && prevId === activeCombatant?.id;
+            const isResync = !boundary && !landingStopMove && prevId !== undefined && prevId === activeCombatant?.id;
             const lrPreempt = foundry.utils.getProperty(options, "lrPreempt") === true;
             if (!isResync && !lrPreempt && previousCombatant?.actor) {
                 await this._onPhaseEnd(previousCombatant, { segmentChanged: boundary });
@@ -2447,12 +2491,9 @@ export class HeroSystem6eCombatSingle extends Combat {
             // the current world time survive — they were declared this instant.
             // Because aborted Phases are skipped outright, an abort's modifiers
             // naturally persist to the Phase after the spent one.
-            if (activeCombatant?.actor) {
+            if (activeCombatant?.actor && !atLandingStop) {
                 await expireManeuverNextPhaseEffects(activeCombatant.actor);
             }
-            // A landing stop parks the pointer on the declarer without granting
-            // them a Phase — no phase-start work, no auto-skip
-            const atLandingStop = this.atDelayedLandingStop;
             if ((!isResync || lrPreempt) && activeCombatant?.actor && !atLandingStop) {
                 await this._onPhaseStart(activeCombatant);
             }
@@ -2582,15 +2623,20 @@ export class HeroSystem6eCombatSingle extends Combat {
         for (const combatant of this.combatants) {
             const actor = combatant.actor;
             if (!actor?.statuses.has("knockedOut")) continue;
-            if ((actor.getCharacteristic("stun")?.value ?? 0) < -10) continue;
             const koStartAbs = combatant.getFlag(game.system.id, "koStartAbs");
             // Monotonic high-water stamp: overlapping chains and rewind replays
             // must not grant a second Recovery for the same Phase
             const granted = combatant.getFlag(game.system.id, "koRecoveredAbs") ?? 0;
             for (let abs = currentAbs - count; abs < currentAbs; abs++) {
+                // Re-checked per Phase, not per sweep: an earlier grant in this
+                // very loop may have woken the character (TakeRecovery without
+                // preventRecoverFromStun clears the KO once STUN climbs above 0)
+                // or lifted them out of the every-Phase band
+                if (!actor.statuses.has("knockedOut")) break;
+                if ((actor.getCharacteristic("stun")?.value ?? 0) < -10) break;
                 if (abs <= granted) continue;
                 if (koStartAbs !== undefined && koStartAbs !== null && abs <= koStartAbs) continue;
-                const segment = ((abs - 1) % 12) + 1;
+                const segment = HeroSystem6eCombatantSingle.segmentOf(abs);
                 if (!combatant.hasPhaseInSegment(segment, abs)) continue;
                 await combatant.setFlag(game.system.id, "koRecoveredAbs", abs);
                 await this._combatCard(
@@ -2814,6 +2860,8 @@ export class HeroSystem6eCombatSingle extends Combat {
      *     priority,          // marker position in the landing segment; null = very end
      *     landed,            // end-of-segment records: the landing stop fired its
      *                        // cards; the record persists until the segment is left
+     *     gmPrompted,        // non-haymaker records: the incapacity adjudication
+     *                        // whisper went out once already
      *     commit,            // true = no other Actions until it resolves (Extra Phase)
      *     targetTokenIds,    // live targets at declaration
      *     actionData? }      // roll-at-landing attacks only; rides to the landing card
@@ -3156,6 +3204,14 @@ export class HeroSystem6eCombatSingle extends Combat {
             );
             return;
         }
+        if (entry[1]?.landed) {
+            // The landing stop already fired this record's cards — resolving
+            // "again" would mint a second, independently rollable attack card
+            ui.notifications.warn(
+                `${combatant.name}'s ${entry[1].label ?? "delayed action"} is already resolving — use its roll card.`,
+            );
+            return;
+        }
         await this._finishDelayedAction(combatant, entry[0], entry[1], { cancelled: false, early: true });
     }
 
@@ -3169,6 +3225,32 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (!combatant?.isOwner) return;
         const entry = this.delayedActionsFor(combatant, "haymaker")[0];
         if (entry) await this._finishDelayedAction(combatant, entry[0], entry[1], { cancelled: true });
+    }
+
+    /**
+     * Voids any outstanding roll cards for a delayed record: their buttons grey
+     * out and a click explains the attack already resolved. A landed record's
+     * roll card outlives the record when the landing is cancelled at the stop
+     * (Stunned at the last moment) — without this the cancelled attack could
+     * still be rolled from chat. Players relay through the GM socket.
+     * @param {string} delayedId
+     * @private
+     */
+    async _voidDelayedRollCards(delayedId) {
+        if (!delayedId) return;
+        for (const message of game.messages.contents) {
+            const payload = message.getFlag(game.system.id, "delayedAttack");
+            if (!payload || payload.delayedId !== delayedId || payload.resolved) continue;
+            if (game.user.isGM) {
+                await message.setFlag(game.system.id, "delayedAttack.resolved", true);
+            } else {
+                game.socket.emit(`system.${game.system.id}`, {
+                    operation: "markDelayedCardResolved",
+                    userId: game.user.id,
+                    messageId: message.id,
+                });
+            }
+        }
     }
 
     /**
@@ -3263,6 +3345,9 @@ export class HeroSystem6eCombatSingle extends Combat {
         } else if (keepMarker && !cancelled) {
             await combatant.setFlag(game.system.id, `delayedActions.${id}.landed`, true);
         } else {
+            // Cancelling after the landing stop fired: the roll card is already
+            // out — void it so the cancelled attack can't still be rolled
+            if (cancelled && record.landed) await this._voidDelayedRollCards(id);
             await combatant.update({ [`flags.${game.system.id}.delayedActions.-=${id}`]: null });
         }
 
@@ -3306,7 +3391,9 @@ export class HeroSystem6eCombatSingle extends Combat {
                     <p class="hint">${hint}</p>`,
                 flags: {
                     [game.system.id]: {
-                        delayedAttack: { itemUuid: record.itemUuid, ...record.actionData },
+                        // delayedId ties the card back to its record so a
+                        // cancel-after-landing can void the outstanding roll
+                        delayedAttack: { itemUuid: record.itemUuid, delayedId: id, ...record.actionData },
                     },
                 },
             };
@@ -3550,10 +3637,13 @@ export class HeroSystem6eCombatSingle extends Combat {
                     payload[`flags.${game.system.id}.actingPriority`] = this.getInitiativePriority(target, segment);
                 }
             } else if (this.combatants.size > 0) {
-                // Deletion emptied the segment: ledger the removals, then advance
-                // to the next populated segment (ending: null — the deleted
-                // combatant gets no phase-end work; nobody re-enters via a held slot)
+                // Deletion emptied the segment: ledger the removals, then a
+                // same-segment landing stop if one is due, else advance to the
+                // next populated segment (ending: null — the deleted combatant
+                // gets no phase-end work; nobody re-enters via a held slot)
                 await this.update(payload, { direction: 1, previousCombatantId: activeId ?? undefined });
+                const landing = await this._advanceToLandingStop({ currentAbs: this.currentAbs, ending: null });
+                if (landing) return;
                 await this._advanceToNextSegment({
                     allCombatants: this.combatants.contents,
                     activeSegment: this.segment,
