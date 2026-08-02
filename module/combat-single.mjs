@@ -3248,7 +3248,9 @@ export class HeroSystem6eCombatSingle extends Combat {
      * Repairs combat state after combatants are removed mid-combat: the removal is
      * ledgered with a snapshot (history rows survive), and the turn index is
      * re-pointed — at the surviving active combatant, or at the next combatant by
-     * the recorded acting-priority threshold when the active one was deleted.
+     * the recorded acting-priority threshold when the active one was deleted. When
+     * the deletion empties the segment entirely, the pointer advances to the next
+     * populated segment instead of stranding the combat on "nobody's turn".
      * @param {{activeId: string|null, events: object[]}|null} capture
      * @param {Combatant[]} documents - The deleted combatant documents (detached)
      * @private
@@ -3294,6 +3296,20 @@ export class HeroSystem6eCombatSingle extends Combat {
                     payload.turn = index;
                     payload[`flags.${game.system.id}.actingPriority`] = this.getInitiativePriority(target, segment);
                 }
+            } else if (this.combatants.size > 0) {
+                // Deletion emptied the segment: ledger the removals, then advance
+                // to the next populated segment (ending: null — the deleted
+                // combatant gets no phase-end work; nobody re-enters via a held slot)
+                await this.update(payload, { direction: 1, previousCombatantId: activeId ?? undefined });
+                await this._advanceToNextSegment({
+                    allCombatants: this.combatants.contents,
+                    activeSegment: this.segment,
+                    currentAbs: this.currentAbs,
+                    ending: null,
+                    endingAtHeldSlot: false,
+                    storedActingPriority: this.getFlag(game.system.id, "actingPriority"),
+                });
+                return;
             }
         }
         // A surviving active combatant makes this a pure resync (prev === active,
