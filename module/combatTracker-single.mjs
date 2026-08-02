@@ -540,9 +540,12 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         for (const [idx, h] of historyRows.entries()) {
             const live = h.combatantId ? combat.combatants.get(h.combatantId) : null;
             const rowId = live ? live.id : `ledger-${abs}-${idx}`;
+            // "acted from hold", not "held": the live segment showed "(acted)"
+            // once the hold was spent, and the ledger row must not read as if the
+            // action reverted to a pending hold when the segment passed (#feedback)
             const kindLabel =
                 {
-                    "held-used": " (held)",
+                    "held-used": " (acted from hold)",
                     "held-forfeit": " (hold spent)",
                     aborted: " (aborted)",
                     haymaker: " (haymaker)",
