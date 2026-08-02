@@ -2804,10 +2804,17 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async cancelDelayedAction(combatantId, delayedId = null) {
         const combatant = this.combatants.get(combatantId);
-        if (!combatant?.isOwner) return;
+        if (!combatant) return;
+        if (!combatant.isOwner) {
+            ui.notifications.warn(`Only ${combatant.name}'s owner (or the GM) can cancel this.`);
+            return;
+        }
         const records = this.delayedActionsFor(combatant);
         const entry = delayedId ? records.find(([id]) => id === delayedId) : records[0];
-        if (!entry) return;
+        if (!entry) {
+            ui.notifications.warn(`${combatant.name} has no pending delayed action — it already resolved or was cancelled.`);
+            return;
+        }
         await this._finishDelayedAction(combatant, entry[0], entry[1], { cancelled: true });
     }
 
@@ -2820,10 +2827,17 @@ export class HeroSystem6eCombatSingle extends Combat {
      */
     async resolveDelayedActionNow(combatantId, delayedId = null) {
         const combatant = this.combatants.get(combatantId);
-        if (!combatant?.isOwner) return;
+        if (!combatant) return;
+        if (!combatant.isOwner) {
+            ui.notifications.warn(`Only ${combatant.name}'s owner (or the GM) can resolve this.`);
+            return;
+        }
         const records = this.delayedActionsFor(combatant);
         const entry = delayedId ? records.find(([id]) => id === delayedId) : records[0];
-        if (!entry) return;
+        if (!entry) {
+            ui.notifications.warn(`${combatant.name} has no pending delayed action — it already resolved or was cancelled.`);
+            return;
+        }
         await this._finishDelayedAction(combatant, entry[0], entry[1], { cancelled: false, early: true });
     }
 

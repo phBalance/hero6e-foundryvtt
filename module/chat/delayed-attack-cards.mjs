@@ -92,10 +92,11 @@ async function withDelayedAttackPayload(app, button, handler, { notPermittedWarn
 }
 
 Hooks.on("renderChatMessageHTML", (app, html) => {
-    // A consumed landing card keeps its buttons visibly dead on every client
+    // A consumed landing card greys its buttons rather than hard-disabling
+    // them; a click still explains that the attack already resolved
     if (app.getFlag?.(game.system.id, "delayedAttack")?.resolved) {
         html.querySelectorAll("button.hero-delayed-roll, button.hero-delayed-fail").forEach((button) => {
-            button.disabled = true;
+            button.classList.add("hero-delayed-spent");
         });
     }
 
