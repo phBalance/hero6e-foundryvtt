@@ -912,7 +912,7 @@ export function sectionalDefenseHeroValidation(modifier, item) {
                 severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
                 modifierID: modifier.ID,
             });
-        } else {
+        } else if (sectionalDefenseRanges.reason !== VALIDATE_SECTION_DEFENSE_ERROR_REASON.NOT_DECLARATION) {
             console.error(`Unknown invalid sectional defense reason: ${sectionalDefenseRanges.reason}.`);
         }
     } else {
