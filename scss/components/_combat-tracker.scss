@@ -8,7 +8,6 @@ $hero-next-turn-dark: #ff9f43;
 $hero-next-turn-light: #b45309;
 $hero-lr-accent-dark: #4fc3f7;
 $hero-lr-accent-light: #0369a1;
-
 $combat-tracker-hero-disposition-opacity-default: 0.05;
 $combat-tracker-hero-disposition-opacity-hover: 0.2;
 $combat-tracker-hero-disposition-opacity-active: 0.6;
@@ -574,11 +573,13 @@ ol.combat-tracker.plain {
    portrait — compact drops the portrait, flows name/effects/initiative onto one
    line, and reveals the control buttons only on hover. The active combatant,
    segment headers, and the held panel keep their full-size treatment. */
+
 /* :not(.segment-member-hidden): collapsed segments zero their members' padding
    (max-height animation); re-applying the compact padding at higher specificity
    leaked spacing under every collapsed header */
-.hero-single-tracker.hero-compact li.combatant.timeline-member:not(.active):not(.segment-member-hidden) {
+.hero-single-tracker.hero-compact li.combatant.timeline-member:not(.active, .segment-member-hidden) {
     padding-block: 1px;
+
     /* Members sit flush with their header's label (6px band padding + 6px label
        margin) instead of core's 8px — without this they read as outdented */
     padding-inline-start: 12px;
@@ -590,6 +591,7 @@ ol.combat-tracker.plain {
 
     .token-name {
         display: flex;
+
         /* nowrap: revealed hover controls must never wrap onto a second line —
            the row's height is not allowed to change on hover */
         flex-flow: row nowrap;
@@ -626,7 +628,9 @@ ol.combat-tracker.plain {
         display: inline-flex;
         align-items: center;
         font-size: var(--font-size-10);
+
         --button-size: 16px;
+
         max-height: 16px;
         flex: 0 0 auto;
     }
