@@ -357,14 +357,6 @@ export async function migrateWorld() {
     );
 
     await migrateToVersion(
-        "4.3.15",
-        lastMigration,
-        [],
-        "rebuild compendium",
-        async () => await CreateHeroCompendiums(),
-    );
-
-    await migrateToVersion(
         "5.0.0",
         lastMigration,
         ["run once"],
