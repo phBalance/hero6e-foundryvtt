@@ -652,8 +652,11 @@ function buildActivationOrSectionalDefenseInternalRepresentation(item, rar) {
             sectionalDefenseActivationRollModifier,
         );
 
-        // Do we have valid ranges defined and are hit locations turned on? If not, then sectional defense don't make sense to consider.
-        if (validSectionalComment && game.settings.get(HEROSYS.module, "hit locations")) {
+        // Do we have valid ranges defined and are sectional defenses turned on?
+        if (
+            validSectionalComment &&
+            game.settings.get(HEROSYS.module, "hit locations") === "hitLocationsWithSectional"
+        ) {
             return {
                 type: RSR_ROLL_TYPE.SECTIONAL_DEFENSES_ROLL,
                 sectionalDefenseLocationsSet: sectionalDefenseLocationsSet,
