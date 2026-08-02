@@ -424,7 +424,6 @@ function getRollsForRar(item, rar) {
         }
 
         // FIXME: OPTIONID= attack roll doesn't seem to exist in HDC but does in the 5e rules (although it's not well defined). It does exist in 6e
-
         // 5e Unknown OPTIONID
         else {
             console.error(`Unknown 5e RSR ${rar.OPTIONID}`);
