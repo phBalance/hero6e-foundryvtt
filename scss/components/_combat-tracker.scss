@@ -132,6 +132,14 @@ body.theme-light .combat-tracker,
     display: none;
 }
 
+/* 0b. POPOUT: AppV2 auto-height resizes the window to its content on every
+   render, and segment changes change the row count — the window visibly grew
+   and shrank as the fight advanced. Pin the popout's height; the timeline
+   already scrolls inside it (core: .combat-tracker { flex: 1; overflow: auto }). */
+.application.sidebar-popout.hero-single-tracker {
+    height: min(80vh, 780px);
+}
+
 /* Core indents any list that reaches 100 entries (ol:has(> li:nth-of-type(100))
    in the base sheet styles); the timeline renders every member row even while
    collapsed, so long combats cross that threshold and pick up stray left
