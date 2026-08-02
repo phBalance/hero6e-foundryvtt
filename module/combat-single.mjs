@@ -2343,7 +2343,10 @@ export class HeroSystem6eCombatSingle extends Combat {
             await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id, {
                 active: false,
             });
-            await this._combatCard(combatant, `${combatant.name} recovers from being stunned.`);
+            await this._combatCard(
+                combatant,
+                `${combatant.name} recovers from being stunned — their Phase was spent recovering and was skipped.`,
+            );
         } else if (actor.statuses.has("knockedOut")) {
             if ((actor.getCharacteristic("stun")?.value ?? 0) >= -10) {
                 // Stamped like spentEndOn: overlapping update chains and rewind
