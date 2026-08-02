@@ -1323,7 +1323,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     : String(initial.dex)
                 : String(Math.max(0, ownDex - 1));
         const initialSegmentAbs = initial?.mode === "position" ? initial.segmentAbs : null;
-        const checkedMode = initial?.mode ?? (segmentChoices.length ? "position" : "event");
+        // Two branches only: "generic" is the event branch with a blank trigger
+        const preferredMode = initial?.mode ?? (segmentChoices.length ? "position" : "event");
+        const checkedMode = preferredMode === "position" && segmentChoices.length ? "position" : "event";
 
         const { escapeHTML } = foundry.utils;
 
@@ -1363,57 +1365,78 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const initialKind = initialAnchorId || initial?.mode !== "position" ? "anchor" : "dex";
 
         const positionOption = segmentChoices.length
-            ? `<label><input type="radio" name="hold-mode" value="position" ${checkedMode === "position" ? "checked" : ""}> Until a position</label>
-               <div class="form-group">
-                   <label>Segment</label>
-                   <select name="hold-segment">${segmentChoices
-                       .map(
-                           (choice) =>
-                               `<option value="${choice.abs}" ${choice.abs === initialSegmentAbs ? "selected" : ""}>${choice.label}</option>`,
-                       )
-                       .join("")}</select>
-               </div>
-               <div class="form-group">
-                   <label><input type="radio" name="hold-position-kind" value="anchor" ${initialKind === "anchor" ? "checked" : ""}> Next to a combatant</label>
-                   <select name="hold-anchor">${anchorOptionsHTML(selectedSegmentAbs, initialAnchorId)}</select>
-               </div>
-               <div class="form-group hero-hold-relation">
-                   <label><input type="radio" name="hold-anchor-relation" value="after" ${initialRelation === "after" ? "checked" : ""}> Right after</label>
-                   <label><input type="radio" name="hold-anchor-relation" value="before" ${initialRelation === "before" ? "checked" : ""}> Right before</label>
-               </div>
-               <div class="form-group">
-                   <label><input type="radio" name="hold-position-kind" value="dex" ${initialKind === "dex" ? "checked" : ""}> At a DEX count</label>
-                   <input type="number" name="hold-dex" value="${defaultDexValue}" min="0" max="99.99" step="0.01">
+            ? `<label class="hero-hold-mode"><input type="radio" name="hold-mode" value="position" ${checkedMode === "position" ? "checked" : ""}> A later spot in the turn order</label>
+               <div class="hero-hold-branch" data-hold-branch="position">
+                   <div class="form-group">
+                       <label>Segment</label>
+                       <select name="hold-segment">${segmentChoices
+                           .map(
+                               (choice) =>
+                                   `<option value="${choice.abs}" ${choice.abs === initialSegmentAbs ? "selected" : ""}>${choice.label}</option>`,
+                           )
+                           .join("")}</select>
+                   </div>
+                   <div class="form-group">
+                       <label><input type="radio" name="hold-position-kind" value="anchor" ${initialKind === "anchor" ? "checked" : ""}> Next to a combatant</label>
+                       <div class="form-fields">
+                           <select name="hold-anchor-relation">
+                               <option value="after" ${initialRelation === "after" ? "selected" : ""}>Right after</option>
+                               <option value="before" ${initialRelation === "before" ? "selected" : ""}>Right before</option>
+                           </select>
+                           <select name="hold-anchor">${anchorOptionsHTML(selectedSegmentAbs, initialAnchorId)}</select>
+                       </div>
+                   </div>
+                   <div class="form-group">
+                       <label><input type="radio" name="hold-position-kind" value="dex" ${initialKind === "dex" ? "checked" : ""}> At a DEX count</label>
+                       <input type="number" name="hold-dex" value="${defaultDexValue}" min="0" max="99.99" step="0.01">
+                   </div>
                </div>`
             : "";
         const content = `<fieldset class="hero-hold-dialog">
             <legend>Hold until</legend>
             ${positionOption}
-            <label><input type="radio" name="hold-mode" value="event" ${checkedMode === "event" || (!positionOption && checkedMode !== "generic") ? "checked" : ""}> An event</label>
-            <div class="form-group">
-                <input type="text" name="hold-trigger" placeholder="e.g. if the guard turns around" value="${escapeHTML(initial?.trigger ?? "")}">
+            <label class="hero-hold-mode"><input type="radio" name="hold-mode" value="event" ${checkedMode === "event" ? "checked" : ""}> An event happens</label>
+            <div class="hero-hold-branch" data-hold-branch="event">
+                <div class="form-group">
+                    <input type="text" name="hold-trigger" placeholder="e.g. the guard turns around" value="${escapeHTML(initial?.trigger ?? "")}">
+                </div>
+                <p class="hint">Leave the event blank for a generic hold — when you may act is the GM's call.</p>
             </div>
-            <label><input type="radio" name="hold-mode" value="generic" ${checkedMode === "generic" ? "checked" : ""}> Generic (no precondition — GM discretion)</label>
+            <p class="hint">The Held Action is lost when the segment of your next natural Phase begins.</p>
         </fieldset>`;
 
         const result = await foundry.applications.api.DialogV2.wait({
             window: { title: `${title} — ${actor.name}` },
             content,
-            // DEX count and anchor are mutually exclusive: the unchecked branch's
-            // controls grey out, and the anchor list re-filters per segment
+            // The unselected mode's whole branch hides (progressive disclosure);
+            // within the position branch, DEX count and anchor are mutually
+            // exclusive — the unchecked one's controls grey out — and the anchor
+            // list re-filters per segment
             render: (event, dialog) => {
                 const root = dialog.element;
-                const segmentSelect = root?.querySelector?.('select[name="hold-segment"]');
-                const anchorSelect = root?.querySelector?.('select[name="hold-anchor"]');
+                if (!root) return;
+                const modeRadios = [...root.querySelectorAll('input[name="hold-mode"]')];
+                const branches = [...root.querySelectorAll("[data-hold-branch]")];
+                const syncBranches = () => {
+                    const mode = modeRadios.find((r) => r.checked)?.value ?? "event";
+                    for (const branch of branches) {
+                        branch.classList.toggle("hero-hold-branch-hidden", branch.dataset.holdBranch !== mode);
+                    }
+                };
+                for (const r of modeRadios) r.addEventListener("change", syncBranches);
+                syncBranches();
+
+                const segmentSelect = root.querySelector('select[name="hold-segment"]');
+                const anchorSelect = root.querySelector('select[name="hold-anchor"]');
                 if (!segmentSelect || !anchorSelect) return;
                 const dexInput = root.querySelector('input[name="hold-dex"]');
                 const kindRadios = [...root.querySelectorAll('input[name="hold-position-kind"]')];
-                const relationRadios = [...root.querySelectorAll('input[name="hold-anchor-relation"]')];
+                const relationSelect = root.querySelector('select[name="hold-anchor-relation"]');
                 const syncControls = () => {
                     const kind = kindRadios.find((r) => r.checked)?.value ?? "dex";
                     if (dexInput) dexInput.disabled = kind !== "dex";
                     anchorSelect.disabled = kind !== "anchor";
-                    for (const r of relationRadios) r.disabled = kind !== "anchor";
+                    if (relationSelect) relationSelect.disabled = kind !== "anchor";
                 };
                 const rebuildAnchors = () => {
                     const prior = anchorSelect.value;
@@ -1507,8 +1530,9 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             }
             return { mode: "position", segmentAbs, dex, ...(fraction !== undefined ? { fraction } : {}) };
         }
-        if (result.mode === "event") return { mode: "event", trigger: result.trigger };
-        return { mode: "generic" };
+        // A blank event IS the generic hold — the dialog no longer offers a
+        // separate "generic" choice
+        return result.trigger ? { mode: "event", trigger: result.trigger } : { mode: "generic" };
     }
 
     /**

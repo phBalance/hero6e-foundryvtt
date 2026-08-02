@@ -527,11 +527,28 @@ ol.combat-tracker.plain {
     padding-right: 1.75em;
 }
 
-/* Anchored-hold relation radios nest under their "Next to a combatant" parent */
-.hero-hold-dialog .hero-hold-relation {
+/* The "Right after/before" relation select stays compact beside the anchor list */
+.hero-hold-dialog select[name="hold-anchor-relation"] {
+    flex: 0 0 auto;
+    min-width: 7.5em;
+    padding-right: 1.75em;
+}
+
+/* Hold dialog: two top-level modes; the unselected mode's branch hides
+   entirely instead of greying out */
+.hero-hold-dialog .hero-hold-mode {
+    font-weight: bold;
+}
+
+.hero-hold-dialog .hero-hold-branch {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     margin-left: 1.75em;
-    justify-content: flex-start;
-    gap: 1em;
+}
+
+.hero-hold-dialog .hero-hold-branch.hero-hold-branch-hidden {
+    display: none;
 }
 
 /* Compact mode (#3157): non-active timeline rows collapse to a single tight line.
