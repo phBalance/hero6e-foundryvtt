@@ -213,12 +213,16 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         const currentAbs = absoluteSegment(combat.round, combat.segment);
         const startAbs = absoluteSegment(1, 12);
 
-        const { membersAt, historyAt, segmentPopulation } = this._segmentQueryHelpers(combat, currentAbs);
-        const { positions, windowAbs } = this._selectTimelinePositions(combat, {
+        const { membersAt, historyAt, segmentPopulation, hiddenPopulation } = this._segmentQueryHelpers(
+            combat,
+            currentAbs,
+        );
+        const { positions, windowAbs, hiddenOnlyAbs } = this._selectTimelinePositions(combat, {
             currentAbs,
             startAbs,
             membersAt,
             segmentPopulation,
+            hiddenPopulation,
         });
 
         // The single tracker follows only Foundry's own disposition setting; the legacy
@@ -250,6 +254,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             membersAt,
             historyAt,
             windowAbs,
+            hiddenOnlyAbs,
             timelineTurns: [],
         };
         this._buildHeldPanel(state);
@@ -359,41 +364,83 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         };
         const segmentPopulation = (abs) => historyAt(abs)?.length ?? membersAt(abs).length;
 
-        return { membersAt, historyAt, segmentPopulation };
+        // GM-hidden stops at a position, player view only (the GM sees the real
+        // rows). Feeds the "Unknown" placeholder: an all-hidden segment must
+        // still occupy the timeline or the ±window walks straight past it into
+        // the next Turn (the players-only orange next-Turn header bug).
+        const hiddenPopulation = (abs) => {
+            if (game.user.isGM) return 0;
+            const segment = segmentOf(abs);
+            if (abs < currentAbs) {
+                return (combat.historyRowsForSegment?.(abs) ?? []).filter((row) => row.hidden).length;
+            }
+            return combat.combatants.filter((c) => {
+                if (!c.actor || !c.hidden) return false;
+                if (c.heldAction?.mode === "position") {
+                    return c.holdsPositionAtAbs(abs) || c.spentHoldAtAbs(abs);
+                }
+                return c.hasPhaseInSegment(segment, abs) || c.spentHoldAtAbs(abs);
+            }).length;
+        };
+
+        return { membersAt, historyAt, segmentPopulation, hiddenPopulation };
     }
 
     /**
      * Chooses which absolute segments render: the current Turn's non-empty
      * segments, the previous/next-2 non-empty window (nearest future one
-     * auto-expands), and delayed-action landing segments.
+     * auto-expands), and delayed-action landing segments. For players, segments
+     * populated ONLY by GM-hidden combatants still occupy the timeline (they
+     * render as condensed "Unknown" placeholders) — dropping them made the
+     * forward window walk off the current Turn's end and paint the next Turn's
+     * first segment as if it were imminent.
      */
-    _selectTimelinePositions(combat, { currentAbs, startAbs, membersAt, segmentPopulation }) {
+    _selectTimelinePositions(combat, { currentAbs, startAbs, membersAt, segmentPopulation, hiddenPopulation }) {
+        const hiddenOnlyAbs = new Set();
+        const markHiddenOnly = (abs) => {
+            if (abs !== currentAbs) hiddenOnlyAbs.add(abs);
+        };
         // Candidate positions: every non-empty segment of the current Turn, clamped to combat start
         const positions = new Set([currentAbs]);
         for (let segment = 1; segment <= 12; segment++) {
             const abs = absoluteSegment(combat.round, segment);
-            if (abs >= startAbs && segmentPopulation(abs) > 0) positions.add(abs);
+            if (abs < startAbs) continue;
+            if (segmentPopulation(abs) > 0) {
+                positions.add(abs);
+            } else if (hiddenPopulation(abs) > 0) {
+                positions.add(abs);
+                markHiddenOnly(abs);
+            }
         }
 
         // Include the previous 2 and next 2 non-empty segments, across Turn boundaries,
         // but only auto-expand the nearest one in each direction.
         // Past segments default to collapsed headers (#4556/#4562); only the
-        // nearest FUTURE segment auto-expands
+        // nearest FUTURE segment auto-expands — and never a placeholder
         const windowAbs = new Set();
         let found = 0;
         for (let abs = currentAbs - 1; abs >= startAbs && found < 2; abs--) {
             if (segmentPopulation(abs) > 0) {
                 positions.add(abs);
                 found++;
+            } else if (hiddenPopulation(abs) > 0) {
+                positions.add(abs);
+                markHiddenOnly(abs);
+                found++;
             }
         }
         found = 0;
+        let futureExpanded = false;
         for (let abs = currentAbs + 1; abs <= currentAbs + 24 && found < 2; abs++) {
-            if (membersAt(abs).length > 0) {
-                if (found === 0) windowAbs.add(abs);
-                positions.add(abs);
-                found++;
+            const visible = membersAt(abs).length > 0;
+            if (!visible && hiddenPopulation(abs) === 0) continue;
+            if (visible && !futureExpanded) {
+                windowAbs.add(abs);
+                futureExpanded = true;
             }
+            positions.add(abs);
+            if (!visible) markHiddenOnly(abs);
+            found++;
         }
 
         // A delayed action's landing segment always renders, even if otherwise
@@ -408,7 +455,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             }
         }
 
-        return { positions, windowAbs };
+        return { positions, windowAbs, hiddenOnlyAbs };
     }
 
     /** Pushes the Held Actions panel (event/generic holders) onto the timeline. */
@@ -463,10 +510,39 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         }
     }
 
+    /**
+     * Player-view stand-in for a run of segments populated only by GM-hidden
+     * combatants: one condensed band — players learn something acts between the
+     * neighbouring segments without learning how much or exactly when.
+     */
+    _pushUnknownPlaceholder(state, abs) {
+        const headerId = `seg-header-unknown-${abs}`;
+        const headerTurn = {
+            id: headerId,
+            _id: headerId,
+            name: "Unknown",
+            img: "icons/svg/mystery-man.svg",
+            css: ["hero-timeline-header-row", "hero-unknown-header", "segment-collapsed"].join(" "),
+            hasRolled: true,
+            initiative: null,
+            isFakeHeader: true,
+            active: false,
+        };
+        state.timelineTurns.push(this._markActorless(headerTurn));
+    }
+
     /** Renders each selected segment: a header row plus member/history/marker rows. */
     _buildSegmentRows(state, positions) {
         const { combat, currentAbs, expansionOverrides, windowAbs, membersAt, historyAt, timelineTurns } = state;
-        for (const abs of [...positions].sort((a, b) => a - b)) {
+        const sorted = [...positions].sort((a, b) => a - b);
+        for (let i = 0; i < sorted.length; i++) {
+            const abs = sorted[i];
+            if (state.hiddenOnlyAbs?.has(abs)) {
+                // Consecutive hidden-only positions condense into ONE band
+                while (i + 1 < sorted.length && state.hiddenOnlyAbs.has(sorted[i + 1])) i++;
+                this._pushUnknownPlaceholder(state, abs);
+                continue;
+            }
             const segment = segmentOf(abs);
             const round = roundOf(abs);
             const isCurrent = abs === currentAbs;

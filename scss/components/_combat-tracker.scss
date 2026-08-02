@@ -470,6 +470,24 @@ ol.combat-tracker.plain {
     color: var(--hero-held-text);
 }
 
+/* 2k2. UNKNOWN PLACEHOLDER: player-view band standing in for segments whose
+   only combatants are GM-hidden — present so the timeline shape is honest,
+   inert and deliberately vague */
+.combat-tracker li.combatant.hero-unknown-header {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.combat-tracker li.combatant.hero-unknown-header .name {
+    font-style: italic;
+    letter-spacing: 2px;
+}
+
+/* No caret: the band never expands */
+.combat-tracker .combatant.hero-unknown-header .name::before {
+    content: "";
+}
+
 /* 2j. LEDGER HISTORY: past segments render what actually happened */
 .combat-tracker li.combatant.hero-history-row {
     cursor: default;
