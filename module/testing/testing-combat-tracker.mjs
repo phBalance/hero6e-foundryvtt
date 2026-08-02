@@ -2127,11 +2127,40 @@ export function registerCombatTests(quench) {
                     const [, record] = combat.delayedActionsFor(combatant, "haymaker")[0] ?? [];
                     expect(record?.resolveAbs, "lands at the very end of the NEXT segment").to.equal(currentAbs + 1);
 
-                    // Advance past the landing segment; boundary maintenance resolves it
-                    await combat.nextTurn(); // into the landing segment
-                    await combat.nextTurn(); // past it
+                    // Advancing lands ON the landing stop (a real pointer stop). The
+                    // SPD 12 declarer's own Segment 1 Phase is consumed by the
+                    // wind-up (6E2 69 High-SPD Haymakers), so the stop is the only
+                    // thing in the landing segment.
+                    await combat.nextTurn(); // onto the landing stop
+                    expect(combat.atDelayedLandingStop, "the landing is a real pointer stop").to.be.true;
+                    expect(
+                        combat._takesTurnInSegment(combatant, 1, { queryAbs: currentAbs + 1 }),
+                        "wind-up consumes the declarer's natural Phase in the landing segment",
+                    ).to.be.false;
+                    await combat.nextTurn(); // past it — leaving the stop cleans the record up
                     const resolved = await waitUntil(() => !combat.hasDelayedAction(combatant, "haymaker"));
                     expect(resolved, "wind-up resolved once its segment fully passed").to.be.true;
+                });
+
+                it("Should return the high-SPD declarer's consumed Phase when the Haymaker is cancelled", async function () {
+                    const bruiser = await makeActor("_Quench HM Cancel", { dex: 12, spd: 12 });
+                    const combat = await makeCombat([bruiser]);
+                    await combat.startCombat();
+                    const combatant = combatantFor(combat, bruiser);
+                    const currentAbs = combat.round * 12 + combat.segment;
+
+                    await combat.scheduleHaymaker(bruiser);
+                    expect(
+                        combat._takesTurnInSegment(combatant, 1, { queryAbs: currentAbs + 1 }),
+                        "wind-up consumes the landing segment's Phase",
+                    ).to.be.false;
+
+                    await combat.cancelHaymaker(combatant.id);
+                    expect(combat.hasDelayedAction(combatant, "haymaker")).to.be.false;
+                    expect(
+                        combat._takesTurnInSegment(combatant, 1, { queryAbs: currentAbs + 1 }),
+                        "cancelling the Haymaker returns the Phase",
+                    ).to.be.true;
                 });
 
                 it("Should shuffle group members per segment and split one out on demand", async function () {
@@ -2209,12 +2238,15 @@ export function registerCombatTests(quench) {
                     await combat.cancelDelayedAction(combatant.id, commitId);
                     expect(combat.blockedActionReason(combatant), "cancel releases the commitment").to.equal(null);
 
-                    // An Extra Segment record resolves once its segment fully passes
+                    // An Extra Segment record gets a real end-of-segment landing
+                    // stop, then cleans up once the segment is left
                     await combat.scheduleDelayedAction(caster, segmentPlan);
                     expect(combat.hasDelayedAction(combatant)).to.be.true;
                     await combat.nextTurn(); // pacer, still Segment 12
                     await combat.nextTurn(); // Segment 1 (pacer only)
-                    await combat.nextTurn(); // Segment 2 — the landing segment has passed
+                    await combat.nextTurn(); // the end-of-segment landing stop
+                    expect(combat.atDelayedLandingStop, "the landing is a real pointer stop").to.be.true;
+                    await combat.nextTurn(); // Segment 2 — leaving the stop cleans up
                     const resolved = await waitUntil(() => !combat.hasDelayedAction(combatant));
                     expect(resolved, "delayed action resolved after its segment ended").to.be.true;
                 });
@@ -2370,14 +2402,18 @@ export function registerCombatTests(quench) {
                     await combat.settleMaintenance?.();
                     expect(combat.hasDelayedAction(combatant), "own Phase does not resolve an end-of-segment landing")
                         .to.be.true;
-                    await combat.nextTurn(); // past it
+                    await combat.nextTurn(); // the end-of-segment landing stop
 
                     // The landing card carries the declaration for the replay
                     const isNewCard = (m) =>
                         !priorCardIds.has(m.id) && m.getFlag(game.system.id, "delayedAttack")?.itemJson;
                     const landed = await waitUntil(() => game.messages.contents.some(isNewCard));
-                    expect(landed, "landing card offers the roll once the segment fully passed").to.be.true;
-                    expect(combat.hasDelayedAction(combatant), "record consumed by the landing").to.be.false;
+                    expect(landed, "landing card offers the roll at the landing stop").to.be.true;
+                    expect(combat.atDelayedLandingStop, "the landing is a real pointer stop").to.be.true;
+
+                    await combat.nextTurn(); // past it — leaving the stop cleans the record up
+                    const cleaned = await waitUntil(() => !combat.hasDelayedAction(combatant));
+                    expect(cleaned, "record consumed once the landing segment is left").to.be.true;
                     const message = game.messages.contents.filter(isNewCard).at(-1);
                     const payload = message.getFlag(game.system.id, "delayedAttack");
                     expect(payload.prepaid, "resources were paid at declaration").to.be.true;

@@ -816,15 +816,19 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                     t.hidden && !game.user.isGM ? "Unknown" : t.name,
                 );
                 const vsText = targetNames.length ? ` vs ${targetNames.join(", ")}` : "";
+                // The landing is a REAL pointer stop: when the pointer sits on it,
+                // the marker row is the active turn
+                const landedActive = isCurrent && !!record.landed && !!combat.atDelayedLandingStop;
                 row.name =
                     record.kind === "haymaker"
-                        ? `💥 ${row.name} — Haymaker resolves${vsText}`
-                        : `⏳ ${row.name} — ${record.label}${vsText}`;
+                        ? `💥 ${row.name} — Haymaker ${record.landed ? "lands NOW" : "resolves"}${vsText}`
+                        : `⏳ ${row.name} — ${record.label}${record.landed ? " — NOW" : ""}${vsText}`;
                 row.initiative =
                     record.priority !== null && record.priority !== undefined ? String(record.priority) : "—";
                 row.effects = { icons: [], tooltip: "" };
+                row.active = landedActive;
                 row.css =
-                    `${row.css} hero-haymaker-row hero-delayed-row hero-delayed-id-${group.delayedId} ${stateCss} ${memberClasses}`.trim();
+                    `${row.css} hero-haymaker-row hero-delayed-row hero-delayed-id-${group.delayedId} ${stateCss} ${memberClasses} ${landedActive ? "active" : ""}`.trim();
                 timelineTurns.push(row);
                 continue;
             }
@@ -851,6 +855,12 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 // status toggles) grey every Phase while the status binds.
                 row.css = `${row.css} hero-aborted-row`.trim();
                 row.name = `${row.name} (aborted)`;
+            } else if (!isPast && combat.haymakerConsumesPhaseAt?.(combatant, abs)) {
+                // High-SPD Haymaker (6E2 69): the wind-up consumes this natural
+                // Phase — visible but greyed, like an abort's spent Phase.
+                // Cancelling the Haymaker brings the Phase straight back.
+                row.css = `${row.css} hero-aborted-row`.trim();
+                row.name = `${row.name} (Phase lost — Haymaker winds up)`;
             }
 
             // An elevated scoped-LR combatant acts early this segment only; the
@@ -1996,9 +2006,18 @@ function autoScrollToActive(app, element, options) {
     // summary row reuses the active member's id and must not match
     const activeId = app.viewed.combatant?.id;
     if (activeId) {
-        const activeRow = element.querySelector(
-            `.current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)[data-combatant-id="${activeId}"], .current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)[data-id="${activeId}"]`,
-        );
+        // At a landing stop the acting "turn" is the delayed marker row, not the
+        // declarer's (possibly greyed) natural-Phase row
+        const delayedStopRow = app.viewed.atDelayedLandingStop
+            ? element.querySelector(
+                  `.current-segment-member.hero-delayed-row[data-combatant-id="${activeId}"], .current-segment-member.hero-delayed-row[data-id="${activeId}"]`,
+              )
+            : null;
+        const activeRow =
+            delayedStopRow ??
+            element.querySelector(
+                `.current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)[data-combatant-id="${activeId}"], .current-segment-member:not(.hero-group-parent):not(.hero-lr-shadow):not(.hero-lr-spent)[data-id="${activeId}"]`,
+            );
         if (activeRow) {
             activeRow.classList.add("active");
             // Per-app guard: the sidebar and a popout are separate instances and
