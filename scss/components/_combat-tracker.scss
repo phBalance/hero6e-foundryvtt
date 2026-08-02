@@ -20,10 +20,7 @@ $combat-tracker-hero-dispositions: (
     "player": rgb(0 212 0),
 );
 
-// Theme variable layer. Dark is the default; light overrides follow core's own
-// precedence model (global body class, or a per-app .themed override).
-.combat-sidebar,
-.combat-tracker {
+@mixin hero-tracker-vars-dark {
     --hero-held-accent: #{$hero-held-accent-dark};
     --hero-held-text: #{$hero-held-text-dark};
     --hero-next-turn: #{$hero-next-turn-dark};
@@ -35,12 +32,10 @@ $combat-tracker-hero-dispositions: (
     --hero-on-accent: #f3f3f3;
     --hero-defeated-accent: #e5484d;
     --hero-header-shadow: rgb(0 0 0 / 30%);
+    --hero-row-border: black;
 }
 
-body.theme-light .combat-sidebar,
-body.theme-light .combat-tracker,
-.combat-sidebar.themed.theme-light,
-.themed.theme-light .combat-tracker {
+@mixin hero-tracker-vars-light {
     --hero-held-accent: #{$hero-held-accent-light};
     --hero-held-text: #{$hero-held-text-light};
     --hero-next-turn: #{$hero-next-turn-light};
@@ -52,6 +47,45 @@ body.theme-light .combat-tracker,
     --hero-on-accent: #f3f3f3;
     --hero-defeated-accent: #a72a35;
     --hero-header-shadow: rgb(0 0 0 / 15%);
+    --hero-row-border: rgb(0 0 0 / 25%);
+}
+
+// Theme variable layer. Dark is the default; light overrides follow core's own
+// precedence model (global body class, or a per-app .themed override).
+.combat-sidebar,
+.combat-tracker {
+    @include hero-tracker-vars-dark;
+}
+
+body.theme-light .combat-sidebar,
+body.theme-light .combat-tracker,
+.combat-sidebar.themed.theme-light,
+.themed.theme-light .combat-tracker {
+    @include hero-tracker-vars-light;
+}
+
+// The sidebar/popout follows the INTERFACE theme (.themed.theme-{x} on the tab
+// element), while body.theme-light tracks the APPLICATIONS theme. With
+// interface=dark + applications=light, the body.theme-light block above matched
+// even though core paints the element dark — re-assert the element's own theme
+// at higher specificity so mixed setups render coherently.
+.combat-sidebar.themed.theme-dark,
+.themed.theme-dark .combat-tracker {
+    @include hero-tracker-vars-dark;
+}
+
+/* Current turn: core's --entry-active-bg is a white wash that disappears on
+   light backgrounds — give the acting row its own accent edge, tint, and bold
+   name. Sits BEFORE the disposition loop so an enabled disposition tint
+   (background-color, equal specificity, later in source) still wins the fill
+   while the edge and bold name persist. */
+.combat-tracker li.combatant.current-segment-member.active {
+    background: color-mix(in srgb, var(--color-border-highlight, #ff6400) 14%, transparent);
+    box-shadow: inset 4px 0 0 var(--color-border-highlight, #ff6400);
+}
+
+.combat-tracker li.combatant.current-segment-member.active .name {
+    font-weight: bold;
 }
 
 // .combat-sidebar covers the legacy tracker, .combat-tracker the single-combatant timeline
@@ -87,7 +121,7 @@ body.theme-light .combat-tracker,
 }
 
 .combat-sidebar .combatant {
-    border: 1px solid black;
+    border: 1px solid var(--hero-row-border, black);
 }
 
 /* --- HERO SYSTEM 6E SIDEBAR TIMELINE DESIGN MATRIX --- */
@@ -502,6 +536,9 @@ ol.combat-tracker.plain {
    leaked spacing under every collapsed header */
 .hero-single-tracker.hero-compact li.combatant.timeline-member:not(.active):not(.segment-member-hidden) {
     padding-block: 1px;
+    /* Members sit flush with their header's label (6px band padding + 6px label
+       margin) instead of core's 8px — without this they read as outdented */
+    padding-inline-start: 12px;
     min-height: 0;
 
     img.token-image {
@@ -510,17 +547,19 @@ ol.combat-tracker.plain {
 
     .token-name {
         display: flex;
-        flex-flow: row wrap;
+        /* nowrap: revealed hover controls must never wrap onto a second line —
+           the row's height is not allowed to change on hover */
+        flex-flow: row nowrap;
         align-items: center;
         column-gap: 6px;
         font-size: var(--font-size-12);
 
         /* The name owns the line: it grows into free space and only ellipsizes
-           when genuinely out of room — icons must never squeeze it out */
+           when genuinely out of room — icons must never squeeze it out entirely */
         strong,
         .name {
             flex: 1 1 auto;
-            min-width: 0;
+            min-width: 6ch;
             font-size: var(--font-size-12);
             line-height: 1.5;
         }
@@ -537,9 +576,16 @@ ol.combat-tracker.plain {
         display: none;
     }
 
+    /* Revealed controls fit INSIDE the 18px text line (12px × 1.5): core's
+       inline-control buttons default to --button-size: 1.5rem, which grew the
+       row on hover and shifted the whole list */
     &:hover .combatant-controls > :not(.token-effects) {
         display: inline-flex;
+        align-items: center;
         font-size: var(--font-size-10);
+        --button-size: 16px;
+        max-height: 16px;
+        flex: 0 0 auto;
     }
 
     /* Status icons stay glanceable inline, sized to content — never growing at
