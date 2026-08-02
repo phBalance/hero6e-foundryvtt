@@ -23,6 +23,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         Hooks.on("renderChatMessageHTML", wireTimingContestButton);
         Hooks.on("createActiveEffect", routeBareStatusToggle);
         Hooks.on("createActiveEffect", cancelDelayedOnIncapacity);
+        Hooks.on("createActiveEffect", stampKnockoutMoment);
         Hooks.once("ready", rebuildTurnsAtReady);
         Hooks.on("renderCombatTrackerConfig", injectTrackerConfigFields);
     }
@@ -2214,6 +2215,30 @@ function routeBareStatusToggle(effect, _options, userId) {
             .catch((e) => console.error(e));
     } catch (e) {
         console.error(`Aborted-status toggle routing failed`, e);
+    }
+}
+
+/**
+ * Records WHEN a combatant was Knocked Out (absolute segment). The per-Phase
+ * KO Recovery sweep needs it: RAW forbids a Recovery in the segment the
+ * character was Knocked Out (6E2 108, 5ER 411). Runs on the client that
+ * applied the status — it has owner rights on the actor's combatant.
+ */
+function stampKnockoutMoment(effect, _options, userId) {
+    try {
+        if (userId !== game.user.id) return;
+        if (!effect.statuses?.has("knockedOut")) return;
+        const actor = effect.parent;
+        if (actor?.documentName !== "Actor") return;
+        const active = activeSingleTrackerCombatFor(actor);
+        if (!active) return;
+        const { combat, combatant } = active;
+        if (!combatant.isOwner) return;
+        combatant
+            .setFlag(game.system.id, "koStartAbs", combat.currentAbs)
+            .catch((e) => console.error(`Knockout-moment stamp failed`, e));
+    } catch (e) {
+        console.error(`Knockout-moment stamp failed`, e);
     }
 }
 

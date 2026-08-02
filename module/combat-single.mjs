@@ -2035,6 +2035,8 @@ export class HeroSystem6eCombatSingle extends Combat {
                 [`flags.${game.system.id}.delayedActions`]: null,
                 [`flags.${game.system.id}.spentEndOn`]: null,
                 [`flags.${game.system.id}.koRecoveredOn`]: null,
+                [`flags.${game.system.id}.koRecoveredAbs`]: null,
+                [`flags.${game.system.id}.koStartAbs`]: null,
             });
         });
 
@@ -2240,6 +2242,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 await this._demotePassedPositionalHolds();
                 if (turnAdvance) await this._consumeExpiredHeldActions();
                 await this._clearExpiredAborts(elapsedSegments);
+                await this._grantKoPhaseRecoveries(elapsedSegments);
             }
 
             // Delayed actions can land mid-segment (Delayed Phase's half-DEX
@@ -2397,9 +2400,11 @@ export class HeroSystem6eCombatSingle extends Combat {
             }
         }
 
-        // Stunned clears at the end of the character's own Phase; KO'd
-        // characters take a free Recovery each of their Phases while STUN >= -10 —
-        // that recovery (without preventRecoverFromStun) is what wakes them up
+        // Stunned clears at the end of the character's own Phase. The KO'd
+        // per-Phase free Recovery is NOT granted here: RAW lands it at the very
+        // end of the segment, and Skip Defeated means a KO'd combatant usually
+        // never holds the pointer at all — _grantKoPhaseRecoveries sweeps every
+        // KO'd combatant's Phases (skipped or not) at each segment boundary
         if (actor.statuses.has("stunned")) {
             await actor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.stunEffect.id, {
                 active: false,
@@ -2408,15 +2413,46 @@ export class HeroSystem6eCombatSingle extends Combat {
                 combatant,
                 `${combatant.name} recovers from being stunned — their Phase was spent recovering and was skipped.`,
             );
-        } else if (actor.statuses.has("knockedOut")) {
-            if ((actor.getCharacteristic("stun")?.value ?? 0) >= -10) {
-                // Stamped like spentEndOn: overlapping update chains and rewind
-                // replays must not grant a second free Recovery
-                const koKey = this.round + this.segment / 100;
-                if ((combatant.getFlag(game.system.id, "koRecoveredOn") || 0) < koKey) {
-                    await combatant.setFlag(game.system.id, "koRecoveredOn", koKey);
-                    await actor.TakeRecovery({ asAction: false, token: combatant.token });
-                }
+        }
+    }
+
+    /**
+     * The per-Phase free Recovery for Knocked Out characters (6E2 108, 5ER 411:
+     * a KO'd character "cannot do anything except take Recoveries" and must take
+     * one every Phase, at the very end of the segment — but never in the segment
+     * they were Knocked Out). Runs at segment boundaries over every KO'd
+     * combatant with a natural Phase in a just-ended segment, so Phases skipped
+     * by Skip Defeated still recover. That Recovery (without
+     * preventRecoverFromStun) is what wakes them once STUN climbs above 0;
+     * deeply unconscious characters (STUN < -10) recover on the Post-Segment 12
+     * path only, per the Recovery Time Table.
+     * @param {number[]|null} elapsedSegments - Just-ended segment numbers, oldest
+     *   first; null when a full Turn (12+) elapsed
+     * @private
+     */
+    async _grantKoPhaseRecoveries(elapsedSegments) {
+        if (!this.started) return;
+        const currentAbs = this.currentAbs;
+        const count = elapsedSegments?.length ?? 12;
+        for (const combatant of this.combatants) {
+            const actor = combatant.actor;
+            if (!actor?.statuses.has("knockedOut")) continue;
+            if ((actor.getCharacteristic("stun")?.value ?? 0) < -10) continue;
+            const koStartAbs = combatant.getFlag(game.system.id, "koStartAbs");
+            // Monotonic high-water stamp: overlapping chains and rewind replays
+            // must not grant a second Recovery for the same Phase
+            const granted = combatant.getFlag(game.system.id, "koRecoveredAbs") ?? 0;
+            for (let abs = currentAbs - count; abs < currentAbs; abs++) {
+                if (abs <= granted) continue;
+                if (koStartAbs !== undefined && koStartAbs !== null && abs <= koStartAbs) continue;
+                const segment = ((abs - 1) % 12) + 1;
+                if (!combatant.hasPhaseInSegment(segment, abs)) continue;
+                await combatant.setFlag(game.system.id, "koRecoveredAbs", abs);
+                await this._combatCard(
+                    combatant,
+                    `${combatant.name} is Knocked Out — their Phase in ${HeroSystem6eCombatantSingle.phaseLabel(abs)} is spent on a free Recovery.`,
+                );
+                await actor.TakeRecovery({ asAction: false, token: combatant.token });
             }
         }
     }
@@ -4243,6 +4279,8 @@ const LEGACY_COMBATANT_FLAG_KEYS = [
     "lightningReflexes",
     "spentEndOn",
     "koRecoveredOn",
+    "koRecoveredAbs",
+    "koStartAbs",
     "endUsedForMovement",
     "heroHistory",
     "heldSlotTakenAbs",
