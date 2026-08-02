@@ -731,10 +731,15 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
                 // Delayed-action landing: informational marker, no controls
                 // (a truthy initiative keeps core's d20 roll button away)
                 const record = group.delayed;
+                // Per-user masking: the GM sees hidden targets' real names
+                const targetNames = (combat.delayedTargets?.(record) ?? []).map((t) =>
+                    t.hidden && !game.user.isGM ? "Unknown" : t.name,
+                );
+                const vsText = targetNames.length ? ` vs ${targetNames.join(", ")}` : "";
                 row.name =
                     record.kind === "haymaker"
-                        ? `💥 ${row.name} — Haymaker resolves`
-                        : `⏳ ${row.name} — ${record.label}`;
+                        ? `💥 ${row.name} — Haymaker resolves${vsText}`
+                        : `⏳ ${row.name} — ${record.label}${vsText}`;
                 row.initiative =
                     record.priority !== null && record.priority !== undefined ? String(record.priority) : "—";
                 row.effects = { icons: [], tooltip: "" };

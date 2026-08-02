@@ -2835,6 +2835,33 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
+     * A delayed record's declared targets that still resolve to tokens.
+     * @param {object} record
+     * @returns {{name: string, hidden: boolean}[]}
+     */
+    delayedTargets(record) {
+        const ids = record?.targetTokenIds?.length
+            ? record.targetTokenIds
+            : (record?.actionData?.targetTokenIds ?? []);
+        const targets = [];
+        for (const id of ids) {
+            const doc = this.scene?.tokens?.get(id) ?? canvas?.tokens?.get(id)?.document;
+            if (doc) targets.push({ name: doc.name, hidden: !!doc.hidden });
+        }
+        return targets;
+    }
+
+    /**
+     * Display names of a delayed record's targets for chat cards. Cards render the
+     * same content for every recipient, so GM-hidden tokens are masked outright.
+     * @param {object} record
+     * @returns {string[]}
+     */
+    delayedTargetNames(record) {
+        return this.delayedTargets(record).map((t) => (t.hidden ? "a hidden target" : t.name));
+    }
+
+    /**
      * Whether the combatant has any scheduled delayed action, optionally of a kind.
      * Reads the legacy single haymaker flag from in-flight combats too.
      * @param {Combatant} combatant
@@ -2978,6 +3005,8 @@ export class HeroSystem6eCombatSingle extends Combat {
         // Declaration labels read "their Haymaker" for the "X begins…" card;
         // possessive outcome cards drop the pronoun ("X's their Haymaker" #4603)
         const label = (record.label ?? "").replace(/^their\s+/i, "");
+        const targetNames = this.delayedTargetNames(record);
+        const targetText = targetNames.length ? ` against ${targetNames.join(", ")}` : "";
         if (id === "legacy-haymaker") {
             await combatant.update({ [`flags.${game.system.id}.haymaker`]: null });
         } else {
@@ -3019,7 +3048,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                     : "";
             const rollCard = {
                 speaker: ChatMessage.getSpeaker({ actor }),
-                content: `${actor?.name}'s ${label} ${record.kind === "haymaker" ? "lands" : "goes off"} now (${momentLabel}) — roll the attack.
+                content: `${actor?.name}'s ${label} ${record.kind === "haymaker" ? "lands" : "goes off"} now (${momentLabel})${targetText} — roll the attack.
                     <button type="button" class="hero-delayed-roll">Roll the attack now</button>${failButton}
                     <p class="hint">${hint}</p>`,
                 flags: {
@@ -3031,9 +3060,9 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (combatant.hidden) rollCard.whisper = ChatMessage.getWhisperRecipients("GM");
             await ChatMessage.create(rollCard);
         } else if (record.kind === "haymaker") {
-            outcome = `${actor?.name}'s ${label} resolves now — apply its damage (${momentLabel}).`;
+            outcome = `${actor?.name}'s ${label} resolves now${targetText} — apply its damage (${momentLabel}).`;
         } else {
-            outcome = `${actor?.name}'s ${label} goes off now (${momentLabel}) — resolve its effect. A target that moved since the declaration is missed automatically.`;
+            outcome = `${actor?.name}'s ${label} goes off now (${momentLabel})${targetText} — resolve its effect. A target that moved since the declaration is missed automatically.`;
         }
         if (outcome) await this._combatCard(combatant, outcome);
         await this.logEvent(cancelled ? "delayed.cancel" : "delayed.resolve", {
