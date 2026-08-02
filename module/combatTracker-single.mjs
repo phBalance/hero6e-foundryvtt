@@ -1,6 +1,6 @@
 import { HeroSystem6eCombatantSingle } from "./combatant-single.mjs";
 import { HeroSystem6eCombatSingle } from "./combat-single.mjs";
-import { isQuenchTestRunning } from "./utility/util.mjs";
+import { activeSingleTrackerCombatFor, isQuenchTestRunning } from "./utility/util.mjs";
 
 const { CombatTracker } = foundry.applications.sidebar.tabs;
 
@@ -22,6 +22,7 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
         Hooks.on("renderCombatTracker", decorateTrackerRender);
         Hooks.on("renderChatMessageHTML", wireTimingContestButton);
         Hooks.on("createActiveEffect", routeBareStatusToggle);
+        Hooks.on("createActiveEffect", cancelDelayedOnIncapacity);
         Hooks.once("ready", rebuildTurnsAtReady);
         Hooks.on("renderCombatTrackerConfig", injectTrackerConfigFields);
     }
@@ -2208,6 +2209,56 @@ function routeBareStatusToggle(effect, _options, userId) {
             .catch((e) => console.error(e));
     } catch (e) {
         console.error(`Aborted-status toggle routing failed`, e);
+    }
+}
+
+/**
+ * A wound-up Haymaker fails outright when its attacker is Stunned or Knocked
+ * Out before it lands (6E2 69; 5ER 389 — dying counts a fortiori). Runs on the
+ * client that applied the status (that client has owner rights on the actor).
+ * Extra Time interruption is explicitly GM discretion (6E1 375), so pending
+ * non-Haymaker records prompt the GM instead of auto-cancelling.
+ */
+function cancelDelayedOnIncapacity(effect, _options, userId) {
+    try {
+        if (userId !== game.user.id) return;
+        const statuses = effect.statuses;
+        if (!statuses?.size) return;
+        const incapacity = ["dead", "knockedOut", "stunned"].find((s) => statuses.has(s));
+        if (!incapacity) return;
+        const actor = effect.parent;
+        if (actor?.documentName !== "Actor") return;
+        const active = activeSingleTrackerCombatFor(actor);
+        if (!active) return;
+        const { combat, combatant } = active;
+        if (!combatant.isOwner) return;
+        const records = combat.delayedActionsFor(combatant);
+        if (!records.length) return;
+
+        const statusLabel = { dead: "killed", knockedOut: "Knocked Out", stunned: "Stunned" }[incapacity];
+        const work = (async () => {
+            for (const [id, record] of records) {
+                if (record.kind !== "haymaker") continue;
+                await combat._finishDelayedAction(combatant, id, record, {
+                    cancelled: true,
+                    reason: `${combatant.name} was ${statusLabel} before it landed`,
+                });
+            }
+            const discretionary = records.filter(([, r]) => r.kind !== "haymaker");
+            if (discretionary.length) {
+                const labels = discretionary.map(([, r]) => r.label).join(", ");
+                await ChatMessage.create({
+                    speaker: ChatMessage.getSpeaker({ actor }),
+                    whisper: ChatMessage.getWhisperRecipients("GM"),
+                    content: `${combatant.name} was ${statusLabel} while ${labels} is pending. Extra Time
+                        interruption is the GM's call (6E1 375) — use the declaration card's Cancel button
+                        if it stops (spent resources stay spent).`,
+                });
+            }
+        })();
+        work.catch((e) => console.error(`Incapacity-driven delayed-action cancel failed`, e));
+    } catch (e) {
+        console.error(`Incapacity-driven delayed-action cancel failed`, e);
     }
 }
 

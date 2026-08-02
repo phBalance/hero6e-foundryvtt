@@ -2966,13 +2966,18 @@ export class HeroSystem6eCombatSingle extends Combat {
      * @param {object} record
      * @param {object} options
      * @param {boolean} options.cancelled
+     * @param {boolean} [options.early]
+     * @param {string} [options.reason] - Cancellation cause, appended to the outcome card
      * @private
      */
-    async _finishDelayedAction(combatant, id, record, { cancelled, early = false } = {}) {
+    async _finishDelayedAction(combatant, id, record, { cancelled, early = false, reason = null } = {}) {
         const actor = combatant.actor;
         const momentLabel = early
             ? `${this.currentPhaseLabel}, early`
             : HeroSystem6eCombatantSingle.phaseLabel(record.resolveAbs ?? 0);
+        // Declaration labels read "their Haymaker" for the "X begins…" card;
+        // possessive outcome cards drop the pronoun ("X's their Haymaker" #4603)
+        const label = (record.label ?? "").replace(/^their\s+/i, "");
         if (id === "legacy-haymaker") {
             await combatant.update({ [`flags.${game.system.id}.haymaker`]: null });
         } else {
@@ -2989,7 +2994,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         let outcome;
         if (cancelled) {
-            outcome = `${actor?.name}'s ${record.label} is interrupted and lost${record.kind === "activation" ? " (resources already spent stay spent)" : ""}.`;
+            outcome = `${actor?.name}'s ${label} is interrupted and lost${reason ? ` — ${reason}` : ""}${record.kind === "activation" ? " (resources already spent stay spent)" : ""}.`;
         } else if (record.kind === "activation") {
             const item = record.itemUuid ? fromUuidSync(record.itemUuid) : null;
             if (item && !item.isActive) {
@@ -2998,8 +3003,8 @@ export class HeroSystem6eCombatSingle extends Combat {
                 await item.turnOn({ delayedResolution: true, token: combatant.token });
             }
             outcome = item?.isActive
-                ? `${actor?.name}'s ${record.label} activates now (${momentLabel}).`
-                : `${actor?.name}'s ${record.label} finished its Extra Time but could not activate — adjudicate (interrupted? Stunned?).`;
+                ? `${actor?.name}'s ${label} activates now (${momentLabel}).`
+                : `${actor?.name}'s ${label} finished its Extra Time but could not activate — adjudicate (interrupted? Stunned?).`;
         } else if ((record.kind === "attack" || record.kind === "haymaker") && record.actionData) {
             // The attack is ROLLED now (it happens when it goes off); the stored
             // declaration rides on the message flag
@@ -3014,7 +3019,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                     : "";
             const rollCard = {
                 speaker: ChatMessage.getSpeaker({ actor }),
-                content: `${actor?.name}'s ${record.label} ${record.kind === "haymaker" ? "lands" : "goes off"} now (${momentLabel}) — roll the attack.
+                content: `${actor?.name}'s ${label} ${record.kind === "haymaker" ? "lands" : "goes off"} now (${momentLabel}) — roll the attack.
                     <button type="button" class="hero-delayed-roll">Roll the attack now</button>${failButton}
                     <p class="hint">${hint}</p>`,
                 flags: {
@@ -3026,9 +3031,9 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (combatant.hidden) rollCard.whisper = ChatMessage.getWhisperRecipients("GM");
             await ChatMessage.create(rollCard);
         } else if (record.kind === "haymaker") {
-            outcome = `${actor?.name}'s ${record.label} resolves now — apply its damage (${momentLabel}).`;
+            outcome = `${actor?.name}'s ${label} resolves now — apply its damage (${momentLabel}).`;
         } else {
-            outcome = `${actor?.name}'s ${record.label} goes off now (${momentLabel}) — resolve its effect. A target that moved since the declaration is missed automatically.`;
+            outcome = `${actor?.name}'s ${label} goes off now (${momentLabel}) — resolve its effect. A target that moved since the declaration is missed automatically.`;
         }
         if (outcome) await this._combatCard(combatant, outcome);
         await this.logEvent(cancelled ? "delayed.cancel" : "delayed.resolve", {
