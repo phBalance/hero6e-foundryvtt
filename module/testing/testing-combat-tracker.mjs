@@ -2163,6 +2163,152 @@ export function registerCombatTests(quench) {
                     ).to.be.true;
                 });
 
+                it("Should keep a pending Haymaker across a forward-and-back segment step", async function () {
+                    const pacer = await makeActor("_Quench HMR Pacer", { dex: 20, spd: 12 });
+                    const bruiser = await makeActor("_Quench HMR Bruiser", { dex: 12, spd: 4 });
+                    const tail = await makeActor("_Quench HMR Tail", { dex: 5, spd: 12 });
+                    const combat = await makeCombat([pacer, bruiser, tail]);
+                    await combat.startCombat();
+                    const combatant = combatantFor(combat, bruiser);
+
+                    // Declared during the bruiser's own Segment 12 stop
+                    await combat.nextTurn(); // pacer (20) → bruiser (12)
+                    expect(combat.combatant.actorId).to.equal(bruiser.id);
+                    await combat.scheduleHaymaker(bruiser);
+                    expect(combat.hasDelayedAction(combatant, "haymaker")).to.be.true;
+
+                    await combat.nextTurn(); // tail (5)
+                    await combat.nextTurn(); // Segment 1 (pacer)
+                    expect(combat.segment).to.equal(1);
+                    expect(combat.hasDelayedAction(combatant, "haymaker"), "wind-up survives the advance").to.be.true;
+
+                    // Stepping back lands on Segment 12's LAST stop (the tail) — the
+                    // declaration happened at an earlier stop and must survive
+                    await combat.previousTurn();
+                    expect(combat.segment).to.equal(12);
+                    expect(combat.combatant.actorId).to.equal(tail.id);
+                    expect(combat.hasDelayedAction(combatant, "haymaker"), "wind-up survives stepping back past it").to
+                        .be.true;
+
+                    // One more step re-opens the DECLARER'S stop: now it un-declares
+                    await combat.previousTurn();
+                    expect(combat.combatant.actorId).to.equal(bruiser.id);
+                    expect(
+                        combat.hasDelayedAction(combatant, "haymaker"),
+                        "re-opening the declaration stop undoes the declaration",
+                    ).to.be.false;
+                });
+
+                it("Should cancel a wound-up Haymaker when the attacker is Stunned", async function () {
+                    const bruiser = await makeActor("_Quench HM Stunned", { dex: 12, spd: 4 });
+                    const combat = await makeCombat([bruiser]);
+                    await combat.startCombat();
+                    const combatant = combatantFor(combat, bruiser);
+
+                    await combat.scheduleHaymaker(bruiser);
+                    expect(combat.hasDelayedAction(combatant, "haymaker")).to.be.true;
+
+                    // 6E2 69 / 5ER 389: Stunned before the landing ruins the Haymaker
+                    await bruiser.toggleStatusEffect("stunned", { active: true });
+                    const cancelled = await waitUntil(() => !combat.hasDelayedAction(combatant, "haymaker"));
+                    expect(cancelled, "Stunned before the landing ruins the Haymaker").to.be.true;
+                });
+
+                it("Should grant the KO'd per-Phase free Recovery when Skip Defeated skips their Phase", async function () {
+                    const sleeper = await makeActor("_Quench KO Skipped", { dex: 10, spd: 4 });
+                    const pacer = await makeActor("_Quench KO Pacer", { dex: 20, spd: 12 });
+                    const combat = await makeCombat([sleeper, pacer]);
+                    const combatant = combatantFor(combat, sleeper);
+
+                    // Deep enough to stay KO'd through the first Recovery, inside the
+                    // every-Phase band (>= -10)
+                    await sleeper.update({ "system.characteristics.stun.value": -5 });
+                    await sleeper.createEmbeddedDocuments("ActiveEffect", [
+                        { name: "Knocked Out", img: "icons/svg/unconscious.svg", statuses: ["knockedOut"] },
+                    ]);
+
+                    const coreConfig = game.settings.get("core", Combat.CONFIG_SETTING);
+                    const savedSkipDefeated = coreConfig?.skipDefeated;
+                    await game.settings.set("core", Combat.CONFIG_SETTING, { ...coreConfig, skipDefeated: true });
+                    try {
+                        await combat.startCombat();
+                        // Skip Defeated: the KO'd sleeper never becomes the active combatant
+                        expect(combat.combatant.actorId).to.equal(pacer.id);
+
+                        // Leaving Segment 12 sweeps the sleeper's skipped Phase there
+                        await combat.nextTurn();
+                        expect(combat.segment).to.equal(1);
+                        const granted = await waitUntil(
+                            () => combatant.getFlag(game.system.id, "koRecoveredAbs") === abs(1, 12),
+                        );
+                        expect(granted, "skipped Phase in Segment 12 granted the free Recovery").to.be.true;
+                        const stunAfter = sleeper.system.characteristics.stun.value;
+                        expect(stunAfter, "REC applied to the negative STUN total").to.be.greaterThan(-5);
+                    } finally {
+                        await game.settings.set("core", Combat.CONFIG_SETTING, {
+                            ...game.settings.get("core", Combat.CONFIG_SETTING),
+                            skipDefeated: savedSkipDefeated,
+                        });
+                    }
+                });
+
+                it("Should re-fire the landing stop after rewinding off it", async function () {
+                    const bruiser = await makeActor("_Quench HM Refire", { dex: 12, spd: 12 });
+                    const tail = await makeActor("_Quench HM Refire Tail", { dex: 5, spd: 12 });
+                    const combat = await makeCombat([bruiser, tail]);
+                    await combat.startCombat();
+                    const combatant = combatantFor(combat, bruiser);
+
+                    await combat.scheduleHaymaker(bruiser); // declared at the bruiser's Segment 12 stop
+                    await combat.nextTurn(); // tail
+                    await combat.nextTurn(); // Segment 1: tail's Phase (bruiser's is consumed by the wind-up)
+                    expect(combat.segment).to.equal(1);
+                    expect(combat.combatant.actorId).to.equal(tail.id);
+
+                    await combat.nextTurn(); // the landing stop
+                    expect(combat.atDelayedLandingStop, "landing stop reached").to.be.true;
+                    const landedOnce = await waitUntil(
+                        () => combat.delayedActionsFor(combatant, "haymaker")[0]?.[1]?.landed === true,
+                    );
+                    expect(landedOnce, "the stop fired and kept the record").to.be.true;
+
+                    // Rewinding off the stop un-lands the record and re-opens the
+                    // segment's last real stop
+                    await combat.previousTurn();
+                    expect(combat.atDelayedLandingStop).to.be.false;
+                    expect(combat.combatant.actorId).to.equal(tail.id);
+                    const record = combat.delayedActionsFor(combatant, "haymaker")[0]?.[1];
+                    expect(record, "record survives the rewind").to.exist;
+                    expect(record.landed, "record un-landed for the replay").to.be.false;
+
+                    // The replay re-fires the stop, then leaving cleans the record up
+                    await combat.nextTurn();
+                    expect(combat.atDelayedLandingStop, "landing stop re-fires on replay").to.be.true;
+                    await combat.nextTurn();
+                    const cleaned = await waitUntil(() => !combat.hasDelayedAction(combatant, "haymaker"));
+                    expect(cleaned, "record cleaned up once the landing segment is left").to.be.true;
+                });
+
+                it("Should advance to the next populated segment when a deletion empties the current one", async function () {
+                    const walker = await makeActor("_Quench Del Walker", { dex: 20, spd: 3 });
+                    const loner = await makeActor("_Quench Del Loner", { dex: 10, spd: 2 });
+                    const combat = await makeCombat([walker, loner]);
+                    await combat.startCombat();
+
+                    // Segment 12 (both) → Segment 4 is the walker's alone (SPD 3: 4/8/12)
+                    await combat.nextTurn(); // loner's Segment 12 stop
+                    await combat.nextTurn(); // Segment 4: walker only
+                    expect(combat.segment).to.equal(4);
+                    expect(combat.combatant.actorId).to.equal(walker.id);
+
+                    // Deleting the segment's only combatant advances to Segment 6 (loner)
+                    await combat.deleteEmbeddedDocuments("Combatant", [combatantFor(combat, walker).id]);
+                    const advanced = await waitUntil(
+                        () => combat.segment === 6 && combat.combatant?.actorId === loner.id,
+                    );
+                    expect(advanced, "pointer advanced to the next populated segment").to.be.true;
+                });
+
                 it("Should shuffle group members per segment and split one out on demand", async function () {
                     const boss = await makeActor("_Quench Group Boss", { dex: 14, spd: 2 });
                     const combat = await makeCombat([boss]);
