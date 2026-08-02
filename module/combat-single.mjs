@@ -1688,12 +1688,14 @@ export class HeroSystem6eCombatSingle extends Combat {
                 }),
             ]),
         );
-        const rewindResets = this._rewindHoldFlagResets(currentAbs, { targetPriority });
+        const { resets, haymakerTeardowns } = this._rewindHoldFlagResets(currentAbs, { targetPriority });
 
-        return this.update(
-            { ...inlineUpdateData, combatants: rewindResets },
+        const result = await this.update(
+            { ...inlineUpdateData, combatants: resets },
             { direction: -1, previousCombatantId: this.combatant?.id },
         );
+        await this._teardownRewoundHaymakers(haymakerTeardowns);
+        return result;
     }
 
     /**
@@ -1740,11 +1742,6 @@ export class HeroSystem6eCombatSingle extends Combat {
                 initiative: this.getInitiativePriority(combatant, prevSegment, { queryAbs: prevAbs }),
             });
         });
-        for (const reset of this._rewindHoldFlagResets(prevAbs)) {
-            const existing = combatantUpdates.find((u) => u._id === reset._id);
-            if (existing) Object.assign(existing, reset);
-            else combatantUpdates.push(reset);
-        }
 
         const recompiledTurns = this._predictTurns(prevSegment, {
             queryAbs: prevAbs,
@@ -1780,12 +1777,27 @@ export class HeroSystem6eCombatSingle extends Combat {
             this.eventLogAppendPayload([this.buildEvent("rewind", { data: { targetAbs: prevAbs } })]),
         );
 
+        // The rewind lands ON the segment's last stop and re-opens it — flag
+        // resets key off that landing priority (declarations before it survive).
+        // Prediction above only reads the initiative entries, so merging the
+        // flag resets in afterwards is safe.
+        const { resets, haymakerTeardowns } = this._rewindHoldFlagResets(prevAbs, {
+            targetPriority: updateData[`flags.${game.system.id}.actingPriority`],
+        });
+        for (const reset of resets) {
+            const existing = combatantUpdates.find((u) => u._id === reset._id);
+            if (existing) Object.assign(existing, reset);
+            else combatantUpdates.push(reset);
+        }
+
         const updateOptions = { direction: -1, previousCombatantId: this.combatant?.id };
         if (segmentDeltaCount < 0) {
             updateOptions.worldTime = { delta: segmentDeltaCount };
         }
 
-        return this.update({ ...updateData, combatants: combatantUpdates }, updateOptions);
+        const result = await this.update({ ...updateData, combatants: combatantUpdates }, updateOptions);
+        await this._teardownRewoundHaymakers(haymakerTeardowns);
+        return result;
     }
 
     /**
@@ -1890,11 +1902,28 @@ export class HeroSystem6eCombatSingle extends Combat {
      * second action in the replayed segment. Undoing a spent hold is a manual GM
      * correction (re-declare the hold).
      * @param {number} targetAbs
-     * @returns {object[]} Combatant update payloads keyed by _id
+     * @param {object} [options]
+     * @param {number|null} [options.targetPriority] - Priority of the stop the rewind lands on
+     * @returns {{resets: object[], haymakerTeardowns: Combatant[]}} Combatant update
+     *   payloads keyed by _id, plus combatants whose pending Haymaker un-declared
+     *   (the caller ends the wind-up AFTER the update applies)
      * @private
      */
     _rewindHoldFlagResets(targetAbs, { targetPriority = null } = {}) {
         const resets = [];
+        const haymakerTeardowns = [];
+        // A declaration "un-happens" only when the rewind re-opens its stop or an
+        // earlier one: landings in a LATER segment never undo it, landings in an
+        // earlier segment always do, and within the declaration's own segment the
+        // landed-on stop re-opens — declarations made at or after that stop
+        // (priority at or below the landing priority) come undone with it.
+        const rewindUndoes = (declaredAbs, declaredPriority) => {
+            if ((declaredAbs ?? Infinity) > targetAbs) return true;
+            if ((declaredAbs ?? Infinity) < targetAbs) return false;
+            if (targetPriority === null || targetPriority === undefined) return false;
+            if (declaredPriority === null || declaredPriority === undefined) return true;
+            return declaredPriority <= targetPriority;
+        };
         for (const combatant of this.combatants) {
             const update = {};
             if (combatant.heldAction?.mode === "position" && (combatant.heldSlotTakenAbs ?? -1) >= targetAbs) {
@@ -1928,21 +1957,53 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (pendingSpd && (pendingSpd.declaredAbs ?? Infinity) >= targetAbs) {
                 update[`flags.${game.system.id}.pendingSpd`] = null;
             }
-            // A Haymaker wound up at or after the target is undone by the rewind
+            // Records predating declaredPriority fall back to the declarer's own
+            // natural stop in the declaration segment
+            const naturalPriorityAt = (abs) =>
+                this.getInitiativePriority(combatant, ((abs - 1) % 12) + 1, { queryAbs: abs });
+            // A Haymaker wound up at or after the rewind's landing stop is undone
             const haymaker = combatant.getFlag(game.system.id, "haymaker");
-            if (haymaker && (haymaker.declaredAbs ?? Infinity) >= targetAbs) {
+            if (
+                haymaker &&
+                rewindUndoes(
+                    haymaker.declaredAbs,
+                    haymaker.declaredPriority ?? naturalPriorityAt(haymaker.declaredAbs ?? targetAbs),
+                )
+            ) {
                 update[`flags.${game.system.id}.haymaker`] = null;
+                haymakerTeardowns.push(combatant);
             }
-            // Likewise delayed actions declared at or after the target
+            // Likewise delayed actions declared at or after the landing stop
             const delayed = combatant.getFlag(game.system.id, "delayedActions") ?? {};
             for (const [delayedId, record] of Object.entries(delayed)) {
-                if ((record?.declaredAbs ?? Infinity) >= targetAbs) {
+                if (
+                    rewindUndoes(
+                        record?.declaredAbs,
+                        record?.declaredPriority ?? naturalPriorityAt(record?.declaredAbs ?? targetAbs),
+                    )
+                ) {
                     update[`flags.${game.system.id}.delayedActions.-=${delayedId}`] = null;
+                    if (record?.kind === "haymaker") haymakerTeardowns.push(combatant);
                 }
             }
             if (Object.keys(update).length > 0) resets.push({ _id: combatant.id, ...update });
         }
-        return resets;
+        return { resets, haymakerTeardowns };
+    }
+
+    /**
+     * Ends the Haymaker wind-up (the -5 DCV effect and active maneuver item) for
+     * combatants whose pending Haymaker a rewind just un-declared — a bare record
+     * delete would strand the maneuver active with no landing left to clean it up.
+     * Runs AFTER the rewind update so a surviving sibling record keeps the wind-up.
+     * @param {Combatant[]} combatants
+     * @private
+     */
+    async _teardownRewoundHaymakers(combatants) {
+        for (const combatant of new Set(combatants)) {
+            if (this.delayedActionsFor(combatant, "haymaker").length > 0) continue;
+            await endHaymakerManeuver(combatant.actor, { token: combatant.token });
+        }
     }
 
     /**
@@ -2567,6 +2628,8 @@ export class HeroSystem6eCombatSingle extends Combat {
      *
      *   { kind: "haymaker"|"attack"|"activation",
      *     label, itemUuid, declaredAbs, resolveAbs,
+     *     declaredPriority,  // stop position at declaration; rewinds keep the record
+     *                        // until the landing re-opens that stop (null on old records)
      *     priority,          // marker position in the landing segment; null = very end
      *     commit,            // true = no other Actions until it resolves (Extra Phase)
      *     targetTokenIds,    // live targets at declaration
@@ -2721,6 +2784,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             label: plan.label,
             itemUuid: item?.uuid ?? plan.itemUuid ?? null,
             declaredAbs: currentAbs,
+            declaredPriority: this.getFlag(game.system.id, "actingPriority") ?? null,
             resolveAbs: plan.resolveAbs,
             priority: plan.priority ?? null,
             commit: !!plan.commit,
