@@ -989,8 +989,9 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         const result = await this.update({ ...startPayload, combatants: combatantUpdates });
 
-        // Combat opens on Segment 12: offer/apply Lightning Reflexes right away
-        // (the started flag short-circuits _onUpdate's boundary maintenance)
+        // Combat opens on Segment 12: offer/apply Lightning Reflexes right away.
+        // The boundary maintenance also fires this for the start update; auto
+        // mode dedups via lrElevatedAbs, prompt mode can double-whisper
         await this._segmentStartLightningReflexes();
         return result;
     }
@@ -2359,7 +2360,13 @@ export class HeroSystem6eCombatSingle extends Combat {
         // Only the active GM runs side effects so multiple connected GMs don't double-fire them
         if (!game.users.activeGM?.isSelf) return;
 
-        // Combat start/reset updates are not turn flow
+        // started is a derived getter (round > 0), not a schema field: the
+        // startCombat/reset payloads' started key never survives into the
+        // update diff, so this guard cannot fire and combat-start updates DO
+        // run the boundary maintenance below (with no previousSegment option,
+        // i.e. elapsedSegments undefined). The first combatant's phase-start
+        // work at combat start depends on that, so the sweeps must treat
+        // undefined as "nothing elapsed" rather than being skipped here.
         if (changed.started !== undefined) return;
 
         const turnChanged = changed.turn !== undefined;
@@ -2612,14 +2619,21 @@ export class HeroSystem6eCombatSingle extends Combat {
      * preventRecoverFromStun) is what wakes them once STUN climbs above 0;
      * deeply unconscious characters (STUN < -10) recover on the Post-Segment 12
      * path only, per the Recovery Time Table.
-     * @param {number[]|null} elapsedSegments - Just-ended segment numbers, oldest
-     *   first; null when a full Turn (12+) elapsed
+     * @param {number[]|null} [elapsedSegments] - Just-ended segment numbers, oldest
+     *   first; null when a full Turn (12+) elapsed. Undefined means no segments
+     *   elapsed (the combat-start update is a boundary write with no
+     *   previousSegment) — treating it as a full Turn would sweep the 12
+     *   pre-combat positions and grant phantom Recoveries that wake the
+     *   character before the first advance.
      * @private
      */
     async _grantKoPhaseRecoveries(elapsedSegments) {
         if (!this.started) return;
+        if (elapsedSegments === undefined) return;
         const currentAbs = this.currentAbs;
         const count = elapsedSegments?.length ?? 12;
+        // Combat opens at Turn 1 Segment 12: no Phase can predate that position
+        const combatStartAbs = HeroSystem6eCombatantSingle.absoluteSegment(1, 12);
         for (const combatant of this.combatants) {
             const actor = combatant.actor;
             if (!actor?.statuses.has("knockedOut")) continue;
@@ -2627,7 +2641,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             // Monotonic high-water stamp: overlapping chains and rewind replays
             // must not grant a second Recovery for the same Phase
             const granted = combatant.getFlag(game.system.id, "koRecoveredAbs") ?? 0;
-            for (let abs = currentAbs - count; abs < currentAbs; abs++) {
+            for (let abs = Math.max(currentAbs - count, combatStartAbs); abs < currentAbs; abs++) {
                 // Re-checked per Phase, not per sweep: an earlier grant in this
                 // very loop may have woken the character (TakeRecovery without
                 // preventRecoverFromStun clears the KO once STUN climbs above 0)
