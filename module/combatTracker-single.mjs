@@ -1,5 +1,6 @@
 import { HeroSystem6eCombatantSingle } from "./combatant-single.mjs";
 import { HeroSystem6eCombatSingle } from "./combat-single.mjs";
+import { overrideCanAct } from "./settings/settings-helpers.mjs";
 import { activeSingleTrackerCombatFor, isQuenchTestRunning } from "./utility/util.mjs";
 
 const { CombatTracker } = foundry.applications.sidebar.tabs;
@@ -130,6 +131,26 @@ export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
             this.element.addEventListener("click", this._onTokenEffectClick.bind(this));
             this._heroEffectsClickBound = true;
         }
+    }
+
+    /**
+     * Guards the footer's full-Turn step buttons against misclicks (legacy-tracker
+     * parity): a Round jump crosses 12 segments of maintenance and Post-Segment 12
+     * recovery, and spent holds are not restored on rewind — so it must be held
+     * behind the OverrideCanAct key. Core routes the footer buttons through this
+     * fallback with the Combat method name in data-action.
+     * @override
+     * @protected
+     */
+    async _onClickAction(event, target) {
+        const action = target?.dataset?.action;
+        if (["previousRound", "nextRound"].includes(action) && this.viewed?.started && !overrideCanAct) {
+            const overrideKeyText = game.keybindings.get(game.system.id, "OverrideCanAct")?.[0]?.key ?? "ControlLeft";
+            return ui.notifications.warn(
+                `Skipping a full Turn is unusual. Hold ${overrideKeyText} and click again to confirm.`,
+            );
+        }
+        return super._onClickAction(event, target);
     }
 
     /**
@@ -1990,6 +2011,9 @@ function decorateTrackerRender(app, html, _context, options) {
     }
     element.classList.toggle("hero-compact", compact);
 
+    // Before the started-guard: the unstarted DEX preview gets tooltips too
+    injectInitiativeTooltips(app, element);
+
     if (!app?.viewed || !app.viewed.started) return;
 
     const encounterTitle = element.querySelector(".combat-tracker-header .encounter-title");
@@ -2003,6 +2027,32 @@ function decorateTrackerRender(app, html, _context, options) {
     markEffectIconsClickable(app, element);
     injectHoldControls(app, element);
     injectLrControls(app, element);
+}
+
+/**
+ * Legacy-tracker-parity composition tooltip on each row's initiative value,
+ * e.g. "14DEX 4SPD 2LR". Post-render decoration because core's tracker template
+ * has no tooltip slot in its initiative markup. Scoped LR levels count only on
+ * rows displaying an elevated position (hero-lr-row), never the Phase remainder.
+ */
+function injectInitiativeTooltips(app, element) {
+    const combat = app.viewed;
+    if (!combat) return;
+    for (const li of element.querySelectorAll("li.combatant[data-combatant-id]")) {
+        if (li.classList.contains("hero-history-row") || li.classList.contains("hero-delayed-row")) continue;
+        const combatant = combat.combatants.get(li.dataset.combatantId);
+        const actor = combatant?.actor;
+        if (!actor) continue;
+        const initiativeEl = li.querySelector(".token-initiative");
+        if (!initiativeEl) continue;
+        const charKey = actor.system?.initiativeCharacteristic || "dex";
+        const charValue = actor.system?.characteristics?.[charKey]?.value ?? 0;
+        const lr = combatant.lightningReflexes;
+        let lrLevels = lr?.always ?? 0;
+        if (li.classList.contains("hero-lr-row")) lrLevels += lr?.scoped?.levels ?? 0;
+        const lrText = lrLevels > 0 ? ` ${lrLevels}LR` : "";
+        initiativeEl.dataset.tooltip = `${charValue}${charKey.toUpperCase()} ${combatant.combatSpd}SPD${lrText}`;
+    }
 }
 
 /** Clears core's active highlights, re-marks the acting row, and auto-scrolls it into view. */

@@ -314,15 +314,6 @@ export default class SettingsHelpers {
             onChange: (value) => HEROSYS.log(false, value),
         });
 
-        game.settings.register(module, "automation2", {
-            name: game.i18n.localize("Settings.AutomationPreview.Name"),
-            scope: "world",
-            config: false, // UI is now part of AutomationMenu.  Intend to allow improved granularity.
-            type: Object,
-            default: {},
-            onChange: (value) => HEROSYS.log(false, value),
-        });
-
         game.settings.registerMenu(module, "AutomationMenu", {
             name: game.i18n.localize("Settings.Automation.Menu.Name"),
             label: game.i18n.localize("Settings.Automation.Menu.Label"), // The text label used in the button
@@ -401,12 +392,21 @@ export default class SettingsHelpers {
         });
 
         // TODO(post-alpha): remove this setting in favour of FoundryVTT's core
-        // combatTrackerConfig.turnMarker.disposition setting
+        // combatTrackerConfig.turnMarker.disposition setting.
+        // Only the legacy tracker reads it, so hide it from config when the
+        // single tracker is on (which follows the core setting instead) — a
+        // visible-but-dead toggle reads as broken. Read from storage directly:
+        // singleCombatantTracker registers later in this function, and its
+        // requiresReload makes the stored value authoritative for this session.
+        const storedSingleTrackerValue = game.settings.storage
+            .get("world")
+            ?.getSetting?.(`${module}.singleCombatantTracker`)?.value;
+        const singleTrackerOn = storedSingleTrackerValue === true || storedSingleTrackerValue === "true";
         game.settings.register(module, "combatTrackerDispositionHighlighting", {
             name: game.i18n.localize("Settings.combatTrackerDispositionHighlighting.Name"),
             hint: game.i18n.localize("Settings.combatTrackerDispositionHighlighting.Hint"),
             scope: "client",
-            config: true,
+            config: !singleTrackerOn,
             type: Boolean,
             default: true,
             onChange: () => ui.combat.render(),
@@ -454,16 +454,6 @@ export default class SettingsHelpers {
             requiresReload: true,
         });
 
-        game.settings.register(module, "ShowOnlyVisibleCombatants", {
-            name: game.i18n.localize("Settings.ShowOnlyVisibleCombatants.Name"),
-            hint: game.i18n.localize("Settings.ShowOnlyVisibleCombatants.Hint"),
-            scope: "world",
-            config: true,
-            type: Boolean,
-            default: false,
-            requiresReload: false,
-        });
-
         function determineKillingAttackDefaultDiceParts() {
             return { d6Count: 0, d6Less1DieCount: 0, halfDieCount: 0, constant: 0 };
         }
@@ -508,16 +498,6 @@ export default class SettingsHelpers {
                 pc: "PC only",
                 none: "None",
             },
-            requiresReload: false,
-        });
-
-        game.settings.register(module, "defaultDexInitiative", {
-            name: game.i18n.localize("Settings.defaultDexInitiative.Name"),
-            hint: game.i18n.localize("Settings.defaultDexInitiative.Hint"),
-            scope: "client",
-            config: true,
-            type: Boolean,
-            default: false,
             requiresReload: false,
         });
 

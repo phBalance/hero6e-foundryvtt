@@ -933,6 +933,7 @@ export class HeroSystem6eCombatSingle extends Combat {
     /** @override */
     async startCombat() {
         console.log(`[${game.system.id}] Initializing Hero System Turn 1 at Segment 12...`);
+        this._playCombatSound("startEncounter");
 
         // A reused Combat document (core Reset, prior run) still carries the last
         // run's flags — holds, ledger, SPD baselines — and the fresh ledger events
@@ -987,7 +988,15 @@ export class HeroSystem6eCombatSingle extends Combat {
         }
         Object.assign(startPayload, this.eventLogAppendPayload(startEvents));
 
+        // Core fires this inside its own startCombat, which this override never
+        // reaches — modules (turn timers, automation) listen for it
+        Hooks.callAll("combatStart", this, startPayload);
+
         const result = await this.update({ ...startPayload, combatants: combatantUpdates });
+
+        // V14 refreshes combat-duration effect tracking at combat start; the
+        // registry does not exist on V13
+        await getDocumentClass("ActiveEffect").registry?.refresh?.("combatStart", { combat: this });
 
         // Combat opens on Segment 12: offer/apply Lightning Reflexes right away.
         // The boundary maintenance also fires this for the start update; auto
@@ -1203,6 +1212,21 @@ export class HeroSystem6eCombatSingle extends Combat {
     }
 
     /**
+     * Emits core's pre-update turn-flow hook (combatTurn, or combatRound when the
+     * update changes the round) for module compatibility: the flow overrides here
+     * commit their own updates, so core's emit points in nextTurn / nextRound /
+     * previousTurn / previousRound never run. Fired on the committing client only,
+     * before the update, exactly like core.
+     * @param {object} updateData
+     * @param {object} updateOptions
+     * @private
+     */
+    _emitTurnFlowHook(updateData, updateOptions) {
+        const hook = updateData.round !== undefined && updateData.round !== this.round ? "combatRound" : "combatTurn";
+        Hooks.callAll(hook, this, updateData, updateOptions);
+    }
+
+    /**
      * Advances to the next turn: within-segment selection first, then a segment scan.
      * @override
      */
@@ -1329,15 +1353,17 @@ export class HeroSystem6eCombatSingle extends Combat {
                 }),
             ]),
         );
+        // landingStop: the declarer may already hold the pointed-at row, making
+        // this a flags-only diff — the option tells _onUpdate it is still a
+        // real pointer movement (cards must fire, phase-end must run)
+        const landingOptions = {
+            direction: 1,
+            previousCombatantId: ending?.id ?? null,
+            landingStop: true,
+        };
+        this._emitTurnFlowHook(payload, landingOptions);
         return {
-            // landingStop: the declarer may already hold the pointed-at row, making
-            // this a flags-only diff — the option tells _onUpdate it is still a
-            // real pointer movement (cards must fire, phase-end must run)
-            result: await this.update(payload, {
-                direction: 1,
-                previousCombatantId: ending?.id ?? null,
-                landingStop: true,
-            }),
+            result: await this.update(payload, landingOptions),
         };
     }
 
@@ -1419,10 +1445,12 @@ export class HeroSystem6eCombatSingle extends Combat {
                 ]),
             );
         }
+        const withinSegmentOptions = { direction: 1, previousCombatantId: ending?.id };
+        this._emitTurnFlowHook(withinSegmentPayload, withinSegmentOptions);
         return {
             result: await this.update(
                 { ...withinSegmentPayload, combatants: inlineCombatantUpdates },
-                { direction: 1, previousCombatantId: ending?.id },
+                withinSegmentOptions,
             ),
         };
     }
@@ -1660,6 +1688,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             updateOptions.worldTime = { delta: segmentDeltaCount };
         }
 
+        this._emitTurnFlowHook(updateData, updateOptions);
         const result = await this.update({ ...updateData, combatants: persistedCombatantUpdates }, updateOptions);
 
         return result;
@@ -1750,10 +1779,9 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (existing) Object.assign(existing, reset);
             else combatantUpdates.push(reset);
         }
-        const result = await this.update(
-            { ...payload, combatants: combatantUpdates },
-            { direction: -1, previousCombatantId: this.combatant?.id },
-        );
+        const rewindOptions = { direction: -1, previousCombatantId: this.combatant?.id };
+        this._emitTurnFlowHook(payload, rewindOptions);
+        const result = await this.update({ ...payload, combatants: combatantUpdates }, rewindOptions);
         await this._teardownRewoundHaymakers(haymakerTeardowns);
         return { result };
     }
@@ -1817,7 +1845,9 @@ export class HeroSystem6eCombatSingle extends Combat {
                 this.buildEvent("rewind", { combatant: stop, data: { targetAbs: currentAbs } }),
             ]),
         );
-        return { result: await this.update(payload, { direction: -1, previousCombatantId: previousId }) };
+        const lrRewindOptions = { direction: -1, previousCombatantId: previousId };
+        this._emitTurnFlowHook(payload, lrRewindOptions);
+        return { result: await this.update(payload, lrRewindOptions) };
     }
 
     /**
@@ -1846,10 +1876,9 @@ export class HeroSystem6eCombatSingle extends Combat {
         );
         const { resets, haymakerTeardowns } = this._rewindHoldFlagResets(currentAbs, { targetPriority });
 
-        const result = await this.update(
-            { ...inlineUpdateData, combatants: resets },
-            { direction: -1, previousCombatantId: this.combatant?.id },
-        );
+        const rewindOptions = { direction: -1, previousCombatantId: this.combatant?.id };
+        this._emitTurnFlowHook(inlineUpdateData, rewindOptions);
+        const result = await this.update({ ...inlineUpdateData, combatants: resets }, rewindOptions);
         await this._teardownRewoundHaymakers(haymakerTeardowns);
         return result;
     }
@@ -1951,6 +1980,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             updateOptions.worldTime = { delta: segmentDeltaCount };
         }
 
+        this._emitTurnFlowHook(updateData, updateOptions);
         const result = await this.update({ ...updateData, combatants: combatantUpdates }, updateOptions);
         await this._teardownRewoundHaymakers(haymakerTeardowns);
         return result;
@@ -2000,6 +2030,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const updateOptions = { direction: 1, turnAdvance: true };
         updateOptions.worldTime = { delta: 12 };
 
+        this._emitTurnFlowHook(updateData, updateOptions);
         return this.update({ ...updateData, combatants: [] }, updateOptions);
     }
 
@@ -2050,6 +2081,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         const updateOptions = { direction: -1 };
         updateOptions.worldTime = { delta: -12 };
 
+        this._emitTurnFlowHook(updateData, updateOptions);
         return this.update({ ...updateData, combatants: combatantUpdates }, updateOptions);
     }
 
