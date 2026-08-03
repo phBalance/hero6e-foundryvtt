@@ -1107,24 +1107,3 @@ Hooks.once("setup", function () {
     // Apply custom application for Compendiums for parent/child features
     game.packs.filter((p) => p.metadata.type === "Item").forEach((p) => (p.applicationClass = HeroSystem6eCompendium));
 });
-
-Hooks.on("getCombatTrackerEntryContext", function (html, menu) {
-    const entry = {
-        name: "COMBAT.CombatantRemoveHero",
-        icon: '<i class="fas fa-trash"></i>',
-        callback: (li) => {
-            const combat = game.combats.viewed;
-            const combatant = combat.combatants.get(li.data("combatant-id"));
-            const tokenId = combatant?.tokenId;
-            if (tokenId) {
-                const combatantIds = combat.combatants.reduce((ids, c) => {
-                    if (tokenId === c.tokenId) ids.push(c.id);
-                    return ids;
-                }, []);
-                return combat.deleteEmbeddedDocuments("Combatant", combatantIds);
-            }
-        },
-    };
-    menu.findSplice((o) => o.name === "COMBAT.CombatantRemove");
-    menu.push(entry);
-});
