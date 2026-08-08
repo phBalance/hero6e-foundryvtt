@@ -19586,6 +19586,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
         },
         {},
     );
+    addPower(
+        {
+            // ENTANGLE related
+            key: "SUSCEPTIBLE",
+            behaviors: ["modifier"],
+            type: ["modifier"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<MODIFIER XMLID="SUSCEPTIBLE" ID="1785780670846" BASECOST="-0.25" LEVELS="0" ALIAS="Susceptible" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="UNCOMMON" OPTIONID="UNCOMMON" OPTION_ALIAS="Uncommon" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="special solvent" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
 
     addPower(
         {
