@@ -3172,15 +3172,24 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
                 console.warn(`targetToken.object.center was unexpected`);
             }
 
+            // Region shape sizes are in pixels.
+            const shape = aoeTemplate.shapes?.[0];
+            const templateSizeInMeters =
+                ((shape?.radius ?? shape?.length ?? 0) / canvas.grid.size) * getGridSizeInMeters();
+
+            if (!templateSizeInMeters) {
+                console.warn(`Unable to determine AoE template size, applying full effect`, aoeTemplate);
+            }
+
             if (hexTemplates && hexGrid) {
                 const gridSizeInMeters = getGridSizeInMeters();
                 distance = calculateDistanceBetween(aoeTemplate, targetTokenCenter).gridSpaces * gridSizeInMeters;
 
-                // NOTE: The grid size is half a hex smaller since the centre hex counts as 1" so template is 1m smaller (see item-attack-application.mjs)
-                pct = distance / (aoeTemplate.distance + 1);
+                // NOTE: The template is half a hex (1m) smaller since the centre hex counts as 1" (see _spawnAreaOfEffect)
+                pct = templateSizeInMeters ? distance / (templateSizeInMeters + 1) : 0;
             } else {
                 distance = calculateDistanceBetween(aoeTemplate, targetTokenCenter).distance;
-                pct = distance / aoeTemplate.distance;
+                pct = templateSizeInMeters ? distance / templateSizeInMeters : 0;
             }
 
             // Remove highest N terms
