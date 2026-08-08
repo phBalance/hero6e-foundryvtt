@@ -16,6 +16,8 @@ export async function CreateHeroCompendiums() {
     }
 }
 
+window.CreateHeroCompendiums = CreateHeroCompendiums;
+
 async function createItem(itemDataArray, packId) {
     try {
         await Item.createDocuments(itemDataArray, {
@@ -108,19 +110,21 @@ async function CreateHeroItems(edition) {
         await legacyHeroItemPack.deleteCompendium();
     }
 
-    // Delete compendium and re-create it.
-    let pack = game.packs.get(`world.${metadata.name}`);
-    if (pack) {
-        await pack.configure({ locked: false });
-        await pack.deleteCompendium();
+    // Delete compendium so we can recreate it.
+    const existingPack = game.packs.get(`world.${metadata.name}`);
+    if (existingPack) {
+        await existingPack.configure({ locked: false });
+        await existingPack.deleteCompendium();
     }
-    pack = await CompendiumCollection.createCompendium(metadata);
+
+    // Create a new compendium
+    const pack = await CompendiumCollection.createCompendium(metadata);
+    const folderRootId = null;
 
     if (pack.locked) {
         await pack.configure({ locked: false });
     }
 
-    // PH: FIXME: Is there a way to simplify just create them all at once?
     async function createFolderGetId(name, color, parentFolderId) {
         const folder = await Folder.create(
             { name, type: "Item", color, folder: parentFolderId },
@@ -132,8 +136,19 @@ async function CreateHeroItems(edition) {
         return folder.id;
     }
 
-    // POWERS
-    const folderPowersId = await createFolderGetId("Powers", CONFIG.HERO.folderColors["Powers"]);
+    function standardPrepareItemsForFolder(folderId) {
+        return function (power) {
+            const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
+            itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
+            itemData.folder = folderId;
+
+            return itemData;
+        };
+    }
+
+    //////////////////////////////////////////////////////////////////////////////
+    // POWERS and skill, perk, characteristic, and talent sub folders
+    const folderPowersId = await createFolderGetId("Powers", CONFIG.HERO.folderColors["Powers"], folderRootId);
 
     // Characteristics folder within powers
     const folderPowersCharacteristicsId = await createFolderGetId(
@@ -152,7 +167,7 @@ async function CreateHeroItems(edition) {
     // Skills folder within powers
     const folderPowersSkillsId = await createFolderGetId(
         "Skills",
-        CONFIG.HERO.folderColors["Powers.Skill"],
+        CONFIG.HERO.folderColors["Powers.Skills"],
         folderPowersId,
     );
 
@@ -163,9 +178,9 @@ async function CreateHeroItems(edition) {
         folderPowersId,
     );
 
-    const itemDataArray = [];
+    const preparedPowers = [];
 
-    for (const power of powers.filter(
+    const allPowers = powers.filter(
         (power) =>
             power.type != undefined &&
             !power.type.includes("martial") &&
@@ -175,10 +190,10 @@ async function CreateHeroItems(edition) {
             !power.behaviors.includes("adder") &&
             power.xml &&
             !power.key.startsWith("__"),
-    )) {
+    );
+    for (const power of allPowers) {
         const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
         itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
-        //console.log(power, itemData, bogusActor);
         if (power.type.includes("characteristic")) {
             itemData.folder = folderPowersCharacteristicsId;
         } else if (power.type.includes("perk")) {
@@ -192,7 +207,7 @@ async function CreateHeroItems(edition) {
             itemData.folder = folderPowersId;
         }
 
-        itemDataArray.push(itemData);
+        preparedPowers.push(itemData);
     }
 
     // SEPARATOR is a LIST with no name
@@ -204,67 +219,65 @@ async function CreateHeroItems(edition) {
         seperatorItemData.name = "Separator";
         seperatorItemData.system.ALIAS = "";
         seperatorItemData.system.NAME = "";
-        itemDataArray.push(seperatorItemData);
+        preparedPowers.push(seperatorItemData);
     } else {
         console.error(`Failed to create separator item`);
     }
 
     //////////////////////////////////////////////////////////////////////////////
-    // PERKS
-    const folderPerksId = await createFolderGetId("Perks", CONFIG.HERO.folderColors["Perks"]);
+    // PERKS and PERK ENHANCERS as separate folder
+    const folderPerksId = await createFolderGetId("Perks", CONFIG.HERO.folderColors["Perks"], folderRootId);
+    const folderPerkEnhancersId = await createFolderGetId(
+        "Perk Enhancers",
+        CONFIG.HERO.folderColors["Perks.Enhancers"],
+        folderPerksId,
+    );
 
-    for (const power of powers.filter((power) => power.type?.includes("perk") && power.xml)) {
-        // Only include powers where XML is defined
-        const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
-        itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
-        itemData.folder = folderPerksId;
-        itemDataArray.push(itemData);
-    }
+    const allPerks = powers.filter((power) => power.type?.includes("perk") && power.xml);
+    const allPerksExceptPerkEnhancers = allPerks.filter((perk) => !perk.type.includes("enhancer"));
+    const allPerkEnhancers = allPerks.filter((perk) => perk.type.includes("enhancer"));
+    const preparedPerks = [
+        ...allPerksExceptPerkEnhancers.map(standardPrepareItemsForFolder(folderPerksId)),
+        ...allPerkEnhancers.map(standardPrepareItemsForFolder(folderPerkEnhancersId)),
+    ];
 
     //////////////////////////////////////////////////////////////////////////////
-    // SKILLS
-    const folderSkillsId = await createFolderGetId("Skills", CONFIG.HERO.folderColors["Skills"]);
+    // SKILLS and SKILL ENHANCERS as separate folder
+    const folderSkillsId = await createFolderGetId("Skills", CONFIG.HERO.folderColors["Skills"], folderRootId);
+    const folderSkillEnhancersId = await createFolderGetId(
+        "Skill Enhancers",
+        CONFIG.HERO.folderColors["Skills.Enhancers"],
+        folderSkillsId,
+    );
 
-    for (const power of powers.filter((power) => power.type?.includes("skill") && power.xml)) {
-        // Only include powers where XML is defined
-        const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
-        itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
-        itemData.folder = folderSkillsId;
-        itemDataArray.push(itemData);
-    }
+    const allSkills = powers.filter((power) => power.type?.includes("skill") && power.xml);
+    const allSkillsExceptSkillEnhancers = allSkills.filter((skill) => !skill.type.includes("enhancer"));
+    const allSkillEnhancers = allSkills.filter((skill) => skill.type.includes("enhancer"));
+    const preparedSkills = [
+        ...allSkillsExceptSkillEnhancers.map(standardPrepareItemsForFolder(folderSkillsId)),
+        ...allSkillEnhancers.map(standardPrepareItemsForFolder(folderSkillEnhancersId)),
+    ];
 
     //////////////////////////////////////////////////////////////////////////////
     // TALENTS
-    const folderTalentsId = await createFolderGetId("Talents", CONFIG.HERO.folderColors["Talents"]);
+    const folderTalentsId = await createFolderGetId("Talents", CONFIG.HERO.folderColors["Talents"], folderRootId);
 
-    for (const power of powers.filter((power) => power.type?.includes("talent") && power.xml)) {
-        // Only include powers where XML is defined
-        const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
-        itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
-        itemData.folder = folderTalentsId;
-        itemDataArray.push(itemData);
-    }
+    const allTalents = powers.filter((power) => power.type?.includes("talent") && power.xml);
+    const preparedTalents = allTalents.map(standardPrepareItemsForFolder(folderTalentsId));
 
     //////////////////////////////////////////////////////////////////////////////
     // DISADVANTAGES/COMPLICATIONS
     const folderDisadvantagesId = await createFolderGetId(
         edition === "five" ? "Disadvantages" : "Complications",
         CONFIG.HERO.folderColors["Disadvantages"],
+        folderRootId,
     );
 
-    for (const power of powers.filter((power) => power.type?.includes("disadvantage") && power.xml)) {
-        // Only include powers where XML is defined
-        const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
-
-        // PH: FIXME: Disadvantages have some weird ones that show up as they're adders. Ignore them.
-        if (!itemData.name) {
-            continue;
-        }
-
-        itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
-        itemData.folder = folderDisadvantagesId;
-        itemDataArray.push(itemData);
-    }
+    // PH: FIXME: Some disadvantages are adders etc. Perhaps we should better describe them? Exclude them based on missing name here.
+    const allDisadvantages = powers.filter((power) => power.type?.includes("disadvantage") && power.xml);
+    const preparedDisadvantages = allDisadvantages
+        .map(standardPrepareItemsForFolder(folderDisadvantagesId))
+        .filter((preparedItem) => preparedItem.name);
 
     // Compendium should be unlocked, but for some reason it may not be
     if (pack.locked) {
@@ -274,7 +287,10 @@ async function CreateHeroItems(edition) {
 
     // Create the array of items in the compendium
     try {
-        await createItem(itemDataArray, pack.metadata.id);
+        await createItem(
+            [...preparedPowers, ...preparedPerks, ...preparedSkills, ...preparedTalents, ...preparedDisadvantages],
+            pack.metadata.id,
+        );
     } catch (e) {
         console.error(e);
     }

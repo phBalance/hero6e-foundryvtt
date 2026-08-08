@@ -76,11 +76,17 @@ HERO.folderColors = {
     Equipment: "#aa00aa",
     Disadvantages: "#aaaa00",
 
-    // Sub Categories of POWER (mute the base category's colour with grey - except for characteristics which is based on powers)
+    // Sub categories of POWER (mute the base category's colour with grey - except for characteristics which is based on powers)
     "Powers.Characteristics": "#b14e4e",
     "Powers.Perks": "#343476",
-    "Powers.Skill": "#347634",
+    "Powers.Skills": "#347634",
     "Powers.Talents": "#347676",
+
+    // Sub category of SKILLS
+    "Skills.Enhancers": "#347634",
+
+    // Sub category of PERKS
+    "Perks.Enhancers": "#343476",
 };
 
 HERO.DEFENSE_ABBREVIATIONS = {
@@ -4962,7 +4968,9 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costEnd: false,
             xml: `<SKILL XMLID="SYSTEMS_OPERATION" ID="1709161555044" BASECOST="3.0" LEVELS="0" ALIAS="Systems Operation" POSITION="57" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CHARACTERISTIC="INT" FAMILIARITY="No" PROFICIENCY="No" LEVELSONLY="No"></SKILL>`,
         },
-        {/*5e is a SYSTEM category */},
+        {
+            /*5e is a SYSTEM category */
+        },
     );
 
     addPower(
