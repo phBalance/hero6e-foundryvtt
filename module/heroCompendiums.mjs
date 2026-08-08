@@ -242,7 +242,27 @@ async function CreateHeroItems(edition) {
         const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
         itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
         itemData.folder = folderTalentsId;
-        itemData.folder = folderTalent[0].id;
+        itemDataArray.push(itemData);
+    }
+
+    //////////////////////////////////////////////////////////////////////////////
+    // DISADVANTAGES/COMPLICATIONS
+    const folderDisadvantagesId = await createFolderGetId(
+        edition === "five" ? "Disadvantages" : "Complications",
+        CONFIG.HERO.folderColors["Disadvantages"],
+    );
+
+    for (const power of powers.filter((power) => power.type?.includes("disadvantage") && power.xml)) {
+        // Only include powers where XML is defined
+        const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
+
+        // PH: FIXME: Disadvantages have some weird ones that show up as they're adders. Ignore them.
+        if (!itemData.name) {
+            continue;
+        }
+
+        itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
+        itemData.folder = folderDisadvantagesId;
         itemDataArray.push(itemData);
     }
 
