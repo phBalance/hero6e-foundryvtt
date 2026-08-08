@@ -16,6 +16,17 @@ export class HeroSystem6eActorActiveEffectsSystemData extends _ActiveEffectTypeD
             XMLID: new fields.StringField(),
         };
     }
+
+    // V14 core suppresses an AE once its duration lapses (ActiveEffect#isSuppressed falls back to
+    // duration.expired, persisted by the ActiveEffectRegistry). The system expires effects itself
+    // (expireEffects), and adjustments fade on the actor's Phase — later than core's world-time
+    // lapse. In that gap a suppressed drain stops contributing to max while the drained value
+    // remains, e.g. BODY 7/7 briefly shows 7/10 [SUPPRESSED] (#4524). Core prefers this getter
+    // over duration.expired, so opt out of suppression entirely (matching V13 behavior).
+    // TODO: When we refactor active effects for V14 properly, evaluate this.
+    get isSuppressed() {
+        return false;
+    }
 }
 
 export class HeroSystem6eActorActiveEffects extends ActiveEffect {

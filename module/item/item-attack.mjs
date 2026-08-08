@@ -4011,8 +4011,7 @@ export async function _onApplyEntangleToSpecificToken(item, token, originalRoll)
         prevEntangle.update({
             name: activeEffect.name,
             flags: activeEffect.flags,
-            [HeroCompatibility.isV14 ? `system.changes` : `changes`]:
-                activeEffect[HeroCompatibility.isV14 ? `system.changes` : `changes`],
+            "system.changes": activeEffect.system?.changes,
             origin: activeEffect.origin,
         });
     } else {
@@ -4130,11 +4129,9 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
             const newBody = body - bodyDamage;
             const name = `${entangleAE.flags[game.system.id]?.XMLID} ${newBody} BODY ${entangleAE.flags[game.system.id]?.entangleDefense.string}`;
             entangleAE.update({ name });
-            entangleAE[HeroCompatibility.isV14 ? `system.changes` : `changes`][bodyChangeIdx].value = newBody;
-            entangleAE.update({
-                [HeroCompatibility.isV14 ? `system.changes` : `changes`]:
-                    entangleAE[HeroCompatibility.isV14 ? `system.changes` : `changes`],
-            });
+            const entangleChanges = entangleAE.system.changes;
+            entangleChanges[bodyChangeIdx].value = newBody;
+            entangleAE.update({ "system.changes": entangleChanges });
             effectsFinal = `Entangle has ${newBody} BODY remaining.`;
         } else {
             await entangleAE.parent.removeActiveEffect(entangleAE);
