@@ -133,7 +133,7 @@ async function CreateHeroItems(edition) {
             {
                 name: "Characteristics",
                 type: "Item",
-                color: CONFIG.HERO.folderColors["Characteristics"],
+                color: CONFIG.HERO.folderColors["Powers.Characteristics"],
                 folder: folderPower[0].id,
             },
         ],
