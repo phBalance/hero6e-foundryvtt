@@ -571,13 +571,10 @@ export async function getConditionalDefenses(token, item, avad) {
                     default: true,
                     callback: (event, button) => Array.from(button.form.querySelectorAll("input")),
                 },
-                {
-                    action: "cancel",
-                    label: "Cancel",
-                    callback: () => null,
-                },
             ],
         });
+
+        // Was the dialog closed without providing input? If so, assume no defenses are desired.
         if (inputs === null) {
             return { ignoreDefenseIds: null, conditionalDefenses: null };
         }
