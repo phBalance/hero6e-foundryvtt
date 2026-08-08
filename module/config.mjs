@@ -19646,9 +19646,12 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             cost: function (modifierModel /*, item */) {
                 // This has no cost itself; it's a 2x cost multiplier. Just pretend the cost of this modifier is
                 // the cost of its parent with any additional adders that it may have.
+                // Guard against counting ourselves should we ever end up in the parent's adder list
+                // (THROUGHOUT also exists as an ADDER under EYECONTACTREQUIRED) — that would recurse forever.
                 const parentsAdders = modifierModel.parent.adders;
                 let parentsAddersCosts = 0;
                 for (const adder of parentsAdders) {
+                    if (adder === modifierModel) continue;
                     parentsAddersCosts += adder.cost;
                 }
 
@@ -19657,6 +19660,18 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             costPerLevel: fixedValueFunction(0),
             dcAffecting: fixedValueFunction(false),
             xml: `<MODIFIER XMLID="THROUGHOUT" ID="1762104990480" BASECOST="1.0" LEVELS="0" ALIAS="Requires Gestures throughout" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No"></MODIFIER>`,
+        },
+        {},
+    );
+    addPower(
+        {
+            // EYECONTACTREQUIRED related (distinct from the GESTURES/INCANTATIONS "throughout" MODIFIER above)
+            key: "THROUGHOUT",
+            behaviors: ["adder"],
+            type: ["adder"],
+            costPerLevel: fixedValueFunction(0),
+            dcAffecting: fixedValueFunction(false),
+            xml: `<ADDER XMLID="THROUGHOUT" ID="1785543718134" BASECOST="-0.5" LEVELS="0" ALIAS="Constant Power requires eye contact throughout use" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="No" INCLUDEINBASE="No" DISPLAYINSTRING="Yes" GROUP="No" SELECTED="YES"></ADDER>`,
         },
         {},
     );
