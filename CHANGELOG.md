@@ -5,6 +5,7 @@
 - This (and future) releases no longer support FoundryVTT V13. This release only works with FoundryVTT V14.
 - Sectional defenses are now only supported if the hit locations setting is "Hit Locations with Sectional Defense".
 - Fixed attacks with strength minima that are specifically defined rather than just using the default range. [#4647](https://github.com/dmdorman/hero6e-foundryvtt/issues/4647)
+- AOE region templates are placed on the attacking token's scene level. [#4637](https://github.com/dmdorman/hero6e-foundryvtt/issues/4637)
 
 ### Version 4.3.17 20260725
 
