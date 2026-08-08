@@ -1188,8 +1188,9 @@ function updateEffectName(activeEffect) {
 
     let xmlidSlug = `${_array.map((o) => `${o.value} ${o.name}`).join(",")}`;
     if (activeEffect.flags[game.system.id]?.XMLID === "HEALING") {
+        // The originating item (or its whole actor) may have been deleted (#4526)
         const attackItem = fromUuidSync(activeEffect.origin);
-        const simplifiedHealing = attackItem.system.INPUT.match(/simplified/i); //&&
+        const simplifiedHealing = attackItem?.system?.INPUT?.match(/simplified/i); //&&
         //["BODY", "STUN"].includes(potentialCharacteristic.toUpperCase());
 
         xmlidSlug = `HEALING ${simplifiedHealing ? "SIMPLIFIED " : ""}${xmlidSlug.replace(/\+/g, "").replace(/-/g, "")}`;
