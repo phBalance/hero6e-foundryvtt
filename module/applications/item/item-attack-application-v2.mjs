@@ -751,11 +751,8 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                 },
             },
 
-            levels:
-                canvas.scene.levels.find((level) => {
-                    const elevation = token.document.elevation ?? 0;
-                    return elevation >= level.bottom && elevation <= level.top;
-                })?.id ?? "defaultLevel0000",
+            levels: [token.document.level], // Only place the region on the token's scene level.
+
             "restriction.enabled": true,
             "restriction.type": "sight",
             "restriction.priority": 0,
@@ -888,7 +885,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
                   },
               }
             : {};
-        newRegion = await this.placeRegionWithHiddenUI(regionData, placementOptions); //await canvas.regions.placeRegion(regionData);
+        newRegion = await this.placeRegionWithHiddenUI(regionData, placementOptions);
         if (newRegion?.documentName !== "Region") {
             throw new Error("Failed to create region for area of effect");
         }
@@ -916,7 +913,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
         }
     }
 
-    async placeRegionWithHiddenUI(regionData, options = {}) {
+    async placeRegionWithHiddenUI(regionData, options) {
         let newRegion;
         const hiddenElementsData = [];
 
