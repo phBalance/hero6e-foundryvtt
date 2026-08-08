@@ -2761,9 +2761,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         const performanceDuration = new Date().getTime() - performanceStart;
         if (performanceDuration > 1000) {
-            console.warn(
-                `${this.actor?.name}/${this.detailedName()}: Performance concernt. Took ${performanceDuration} seconds to upload.`,
-            );
+            console.warn(`${actor?.name}/${xml}: Performance concern. Took ${performanceDuration} seconds to upload.`);
         }
 
         return itemData;

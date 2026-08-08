@@ -76,11 +76,17 @@ HERO.folderColors = {
     Equipment: "#aa00aa",
     Disadvantages: "#aaaa00",
 
-    // Sub Categories of POWER
-    "Powers.Characteristics": "#ff6666",
-    "Powers.Perks": "#ff6666",
-    "Powers.Skill": "#ff6666",
-    "Powers.Talents": "#ff6666",
+    // Sub categories of POWER (mute the base category's colour with grey - except for characteristics which is based on powers)
+    "Powers.Characteristics": "#b14e4e",
+    "Powers.Perks": "#343476",
+    "Powers.Skills": "#347634",
+    "Powers.Talents": "#347676",
+
+    // Sub category of SKILLS
+    "Skills.Enhancers": "#347634",
+
+    // Sub category of PERKS
+    "Perks.Enhancers": "#343476",
 };
 
 HERO.DEFENSE_ABBREVIATIONS = {
