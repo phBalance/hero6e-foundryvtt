@@ -1489,7 +1489,7 @@ export function getAttackTags(item) {
                 break;
 
             case "STRMINIMUM": {
-                const strMinimum = parseInt(mod.OPTION_ALIAS.match(/\d+/)?.[0] || 0);
+                const strMinimum = calculateStrengthMinimumForItem(effectiveAttackItem, mod);
                 attackTags.push({
                     name: `${strMinimum} ${mod.ALIAS || mod.XMLID}`,
                     title: `${mod.XMLID}`,
