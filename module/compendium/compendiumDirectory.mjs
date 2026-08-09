@@ -42,24 +42,29 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
             );
             html = html.replace(
                 "Document.</p>",
-                `Document.</p><label>Hero Designer Prefab</label><input name="upload" class="upload" type="file" accept=".hdp"></input>`,
+                `Document.</p><label>Hero Designer Prefab</label><input name="upload" class="upload" type="file" accept=".hdp" multiple></input>`,
             );
 
             // DialogV2RenderCallback
             function handleRender(event, dialog) {
                 const inputUpload = dialog.element.querySelector("input.upload");
                 inputUpload.addEventListener("change", (event) => {
-                    console.log(event, event.target.files[0]);
-                    const reader = new FileReader();
-                    reader.onload = async function (event) {
-                        const contents = event.target.result;
+                    const files = Array.from(event.target.files);
+                    console.log(event, files);
 
-                        const parser = new DOMParser();
-                        const xmlDoc = parser.parseFromString(contents, "text/xml");
-                        // TODO create the Item compendium
-                        HeroSystem6eCompendiumDirectory.uploadFromXml(xmlDoc);
-                    }.bind(this);
-                    reader.readAsText(event.target.files[0]);
+                    files.forEach((file) => {
+                        const reader = new FileReader();
+                        reader.onload = async function (event) {
+                            const contents = event.target.result;
+
+                            const parser = new DOMParser();
+                            const xmlDoc = parser.parseFromString(contents, "text/xml");
+
+                            HeroSystem6eCompendiumDirectory.uploadFromXml(xmlDoc);
+                        }.bind(this);
+
+                        reader.readAsText(file);
+                    });
 
                     // Close Create Compendium message box
                     $(event.currentTarget).closest(".window-content").find("button").click();
