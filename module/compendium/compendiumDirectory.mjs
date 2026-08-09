@@ -2,6 +2,7 @@ import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
 
+const { DialogV2 } = foundry.applications.api;
 const { CompendiumDirectory } = foundry.applications.sidebar.tabs;
 const { CompendiumCollection } = foundry.documents.collections;
 const { renderTemplate } = foundry.applications.handlebars;
@@ -43,8 +44,6 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                 "Document.</p>",
                 `Document.</p><label>Hero Designer Prefab</label><input name="upload" class="upload" type="file" accept=".hdp"></input>`,
             );
-
-            const { DialogV2 } = foundry.applications.api;
 
             // DialogV2RenderCallback
             function handleRender(event, dialog) {
@@ -197,6 +196,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                             type: "Item",
                             name: name,
                             color: CONFIG.HERO.folderColors[name],
+                            sorting: "m", // Sort documents in this folder in the order of the HDP rather than alphabetically.
                         },
                         { pack: pack.metadata.id },
                     );
@@ -208,11 +208,12 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                         pack.contents.find((o) => o.system.ID === itemData.system.PARENTID)?.folder ||
                         folders[folderName];
                     const subFolder = await Folder.create(
-                        { type: "Item", name: itemData.name, folder: parentFolder },
+                        { type: "Item", name: itemData.name, folder: parentFolder, sorting: "m", sort: itemData.sort },
                         { pack: pack.metadata.id },
                     );
                     itemData.folder = subFolder.id;
                 }
+
                 // Is a child?
                 else if (itemData.system.PARENTID) {
                     const parentFolder = pack.contents.find((o) => o.system.ID === itemData.system.PARENTID)?.folder;
