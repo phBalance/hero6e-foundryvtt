@@ -1,6 +1,6 @@
-import { HeroSystem6eActor } from "./actor/actor.mjs";
-import { HeroSystem6eItem } from "./item/item.mjs";
-import { getPowerInfo } from "./utility/util.mjs";
+import { HeroSystem6eActor } from "../actor/actor.mjs";
+import { HeroSystem6eItem } from "../item/item.mjs";
+import { getPowerInfo } from "../utility/util.mjs";
 
 const { CompendiumDirectory } = foundry.applications.sidebar.tabs;
 const { CompendiumCollection } = foundry.documents.collections;
@@ -123,6 +123,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
 
         const metadata = {
             label: compendiumName,
+            name: compendiumName.slugify({ strict: true }),
             type: "Item",
             flags: {
                 [`${game.system.id}.versionHeroSystem6eCreated`]: game.system.version,
@@ -152,13 +153,34 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
         );
 
         if (itemsToCreate.length === 0) {
-            return ui.notifications.error(`${compendiumName} has no items from which to create a compendium from.`);
+            return ui.notifications.error(`${compendiumName} has no items from which to create a compendium.`);
+        }
+
+        // Does the compendium already exist? If so, prompt for delete.
+        // Delete compendium so we can recreate it.
+        const packName = `world.${metadata.name}`;
+        const existingPack = game.packs.get(packName);
+        if (existingPack) {
+            const confirmed = await foundry.applications.api.DialogV2.confirm({
+                window: { title: "Overwrite Compendium Entry" },
+                content: `<p>"<strong>${metadata.label}</strong>" already exists in this compendium. Overwrite it?</p>`,
+                rejectClose: false,
+            });
+            if (!confirmed) {
+                return;
+            }
+
+            console.debug(`Overwriting existing compendium ${packName} on upload.`);
+            await existingPack.configure({ locked: false });
+            await existingPack.deleteCompendium();
         }
 
         // Create Compendium
         const pack = await CompendiumCollection.createCompendium(metadata);
 
-        if (targetFolderId) await pack.setFolder(targetFolderId);
+        if (targetFolderId) {
+            await pack.setFolder(targetFolderId);
+        }
 
         ui.notifications.info(`Creating compendium ${pack.metadata.label} from Hero Designer Prefab file.`);
 
@@ -191,7 +213,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                     );
                     itemData.folder = subFolder.id;
                 }
-                // Check if a child
+                // Is a child?
                 else if (itemData.system.PARENTID) {
                     const parentFolder = pack.contents.find((o) => o.system.ID === itemData.system.PARENTID)?.folder;
                     if (parentFolder) {
