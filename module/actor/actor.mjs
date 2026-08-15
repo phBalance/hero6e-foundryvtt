@@ -2324,7 +2324,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             }
 
             if (effectIdsToDelete.length > 0) {
-                await this.deleteEmbeddedDocuments("ActiveEffect", effectIdsToDelete);
+                try {
+                    await this.deleteEmbeddedDocuments("ActiveEffect", effectIdsToDelete);
+                } catch (e) {
+                    console.error(e);
+                }
             }
 
             end = Date.now();
@@ -2339,7 +2343,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 .map((ae) => ae.id);
 
             if (maneuverEffectIds.length > 0) {
-                await this.deleteEmbeddedDocuments("ActiveEffect", maneuverEffectIds);
+                try {
+                    await this.deleteEmbeddedDocuments("ActiveEffect", maneuverEffectIds);
+                } catch (e) {
+                    console.error(e);
+                }
             }
 
             end = Date.now();
