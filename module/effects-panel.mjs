@@ -59,15 +59,15 @@ export class EffectsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
 
             if (ae.parent instanceof HeroSystem6eItem) {
                 // Only show items that have a duration (temporary), or are perceivable
-                if (!d.duration && !ae.parent.isPerceivable()) {
+                if (!d.seconds && !ae.parent.isPerceivable()) {
                     continue;
                 }
-                if (d.duration) {
+                if (d.seconds) {
                     effectData.flags[game.system.id] ??= {};
                     effectData.flags[game.system.id].label = d.label;
                 }
             } else {
-                if (d.duration) {
+                if (d.seconds) {
                     effectData.flags[game.system.id] ??= {};
                     effectData.flags[game.system.id].label = d.label;
                     effectData.flags[game.system.id].targetDisplay ??= effectData.flags[game.system.id]?.target;
