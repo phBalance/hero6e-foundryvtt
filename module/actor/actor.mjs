@@ -339,6 +339,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // The 5e recompute below reads characteristic nodes, which may not exist yet mid-construction.
         if (!this.system?.characteristics) return;
 
+        // If the actor is a cold sidebar entry and has no active token on the current scene,
+        // skip intense item scans or deep logic until it's actually interacted with.
+        if (!this.getActiveTokens().length && !this.sheet?.rendered) {
+            return;
+        }
+
         if (this.is5e === true) {
             const characteristicInfo = getCharacteristicInfoArrayForActor(this);
 
