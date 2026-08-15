@@ -55,7 +55,7 @@ export class Attack {
             changes.push({
                 key: `system.characteristics.dcv.max`,
                 value: dcv,
-                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
         }
@@ -70,7 +70,7 @@ export class Attack {
             changes.push({
                 key: `system.characteristics.dmcv.max`,
                 value: dmcv,
-                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
         }
@@ -89,7 +89,7 @@ export class Attack {
             changes.push({
                 key: `system.characteristics.dcv.value`,
                 value: cvModifier.cvMod.dcvMultiplier,
-                mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                type: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
             });
         }

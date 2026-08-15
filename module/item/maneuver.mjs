@@ -26,7 +26,7 @@ function addDcvTraitToChanges(maneuverDcvChange) {
         return {
             key: "system.characteristics.dcv.max",
             value: maneuverDcvChange,
-            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
             priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
         };
     }
@@ -37,7 +37,7 @@ function addOcvTraitToChanges(maneuverOcvChange) {
         return {
             key: "system.characteristics.ocv.max",
             value: maneuverOcvChange,
-            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+            type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
             priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
         };
     }

@@ -558,7 +558,10 @@ export function calculateAddedDicePartsFromItem(item, baseAttackItem, options) {
         (ae) => !ae.disabled && ae.flags?.[game.system.id]?.target === item.uuid,
     ) || []) {
         for (const change of ae.changes.filter(
-            (change) => change.key === "system.value" && change.value !== 0 && change.mode === 2,
+            (change) =>
+                change.key === "system.value" &&
+                change.value !== 0 &&
+                change.type === CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
         )) {
             const value = parseInt(change.value);
             const aeDiceParts = calculateDicePartsFromDcForItem(baseAttackItem, value);

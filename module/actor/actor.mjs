@@ -339,12 +339,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // The 5e recompute below reads characteristic nodes, which may not exist yet mid-construction.
         if (!this.system?.characteristics) return;
 
-        // If the actor is a cold sidebar entry and has no active token on the current scene,
-        // skip intense item scans or deep logic until it's actually interacted with.
-        if (!this.getActiveTokens().length && !this.sheet?.rendered) {
-            return;
-        }
-
         if (this.is5e === true) {
             const characteristicInfo = getCharacteristicInfoArrayForActor(this);
 
@@ -539,7 +533,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      * Single pass over all applicable effects collecting changes that target a characteristic max,
      * keyed by lowercase characteristic. Hot-path callers (prepareDerivedData, fullHealth) build this
      * once and hand it to the helpers below instead of re-walking actor + item effects per
-     * characteristic. Reads V13 (effect.changes, numeric change.mode) and V14 (effect.system.changes,
+     * characteristic. Reads V14 (effect.system.changes,
      * string change.type) shapes and normalizes to a numeric mode.
      */
     _collectActiveEffectMaxChanges() {
@@ -560,11 +554,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 const match = change.key?.match(/^system\.characteristics\.([a-z]+)\.max$/);
                 if (!match) continue;
 
-                const rawMode = change.mode ?? change.type;
+                const rawType = change.type ?? change.type;
                 const mode =
-                    typeof rawMode === "number"
-                        ? rawMode
-                        : CONST.ACTIVE_EFFECT_MODES[String(rawMode ?? "").toUpperCase()];
+                    typeof rawType === "number"
+                        ? rawType
+                        : CONFIG.HERO.ACTIVE_EFFECT_MODES[String(rawType ?? "").toUpperCase()];
 
                 const entries = byKey.get(match[1]) ?? [];
                 entries.push({
@@ -595,7 +589,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     _applyActiveEffectChangeEntries(startValue, entries) {
         if (entries.length === 0) return startValue;
 
-        const modes = CONST.ACTIVE_EFFECT_MODES;
+        const modes = CONFIG.HERO.ACTIVE_EFFECT_MODES;
         const sorted = [...entries].sort((a, b) => a.priority - b.priority || a.index - b.index);
 
         let value = startValue;
@@ -1599,7 +1593,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         {
                             key: "system.characteristics.dcv.max",
                             value: 0.5,
-                            mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                            type: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                             priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                         },
                     ],
@@ -1990,7 +1984,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             changes.push({
                 key: "system.characteristics.dcv.max",
                 value: _sizeDetails.dcv,
-                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                 priority: this.is5e
                     ? CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD
                     : CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE, // 6e don't allow this to be halved - see note above
@@ -1999,19 +1993,19 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             changes.push({
                 key: "system.characteristics.str.max",
                 value: _sizeDetails.str,
-                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
             changes.push({
                 key: "kbResistance",
                 value: _sizeDetails.kbResistance,
-                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
             changes.push({
                 key: "system.characteristics.body.max",
                 value: _sizeDetails.body,
-                mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                 priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
             });
             activeEffect = foundry.utils.mergeObject(activeEffect, {
@@ -2122,55 +2116,55 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 {
                     key: "system.characteristics.dcv.max",
                     value: dcvDex,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                 },
                 {
                     key: "system.characteristics.dex.max",
                     value: dcvDex,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                 },
                 {
                     key: "system.characteristics.running.max",
                     value: move,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                 },
                 {
                     key: "system.characteristics.swimming.max",
                     value: move,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                 },
                 {
                     key: "system.characteristics.leaping.max",
                     value: move,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                 },
                 {
                     key: "system.characteristics.flight.max",
                     value: move,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                 },
                 {
                     key: "system.characteristics.swinging.max",
                     value: move,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                 },
                 {
                     key: "system.characteristics.teleportation.max",
                     value: move,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                 },
                 {
                     key: "system.characteristics.tunneling.max",
                     value: move,
-                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                 },
             ];
@@ -2236,37 +2230,37 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                     {
                         key: "system.characteristics.dcv.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.running.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.leaping.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.swimming.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.swinging.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                     {
                         key: "system.characteristics.tunneling.max",
                         value: 0.5,
-                        mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                     },
                 ],
@@ -4814,7 +4808,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
 
         // Filter out redundant multiplies, keeping lowest value
-        // const mults = changes.filter((c) => c.mode === CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
+        // const mults = changes.filter((c) => c.mode === CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY);
         // if (mults.length > 1) {
         //     const uniqueKeys = new Set();
         //     mults.forEach((obj) => {
@@ -4827,7 +4821,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         //             const minValue = Math.min(...multsUniqueKey.map((c) => parseFloat(c.value)));
         //             const keepMult = multsUniqueKey.find((c) => parseFloat(c.value) === minValue);
         //             // remove all multsUniqueKey and add back in the keepMult
-        //             changes = changes.filter((c) => c.key !== key || c.mode !== CONST.ACTIVE_EFFECT_MODES.MULTIPLY);
+        //             changes = changes.filter((c) => c.key !== key || c.mode !== CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY);
         //             changes.push(keepMult);
         //         }
         //     }
