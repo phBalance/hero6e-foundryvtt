@@ -151,16 +151,15 @@ export function registerCombatWorkflowTests(quench) {
 
                         quenchScene = await createQuenchScene({ quench: this });
 
-                        attackerActor = await Actor.create({
-                            name: "_Quench_Attacker",
-                            type: "pc",
-                            flags: {
-                                core: {
-                                    sheetClass: "herosystem6e.HeroSystemActorSheetV2",
-                                },
+                        attackerActor = await Actor.create(
+                            {
+                                name: "_Quench_Attacker",
+                                type: "pc",
+
+                                img: "icons/svg/sword.svg",
                             },
-                            img: "icons/svg/sword.svg",
-                        });
+                            { is5e: false },
+                        );
 
                         const itemsToCreate = [];
 
@@ -196,16 +195,14 @@ export function registerCombatWorkflowTests(quench) {
 
                         await attackerActor.createEmbeddedDocuments("Item", itemsToCreate);
 
-                        defenderActor = await Actor.create({
-                            name: "_Quench_Defender",
-                            type: "pc",
-                            flags: {
-                                core: {
-                                    sheetClass: "herosystem6e.HeroSystemActorSheetV2",
-                                },
+                        defenderActor = await Actor.create(
+                            {
+                                name: "_Quench_Defender",
+                                type: "pc",
+                                img: "icons/svg/shield.svg",
                             },
-                            img: "icons/svg/shield.svg",
-                        });
+                            { is5e: false },
+                        );
 
                         [attackerTokenDoc] = await quenchScene.createEmbeddedDocuments("Token", [
                             await attackerActor.getTokenDocument({ x: 100, y: 100, actorLink: false }),
@@ -414,7 +411,7 @@ export function registerCombatWorkflowTests(quench) {
                         assert.ok(tags.textContent.includes("Base to hit 11"), "Base to hit 11");
                         assert.ok(tags.textContent.includes("ocv 3"), "ocv 3");
                         assert.ok(tags.textContent.includes("OCV modifier 20"), "OCV modifier 20");
-                        assert.ok(tags.textContent.includes("Range penalty (16m) -2"), "+20 OCV");
+                        assert.ok(tags.textContent.includes("Range penalty (16m) -2"), "Range penalty (16m) -2");
 
                         const diceResultDiv = toHitDetailsDiv.querySelector("div.dice-result");
                         assert.ok(
