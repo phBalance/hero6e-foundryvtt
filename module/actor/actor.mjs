@@ -3539,7 +3539,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         //const base64 =
                         //"data:image/" + extension + ";base64," + xml.getElementsByTagName("IMAGE")[0].textContent;
 
-                        await ImageHelper.uploadBase64(base64, filename, path);
+                        await foundry.helpers.media.ImageHelper.uploadBase64(base64, filename, path);
 
                         // FORGE stuff (because users add things into their own directories)
                         if (typeof ForgeAPI !== "undefined") {

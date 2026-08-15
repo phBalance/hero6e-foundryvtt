@@ -48,7 +48,6 @@ export default [
                 HexagonalGrid: "readonly",
                 Hooks: "readonly",
                 Hooks$1: "readonly",
-                ImageHelper: "readonly",
                 MeasuredTemplate: "readonly",
                 NumericTerm: "readonly",
                 OperatorTerm: "readonly",
