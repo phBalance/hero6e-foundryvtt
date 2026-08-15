@@ -2324,7 +2324,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             }
 
             if (effectIdsToDelete.length > 0) {
-                await this.deleteEmbeddedDocuments("ActiveEffect", effectIdsToDelete);
+                try {
+                    await this.deleteEmbeddedDocuments("ActiveEffect", effectIdsToDelete);
+                } catch (e) {
+                    console.error(e);
+                }
             }
 
             end = Date.now();
@@ -2339,7 +2343,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 .map((ae) => ae.id);
 
             if (maneuverEffectIds.length > 0) {
-                await this.deleteEmbeddedDocuments("ActiveEffect", maneuverEffectIds);
+                try {
+                    await this.deleteEmbeddedDocuments("ActiveEffect", maneuverEffectIds);
+                } catch (e) {
+                    console.error(e);
+                }
             }
 
             end = Date.now();
@@ -3531,7 +3539,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                         //const base64 =
                         //"data:image/" + extension + ";base64," + xml.getElementsByTagName("IMAGE")[0].textContent;
 
-                        await ImageHelper.uploadBase64(base64, filename, path);
+                        await foundry.helpers.media.ImageHelper.uploadBase64(base64, filename, path);
 
                         // FORGE stuff (because users add things into their own directories)
                         if (typeof ForgeAPI !== "undefined") {
@@ -4712,9 +4720,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
 
         // Hero Designer appears to store WEIGHT as LBS instead of KG.
-        const equipment = this.items.filter(
-            (o) => o.type === "equipment" && (o.parentItem ? o.parentItem.isActive : o.isActive),
-        );
+        const equipment = this.items.filter((item) => item.type === "equipment" && !item.parentItem && item.isCarried);
         const weightLbs = equipment.reduce((a, b) => a + parseFloat(b.system?.WEIGHT || 0), 0);
         const weightKg = (weightLbs / 2.2046226218) * equipmentWeightPercentage;
 
@@ -4722,7 +4728,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     get netWorth() {
-        const equipment = this.items.filter((o) => o.type === "equipment" && o.isActive);
+        const equipment = this.items.filter((item) => item.type === "equipment" && !item.parentItem && item.isCarried);
         const price = equipment.reduce((a, b) => a + parseFloat(b.system.PRICE), 0);
         return price.toFixed(2);
     }

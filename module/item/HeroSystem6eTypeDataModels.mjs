@@ -1055,7 +1055,7 @@ export class HeroSystem6eItemTypeDataModelProps extends HeroSystem6eItemTypeData
             PARENTID: new HeroNumberField({ integer: true }),
             POSITION: new HeroNumberField({ integer: true }),
             POWER: new ArrayField(new EmbeddedDataField(HeroPowerModel)),
-
+            NATIVE_TONGUE: new BooleanField({ initial: null, nullable: true }),
             SFX: new StringField(),
             XMLID: new StringField(),
             SHOW_ACTIVE_COST: new BooleanField({ initial: null, nullable: true }),
@@ -1269,6 +1269,10 @@ export class HeroSystem6eItemPower extends HeroSystem6eItemTypeDataModelProps {
             // Perk
             BASEPOINTS: new StringField(),
             DISADPOINTS: new HeroNumberField({ integer: true, min: 0 }),
+
+            // Equipment
+            PRICE: new StringField(),
+            WEIGHT: new StringField(),
         };
     }
 }
@@ -1282,9 +1286,8 @@ export class HeroSystem6eItemEquipment extends HeroSystem6eItemPower {
             ...super.defineSchema(),
             CARRIED: new BooleanField({ nullable: true }), // Consider removing as it is a duplicate definition (from HeroSystem6eItemTypeDataModelProps)
             EVER: new StringField(),
-            PRICE: new StringField(),
+
             SKILL: new StringField(),
-            WEIGHT: new StringField(),
         };
     }
 }
@@ -1309,7 +1312,7 @@ export class HeroSystem6eItemSkill extends HeroSystem6eItemTypeDataModelProps {
             ROLL: new StringField(),
             TEXT: new StringField(),
             TYPE: new StringField(),
-            NATIVE_TONGUE: new BooleanField({ initial: null, nullable: true }),
+
             active: new BooleanField({ initial: true, nullable: true }), // should be part of  HeroSystem6eItemTypeDataModelProps and not needed here
         };
     }

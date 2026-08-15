@@ -10,7 +10,7 @@ export class HeroSystem6eTemplateLayer extends TemplateLayer {
         return preview;
     }
 
-    /** Overriden to snap according to the dragged template's type */
+    /** Overridden to snap according to the dragged template's type */
     // getSnappedPoint(point) {
     //     const template = this.preview?.children.at(0);
     //     if (!template || !canvas.grid.isSquare) return super.getSnappedPoint(point);

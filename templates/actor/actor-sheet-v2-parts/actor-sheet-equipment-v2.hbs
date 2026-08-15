@@ -4,6 +4,11 @@
   data-tab='equipment'
 >
     {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-search-partial-v2.hbs') this }}
+
+    <div class="flexrow equipment-price-weight-summary">
+        <div class="flexcol">Net Worth: ${{this.actor.netWorth}}</div>
+        <div class="flexcol">Net Weight: {{this.actor.encumbrance}} kg</div>
+    </div>
     <section class="item-list-container">
         <div class="item-header">
             <div class="item-column item-description">{{localize "ActorSheet.Description"}}</div>
