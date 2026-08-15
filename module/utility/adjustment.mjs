@@ -260,7 +260,7 @@ function _createAEChangeBlock(targetCharOrPower, targetSystem, item) {
     return {
         key,
         value: 0,
-        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
     };
 }

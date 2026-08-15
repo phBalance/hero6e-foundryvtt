@@ -545,48 +545,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             if (this.baseInfo?.activeEffect) {
                 const effectData = this.baseInfo?.activeEffect(_abstractItem);
                 if (effectData) {
-                    // Ensure v14 is using system.changes
-                    if (HeroCompatibility.isV14) {
-                        console.warn(`${effectData.name} v14 changes moved to system.changes`);
-                        effectData.system.changes ??= effectData.changes;
-                        delete effectData.changes;
-
-                        // V14 appears to use "type" instead of "mode"
-                        for (const change of effectData.system.changes) {
-                            change.type ??= change.mode;
-
-                            // V14 no longer uses numeric change.type instead it uses a string
-                            // TODO: Rework change.type into HERO.CONFIG constants and perhaps a "fix" function
-                            if (Number.isNumeric(change.type)) {
-                                switch (change.type) {
-                                    case 1:
-                                        change.type = "multiply"; //CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY
-                                        break;
-
-                                    case 2:
-                                        change.type = "add"; //CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD
-                                        break;
-
-                                    case 3:
-                                        change.type = "downgrade"; //CONFIG.HERO.ACTIVE_EFFECT_MODES.DOWNGRADE
-                                        break;
-
-                                    case 4:
-                                        change.type = "upgrade"; //CONFIG.HERO.ACTIVE_EFFECT_MODES.UPGRADE
-                                        break;
-
-                                    case 5:
-                                        change.type = "override"; //CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE
-                                        break;
-
-                                    default:
-                                        // Assume V14 change.type is correct
-                                        break;
-                                }
-                            }
-                        }
-                    }
-
                     // Some items will have more than one AE, for example a BULKY +X CON item, the BULKY AE has no system.XMLID
                     const currentAE =
                         this.effects.find((ae) => ae.system.XMLID === this.system.XMLID) ??
@@ -631,7 +589,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         {
                             key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
                             value: parseInt(this.system.LEVELS),
-                            mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                            type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                             priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                         },
                     ];
@@ -645,7 +603,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                                 changes.push({
                                     key: `system.characteristics.${movementKey.toLowerCase()}.max`,
                                     value: parseInt(this.system.LEVELS),
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                                 });
                                 foundMatch = true;
@@ -690,7 +648,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     {
                         key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
                         value: value,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
@@ -747,7 +705,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         {
                             key: "system.characteristics.dcv.max",
                             value: dcvValue,
-                            mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
+                            type: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                             priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                         },
                     ];
@@ -852,13 +810,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     {
                         key: "ATL.light.bright",
                         value: parseFloat(this.system.QUANTITY),
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                     {
                         key: "ATL.light.color",
                         value: generateUniqueLightColor(this.uuid),
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                 ];

@@ -177,12 +177,12 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                         {
                                             key: "system.characteristics.str.max",
                                             value: "10",
-                                            mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                            type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                         },
                                         {
                                             key: "system.characteristics.dex.max",
                                             value: "10",
-                                            mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                            type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                         },
                                     ],
                                 },
@@ -266,12 +266,12 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                         {
                                             key: "system.characteristics.str.max",
                                             value: "-40",
-                                            mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                            type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                         },
                                         {
                                             key: "system.characteristics.dex.max",
                                             value: "-30",
-                                            mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                            type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                         },
                                     ],
                                 },
@@ -327,7 +327,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.dex.max",
                                     value: "10",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -352,12 +352,12 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.dex.max",
                                     value: "10",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                                 {
                                     key: "system.characteristics.dcv.max",
                                     value: "-8",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -392,7 +392,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.str.max",
                                     value: "20",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -415,7 +415,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.str.max",
                                     value: "20",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -448,7 +448,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.dex.max",
                                     value: "10",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -474,7 +474,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                     : {
                                           key: "system.characteristics.dex.max",
                                           value: "5",
-                                          mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                          type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                       },
                             ],
                             flags: {
@@ -526,12 +526,12 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.str.max",
                                     value: "-40",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                                 {
                                     key: "system.characteristics.dex.max",
                                     value: "-30",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -565,12 +565,12 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.dex.max",
                                     value: "-30",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                                 {
                                     key: "system.characteristics.str.max",
                                     value: "-40",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -582,12 +582,12 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.dex.max",
                                     value: "10",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                                 {
                                     key: "system.characteristics.str.max",
                                     value: "20",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -637,7 +637,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.dex.max",
                                     value: "10",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -672,7 +672,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.str.max",
                                     value: "20",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -725,17 +725,17 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.pd.max",
                                     value: "5",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                                 {
                                     key: "system.characteristics.ed.max",
                                     value: "5",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                                 {
                                     key: "system.characteristics.dcv.max",
                                     value: "-8",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -759,7 +759,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                     {
                                         key: "system.characteristics.dcv.max",
                                         value: 0.5,
-                                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
+                                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                                     },
                                 ],
                             },
@@ -770,7 +770,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                     {
                                         key: "system.characteristics.dcv.max",
                                         value: 0.5,
-                                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
+                                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                                     },
                                 ],
                             },
@@ -799,17 +799,17 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                     {
                                         key: "system.characteristics.str.max",
                                         value: "-40",
-                                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                     },
                                     {
                                         key: "system.characteristics.con.max",
                                         value: "-40",
-                                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                     },
                                     {
                                         key: "system.characteristics.dex.max",
                                         value: "-30",
-                                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                     },
                                 ],
                             },
@@ -837,7 +837,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.ego.max",
                                     value: "10",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -852,7 +852,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.ego.max",
                                     value: "-30",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -883,7 +883,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.str.max",
                                     value: "8",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -902,7 +902,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.str.max",
                                     value: "-40",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });
@@ -929,7 +929,7 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
                                 {
                                     key: "system.characteristics.str.max",
                                     value: "8",
-                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                                    type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                 },
                             ],
                         });

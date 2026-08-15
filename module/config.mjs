@@ -7070,19 +7070,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     {
                         key: "system.characteristics.str.max",
                         value: strAdd,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.pd.max",
                         value: pdAdd,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.ed.max",
                         value: edAdd,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
@@ -7696,19 +7696,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     {
                         key: "system.characteristics.str.max",
                         value: details.str,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.body.max",
                         value: details.body,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.stun.max",
                         value: details.stun,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
@@ -7717,37 +7717,37 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         // However 5e use the -DCV concept and we will implement 6e in kind for now.
                         key: "system.characteristics.dcv.max",
                         value: -details.dcv,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE, // Intentionally not being halved
                     },
                     {
                         key: "system.characteristics.con.max",
                         value: details.con,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.pre.max",
                         value: details.pre,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.pd.max",
                         value: details.pd,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.ed.max",
                         value: details.ed,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.running.max",
                         value: details.running,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
@@ -7807,19 +7807,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     {
                         key: "system.characteristics.str.max",
                         value: details.str,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.body.max",
                         value: details.body,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
                         key: "system.characteristics.stun.max",
                         value: details.stun,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                     {
@@ -7828,7 +7828,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                         // However 5e use the -DCV concept and we will implement 6e in kind for now.
                         key: "system.characteristics.dcv.max",
                         value: -details.dcv,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
@@ -8450,7 +8450,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                     {
                         key: "system.characteristics.dcv.max",
                         value: dcvAdd,
-                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
+                        type: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
