@@ -1,8 +1,8 @@
 const { Actor } = foundry.documents;
 
-export async function createQuenchActor({ quench, contents, is5e, actorType = "pc" }) {
+export async function createQuenchActor({ quench, contents, is5e, actorType: type = "pc", name, img }) {
     const CHARACTER_NAME = contents?.match(/CHARACTER_NAME=".*?"/)?.[0];
-    const name = CHARACTER_NAME?.match(/CHARACTER_NAME="(.*?)"/)?.[1] || "";
+    name ??= CHARACTER_NAME?.match(/CHARACTER_NAME="(.*?)"/)?.[1] || "";
 
     function generateQuenchTitleRecursive(quench) {
         // '__root/hero6efoundryvttv2.utils.defense_root/Resistant Protection/rPD 1'
@@ -30,7 +30,8 @@ export async function createQuenchActor({ quench, contents, is5e, actorType = "p
     const actor = await Actor.create(
         {
             name: quenchName,
-            type: actorType,
+            type,
+            img,
         },
         { is5e, quenchCreate: true },
     );
