@@ -560,23 +560,23 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                             if (Number.isNumeric(change.type)) {
                                 switch (change.type) {
                                     case 1:
-                                        change.type = "multiply"; //CONST.ACTIVE_EFFECT_MODES.MULTIPLY
+                                        change.type = "multiply"; //CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY
                                         break;
 
                                     case 2:
-                                        change.type = "add"; //CONST.ACTIVE_EFFECT_MODES.ADD
+                                        change.type = "add"; //CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD
                                         break;
 
                                     case 3:
-                                        change.type = "downgrade"; //CONST.ACTIVE_EFFECT_MODES.DOWNGRADE
+                                        change.type = "downgrade"; //CONFIG.HERO.ACTIVE_EFFECT_MODES.DOWNGRADE
                                         break;
 
                                     case 4:
-                                        change.type = "upgrade"; //CONST.ACTIVE_EFFECT_MODES.UPGRADE
+                                        change.type = "upgrade"; //CONFIG.HERO.ACTIVE_EFFECT_MODES.UPGRADE
                                         break;
 
                                     case 5:
-                                        change.type = "override"; //CONST.ACTIVE_EFFECT_MODES.OVERRIDE
+                                        change.type = "override"; //CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE
                                         break;
 
                                     default:
@@ -631,7 +631,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         {
                             key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
                             value: parseInt(this.system.LEVELS),
-                            mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                            mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                             priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                         },
                     ];
@@ -645,7 +645,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                                 changes.push({
                                     key: `system.characteristics.${movementKey.toLowerCase()}.max`,
                                     value: parseInt(this.system.LEVELS),
-                                    mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                                    mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                                     priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                                 });
                                 foundMatch = true;
@@ -690,7 +690,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     {
                         key: `system.characteristics.${this.system.XMLID.toLowerCase()}.max`,
                         value: value,
-                        mode: CONST.ACTIVE_EFFECT_MODES.ADD,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.ADD,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.ADD,
                     },
                 ];
@@ -747,7 +747,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         {
                             key: "system.characteristics.dcv.max",
                             value: dcvValue,
-                            mode: CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+                            mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.MULTIPLY,
                             priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.MULTIPLY,
                         },
                     ];
@@ -852,13 +852,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     {
                         key: "ATL.light.bright",
                         value: parseFloat(this.system.QUANTITY),
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                     {
                         key: "ATL.light.color",
                         value: generateUniqueLightColor(this.uuid),
-                        mode: CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+                        mode: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
                 ];
