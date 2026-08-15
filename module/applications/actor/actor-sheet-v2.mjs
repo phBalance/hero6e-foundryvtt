@@ -322,8 +322,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     _getHeaderControls() {
         const controls = super._getHeaderControls();
 
-        // Add back in configureToken, even for linked tokens
-        if (!controls.find((c) => c.action === "configureToken") && this.token) {
+        if (!controls.find((c) => c.action === "configureToken")) {
             controls.splice(1, 0, {
                 action: "configureToken",
                 icon: "fa-regular fa-circle-user",
@@ -436,14 +435,19 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         };
     }
 
-    #token;
+    #tokenUuid;
 
     // Fixed-position context menus are appended to document.body (via the popover API), not to this
     // sheet's element, so ApplicationV2 teardown does not remove them. Track them to close on _onClose.
     #contextMenus = [];
 
     get token() {
-        return this.document.token ?? this.#token ?? tokenEducatedGuess({ actor: this.actor });
+        // If it's an unlinked NPC, super.token instantly returns the synthetic token document
+        const nativeToken = super.token;
+        if (nativeToken) return nativeToken;
+
+        // If it's a linked PC, super.token is null, so it falls back to your saved UUID or guess
+        return fromUuidSync(this.#tokenUuid) ?? tokenEducatedGuess({ actor: this.actor });
     }
 
     static TABS = {
@@ -849,8 +853,14 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     async _onFirstRender(context, options) {
         await super._onFirstRender(context, options);
 
-        // Keep track of token; needed for linked actors
-        this.#token = options.token ?? this.document.token ?? tokenEducatedGuess({ actor: this.actor });
+        // options.token is populated by the canvas click event (works for linked & unlinked)
+        // this.token captures native unlinked sheets as a clean structural fallback
+        // tokenEducatedGuess catches sidebar directory clicks where no token context exists
+        const initialToken = options.token ?? this.token ?? tokenEducatedGuess({ actor: this.actor });
+
+        if (initialToken) {
+            this.#tokenUuid = initialToken.uuid;
+        }
 
         this.#contextMenus = [
             // General right click on row
