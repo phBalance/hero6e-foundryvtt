@@ -1,8 +1,8 @@
 {{!-- {{ log 'HEROSYS effects-panel' this }} --}}
 <article id="effects-panel" class="{{this.css}}">
     {{#each effects}}
-        {{!-- {{ log 'HEROSYS effects-panel.effect' this }} --}}
-        <div class="effect-item" data-item-id="this.id">
+        {{ log 'HEROSYS effects-panel.effect' this }}
+        <div class="effect-item" data-effect-id="{{this._id}}">
             <div class="effect-info">
                 <h1>
                     {{this.name}}
@@ -54,14 +54,8 @@
                             {{#each this.changes}}
                                 <tr>
                                     <td>{{this.key}}</td>
-                                    <td>
-                                        {{#if (eq this.mode 1)}}Multiply
-                                        {{else if (eq this.mode 2)}}Add
-                                        {{else if (eq this.mode 3)}}Downgrade
-                                        {{else if (eq this.mode 4)}}Upgrade
-                                        {{else if (eq this.mode 5)}}Override
-                                        {{else}}{{this.mode}}
-                                        {{/if}}
+                                    <td> 
+                                        {{this.type}}
                                     </td>
                                     <td>{{this.value}}</td>
                                 </tr>
