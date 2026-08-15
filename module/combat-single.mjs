@@ -2818,11 +2818,13 @@ export class HeroSystem6eCombatSingle extends Combat {
             if (error || warning) {
                 content += `<li>(${powerUsingResourcesToContinue.name} ${error || warning}: power turned off)</li>`;
                 await powerUsingResourcesToContinue.toggle();
-            } else if (!(
-                resourcesRequired.totalCharges === 0 &&
-                resourcesRequired.totalEnd === 0 &&
-                resourcesRequired.totalReserveEnd === 0
-            )) {
+            } else if (
+                !(
+                    resourcesRequired.totalCharges === 0 &&
+                    resourcesRequired.totalEnd === 0 &&
+                    resourcesRequired.totalReserveEnd === 0
+                )
+            ) {
                 content += resourcesUsedDescription
                     ? `<li>${powerUsingResourcesToContinue.detailedName()} spent ${resourcesUsedDescription}${resourcesUsedDescriptionRenderedRoll}</li>`
                     : "";
