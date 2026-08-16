@@ -1417,7 +1417,7 @@ export class HeroSystem6eItemMartialArt extends HeroSystem6eItemTypeDataModelPro
             DCV: new StringField(),
             DISPLAY: new StringField(),
             EFFECT: new StringField(),
-            MAXSTR: new StringField(),
+            MAXSTR: new HeroNumberField({ initial: 0, nullable: false }),
             OCV: new StringField(),
             PHASE: new StringField(),
             RANGE: new HeroNumberField({ initial: 0, nullable: false }),
