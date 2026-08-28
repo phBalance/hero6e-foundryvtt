@@ -41,6 +41,7 @@ Hooks.on("quenchReady", async (quench) => {
         { registerWorldTimeTests },
         { registerVisionTests },
         { registerActiveEffectTests },
+        { registerDragAndDropTests },
     ] = await Promise.all([
         import("./testing-automaton.mjs"),
         import("./testing-base.mjs"),
@@ -67,6 +68,7 @@ Hooks.on("quenchReady", async (quench) => {
         import("./testing-world-time.mjs"),
         import("./testing-vision.mjs"),
         import("./testing-active-effects.mjs"),
+        import("./testing-drag-and-drop.mjs"),
     ]);
 
     registerGlobalSetup(quench);
@@ -95,6 +97,7 @@ Hooks.on("quenchReady", async (quench) => {
     registerWorldTimeTests(quench);
     registerVisionTests(quench);
     registerActiveEffectTests(quench);
+    registerDragAndDropTests(quench);
 
     registerGlobalTeardown(quench);
 });

@@ -1355,10 +1355,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
      * @protected
      */
     async _onDrop(event) {
-        event.stopPropagation();
-        event.preventDefault();
+        // Quench tests pass a fake event
+        event.stopPropagation?.();
+        event.preventDefault?.();
 
-        const target = event.currentTarget.closest("nav a");
+        const target = (event.currentTarget || event.target).closest("nav a");
         if (target) target.classList.remove("drag-hover");
 
         const data = foundry.applications.ux.TextEditor.getDragEventData(event);
@@ -1437,8 +1438,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     async _onDropItem(event, data) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
+        // Quench passes fake event.
+        event.preventDefault?.();
+        event.stopImmediatePropagation?.();
 
         if (!this.actor.isOwner) {
             console.warn(`not owner`);
@@ -1514,8 +1516,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
     async _onDropItemOnTab(event, data, item, targetTab) {
         console.log("Entering _onDropItemOnTab for:", item.name, item.type);
-        event.preventDefault();
-        event.stopImmediatePropagation();
+        event.preventDefault?.();
+        event.stopImmediatePropagation?.();
 
         if (!item) {
             console.error(`Missing item`);
