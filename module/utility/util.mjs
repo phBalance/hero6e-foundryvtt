@@ -1,8 +1,9 @@
 import { HeroSystem6eActor } from "../actor/actor.mjs";
+import { performAdjustment } from "../actor/actor-adjustment.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 //import { HeroSystem6eActor } from "../actor/actor.mjs";
-import { performAdjustment, renderAdjustmentChatCards } from "./adjustment.mjs";
+import { renderAdjustmentChatCards } from "./adjustment.mjs";
 
 const { Item } = foundry.documents;
 
@@ -571,6 +572,18 @@ export function hdcTimeOptionIdToSeconds(durationOptionId) {
     }
 
     return seconds;
+}
+
+// Millisecond precision below 5s
+export function formatDuration(totalMs) {
+    totalMs = Math.round(totalMs);
+    if (totalMs < 1000) {
+        return `${totalMs}ms`;
+    }
+    if (totalMs < 5000) {
+        return `${Math.floor(totalMs / 1000)}s ${totalMs % 1000}ms`;
+    }
+    return `${Math.ceil(totalMs / 1000)} seconds`;
 }
 
 export function toHHMMSS(secs) {
