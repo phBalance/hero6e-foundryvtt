@@ -1,6 +1,7 @@
 export class HeroSystem6eCompendium extends foundry.applications.sidebar.apps.Compendium {
     static HERO_COMPENDIUM_INDEX_FIELDS = ["system.PARENTID", "system.XMLID", "system.ID", "system.is5e"];
     static HERO_CONTAINER_XMLIDS = ["LIST", "COMPOUNDPOWER", "MULTIPOWER", "VPP"];
+    static HERO_CONTAINER_STACKABLE_XMLIDS = ["COMPOUNDPOWER", "MULTIPOWER", "VPP"];
 
     #dragDrop;
 
@@ -153,38 +154,38 @@ export class HeroSystem6eCompendium extends foundry.applications.sidebar.apps.Co
                     HeroSystem6eCompendium.HERO_CONTAINER_XMLIDS.includes(o.system?.XMLID),
             );
 
-            const system = parentEntry?.system || {};
+            if (!parentEntry) return;
+
+            const system = parentEntry.system || {};
             const edition = system.is5e ? "5" : "6";
 
             headerEl.classList.add(`hero-edition-${edition}`);
 
-            if (parentEntry) {
-                const xmlId = parentEntry.system.XMLID.toLowerCase();
-                folderEl.classList.add("hero-parent-folder", `hero-folder-${xmlId}`);
-                headerEl.classList.add("hero-parent-header", `hero-header-${xmlId}`);
+            const xmlId = parentEntry.system.XMLID.toLowerCase();
+            folderEl.classList.add("hero-parent-folder", `hero-folder-${xmlId}`);
+            headerEl.classList.add("hero-parent-header", `hero-header-${xmlId}`);
 
-                let controlsEl =
-                    folderEl.querySelector(".folder-controls") ||
-                    folderEl.querySelector(".directory-item-controls") ||
-                    headerEl;
-                if (controlsEl && !controlsEl.querySelector(".hero-compound-edit")) {
-                    const editBtn = document.createElement("a");
-                    editBtn.className = "hero-compound-edit item-control";
-                    editBtn.innerHTML = '<i class="fas fa-edit"></i>';
-                    editBtn.title = `Edit ${parentEntry.name} Sheet`;
+            let controlsEl =
+                folderEl.querySelector(".folder-controls") ||
+                folderEl.querySelector(".directory-item-controls") ||
+                headerEl;
+            if (controlsEl && !controlsEl.querySelector(".hero-compound-edit")) {
+                const editBtn = document.createElement("a");
+                editBtn.className = "hero-compound-edit item-control";
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                editBtn.title = `Edit ${parentEntry.name} Sheet`;
 
-                    editBtn.addEventListener("click", async (ev) => {
-                        ev.stopPropagation();
-                        const doc = await this.collection.getDocument(parentEntry._id);
-                        if (doc) doc.sheet.render(true);
-                    });
+                editBtn.addEventListener("click", async (ev) => {
+                    ev.stopPropagation();
+                    const doc = await this.collection.getDocument(parentEntry._id);
+                    if (doc) doc.sheet.render(true);
+                });
 
-                    const actionBtn = controlsEl.querySelector("[data-action], .fa-suitcase, .fa-backpack, button, a");
-                    if (actionBtn && actionBtn !== editBtn) {
-                        controlsEl.insertBefore(editBtn, actionBtn);
-                    } else {
-                        controlsEl.appendChild(editBtn);
-                    }
+                const actionBtn = controlsEl.querySelector("[data-action], .fa-suitcase, .fa-backpack, button, a");
+                if (actionBtn && actionBtn !== editBtn) {
+                    controlsEl.insertBefore(editBtn, actionBtn);
+                } else {
+                    controlsEl.appendChild(editBtn);
                 }
             }
         });
