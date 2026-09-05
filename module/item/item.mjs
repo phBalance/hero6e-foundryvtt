@@ -1395,7 +1395,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             const chargesMax = parseInt(chargeItemModifier.OPTION_ALIAS ?? chargeItemModifier) || 0;
             const currentCharges = system.numCharges ?? system._charges ?? 0;
             if (chargesMax > 0 && currentCharges < chargesMax) {
-                updateData["system.numCharges"] = chargesMax;
+                //updateData["system.numCharges"] = chargesMax;  // numCharges is now a getter
                 updateData["system._charges"] = chargesMax;
             }
 
@@ -2380,23 +2380,34 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     get is5e() {
-        // If item has undefined is5e use actor.is5e
-        if (this.actor && !this.system.is5e && this.system.is5e !== false) {
+        // Compendiums don't have actors, so default to item.
+        if (this.actor === undefined) {
+            return this.system.is5e;
+        }
+
+        // If item has undefined is5e use actor.is5e.
+        // This is unexpected as all items should have is5e, but some legacy items may not.
+        if (this.system.is5e === undefined) {
             console.warn(
-                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor?.system.is5e}`,
+                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor?.system.is5e}, deferring to actor.`,
                 this,
             );
             return this.actor?.is5e;
         }
 
-        if (this.actor && this.actor?.is5e !== this.system.is5e) {
-            console.error(
-                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor?.system.is5e}`,
+        // If item and actor disagree, favor actor.
+        // Happens when 5e items are added to 6e actors (and vice versa).
+        // Uncommon, but does occur with purchased HDPs.
+        if (this.actor?.is5e !== this.system.is5e) {
+            console.warn(
+                `${this.actor?.name}/${this.detailedName()} has is5e=${this.system.is5e} does not match actor=${this.actor?.system.is5e}, deferring to actor.`,
                 this,
             );
+            return this.actor.system.is5e;
+        } else {
+            // actor & item is5e match so doesn't really matter which one we return
+            return this.system.is5e;
         }
-
-        return this.system.is5e;
     }
 
     get aoeAttackParameters() {
@@ -2574,8 +2585,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             if (actorEffects) {
                 return true;
             }
-        } else {
-            console.error(`${this.name} has no actor`);
         }
 
         // Careful isActivatableManeuver doesn't stand alone, it only handles specific cases.
@@ -2809,42 +2818,65 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     /**
-     * Retrieves all child items of the current item based on the PARENTID property.
+     * Retrieves all child items of the current item synchronously.
+     * Warns if a compendium item is accessed before its parent pack has been preloaded.
      *
-     * @returns {Array} An array of child items.
+     * @returns {Item[]} An array of child item documents.
      */
     get childItems() {
-        /// Compendiums only have the index entry, so need to get the whole item
-        // However, we apparently never need this, so commenting it out for now.
-        // If we HAVE to have this we need to make get childItems async, which is messy.
-        // if (this.pack) {
-        //     const p = game.packs.get(this.pack).getDocuments({ "system.ID": this.system.PARENTID });
-        //     p.then()
-        // }
-        // game.packs.get(this.pack).index.contents
-
-        // Super old items may not have an ID
         if (!this.system?.ID) return [];
 
-        const items = this.actor?.items || (this.pack ? [] : game.items);
+        const candidateItems = (() => {
+            if (this.actor) return this.actor.items;
+            if (this.pack) {
+                const pack = game.packs.get(this.pack);
+                if (pack && pack.index.size > 0 && pack.size === 0) {
+                    console.warn(
+                        `[Hero System] '${this.name}' accessed childItems synchronously, but compendium pack '${this.pack}' is not loaded. Preload the pack using await pack.getDocuments() first.`,
+                    );
+                }
+                return pack?.contents || [];
+            }
+            return game.items.contents;
+        })();
 
-        const children = items
-            .filter((item) => item.system.PARENTID === this.system.ID)
+        return candidateItems
+            .filter((item) => item.system?.PARENTID === this.system.ID)
             .sort((a, b) => (a.sort || 0) - (b.sort || 0));
-        return children;
     }
 
     async childItemsFromPack() {
         if (!this.pack) return [];
         const pack = game.packs.get(this.pack);
         if (!pack) return [];
-        const documents = await pack.getDocuments(); // query not working and undocumented { "system.PARENTID": this.system.ID });
-        return documents.filter(
-            (item) =>
-                item.system.PARENTID &&
-                item.system.PARENTID === this.system.ID &&
-                item.folder?.uuid === this.folder?.uuid,
+
+        // 1. Get light index data including system fields and folder structure
+        const index = await pack.getIndex({ fields: ["system.PARENTID", "system.ID", "folder"] });
+
+        const familyIDs = new Set([this.system.ID]);
+        let previousSize = 0;
+
+        // 2. Run the same tree assembly logic over the lightweight index
+        while (familyIDs.size !== previousSize) {
+            previousSize = familyIDs.size;
+            for (const entry of index) {
+                if (entry.system?.PARENTID && familyIDs.has(entry.system.PARENTID)) {
+                    familyIDs.add(entry.system.ID || entry._id);
+                }
+            }
+        }
+        familyIDs.delete(this.system.ID);
+
+        // 3. Filter index entries to match your folder criteria
+        const targetEntries = index.filter(
+            (entry) => familyIDs.has(entry.system?.ID || entry._id) && entry.folder === this.folder?.id, // Index uses folder IDs, not uuids
         );
+
+        if (targetEntries.length === 0) return [];
+
+        // 4. Only fetch the exact full documents needed from the database
+        const documentPromises = targetEntries.map((entry) => pack.getDocument(entry._id));
+        return Promise.all(documentPromises);
     }
 
     get childIdx() {
@@ -5475,7 +5507,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 return false;
             } else if (this.vppUnSlotted) {
                 return false;
-            } else if (this.type === "equipment" && this.system.CARRIED !== true) {
+            } else if (this.type === "equipment" && !this.isCarried) {
                 return false;
             } else if (this.system.XMLID === "STRIKE") {
                 return true;
@@ -5996,6 +6028,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
     get _activePoints() {
         // PH: FIXME: This has to be removed.
+        // AARON: One reason for custom activePoints function is to sum up COMPOUNDPOWER items
         if (this.baseInfo?.activePoints) {
             return this.baseInfo?.activePoints(this);
         }
@@ -7868,13 +7901,38 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // Without baseInfo the is* type getters below throw. Typically an item stamped with
         // the wrong edition (e.g. a 5e-only XMLID like ARMOR marked as 6e).
-        if (!this.baseInfo) {
+        const baseInfo = getPowerInfo({ XMLID: this.system.XMLID, xmlTag: this.system.xmlTag, actor: targetActor });
+        if (!baseInfo) {
             validationFailureMessages.push({
                 itemId: this.id,
                 message: `${this.detailedName()} is not a known ${this.is5e ? "5e" : "6e"} ${this.type} and cannot be converted.`,
                 severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
             });
             return validationFailureMessages;
+        }
+
+        for (const adder of this.adders) {
+            const baseInfo = getPowerInfo({ XMLID: adder.XMILD, xmlTag: adder.xmlTag, actor: targetActor });
+            if (!baseInfo) {
+                validationFailureMessages.push({
+                    itemId: this.id,
+                    message: `${adder.XMLID} is not a known ${this.is5e ? "5e" : "6e"} adder for ${this.system.XMLID} and cannot be converted.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                });
+                return validationFailureMessages;
+            }
+        }
+
+        for (const modifier of this.modifiers) {
+            const baseInfo = getPowerInfo({ XMLID: modifier.XMILD, xmlTag: modifier.xmlTag, actor: targetActor });
+            if (!baseInfo) {
+                validationFailureMessages.push({
+                    itemId: this.id,
+                    message: `${modifier.XMLID} is not a known ${this.is5e ? "5e" : "6e"} modifier for ${this.system.XMLID} and cannot be converted.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                });
+                return validationFailureMessages;
+            }
         }
 
         // Verify the item is valid for the targetActor's type

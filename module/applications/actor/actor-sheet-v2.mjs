@@ -2,17 +2,17 @@ import { getActorDefensesVsAttack } from "../../utility/defense.mjs";
 import { HeroSystem6eActor } from "../../actor/actor.mjs";
 import { HeroSystem6eItem } from "../../item/item.mjs";
 import {
-    getPowerInfo,
     getCharacteristicInfoArrayForActor,
     tokenEducatedGuess,
     whisperUserTargetsForActor,
 } from "../../utility/util.mjs";
-import { HeroSystem6eCompendium } from "../../compendium/compendium.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
 const { DragDrop } = foundry.applications.ux;
 const { FilePicker } = foundry.applications.apps;
+
+const { Actor } = foundry.documents;
 
 // REF: https://foundryvtt.wiki/en/development/guides/converting-to-appv2
 // REF: https://foundryvtt.wiki/en/development/guides/applicationV2-conversion-guide
@@ -1084,75 +1084,373 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     /**
-     * Deeply compares an incoming item against existing actor items to find an identical match for QUANTITY stacking.
-     * Instantiates a temporary in-memory Actor document containing deep-cloned parent and child items
-     * so that system getters resolve correctly without mutating the original drop payloads.
-     *
-     * @param {Object} itemData - The incoming item data object intended for creation.
-     * @param {Item|Object} [sourceItem=null] - The original item document or data (used to accurately fetch child items).
-     * @param {Object} [options={}] - Configuration options routing the drop context.
-     * @param {string} [options.targetType] - The UI tab or target type the item is being dropped onto (e.g., "equipment").
-     * @param {Object[]} [itemsToProcess=[]] - The full raw batch of items being dropped, used to link container children in-memory.
-     * @returns {Promise<Item|null>} Resolves to the matching existing Item document on the actor, or null if no match is found.
+     * Native override for item drops on the actor sheet.
      */
-    async _findExistingMatchingItem(itemData, sourceItem = null, options = {}, itemsToProcess = []) {
-        const isTopLevel = !itemData.system.PARENTID;
-        if (!isTopLevel) return null;
+    async _onDropItem(event, data) {
+        event.preventDefault?.();
+        event.stopImmediatePropagation?.();
 
-        const targetType = options.targetType || itemData.type;
-        if (targetType !== "equipment" && itemData.type !== "equipment") return null;
-        if (itemData.type === "list" || itemData.system?.XMLID === "LIST") return null;
+        const item = await fromUuid(data.uuid);
+        if (!item) {
+            console.error("Missing item");
+            return;
+        }
 
-        // 1. Clone itemData safely
-        const clonedItemData = foundry.utils.deepClone(itemData);
-        const parentSystemId = clonedItemData.system?.ID || clonedItemData.system?.id;
+        // Resolve target type if dropped directly onto a specific actor sheet tab
+        const targetType = this._resolveDropTargetType(event);
 
-        const possibleIds = new Set(
-            [parentSystemId, clonedItemData.system?.ID, sourceItem?.system?.ID, clonedItemData._id].filter(Boolean),
-        );
-
-        // 2. Deep-clone children from the drop pool before modifying anything for our temp evaluation actor
-        const directChildren = itemsToProcess
-            .filter((i) => {
-                const childParentId = i.system?.PARENTID || i.system?.parentId || i.parent_id;
-                return childParentId && possibleIds.has(childParentId);
-            })
-            .map((i) => {
-                const clonedChild = foundry.utils.deepClone(i);
-                if (parentSystemId && clonedChild.system) {
-                    clonedChild.system.PARENTID = parentSystemId;
+        // Intra-actor dropping (containers / reordering)
+        const sameActor = item.actor?.id === this.actor.id;
+        if (sameActor) {
+            // Move to different tab
+            if (targetType !== item.type) {
+                if (!item.isValidTypeConversion(targetType, this.actor)) {
+                    const conversionFailures = item.validationTypeConversionFailures(targetType, this.actor);
+                    ui.notifications.error(conversionFailures[0].message);
+                    console.error(`Failed to convert ${item.name} to ${targetType}`, conversionFailures);
+                    return;
                 }
-                return clonedChild;
+
+                const originalType = item.type;
+
+                // New system without PARENTID
+                const newSystem = item.system.toObject();
+                delete newSystem.PARENTID;
+
+                await item.update({
+                    type: targetType,
+                    system: new foundry.data.operators.ForcedReplacement(newSystem),
+                });
+
+                ui.notifications.success(
+                    `<b>${item.name}</b> was moved from <b>${originalType}</b> to <b>${item.type}</b>.`,
+                );
+                return;
+            }
+
+            const dropTarget = event.target.closest("[data-document-uuid]");
+            if (!item.isContainer || item.system.XMLID === "COMPOUNDPOWER") {
+                const dropTargetItem = await fromUuid(dropTarget?.dataset.documentUuid);
+                if (!item.system.PARENTID && dropTargetItem?.isContainer) {
+                    ui.notifications.success(`<b>${item.name}</b> was moved into parent <b>${dropTargetItem.name}</b>`);
+                    await item.update({ "system.PARENTID": dropTargetItem.system.ID });
+                } else if (item.system.PARENTID && !dropTargetItem?.system.PARENTID) {
+                    ui.notifications.success(
+                        `<b>${item.name}</b> was removed from parent <b>${item.parentItem?.name}</b>.`,
+                    );
+                    await item.update({ "system.PARENTID": new foundry.data.operators.ForcedDeletion() });
+                } else if (!item.isContainer && dropTargetItem?.isContainer) {
+                    ui.notifications.success(`<b>${item.name}</b> was moved into parent <b>${dropTargetItem.name}</b>`);
+                    await item.update({ "system.PARENTID": dropTargetItem.system.ID });
+                } else if (
+                    dropTargetItem?.parentItem &&
+                    !item.parentItem &&
+                    item.childItems?.length === 0 &&
+                    dropTargetItem.childItems?.length === 0
+                ) {
+                    ui.notifications.success(
+                        `<b>${item.name}</b> was moved into parent <b>${dropTargetItem.parentItem.name}</b>`,
+                    );
+                    await item.update({ "system.PARENTID": dropTargetItem.parentItem.system.ID });
+                }
+            }
+            return super._onDropItem(event, item);
+        }
+
+        // Run through the unified preparation & commit pipeline
+        const normalizedItems = await this._prepareNormalizedDropItems(data, targetType);
+        await this._commitNormalizedDropItems(normalizedItems, item);
+    }
+
+    /**
+     * Native override for folder drops on the actor sheet.
+     */
+    async _onDropFolder(event, folder) {
+        event.preventDefault?.();
+        event.stopImmediatePropagation?.();
+
+        if (!this.actor.isOwner) return null;
+
+        const targetType = this._resolveDropTargetType(event);
+        const normalizedItems = await this._prepareNormalizedDropItems({ uuid: folder.uuid }, targetType);
+        await this._commitNormalizedDropItems(normalizedItems, folder);
+
+        return normalizedItems;
+    }
+
+    /**
+     * Helper to resolve the target item type based on where the drop event occurred on the sheet.
+     */
+    _resolveDropTargetType(event) {
+        const target = event?.target ?? event?.currentTarget;
+        const droppedOnTab = target?.closest?.("[data-tab]")?.dataset?.tab?.replace(/(?<!analysi)s$/, "");
+        return (
+            droppedOnTab ?? this.tabGroups?.primary?.replace(/s$/, "").replace("martial", "martialart") ?? "equipment"
+        );
+    }
+
+    /**
+     * Prepares, normalizes, and maps IDs for a dropped item or folder tree.
+     */
+    async _prepareNormalizedDropItems(data, targetType) {
+        let normalizedItems = [];
+        async function recurseAddItemFromUuid(uuid) {
+            let item = await fromUuid(uuid);
+            if (!item) {
+                console.error(`${uuid} was not found`);
+                return;
+            }
+
+            const pack = item.pack ? game.packs.get(item.pack) : null;
+            const contents = pack ? await pack.getDocuments({ folder: item.id }) : item.contents;
+
+            if (item.documentName === "Folder") {
+                // Root level folders like EQUIPMENT
+                for (const child of item.children || []) {
+                    await recurseAddItemFromUuid(child.folder?.uuid || child.uuid);
+                }
+                for (const child of contents) {
+                    await recurseAddItemFromUuid(child.uuid);
+                }
+            } else {
+                if (item.documentName === "Item") {
+                    if (!normalizedItems.find((normItem) => normItem.id === item.id)) {
+                        normalizedItems.push(item);
+                    }
+                }
+
+                for (const childItem of item.childItems) {
+                    await recurseAddItemFromUuid(childItem.uuid);
+                }
+            }
+        }
+
+        await recurseAddItemFromUuid(data.uuid);
+        if (normalizedItems.length === 0) return [];
+
+        // Make sure we don't alter sources
+        normalizedItems = foundry.utils.deepClone(normalizedItems);
+
+        // Full charges
+        for (const item of normalizedItems) {
+            const updateData = foundry.utils.deepClone(HeroSystem6eItem._prepareOriginalResetData(item));
+            foundry.utils.mergeObject(item, updateData, {
+                insertKeys: true,
+                insertValues: true,
+                overwrite: true,
+                inplace: true,
             });
+        }
 
-        // 3. Spin up the temporary in-memory Actor using cloned data exclusively
-        const tempActorClass = game.actors.documentClass;
-        const tempActor = new tempActorClass(
+        // Create temporary actor and add all itemsToDrop to initialize
+        // schema in memory.  Allows for Item helpers to work.
+        const tempActor = new Actor(
             {
-                name: "TempEvaluationActor",
-                type: this.actor.type || "character",
-                items: [clonedItemData, ...directChildren],
+                name: "TempDropActor",
+                type: this.actor.type,
+                items: normalizedItems,
+                system: foundry.utils.deepClone(this.actor.system),
             },
-            { parent: null },
+            { temporary: true },
         );
 
-        const tempItem =
-            tempActor.items.get(clonedItemData._id) ||
-            tempActor.items.contents.find(
-                (i) => (i.system?.XMLID || i.type) === (clonedItemData.system?.XMLID || clonedItemData.type),
-            );
+        // We let is5e mismatches between Actor and Item pass with a console.warn.
+        // However, if no baseInfo then that is a hard NO, so bail.
+        for (const item of tempActor.items) {
+            if (!item.baseInfo) {
+                ui.notifications.error(
+                    `${item.name}/${item.system.XMLID} is a ${item.system.is5e ? "5e" : "6e"} item that has no ${item.system.is5e ? "6e" : "5e"} equivalent`,
+                );
+                return;
+            }
+        }
 
-        if (!tempItem) return null;
+        // Check if targetType is valid for this specific actor and assign targetType
+        for (const item of tempActor.items) {
+            if (!item.isValidTypeConversion(targetType, this.actor)) {
+                const conversionFailures = item.validationTypeConversionFailures(targetType, this.actor);
+                ui.notifications.error(conversionFailures[0].message);
+                console.error(`Failed to convert ${item.name} to ${targetType}`, conversionFailures);
+                return [];
+            }
+        }
 
-        const getDocumentTreeSignature = async (itemDoc, sourceRaw = null) => {
-            let children = itemDoc.childItems || [];
+        // Generate ID mapping first so parent/child relations survive
+        const idMapping = new Map();
+        let baseTime = Date.now();
 
-            if (children.length === 0) {
-                if (sourceRaw && sourceRaw.childItems) {
-                    children = sourceRaw.childItems;
-                } else if (itemDoc.pack) {
-                    children = await itemDoc.childItemsFromPack();
+        for (let i = 0; i < normalizedItems.length; i++) {
+            const item = normalizedItems[i];
+            if (!item.system) item.system = {};
+            const oldId = item.system.ID;
+            const newId = baseTime + i;
+            if (oldId) {
+                idMapping.set(oldId, newId);
+            }
+            item.system.ID = newId;
+        }
+
+        // Step 2: Remap internal PARENTID relations, or clear orphaned external ones
+        for (const item of normalizedItems) {
+            if (item.system.PARENTID != null && item.system.PARENTID !== "") {
+                if (idMapping.has(item.system.PARENTID)) {
+                    // Internal relation within the dropped tree—remap to the new ID
+                    item.system.PARENTID = idMapping.get(item.system.PARENTID);
+                } else {
+                    // Leftover compendium parent that wasn't dragged—clear it so it's a clean root item
+                    item.system.PARENTID = undefined;
                 }
+            }
+        }
+
+        // Step 6: Ensure proper targetType
+        for (const item of normalizedItems) {
+            item.type = targetType;
+        }
+
+        // We will re-add the items to actor as we apparently can't change the in-memory item.type
+
+        return normalizedItems;
+    }
+
+    /**
+     * Commits normalized items, handling signature duplicate checks, equipment quantity stacking, and chat messaging.
+     */
+    async _commitNormalizedDropItems(normalizedItems, source = null) {
+        if (!normalizedItems || normalizedItems.length === 0) return;
+
+        const droppedIds = new Set(normalizedItems.map((i) => i.system?.ID));
+        const rootItems = normalizedItems.filter((i) => !i.system?.PARENTID || !droppedIds.has(i.system.PARENTID));
+
+        const itemsToCreate = [];
+        let stackedInfo = null;
+        let createdRootItem = null;
+
+        for (const rootItem of rootItems) {
+            const existingMatch = await this._findExistingMatchingItem(rootItem, normalizedItems);
+
+            if (existingMatch && rootItem.type === "equipment") {
+                const currentQty = existingMatch.system.QUANTITY ?? existingMatch.system.quantity ?? 1;
+                const dropQty = rootItem.system.QUANTITY ?? rootItem.system.quantity ?? 1;
+                const newQty = currentQty + dropQty;
+
+                await existingMatch.update({ "system.QUANTITY": newQty });
+
+                stackedInfo = {
+                    name: rootItem.name,
+                    oldQty: currentQty,
+                    dropQty: dropQty,
+                    newQty: newQty,
+                };
+                createdRootItem = existingMatch;
+            } else {
+                const subtree = this._getSubtreeItems(rootItem, normalizedItems);
+                const rawSubtree = subtree.map((i) => (typeof i.toObject === "function" ? i.toObject() : i));
+                itemsToCreate.push(...rawSubtree);
+                if (!createdRootItem) {
+                    createdRootItem = rootItem;
+                }
+            }
+        }
+
+        if (itemsToCreate.length > 0) {
+            const createdDocs = await this.actor.createEmbeddedDocuments("Item", itemsToCreate);
+            if (!createdRootItem && createdDocs.length > 0) {
+                createdRootItem = createdDocs[0];
+            }
+        }
+
+        // Handle chat messaging and cleanup
+        if (source && createdRootItem) {
+            const actor = this.actor;
+            const token = actor.token;
+            const dropName = token?.name || actor.getActiveTokens()?.[0]?.name || actor.name;
+            const isFolder = source.documentName === "Folder";
+
+            const dragName = (() => {
+                if (source.pack) {
+                    const pack = game.packs.get(source.pack);
+                    return pack?.metadata?.label ?? source.pack;
+                }
+                if (isFolder) return "Item Sidebar";
+                return (
+                    source.actor?.token?.name ||
+                    source.actor?.getActiveTokens()?.[0]?.name ||
+                    source.actor?.name ||
+                    (source.uuid.startsWith("Item.") ? "ItemSidebar" : "Compendium")
+                );
+            })();
+
+            const chatData = {
+                author: game.user._id,
+                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
+                whisper: isFolder
+                    ? whisperUserTargetsForActor(this.actor)
+                    : [...whisperUserTargetsForActor(this.actor), ...whisperUserTargetsForActor(source.actor)],
+                speaker: ChatMessage.getSpeaker({ actor: this.actor, token: this.token }),
+            };
+            chatData.whisper = Array.from(new Map(chatData.whisper.map((user) => [user.id, user])).values());
+
+            const containerXmlId = source.system?.XMLID
+                ? ` (${source.system.XMLID})`
+                : rootItems[0]?.system?.XMLID
+                  ? ` (${rootItems[0].system.XMLID})`
+                  : "";
+
+            const targetType = normalizedItems[0].type;
+
+            if (stackedInfo) {
+                chatData.content =
+                    `<b>${stackedInfo.name}</b>${containerXmlId} was copied from <b>${dragName}</b>${source.pack ? " compendium" : ""}.<br>` +
+                    `Its QUANTITY was increased by <b>${stackedInfo.dropQty}</b> ` +
+                    `(from ${stackedInfo.oldQty} to ${stackedInfo.newQty}) ` +
+                    `on the <b>${targetType}</b> tab of <b>${dropName}</b>.`;
+                ChatMessage.create(chatData);
+            } else if (isFolder) {
+                chatData.content = `<b>${source.name}</b>${containerXmlId} was added to the <b>${targetType}</b> tab of <b>${dropName}</b> from the ${source.pack ? `<b>${dragName}</b> compendium` : "<b>Item Sidebar</b>"}: <ul>${rootItems.map((item) => `<li>${item.name}</li>`).join("")}</ul>`;
+                ChatMessage.create(chatData);
+            } else if (source.type === "equipment" && source.actor) {
+                source.delete();
+                chatData.content = `<b>${source.name}</b> was transferred from <b>${dragName}</b> to the <b>${targetType}</b> tab of <b>${dropName}</b>.`;
+                ChatMessage.create(chatData);
+            } else {
+                chatData.content = `<b>${source.name}</b>${containerXmlId} was copied from <b>${dragName}</b>${source.pack ? " compendium" : ""} to the <b>${targetType}</b> tab of <b>${dropName}</b>.`;
+                ChatMessage.create(chatData);
+            }
+        }
+    }
+
+    /**
+     * Helper to recursively collect a root item and all its descendant children from a pool.
+     */
+    _getSubtreeItems(item, pool) {
+        const results = [item];
+        const children = pool.filter((i) => i.system?.PARENTID === item.system?.ID && i.system?.ID !== item.system?.ID);
+        for (const child of children) {
+            results.push(...this._getSubtreeItems(child, pool));
+        }
+        return results;
+    }
+
+    /**
+     * Finds an existing matching item based on deep tree signature.
+     */
+    async _findExistingMatchingItem(itemDoc, allItemsPool) {
+        if (itemDoc.system?.PARENTID) return null;
+        if (itemDoc.system?.XMLID === "LIST") return null;
+
+        const getDocumentTreeSignature = async (doc, pool = []) => {
+            // Extract raw source object to bypass computed getters (like activePoints)
+            const rawDoc = typeof doc.toObject === "function" ? doc.toObject() : doc._source || doc;
+            const system = rawDoc.system || {};
+
+            // Resolve children using either embedded relationships or a flat pool of raw objects
+            let children = rawDoc.childItems || doc.childItems || [];
+            if (children.length === 0 && pool.length > 0 && system.ID) {
+                children = pool.filter((i) => {
+                    const iSys = typeof i.toObject === "function" ? i.toObject().system : i._source?.system || i.system;
+                    return iSys?.PARENTID === system.ID;
+                });
             }
 
             const cleanCollection = (arr) =>
@@ -1166,575 +1464,61 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
             const childSigs = [];
             for (const child of children) {
-                const childDoc =
-                    child instanceof foundry.abstract.Document
-                        ? child
-                        : tempActor.items.get(child._id) ||
-                          new tempActor.items.documentClass(child, { parent: tempActor });
-                childSigs.push(await getDocumentTreeSignature(childDoc));
+                childSigs.push(await getDocumentTreeSignature(child, pool));
             }
             childSigs.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 
-            const sig = {
-                xmlid: itemDoc.system?.XMLID || itemDoc.type,
-                name: (itemDoc.name ?? "").replace(/\s*\(.*?\)/g, "").trim(),
-                activePoints: itemDoc.system?.ACTIVEPOINTS ?? itemDoc.system?.activePoints ?? 0,
-                modifiers: cleanCollection(itemDoc.system?.MODIFIER),
-                adders: cleanCollection(itemDoc.system?.ADDER),
+            return {
+                xmlid: system.XMLID || rawDoc.type,
+                name: (rawDoc.name ?? "").replace(/\s*\(.*?\)/g, "").trim(),
+                activePoints: system.activePoints ?? 0,
+                modifiers: cleanCollection(system.MODIFIER),
+                adders: cleanCollection(system.ADDER),
                 children: childSigs,
             };
-
-            return sig;
         };
 
-        const incomingTree = await getDocumentTreeSignature(tempItem, sourceItem);
+        const incomingTree = await getDocumentTreeSignature(itemDoc, allItemsPool);
         const incomingSig = JSON.stringify(incomingTree);
 
         for (const existingItem of this.actor.items) {
             if (
-                existingItem.type !== itemData.type ||
-                existingItem.system?.XMLID !== itemData.system?.XMLID ||
+                existingItem.type !== itemDoc.type ||
+                existingItem.system?.XMLID !== itemDoc.system?.XMLID ||
                 existingItem.system?.PARENTID
             ) {
                 continue;
             }
 
-            const existingTree = await getDocumentTreeSignature(existingItem);
+            const existingTree = await getDocumentTreeSignature(existingItem, this.actor.items.contents);
             const existingSig = JSON.stringify(existingTree);
 
             if (existingSig === incomingSig) {
                 return existingItem;
             } else {
+                const findDiff = (obj1, obj2, path = "", context = "") => {
+                    if (obj1 === obj2) return null;
+                    if (typeof obj1 !== "object" || obj1 === null || typeof obj2 !== "object" || obj2 === null) {
+                        return `[${context || "Root"}] ${path}: ${JSON.stringify(obj1)} !== ${JSON.stringify(obj2)}`;
+                    }
+                    const currentContext = obj1.name || obj2.name || obj1.xmlid || obj2.xmlid || context;
+                    const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
+                    for (const key of keys) {
+                        const diff = findDiff(obj1[key], obj2[key], path ? `${path}.${key}` : key, currentContext);
+                        if (diff) return diff;
+                    }
+                    return null;
+                };
+
                 console.groupCollapsed(
-                    `[Stacking Diff Check] Mismatch found between incoming "${itemData.name}" and existing "${existingItem.name}"`,
+                    `[Stacking Diff Check] Mismatch for "${itemDoc.name}" and existing "${existingItem.name}"`,
                 );
-                console.log("Full Incoming Signature:", incomingTree);
-                console.log("Full Existing Signature:", existingTree);
-                console.log("Incoming Children:", incomingTree.children);
-                console.log("Existing Children:", existingTree.children);
+                console.error("Exact signature divergence:", findDiff(existingTree, incomingTree));
                 console.groupEnd();
             }
         }
 
         return null;
-    }
-
-    /**
-     * Asynchronously prepares, sanitizes, and normalizes an array of item data for insertion onto the actor.
-     * Handles ID generation, parent-child ID linkage for containers/compound powers, ruleset validation,
-     * compendium default resets, and checks for stackable equipment/containers via QUANTITY using recursive tree matching.
-     *
-     * @param {Item[]|Object[]} itemsToProcess - Array of source items or raw item data objects being dropped.
-     * @param {Object} [options={}] - Configuration options for the drop operation.
-     * @param {string} [options.targetType] - The UI tab or target type the item is being dropped onto (e.g., "equipment").
-     * @param {boolean} [options.isCompendiumDrop] - True if the item originates from a compendium pack.
-     * @returns {Promise<Object[]>} Resolves to a fully prepared array of item data ready for embedded creation.
-     *                              The returned array includes a `stackedInfo` property containing stacking metadata.
-     */
-    async _prepareDroppedItemData(itemsToProcess, options = {}) {
-        const itemsToCreate = [];
-        const idMapping = new Map();
-        const stackedItemsInfo = [];
-        const skippedParentIds = new Set();
-
-        const droppedIds = new Set(itemsToProcess.map((i) => i.system?.ID).filter(Boolean));
-
-        for (const sourceItem of itemsToProcess) {
-            if (sourceItem.system?.PARENTID && skippedParentIds.has(sourceItem.system.PARENTID)) {
-                continue;
-            }
-
-            console.log(
-                "Entering _prepareDroppedItemData::itemsToProcess for:",
-                sourceItem.name,
-                sourceItem.system?.XMLID,
-            );
-            const itemData = foundry.utils.deepClone(sourceItem);
-
-            delete itemData._id;
-            delete itemData.ownership;
-            delete itemData.flags;
-            delete itemData.folder;
-
-            if (itemData.system?.PARENTID && !droppedIds.has(itemData.system.PARENTID)) {
-                delete itemData.system.PARENTID;
-            }
-
-            const oldSystemId = itemData.system?.ID;
-            const newId = new Date().getTime() + itemsToCreate.length;
-
-            if (oldSystemId) {
-                idMapping.set(oldSystemId, newId);
-            }
-            itemData.system.ID = newId;
-
-            if (itemData.system.active) itemData.system.active = false;
-            if (itemData.effects) itemData.effects = [];
-
-            if (options.targetType) {
-                itemData.type = options.targetType;
-            }
-
-            // PERFORMANCE OPTIMIZATION: Only call getPowerInfo if xmlTag is missing
-            if (!itemData.system.xmlTag) {
-                const baseInfoCheck = getPowerInfo({
-                    xmlid: itemData.system.XMLID,
-                    is5e: this.actor.is5e,
-                    xmlTag: itemData.system.xmlTag,
-                });
-                if (!baseInfoCheck) {
-                    throw new Error(
-                        `${itemData.system.XMLID} is not valid for ${this.actor.is5e ? "5e" : "6e"}. "${itemData.name}" was not transferred.`,
-                    );
-                }
-                itemData.system.xmlTag = baseInfoCheck.xmlTag;
-            }
-
-            if (options.isCompendiumDrop) {
-                const resetUpdates = HeroSystem6eItem._prepareOriginalResetData(itemData);
-                for (const [key, value] of Object.entries(resetUpdates)) {
-                    foundry.utils.setProperty(itemData, key, value);
-                }
-            }
-
-            const isTopLevel = !itemData.system.PARENTID;
-            const targetType = options.targetType || itemData.type;
-            const isEquipmentTab = targetType === "equipment";
-            const containerXmlids = ["COMPOUNDPOWER", "VPP", "MULTIPOWER", "MP"];
-            const isStackableType =
-                itemData.type === "equipment" || containerXmlids.includes(itemData.system?.XMLID?.toUpperCase());
-
-            if (isStackableType && isTopLevel && isEquipmentTab) {
-                const existingItem = await this._findExistingMatchingItem(
-                    itemData,
-                    sourceItem,
-                    options,
-                    itemsToProcess,
-                );
-
-                if (existingItem) {
-                    const currentQty = existingItem.system.QUANTITY ?? 1;
-                    const dropQty = itemData.system.QUANTITY ?? 1;
-                    const newQty = currentQty + dropQty;
-
-                    await existingItem.update({ "system.QUANTITY": newQty });
-
-                    stackedItemsInfo.push({
-                        name: itemData.name,
-                        oldQty: currentQty,
-                        dropQty: dropQty,
-                        newQty: newQty,
-                    });
-
-                    if (oldSystemId) {
-                        skippedParentIds.add(oldSystemId);
-                    }
-
-                    continue;
-                }
-            }
-
-            itemsToCreate.push(itemData);
-        }
-
-        for (const itemData of itemsToCreate) {
-            if (itemData.system.PARENTID) {
-                if (idMapping.has(itemData.system.PARENTID)) {
-                    itemData.system.PARENTID = idMapping.get(itemData.system.PARENTID);
-                } else {
-                    delete itemData.system.PARENTID;
-                }
-            }
-        }
-
-        itemsToCreate.stackedInfo = stackedItemsInfo;
-        return itemsToCreate;
-    }
-
-    /**
-     * Callback actions which occur when a dragged element is dropped on a target.
-     * @param {DragEvent} event       The originating DragEvent
-     * @protected
-     */
-    async _onDrop(event) {
-        event.stopPropagation();
-        event.preventDefault();
-
-        const target = event.currentTarget.closest("nav a");
-        if (target) target.classList.remove("drag-hover");
-
-        const data = foundry.applications.ux.TextEditor.getDragEventData(event);
-        switch (data?.type) {
-            case "Item":
-                await this._onDropItem(event, data);
-                break;
-
-            case "Folder":
-                await this.onDropFolder(await fromUuid(data.uuid), event);
-                break;
-
-            default:
-                console.warn(`Unhandled _onDrop type=${data?.type}`);
-                break;
-        }
-    }
-
-    // Tabs that name an Item subtype; a drop on any other tab keeps each item's own type
-    static #TAB_ITEM_TYPES = {
-        martial: "martialart",
-        skills: "skill",
-        maneuvers: "maneuver",
-        powers: "power",
-        equipment: "equipment",
-        characteristics: "characteristic",
-        perks: "perk",
-        talents: "talent",
-        disadvantages: "disadvantage",
-        complications: "complication",
-    };
-
-    async onDropFolder(folder, event) {
-        console.log("Entering onDropFolder for:", folder.name);
-        let itemsToDrop = folder.contents;
-        const pack = game.packs.get(folder.pack);
-
-        const target = event?.target ?? event?.currentTarget;
-        const droppedOnTab = target?.closest?.("[data-tab]")?.dataset?.tab;
-        const targetType = HeroSystemActorSheetV2.#TAB_ITEM_TYPES[droppedOnTab ?? this.tabGroups.primary];
-
-        if (folder.pack || !itemsToDrop?.[0]?.id) {
-            function getFolderIds(f) {
-                let ids = [f.id];
-                const subfolders = pack.folders.filter((sub) => sub.folder?.id === f.id);
-                for (const sub of subfolders) {
-                    ids = ids.concat(getFolderIds(sub));
-                }
-                return ids;
-            }
-            const allFolderIds = getFolderIds(folder);
-            itemsToDrop = await pack.getDocuments({ folder__in: allFolderIds });
-        }
-
-        let topItems = itemsToDrop.filter((i) => !i.system.PARENTID);
-
-        if (!topItems.length) {
-            const matchingContainer = itemsToDrop.find(
-                (i) => i.name === folder.name && HeroSystem6eCompendium.HERO_CONTAINER_XMLIDS.includes(i.system?.XMLID),
-            );
-            if (matchingContainer) topItems = [matchingContainer];
-        }
-
-        if (!topItems.length) {
-            throw new Error("Expecting at least one item");
-        }
-
-        const rawItemsData = itemsToDrop.map((i) => i.toObject());
-
-        try {
-            const itemsToCreate = await this._prepareDroppedItemData(rawItemsData, {
-                targetType,
-                isCompendiumDrop: Boolean(folder.pack),
-            });
-
-            const chatData = {
-                author: game.user._id,
-                style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-                content: `These <b>${targetType ?? "item"}</b> items were added to <b>${this.actor.name}</b> from the ${topItems[0].uuid.startsWith("Item.") ? "<b>Item Sidebar</b>" : `<b>${pack.metadata.label ?? pack.metadata.name}</b> compendium`}: <ul>${topItems.map((item) => `<li>${item.name}</li>`).join("")}</ul>`,
-                whisper: whisperUserTargetsForActor(this.actor),
-                speaker: ChatMessage.getSpeaker({ actor: this.actor, token: this.token }),
-            };
-            ChatMessage.create(chatData);
-
-            await this.actor.createEmbeddedDocuments("Item", itemsToCreate);
-        } catch (error) {
-            console.error(error);
-            ui.notifications.error(error.message);
-        }
-    }
-
-    async _onDropItem(event, data) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-
-        if (!this.actor.isOwner) {
-            console.warn(`not owner`);
-            return false;
-        }
-
-        const item = await fromUuid(data.uuid);
-        if (!item) {
-            console.error(`Missing item`);
-            return;
-        }
-        console.log("Entering _onDropItem for:", item.name, item.type);
-
-        // Dropping directly onto a specific tab
-        const target = event.currentTarget ?? event.target;
-        const targetTab = target?.closest("[data-tab]")?.dataset?.tab;
-        if (targetTab) {
-            return this._onDropItemOnTab(event, data, item, targetTab);
-        }
-
-        // Intra-actor dropping (containers / reordering)
-        const sameActor = item.actor?.id === this.actor.id;
-        if (sameActor) {
-            const dropTarget = event.target.closest("[data-document-uuid]");
-            if (!item.isContainer || item.system.XMLID === "COMPOUNDPOWER") {
-                const dropTargetItem = await fromUuid(dropTarget?.dataset.documentUuid);
-                if (!item.system.PARENTID && dropTargetItem?.isContainer) {
-                    ui.notifications.info(`<b>${item.name}</b> was moved into parent <b>${dropTargetItem.name}</b>`);
-                    await item.update({ "system.PARENTID": dropTargetItem.system.ID });
-                } else if (item.system.PARENTID && !dropTargetItem?.system.PARENTID) {
-                    ui.notifications.info(
-                        `<b>${item.name}</b> was removed from parent <b>${item.parentItem?.name}</b>.`,
-                    );
-                    await item.update({ "system.PARENTID": new foundry.data.operators.ForcedDeletion() });
-                } else if (!item.isContainer && dropTargetItem?.isContainer) {
-                    ui.notifications.info(`<b>${item.name}</b> was moved into parent <b>${dropTargetItem.name}</b>`);
-                    await item.update({ "system.PARENTID": dropTargetItem.system.ID });
-                } else if (
-                    dropTargetItem?.parentItem &&
-                    !item.parentItem &&
-                    item.childItems?.length === 0 &&
-                    dropTargetItem.childItems?.length === 0
-                ) {
-                    ui.notifications.info(
-                        `<b>${item.name}</b> was moved into parent <b>${dropTargetItem.parentItem.name}</b>`,
-                    );
-                    await item.update({ "system.PARENTID": dropTargetItem.parentItem.system.ID });
-                }
-            }
-            return super._onDropItem(event, item);
-        }
-
-        // General sheet drop validations
-        if (item.isCombatManeuver) {
-            ui.notifications.error(`You cannot drop a MANEUVER onto an actor.`);
-            return;
-        }
-
-        const baseInfoCheck = getPowerInfo({
-            xmlid: item.system.XMLID,
-            is5e: this.actor.is5e,
-            xmlTag: item.system.xmlTag,
-        });
-        if (!baseInfoCheck) {
-            ui.notifications.error(
-                `${item.system.XMLID} is a ${item.is5e ? "5e" : "6e"} only item and cannot be dropped onto a ${this.actor.is5e ? "5e" : "6e"} actor.`,
-            );
-            return;
-        }
-
-        await this.DropItemFramework(item, {});
-    }
-
-    async _onDropItemOnTab(event, data, item, targetTab) {
-        console.log("Entering _onDropItemOnTab for:", item.name, item.type);
-        event.preventDefault();
-        event.stopImmediatePropagation();
-
-        if (!item) {
-            console.error(`Missing item`);
-            return;
-        }
-
-        const targetType = HeroSystemActorSheetV2.#TAB_ITEM_TYPES[targetTab] ?? item.type;
-        if (!item.isValidTypeConversion(targetType, this.actor)) {
-            const conversionFailures = item.validationTypeConversionFailures(targetType, this.actor);
-            console.error(conversionFailures);
-            return ui.notifications.error(conversionFailures[0].message);
-        }
-
-        const sameActor = item.actor?.id === this.actor.id;
-        if (!sameActor) {
-            const baseInfoCheck = getPowerInfo({
-                xmlid: item.system.XMLID,
-                is5e: this.actor.is5e,
-                xmlTag: item.system.xmlTag,
-            });
-            if (!baseInfoCheck) {
-                ui.notifications.error(
-                    `${item.system.XMLID} is a ${item.is5e ? "5e" : "6e"} only item and cannot be dropped onto a ${this.actor.is5e ? "5e" : "6e"} actor.`,
-                );
-                return;
-            }
-            return this.DropItemFramework(item, { type: targetType });
-        }
-
-        if (!item.actor) {
-            console.error(`${item.name} is missing parent actor`);
-            return;
-        }
-
-        try {
-            await item.update({ "system.PARENTID": new foundry.data.operators.ForcedDeletion() }, { render: false });
-            await item.convertToType(targetType);
-        } catch (error) {
-            console.error(error);
-            ui.notifications.error(
-                `${item.detailedName()} for ${this.actor.name} failed to be converted to type ${targetType}`,
-            );
-        }
-    }
-
-    /**
-     * Main framework entry point for dropping, converting, validating, and logging dropped items.
-     * Centralizes whisper targets, actor lookups, and single-source chat message dispatching.
-     *
-     * @param {Item} item         - The item being dropped.
-     * @param {Object} options    - Configuration options for the drop (e.g., target type, parent ID).
-     * @returns {Promise<void>}
-     */
-    async DropItemFramework(item, options) {
-        console.log("Entering DropItemFramework for:", item.name, item.type);
-        const itemData = item.toObject();
-        itemData.system.ID = new Date().getTime();
-
-        const targetType = options.type ?? HeroSystemActorSheetV2.#TAB_ITEM_TYPES[this.tabGroups.primary] ?? item.type;
-        if (item.isValidTypeConversion(targetType, this.actor)) {
-            itemData.type = targetType;
-        } else {
-            const conversionFailures = item.validationTypeConversionFailures(targetType, this.actor);
-            console.error(conversionFailures);
-            return ui.notifications.error(conversionFailures[0].message);
-        }
-
-        const baseInfoCheck = getPowerInfo({
-            xmlid: itemData.system.XMLID,
-            is5e: this.actor.is5e,
-            xmlTag: itemData.system.xmlTag,
-        });
-        itemData.system.xmlTag ??= baseInfoCheck?.xmlTag;
-
-        delete itemData.system.PARENTID;
-        if (options.PARENTID) {
-            itemData.system.PARENTID = options.PARENTID;
-        }
-        delete itemData.system.childIdx;
-
-        if (this.actor.uuid === item.parent?.uuid) return this._onSortItem(event, itemData);
-
-        if (itemData.system.is5e !== undefined && itemData.system.is5e !== this.actor.is5e) {
-            ui.notifications.warn(
-                `${itemData.name} is a ${itemData.system.is5e ? "5e" : "6e"} item. ${this.actor.name} is a ${this.actor.system.is5e ? "5e" : "6e"} actor. Mixing 5e/6e may have unpredictable results.`,
-            );
-        }
-
-        // --- EQUIPMENT INFO ---
-        if (itemData.type !== "equipment") {
-            const existingItem = this._findExistingMatchingItem(itemData, item);
-            if (existingItem) {
-                ui.notifications.info(
-                    `${itemData.name} was added as a duplicate item. If you want to track QUANTITY, items must be placed on the equipment tab.`,
-                );
-            }
-        }
-
-        if (options.isCompendiumDrop) {
-            const resetUpdates = HeroSystem6eItem._prepareOriginalResetData(itemData);
-            for (const [key, value] of Object.entries(resetUpdates)) {
-                foundry.utils.setProperty(itemData, key, value);
-            }
-        }
-
-        // Process item creation or quantity stacking via helper
-        const dropResult = await this._onDropItemCreate(itemData, item);
-        const stackedInfo = dropResult?.stackedInfo;
-
-        const actor = this.actor;
-        const token = actor.token;
-        const dropName = token?.name || actor.getActiveTokens()?.[0]?.name || actor.name;
-
-        const dragName = (() => {
-            if (item.pack) {
-                const pack = game.packs.get(item.pack);
-                return pack?.metadata?.label ?? item.pack;
-            }
-            return (
-                item.actor?.token?.name ||
-                item.actor?.getActiveTokens()?.[0]?.name ||
-                item.actor?.name ||
-                (item.uuid.startsWith("Item.") ? "ItemSidebar" : "Compendium")
-            );
-        })();
-
-        const chatData = {
-            author: game.user._id,
-            style: CONST.CHAT_MESSAGE_STYLES.OTHER,
-            whisper: [...whisperUserTargetsForActor(this.actor), ...whisperUserTargetsForActor(item.actor)],
-            speaker: ChatMessage.getSpeaker({ actor: this.actor, token: this.token }),
-        };
-        chatData.whisper = Array.from(new Map(chatData.whisper.map((user) => [user.id, user])).values());
-
-        const targetTab = itemData.type;
-
-        // Construct the single, appropriate chat message based on drop behavior
-        if (stackedInfo) {
-            chatData.content =
-                `<b>${stackedInfo.name}</b> was copied from <b>${dragName}</b>${item.pack ? " compendium" : ""}.<br>` +
-                `Its QUANTITY was increased by <b>${stackedInfo.dropQty}</b> ` +
-                `(from ${stackedInfo.oldQty} to ${stackedInfo.newQty}) ` +
-                `on the <b>${targetTab}</b> tab of <b>${dropName}</b>.`;
-            ChatMessage.create(chatData);
-        } else if (item.type === "equipment" && item.actor) {
-            item.delete();
-            chatData.content = `<b>${item.name}</b> was transferred from <b>${dragName}</b> to the <b>${targetTab}</b> tab of <b>${dropName}</b>.`;
-            ChatMessage.create(chatData);
-        } else {
-            chatData.content = `<b>${item.name}</b> was copied from <b>${dragName}</b>${item.pack ? " compendium" : ""} to the <b>${targetTab}</b> tab of <b>${dropName}</b>.`;
-            ChatMessage.create(chatData);
-        }
-
-        // Only drop/create child items if a new parent was actually created.
-        // If stackedInfo is present, the parent already existed and incremented its quantity,
-        // so its existing children shouldn't be duplicated!
-        if (!stackedInfo) {
-            for (const child of item.pack ? await item.childItemsFromPack() : item.childItems) {
-                await this.DropItemFramework(child, {
-                    PARENTID: itemData.system.ID,
-                    type: itemData.type,
-                    isCompendiumDrop: Boolean(item.pack),
-                });
-            }
-        }
-    }
-
-    /**
-     * Handles the creation or quantity-stacking of dropped items on the actor.
-     * If an identical equipment item exists, its quantity is increased rather than creating a duplicate.
-     *
-     * @param {Object} itemData - The sanitized and prepared item data object to create.
-     * @returns {Promise<Object>} An object containing the created document(s) and any stacking metadata.
-     * @protected
-     */
-    async _onDropItemCreate(itemData, sourceItem) {
-        console.log("Entering _onDropItemCreate for:", itemData.name, itemData.type);
-        const isTopLevel = !itemData.system.PARENTID;
-        const targetType = itemData.type;
-
-        // Await the helper since it now handles asynchronous compendium pack child fetching
-        const existingItem = await this._findExistingMatchingItem(itemData, targetType, sourceItem);
-
-        if (existingItem && isTopLevel && targetType === "equipment") {
-            const currentQty = existingItem.system.QUANTITY ?? 1;
-            const dropQty = itemData.system.QUANTITY ?? 1;
-            const newQty = currentQty + dropQty;
-
-            await existingItem.update({ "system.QUANTITY": newQty });
-
-            return {
-                items: [],
-                stackedInfo: {
-                    name: itemData.name,
-                    oldQty: currentQty,
-                    dropQty: dropQty,
-                    newQty: newQty,
-                },
-            };
-        }
-
-        const newItems = await this.actor.createEmbeddedDocuments("Item", [itemData]);
-        return { items: newItems, stackedInfo: null };
     }
 
     async _uploadCharacterSheet(event) {

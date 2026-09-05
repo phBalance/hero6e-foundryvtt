@@ -1302,9 +1302,6 @@ export class HeroSystem6eItemEquipment extends HeroSystem6eItemPower {
         return {
             ...super.defineSchema(),
             CARRIED: new BooleanField({ nullable: true }), // Consider removing as it is a duplicate definition (from HeroSystem6eItemTypeDataModelProps)
-            EVER: new StringField(),
-
-            SKILL: new StringField(),
         };
     }
 }

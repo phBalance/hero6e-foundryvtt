@@ -18,7 +18,7 @@ export async function createQuenchActor({ quench, contents, is5e, actorType: typ
     const quenchName = `_Quench ${Date.now().toString()} ${name.replace(
         /\W+/g,
         " ",
-    )} ${generateQuenchTitleRecursive(quench.currentTest || quench.test)}`;
+    )} ${generateQuenchTitleRecursive(quench.currentTest || quench.test || quench)}`;
 
     // Delete any previous leftover actors for this test
     const oldQuenchActors = game.actors.filter((a) => a.name.includes(quench.title));

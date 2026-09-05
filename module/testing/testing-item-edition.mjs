@@ -9,20 +9,26 @@ export function registerItemEditionTests(quench) {
             const { describe, it, before, after, assert } = context;
 
             describe("Item Edition Preservation and Type Conversion Validation", function () {
-                let quenchActor = null;
-                let quenchAutomaton = null;
+                let quenchActor6e = null;
+                let quenchAutomaton6e = null;
                 const worldItems = [];
 
                 before(async function () {
-                    quenchActor = await Actor.create({
+                    quenchActor6e = await Actor.create({
                         name: "_Quench_Edition_Tester",
                         type: "pc",
                         img: "icons/svg/mystery-man.svg",
+                        system: {
+                            is5e: false,
+                        },
                     });
-                    quenchAutomaton = await Actor.create({
+                    quenchAutomaton6e = await Actor.create({
                         name: "_Quench_Edition_Automaton",
                         type: "automaton",
                         img: "icons/svg/mystery-man.svg",
+                        system: {
+                            is5e: false,
+                        },
                     });
                 });
 
@@ -30,8 +36,8 @@ export function registerItemEditionTests(quench) {
                     for (const item of worldItems) {
                         await item.delete();
                     }
-                    if (quenchActor) await quenchActor.delete();
-                    if (quenchAutomaton) await quenchAutomaton.delete();
+                    if (quenchActor6e) await quenchActor6e.delete();
+                    if (quenchAutomaton6e) await quenchAutomaton6e.delete();
                 });
 
                 it("World item creation preserves the item's 5e edition (#4478)", async function () {
@@ -66,13 +72,13 @@ export function registerItemEditionTests(quench) {
                     });
                     assert.ok(!brokenItem.baseInfo, "ARMOR has no baseInfo under 6e.");
 
-                    const failures = brokenItem.validationTypeConversionFailures("equipment", quenchActor);
+                    const failures = brokenItem.validationTypeConversionFailures("equipment", quenchActor6e);
                     assert.ok(
                         failures.some((f) => f.severity === CONFIG.HERO.VALIDATION_SEVERITY.ERROR),
                         "Validation reports an ERROR failure.",
                     );
                     assert.strictEqual(
-                        brokenItem.isValidTypeConversion("equipment", quenchActor),
+                        brokenItem.isValidTypeConversion("equipment", quenchActor6e),
                         false,
                         "Conversion is rejected.",
                     );
@@ -91,7 +97,7 @@ export function registerItemEditionTests(quench) {
                         },
                     });
 
-                    const failures = perkItem.validationTypeConversionFailures("perk", quenchAutomaton);
+                    const failures = perkItem.validationTypeConversionFailures("perk", quenchAutomaton6e);
                     assert.ok(
                         failures.some((f) => f.severity === CONFIG.HERO.VALIDATION_SEVERITY.INFO),
                         "Automaton perk reports an INFO severity failure.",
@@ -101,7 +107,7 @@ export function registerItemEditionTests(quench) {
                         "No ERROR severity failures.",
                     );
                     assert.strictEqual(
-                        perkItem.isValidTypeConversion("perk", quenchAutomaton),
+                        perkItem.isValidTypeConversion("perk", quenchAutomaton6e),
                         true,
                         "INFO severity failures do not block conversion.",
                     );

@@ -6956,7 +6956,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const is5e = item.is5e;
                 switch (item.system?.OPTIONID) {
                     case "SIGHTGROUP":
-                        return is5e ? 10 : 5; // Targeting sense gruop
+                        return is5e ? 10 : 5; // Targeting sense group
                     case "HEARINGGROUP":
                     case "MENTALGROUP":
                     case "RADIOGROUP":
