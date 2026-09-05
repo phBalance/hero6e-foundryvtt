@@ -7902,13 +7902,38 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // Without baseInfo the is* type getters below throw. Typically an item stamped with
         // the wrong edition (e.g. a 5e-only XMLID like ARMOR marked as 6e).
-        if (!this.baseInfo) {
+        const baseInfo = getPowerInfo({ XMLID: this.system.XMLID, xmlTag: this.system.xmlTag, actor: targetActor });
+        if (!baseInfo) {
             validationFailureMessages.push({
                 itemId: this.id,
                 message: `${this.detailedName()} is not a known ${this.is5e ? "5e" : "6e"} ${this.type} and cannot be converted.`,
                 severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
             });
             return validationFailureMessages;
+        }
+
+        for (const adder of this.adders) {
+            const baseInfo = getPowerInfo({ XMLID: adder.XMILD, xmlTag: adder.xmlTag, actor: targetActor });
+            if (!baseInfo) {
+                validationFailureMessages.push({
+                    itemId: this.id,
+                    message: `${adder.XMLID} is not a known ${this.is5e ? "5e" : "6e"} adder for ${this.system.XMLID} and cannot be converted.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                });
+                return validationFailureMessages;
+            }
+        }
+
+        for (const modifier of this.modifiers) {
+            const baseInfo = getPowerInfo({ XMLID: modifier.XMILD, xmlTag: modifier.xmlTag, actor: targetActor });
+            if (!baseInfo) {
+                validationFailureMessages.push({
+                    itemId: this.id,
+                    message: `${modifier.XMLID} is not a known ${this.is5e ? "5e" : "6e"} modifier for ${this.system.XMLID} and cannot be converted.`,
+                    severity: CONFIG.HERO.VALIDATION_SEVERITY.ERROR,
+                });
+                return validationFailureMessages;
+            }
         }
 
         // Verify the item is valid for the targetActor's type

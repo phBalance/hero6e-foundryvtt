@@ -1098,21 +1098,66 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             return;
         }
 
-        // 1. Delegate intra-actor sorting / container hierarchy drops to native or specialized logic
+        // Resolve target type if dropped directly onto a specific actor sheet tab
+        const targetType = this._resolveDropTargetType(event);
+
+        // Intra-actor dropping (containers / reordering)
         const sameActor = item.actor?.id === this.actor.id;
         if (sameActor) {
-            const dropTarget = event.target?.closest("[data-document-uuid]");
-            const dropTargetItem = dropTarget ? await fromUuid(dropTarget.dataset.documentUuid) : null;
+            // Move to different tab
+            if (targetType !== item.type) {
+                if (!item.isValidTypeConversion(targetType, this.actor)) {
+                    const conversionFailures = item.validationTypeConversionFailures(targetType, this.actor);
+                    ui.notifications.error(conversionFailures[0].message);
+                    console.error(`Failed to convert ${item.name} to ${targetType}`, conversionFailures);
+                    return;
+                }
 
-            if (dropTargetItem?.isContainer || dropTargetItem?.parentItem) {
-                // Handle intra-actor container moves using your existing logic or parent updates
-                return super._onDropItem(event, item);
+                const originalType = item.type;
+
+                // New system without PARENTID
+                const newSystem = item.system.toObject();
+                delete newSystem.PARENTID;
+
+                await item.update({
+                    type: targetType,
+                    system: new foundry.data.operators.ForcedReplacement(newSystem),
+                });
+
+                ui.notifications.success(
+                    `<b>${item.name}</b> was moved from <b>${originalType}</b> to <b>${item.type}</b>.`,
+                );
+                return;
+            }
+
+            const dropTarget = event.target.closest("[data-document-uuid]");
+            if (!item.isContainer || item.system.XMLID === "COMPOUNDPOWER") {
+                const dropTargetItem = await fromUuid(dropTarget?.dataset.documentUuid);
+                if (!item.system.PARENTID && dropTargetItem?.isContainer) {
+                    ui.notifications.success(`<b>${item.name}</b> was moved into parent <b>${dropTargetItem.name}</b>`);
+                    await item.update({ "system.PARENTID": dropTargetItem.system.ID });
+                } else if (item.system.PARENTID && !dropTargetItem?.system.PARENTID) {
+                    ui.notifications.success(
+                        `<b>${item.name}</b> was removed from parent <b>${item.parentItem?.name}</b>.`,
+                    );
+                    await item.update({ "system.PARENTID": new foundry.data.operators.ForcedDeletion() });
+                } else if (!item.isContainer && dropTargetItem?.isContainer) {
+                    ui.notifications.success(`<b>${item.name}</b> was moved into parent <b>${dropTargetItem.name}</b>`);
+                    await item.update({ "system.PARENTID": dropTargetItem.system.ID });
+                } else if (
+                    dropTargetItem?.parentItem &&
+                    !item.parentItem &&
+                    item.childItems?.length === 0 &&
+                    dropTargetItem.childItems?.length === 0
+                ) {
+                    ui.notifications.success(
+                        `<b>${item.name}</b> was moved into parent <b>${dropTargetItem.parentItem.name}</b>`,
+                    );
+                    await item.update({ "system.PARENTID": dropTargetItem.parentItem.system.ID });
+                }
             }
             return super._onDropItem(event, item);
         }
-
-        // 2. Resolve target type if dropped directly onto a specific actor sheet tab
-        const targetType = this._resolveDropTargetType(event);
 
         // Run through the unified preparation & commit pipeline
         const normalizedItems = await this._prepareNormalizedDropItems(data, targetType);
@@ -1158,23 +1203,26 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 return;
             }
 
+            const pack = item.pack ? game.packs.get(item.pack) : null;
+            const contents = pack ? await pack.getDocuments({ folder: item.id }) : item.contents;
+
             if (item.documentName === "Folder") {
-                const pack = item.pack ? game.packs.get(item.pack) : null;
-                if (pack) {
-                    const contents = await pack.getDocuments({ folder: item.id });
-                    for (const doc of contents) normalizedItems.push(doc);
-                } else {
-                    for (const child of item.children || []) {
-                        await recurseAddItemFromUuid(child.folder?.uuid || child.uuid);
-                    }
-                    for (const child of item.contents || []) {
-                        await recurseAddItemFromUuid(child.uuid);
-                    }
+                // Root level folders like EQUIPMENT
+                for (const child of item.children || []) {
+                    await recurseAddItemFromUuid(child.folder?.uuid || child.uuid);
+                }
+                for (const child of contents) {
+                    await recurseAddItemFromUuid(child.uuid);
                 }
             } else {
-                normalizedItems.push(item.toObject());
-                for (const child of item.childItems) {
-                    await recurseAddItemFromUuid(child.uuid);
+                if (item.documentName === "Item") {
+                    if (!normalizedItems.find((normItem) => normItem.id === item.id)) {
+                        normalizedItems.push(item);
+                    }
+                }
+
+                for (const childItem of item.childItems) {
+                    await recurseAddItemFromUuid(childItem.uuid);
                 }
             }
         }
@@ -1231,8 +1279,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         for (const item of tempActor.items) {
             if (!item.isValidTypeConversion(targetType, this.actor)) {
                 const conversionFailures = item.validationTypeConversionFailures(targetType, this.actor);
-                console.error(conversionFailures);
-                return ui.notifications.error(conversionFailures[0].message);
+                ui.notifications.error(conversionFailures[0].message);
+                console.error(`Failed to convert ${item.name} to ${targetType}`, conversionFailures);
+                return [];
             }
         }
 
