@@ -142,7 +142,7 @@ export function registerDragAndDropTests(quench) {
                 expect(blastMItems.length).to.equal(2);
             });
 
-            it("Drop 'Blast M' to equipment tab twice (auto-converts to equipment and stacks)", async () => {
+            it("Drop 'Blast M' to equipment tab twice (stacking check)", async () => {
                 const documents = await testCompendium.getDocuments();
                 const blastMDoc = documents.find((d) => d.name === "Blast M");
                 expect(blastMDoc).to.exist;
@@ -178,7 +178,7 @@ export function registerDragAndDropTests(quench) {
                 expect(equipmentItems[0].system.QUANTITY).to.equal(2);
             });
 
-            it("Add 'List1' twice to powers and equipment (no stacking, creates multiple copies)", async () => {
+            it("Add 'List1' twice to powers and equipment (stacking check)", async () => {
                 const documents = await testCompendium.getDocuments();
                 const listDoc = documents.find((d) => d.name === "List1");
                 expect(listDoc).to.exist;
@@ -236,7 +236,7 @@ export function registerDragAndDropTests(quench) {
                 expect(equipmentListItems.length).to.equal(2);
             });
 
-            it("Add 'VPP1' twice to powers and equipment (no stacking, creates multiple copies)", async () => {
+            it("Add 'VPP1' twice to powers and equipment (stacking check)", async () => {
                 const documents = await testCompendium.getDocuments();
                 const vppDoc = documents.find((d) => d.name === "VPP1");
                 expect(vppDoc).to.exist;
@@ -295,7 +295,7 @@ export function registerDragAndDropTests(quench) {
                 expect(equipmentVppItems[0].system.QUANTITY).to.equal(2);
             });
 
-            it.only("Add 'Multipower' twice to powers and equipment (no stacking, creates multiple copies)", async () => {
+            it("Add 'Multipower' twice to powers and equipment (stacking check)", async () => {
                 const documents = await testCompendium.getDocuments();
                 const mpDoc = documents.find((d) => d.system.XMLID === "MULTIPOWER");
                 expect(mpDoc).to.exist;

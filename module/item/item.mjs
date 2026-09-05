@@ -1395,7 +1395,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             const chargesMax = parseInt(chargeItemModifier.OPTION_ALIAS ?? chargeItemModifier) || 0;
             const currentCharges = system.numCharges ?? system._charges ?? 0;
             if (chargesMax > 0 && currentCharges < chargesMax) {
-                updateData["system.numCharges"] = chargesMax;
+                //updateData["system.numCharges"] = chargesMax;  // numCharges is now a getter
                 updateData["system._charges"] = chargesMax;
             }
 
@@ -2585,8 +2585,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             if (actorEffects) {
                 return true;
             }
-        } else {
-            console.error(`${this.name} has no actor`);
         }
 
         // Careful isActivatableManeuver doesn't stand alone, it only handles specific cases.

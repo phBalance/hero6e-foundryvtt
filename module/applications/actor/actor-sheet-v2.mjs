@@ -2,12 +2,10 @@ import { getActorDefensesVsAttack } from "../../utility/defense.mjs";
 import { HeroSystem6eActor } from "../../actor/actor.mjs";
 import { HeroSystem6eItem } from "../../item/item.mjs";
 import {
-    getPowerInfo,
     getCharacteristicInfoArrayForActor,
     tokenEducatedGuess,
     whisperUserTargetsForActor,
 } from "../../utility/util.mjs";
-import { HeroSystem6eCompendium } from "../../compendium/compendium.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -1230,29 +1228,21 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         await recurseAddItemFromUuid(data.uuid);
         if (normalizedItems.length === 0) return [];
 
-        // Step 1: Generate ID mapping first so parent/child relations survive
-        const idMapping = new Map();
-        let baseTime = Date.now();
+        // Make sure we don't alter sources
+        normalizedItems = foundry.utils.deepClone(normalizedItems);
 
-        for (let i = 0; i < normalizedItems.length; i++) {
-            const item = normalizedItems[i];
-            if (!item.system) item.system = {};
-            const oldId = item.system.ID;
-            const newId = (baseTime + i).toString();
-            if (oldId) {
-                idMapping.set(oldId, newId);
-            }
-            item.system.ID = newId;
-        }
-
-        // Step 2: Remap PARENTID and align types in memory safely
+        // Full charges
         for (const item of normalizedItems) {
-            if (item.system.PARENTID && idMapping.has(item.system.PARENTID)) {
-                item.system.PARENTID = idMapping.get(item.system.PARENTID);
-            }
+            const updateData = foundry.utils.deepClone(HeroSystem6eItem._prepareOriginalResetData(item));
+            foundry.utils.mergeObject(item, updateData, {
+                insertKeys: true,
+                insertValues: true,
+                overwrite: true,
+                inplace: true,
+            });
         }
 
-        // Step 3: Create temporary actor and add all itemsToDrop to initialize
+        // Create temporary actor and add all itemsToDrop to initialize
         // schema in memory.  Allows for Item helpers to work.
         const tempActor = new Actor(
             {
@@ -1264,7 +1254,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             { temporary: true },
         );
 
-        // Step 4: We let is5e mismatches between Actor and Item pass with a console.warn.
+        // We let is5e mismatches between Actor and Item pass with a console.warn.
         // However, if no baseInfo then that is a hard NO, so bail.
         for (const item of tempActor.items) {
             if (!item.baseInfo) {
@@ -1275,7 +1265,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             }
         }
 
-        // Step 5: Check if targetType is valid for this specific actor and assign targetType
+        // Check if targetType is valid for this specific actor and assign targetType
         for (const item of tempActor.items) {
             if (!item.isValidTypeConversion(targetType, this.actor)) {
                 const conversionFailures = item.validationTypeConversionFailures(targetType, this.actor);
@@ -1285,10 +1275,40 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             }
         }
 
+        // Generate ID mapping first so parent/child relations survive
+        const idMapping = new Map();
+        let baseTime = Date.now();
+
+        for (let i = 0; i < normalizedItems.length; i++) {
+            const item = normalizedItems[i];
+            if (!item.system) item.system = {};
+            const oldId = item.system.ID;
+            const newId = baseTime + i;
+            if (oldId) {
+                idMapping.set(oldId, newId);
+            }
+            item.system.ID = newId;
+        }
+
+        // Step 2: Remap internal PARENTID relations, or clear orphaned external ones
+        for (const item of normalizedItems) {
+            if (item.system.PARENTID != null && item.system.PARENTID !== "") {
+                if (idMapping.has(item.system.PARENTID)) {
+                    // Internal relation within the dropped tree—remap to the new ID
+                    item.system.PARENTID = idMapping.get(item.system.PARENTID);
+                } else {
+                    // Leftover compendium parent that wasn't dragged—clear it so it's a clean root item
+                    item.system.PARENTID = undefined;
+                }
+            }
+        }
+
         // Step 6: Ensure proper targetType
         for (const item of normalizedItems) {
             item.type = targetType;
         }
+
+        // We will re-add the items to actor as we apparently can't change the in-memory item.type
 
         return normalizedItems;
     }
@@ -1420,9 +1440,17 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         if (itemDoc.system?.XMLID === "LIST") return null;
 
         const getDocumentTreeSignature = async (doc, pool = []) => {
-            let children = doc.childItems || [];
-            if (children.length === 0 && pool.length > 0 && doc.system?.ID) {
-                children = pool.filter((i) => i.system?.PARENTID === doc.system.ID);
+            // Extract raw source object to bypass computed getters (like activePoints)
+            const rawDoc = typeof doc.toObject === "function" ? doc.toObject() : doc._source || doc;
+            const system = rawDoc.system || {};
+
+            // Resolve children using either embedded relationships or a flat pool of raw objects
+            let children = rawDoc.childItems || doc.childItems || [];
+            if (children.length === 0 && pool.length > 0 && system.ID) {
+                children = pool.filter((i) => {
+                    const iSys = typeof i.toObject === "function" ? i.toObject().system : i._source?.system || i.system;
+                    return iSys?.PARENTID === system.ID;
+                });
             }
 
             const cleanCollection = (arr) =>
@@ -1441,11 +1469,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             childSigs.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 
             return {
-                xmlid: doc.system?.XMLID || doc.type,
-                name: (doc.name ?? "").replace(/\s*\(.*?\)/g, "").trim(),
-                activePoints: doc.system?.activePoints ?? 0,
-                modifiers: cleanCollection(doc.system?.MODIFIER),
-                adders: cleanCollection(doc.system?.ADDER),
+                xmlid: system.XMLID || rawDoc.type,
+                name: (rawDoc.name ?? "").replace(/\s*\(.*?\)/g, "").trim(),
+                activePoints: system.activePoints ?? 0,
+                modifiers: cleanCollection(system.MODIFIER),
+                adders: cleanCollection(system.ADDER),
                 children: childSigs,
             };
         };
