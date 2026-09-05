@@ -79,7 +79,7 @@ export function registerDragAndDropTests(quench) {
 
             before(async () => {
                 testCompendium = await HeroSystem6eCompendiumDirectory.uploadFromXml(hdpContents);
-                quenchActor = await createQuenchActor({ quench: this, is5e: true, actorType: "pc" });
+                quenchActor = await createQuenchActor({ quench: this, is5e: false, actorType: "pc" });
 
                 actorSheet = quenchActor.sheet;
                 await actorSheet.render(true);
