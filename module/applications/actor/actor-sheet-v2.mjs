@@ -1103,7 +1103,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         const sameActor = item.actor?.id === this.actor.id;
         if (sameActor) {
             // Move to different tab
-            if (targetType !== item.type) {
+            if (targetType && targetType !== item.type) {
                 if (!item.isValidTypeConversion(targetType, this.actor)) {
                     const conversionFailures = item.validationTypeConversionFailures(targetType, this.actor);
                     ui.notifications.error(conversionFailures[0].message);
@@ -1178,15 +1178,29 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         return normalizedItems;
     }
 
+    // Items dropped into these tabs work as expected, but if dropped to a tab not listed here
+    // they will be dropped onto the tab that item.type had.  So if dropping a POWER from the
+    // compendium to the ATTACK tab (which isn't listed here), the item will be dropped into the POWERS tab.
+    static #TAB_ITEM_TYPES = {
+        martial: "martialart",
+        skills: "skill",
+        maneuvers: "maneuver",
+        powers: "power",
+        equipment: "equipment",
+        characteristics: "characteristic", // Future?  Does not break anything.
+        perks: "perk",
+        talents: "talent",
+        disadvantages: "disadvantage", // 6e shows complications, but internally it is always disadvantage
+    };
+
     /**
      * Helper to resolve the target item type based on where the drop event occurred on the sheet.
+     * Returns null when the drop location does not name an item type.
      */
     _resolveDropTargetType(event) {
         const target = event?.target ?? event?.currentTarget;
-        const droppedOnTab = target?.closest?.("[data-tab]")?.dataset?.tab?.replace(/(?<!analysi)s$/, "");
-        return (
-            droppedOnTab ?? this.tabGroups?.primary?.replace(/s$/, "").replace("martial", "martialart") ?? "equipment"
-        );
+        const droppedOnTab = target?.closest?.("[data-tab]")?.dataset?.tab;
+        return HeroSystemActorSheetV2.#TAB_ITEM_TYPES[droppedOnTab ?? this.tabGroups?.primary] ?? null;
     }
 
     /**
@@ -1267,8 +1281,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
         // Check if targetType is valid for this specific actor and assign targetType
         for (const item of tempActor.items) {
-            if (!item.isValidTypeConversion(targetType, this.actor)) {
-                const conversionFailures = item.validationTypeConversionFailures(targetType, this.actor);
+            if (!item.isValidTypeConversion(targetType ?? item.type, this.actor)) {
+                const conversionFailures = item.validationTypeConversionFailures(targetType ?? item.type, this.actor);
                 ui.notifications.error(conversionFailures[0].message);
                 console.error(`Failed to convert ${item.name} to ${targetType}`, conversionFailures);
                 return [];
@@ -1303,9 +1317,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             }
         }
 
-        // Step 6: Ensure proper targetType
+        // Step 6: Ensure proper targetType; drops outside a type-naming tab keep each item's own type
         for (const item of normalizedItems) {
-            item.type = targetType;
+            item.type = targetType ?? item.type;
         }
 
         // We will re-add the items to actor as we apparently can't change the in-memory item.type
