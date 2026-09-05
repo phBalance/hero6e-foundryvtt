@@ -5508,7 +5508,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 return false;
             } else if (this.vppUnSlotted) {
                 return false;
-            } else if (this.type === "equipment" && this.system.CARRIED !== true) {
+            } else if (this.type === "equipment" && !this.isCarried) {
                 return false;
             } else if (this.system.XMLID === "STRIKE") {
                 return true;
