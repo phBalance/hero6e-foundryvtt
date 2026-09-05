@@ -2381,7 +2381,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
     get is5e() {
         // Compendiums don't have actors, so default to item.
-        if (this.actor === undefined) {
+        if (!this.actor) {
             return this.system.is5e;
         }
 
@@ -7912,7 +7912,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         for (const adder of this.adders) {
-            const baseInfo = getPowerInfo({ XMLID: adder.XMILD, xmlTag: adder.xmlTag, actor: targetActor });
+            const baseInfo = getPowerInfo({ XMLID: adder.XMLID, xmlTag: adder.xmlTag, actor: targetActor });
             if (!baseInfo) {
                 validationFailureMessages.push({
                     itemId: this.id,
@@ -7924,7 +7924,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         for (const modifier of this.modifiers) {
-            const baseInfo = getPowerInfo({ XMLID: modifier.XMILD, xmlTag: modifier.xmlTag, actor: targetActor });
+            const baseInfo = getPowerInfo({ XMLID: modifier.XMLID, xmlTag: modifier.xmlTag, actor: targetActor });
             if (!baseInfo) {
                 validationFailureMessages.push({
                     itemId: this.id,
