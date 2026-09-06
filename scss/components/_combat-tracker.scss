@@ -1,9 +1,9 @@
 @use "../abstracts" as *;
-@use "../theme/tokens";
 
-$disposition-opacity-default: 0.05;
-$disposition-opacity-hover: 0.2;
-$disposition-opacity-active: 0.6;
+$dispositions: friendly, neutral, hostile, secret, player;
+$disposition-tint-default: 5%;
+$disposition-tint-hover: 20%;
+$disposition-tint-active: 60%;
 
 // Keep header overrides after row rules of equal specificity.
 
@@ -42,16 +42,18 @@ ol.combat-tracker.plain {
             }
         }
 
-        @each $disposition-name, $disposition-color in tokens.$hero-dispositions {
-            &.combat-tracker-hero-disposition-#{$disposition-name} {
-                background-color: rgba($disposition-color, $disposition-opacity-default);
+        @each $disposition in $dispositions {
+            $color: var(--hero-disposition-#{$disposition});
+
+            &.combat-tracker-hero-disposition-#{$disposition} {
+                background-color: color-mix(in srgb, $color $disposition-tint-default, transparent);
 
                 &:hover {
-                    background-color: rgba($disposition-color, $disposition-opacity-hover);
+                    background-color: color-mix(in srgb, $color $disposition-tint-hover, transparent);
                 }
 
                 &.active {
-                    background-color: rgba($disposition-color, $disposition-opacity-active);
+                    background-color: color-mix(in srgb, $color $disposition-tint-active, transparent);
                 }
             }
         }

@@ -8,6 +8,11 @@ $static: (
     --hero-folder-compound: #ff9800,
     --hero-folder-multipower: #2196f3,
     --hero-folder-vpp: #9c27b0,
+    --hero-disposition-friendly: rgb(67 223 223),
+    --hero-disposition-neutral: rgb(241 216 5),
+    --hero-disposition-hostile: rgb(231 33 36),
+    --hero-disposition-secret: rgb(166 18 212),
+    --hero-disposition-player: rgb(0 212 0),
 );
 
 // Chat stays light in every theme. Use literals or theme-independent core primitives here.
@@ -141,15 +146,6 @@ $themes: (
     light: $light,
     dark: $dark,
     hc: $hc,
-);
-
-// Combat tracker disposition tints; Sass colours because the tracker derives alphas from them.
-$hero-dispositions: (
-    "friendly": rgb(67 223 223),
-    "neutral": rgb(241 216 5),
-    "hostile": rgb(231 33 36),
-    "secret": rgb(166 18 212),
-    "player": rgb(0 212 0),
 );
 
 @mixin emit($map) {
