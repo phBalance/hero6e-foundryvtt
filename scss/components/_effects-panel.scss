@@ -1,3 +1,5 @@
+@use "../abstracts" as *;
+
 #effects-panel {
     pointer-events: none;
     top: 5px;
@@ -163,8 +165,7 @@
                 overflow: hidden;
 
                 .value {
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    @include truncate;
 
                     strong {
                         display: inline-block;

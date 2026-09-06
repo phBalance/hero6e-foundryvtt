@@ -1,3 +1,5 @@
+@use "../abstracts" as *;
+
 .hero.chat-card {
     font-style: normal;
     font-size: 12px;
@@ -95,9 +97,7 @@
     }
 
     .ellipsis-text {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        @include truncate;
     }
 
     &.attack-card {
@@ -258,15 +258,6 @@
             border: none;
             margin: 0 0 5px;
         }
-
-        div.description {
-            border: 1px dashed var(--input-border-color);
-            background: var(--input-background-color);
-            color: var(--input-text-color);
-            margin: 15px 0;
-            padding: 5px;
-            overflow-wrap: anywhere;
-        }
     }
 
     div.apply-damage-amount {
@@ -279,13 +270,9 @@
         margin-bottom: 3px;
     }
 
-    &.attack-card div.description {
-        background-color: var(--hero-surface-tint);
-        border: 1px dashed var(--input-border-color);
-        margin: 15px 0;
-        padding: 5px;
-        max-width: 100%;
-        user-select: text;
+    &.attack-card div.description,
+    &.conditional-defense-card div.description {
+        @include boxed-description;
     }
 }
 
@@ -382,10 +369,9 @@
             }
 
             .target-name {
+                @include truncate;
+
                 font-weight: bold;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
             }
         }
 

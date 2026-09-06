@@ -1,18 +1,8 @@
+@use "../abstracts" as *;
+
 .herosystem6e.item-attack-application-v2 {
     .form-group {
-        clear: both;
-        display: flex;
-        flex-flow: row wrap;
-        margin: 3px 0;
-        align-items: center;
-
-        > label {
-            flex: 2;
-        }
-
-        > * {
-            flex: 3;
-        }
+        @include form-row;
     }
 
     .noflexwrap input[type="text"],
@@ -30,25 +20,6 @@
     .sheet-footer button {
         width: 100%;
         height: auto;
-    }
-
-    div.description {
-        border: 1px dashed var(--input-border-color);
-        background: var(--input-background-color);
-        color: var(--input-text-color);
-    }
-
-    .multi-attack-options.target-container {
-        display: grid;
-        grid-template-columns: 8fr 8fr 1fr;
-        align-items: center;
-        width: 100%;
-        text-align: center;
-    }
-
-    .target-info-header,
-    .target-info-row {
-        display: contents;
     }
 
     .target-info-row .target-name {

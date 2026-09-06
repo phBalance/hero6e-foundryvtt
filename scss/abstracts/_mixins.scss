@@ -1,0 +1,56 @@
+// Keep shared selectors weaker than component rules.
+@mixin validation-tint($level, $strength: 10%, $edges: true) {
+    background-color: color-mix(in srgb, var(--hero-#{$level}) $strength, transparent);
+
+    @if $edges {
+        border-top: 1px solid color-mix(in srgb, var(--hero-#{$level}) 30%, transparent);
+        border-bottom: 1px solid color-mix(in srgb, var(--hero-#{$level}) 30%, transparent);
+    }
+}
+
+@mixin validation-outline($level) {
+    outline: var(--hero-#{$level}) solid 1px;
+}
+
+@mixin boxed-description {
+    background-color: var(--hero-surface-tint);
+    border: 1px dashed var(--hero-border);
+    margin: 15px 0;
+    padding: 5px;
+    max-width: 100%;
+    user-select: text;
+    overflow-wrap: anywhere;
+}
+
+@mixin form-row($label-basis: 40%) {
+// Fixed label widths avoid padding-dependent column shifts.
+@mixin form-row {
+    clear: both;
+    display: flex;
+    flex-flow: row wrap;
+    margin: 3px 0;
+    align-items: center;
+
+    > label {
+        flex: 0 0 $label-basis;
+    }
+
+    > * {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+}
+
+@mixin truncate($lines: 1) {
+    overflow: hidden;
+
+    @if $lines == 1 {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    } @else {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: $lines;
+        line-clamp: $lines;
+    }
+}

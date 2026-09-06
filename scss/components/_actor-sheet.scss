@@ -1,3 +1,5 @@
+@use "../abstracts" as *;
+
 .herosystem6e.actor-sheet-v2 {
     min-height: 310px;
     min-width: 500px;
@@ -101,35 +103,14 @@
     opacity: 0.3;
 }
 
-.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-error {
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--hero-error) 50%, transparent) inset;
-    outline: var(--hero-error) solid 1px;
-}
+@each $level in (error, info, warning) {
+    .herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-#{$level} {
+        @include validation-outline($level);
+    }
 
-.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-info {
-    outline: color-mix(in srgb, var(--hero-info) 80%, transparent) solid 1px;
-}
-
-.herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-warning {
-    outline: var(--hero-warning) solid 2px;
-}
-
-.herosystem6e.actor-sheet-v2 .item-row.validation-error > div.item-column {
-    background-color: color-mix(in srgb, var(--hero-error) 10%, transparent) !important;
-    border-top: 1px solid color-mix(in srgb, var(--hero-error) 30%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--hero-error) 30%, transparent);
-}
-
-.herosystem6e.actor-sheet-v2 .item-row.validation-info > div.item-column {
-    background-color: color-mix(in srgb, var(--hero-info) 10%, transparent) !important;
-    border-top: 1px solid color-mix(in srgb, var(--hero-info) 30%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--hero-info) 30%, transparent);
-}
-
-.herosystem6e.actor-sheet-v2 .item-row.validation-warning > div.item-column {
-    background-color: color-mix(in srgb, var(--hero-warning) 20%, transparent) !important;
-    border-top: 1px solid color-mix(in srgb, var(--hero-warning) 30%, transparent);
-    border-bottom: 1px solid color-mix(in srgb, var(--hero-warning) 30%, transparent);
+    .herosystem6e.actor-sheet-v2 .item-row.item-row.validation-#{$level} > div.item-column {
+        @include validation-tint($level);
+    }
 }
 
 .herosystem6e.actor-sheet-v2 section.window-content {
@@ -149,12 +130,14 @@
     }
 }
 
-input.under-max {
-    background-color: color-mix(in srgb, var(--hero-error) 20%, transparent);
-}
+.herosystem6e.actor-sheet-v2 {
+    input.under-max {
+        @include validation-tint(error, 20%, $edges: false);
+    }
 
-input.over-max {
-    background-color: color-mix(in srgb, var(--hero-success) 20%, transparent);
+    input.over-max {
+        @include validation-tint(success, 20%, $edges: false);
+    }
 }
 
 .herosystem6e.actor-sheet-v2 .window-content aside {
@@ -593,11 +576,7 @@ input.over-max {
             }
 
             span {
-                -webkit-line-clamp: 2;
-                line-clamp: 2;
-                display: -webkit-box;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
+                @include truncate(2);
             }
         }
     }

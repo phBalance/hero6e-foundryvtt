@@ -1,3 +1,5 @@
+@use "../abstracts" as *;
+
 .herosystem6e.item-sheet-v2 {
     div.item-sheet-content {
         display: flex;
@@ -58,23 +60,7 @@
     }
 
     .form-group {
-        clear: both;
-        display: flex;
-        flex-flow: row wrap;
-        margin: 3px 0;
-        align-items: center;
-
-        /* Fixed label basis: with grow-based splits (flex: 2 / flex: 3) each field's
-           padding+border floors its flex-basis-0 size, shifting the field column left
-           on plain-input rows relative to padding-less wrappers */
-        > label {
-            flex: 0 0 40%;
-        }
-
-        > * {
-            flex: 1 1 0;
-            min-width: 0;
-        }
+        @include form-row;
 
         > input[type="checkbox"] {
             flex: 0 0 20px;
@@ -101,7 +87,7 @@
         }
 
         &.validation {
-            background-color: color-mix(in srgb, var(--hero-warning) 50%, transparent);
+            @include validation-tint(warning, 50%, $edges: false);
 
             i.fa-regular {
                 color: var(--hero-error);
@@ -110,12 +96,7 @@
     }
 
     div.description {
-        background-color: var(--hero-surface-tint);
-        border: 1px dashed var(--color-tabs-border);
-        margin: 15px 0;
-        padding: 5px;
-        max-width: 100%;
-        user-select: text;
+        @include boxed-description;
     }
 
     div.summary-break {
@@ -151,7 +132,7 @@
         }
 
         tr.validation {
-            background-color: color-mix(in srgb, var(--hero-warning) 50%, transparent);
+            @include validation-tint(warning, 50%, $edges: false);
         }
 
         tr.modifier-adder td:first-child {
