@@ -450,12 +450,14 @@ export class HeroSystemItemSheetV2 extends HeroAppMixin(HandlebarsApplicationMix
                 </select>
             </p>`;
 
-        const inputData = await foundry.applications.api.DialogV2.input({
-            window: {
-                title: `Create ${adderOrModifier.toUpperCase()} for ${item.system.XMLID}`,
-            },
-            content,
-        });
+        const inputData = await foundry.applications.api.DialogV2.input(
+            this.dialogOptions({
+                window: {
+                    title: `Create ${adderOrModifier.toUpperCase()} for ${item.system.XMLID}`,
+                },
+                content,
+            }),
+        );
         if (!inputData?.xmlid) {
             return;
         }
@@ -538,14 +540,16 @@ export class HeroSystemItemSheetV2 extends HeroAppMixin(HandlebarsApplicationMix
             return ui.notifications.error(`Unable to delete adder/modifier.`);
         }
 
-        const confirmed = await foundry.applications.api.DialogV2.confirm({
-            window: {
-                title:
-                    game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title") +
-                    ` ${adderOrModifier.ALIAS ?? adderOrModifier.XMLID}`,
-            },
-            content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content"),
-        });
+        const confirmed = await foundry.applications.api.DialogV2.confirm(
+            this.dialogOptions({
+                window: {
+                    title:
+                        game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title") +
+                        ` ${adderOrModifier.ALIAS ?? adderOrModifier.XMLID}`,
+                },
+                content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content"),
+            }),
+        );
 
         if (confirmed) {
             await this.item.update({
@@ -562,11 +566,13 @@ export class HeroSystemItemSheetV2 extends HeroAppMixin(HandlebarsApplicationMix
         const item = this.item;
         if (!item.system._hdcXml) return;
 
-        const confirmed = await foundry.applications.api.DialogV2.confirm({
-            window: { title: `Restore ${item.name}` },
-            content: `<p>Restore <b>${item.name}</b> from its original Hero Designer data?
+        const confirmed = await foundry.applications.api.DialogV2.confirm(
+            this.dialogOptions({
+                window: { title: `Restore ${item.name}` },
+                content: `<p>Restore <b>${item.name}</b> from its original Hero Designer data?
                 Current values (LEVELS, adders, modifiers, charges, notes) will be replaced.</p>`,
-        });
+            }),
+        );
         if (!confirmed) return;
 
         if (await item.restoreFromHdc()) {
@@ -598,10 +604,12 @@ export class HeroSystemItemSheetV2 extends HeroAppMixin(HandlebarsApplicationMix
             return ui.notifications.error(conversionFailures[0].message);
         }
 
-        const confirmed = await foundry.applications.api.DialogV2.confirm({
-            window: { title: `Confirm ${item.name} type change` },
-            content: `Convert ${item.name} from a ${item.type} to ${targetType.toUpperCase()}`,
-        });
+        const confirmed = await foundry.applications.api.DialogV2.confirm(
+            this.dialogOptions({
+                window: { title: `Confirm ${item.name} type change` },
+                content: `Convert ${item.name} from a ${item.type} to ${targetType.toUpperCase()}`,
+            }),
+        );
 
         if (!confirmed) {
             return;

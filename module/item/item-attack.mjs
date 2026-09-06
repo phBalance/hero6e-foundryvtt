@@ -49,6 +49,7 @@ import {
     whisperUserTargetsForActor,
 } from "../utility/util.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
+import { heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
 
 const { renderTemplate } = foundry.applications.handlebars;
 
@@ -340,23 +341,25 @@ export async function getTargetArray(formData) {
                 html += `<li style="text-align:left">${target.name}</li>`;
             }
             html += "</ol></td></tr></table>";
-            targetArray = await foundry.applications.api.DialogV2.wait({
-                window: { title: `Pick target list` },
-                content: html,
-                buttons: [
-                    {
-                        action: "gm",
-                        label: game.user.name,
-                        default: true,
-                        callback: () => targetArray,
-                    },
-                    {
-                        action: "user",
-                        label: game.users.get(formData.userId).name,
-                        callback: () => userTargetArray,
-                    },
-                ],
-            });
+            targetArray = await foundry.applications.api.DialogV2.wait(
+                heroDialogOptions(null, {
+                    window: { title: `Pick target list` },
+                    content: html,
+                    buttons: [
+                        {
+                            action: "gm",
+                            label: game.user.name,
+                            default: true,
+                            callback: () => targetArray,
+                        },
+                        {
+                            action: "user",
+                            label: game.users.get(formData.userId).name,
+                            callback: () => userTargetArray,
+                        },
+                    ],
+                }),
+            );
         }
     }
 
@@ -2029,26 +2032,28 @@ export async function _onRollKnockback(event) {
         </p>
     `;
 
-    await foundry.applications.api.DialogV2.wait({
-        window: { title: `Confirm Knockback details` },
-        position: { width: 400 },
-        content: html,
-        buttons: [
-            {
-                action: "normal",
-                label: "Roll & Apply",
-                default: true,
-                callback: async (event, button) => {
-                    const dice = button.form.elements.knockbackDice.value;
-                    await _rollApplyKnockback(token, parseInt(dice));
+    await foundry.applications.api.DialogV2.wait(
+        heroDialogOptions(event.currentTarget, {
+            window: { title: `Confirm Knockback details` },
+            position: { width: 400 },
+            content: html,
+            buttons: [
+                {
+                    action: "normal",
+                    label: "Roll & Apply",
+                    default: true,
+                    callback: async (event, button) => {
+                        const dice = button.form.elements.knockbackDice.value;
+                        await _rollApplyKnockback(token, parseInt(dice));
+                    },
                 },
-            },
-            {
-                action: "cancel",
-                label: "Cancel",
-            },
-        ],
-    });
+                {
+                    action: "cancel",
+                    label: "Cancel",
+                },
+            ],
+        }),
+    );
 }
 
 // Fisher-Yates Shuffle
@@ -2123,14 +2128,16 @@ export async function _onRollPowerToRemove(event) {
     const template = `systems/${HEROSYS.module}/templates/attack/remove-power-from-automaton.hbs`;
     const content = await renderTemplate(template, { choices });
 
-    const powerToRemoveId = await foundry.applications.api.DialogV2.prompt({
-        window: { title: `Remove power from ${targetToken.name}` },
-        content,
-        ok: {
-            label: "Remove Power",
-            callback: (event, button) => button.form.elements.powerToRemove.value,
-        },
-    });
+    const powerToRemoveId = await foundry.applications.api.DialogV2.prompt(
+        heroDialogOptions(event.currentTarget, {
+            window: { title: `Remove power from ${targetToken.name}` },
+            content,
+            ok: {
+                label: "Remove Power",
+                callback: (event, button) => button.form.elements.powerToRemove.value,
+            },
+        }),
+    );
 
     // If the user has just closed the dialog without selecting something, we're done.
     if (powerToRemoveId == null) {
@@ -3393,23 +3400,25 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         // If they clicked "Apply Damage" then prompt
         // WHAT? if (damageRoller.getType === HeroRoller.ROLL_TYPE.ENTANGLE) {
         if (damageRoller.getType() !== HeroRoller.ROLL_TYPE.ENTANGLE && targetEntangle === undefined) {
-            targetEntangle = await foundry.applications.api.DialogV2.wait({
-                window: { title: `Confirm Target` },
-                content: `Target ${targetToken.name} or the ENTANGLE effecting ${targetToken.name}?`,
-                buttons: [
-                    {
-                        action: "token",
-                        label: `${targetToken.name}`,
-                        default: true,
-                        callback: () => false,
-                    },
-                    {
-                        action: "entangle",
-                        label: `ENTANGLE`,
-                        callback: () => true,
-                    },
-                ],
-            });
+            targetEntangle = await foundry.applications.api.DialogV2.wait(
+                heroDialogOptions(null, {
+                    window: { title: `Confirm Target` },
+                    content: `Target ${targetToken.name} or the ENTANGLE effecting ${targetToken.name}?`,
+                    buttons: [
+                        {
+                            action: "token",
+                            label: `${targetToken.name}`,
+                            default: true,
+                            callback: () => false,
+                        },
+                        {
+                            action: "entangle",
+                            label: `ENTANGLE`,
+                            callback: () => true,
+                        },
+                    ],
+                }),
+            );
         }
 
         if (targetEntangle && entangleAE) {
@@ -4271,23 +4280,25 @@ export async function _onApplyAdjustmentToSpecificToken(
             html += `</table>`;
 
             const checked =
-                (await foundry.applications.api.DialogV2.wait({
-                    window: { title: `Pick power to adjust` },
-                    content: html,
-                    buttons: [
-                        {
-                            action: "normal",
-                            label: "Apply",
-                            default: true,
-                            callback: (event, button) => Array.from(button.form.querySelectorAll("input:checked")),
-                        },
-                        {
-                            action: "cancel",
-                            label: "Cancel",
-                            callback: () => [],
-                        },
-                    ],
-                })) || [];
+                (await foundry.applications.api.DialogV2.wait(
+                    heroDialogOptions(null, {
+                        window: { title: `Pick power to adjust` },
+                        content: html,
+                        buttons: [
+                            {
+                                action: "normal",
+                                label: "Apply",
+                                default: true,
+                                callback: (event, button) => Array.from(button.form.querySelectorAll("input:checked")),
+                            },
+                            {
+                                action: "cancel",
+                                label: "Cancel",
+                                callback: () => [],
+                            },
+                        ],
+                    }),
+                )) || [];
 
             // When !valid the populated array holds the unparseable INPUT tokens; replace them with the
             // picks. Cancelling clears them too so the invalid-target error below aborts the adjustment.
@@ -5091,16 +5102,18 @@ export async function _onModalDamageCard(event) {
     content.find(".modal-damage-card").remove();
     content = content.html();
 
-    const dialog = new foundry.applications.api.DialogV2({
-        window: { title: `Modal Damage` },
-        content,
-        buttons: [
-            {
-                action: "cancel",
-                label: "Close",
-            },
-        ],
-    });
+    const dialog = new foundry.applications.api.DialogV2(
+        heroDialogOptions(event.currentTarget, {
+            window: { title: `Modal Damage` },
+            content,
+            buttons: [
+                {
+                    action: "cancel",
+                    label: "Close",
+                },
+            ],
+        }),
+    );
 
     // DialogV2 wraps content in a <form> and only honors the `render` option via its static
     // wait/prompt/confirm helpers, so wire the listener ourselves. The cloned card's buttons

@@ -16,6 +16,7 @@ import {
     toHHMMSS,
     whisperUserTargetsForActor,
 } from "./utility/util.mjs";
+import { heroDialogOptions } from "./applications/api/hero-app-mixin.mjs";
 
 const ROLL_RETENTION_SEGMENTS = 24; // two full Turns
 
@@ -4805,14 +4806,16 @@ export async function promptToDeleteAoeInstantRegions() {
         const effectiveItem = rehydrateAttackItem(region.flags[game.system.id].effectiveItemJson).item;
         if (effectiveItem.system.duration !== CONFIG.HERO.DURATION_TYPES.INSTANT) continue;
 
-        const proceed = await foundry.applications.api.DialogV2.confirm({
-            window: {
-                title: `Delete region ${region.name}?`,
-            },
-            content: `<p>The region <b>${region.name}</b> is likely no longer needed. Would you like to delete it?</p>`,
-            rejectClose: false,
-            modal: true,
-        });
+        const proceed = await foundry.applications.api.DialogV2.confirm(
+            heroDialogOptions(null, {
+                window: {
+                    title: `Delete region ${region.name}?`,
+                },
+                content: `<p>The region <b>${region.name}</b> is likely no longer needed. Would you like to delete it?</p>`,
+                rejectClose: false,
+                modal: true,
+            }),
+        );
 
         if (proceed) {
             await region.delete();

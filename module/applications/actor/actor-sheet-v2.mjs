@@ -204,43 +204,46 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
 
         const content = contentFullHealth + contentRestore + contentReset + contentRebuild;
 
-        const action = await foundry.applications.api.DialogV2.wait({
-            window: {
-                maxWidth: "200px",
-                title:
-                    game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
-            },
-            position: {
-                width: 600,
-            },
-            content,
-            buttons: [
-                {
-                    icon: "fas fa-heart-crack",
-                    label: "Full Health",
-                    action: "fullHealth",
-                    tooltip: "",
+        const action = await foundry.applications.api.DialogV2.wait(
+            this.dialogOptions({
+                window: {
+                    maxWidth: "200px",
+                    title:
+                        game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") +
+                        ` [${this.actor.name}]`,
                 },
-                {
-                    icon: "fa-duotone fa-regular fa-cards-blank",
-                    label: "Restore",
-                    action: "restore",
-                    disabled: !this.actor.token,
+                position: {
+                    width: 600,
                 },
-                {
-                    icon: "fas fa-rotate-left",
-                    label: "Reset Actor",
-                    action: "reset",
-                    disabled: resetRebuildDisabled,
-                },
-                {
-                    icon: "fas fa-hammer",
-                    label: "Rebuild",
-                    action: "rebuild",
-                    disabled: resetRebuildDisabled,
-                },
-            ],
-        });
+                content,
+                buttons: [
+                    {
+                        icon: "fas fa-heart-crack",
+                        label: "Full Health",
+                        action: "fullHealth",
+                        tooltip: "",
+                    },
+                    {
+                        icon: "fa-duotone fa-regular fa-cards-blank",
+                        label: "Restore",
+                        action: "restore",
+                        disabled: !this.actor.token,
+                    },
+                    {
+                        icon: "fas fa-rotate-left",
+                        label: "Reset Actor",
+                        action: "reset",
+                        disabled: resetRebuildDisabled,
+                    },
+                    {
+                        icon: "fas fa-hammer",
+                        label: "Rebuild",
+                        action: "rebuild",
+                        disabled: resetRebuildDisabled,
+                    },
+                ],
+            }),
+        );
 
         switch (action) {
             case "fullHealth":
@@ -263,9 +266,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
     }
 
     static #onConfigureActorType() {
-        this.actor.changeTypeDialog({
-            classes: Array.from(this.classList).filter((c) => c.includes("herosystem") || c.includes("theme")),
-        });
+        this.actor.changeTypeDialog(this.dialogOptions({}));
     }
 
     static #onConfigureToken() {
@@ -281,12 +282,14 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
     }
 
     static async #onDeleteAllTemporaryEffects() {
-        const confirm = await foundry.applications.api.DialogV2.confirm({
-            window: { title: "Delete all Temporary Effects" },
-            content:
-                `<h4>Are you sure?</h4><p>This will permanently delete all ${this.actor.temporaryEffects.length} ` +
-                `temporary effects.</p>`,
-        });
+        const confirm = await foundry.applications.api.DialogV2.confirm(
+            this.dialogOptions({
+                window: { title: "Delete all Temporary Effects" },
+                content:
+                    `<h4>Are you sure?</h4><p>This will permanently delete all ${this.actor.temporaryEffects.length} ` +
+                    `temporary effects.</p>`,
+            }),
+        );
 
         if (confirm) {
             await this.actor.deleteEmbeddedDocuments(
@@ -297,12 +300,14 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
     }
 
     static async #onDeleteAllActiveEffects() {
-        const confirm = await foundry.applications.api.DialogV2.confirm({
-            window: { title: "Delete all activeEffects" },
-            content:
-                `<h4>Are you sure?</h4><p>This will attempt to permanently delete all ${Array.from(this.actor.allApplicableEffects()).length} ` +
-                `active effects.  Some effects will get re-applied.  This may break some powers and/or automation, requiring a re-upload of HDC or FullHealth+Rebuild to fix.</p>`,
-        });
+        const confirm = await foundry.applications.api.DialogV2.confirm(
+            this.dialogOptions({
+                window: { title: "Delete all activeEffects" },
+                content:
+                    `<h4>Are you sure?</h4><p>This will attempt to permanently delete all ${Array.from(this.actor.allApplicableEffects()).length} ` +
+                    `active effects.  Some effects will get re-applied.  This may break some powers and/or automation, requiring a re-upload of HDC or FullHealth+Rebuild to fix.</p>`,
+            }),
+        );
 
         if (confirm) {
             // Intentionally not bulk deleting as we may have errors and we want to delete
@@ -1673,11 +1678,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
                 },
                 callback: async (target) => {
                     const document = this._getEmbeddedDocument(target);
-                    await document.deleteDialog({
-                        classes: Array.from(this.classList).filter(
-                            (c) => c.includes("herosystem") || c.includes("theme"),
-                        ),
-                    });
+                    await document.deleteDialog(this.dialogOptions({}));
                 },
             },
 

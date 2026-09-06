@@ -2,6 +2,7 @@ import { createTemporaryItemAttackActionForApplyingDamage, generateChatMessage }
 import { HeroRoller } from "./dice.mjs";
 
 import { HEROSYS } from "../herosystem6e.mjs";
+import { heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
 
 // v13 compatibility
 const { renderTemplate } = foundry.applications.handlebars;
@@ -53,15 +54,17 @@ export class GenericRoller {
         const options = { ocv: canvas.tokens.controlled.at(0)?.actor?.system.characteristics.ocv?.value || 0 };
         const template = await renderTemplate(`systems/${HEROSYS.module}/templates/system/heroRoll-toHit.hbs`, options);
 
-        const userSelection = await foundry.applications.api.DialogV2.prompt({
-            window: { title: "Roll ToHit" },
-            content: template,
-            ok: {
-                label: "Roll ToHit",
-                callback: (event, button) => new FormDataExtended(button.form).object,
-            },
-            rejectClose: false,
-        });
+        const userSelection = await foundry.applications.api.DialogV2.prompt(
+            heroDialogOptions(null, {
+                window: { title: "Roll ToHit" },
+                content: template,
+                ok: {
+                    label: "Roll ToHit",
+                    callback: (event, button) => new FormDataExtended(button.form).object,
+                },
+                rejectClose: false,
+            }),
+        );
 
         // No user selection? If so, don't roll.
         if (!userSelection) {
@@ -138,15 +141,17 @@ export class GenericRoller {
             `systems/${HEROSYS.module}/templates/system/heroRoll-damage.hbs`,
             options,
         );
-        const userSelection = await foundry.applications.api.DialogV2.prompt({
-            window: { title: "Roll Damage" },
-            content: template,
-            ok: {
-                label: "Roll Damage",
-                callback: (event, button) => new FormDataExtended(button.form).object,
-            },
-            rejectClose: false,
-        });
+        const userSelection = await foundry.applications.api.DialogV2.prompt(
+            heroDialogOptions(null, {
+                window: { title: "Roll Damage" },
+                content: template,
+                ok: {
+                    label: "Roll Damage",
+                    callback: (event, button) => new FormDataExtended(button.form).object,
+                },
+                rejectClose: false,
+            }),
+        );
 
         // No user selection? If so, don't roll.
         if (!userSelection) {

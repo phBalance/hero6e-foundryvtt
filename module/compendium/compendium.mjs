@@ -446,11 +446,13 @@ export class HeroSystem6eCompendium extends HeroAppMixin(foundry.applications.si
                 const folder = this.collection.folders.get(folderId);
                 if (!folder) return;
 
-                const confirmed = await foundry.applications.api.DialogV2.confirm({
-                    window: { title: `${game.i18n.localize("FOLDER.Delete")}: ${folder.name}` },
-                    content: `<p>Are you sure? This will permanently delete <strong>${folder.name}</strong> and all items inside it.</p>`,
-                    rejectClose: false,
-                });
+                const confirmed = await foundry.applications.api.DialogV2.confirm(
+                    this.dialogOptions({
+                        window: { title: `${game.i18n.localize("FOLDER.Delete")}: ${folder.name}` },
+                        content: `<p>Are you sure? This will permanently delete <strong>${folder.name}</strong> and all items inside it.</p>`,
+                        rejectClose: false,
+                    }),
+                );
 
                 if (!confirmed) return;
 

@@ -41,6 +41,7 @@ import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
 import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
+import { heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
 
 const { Item } = foundry.documents;
 const { FilePicker } = foundry.applications.apps;
@@ -7770,7 +7771,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // If no childItems use the built in Foundry Delete Prompt
         if (this.childItems.length === 0) {
-            return super.deleteDialog(options, operation);
+            return super.deleteDialog(heroDialogOptions(null, options), operation);
         }
 
         // Recursively count all descendants for the warning text
@@ -7796,37 +7797,40 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             game.i18n.format("SIDEBAR.DeleteWarning", { type });
 
         return new foundry.applications.api.DialogV2(
-            foundry.utils.mergeObject(
-                {
-                    content,
-                    buttons: [
-                        {
-                            action: "containerOnly",
-                            label: `${this.system.XMLID} only`,
-                            callback: () => {
-                                this.delete(operation);
+            heroDialogOptions(
+                null,
+                foundry.utils.mergeObject(
+                    {
+                        content,
+                        buttons: [
+                            {
+                                action: "containerOnly",
+                                label: `${this.system.XMLID} only`,
+                                callback: () => {
+                                    this.delete(operation);
+                                },
                             },
-                        },
-                        {
-                            action: "containerAndChildren",
-                            label: `${this.system.XMLID} + children`,
-                            callback: () => {
-                                this.actor.deleteEmbeddedDocuments("Item", allDescendantIds);
+                            {
+                                action: "containerAndChildren",
+                                label: `${this.system.XMLID} + children`,
+                                callback: () => {
+                                    this.actor.deleteEmbeddedDocuments("Item", allDescendantIds);
+                                },
                             },
+                            {
+                                action: "cancel",
+                                label: `Cancel`,
+                                default: true,
+                            },
+                        ],
+                        window: {
+                            icon: "fa-solid fa-trash",
+                            title: `${game.i18n.format("DOCUMENT.Delete", { type })}: ${this.name}`,
                         },
-                        {
-                            action: "cancel",
-                            label: `Cancel`,
-                            default: true,
-                        },
-                    ],
-                    window: {
-                        icon: "fa-solid fa-trash",
-                        title: `${game.i18n.format("DOCUMENT.Delete", { type })}: ${this.name}`,
+                        options: { popOutModuleDisable: true },
                     },
-                    options: { popOutModuleDisable: true },
-                },
-                options,
+                    options,
+                ),
             ),
         ).render({ force: true });
     }
