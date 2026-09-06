@@ -59,7 +59,7 @@
         </tr>
 
         {{#each mod.adders as |adder|}}
-            <tr class="hero modifier-adder indent {{#if mod.parentId}}from-parent{{/if}}">
+            <tr class="modifier-adder indent {{#if mod.parentId}}from-parent{{/if}}">
                 <td class="adder-name" title="{{adder.XMLID}}">{{adder.ALIAS}} {{adder.OPTION_ALIAS}} {{#if adder.PRIVATE}}p{{/if}}</td>
                 <td class="adder-cost">{{adder.cost}}</td>
                 <td class="adder-controls"></td>
@@ -67,7 +67,7 @@
         {{/each}}
 
         {{#each mod.modifiers as |mod2|}}
-            <tr class="hero modifier-adder indent {{#if mod.parentId}}from-parent{{/if}}">
+            <tr class="modifier-adder indent {{#if mod.parentId}}from-parent{{/if}}">
                 <td class="modifier-name" title="{{mod2.XMLID}}">{{mod2.ALIAS}} {{mod2.OPTION_ALIAS}} {{#if mod2.PRIVATE}}p{{/if}}</td>
                 <td class="adder-cost">{{mod2.cost}}</td>
                 <td class="adder-controls"></td>

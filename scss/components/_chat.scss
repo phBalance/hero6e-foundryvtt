@@ -458,6 +458,17 @@ button.hero-delayed-spent {
     width: 100%;
 }
 
+.chat-message {
+    // Buttons already pressed once
+    .hero-used {
+        color: var(--color-text-subtle);
+    }
+
+    .hero-inobvious {
+        color: var(--hero-info);
+    }
+}
+
 .chat-message .message-header h4.message-sender {
     font-size: 18px;
 

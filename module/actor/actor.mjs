@@ -2773,7 +2773,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             const p = item.isPerceivable(false); // inobivous is not included
             if (p) {
                 perceivable.push(
-                    `<b${p === "maybe" ? ` style="color:blue" title="Inobvious requires PERCEPTION roll"` : ""}>${item.parentItem ? `${item.parentItem.name}: ` : ""}${item.name}</b> ${item.system.description}`,
+                    `<b${p === "maybe" ? ` class="hero-inobvious" title="Inobvious requires PERCEPTION roll"` : ""}>${item.parentItem ? `${item.parentItem.name}: ` : ""}${item.name}</b> ${item.system.description}`,
                 );
             }
         }

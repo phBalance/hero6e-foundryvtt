@@ -2147,7 +2147,7 @@ export async function _onRollPowerToRemove(event) {
     let chatContent = null;
     if (powerToRemoveId === "STR") {
         event.target.textContent = "Removed 10 STR";
-        event.target.style.color = "darkgray";
+        event.target.classList.add("hero-used");
         chatContent = "Removed 10 STR";
         await actor.update({
             "system.characteristics.str.value": actor.system.characteristics.str.value - 10,
@@ -2155,7 +2155,7 @@ export async function _onRollPowerToRemove(event) {
         });
     } else if (powerToRemoveId === "SPD") {
         event.target.textContent = "Removed 1 SPD";
-        event.target.style.color = "darkgray";
+        event.target.classList.add("hero-used");
         chatContent = "Removed 1 SPD";
         await actor.update({
             "system.characteristics.spd.value": actor.system.characteristics.spd.value - 1,
@@ -2172,7 +2172,7 @@ export async function _onRollPowerToRemove(event) {
                 const button = parsedMessageContent.querySelector(`button.roll-powerToRemove`);
                 if (button) {
                     button.textContent = `Removed ${item.name}`;
-                    button.style.color = "darkgray";
+                    button.classList.add("hero-used");
                     await message.update({ content: parsedMessageContent.innerHTML });
                 }
                 chatContent = `Removed power ${item.name}`;
@@ -2815,7 +2815,7 @@ export async function _onRollBreakfall(event) {
             parsedMessageContent.innerHTML = message.content;
             const button = parsedMessageContent.querySelector(`button.roll-breakfall`);
             if (button) {
-                button.style.color = "darkgray";
+                button.classList.add("hero-used");
                 console.log(`emit updateChatMessage`);
                 if (game.user.isGM) {
                     await message.update({ content: parsedMessageContent.innerHTML });
@@ -3277,8 +3277,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
         }
     }
 
-    // change font color to indicate this button has already been pressed
-    $(button).css("color", "#A9A9A9");
+    $(button).addClass("hero-used");
 }
 
 export async function _onApplyDamageToSpecificToken(item, _damageData, action, targetData) {

@@ -1,5 +1,13 @@
 export const HERO_ROOT_CLASS = "herosystem6e";
 
+// Keys must match the theme maps in scss/theme/_tokens.scss
+export const HERO_SHEET_THEMES = Object.freeze({
+    "": "Default",
+    light: "Light",
+    dark: "Dark",
+    hc: "High Contrast",
+});
+
 /**
  * Root class plus the theme classes of the nearest themed ancestor, for stamping onto dialogs.
  * DialogV2 mounts on body and would otherwise ignore a per-sheet theme.
