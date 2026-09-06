@@ -1,0 +1,34 @@
+.herosystem6e.vpp-config {
+    div.vpp-selects {
+        align-items: flex-start;
+
+        span {
+            font-size: 18px;
+        }
+    }
+
+    select.form-control {
+        height: auto;
+        margin-top: 5px;
+    }
+
+    div.vpp-select-control {
+        margin: 0 5px;
+    }
+
+    button.vpp-select-control {
+        margin-top: 5px;
+    }
+
+    select > option {
+        background: none;
+
+        &::before {
+            display: inline-block;
+            content: attr(data-cost) ":";
+            width: 20px;
+            text-align: right;
+            margin-right: 5px;
+        }
+    }
+}

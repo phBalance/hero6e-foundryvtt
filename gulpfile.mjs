@@ -10,6 +10,7 @@ import gulpPlumber from "gulp-plumber";
 const sass = gulpSass(dartSass);
 
 const SASS_FILES = ["scss/**/*.scss"];
+const SASS_ENTRY = "scss/herosystem6e.scss";
 const JAVASCRIPT_FILES = ["**/*.js", "**/*.mjs", "!node_modules/**"];
 const MARKDOWN_FILES = ["**/*.md", "!node_modules/**"];
 
@@ -94,7 +95,7 @@ function compileSass() {
         style: "expanded",
     };
     return gulp
-        .src(SASS_FILES)
+        .src(SASS_ENTRY)
         .pipe(sass.sync(options).on("error", handleError))
         .pipe(
             gulpAutoPrefix({

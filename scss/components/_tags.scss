@@ -1,0 +1,47 @@
+@use "../abstracts" as *;
+
+@include hero-scoped {
+    div.tags {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .tag {
+        margin-right: 4px;
+        margin-top: 1px;
+        margin-bottom: 1px;
+    }
+
+    .tags .tag {
+        background-color: #5e0000;
+        border-radius: 2px;
+        box-shadow: inset 0 0 0 1px rgb(0 0 0 / 50%);
+        color: #fff;
+        padding: 0.1em 0.25em;
+
+        &.tag-transparent,
+        &.tag-knockback {
+            background-color: transparent;
+            border-radius: 4px;
+            box-shadow: inset 0 0 0 1px rgb(0 0 0 / 30%);
+            color: rgb(75 74 68);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        &.tag-knockback {
+            box-shadow: inset 0 0 0 1px rgb(0 0 255 / 50%);
+        }
+
+        &.area-effect-tag {
+            background-color: #d06fa2;
+        }
+    }
+
+    .tag > .strikethrough,
+    div.hit-roll .strikethrough {
+        text-decoration-line: line-through;
+        text-decoration-color: rgb(255 0 0 / 80%);
+    }
+}

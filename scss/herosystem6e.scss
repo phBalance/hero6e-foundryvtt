@@ -1,30 +1,21 @@
-// Import utilities.
-@use "sass:meta";
-@use "utils/colors";
+@use "base/global";
+@use "base/foundry-overrides";
+@use "components/tags";
+@use "components/item-shared";
+@use "components/actor-sheet";
+@use "components/item-sheet";
+@use "components/item-attack-app";
+@use "components/item-modifier-app";
+@use "components/vpp-config";
+@use "components/active-effect-config";
+@use "components/chat";
+@use "components/generic-roller";
+@use "components/combat-tracker";
+@use "components/effects-panel";
+@use "components/compendium";
+@use "components/settings";
 
-body {
-    --herosystem-color-announce-failure: var(--color-level-error);
-    --herosystem-color-announce-success: #006400;
-
-    .announce-failure {
-        color: var(--herosystem-color-announce-failure);
-        font-weight: bold;
-    }
-
-    .announce-success {
-        color: var(--herosystem-color-announce-success);
-        font-weight: bold;
-    }
-
-    .hero-warning {
-        color: colors.$c-warning;
-    }
-}
-
-/* Styles for dice which are direct overrides of FoundryVTT styling */
-@include meta.load-css("components/foundry-overrides/dice");
-
-/* FIXME: This should not be using the class as a guard. These rules should all use the hero guard and be more tightly scoped (e.g. remove body as they're not global overrides). */
+// Legacy theme variables, replaced by theme/tokens in a later commit
 .herosystem6e,
 .herosystem6e.theme-hc {
     --herosystem-blue: #286293;
@@ -95,41 +86,3 @@ form.herosystem6e.theme-hc {
         margin-bottom: 2px;
     }
 }
-
-/* END FIXME: This should not be using the class as a guard. These rules should all use the hero guard and be more tightly scoped (e.g. remove body as they're not global overrides). */
-
-.hero.auto-overflow {
-    overflow: auto;
-}
-
-@include meta.load-css("components/chat");
-
-/* Styles for uploading */
-@include meta.load-css("components/upload");
-
-/* Stuff that doesn't have a distinct home - should go away */
-@include meta.load-css("components/junk");
-
-/* Combat Tracker */
-@include meta.load-css("components/combat-tracker");
-
-/* Settings window group headers */
-@include meta.load-css("components/settings-config");
-
-/* Effects Panel */
-@include meta.load-css("components/effects-panel");
-
-/* HeroRoll Panel */
-@include meta.load-css("components/hero-generic-roller");
-
-/* Styles for Notes */
-@include meta.load-css("components/notes");
-
-/* Styles for Active Effects */
-@include meta.load-css("components/active-effects");
-
-/* Styles for Item Attack Application */
-@include meta.load-css("components/item-attack");
-
-/* Styles for Compendium Application */
-@include meta.load-css("components/compendium");

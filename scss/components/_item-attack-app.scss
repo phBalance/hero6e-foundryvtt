@@ -1,4 +1,4 @@
-#item-attack-form-application-v2 {
+.herosystem6e.item-attack-application-v2 {
     .form-group {
         clear: both;
         display: flex;
@@ -91,5 +91,9 @@
         li {
             list-style-type: none;
         }
+    }
+
+    .aoe-button {
+        margin-bottom: 3px;
     }
 }
