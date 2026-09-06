@@ -81,4 +81,15 @@
             grid-column: 3;
         }
     }
+
+    .hand-to-hand-attacks,
+    .naked-advantage-attacks {
+        ol {
+            padding: 0;
+        }
+
+        li {
+            list-style-type: none;
+        }
+    }
 }

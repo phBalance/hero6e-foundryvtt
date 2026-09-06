@@ -1,8 +1,6 @@
 // Import utilities.
 @use "sass:meta";
-@use "utils/typography";
 @use "utils/colors";
-@use "utils/variables";
 
 body {
     --herosystem-color-announce-failure: var(--color-level-error);
@@ -100,28 +98,14 @@ form.herosystem6e.theme-hc {
 
 /* END FIXME: This should not be using the class as a guard. These rules should all use the hero guard and be more tightly scoped (e.g. remove body as they're not global overrides). */
 
-/* Styles limited to hero sheets */
-.hero {
-    @include meta.load-css("global/grid"); /* V13 - Moved from global as these should be scoped */
-    @include meta.load-css("global/flex"); /* V13 - Moved from global as these should be scoped */
-    @include meta.load-css("components/forms");
-    @include meta.load-css("components/resource");
-    @include meta.load-css("components/tabs");
-    @include meta.load-css("components/items");
-    @include meta.load-css("components/rollable-skill");
-
-    &.auto-overflow {
-        overflow: auto;
-    }
+.hero.auto-overflow {
+    overflow: auto;
 }
 
 @include meta.load-css("components/chat");
 
 /* Styles for uploading */
 @include meta.load-css("components/upload");
-
-/* Styles for power cards */
-@include meta.load-css("components/power-cards");
 
 /* Stuff that doesn't have a distinct home - should go away */
 @include meta.load-css("components/junk");
@@ -137,9 +121,6 @@ form.herosystem6e.theme-hc {
 
 /* HeroRoll Panel */
 @include meta.load-css("components/hero-generic-roller");
-
-/* Styles for TextEditor */
-@include meta.load-css("components/text-editor");
 
 /* Styles for Notes */
 @include meta.load-css("components/notes");

@@ -1,6 +1,11 @@
 .herosystem6e.actor-sheet-v2 {
     min-height: 310px;
     min-width: 500px;
+
+    // Core ships .flex0-3 only
+    .flexrow > .flex4 {
+        flex: 4;
+    }
 }
 
 .herosystem6e.actor-sheet-v2 .uploading-blur {
