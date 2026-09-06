@@ -18,7 +18,7 @@
             width="100" 
         />
         {{/if}}
-        <div class="sidebar-actions flexrow flex-group-center">
+        <div class="sidebar-actions flexrow">
             <button class="profile-img-button {{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" type="button" data-action="togglePortrait">
                 {{#if (eq portraitToggleState "portrait")}} Portrait {{/if}}
                 {{#if (eq portraitToggleState "token")}} Token {{/if}}
@@ -119,7 +119,7 @@
                     {{#if defense.rPOWD}}<li title="{{defense.rPOWDtags}}"><span>rPOWD={{defense.rPOWD}}</span></li>{{/if}}
                 </fieldset>
 
-                <div class="sidebar-actions flexrow flex-group-center">
+                <div class="sidebar-actions flexrow">
                     <button class="{{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" type="button" data-action="recovery">Take Recovery</button>
                     <button class="{{#if (getScopedFlagValue actor @root/gameSystemId "uploading")}}uploading-blur{{/if}}" type="button" data-action="presenceAttack">Presence Attack</button>
                     <button type="button" data-action="fullHealth"
