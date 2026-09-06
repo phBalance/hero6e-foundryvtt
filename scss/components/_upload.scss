@@ -31,11 +31,6 @@ label.upload-button {
     transition: 0.5s;
     padding: 0 8px;
 
-    &:disabled {
-        color: #4b4a44;
-        box-shadow: none;
-    }
-
     & > i {
         margin-right: 3px;
     }

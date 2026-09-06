@@ -31,7 +31,6 @@ $combat-tracker-hero-dispositions: (
     --hero-on-accent: #f3f3f3;
     --hero-defeated-accent: #e5484d;
     --hero-header-shadow: rgb(0 0 0 / 30%);
-    --hero-row-border: black;
 }
 
 @mixin hero-tracker-vars-light {
@@ -46,7 +45,6 @@ $combat-tracker-hero-dispositions: (
     --hero-on-accent: #f3f3f3;
     --hero-defeated-accent: #a72a35;
     --hero-header-shadow: rgb(0 0 0 / 15%);
-    --hero-row-border: rgb(0 0 0 / 25%);
 }
 
 // Theme variable layer. Dark is the default; light overrides follow core's own

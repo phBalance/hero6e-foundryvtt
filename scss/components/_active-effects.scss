@@ -1,27 +1,7 @@
-// div.herosystem-active-effect-config {
-//     background: red;
-// }
-
-// div.herosystem-active-effect-config > .window-content {
-//     background: red;
-// }
-
 div.herosystem-active-effect-config div.description {
     background-color: rgb(0 0 0 / 10%);
     border: 1px dashed var(--input-border-color);
     padding: 5px;
     max-width: 100%;
     user-select: text;
-}
-
-.active-effect-sheet .effect-change .key {
-    flex: 3;
-}
-
-.active-effect-sheet .effect-change .source {
-    flex: 2;
-}
-
-.active-effect-sheet .effects-header {
-    height: auto;
 }
