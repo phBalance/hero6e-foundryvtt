@@ -16,11 +16,11 @@
     }
 
     .item-oihid {
-        color: rgb(200 0 0 / 80%);
+        color: var(--hero-error);
     }
 
     div.item-chat {
-        color: darkgreen;
+        color: var(--hero-success);
         font-weight: 100;
     }
 }

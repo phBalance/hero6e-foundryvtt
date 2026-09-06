@@ -27,10 +27,10 @@
     // .uploading is the part root, not an intermediate wrapper.
     .uploading-error,
     .uploading-loading {
-        background: white;
+        background: var(--hero-surface-raised);
         padding: 5px;
         width: 95%;
-        border: 2px solid red;
+        border: 2px solid var(--hero-error);
         margin: 5px;
         border-radius: 5px;
         pointer-events: auto;
@@ -43,13 +43,13 @@
         max-height: 90%;
 
         .uploading-error-title {
-            color: red;
+            color: var(--hero-error);
             font-size: 32px;
             text-align: center;
         }
 
         .uploading-error-versions {
-            color: #555;
+            color: var(--color-text-secondary);
             font-size: 12px;
             text-align: center;
             margin-bottom: 5px;
@@ -59,7 +59,7 @@
             flex: 1 1 auto;
             min-height: 0;
             overflow: auto;
-            color: red;
+            color: var(--hero-error);
             text-wrap: auto;
             user-select: text;
         }
@@ -69,7 +69,7 @@
             margin: 5px 0 0;
             font-size: 13px;
             text-align: center;
-            color: #222;
+            color: var(--color-text-emphatic);
         }
 
         .uploading-error-actions {
@@ -102,34 +102,34 @@
 }
 
 .herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-error {
-    box-shadow: 0 0 0 1px rgb(255 0 0 / 50%) inset;
-    outline: rgb(255 0 0 / 100%) solid 1px;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--hero-error) 50%, transparent) inset;
+    outline: var(--hero-error) solid 1px;
 }
 
 .herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-info {
-    outline: rgb(0 0 255 / 80%) solid 1px;
+    outline: color-mix(in srgb, var(--hero-info) 80%, transparent) solid 1px;
 }
 
 .herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-warning {
-    outline: #d6aa28 solid 2px;
+    outline: var(--hero-warning) solid 2px;
 }
 
 .herosystem6e.actor-sheet-v2 .item-row.validation-error > div.item-column {
-    background-color: rgb(255 0 0 / 10%) !important;
-    border-top: 1px solid rgb(255 0 0 / 30%);
-    border-bottom: 1px solid rgb(255 0 0 / 30%);
+    background-color: color-mix(in srgb, var(--hero-error) 10%, transparent) !important;
+    border-top: 1px solid color-mix(in srgb, var(--hero-error) 30%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--hero-error) 30%, transparent);
 }
 
 .herosystem6e.actor-sheet-v2 .item-row.validation-info > div.item-column {
-    background-color: rgb(0 0 255 / 10%) !important;
-    border-top: 1px solid rgb(0 0 255 / 30%);
-    border-bottom: 1px solid rgb(0 0 255 / 30%);
+    background-color: color-mix(in srgb, var(--hero-info) 10%, transparent) !important;
+    border-top: 1px solid color-mix(in srgb, var(--hero-info) 30%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--hero-info) 30%, transparent);
 }
 
 .herosystem6e.actor-sheet-v2 .item-row.validation-warning > div.item-column {
-    background-color: rgb(255 255 0 / 20%) !important;
-    border-top: 1px solid rgb(255 255 0 / 30%);
-    border-bottom: 1px solid rgb(255 255 0 / 30%);
+    background-color: color-mix(in srgb, var(--hero-warning) 20%, transparent) !important;
+    border-top: 1px solid color-mix(in srgb, var(--hero-warning) 30%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--hero-warning) 30%, transparent);
 }
 
 .herosystem6e.actor-sheet-v2 section.window-content {
@@ -150,11 +150,11 @@
 }
 
 input.under-max {
-    background-color: rgb(255 0 0 / 20%);
+    background-color: color-mix(in srgb, var(--hero-error) 20%, transparent);
 }
 
 input.over-max {
-    background-color: rgb(0 255 0 / 20%);
+    background-color: color-mix(in srgb, var(--hero-success) 20%, transparent);
 }
 
 .herosystem6e.actor-sheet-v2 .window-content aside {
@@ -185,7 +185,7 @@ input.over-max {
             margin: 3px 0;
             text-align: center;
             line-height: normal;
-            height: var(--form-field-height);
+            height: var(--input-height);
         }
 
         ul > li {
@@ -275,8 +275,8 @@ input.over-max {
     }
 
     a.drag-hover {
-        background-color: blue;
-        color: white;
+        background-color: var(--hero-accent);
+        color: var(--hero-text-on-accent);
     }
 }
 
@@ -301,11 +301,11 @@ input.over-max {
             display: flex;
             align-items: center;
             border-radius: 4px;
-            box-shadow: 0 0 6px var(--herosystem-shadow-45);
-            border: 1px solid var(--herosystem-border);
+            box-shadow: 0 0 6px var(--hero-shadow);
+            border: 1px solid var(--hero-accent);
             padding-right: 0.25rem;
             position: relative;
-            background: var(--herosystem-search-background);
+            background: var(--hero-surface-raised);
 
             > input {
                 flex: 1;
@@ -314,10 +314,10 @@ input.over-max {
                 padding: 0.5rem 0.5rem 0.5rem 2.25rem;
                 line-height: 1;
                 outline: none;
-                color: var(--herosystem-search-text);
+                color: var(--color-text-primary);
 
                 --input-box-shadow: none;
-                --input-placeholder-color: var(--herosystem-filter-control-color);
+                --input-placeholder-color: var(--color-text-subtle);
             }
         }
 
@@ -325,7 +325,7 @@ input.over-max {
             content: "\f002";
             font-family: var(--font-awesome);
             font-weight: bold;
-            color: var(--color-text-tertiary);
+            color: var(--color-text-subtle);
             position: absolute;
             left: 0.75rem;
         }
@@ -338,7 +338,7 @@ input.over-max {
 
             button {
                 height: 100%;
-                color: var(--herosystem-filter-control-color);
+                color: var(--color-text-subtle);
                 padding: 0 0.375rem;
             }
 
@@ -358,8 +358,8 @@ input.over-max {
         .item-header {
             display: flex;
             align-items: stretch;
-            background-color: var(--herosystem-table-header-bg-color);
-            color: var(--herosystem-header-text);
+            background-color: var(--hero-surface-header);
+            color: var(--hero-text-header);
             border-top-left-radius: 4px;
             border-top-right-radius: 4px;
             position: sticky;
@@ -406,7 +406,7 @@ input.over-max {
             justify-content: left;
 
             .item-description-text {
-                color: blue;
+                color: var(--hero-info);
             }
         }
 
@@ -414,7 +414,7 @@ input.over-max {
             .item-row {
                 display: flex;
                 align-items: stretch;
-                border-bottom: 1px solid var(--herosystem-header-background);
+                border-bottom: 1px solid var(--hero-surface-header);
             }
         }
 
@@ -439,7 +439,7 @@ input.over-max {
             width: 24px;
             height: 24px;
             flex-shrink: 0;
-            border: 1px solid var(--herosystem-table-header-bg-color);
+            border: 1px solid var(--hero-surface-header);
             border-radius: 4px;
         }
 
@@ -636,7 +636,7 @@ input.over-max {
     label.upload-button {
         height: 30px;
         margin: 3px 5px;
-        background: rgb(0 0 0 / 10%);
+        background: var(--hero-surface-tint);
         border: 1px solid var(--color-dark-5);
         border-radius: 3px;
         font-size: 14px;
@@ -654,7 +654,7 @@ input.over-max {
         }
 
         &:not(.is-owner) > span {
-            color: #4b4a44;
+            color: var(--color-text-subtle);
         }
 
         &.is-owner {

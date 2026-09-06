@@ -13,35 +13,35 @@
     }
 
     .tags .tag {
-        background-color: #5e0000;
+        background-color: var(--hero-tag);
         border-radius: 2px;
-        box-shadow: inset 0 0 0 1px rgb(0 0 0 / 50%);
-        color: #fff;
+        box-shadow: inset 0 0 0 1px var(--hero-border);
+        color: var(--hero-text-on-accent);
         padding: 0.1em 0.25em;
 
         &.tag-transparent,
         &.tag-knockback {
             background-color: transparent;
             border-radius: 4px;
-            box-shadow: inset 0 0 0 1px rgb(0 0 0 / 30%);
-            color: rgb(75 74 68);
+            box-shadow: inset 0 0 0 1px var(--hero-border);
+            color: var(--color-text-primary);
             font-size: 10px;
             font-weight: 500;
             letter-spacing: 0.5px;
         }
 
         &.tag-knockback {
-            box-shadow: inset 0 0 0 1px rgb(0 0 255 / 50%);
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--hero-info) 50%, transparent);
         }
 
         &.area-effect-tag {
-            background-color: #d06fa2;
+            background-color: var(--hero-tag-aoe);
         }
     }
 
     .tag > .strikethrough,
     div.hit-roll .strikethrough {
         text-decoration-line: line-through;
-        text-decoration-color: rgb(255 0 0 / 80%);
+        text-decoration-color: color-mix(in srgb, var(--hero-error) 80%, transparent);
     }
 }

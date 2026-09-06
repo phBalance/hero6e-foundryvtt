@@ -15,7 +15,7 @@
         margin-right: 4px;
 
         &:hover {
-            color: var(--color-shadow-primary, #ff6400);
+            color: var(--hero-accent-hot);
         }
     }
 
@@ -25,62 +25,62 @@
 
     // List styling (Slate Blue/Grey)
     .folder-header.hero-header-list {
-        background-color: #263238; // Solid dark slate
-        border-left: 3px solid #607d8b;
+        background-color: color-mix(in srgb, var(--hero-folder-list) 25%, var(--hero-surface-raised));
+        border-left: 3px solid var(--hero-folder-list);
 
         i.fa-folder,
         i.fa-folder-open {
-            color: #607d8b;
+            color: var(--hero-folder-list);
         }
     }
 
     .hero-parent-folder.hero-folder-list > .subdirectory {
-        border-left: 3px solid #607d8b;
+        border-left: 3px solid var(--hero-folder-list);
     }
 
     // Compound Power styling (Amber / Dark Orange)
     .folder-header.hero-header-compoundpower {
-        background-color: #3e2723; // Solid dark brown/amber
-        border-left: 3px solid #ff9800;
+        background-color: color-mix(in srgb, var(--hero-folder-compound) 25%, var(--hero-surface-raised));
+        border-left: 3px solid var(--hero-folder-compound);
 
         i.fa-folder,
         i.fa-folder-open {
-            color: #ff9800;
+            color: var(--hero-folder-compound);
         }
     }
 
     .hero-parent-folder.hero-folder-compoundpower > .subdirectory {
-        border-left: 3px solid #ff9800;
+        border-left: 3px solid var(--hero-folder-compound);
     }
 
     // Multipower styling (Dark Blue)
     .folder-header.hero-header-multipower {
-        background-color: #0d47a1; // Solid deep blue
-        border-left: 3px solid #2196f3;
+        background-color: color-mix(in srgb, var(--hero-folder-multipower) 25%, var(--hero-surface-raised));
+        border-left: 3px solid var(--hero-folder-multipower);
 
         i.fa-folder,
         i.fa-folder-open {
-            color: #2196f3;
+            color: var(--hero-folder-multipower);
         }
     }
 
     .hero-parent-folder.hero-folder-multipower > .subdirectory {
-        border-left: 3px solid #2196f3;
+        border-left: 3px solid var(--hero-folder-multipower);
     }
 
     // VPP styling (Dark Purple)
     .folder-header.hero-header-vpp {
-        background-color: #4a148c; // Solid deep purple
-        border-left: 3px solid #9c27b0;
+        background-color: color-mix(in srgb, var(--hero-folder-vpp) 25%, var(--hero-surface-raised));
+        border-left: 3px solid var(--hero-folder-vpp);
 
         i.fa-folder,
         i.fa-folder-open {
-            color: #9c27b0;
+            color: var(--hero-folder-vpp);
         }
     }
 
     .hero-parent-folder.hero-folder-vpp > .subdirectory {
-        border-left: 3px solid #9c27b0;
+        border-left: 3px solid var(--hero-folder-vpp);
     }
 
     // ==========================================

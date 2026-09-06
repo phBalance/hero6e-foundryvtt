@@ -1,6 +1,6 @@
 .herosystem-active-effect-config {
     div.description {
-        background-color: rgb(0 0 0 / 10%);
+        background-color: var(--hero-surface-tint);
         border: 1px dashed var(--input-border-color);
         padding: 5px;
         max-width: 100%;

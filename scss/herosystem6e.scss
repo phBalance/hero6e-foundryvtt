@@ -1,3 +1,4 @@
+@use "theme/tokens";
 @use "base/global";
 @use "base/foundry-overrides";
 @use "components/tags";
@@ -14,75 +15,3 @@
 @use "components/effects-panel";
 @use "components/compendium";
 @use "components/settings";
-
-// Legacy theme variables, replaced by theme/tokens in a later commit
-.herosystem6e,
-.herosystem6e.theme-hc {
-    --herosystem-blue: #286293;
-    --herosystem-table-header-bg-color: var(--table-header-bg-color);
-    --herosystem-shadow-45: rgb(0 0 0 / 45%);
-    --herosystem-border: var(--herosystem-blue);
-    --herosystem-search-background: var(--color-light-1);
-    --herosystem-search-text: var(--color-dark-1);
-    --herosystem-text-light-6: #666;
-    --herosystem-filter-control-color: #999;
-    --herosystem-header-background: var(--table-header-bg-color);
-    --herosystem-item-row-border: rgb(var(--herosystem-blue) / 20%);
-    --herosystem-header-text: var(--table-header-text-color);
-    --input-border-color: var(--color-dark-4, rgb(0 0 0 / 50%));
-    --input-text-color: var(--color-dark-2);
-    --input-background-color: var(--color-light-2);
-}
-
-body.theme-light .herosystem6e,
-.herosystem6e.theme-light {
-    // opacity+sticky is a problem
-    --herosystem-table-header-bg-color: #cac7bf;
-    --herosystem-header-background: #cac7bf;
-}
-
-body.theme-dark .herosystem6e:not(.themed),
-.herosystem6e.theme-dark {
-    --herosystem-table-header-bg-color: var(--color-cool-4); // #333
-    --background: black;
-    --herosystem-search-background: var(--color-dark-3); // 333
-    --herosystem-search-text: var(--color-light-1); // #f7f3e8
-    --input-border-color: var(--color-light-4, rgb(255 255 255 / 40%));
-    --input-text-color: var(--color-light-2);
-    --input-background-color: var(--color-dark-3);
-}
-
-// ref: https://venngage.com/tools/accessible-color-palette-generator
-form.herosystem6e.theme-hc {
-    --herosystem-table-header-bg-color: var(--color-dark-1);
-    --table-header-text-color: white;
-    --background: var(--color-light-1);
-    --color-text-primary: var(--color-dark-1);
-    --color-text-secondary: var(--color-dark-2);
-    --input-text-color: var(--color-dark-2);
-    --input-background-color: var(--color-light-2);
-
-    border: 1px solid white;
-
-    button:not(.unbutton),
-    header {
-        background-color: black;
-        color: white;
-
-        div {
-            background-color: var(--color-light-1);
-            color: black;
-        }
-    }
-
-    input {
-        color: black;
-        background-color: var(--color-light-2);
-        border: 1px solid black;
-    }
-
-    fieldset {
-        border-width: 1px;
-        margin-bottom: 2px;
-    }
-}

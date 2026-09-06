@@ -1,13 +1,11 @@
-@use "../utils/colors";
-
 .hero.chat-card {
     font-style: normal;
     font-size: 12px;
 
     .card-header {
         padding: 3px 0;
-        border-top: 2px groove #fff;
-        border-bottom: 2px groove #fff;
+        border-top: 2px groove var(--hero-surface-raised);
+        border-bottom: 2px groove var(--hero-surface-raised);
 
         img {
             flex: 0 0 36px;
@@ -31,7 +29,7 @@
 
     .card-section {
         padding: 3px 0;
-        border-bottom: 2px groove #fff;
+        border-bottom: 2px groove var(--hero-surface-raised);
 
         .description {
             flex: 1;
@@ -71,7 +69,7 @@
             display: block;
             line-height: 28px;
             text-align: center;
-            border: 1px solid #ccc;
+            border: 1px solid var(--hero-border);
         }
 
         button {
@@ -92,7 +90,7 @@
         }
 
         .error {
-            color: red;
+            color: var(--hero-error);
         }
     }
 
@@ -143,30 +141,30 @@
 
     .target-info-header {
         display: contents;
-        color: var(--color-text-light-highlight);
-        text-shadow: 1px 2px var(--color-shadow-dark);
+        color: var(--hero-text-header);
+        text-shadow: 1px 2px var(--hero-shadow);
         margin: 2px;
     }
 
     .target-info-header div {
         padding-top: 3px;
         padding-bottom: 3px;
-        border-bottom: 1px solid var(--color-border-dark);
+        border-bottom: 1px solid var(--hero-border);
     }
 
     .target-container {
         display: grid;
         width: 100%;
         border-collapse: collapse;
-        border-top: 1px solid var(--color-border-light-tertiary);
-        border-bottom: 1px solid var(--color-border-light-tertiary);
+        border-top: 1px solid var(--hero-border);
+        border-bottom: 1px solid var(--hero-border);
         margin: 0.5em 0;
         text-align: center;
     }
 
     .target-container .target-info-header div {
         font-weight: bold;
-        background-color: #696762;
+        background-color: var(--hero-surface-header);
     }
 
     .target-container div div {
@@ -178,11 +176,11 @@
     }
 
     .target-container .target-info-row:nth-child(odd) div {
-        background-color: #dddbd2;
+        background-color: transparent;
     }
 
     .target-container .target-info-row:nth-child(even) div {
-        background-color: #cfcdc3;
+        background-color: var(--hero-surface-tint);
     }
 
     .target-info-row {
@@ -200,26 +198,26 @@
 
     &.to-hit-card {
         .target-dc-result .miss {
-            color: colors.$c-miss;
+            color: var(--hero-error);
         }
 
         .target-dc-result .hit {
-            color: colors.$c-hit;
+            color: var(--hero-info);
         }
 
         .target-dc {
-            border-bottom: 2px groove #fff;
+            border-bottom: 2px groove var(--hero-surface-raised);
             margin-bottom: 4px;
         }
     }
 
     &.item-mindscan-target-card {
         .miss {
-            color: colors.$c-miss;
+            color: var(--hero-error);
         }
 
         .hit {
-            color: colors.$c-hit;
+            color: var(--hero-info);
         }
     }
 
@@ -234,13 +232,13 @@
     }
 
     [data-visibility="gm"] {
-        background-color: rgb(240 240 255 / 90%);
-        outline: 1px solid rgb(0 0 255 / 40%);
+        background-color: color-mix(in srgb, var(--hero-info) 8%, var(--hero-surface-raised));
+        outline: 1px solid color-mix(in srgb, var(--hero-info) 40%, transparent);
     }
 
     [data-visibility="redacted"] {
-        background-color: black;
-        color: white;
+        background-color: var(--color-dark-1);
+        color: var(--hero-text-on-accent);
     }
 
     .hex-facing {
@@ -272,8 +270,8 @@
     }
 
     div.apply-damage-amount {
-        border-top: 1px solid var(--color-underline-header);
-        border-bottom: 1px solid var(--color-underline-header);
+        border-top: 1px solid var(--hero-border);
+        border-bottom: 1px solid var(--hero-border);
         text-align: center;
         font-size: var(--font-size-20);
         line-height: 24px;
@@ -282,7 +280,7 @@
     }
 
     &.attack-card div.description {
-        background-color: rgb(0 0 0 / 10%);
+        background-color: var(--hero-surface-tint);
         border: 1px dashed var(--input-border-color);
         margin: 15px 0;
         padding: 5px;
@@ -323,8 +321,8 @@
 }
 
 .hero6e-to-hit-details {
-    border: 1px solid var(--color-border-light, #ccc);
-    background: rgb(0 0 0 / 3%);
+    border: 1px solid var(--hero-border);
+    background: var(--hero-surface-tint);
     border-radius: 4px;
     margin: 1px 0;
     overflow: hidden;
@@ -337,7 +335,7 @@
         gap: 2px;
         width: 100%;
         padding: 0;
-        background: var(--color-bg-btn, #e0e0e0);
+        background: var(--hero-surface-header);
         cursor: pointer;
         font-weight: bold;
         list-style: none;
@@ -417,7 +415,7 @@
     &::details-content {
         height: 0;
         overflow: hidden;
-        background: var(--color-bg-light, #fff);
+        background: var(--hero-surface-raised);
         opacity: 0;
         transition:
             height 0.25s ease-out,
@@ -428,7 +426,7 @@
     &[open]::details-content {
         height: auto;
         opacity: 1;
-        border-top: 1px solid var(--color-border-light, #ccc);
+        border-top: 1px solid var(--hero-border);
     }
 
     // Interior content inner cell structural rules
@@ -460,7 +458,7 @@
    stay in place with greyed text instead of the heavy disabled treatment;
    clicking still explains that the attack already resolved */
 button.hero-delayed-spent {
-    color: var(--color-text-subtle, #7a7971);
+    color: var(--color-text-subtle);
     opacity: 0.65;
     cursor: default;
 

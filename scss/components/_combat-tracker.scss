@@ -1,71 +1,8 @@
-// SCSS accents (single source of truth), emitted below as per-theme CSS custom
-// properties so the tracker reads correctly in light and dark mode.
-$hero-held-accent-dark: #d9a520;
-$hero-held-accent-light: #8a6d0e;
-$hero-held-text-dark: #ecc94b;
-$hero-held-text-light: #6b5300;
-$hero-next-turn-dark: #ff9f43;
-$hero-next-turn-light: #b45309;
-$hero-lr-accent-dark: #4fc3f7;
-$hero-lr-accent-light: #0369a1;
-$combat-tracker-hero-disposition-opacity-default: 0.05;
-$combat-tracker-hero-disposition-opacity-hover: 0.2;
-$combat-tracker-hero-disposition-opacity-active: 0.6;
-$combat-tracker-hero-dispositions: (
-    "friendly": rgb(67 223 223),
-    "neutral": rgb(241 216 5),
-    "hostile": rgb(231 33 36),
-    "secret": rgb(166 18 212),
-    "player": rgb(0 212 0),
-);
+@use "../theme/tokens";
 
-@mixin hero-tracker-vars-dark {
-    --hero-held-accent: #{$hero-held-accent-dark};
-    --hero-held-text: #{$hero-held-text-dark};
-    --hero-next-turn: #{$hero-next-turn-dark};
-    --hero-lr-accent: #{$hero-lr-accent-dark};
-    --hero-tracker-surface: var(--color-cool-5, rgb(28 27 34));
-    --hero-header-surface: var(--color-cool-5, rgb(28 27 34));
-    --hero-header-text: #e2e8f0;
-    --hero-muted-text: #8a929e;
-    --hero-on-accent: #f3f3f3;
-    --hero-defeated-accent: #e5484d;
-    --hero-header-shadow: rgb(0 0 0 / 30%);
-}
-
-@mixin hero-tracker-vars-light {
-    --hero-held-accent: #{$hero-held-accent-light};
-    --hero-held-text: #{$hero-held-text-light};
-    --hero-next-turn: #{$hero-next-turn-light};
-    --hero-lr-accent: #{$hero-lr-accent-light};
-    --hero-tracker-surface: var(--color-light-1, #f0f0e0);
-    --hero-header-surface: #d9d3c2;
-    --hero-header-text: var(--color-text-emphatic, #1b1d24);
-    --hero-muted-text: #4a4f58;
-    --hero-on-accent: #f3f3f3;
-    --hero-defeated-accent: #a72a35;
-    --hero-header-shadow: rgb(0 0 0 / 15%);
-}
-
-// Theme variable layer. Dark is the default; light overrides follow core's own
-// precedence model (global body class, or a per-app .themed override).
-.combat-tracker {
-    @include hero-tracker-vars-dark;
-}
-
-body.theme-light .combat-tracker,
-.themed.theme-light .combat-tracker {
-    @include hero-tracker-vars-light;
-}
-
-// The sidebar/popout follows the INTERFACE theme (.themed.theme-{x} on the tab
-// element), while body.theme-light tracks the APPLICATIONS theme. With
-// interface=dark + applications=light, the body.theme-light block above matched
-// even though core paints the element dark — re-assert the element's own theme
-// at higher specificity so mixed setups render coherently.
-.themed.theme-dark .combat-tracker {
-    @include hero-tracker-vars-dark;
-}
+$disposition-opacity-default: 0.05;
+$disposition-opacity-hover: 0.2;
+$disposition-opacity-active: 0.6;
 
 /* Current turn: core's --entry-active-bg is a white wash that disappears on
    light backgrounds — give the acting row its own accent edge, tint, and bold
@@ -73,25 +10,25 @@ body.theme-light .combat-tracker,
    (background-color, equal specificity, later in source) still wins the fill
    while the edge and bold name persist. */
 .combat-tracker li.combatant.current-segment-member.active {
-    background: color-mix(in srgb, var(--color-border-highlight, #ff6400) 14%, transparent);
-    box-shadow: inset 4px 0 0 var(--color-border-highlight, #ff6400);
+    background: color-mix(in srgb, var(--hero-accent-hot) 14%, transparent);
+    box-shadow: inset 4px 0 0 var(--hero-accent-hot);
 }
 
 .combat-tracker li.combatant.current-segment-member.active .name {
     font-weight: bold;
 }
 
-@each $disposition-name, $disposition-color in $combat-tracker-hero-dispositions {
+@each $disposition-name, $disposition-color in tokens.$hero-dispositions {
     .combat-tracker li.combatant.combat-tracker-hero-disposition-#{$disposition-name} {
-        background-color: rgba($disposition-color, $combat-tracker-hero-disposition-opacity-default);
+        background-color: rgba($disposition-color, $disposition-opacity-default);
     }
 
     .combat-tracker li.combatant.combat-tracker-hero-disposition-#{$disposition-name}:hover {
-        background-color: rgba($disposition-color, $combat-tracker-hero-disposition-opacity-hover);
+        background-color: rgba($disposition-color, $disposition-opacity-hover);
     }
 
     .combat-tracker li.combatant.combat-tracker-hero-disposition-#{$disposition-name}.active {
-        background-color: rgba($disposition-color, $combat-tracker-hero-disposition-opacity-active);
+        background-color: rgba($disposition-color, $disposition-opacity-active);
     }
 }
 
@@ -128,8 +65,8 @@ ol.combat-tracker.plain {
     margin-bottom: 2px !important;
     align-items: center !important;
     overflow: hidden !important;
-    background: var(--hero-header-surface);
-    box-shadow: 0 2px 4px var(--hero-header-shadow);
+    background: var(--hero-surface-header);
+    box-shadow: 0 2px 4px var(--hero-shadow);
 }
 
 /* Collapse carets live in CSS so expansion toggles never rewrite header text */
@@ -146,10 +83,10 @@ ol.combat-tracker.plain {
 
 /* 2. ACTIVE CURRENT SEGMENT UNIQUE THEMING */
 .combat-tracker .active-segment-header-slot {
-    background: var(--color-shadow-primary) !important;
-    color: var(--hero-on-accent) !important;
-    border: 1px solid var(--color-border-highlight) !important;
-    border-left: 5px solid var(--color-border-highlight) !important;
+    background: var(--hero-accent-hot) !important;
+    color: var(--hero-text-on-accent) !important;
+    border: 1px solid var(--hero-accent-hot) !important;
+    border-left: 5px solid var(--hero-accent-hot) !important;
     font-size: 1.1em;
 
     /* The current segment cannot be collapsed */
@@ -160,7 +97,7 @@ ol.combat-tracker.plain {
    even in light mode. li.combatant outranks the shared header-text rule in
    section 3, which carries equal class specificity and comes later. */
 .combat-tracker li.combatant.active-segment-header-slot .name {
-    color: var(--hero-on-accent) !important;
+    color: var(--hero-text-on-accent) !important;
 }
 
 /* 2b. COLLAPSIBLE SEGMENT HEADERS */
@@ -169,12 +106,12 @@ ol.combat-tracker.plain {
 }
 
 .combat-tracker .collapsible-segment-header-slot:hover {
-    border-color: var(--color-border-highlight) !important;
+    border-color: var(--hero-accent-hot) !important;
 }
 
 /* li.combatant outranks the shared header-text rule in section 3 */
 .combat-tracker li.combatant.past-segment-header-slot .name {
-    color: var(--hero-muted-text) !important;
+    color: var(--color-text-subtle) !important;
 }
 
 /* 2c. NON-CURRENT SEGMENT MEMBER ROWS */
@@ -210,16 +147,16 @@ ol.combat-tracker.plain {
 
 /* 2d. NEXT TURN (FUTURE ROUND) SEGMENTS RENDER ORANGE */
 .combat-tracker .combatant.next-turn-header-slot {
-    border-left: 5px solid var(--hero-next-turn) !important;
+    border-left: 5px solid var(--hero-accent-next) !important;
 }
 
 .combat-tracker li.combatant.next-turn-header-slot .name {
-    color: var(--hero-next-turn) !important;
+    color: var(--hero-accent-next) !important;
 }
 
 .combat-tracker .combatant.next-turn-preview {
-    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--hero-next-turn) 80%, transparent);
-    background: color-mix(in srgb, var(--hero-next-turn) 6%, transparent);
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--hero-accent-next) 80%, transparent);
+    background: color-mix(in srgb, var(--hero-accent-next) 6%, transparent);
 }
 
 /* 2e. SAME-ACTOR GROUPS: ×N SUMMARY HEADER WITH INDENTED MEMBERS WHEN EXPLODED */
@@ -234,7 +171,7 @@ ol.combat-tracker.plain {
 
 .combat-tracker li.combatant.hero-group-exploded {
     margin-left: 14px;
-    border-left: 2px solid var(--color-border-highlight, #ff6400);
+    border-left: 2px solid var(--hero-accent-hot);
 }
 
 /* Member rows share the group's priority, shown once on the header */
@@ -277,12 +214,12 @@ ol.combat-tracker.plain {
     z-index: 6;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
-    border-left: 5px solid var(--hero-held-accent) !important;
-    background: var(--hero-tracker-surface) !important;
+    border-left: 5px solid var(--hero-accent-held) !important;
+    background: var(--hero-surface-raised) !important;
 }
 
 .combat-tracker li.combatant.hero-held-panel-header .name {
-    color: var(--hero-held-text) !important;
+    color: var(--hero-accent-held) !important;
 }
 
 /* Member rows live in a pinned container built by the render hook; it caps out
@@ -297,8 +234,8 @@ ol.combat-tracker.plain {
     margin: 0;
     padding: 0;
     list-style: none;
-    background: var(--hero-tracker-surface);
-    box-shadow: 0 3px 6px var(--hero-header-shadow);
+    background: var(--hero-surface-raised);
+    box-shadow: 0 3px 6px var(--hero-shadow);
 }
 
 .combat-tracker .hero-held-scroll-wrapper.hero-held-collapsed {
@@ -311,8 +248,8 @@ ol.combat-tracker.plain {
 }
 
 .combat-tracker li.combatant.hero-held-row {
-    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--hero-held-accent) 80%, transparent);
-    background: color-mix(in srgb, var(--hero-held-accent) 6%, transparent);
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--hero-accent-held) 80%, transparent);
+    background: color-mix(in srgb, var(--hero-accent-held) 6%, transparent);
 }
 
 .combat-tracker li.combatant.hero-held-row .name {
@@ -363,17 +300,17 @@ ol.combat-tracker.plain {
 
 /* 2h2. LIGHTNING REFLEXES: ELEVATED ROWS AND THE ACT-EARLY TOGGLE */
 .combat-tracker li.combatant.hero-lr-row {
-    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--hero-lr-accent) 80%, transparent);
-    background: color-mix(in srgb, var(--hero-lr-accent) 6%, transparent);
+    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--hero-accent) 80%, transparent);
+    background: color-mix(in srgb, var(--hero-accent) 6%, transparent);
 }
 
 .combat-tracker li.combatant .hero-lr-elevate {
-    color: color-mix(in srgb, var(--hero-lr-accent) 55%, transparent);
+    color: color-mix(in srgb, var(--hero-accent) 55%, transparent);
 }
 
 .combat-tracker li.combatant .hero-lr-elevate:hover,
 .combat-tracker li.combatant .hero-lr-elevate.hero-lr-elevated {
-    color: var(--hero-lr-accent);
+    color: var(--hero-accent);
 }
 
 /* Completed LR stop: inert record of where the scoped action happened */
@@ -437,7 +374,7 @@ ol.combat-tracker.plain {
 }
 
 .combat-tracker li.combatant.hero-delayed-row .hero-delayed-controls .combatant-control:hover {
-    color: var(--hero-held-text);
+    color: var(--hero-accent-held);
 }
 
 /* 2k2. UNKNOWN PLACEHOLDER: player-view band standing in for segments whose
@@ -480,12 +417,12 @@ ol.combat-tracker.plain {
 /* 2l. DEFEATED: core's strike-through drowns in the hero row treatments (#4555) —
    add a red edge, tint, and portrait fade that survive past/future filters */
 .combat-tracker li.combatant.defeated {
-    background: color-mix(in srgb, var(--hero-defeated-accent) 10%, transparent);
-    box-shadow: inset 3px 0 0 var(--hero-defeated-accent);
+    background: color-mix(in srgb, var(--hero-error) 10%, transparent);
+    box-shadow: inset 3px 0 0 var(--hero-error);
 }
 
 .combat-tracker li.combatant.defeated .name {
-    color: var(--hero-defeated-accent);
+    color: var(--hero-error);
     text-decoration: line-through;
 }
 
@@ -624,7 +561,7 @@ ol.combat-tracker.plain {
 
 /* Injected "Use Held Action" controls */
 .combat-tracker li.combatant .hero-use-held {
-    color: var(--hero-held-text);
+    color: var(--hero-accent-held);
 }
 
 .combat-tracker li.combatant .hero-use-held-compact,
@@ -638,7 +575,7 @@ ol.combat-tracker.plain {
     font-size: var(--font-size-10);
     font-weight: bold;
     line-height: 1.1;
-    color: var(--hero-held-text);
+    color: var(--hero-accent-held);
 }
 
 .combat-tracker li.combatant .hero-use-held-compact {
@@ -646,11 +583,11 @@ ol.combat-tracker.plain {
 }
 
 .combat-tracker li.combatant .hero-use-held-compact:hover {
-    text-shadow: 0 0 6px var(--hero-held-text);
+    text-shadow: 0 0 6px var(--hero-accent-held);
 }
 
 .combat-tracker li.combatant .hero-held-condition {
-    color: var(--hero-muted-text);
+    color: var(--color-text-subtle);
 }
 
 /* 3. INTERNAL DOM COMPONENT ALIGNMENTS & VISIBILITY FOR HEADERS */
@@ -667,7 +604,7 @@ ol.combat-tracker.plain {
 
 .combat-tracker .combatant.hero-timeline-header-row .name {
     font-size: var(--font-size-11) !important;
-    color: var(--hero-header-text) !important;
+    color: var(--hero-text-header) !important;
     font-weight: bold !important;
     text-transform: uppercase;
     letter-spacing: 0.75px;

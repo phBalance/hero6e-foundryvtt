@@ -1,28 +1,22 @@
 @use "../abstracts" as *;
-@use "../utils/colors";
 
 html,
 .herosystem6e {
     interpolate-size: allow-keywords;
 }
 
-body {
-    --herosystem-color-announce-failure: var(--color-level-error);
-    --herosystem-color-announce-success: #006400;
-}
-
 .announce-failure {
-    color: var(--herosystem-color-announce-failure);
+    color: var(--hero-error);
     font-weight: bold;
 }
 
 .announce-success {
-    color: var(--herosystem-color-announce-success);
+    color: var(--hero-success);
     font-weight: bold;
 }
 
 .hero-warning {
-    color: colors.$c-warning;
+    color: var(--hero-warning);
 }
 
 @include hero-scoped {
