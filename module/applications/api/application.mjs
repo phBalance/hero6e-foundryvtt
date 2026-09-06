@@ -1,11 +1,11 @@
+import { HeroAppMixin } from "./hero-app-mixin.mjs";
 // Inspired from Draw Steel https://github.com/MetaMorphic-Digital/draw-steel/blob/develop/src/module/applications/api/application.mjs
 
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
-export class HeroApplication extends HandlebarsApplicationMixin(ApplicationV2) {
+export class HeroApplication extends HeroAppMixin(HandlebarsApplicationMixin(ApplicationV2)) {
     /** @inheritdoc */
     static DEFAULT_OPTIONS = {
-        classes: ["hero6efoundryvttv2"],
         form: {
             handler: HeroApplication.#submitHandler,
             closeOnSubmit: true,

@@ -2,6 +2,7 @@ import { xmlToJsonNode } from "../utility/xml-to-json.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
 import { HeroSystem6eCompendium } from "./compendium.mjs";
+import { HeroAppMixin } from "../applications/api/hero-app-mixin.mjs";
 
 const { DialogV2 } = foundry.applications.api;
 const { CompendiumDirectory } = foundry.applications.sidebar.tabs;
@@ -13,7 +14,7 @@ const { FormDataExtended } = foundry.applications.ux;
  * Custom Compendium Directory sidebar tab for Hero System 6e.
  * Extends core CompendiumDirectory to support direct Hero Designer Prefab (.hdp) batch uploads.
  */
-export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
+export class HeroSystem6eCompendiumDirectory extends HeroAppMixin(CompendiumDirectory) {
     constructor(...args) {
         super(...args);
     }

@@ -1,6 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { CreateHeroCompendiums } from "../heroCompendiums.mjs";
 import { HdcResetMenu } from "./hdc-reset-menu.mjs";
+import { HeroAppMixin } from "../applications/api/hero-app-mixin.mjs";
 //import { CampaignRulesSettingsConfig } from "./campaign-rules-settings.mjs";
 
 export let overrideCanAct = false;
@@ -8,10 +9,9 @@ export let overrideCanAct = false;
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
 // Shared shell for AppV2 settings submenus: a form window that persists every change and stays open.
-class HeroSettingsMenu extends HandlebarsApplicationMixin(ApplicationV2) {
+class HeroSettingsMenu extends HeroAppMixin(HandlebarsApplicationMixin(ApplicationV2)) {
     static DEFAULT_OPTIONS = {
         tag: "form",
-        classes: ["herosystem6e"],
         position: {
             height: "auto",
         },

@@ -6,6 +6,7 @@ import {
     tokenEducatedGuess,
     whisperUserTargetsForActor,
 } from "../../utility/util.mjs";
+import { HeroAppMixin } from "../api/hero-app-mixin.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -17,7 +18,7 @@ const { Actor } = foundry.documents;
 // REF: https://foundryvtt.wiki/en/development/guides/converting-to-appv2
 // REF: https://foundryvtt.wiki/en/development/guides/applicationV2-conversion-guide
 
-export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorSheetV2) {
+export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMixin(ActorSheetV2)) {
     // Dynamic PARTS based on system.id
     static {
         Hooks.once("init", async function () {
@@ -31,7 +32,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         //     //handler: TemplateApplication.#onSubmit,
         //     closeOnSubmit: false, // do not close when submitted
         // },
-        classes: ["herosystem6e", "actor-sheet-v2"],
+        classes: ["actor-sheet-v2"],
         position: {
             width: 800,
             height: 717,

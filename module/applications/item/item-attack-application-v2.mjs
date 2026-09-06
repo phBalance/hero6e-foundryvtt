@@ -21,6 +21,7 @@ import {
     getGridSizeInMeters,
     getSystemDisplayUnits,
 } from "../../utility/units.mjs";
+import { HeroAppMixin } from "../api/hero-app-mixin.mjs";
 
 const { FormDataExtended } = foundry.applications.ux;
 
@@ -37,7 +38,7 @@ const heroAoeTypeToFoundryAoeTypeConversions = Object.freeze({
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(ApplicationV2) {
+export class ItemAttackFormApplicationV2 extends HeroAppMixin(HandlebarsApplicationMixin(ApplicationV2)) {
     // Dynamic PARTS based on system.id
     static {
         Hooks.once("init", async function () {
@@ -110,7 +111,7 @@ export class ItemAttackFormApplicationV2 extends HandlebarsApplicationMixin(Appl
 
     static DEFAULT_OPTIONS = {
         tag: "form",
-        classes: ["herosystem6e", "item-attack-application-v2"],
+        classes: ["item-attack-application-v2"],
         id: "item-attack-form-application-v2",
         position: {
             width: "400",

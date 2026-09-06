@@ -3,6 +3,7 @@ import { HeroSystem6eCombatSingle } from "./combat-single.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 import { overrideCanAct } from "./settings/settings-helpers.mjs";
 import { activeSingleTrackerCombatFor, isQuenchTestRunning } from "./utility/util.mjs";
+import { HeroAppMixin } from "./applications/api/hero-app-mixin.mjs";
 
 const { CombatTracker } = foundry.applications.sidebar.tabs;
 
@@ -10,7 +11,7 @@ const { CombatTracker } = foundry.applications.sidebar.tabs;
 // monotonic across Turns; combat begins at Turn 1, Segment 12)
 const { absoluteSegment, segmentOf, roundOf, phaseLabel } = HeroSystem6eCombatantSingle;
 
-export class HeroSystem6eCombatTrackerSingle extends CombatTracker {
+export class HeroSystem6eCombatTrackerSingle extends HeroAppMixin(CombatTracker) {
     /** Combatant id this app instance last auto-scrolled to (sidebar and popout scroll independently). */
     _lastAutoScrolledId;
 

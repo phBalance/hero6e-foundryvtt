@@ -1,4 +1,5 @@
-export class HeroSystem6eCompendium extends foundry.applications.sidebar.apps.Compendium {
+import { HeroAppMixin } from "../applications/api/hero-app-mixin.mjs";
+export class HeroSystem6eCompendium extends HeroAppMixin(foundry.applications.sidebar.apps.Compendium) {
     static HERO_COMPENDIUM_INDEX_FIELDS = ["system.PARENTID", "system.XMLID", "system.ID", "system.is5e"];
     static HERO_CONTAINER_XMLIDS = ["LIST", "COMPOUNDPOWER", "MULTIPOWER", "VPP"];
     static HERO_CONTAINER_STACKABLE_XMLIDS = ["COMPOUNDPOWER", "MULTIPOWER", "VPP"];
@@ -10,19 +11,15 @@ export class HeroSystem6eCompendium extends foundry.applications.sidebar.apps.Co
         this.#dragDrop = this.#createDragDropHandlers();
     }
 
-    /** @override (sorta)*/
-    static get DEFAULT_OPTIONS() {
-        const superDefaultOptions = super.DEFAULT_OPTIONS;
-        return foundry.utils.mergeObject(superDefaultOptions, {
-            classes: [...superDefaultOptions.classes, "hero-system-compendium"],
-            dragDrop: [
-                {
-                    dragSelector: ".directory-item, .folder",
-                    dropSelector: ".directory-list, .folder, .directory, section.window-content",
-                },
-            ],
-        });
-    }
+    static DEFAULT_OPTIONS = {
+        classes: ["hero-system-compendium"],
+        dragDrop: [
+            {
+                dragSelector: ".directory-item, .folder",
+                dropSelector: ".directory-list, .folder, .directory, section.window-content",
+            },
+        ],
+    };
 
     #createDragDropHandlers() {
         return this.options.dragDrop.map((dragDropHandler) => {

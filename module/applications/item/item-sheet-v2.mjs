@@ -9,13 +9,14 @@ import {
 import { adjustmentSourcesPermissive, adjustmentSourcesStrict } from "../../utility/adjustment.mjs";
 import { HeroAdderModel, HeroModifierModel } from "../../item/HeroSystem6eTypeDataModels.mjs";
 import { ItemModifierApplicationV2 } from "./item-modifier-application.mjs";
+import { HeroAppMixin } from "../api/hero-app-mixin.mjs";
 
 // REF: https://foundryvtt.wiki/en/development/guides/converting-to-appv2
 // REF: https://foundryvtt.wiki/en/development/guides/applicationV2-conversion-guide
 
 const ADJUSTMENT_XMLIDS = ["ABSORPTION", "AID", "DISPEL", "DRAIN", "HEALING", "SUCCOR", "SUPPRESS", "TRANSFER"];
 
-export class HeroSystemItemSheetV2 extends HandlebarsApplicationMixin(ItemSheetV2) {
+export class HeroSystemItemSheetV2 extends HeroAppMixin(HandlebarsApplicationMixin(ItemSheetV2)) {
     // Dynamic PARTS based on system.id
     static {
         Hooks.once("init", function () {
@@ -24,7 +25,7 @@ export class HeroSystemItemSheetV2 extends HandlebarsApplicationMixin(ItemSheetV
     }
 
     static DEFAULT_OPTIONS = {
-        classes: ["herosystem6e", "item-sheet-v2"],
+        classes: ["item-sheet-v2"],
         position: {
             width: 520,
             height: 660,
