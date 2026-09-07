@@ -1181,7 +1181,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     // Items dropped into these tabs work as expected, but if dropped to a tab not listed here
     // they will be dropped onto the tab that item.type had.  So if dropping a POWER from the
     // compendium to the ATTACK tab (which isn't listed here), the item will be dropped into the POWERS tab.
-    static #TAB_ITEM_TYPES = {
+    static _TAB_ITEM_TYPES = {
         martial: "martialart",
         skills: "skill",
         maneuvers: "maneuver",
@@ -1190,7 +1190,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         characteristics: "characteristic", // Future?  Does not break anything.
         perks: "perk",
         talents: "talent",
-        disadvantages: "disadvantage", // 6e shows complications, but internally it is always disadvantage
+        disadvantages: "disadvantage",
+        complications: "disadvantage", // 6e shows complications, but internally it is always disadvantage (used in quench tests)
     };
 
     /**
@@ -1200,7 +1201,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     _resolveDropTargetType(event) {
         const target = event?.target ?? event?.currentTarget;
         const droppedOnTab = target?.closest?.("[data-tab]")?.dataset?.tab;
-        return HeroSystemActorSheetV2.#TAB_ITEM_TYPES[droppedOnTab ?? this.tabGroups?.primary] ?? null;
+        return HeroSystemActorSheetV2._TAB_ITEM_TYPES[droppedOnTab ?? this.tabGroups?.primary] ?? null;
     }
 
     /**
@@ -1234,6 +1235,14 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 }
 
                 for (const childItem of item.childItems) {
+                    // Sanity check (For example WELL_CONNECTED)
+                    if (!item.folder.contents.find((item) => item.uuid === childItem.uuid)) {
+                        console.error(
+                            `${childItem.name} has incorrect PARENTID reference to ${item.name}. ` +
+                                `Typically caused by an improper ID and/or PARENTID numbers in the XML definition in config.mjs.`,
+                        );
+                        continue;
+                    }
                     await recurseAddItemFromUuid(childItem.uuid);
                 }
             }
@@ -1245,15 +1254,22 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         // Make sure we don't alter sources
         normalizedItems = foundry.utils.deepClone(normalizedItems);
 
-        // Full charges
-        for (const item of normalizedItems) {
-            const updateData = foundry.utils.deepClone(HeroSystem6eItem._prepareOriginalResetData(item));
-            foundry.utils.mergeObject(item, updateData, {
+        // Full charges & unfreeze
+        for (let i = 0; i < normalizedItems.length; i++) {
+            const item = normalizedItems[i];
+            // Ensure we start with a fully unfrozen plain object representation
+            const rawData = JSON.parse(JSON.stringify(item.toObject ? item.toObject() : item));
+            const updateData = foundry.utils.deepClone(HeroSystem6eItem._prepareOriginalResetData(rawData));
+
+            // Merge into a fresh plain object instead of modifying a proxy/sealed source inplace
+            const merged = foundry.utils.mergeObject(rawData, updateData, {
                 insertKeys: true,
                 insertValues: true,
                 overwrite: true,
-                inplace: true,
+                inplace: false, // Don't mutate locked/sealed structures in place
             });
+
+            normalizedItems[i] = JSON.parse(JSON.stringify(merged));
         }
 
         // Create temporary actor and add all itemsToDrop to initialize
@@ -1322,8 +1338,6 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             item.type = targetType ?? item.type;
         }
 
-        // We will re-add the items to actor as we apparently can't change the in-memory item.type
-
         return normalizedItems;
     }
 
@@ -1336,7 +1350,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         const droppedIds = new Set(normalizedItems.map((i) => i.system?.ID));
         const rootItems = normalizedItems.filter((i) => !i.system?.PARENTID || !droppedIds.has(i.system.PARENTID));
 
-        const itemsToCreate = [];
+        let itemsToCreate = [];
         let stackedInfo = null;
         let createdRootItem = null;
 
@@ -1368,6 +1382,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         }
 
         if (itemsToCreate.length > 0) {
+            // Really make sure no properties are frozen
+            itemsToCreate = JSON.parse(JSON.stringify(itemsToCreate));
             const createdDocs = await this.actor.createEmbeddedDocuments("Item", itemsToCreate);
             if (!createdRootItem && createdDocs.length > 0) {
                 createdRootItem = createdDocs[0];
@@ -1375,7 +1391,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         }
 
         // Handle chat messaging and cleanup
-        if (source && createdRootItem) {
+        if (source && createdRootItem && !this.actor?.name.startsWith("_Quench")) {
             const actor = this.actor;
             const token = actor.token;
             const dropName = token?.name || actor.getActiveTokens()?.[0]?.name || actor.name;

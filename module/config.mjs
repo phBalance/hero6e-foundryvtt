@@ -923,7 +923,10 @@ function pdEdCostPerLevel(itemOrActor) {
 function addPower(powerDescription6e, powerOverrideFor5e) {
     if (powerDescription6e) {
         if (powerDescription6e.xml) {
-            powerDescription6e.xml = powerDescription6e.xml.replace(/\n/g, "").trim();
+            powerDescription6e.xml = powerDescription6e.xml
+                .replace(/\n/g, "")
+                .replace(/\s*PARENTID=["']\d+["']/g, "")
+                .trim();
             const parser = new DOMParser();
             const xml = parser.parseFromString(powerDescription6e.xml.trim(), "text/xml");
 
@@ -4308,35 +4311,43 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
     );
     addPower(undefined, {
         key: "NEGATIVECOMBATSKILLLEVELS",
-        type: ["skill"],
+        type: ["attack"],
         behaviors: [],
         costPerLevel: fixedValueFunction(2),
         duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
-        costEnd: false,
+        costEnd: true,
+        usesStrength: false,
+        baseEffectDicePartsBundle: defaultPowerDicePartsBundle,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<POWER XMLID="NEGATIVECOMBATSKILLLEVELS" ID="1763830401211" BASECOST="0.0" LEVELS="1" ALIAS="Negative Combat Skill Levels" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="DCV" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
     });
     addPower(undefined, {
         key: "NEGATIVEPENALTYSKILLLEVELS",
-        type: ["skill"],
-        behaviors: [],
+        type: ["attack"], // adjustment?
+        behaviors: ["to-hit", "dice"],
         costPerLevel: fixedValueFunction(2),
         duration: HERO.DURATION_TYPES.CONSTANT,
-        target: "self only",
-        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
-        costEnd: false,
+        rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.NO_RANGE),
+        costEnd: true,
+        usesStrength: false,
+        baseEffectDicePartsBundle: defaultPowerDicePartsBundle,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<POWER XMLID="NEGATIVEPENALTYSKILLLEVELS" ID="1763830404491" BASECOST="0.0" LEVELS="1" ALIAS="Negative Penalty Skill Levels" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="[a single attack]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Hit Location modifiers" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
     });
     addPower(undefined, {
         key: "NEGATIVESKILLLEVELS",
-        type: ["skill"],
+        type: ["attack"],
         behaviors: [],
         costPerLevel: fixedValueFunction(2),
         duration: HERO.DURATION_TYPES.CONSTANT,
         target: "self only",
         rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
-        costEnd: false,
+        costEnd: true,
+        usesStrength: false,
+        baseEffectDicePartsBundle: defaultPowerDicePartsBundle,
+        doesKillingDamage: fixedValueFunction(false),
         xml: `<POWER XMLID="NEGATIVESKILLLEVELS" ID="1763830407179" BASECOST="0.0" LEVELS="1" ALIAS="Negative Skill Levels" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="SINGLE" OPTIONID="SINGLE" OPTION_ALIAS="[any one Skill]" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"></POWER>`,
     });
 
@@ -5458,7 +5469,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1), // TODO: Not correct .. needs function
-            xml: `<PERK XMLID="CONTACT" ID="1709161420959" BASECOST="0.0" LEVELS="1" ALIAS="Contact" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1710994081842" NAME=""></PERK>`,
+            xml: `<PERK XMLID="CONTACT" ID="1709161420959" BASECOST="0.0" LEVELS="1" ALIAS="Contact" POSITION="4" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></PERK>`,
         },
         {},
     );
@@ -5514,7 +5525,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             rangeForItem: fixedValueFunction(HERO.RANGE_TYPES.SELF),
             costEnd: false,
             costPerLevel: fixedValueFunction(1), // TODO: Not correct ... needs function
-            xml: `<PERK XMLID="FAVOR" ID="1709161428760" BASECOST="1.0" LEVELS="0" ALIAS="Favor" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1710994081842" NAME=""></PERK>`,
+            xml: `<PERK XMLID="FAVOR" ID="1709161428760" BASECOST="1.0" LEVELS="0" ALIAS="Favor" POSITION="5" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""></PERK>`,
         },
         {},
     );

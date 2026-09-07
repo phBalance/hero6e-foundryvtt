@@ -1,5 +1,6 @@
 import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 import { HeroSystem6eCompendiumDirectory } from "../compendium/compendiumDirectory.mjs";
+import { HeroSystemActorSheetV2 } from "../applications/actor/actor-sheet-v2.mjs";
 
 export function registerDragAndDropTests(quench) {
     quench.registerBatch(`${game.system.id}.testing.drop-tests`, (context) => {
@@ -73,31 +74,38 @@ export function registerDragAndDropTests(quench) {
 
         describe("HDP Upload & Stacking", function () {
             setQuenchTimeout(this);
-            let quenchActor;
+            let quenchActor6e;
+            let quenchActor5e;
             let testCompendium;
-            let actorSheet;
+            let actorSheet6e;
+            let actorSheet5e;
 
             before(async () => {
                 testCompendium = await HeroSystem6eCompendiumDirectory.uploadFromXml(hdpContents);
-                quenchActor = await createQuenchActor({ quench: this, is5e: false, actorType: "pc" });
+                quenchActor6e = await createQuenchActor({ quench: this, is5e: false, actorType: "pc" });
+                actorSheet6e = quenchActor6e.sheet;
+                await actorSheet6e.render(true);
 
-                actorSheet = quenchActor.sheet;
-                await actorSheet.render(true);
+                quenchActor5e = await createQuenchActor({ quench: this, is5e: true, actorType: "pc" });
+                actorSheet5e = quenchActor5e.sheet;
             });
 
             beforeEach(async () => {
-                if (quenchActor?.items?.size > 0) {
-                    const ids = quenchActor.items.map((i) => i.id);
-                    await quenchActor.deleteEmbeddedDocuments("Item", ids);
+                if (quenchActor6e?.items?.size > 0) {
+                    const ids = quenchActor6e.items.map((i) => i.id);
+                    await quenchActor6e.deleteEmbeddedDocuments("Item", ids);
                 }
             });
 
             after(async () => {
-                if (actorSheet?.rendered) {
-                    await actorSheet.close();
+                if (actorSheet6e?.rendered) {
+                    await actorSheet6e.close();
                 }
-                if (quenchActor) {
-                    await deleteQuenchActor({ quench: this, actor: quenchActor });
+                if (quenchActor6e) {
+                    await deleteQuenchActor({ quench: this, actor: quenchActor6e });
+                }
+                if (quenchActor5e) {
+                    await deleteQuenchActor({ quench: this, actor: quenchActor5e });
                 }
                 if (testCompendium) {
                     await testCompendium.deleteCompendium();
@@ -129,16 +137,16 @@ export function registerDragAndDropTests(quench) {
                         },
                     },
                     target:
-                        actorSheet.element?.querySelector(".tab[data-tab='powers'], [data-tab='powers']") ||
-                        actorSheet.element,
+                        actorSheet6e.element?.querySelector(".tab[data-tab='powers'], [data-tab='powers']") ||
+                        actorSheet6e.element,
                 };
 
-                await actorSheet._onDrop(fakeEvent);
-                let blastMItems = quenchActor.items.filter((item) => item.name === blastMDoc.name);
+                await actorSheet6e._onDrop(fakeEvent);
+                let blastMItems = quenchActor6e.items.filter((item) => item.name === blastMDoc.name);
                 expect(blastMItems.length).to.equal(1);
 
-                await actorSheet._onDrop(fakeEvent);
-                blastMItems = quenchActor.items.filter((item) => item.name === blastMDoc.name);
+                await actorSheet6e._onDrop(fakeEvent);
+                blastMItems = quenchActor6e.items.filter((item) => item.name === blastMDoc.name);
                 expect(blastMItems.length).to.equal(2);
             });
 
@@ -161,19 +169,19 @@ export function registerDragAndDropTests(quench) {
                         },
                     },
                     target:
-                        actorSheet.element?.querySelector(".tab[data-tab='equipment'], [data-tab='equipment']") ||
-                        actorSheet.element,
+                        actorSheet6e.element?.querySelector(".tab[data-tab='equipment'], [data-tab='equipment']") ||
+                        actorSheet6e.element,
                 };
 
                 // Drop first instance into equipment tab
-                await actorSheet._onDrop(fakeEvent);
-                let equipmentItems = quenchActor.items.filter((item) => item.name === blastMDoc.name);
+                await actorSheet6e._onDrop(fakeEvent);
+                let equipmentItems = quenchActor6e.items.filter((item) => item.name === blastMDoc.name);
                 expect(equipmentItems.length).to.equal(1);
                 expect(equipmentItems[0].system.QUANTITY).to.equal(1);
 
                 // Drop second instance into equipment tab (should stack into the existing equipment entry)
-                await actorSheet._onDrop(fakeEvent);
-                equipmentItems = quenchActor.items.filter((item) => item.name === blastMDoc.name);
+                await actorSheet6e._onDrop(fakeEvent);
+                equipmentItems = quenchActor6e.items.filter((item) => item.name === blastMDoc.name);
                 expect(equipmentItems.length).to.equal(1);
                 expect(equipmentItems[0].system.QUANTITY).to.equal(2);
             });
@@ -197,8 +205,8 @@ export function registerDragAndDropTests(quench) {
                         },
                     },
                     target:
-                        actorSheet.element?.querySelector(".tab[data-tab='powers'], [data-tab='powers']") ||
-                        actorSheet.element,
+                        actorSheet6e.element?.querySelector(".tab[data-tab='powers'], [data-tab='powers']") ||
+                        actorSheet6e.element,
                 };
 
                 const equipmentEvent = {
@@ -215,24 +223,24 @@ export function registerDragAndDropTests(quench) {
                         },
                     },
                     target:
-                        actorSheet.element?.querySelector(".tab[data-tab='equipment'], [data-tab='equipment']") ||
-                        actorSheet.element,
+                        actorSheet6e.element?.querySelector(".tab[data-tab='equipment'], [data-tab='equipment']") ||
+                        actorSheet6e.element,
                 };
 
                 // Test dropping List1 twice to Powers (expect 2 separate list items)
-                await actorSheet._onDrop(powersEvent);
-                await actorSheet._onDrop(powersEvent);
-                let powerListItems = quenchActor.items.filter((item) => item.name === listDoc.name);
+                await actorSheet6e._onDrop(powersEvent);
+                await actorSheet6e._onDrop(powersEvent);
+                let powerListItems = quenchActor6e.items.filter((item) => item.name === listDoc.name);
                 expect(powerListItems.length).to.equal(2);
 
                 // Clear out items for equipment test
-                const currentIds = quenchActor.items.map((i) => i.id);
-                await quenchActor.deleteEmbeddedDocuments("Item", currentIds);
+                const currentIds = quenchActor6e.items.map((i) => i.id);
+                await quenchActor6e.deleteEmbeddedDocuments("Item", currentIds);
 
                 // Test dropping List1 twice to Equipment (LIST doesn't support quantity, creates 2 items)
-                await actorSheet._onDrop(equipmentEvent);
-                await actorSheet._onDrop(equipmentEvent);
-                let equipmentListItems = quenchActor.items.filter((item) => item.name === listDoc.name);
+                await actorSheet6e._onDrop(equipmentEvent);
+                await actorSheet6e._onDrop(equipmentEvent);
+                let equipmentListItems = quenchActor6e.items.filter((item) => item.name === listDoc.name);
                 expect(equipmentListItems.length).to.equal(2);
             });
 
@@ -255,8 +263,8 @@ export function registerDragAndDropTests(quench) {
                         },
                     },
                     target:
-                        actorSheet.element?.querySelector(".tab[data-tab='powers'], [data-tab='powers']") ||
-                        actorSheet.element,
+                        actorSheet6e.element?.querySelector(".tab[data-tab='powers'], [data-tab='powers']") ||
+                        actorSheet6e.element,
                 };
 
                 const equipmentEvent = {
@@ -273,24 +281,24 @@ export function registerDragAndDropTests(quench) {
                         },
                     },
                     target:
-                        actorSheet.element?.querySelector(".tab[data-tab='equipment'], [data-tab='equipment']") ||
-                        actorSheet.element,
+                        actorSheet6e.element?.querySelector(".tab[data-tab='equipment'], [data-tab='equipment']") ||
+                        actorSheet6e.element,
                 };
 
                 // Test dropping VPP1 twice to Powers
-                await actorSheet._onDrop(powersEvent);
-                await actorSheet._onDrop(powersEvent);
-                let powerVppItems = quenchActor.items.filter((item) => item.name === vppDoc.name);
+                await actorSheet6e._onDrop(powersEvent);
+                await actorSheet6e._onDrop(powersEvent);
+                let powerVppItems = quenchActor6e.items.filter((item) => item.name === vppDoc.name);
                 expect(powerVppItems.length).to.equal(2);
 
                 // Clear out items for equipment test
-                const currentIds = quenchActor.items.map((i) => i.id);
-                await quenchActor.deleteEmbeddedDocuments("Item", currentIds);
+                const currentIds = quenchActor6e.items.map((i) => i.id);
+                await quenchActor6e.deleteEmbeddedDocuments("Item", currentIds);
 
                 // Test dropping VPP1 twice to Equipment (expect 1 item with quantity 2)
-                await actorSheet._onDrop(equipmentEvent);
-                await actorSheet._onDrop(equipmentEvent);
-                let equipmentVppItems = quenchActor.items.filter((item) => item.name === vppDoc.name);
+                await actorSheet6e._onDrop(equipmentEvent);
+                await actorSheet6e._onDrop(equipmentEvent);
+                let equipmentVppItems = quenchActor6e.items.filter((item) => item.name === vppDoc.name);
                 expect(equipmentVppItems.length).to.equal(1);
                 expect(equipmentVppItems[0].system.QUANTITY).to.equal(2);
             });
@@ -314,8 +322,8 @@ export function registerDragAndDropTests(quench) {
                         },
                     },
                     target:
-                        actorSheet.element?.querySelector(".tab[data-tab='powers'], [data-tab='powers']") ||
-                        actorSheet.element,
+                        actorSheet6e.element?.querySelector(".tab[data-tab='powers'], [data-tab='powers']") ||
+                        actorSheet6e.element,
                 };
 
                 const equipmentEvent = {
@@ -332,29 +340,122 @@ export function registerDragAndDropTests(quench) {
                         },
                     },
                     target:
-                        actorSheet.element?.querySelector(".tab[data-tab='equipment'], [data-tab='equipment']") ||
-                        actorSheet.element,
+                        actorSheet6e.element?.querySelector(".tab[data-tab='equipment'], [data-tab='equipment']") ||
+                        actorSheet6e.element,
                 };
 
                 // Test dropping Multipower twice to Powers
-                await actorSheet._onDrop(powersEvent);
-                await actorSheet._onDrop(powersEvent);
-                let powerMpItems = quenchActor.items.filter((item) => item.system.XMLID === "MULTIPOWER");
+                await actorSheet6e._onDrop(powersEvent);
+                await actorSheet6e._onDrop(powersEvent);
+                let powerMpItems = quenchActor6e.items.filter((item) => item.system.XMLID === "MULTIPOWER");
                 expect(powerMpItems.length).to.equal(2);
 
                 // Clear out items for equipment test
-                const currentIds = quenchActor.items.map((i) => i.id);
-                await quenchActor.deleteEmbeddedDocuments("Item", currentIds);
+                const currentIds = quenchActor6e.items.map((i) => i.id);
+                await quenchActor6e.deleteEmbeddedDocuments("Item", currentIds);
 
                 // Test dropping Multipower twice to Equipment (currently fails due to stacking bug; expects 1 item with quantity 2)
-                await actorSheet._onDrop(equipmentEvent);
-                const itemCountAfterFirstMultiPower = quenchActor.items.size;
-                await actorSheet._onDrop(equipmentEvent);
-                let equipmentMpItems = quenchActor.items.filter((item) => item.system.XMLID === "MULTIPOWER");
+                await actorSheet6e._onDrop(equipmentEvent);
+                const itemCountAfterFirstMultiPower = quenchActor6e.items.size;
+                await actorSheet6e._onDrop(equipmentEvent);
+                let equipmentMpItems = quenchActor6e.items.filter((item) => item.system.XMLID === "MULTIPOWER");
                 expect(equipmentMpItems.length).to.equal(1);
                 expect(equipmentMpItems[0].system.QUANTITY).to.equal(2);
-                expect(quenchActor.items.size).to.equal(itemCountAfterFirstMultiPower);
+                expect(quenchActor6e.items.size).to.equal(itemCountAfterFirstMultiPower);
             });
+
+            // Test dropping all the standard 5e/6e compendium items onto an actor
+            for (const edition of [5, 6]) {
+                describe(`Add all ${edition}e compendium items`, function () {
+                    let compendium, actorSheet;
+                    const compendiumName = `world.heroitems-${edition}e`;
+
+                    before(async function () {
+                        compendium = game.packs.get(compendiumName);
+                        expect(compendium, `Unable to locate ${compendiumName}`).to.exist;
+
+                        actorSheet = edition === 5 ? actorSheet5e : actorSheet6e;
+                        await actorSheet.render(true);
+                    });
+
+                    beforeEach(async function () {
+                        const itemIds = actorSheet.actor.items.map((i) => i.id);
+                        if (itemIds.length > 0) {
+                            await actorSheet.actor.deleteEmbeddedDocuments("Item", itemIds);
+                        }
+                    });
+
+                    const targetPack = game.packs.get(compendiumName);
+                    // Only target root folders that have no parent folder, sorted alphabetically by name
+                    const rootFolders = (targetPack?.folders ?? [])
+                        .filter((folder) => !folder.folder)
+                        .sort((a, b) => a.name.localeCompare(b.name));
+
+                    rootFolders.forEach((folder) => {
+                        it(`${edition}e ${folder.name}`, async function () {
+                            const itemType =
+                                HeroSystemActorSheetV2._TAB_ITEM_TYPES[folder.name.toLowerCase()] ||
+                                folder.name.toLowerCase();
+
+                            const genericEvent = {
+                                preventDefault: () => {},
+                                dataTransfer: {
+                                    getData: (format) => {
+                                        if (format === "text/plain") {
+                                            return JSON.stringify({
+                                                type: folder.documentName,
+                                                uuid: folder.uuid,
+                                            });
+                                        }
+                                        return "";
+                                    },
+                                },
+                                target: actorSheet6e.element,
+                            };
+
+                            await actorSheet._onDrop(genericEvent);
+
+                            // Helper to recursively collect all nested subfolder IDs
+                            const getDescendantFolderIds = (folder) => {
+                                let ids = [];
+                                for (const child of folder.children) {
+                                    const childFolder = child.folder;
+                                    ids.push(childFolder.id);
+                                    ids.push(...getDescendantFolderIds(childFolder));
+                                }
+                                return ids;
+                            };
+
+                            const allFolderIds = [folder.id, ...getDescendantFolderIds(folder)];
+                            const expectedEntries = targetPack.index.filter((entry) =>
+                                allFolderIds.includes(entry.folder),
+                            );
+                            const expectedCount = expectedEntries.length;
+
+                            const matchingItems = actorSheet.actor.items.filter((o) => o.type === itemType);
+
+                            if (matchingItems.length !== expectedCount) {
+                                const expectedNames = expectedEntries.map((e) => e.name).sort();
+                                const actualNames = matchingItems.map((i) => i.name).sort();
+
+                                console.warn(
+                                    `[Test Mismatch] Folder "${folder.name}" (${edition}e): Expected ${expectedCount}, but found ${matchingItems.length}`,
+                                );
+                                console.warn("Expected items:", expectedNames);
+                                console.warn("Actual items on actor:", actualNames);
+
+                                // Find missing or extra items for convenience
+                                const missing = expectedNames.filter((name) => !actualNames.includes(name));
+                                const extra = actualNames.filter((name) => !expectedNames.includes(name));
+                                if (missing.length > 0) console.warn("Missing items:", missing);
+                                if (extra.length > 0) console.warn("Unexpected extra items:", extra);
+                            }
+
+                            expect(matchingItems.length).to.equal(expectedCount);
+                        });
+                    });
+                });
+            }
         });
     });
 }

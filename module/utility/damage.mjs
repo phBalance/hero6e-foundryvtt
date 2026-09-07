@@ -888,6 +888,9 @@ export function subtractDiceParts(item, firstDiceParts, secondDiceParts, useDieM
  * @returns {HeroSystemFormulaDicePartsBundle}
  */
 export function calculateDicePartsForItem(item, options) {
+    if (!item.baseInfo?.baseEffectDicePartsBundle) {
+        console.error(`${item.name} has no baseInfo.baseEffectDicePartsBundle`);
+    }
     const {
         diceParts: baseDiceParts,
         tags: baseTags,
