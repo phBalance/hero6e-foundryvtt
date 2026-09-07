@@ -9,7 +9,7 @@ import {
 import { adjustmentSourcesPermissive, adjustmentSourcesStrict } from "../../utility/adjustment.mjs";
 import { HeroAdderModel, HeroModifierModel } from "../../item/HeroSystem6eTypeDataModels.mjs";
 import { ItemModifierApplicationV2 } from "./item-modifier-application.mjs";
-import { HeroAppMixin } from "../api/hero-app-mixin.mjs";
+import { HeroAppMixin, HeroDialogV2 } from "../api/hero-app-mixin.mjs";
 
 // REF: https://foundryvtt.wiki/en/development/guides/converting-to-appv2
 // REF: https://foundryvtt.wiki/en/development/guides/applicationV2-conversion-guide
@@ -450,7 +450,7 @@ export class HeroSystemItemSheetV2 extends HeroAppMixin(HandlebarsApplicationMix
                 </select>
             </p>`;
 
-        const inputData = await foundry.applications.api.DialogV2.input(
+        const inputData = await HeroDialogV2.input(
             this.dialogOptions({
                 window: {
                     title: `Create ${adderOrModifier.toUpperCase()} for ${item.system.XMLID}`,
@@ -540,7 +540,7 @@ export class HeroSystemItemSheetV2 extends HeroAppMixin(HandlebarsApplicationMix
             return ui.notifications.error(`Unable to delete adder/modifier.`);
         }
 
-        const confirmed = await foundry.applications.api.DialogV2.confirm(
+        const confirmed = await HeroDialogV2.confirm(
             this.dialogOptions({
                 window: {
                     title:
@@ -566,7 +566,7 @@ export class HeroSystemItemSheetV2 extends HeroAppMixin(HandlebarsApplicationMix
         const item = this.item;
         if (!item.system._hdcXml) return;
 
-        const confirmed = await foundry.applications.api.DialogV2.confirm(
+        const confirmed = await HeroDialogV2.confirm(
             this.dialogOptions({
                 window: { title: `Restore ${item.name}` },
                 content: `<p>Restore <b>${item.name}</b> from its original Hero Designer data?
@@ -604,7 +604,7 @@ export class HeroSystemItemSheetV2 extends HeroAppMixin(HandlebarsApplicationMix
             return ui.notifications.error(conversionFailures[0].message);
         }
 
-        const confirmed = await foundry.applications.api.DialogV2.confirm(
+        const confirmed = await HeroDialogV2.confirm(
             this.dialogOptions({
                 window: { title: `Confirm ${item.name} type change` },
                 content: `Convert ${item.name} from a ${item.type} to ${targetType.toUpperCase()}`,

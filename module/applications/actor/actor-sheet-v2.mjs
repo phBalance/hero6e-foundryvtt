@@ -6,7 +6,7 @@ import {
     tokenEducatedGuess,
     whisperUserTargetsForActor,
 } from "../../utility/util.mjs";
-import { HeroAppMixin } from "../api/hero-app-mixin.mjs";
+import { HeroAppMixin, HeroDialogV2 } from "../api/hero-app-mixin.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -204,7 +204,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
 
         const content = contentFullHealth + contentRestore + contentReset + contentRebuild;
 
-        const action = await foundry.applications.api.DialogV2.wait(
+        const action = await HeroDialogV2.wait(
             this.dialogOptions({
                 window: {
                     maxWidth: "200px",
@@ -266,7 +266,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
     }
 
     static #onConfigureActorType() {
-        this.actor.changeTypeDialog(this.dialogOptions({}));
+        this.actor.changeTypeDialog(this.dialogOptions());
     }
 
     static #onConfigureToken() {
@@ -282,7 +282,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
     }
 
     static async #onDeleteAllTemporaryEffects() {
-        const confirm = await foundry.applications.api.DialogV2.confirm(
+        const confirm = await HeroDialogV2.confirm(
             this.dialogOptions({
                 window: { title: "Delete all Temporary Effects" },
                 content:
@@ -300,7 +300,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
     }
 
     static async #onDeleteAllActiveEffects() {
-        const confirm = await foundry.applications.api.DialogV2.confirm(
+        const confirm = await HeroDialogV2.confirm(
             this.dialogOptions({
                 window: { title: "Delete all activeEffects" },
                 content:
@@ -1678,7 +1678,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
                 },
                 callback: async (target) => {
                     const document = this._getEmbeddedDocument(target);
-                    await document.deleteDialog(this.dialogOptions({}));
+                    await document.deleteDialog(this.dialogOptions());
                 },
             },
 

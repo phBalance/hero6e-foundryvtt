@@ -6,7 +6,7 @@ import { FrozenSet } from "../utility/frozen-set.mjs";
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { doSuccessRoll, emphasizeSuccessFailureFlavour, generateSuccessChatCard } from "../utility/success-card.mjs";
 import { tokenEducatedGuess } from "../utility/util.mjs";
-import { heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 // Probability, in %, of that number on 3d6
 const HIT_LOCATION_PROBABILITY = Object.freeze({
@@ -233,21 +233,19 @@ async function userSelectsASkill(skillArray) {
         )
         .join("");
 
-    const arrayIndex = await foundry.applications.api.DialogV2.wait(
-        heroDialogOptions(null, {
-            window: { title: "Choose Your Variable Skill" },
-            content: `<fieldset><legend>Skills</legend>${radios}</fieldset>`,
-            buttons: [
-                {
-                    action: "choose",
-                    label: "Confirm",
-                    default: true,
-                    callback: (event, button) => button.form.elements.skill.value,
-                },
-            ],
-            rejectClose: false, // returns null instead of throwing if the user closes the dialog
-        }),
-    );
+    const arrayIndex = await HeroDialogV2.wait({
+        window: { title: "Choose Your Variable Skill" },
+        content: `<fieldset><legend>Skills</legend>${radios}</fieldset>`,
+        buttons: [
+            {
+                action: "choose",
+                label: "Confirm",
+                default: true,
+                callback: (event, button) => button.form.elements.skill.value,
+            },
+        ],
+        rejectClose: false, // returns null instead of throwing if the user closes the dialog
+    });
 
     // null is returned if the user is closing the dialog.
     return arrayIndex == null ? null : skillArray[arrayIndex];

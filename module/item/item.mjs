@@ -41,7 +41,7 @@ import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
 import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
-import { heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
+import { HeroDialogV2, heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
 
 const { Item } = foundry.documents;
 const { FilePicker } = foundry.applications.apps;
@@ -7796,41 +7796,38 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             `Delete ${this.system.XMLID} only, or delete ${this.system.XMLID} and all ${totalChildrenCount} children? ` +
             game.i18n.format("SIDEBAR.DeleteWarning", { type });
 
-        return new foundry.applications.api.DialogV2(
-            heroDialogOptions(
-                null,
-                foundry.utils.mergeObject(
-                    {
-                        content,
-                        buttons: [
-                            {
-                                action: "containerOnly",
-                                label: `${this.system.XMLID} only`,
-                                callback: () => {
-                                    this.delete(operation);
-                                },
+        return new HeroDialogV2(
+            foundry.utils.mergeObject(
+                {
+                    content,
+                    buttons: [
+                        {
+                            action: "containerOnly",
+                            label: `${this.system.XMLID} only`,
+                            callback: () => {
+                                this.delete(operation);
                             },
-                            {
-                                action: "containerAndChildren",
-                                label: `${this.system.XMLID} + children`,
-                                callback: () => {
-                                    this.actor.deleteEmbeddedDocuments("Item", allDescendantIds);
-                                },
-                            },
-                            {
-                                action: "cancel",
-                                label: `Cancel`,
-                                default: true,
-                            },
-                        ],
-                        window: {
-                            icon: "fa-solid fa-trash",
-                            title: `${game.i18n.format("DOCUMENT.Delete", { type })}: ${this.name}`,
                         },
-                        options: { popOutModuleDisable: true },
+                        {
+                            action: "containerAndChildren",
+                            label: `${this.system.XMLID} + children`,
+                            callback: () => {
+                                this.actor.deleteEmbeddedDocuments("Item", allDescendantIds);
+                            },
+                        },
+                        {
+                            action: "cancel",
+                            label: `Cancel`,
+                            default: true,
+                        },
+                    ],
+                    window: {
+                        icon: "fa-solid fa-trash",
+                        title: `${game.i18n.format("DOCUMENT.Delete", { type })}: ${this.name}`,
                     },
-                    options,
-                ),
+                    options: { popOutModuleDisable: true },
+                },
+                options,
             ),
         ).render({ force: true });
     }

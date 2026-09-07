@@ -627,6 +627,14 @@ export function toHHMMSS(secs) {
  * @param {HeroSystem6eToken | HeroSystem6eTokenDocument | PrototypeToken | null} token
  * @returns {string | null}
  */
+/**
+ * Mark a chat button as used.
+ * @param {HTMLElement} button
+ */
+export function markButtonUsed(button) {
+    button.classList.add("hero-used");
+}
+
 export function getTokenUuid(token) {
     return token?.document?.uuid ?? token?.uuid ?? null;
 }

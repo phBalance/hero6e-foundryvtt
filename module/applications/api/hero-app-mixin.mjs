@@ -38,11 +38,10 @@ export const HeroAppMixin = (Base) =>
     class extends Base {
         static DEFAULT_OPTIONS = { classes: [HERO_ROOT_CLASS] };
 
-        get themeClasses() {
-            return heroThemeClasses(this);
-        }
-
-        dialogOptions(options) {
+        dialogOptions(options = {}) {
             return heroDialogOptions(this, options);
         }
     };
+
+/** System-styled DialogV2. Pass dialogOptions() to preserve the source sheet's theme. */
+export class HeroDialogV2 extends HeroAppMixin(foundry.applications.api.DialogV2) {}

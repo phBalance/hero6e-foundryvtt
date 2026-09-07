@@ -3,7 +3,7 @@ import { HeroSystem6eCombatSingle } from "./combat-single.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 import { overrideCanAct } from "./settings/settings-helpers.mjs";
 import { activeSingleTrackerCombatFor, isQuenchTestRunning } from "./utility/util.mjs";
-import { HeroAppMixin, heroDialogOptions } from "./applications/api/hero-app-mixin.mjs";
+import { HeroAppMixin, HeroDialogV2, heroDialogOptions } from "./applications/api/hero-app-mixin.mjs";
 
 const { CombatTracker } = foundry.applications.sidebar.tabs;
 
@@ -1622,7 +1622,7 @@ export class HeroSystem6eCombatTrackerSingle extends HeroAppMixin(CombatTracker)
             <p class="hint">The Held Action is lost when the segment of your next natural Phase begins.</p>
         </fieldset>`;
 
-        const result = await foundry.applications.api.DialogV2.wait(
+        const result = await HeroDialogV2.wait(
             this.dialogOptions({
                 window: { title: `${title} — ${actor.name}` },
                 content,
@@ -1796,7 +1796,7 @@ export class HeroSystem6eCombatTrackerSingle extends HeroAppMixin(CombatTracker)
                     `${actor.name} has already acted this Segment and cannot declare a Held Action.`,
                 );
             }
-            const proceed = await foundry.applications.api.DialogV2.confirm(
+            const proceed = await HeroDialogV2.confirm(
                 this.dialogOptions({
                     window: { title: `Hold Action — ${actor.name}` },
                     content: `<p>${actor.name} has already acted this Segment. Declare a Held Action anyway?</p>`,
@@ -1996,7 +1996,7 @@ export class HeroSystem6eCombatTrackerSingle extends HeroAppMixin(CombatTracker)
         const reason = combat.blockedAbortReason(combatant);
         if (reason && !game.user.isGM) return void ui.notifications.warn(reason);
         if (reason) {
-            const proceed = await foundry.applications.api.DialogV2.confirm(
+            const proceed = await HeroDialogV2.confirm(
                 this.dialogOptions({
                     window: { title: `Abort — ${actor.name}` },
                     content: `<p>${reason}</p><p>Abort anyway?</p>`,
@@ -2040,7 +2040,7 @@ export class HeroSystem6eCombatTrackerSingle extends HeroAppMixin(CombatTracker)
             <p class="hint">${costLine}</p>
         </fieldset>`;
 
-        const result = await foundry.applications.api.DialogV2.wait(
+        const result = await HeroDialogV2.wait(
             this.dialogOptions({
                 window: { title: `Abort — ${actor.name}` },
                 content,
@@ -2431,7 +2431,7 @@ async function onTimingContest(button) {
             <p class="hint">Mental Powers contest EGO instead of DEX.</p>
         </fieldset>`;
 
-    const choice = await foundry.applications.api.DialogV2.wait(
+    const choice = await HeroDialogV2.wait(
         heroDialogOptions(button, {
             window: { title: `Timing Contest — ${holder.name} vs ${opponent.name}` },
             content,

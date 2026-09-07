@@ -1,6 +1,6 @@
 // import { HeroSystem6eItem } from "../item/item.mjs";
 // import { HeroSystem6eActor } from "../actor/actor.mjs";
-import { heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
+import { HeroDialogV2, heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
 
 export async function onManageActiveEffect(event, owner) {
     event.preventDefault();
@@ -33,7 +33,7 @@ export async function onManageActiveEffect(event, owner) {
                 return;
             }
 
-            const confirmed = await foundry.applications.api.DialogV2.confirm(
+            const confirmed = await HeroDialogV2.confirm(
                 heroDialogOptions(a, {
                     window: {
                         title: `${game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title")} [${effect.name}]`,

@@ -1,4 +1,4 @@
-import { HeroAppMixin } from "../applications/api/hero-app-mixin.mjs";
+import { HeroAppMixin, HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 export class HeroSystem6eCompendium extends HeroAppMixin(foundry.applications.sidebar.apps.Compendium) {
     static HERO_COMPENDIUM_INDEX_FIELDS = ["system.PARENTID", "system.XMLID", "system.ID", "system.is5e"];
     static HERO_CONTAINER_XMLIDS = ["LIST", "COMPOUNDPOWER", "MULTIPOWER", "VPP"];
@@ -446,7 +446,7 @@ export class HeroSystem6eCompendium extends HeroAppMixin(foundry.applications.si
                 const folder = this.collection.folders.get(folderId);
                 if (!folder) return;
 
-                const confirmed = await foundry.applications.api.DialogV2.confirm(
+                const confirmed = await HeroDialogV2.confirm(
                     this.dialogOptions({
                         window: { title: `${game.i18n.localize("FOLDER.Delete")}: ${folder.name}` },
                         content: `<p>Are you sure? This will permanently delete <strong>${folder.name}</strong> and all items inside it.</p>`,

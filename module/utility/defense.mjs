@@ -1,7 +1,7 @@
 import { HEROSYS } from "../herosystem6e.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { roundFavorPlayerAwayFromZero } from "./round.mjs";
-import { heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 const { renderTemplate } = foundry.applications.handlebars;
 
@@ -601,21 +601,19 @@ export async function getConditionalDefenses(token, item, avad) {
         const conditionalDefenseCardTemplate = `systems/${HEROSYS.module}/templates/attack/item-conditional-defense-card.hbs`;
         const html = await renderTemplate(conditionalDefenseCardTemplate, data);
 
-        const inputs = await foundry.applications.api.DialogV2.wait(
-            heroDialogOptions(null, {
-                position: { width: 400 },
-                window: { title: token.name + " conditional defenses" },
-                content: html,
-                buttons: [
-                    {
-                        action: "normal",
-                        label: "Apply Damage",
-                        default: true,
-                        callback: (event, button) => Array.from(button.form.querySelectorAll("input")),
-                    },
-                ],
-            }),
-        );
+        const inputs = await HeroDialogV2.wait({
+            position: { width: 400 },
+            window: { title: token.name + " conditional defenses" },
+            content: html,
+            buttons: [
+                {
+                    action: "normal",
+                    label: "Apply Damage",
+                    default: true,
+                    callback: (event, button) => Array.from(button.form.querySelectorAll("input")),
+                },
+            ],
+        });
 
         // Was the dialog closed without providing input? If so, assume no defenses are desired.
         if (inputs === null) {

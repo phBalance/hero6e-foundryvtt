@@ -2,7 +2,7 @@ import { HeroRoller, DICE_SO_NICE_CUSTOM_SETS } from "../heroRoller/dice.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { clamp } from "../utility/round.mjs";
 import { whisperUserTargetsForActor } from "../utility/util.mjs";
-import { heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 /**
  * Multistage helper function useful for most item activations.
@@ -62,13 +62,11 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
         const potentialStunCost = calculateRequiredStunDiceForLackOfEnd(actor, resourcesRequired.totalEnd);
 
         if (!options.forceStunUsage) {
-            const confirmed = await foundry.applications.api.DialogV2.confirm(
-                heroDialogOptions(null, {
-                    window: { title: "USING STUN FOR ENDURANCE" },
-                    content: `<p><b>${item.name}</b> requires ${resourcesRequired.totalEnd} END. <b>${actor.name}</b> has ${actorEndurance} END.
+            const confirmed = await HeroDialogV2.confirm({
+                window: { title: "USING STUN FOR ENDURANCE" },
+                content: `<p><b>${item.name}</b> requires ${resourcesRequired.totalEnd} END. <b>${actor.name}</b> has ${actorEndurance} END.
                                 Do you want to take ${potentialStunCost.stunDice}d6 STUN damage to make up for the lack of END?</p>`,
-                }),
-            );
+            });
             if (!confirmed) {
                 return {
                     warning: `${item.detailedName()} needs ${resourcesRequired.totalEnd} END but ${actor.name} only has ${actorEndurance} END. The player is not spending STUN to make up the difference`,

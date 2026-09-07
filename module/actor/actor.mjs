@@ -30,7 +30,7 @@ import {
 } from "../utility/util.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.mjs";
 import { uploadActorFromXml } from "./actor-upload.mjs";
-import { heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 const { renderTemplate } = foundry.applications.handlebars;
 const { Actor } = foundry.documents;
@@ -931,24 +931,21 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         };
         const content = await renderTemplate(template, cardData);
 
-        await foundry.applications.api.DialogV2.prompt(
-            heroDialogOptions(
-                null,
-                foundry.utils.mergeObject(
-                    {
-                        window: { title: `Change ${this.name} Type` },
-                        content,
-                        ok: {
-                            label: "Apply",
-                            callback: (event, button) => button.form.elements.actorType.value,
-                        },
-                        submit: async (result) => {
-                            if (result) await this._changeType(result);
-                            else console.error(`User picked option: ${result}`);
-                        },
+        await HeroDialogV2.prompt(
+            foundry.utils.mergeObject(
+                {
+                    window: { title: `Change ${this.name} Type` },
+                    content,
+                    ok: {
+                        label: "Apply",
+                        callback: (event, button) => button.form.elements.actorType.value,
                     },
-                    options,
-                ),
+                    submit: async (result) => {
+                        if (result) await this._changeType(result);
+                        else console.error(`User picked option: ${result}`);
+                    },
+                },
+                options,
             ),
         );
     }

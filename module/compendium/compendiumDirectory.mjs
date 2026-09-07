@@ -2,9 +2,8 @@ import { xmlToJsonNode } from "../utility/xml-to-json.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
 import { HeroSystem6eCompendium } from "./compendium.mjs";
-import { HeroAppMixin, heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
+import { HeroAppMixin, HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
-const { DialogV2 } = foundry.applications.api;
 const { CompendiumDirectory } = foundry.applications.sidebar.tabs;
 const { CompendiumCollection } = foundry.documents.collections;
 const { renderTemplate } = foundry.applications.handlebars;
@@ -130,7 +129,7 @@ export class HeroSystem6eCompendiumDirectory extends HeroAppMixin(CompendiumDire
                 });
             };
 
-            const metadata = await DialogV2.prompt(
+            const metadata = await HeroDialogV2.prompt(
                 this.dialogOptions({
                     content,
                     id: "create-compendium",
@@ -252,13 +251,11 @@ export class HeroSystem6eCompendiumDirectory extends HeroAppMixin(CompendiumDire
         const existingPack = game.packs.get(packName);
 
         if (existingPack) {
-            const confirmed = await DialogV2.confirm(
-                heroDialogOptions(null, {
-                    window: { title: "Overwrite Compendium Entry" },
-                    content: `<p><strong>"${metadata.label}"</strong> already exists. Overwrite it?</p>`,
-                    rejectClose: false,
-                }),
-            );
+            const confirmed = await HeroDialogV2.confirm({
+                window: { title: "Overwrite Compendium Entry" },
+                content: `<p><strong>"${metadata.label}"</strong> already exists. Overwrite it?</p>`,
+                rejectClose: false,
+            });
 
             if (!confirmed) return;
 
