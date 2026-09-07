@@ -1,0 +1,11 @@
+<li class="item powers group-header expandable-document" data-item-id="{{this.id}}" data-document-uuid="{{this.uuid}}">
+    <div class="item-row draggable {{this.validationCss}}">
+
+        {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-item-description-v2.hbs') this }}
+
+        <div class="item-column item-controls">
+            <a class="fa-fw fa-solid fa-ellipsis-vertical" data-action="documentListContext"></a>
+        </div>
+
+    </div>
+</li>

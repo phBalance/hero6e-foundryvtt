@@ -544,6 +544,10 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
                 case "attacks":
                 case "defenses":
                 case "movements":
+                    context.items = this.#groupedEntries(this._items[partId]);
+                    context.searchValue = this.searchValues[partId];
+                    break;
+
                 case "martial":
                 case "skills":
                 case "maneuvers":
@@ -669,6 +673,35 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
         }
 
         return context;
+    }
+
+    /**
+     * Rows for a tab that lists only part of the item tree: the matching items plus every ancestor,
+     * in document order with children under their parents. Ancestors that don't match on their own
+     * are group headers.
+     * @param {HeroSystem6eItem[]} items
+     * @returns {{ item: HeroSystem6eItem, header: boolean }[]}
+     */
+    #groupedEntries(items) {
+        const matching = new Set(items);
+        const included = new Set();
+        for (const item of items) {
+            for (let ancestor = item; ancestor && !included.has(ancestor); ancestor = ancestor.parentItem) {
+                included.add(ancestor);
+            }
+        }
+
+        const entries = [];
+        const walk = (item) => {
+            entries.push({ item, header: !matching.has(item) });
+            for (const child of item.childItems) {
+                if (included.has(child)) walk(child);
+            }
+        };
+        for (const item of this.actor.items) {
+            if (included.has(item) && !item.parentItem) walk(item);
+        }
+        return entries;
     }
 
     // Character & Active Points tooltip details
@@ -1796,33 +1829,24 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
             }
 
             const formElement = target.closest("form");
-            const parentElement = formElement.querySelector(`li[data-document-uuid="${item.uuid}"]`);
-            if (!parentElement) {
+            const parentElements = formElement.querySelectorAll(`li[data-document-uuid="${item.uuid}"]`);
+            if (parentElements.length === 0) {
                 console.error("unable to find parentEl");
                 continue;
             }
-            if (value) {
-                parentElement.classList.add("collapsed");
-            } else {
-                parentElement.classList.remove("collapsed");
-            }
+            for (const parentElement of parentElements) {
+                parentElement.classList.toggle("collapsed", value);
 
-            const listElement = parentElement.closest("ol.item-list");
-            if (!listElement) {
-                console.error("unable to find itemList");
-                continue;
-            }
-
-            for (const child of item.childItems) {
-                const childElement = listElement.querySelector(`li[data-document-uuid="${child.uuid}"]`);
-                if (!childElement) {
-                    console.error("unable to find item child element");
+                const listElement = parentElement.closest("ol.item-list");
+                if (!listElement) {
+                    console.error("unable to find itemList");
                     continue;
                 }
-                if (value) {
-                    childElement.classList.add("collapsed-child");
-                } else {
-                    childElement.classList.remove("collapsed-child");
+
+                for (const child of item.childItems) {
+                    listElement
+                        .querySelector(`li[data-document-uuid="${child.uuid}"]`)
+                        ?.classList.toggle("collapsed-child", value);
                 }
             }
         }

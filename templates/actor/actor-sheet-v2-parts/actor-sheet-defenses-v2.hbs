@@ -14,8 +14,12 @@
         </div>
 
         <ol class="item-list unlist">
-            {{#each items as |item|}}
-                {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-defenses-partial-item-v2.hbs') item }}
+            {{#each items as |entry|}}
+                {{#if entry.header}}
+                    {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-group-header-partial-v2.hbs') entry.item }}
+                {{else}}
+                    {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-defenses-partial-item-v2.hbs') entry.item }}
+                {{/if}}
             {{/each}}
         </ol>
     </section>
