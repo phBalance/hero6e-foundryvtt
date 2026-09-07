@@ -9,12 +9,8 @@
     padding: var(--chat-message-spacing);
 
     button {
-        background: var(--hero-accent);
-        border: 1px solid var(--hero-border);
-        box-shadow: 0 0 6px inset var(--hero-shadow);
         align-items: center;
         justify-content: center;
-        color: var(--hero-text-on-accent);
         margin: 1px;
     }
 }
