@@ -107,7 +107,14 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                     // Process each uploaded file sequentially
                     for (const file of files) {
                         try {
-                            const contents = await file.text();
+                            // HDC and HDP files are always UTF-16 encoded. If, for some reason, they're not then should
+                            // read the first bit of the file and figure out what the encoding is.
+                            const contents = await new Promise((resolve, reject) => {
+                                const reader = new FileReader();
+                                reader.onload = () => resolve(reader.result);
+                                reader.onerror = () => reject(reader.error);
+                                reader.readAsText(file, "UTF-16");
+                            });
                             await HeroSystem6eCompendiumDirectory.uploadFromXml(contents, folderId, {
                                 fileName: file.name,
                             });
