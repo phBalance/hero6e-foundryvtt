@@ -41,23 +41,21 @@
         }
     }
 
-    // ==========================================
-    // 3. Edition Badge
-    // ==========================================
+    // Preserve core's position: sticky on folder headers.
     @each $edition in (5, 6) {
-        .directory-item.hero-edition-#{$edition},
-        .folder-header.hero-edition-#{$edition} {
+        .directory-item.hero-edition-#{$edition} {
             position: relative;
+        }
 
-            &::after {
-                content: "#{$edition}e";
-                position: absolute;
-                right: 2px;
-                bottom: 2px;
-                font: bold 11px/1 sans-serif;
-                color: var(--hero-edition-#{$edition});
-                pointer-events: none;
-            }
+        .directory-item.hero-edition-#{$edition}::after,
+        .folder-header.hero-edition-#{$edition}::after {
+            content: "#{$edition}e";
+            position: absolute;
+            right: 2px;
+            bottom: 2px;
+            font: bold 11px/1 sans-serif;
+            color: var(--hero-edition-#{$edition});
+            pointer-events: none;
         }
     }
 }
