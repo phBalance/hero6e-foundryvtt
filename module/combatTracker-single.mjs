@@ -3,7 +3,7 @@ import { HeroSystem6eCombatSingle } from "./combat-single.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor/actor-active-effects.mjs";
 import { overrideCanAct } from "./settings/settings-helpers.mjs";
 import { activeSingleTrackerCombatFor, isQuenchTestRunning } from "./utility/util.mjs";
-import { HeroAppMixin, HeroDialogV2, heroDialogOptions } from "./applications/api/hero-app-mixin.mjs";
+import { HeroAppMixin, HeroDialogV2 } from "./applications/api/hero-app-mixin.mjs";
 
 const { CombatTracker } = foundry.applications.sidebar.tabs;
 
@@ -1622,82 +1622,77 @@ export class HeroSystem6eCombatTrackerSingle extends HeroAppMixin(CombatTracker)
             <p class="hint">The Held Action is lost when the segment of your next natural Phase begins.</p>
         </fieldset>`;
 
-        const result = await HeroDialogV2.wait(
-            this.dialogOptions({
-                window: { title: `${title} — ${actor.name}` },
-                content,
-                // The unselected mode's whole branch hides (progressive disclosure);
-                // within the position branch, DEX count and anchor are mutually
-                // exclusive — the unchecked one's controls grey out — and the anchor
-                // list re-filters per segment
-                render: (event, dialog) => {
-                    const root = dialog.element;
-                    if (!root) return;
-                    const modeRadios = [...root.querySelectorAll('input[name="hold-mode"]')];
-                    const branches = [...root.querySelectorAll("[data-hold-branch]")];
-                    const syncBranches = () => {
-                        const mode = modeRadios.find((r) => r.checked)?.value ?? "event";
-                        for (const branch of branches) {
-                            branch.classList.toggle("hero-hold-branch-hidden", branch.dataset.holdBranch !== mode);
-                        }
-                    };
-                    for (const r of modeRadios) r.addEventListener("change", syncBranches);
-                    syncBranches();
+        const result = await HeroDialogV2.wait({
+            window: { title: `${title} — ${actor.name}` },
+            content,
+            // The unselected mode's whole branch hides (progressive disclosure);
+            // within the position branch, DEX count and anchor are mutually
+            // exclusive — the unchecked one's controls grey out — and the anchor
+            // list re-filters per segment
+            render: (event, dialog) => {
+                const root = dialog.element;
+                if (!root) return;
+                const modeRadios = [...root.querySelectorAll('input[name="hold-mode"]')];
+                const branches = [...root.querySelectorAll("[data-hold-branch]")];
+                const syncBranches = () => {
+                    const mode = modeRadios.find((r) => r.checked)?.value ?? "event";
+                    for (const branch of branches) {
+                        branch.classList.toggle("hero-hold-branch-hidden", branch.dataset.holdBranch !== mode);
+                    }
+                };
+                for (const r of modeRadios) r.addEventListener("change", syncBranches);
+                syncBranches();
 
-                    const segmentSelect = root.querySelector('select[name="hold-segment"]');
-                    const anchorSelect = root.querySelector('select[name="hold-anchor"]');
-                    if (!segmentSelect || !anchorSelect) return;
-                    const dexInput = root.querySelector('input[name="hold-dex"]');
-                    const kindRadios = [...root.querySelectorAll('input[name="hold-position-kind"]')];
-                    const relationSelect = root.querySelector('select[name="hold-anchor-relation"]');
-                    const syncControls = () => {
-                        const kind = kindRadios.find((r) => r.checked)?.value ?? "dex";
-                        if (dexInput) dexInput.disabled = kind !== "dex";
-                        anchorSelect.disabled = kind !== "anchor";
-                        if (relationSelect) relationSelect.disabled = kind !== "anchor";
-                    };
-                    const rebuildAnchors = () => {
-                        const prior = anchorSelect.value;
-                        anchorSelect.innerHTML = anchorOptionsHTML(
-                            parseInt(segmentSelect.value),
-                            prior || initialAnchorId,
-                        );
-                        // A segment nobody acts in cannot be anchored
-                        const anchorKind = kindRadios.find((r) => r.value === "anchor");
-                        const dexKind = kindRadios.find((r) => r.value === "dex");
-                        if (anchorKind) {
-                            anchorKind.disabled = !anchorSelect.options.length;
-                            if (anchorKind.disabled && anchorKind.checked && dexKind) dexKind.checked = true;
-                        }
-                        syncControls();
-                    };
-                    segmentSelect.addEventListener("change", rebuildAnchors);
-                    for (const r of kindRadios) r.addEventListener("change", syncControls);
-                    rebuildAnchors();
-                },
-                buttons: [
-                    {
-                        action: "hold",
-                        label: "Hold",
-                        default: true,
-                        callback: (event, button) => {
-                            const form = button.form.elements;
-                            return {
-                                mode: form["hold-mode"].value,
-                                segmentAbs: parseInt(form["hold-segment"]?.value),
-                                positionKind: form["hold-position-kind"]?.value ?? "dex",
-                                dexRaw: parseFloat(form["hold-dex"]?.value),
-                                anchorId: form["hold-anchor"]?.value || null,
-                                relation: form["hold-anchor-relation"]?.value ?? "after",
-                                trigger: form["hold-trigger"]?.value.trim() ?? "",
-                            };
-                        },
+                const segmentSelect = root.querySelector('select[name="hold-segment"]');
+                const anchorSelect = root.querySelector('select[name="hold-anchor"]');
+                if (!segmentSelect || !anchorSelect) return;
+                const dexInput = root.querySelector('input[name="hold-dex"]');
+                const kindRadios = [...root.querySelectorAll('input[name="hold-position-kind"]')];
+                const relationSelect = root.querySelector('select[name="hold-anchor-relation"]');
+                const syncControls = () => {
+                    const kind = kindRadios.find((r) => r.checked)?.value ?? "dex";
+                    if (dexInput) dexInput.disabled = kind !== "dex";
+                    anchorSelect.disabled = kind !== "anchor";
+                    if (relationSelect) relationSelect.disabled = kind !== "anchor";
+                };
+                const rebuildAnchors = () => {
+                    const prior = anchorSelect.value;
+                    anchorSelect.innerHTML = anchorOptionsHTML(parseInt(segmentSelect.value), prior || initialAnchorId);
+                    // A segment nobody acts in cannot be anchored
+                    const anchorKind = kindRadios.find((r) => r.value === "anchor");
+                    const dexKind = kindRadios.find((r) => r.value === "dex");
+                    if (anchorKind) {
+                        anchorKind.disabled = !anchorSelect.options.length;
+                        if (anchorKind.disabled && anchorKind.checked && dexKind) dexKind.checked = true;
+                    }
+                    syncControls();
+                };
+                segmentSelect.addEventListener("change", rebuildAnchors);
+                for (const r of kindRadios) r.addEventListener("change", syncControls);
+                rebuildAnchors();
+            },
+            buttons: [
+                {
+                    action: "hold",
+                    label: "Hold",
+                    default: true,
+                    callback: (event, button) => {
+                        const form = button.form.elements;
+                        return {
+                            mode: form["hold-mode"].value,
+                            segmentAbs: parseInt(form["hold-segment"]?.value),
+                            positionKind: form["hold-position-kind"]?.value ?? "dex",
+                            dexRaw: parseFloat(form["hold-dex"]?.value),
+                            anchorId: form["hold-anchor"]?.value || null,
+                            relation: form["hold-anchor-relation"]?.value ?? "after",
+                            trigger: form["hold-trigger"]?.value.trim() ?? "",
+                        };
                     },
-                    { action: "cancel", label: "Cancel" },
-                ],
-                rejectClose: false,
-            }),
-        );
+                },
+                { action: "cancel", label: "Cancel" },
+            ],
+            rejectClose: false,
+        });
         if (!result || result === "cancel") return null;
 
         if (result.mode === "position") {
@@ -1796,13 +1791,11 @@ export class HeroSystem6eCombatTrackerSingle extends HeroAppMixin(CombatTracker)
                     `${actor.name} has already acted this Segment and cannot declare a Held Action.`,
                 );
             }
-            const proceed = await HeroDialogV2.confirm(
-                this.dialogOptions({
-                    window: { title: `Hold Action — ${actor.name}` },
-                    content: `<p>${actor.name} has already acted this Segment. Declare a Held Action anyway?</p>`,
-                    rejectClose: false,
-                }),
-            );
+            const proceed = await HeroDialogV2.confirm({
+                window: { title: `Hold Action — ${actor.name}` },
+                content: `<p>${actor.name} has already acted this Segment. Declare a Held Action anyway?</p>`,
+                rejectClose: false,
+            });
             if (!proceed) return;
         }
 
@@ -1996,13 +1989,11 @@ export class HeroSystem6eCombatTrackerSingle extends HeroAppMixin(CombatTracker)
         const reason = combat.blockedAbortReason(combatant);
         if (reason && !game.user.isGM) return void ui.notifications.warn(reason);
         if (reason) {
-            const proceed = await HeroDialogV2.confirm(
-                this.dialogOptions({
-                    window: { title: `Abort — ${actor.name}` },
-                    content: `<p>${reason}</p><p>Abort anyway?</p>`,
-                    rejectClose: false,
-                }),
-            );
+            const proceed = await HeroDialogV2.confirm({
+                window: { title: `Abort — ${actor.name}` },
+                content: `<p>${reason}</p><p>Abort anyway?</p>`,
+                rejectClose: false,
+            });
             if (!proceed) return;
         }
 
@@ -2040,29 +2031,27 @@ export class HeroSystem6eCombatTrackerSingle extends HeroAppMixin(CombatTracker)
             <p class="hint">${costLine}</p>
         </fieldset>`;
 
-        const result = await HeroDialogV2.wait(
-            this.dialogOptions({
-                window: { title: `Abort — ${actor.name}` },
-                content,
-                buttons: [
-                    {
-                        action: "abort",
-                        label: "Abort",
-                        default: true,
-                        callback: (event, button) => {
-                            const form = button.form.elements;
-                            return {
-                                action: form["abort-action"].value,
-                                detail: form["abort-detail"]?.value.trim() ?? "",
-                                extraPhase: !!form["abort-extra-phase"]?.checked,
-                            };
-                        },
+        const result = await HeroDialogV2.wait({
+            window: { title: `Abort — ${actor.name}` },
+            content,
+            buttons: [
+                {
+                    action: "abort",
+                    label: "Abort",
+                    default: true,
+                    callback: (event, button) => {
+                        const form = button.form.elements;
+                        return {
+                            action: form["abort-action"].value,
+                            detail: form["abort-detail"]?.value.trim() ?? "",
+                            extraPhase: !!form["abort-extra-phase"]?.checked,
+                        };
                     },
-                    { action: "cancel", label: "Cancel" },
-                ],
-                rejectClose: false,
-            }),
-        );
+                },
+                { action: "cancel", label: "Cancel" },
+            ],
+            rejectClose: false,
+        });
         if (!result || result === "cancel") return;
 
         const labels = { dodge: "Dodge", block: "Block", dive: "Dive For Cover", other: "a defensive Action" };
@@ -2431,25 +2420,23 @@ async function onTimingContest(button) {
             <p class="hint">Mental Powers contest EGO instead of DEX.</p>
         </fieldset>`;
 
-    const choice = await HeroDialogV2.wait(
-        heroDialogOptions(button, {
-            window: { title: `Timing Contest — ${holder.name} vs ${opponent.name}` },
-            content,
-            buttons: [
-                {
-                    action: "roll",
-                    label: "Roll",
-                    default: true,
-                    callback: (event, btn) => ({
-                        holderChar: btn.form.elements["holder-char"].value,
-                        opponentChar: btn.form.elements["opponent-char"].value,
-                    }),
-                },
-                { action: "cancel", label: "Cancel" },
-            ],
-            rejectClose: false,
-        }),
-    );
+    const choice = await HeroDialogV2.wait({
+        window: { title: `Timing Contest — ${holder.name} vs ${opponent.name}` },
+        content,
+        buttons: [
+            {
+                action: "roll",
+                label: "Roll",
+                default: true,
+                callback: (event, btn) => ({
+                    holderChar: btn.form.elements["holder-char"].value,
+                    opponentChar: btn.form.elements["opponent-char"].value,
+                }),
+            },
+            { action: "cancel", label: "Cancel" },
+        ],
+        rejectClose: false,
+    });
     if (!choice || choice === "cancel") return;
 
     const rollSide = async (combatant, key) => {

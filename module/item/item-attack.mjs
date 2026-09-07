@@ -50,7 +50,7 @@ import {
     whisperUserTargetsForActor,
 } from "../utility/util.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
-import { HeroDialogV2, heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 const { renderTemplate } = foundry.applications.handlebars;
 
@@ -2031,28 +2031,26 @@ export async function _onRollKnockback(event) {
         </p>
     `;
 
-    await HeroDialogV2.wait(
-        heroDialogOptions(event.currentTarget, {
-            window: { title: `Confirm Knockback details` },
-            position: { width: 400 },
-            content: html,
-            buttons: [
-                {
-                    action: "normal",
-                    label: "Roll & Apply",
-                    default: true,
-                    callback: async (event, button) => {
-                        const dice = button.form.elements.knockbackDice.value;
-                        await _rollApplyKnockback(token, parseInt(dice));
-                    },
+    await HeroDialogV2.wait({
+        window: { title: `Confirm Knockback details` },
+        position: { width: 400 },
+        content: html,
+        buttons: [
+            {
+                action: "normal",
+                label: "Roll & Apply",
+                default: true,
+                callback: async (event, button) => {
+                    const dice = button.form.elements.knockbackDice.value;
+                    await _rollApplyKnockback(token, parseInt(dice));
                 },
-                {
-                    action: "cancel",
-                    label: "Cancel",
-                },
-            ],
-        }),
-    );
+            },
+            {
+                action: "cancel",
+                label: "Cancel",
+            },
+        ],
+    });
 }
 
 // Fisher-Yates Shuffle
@@ -2127,16 +2125,14 @@ export async function _onRollPowerToRemove(event) {
     const template = `systems/${HEROSYS.module}/templates/attack/remove-power-from-automaton.hbs`;
     const content = await renderTemplate(template, { choices });
 
-    const powerToRemoveId = await HeroDialogV2.prompt(
-        heroDialogOptions(event.currentTarget, {
-            window: { title: `Remove power from ${targetToken.name}` },
-            content,
-            ok: {
-                label: "Remove Power",
-                callback: (event, button) => button.form.elements.powerToRemove.value,
-            },
-        }),
-    );
+    const powerToRemoveId = await HeroDialogV2.prompt({
+        window: { title: `Remove power from ${targetToken.name}` },
+        content,
+        ok: {
+            label: "Remove Power",
+            callback: (event, button) => button.form.elements.powerToRemove.value,
+        },
+    });
 
     // If the user has just closed the dialog without selecting something, we're done.
     if (powerToRemoveId == null) {
@@ -5096,18 +5092,16 @@ export async function _onModalDamageCard(event) {
     content.find(".modal-damage-card").remove();
     content = content.html();
 
-    const dialog = new HeroDialogV2(
-        heroDialogOptions(event.currentTarget, {
-            window: { title: `Modal Damage` },
-            content,
-            buttons: [
-                {
-                    action: "cancel",
-                    label: "Close",
-                },
-            ],
-        }),
-    );
+    const dialog = new HeroDialogV2({
+        window: { title: `Modal Damage` },
+        content,
+        buttons: [
+            {
+                action: "cancel",
+                label: "Close",
+            },
+        ],
+    });
 
     // DialogV2 wraps content in a <form> and only honors the `render` option via its static
     // wait/prompt/confirm helpers, so wire the listener ourselves. The cloned card's buttons

@@ -9,14 +9,14 @@ export const HERO_SHEET_THEMES = Object.freeze({
 });
 
 /**
- * Root class plus the theme classes of the nearest themed ancestor, for stamping onto dialogs.
- * DialogV2 mounts on body and would otherwise ignore a per-sheet theme.
+ * Collect root and explicit sheet theme classes for a dialog.
+ * Dialogs mount on body. Inherit explicit sheet themes, but exclude sidebar/hotbar interface themes.
  * @param {foundry.applications.api.ApplicationV2|HTMLElement|null} source
  * @returns {string[]}
  */
 export function heroThemeClasses(source) {
     const element = source instanceof HTMLElement ? source : source?.element;
-    const themed = element?.closest?.(".themed");
+    const themed = element?.closest?.(".sheet.themed");
     const classes = [HERO_ROOT_CLASS];
     if (themed) {
         classes.push("themed", ...Array.from(themed.classList).filter((c) => c.startsWith("theme-")));

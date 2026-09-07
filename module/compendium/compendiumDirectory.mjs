@@ -129,19 +129,17 @@ export class HeroSystem6eCompendiumDirectory extends HeroAppMixin(CompendiumDire
                 });
             };
 
-            const metadata = await HeroDialogV2.prompt(
-                this.dialogOptions({
-                    content,
-                    id: "create-compendium",
-                    window: { title: "COMPENDIUM.Create" },
-                    position: { width: 480 },
-                    ok: {
-                        label: "COMPENDIUM.Create",
-                        callback: (_event, button) => new FormDataExtended(button.form).object,
-                    },
-                    render: handleRender,
-                }),
-            );
+            const metadata = await HeroDialogV2.prompt({
+                content,
+                id: "create-compendium",
+                window: { title: "COMPENDIUM.Create" },
+                position: { width: 480 },
+                ok: {
+                    label: "COMPENDIUM.Create",
+                    callback: (_event, button) => new FormDataExtended(button.form).object,
+                },
+                render: handleRender,
+            });
 
             // If user closed dialog or uploaded files directly, bypass standard creation
             if (!metadata || metadata.upload) return;
