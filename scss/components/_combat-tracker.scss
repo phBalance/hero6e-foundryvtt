@@ -32,6 +32,13 @@ ol.combat-tracker.plain {
 
 .combat-tracker {
     li.combatant {
+        border-radius: 0;
+        padding-block: var(--element-spacing-half);
+
+        &.active::before {
+            border-radius: 0;
+        }
+
         // Disposition rules below override the fill but preserve the active edge.
         &.current-segment-member.active {
             background: color-mix(in srgb, var(--hero-accent-hot) 14%, transparent);
