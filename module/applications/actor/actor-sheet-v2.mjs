@@ -676,9 +676,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
     }
 
     /**
-     * Rows for a tab that lists only part of the item tree: the matching items plus every ancestor,
-     * in document order with children under their parents. Ancestors that don't match on their own
-     * are group headers.
+     * Include nonmatching ancestors as headers; sort siblings alphabetically.
      * @param {HeroSystem6eItem[]} items
      * @returns {{ item: HeroSystem6eItem, header: boolean }[]}
      */
@@ -691,16 +689,13 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
             }
         }
 
+        const byName = (a, b) => a.name.localeCompare(b.name);
         const entries = [];
         const walk = (item) => {
             entries.push({ item, header: !matching.has(item) });
-            for (const child of item.childItems) {
-                if (included.has(child)) walk(child);
-            }
+            for (const child of item.childItems.filter((i) => included.has(i)).sort(byName)) walk(child);
         };
-        for (const item of this.actor.items) {
-            if (included.has(item) && !item.parentItem) walk(item);
-        }
+        for (const item of this.actor.items.filter((i) => included.has(i) && !i.parentItem).sort(byName)) walk(item);
         return entries;
     }
 
