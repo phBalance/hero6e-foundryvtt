@@ -150,34 +150,6 @@ async function CreateHeroItems(edition) {
     // POWERS and skill, perk, characteristic, and talent sub folders
     const folderPowersId = await createFolderGetId("Powers", CONFIG.HERO.folderColors["Powers"], folderRootId);
 
-    // Characteristics folder within powers
-    const folderPowersCharacteristicsId = await createFolderGetId(
-        "Characteristics",
-        CONFIG.HERO.folderColors["Powers.Characteristics"],
-        folderPowersId,
-    );
-
-    // Perks folder within powers
-    const folderPowersPerksId = await createFolderGetId(
-        "Perks",
-        CONFIG.HERO.folderColors["Powers.Perks"],
-        folderPowersId,
-    );
-
-    // Skills folder within powers
-    const folderPowersSkillsId = await createFolderGetId(
-        "Skills",
-        CONFIG.HERO.folderColors["Powers.Skills"],
-        folderPowersId,
-    );
-
-    // Talent folder within powers
-    const folderPowersTalentsId = await createFolderGetId(
-        "Talents",
-        CONFIG.HERO.folderColors["Powers.Talents"],
-        folderPowersId,
-    );
-
     const preparedPowers = [];
 
     const allPowers = powers.filter(
@@ -195,13 +167,16 @@ async function CreateHeroItems(edition) {
         const itemData = HeroSystem6eItem.itemDataFromXml(power.xml, bogusActor);
         itemData.system.versionHeroSystem6eManuallyCreated = game.system.version;
         if (power.type.includes("characteristic")) {
-            itemData.folder = folderPowersCharacteristicsId;
+            continue; //itemData.folder = folderPowersCharacteristicsId;
         } else if (power.type.includes("perk")) {
-            itemData.folder = folderPowersPerksId;
-        } else if (power.type.includes("skill")) {
-            itemData.folder = folderPowersSkillsId;
+            continue;
+        } else if (power.type.includes("skill") && !power.xml.includes("<POWER")) {
+            // FINDWEAKNESS special case requires the <POWER check
+            continue;
         } else if (power.type.includes("talent")) {
-            itemData.folder = folderPowersTalentsId;
+            continue;
+        } else if (power.type.includes("martial") || power.xml.includes("<MANEUVER")) {
+            continue;
         } else if (itemData.system.XMLID !== "LIST") {
             // LIST will not be in a folder (to match SEPARATOR below)
             itemData.folder = folderPowersId;
@@ -250,7 +225,10 @@ async function CreateHeroItems(edition) {
         folderSkillsId,
     );
 
-    const allSkills = powers.filter((power) => power.type?.includes("skill") && power.xml);
+    // FINDWEAKNESS is a POWER that behaves like a SKILL
+    const allSkills = powers.filter(
+        (power) => power.type?.includes("skill") && power.xml && !power.xml.includes("<POWER"),
+    );
     const allSkillsExceptSkillEnhancers = allSkills.filter((skill) => !skill.type.includes("enhancer"));
     const allSkillEnhancers = allSkills.filter((skill) => skill.type.includes("enhancer"));
     const preparedSkills = [

@@ -2732,12 +2732,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     (power) =>
                         power.type.includes("characteristic") ||
                         power.type.includes("framework") ||
-                        (power.type.includes("skill") && power.type.includes("enhancer")),
+                        power.type.includes("enhancer"),
                 )
                 .map((power) => power.key),
         ]) {
             const itemSubTag = itemTag
-                .replace(/S$/, "")
+                .replace(/(?<!JACK_OF_ALL_TRADE)S$/, "")
                 .replace("MARTIALART", "MANEUVER")
                 .replace("DISADVANTAGE", "DISAD");
             if (heroJson[itemSubTag]) {
@@ -4763,7 +4763,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                         rollValue = 14;
                         break;
                     }
-                    console.error(`ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`);
+                    if (!squelch(`${this.id}CHANCETOCHANGE`)) {
+                        console.error(`ACCIDENTALCHANGE doesn't have a CHANCETOCHANGE adder. Defaulting to 8-`);
+                    }
             }
 
             tags.push({
@@ -4774,26 +4776,28 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             roll = `${rollValue}-`;
         } else if (skillData.XMLID === "DEPENDENTNPC" || skillData.XMLID === "HUNTED") {
             const appearance = skillData.ADDER.find((adder) => adder.XMLID === "APPEARANCE");
-            const appearanceChance = appearance?.OPTIONID || appearance.OPTION;
+            const appearanceChance = appearance?.OPTIONID || appearance?.OPTION;
             let chance;
 
-            if (appearanceChance === "EIGHT" || appearanceChance === "8ORLESS" || appearanceChance.startsWith("8-")) {
+            if (appearanceChance === "EIGHT" || appearanceChance === "8ORLESS" || appearanceChance?.startsWith("8-")) {
                 chance = 8;
             } else if (
                 appearanceChance === "ELEVEN" ||
                 appearanceChance === "11ORLESS" ||
-                appearanceChance.startsWith("11-")
+                appearanceChance?.startsWith("11-")
             ) {
                 chance = 11;
             } else if (
                 appearanceChance === "FOURTEEN" ||
                 appearanceChance === "14ORLESS" ||
-                appearanceChance.startsWith("14-")
+                appearanceChance?.startsWith("14-")
             ) {
                 chance = 14;
             } else {
                 // Shouldn't happen. Give it a default.
-                console.error(`${skillData.XMLID} unknown APPEARANCE adder ${appearanceChance}. Defaulting to 8-`);
+                if (!squelch(`${this.id}appearanceChance`)) {
+                    console.error(`${skillData.XMLID} unknown APPEARANCE adder ${appearanceChance}. Defaulting to 8-`);
+                }
             }
 
             tags.push({
@@ -4814,7 +4818,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 rollValue = 14;
             } else {
                 // Shouldn't happen. Give it a default.
-                console.error(`ENRAGED doesn't have a CHANCETOGO adder. Defaulting to 8-`);
+                if (!squelch(`${this.id}CHANCETOGO`)) {
+                    console.error(`ENRAGED doesn't have a CHANCETOGO adder. Defaulting to 8-`);
+                }
                 rollValue = 8;
             }
 
@@ -4837,7 +4843,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             } else if (intensity === "TOTAL") {
                 intensityValue = -5;
             } else {
-                console.error(`unknown intensity ${intensity} for PSYCHOLOGICALLIMITATION`);
+                if (!squelch(`${this.id}intensity`)) {
+                    console.error(`unknown intensity ${intensity} for PSYCHOLOGICALLIMITATION`);
+                }
                 intensityValue = egoRoll;
             }
 
@@ -4856,14 +4864,16 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             const occurChance = skillData.ADDER.find((adder) => adder.XMLID === "OCCUR")?.OPTIONID;
             let rollValue;
 
-            if (occurChance === "OCCASIONALLY" || occurChance.includes("8-")) {
+            if (occurChance === "OCCASIONALLY" || occurChance?.includes("8-")) {
                 rollValue = 8;
-            } else if (occurChance === "FREQUENTLY" || occurChance.includes("11-")) {
+            } else if (occurChance === "FREQUENTLY" || occurChance?.includes("11-")) {
                 rollValue = 11;
-            } else if (occurChance === "VERYFREQUENTLY" || occurChance.includes("14-")) {
+            } else if (occurChance === "VERYFREQUENTLY" || occurChance?.includes("14-")) {
                 rollValue = 14;
             } else {
-                console.error(`unknown occurChance ${occurChance} for SOCIALLIMITATION`);
+                if (!squelch(`${this.id}occurChance`)) {
+                    console.error(`unknown occurChance ${occurChance} for SOCIALLIMITATION`);
+                }
                 rollValue = 14;
             }
 
@@ -8392,7 +8402,11 @@ export function getCostPerHalfDie(item, baseCpPerDie) {
             break;
 
         default:
-            console.error(`${item.detailedName()} for ${item.actor.name} has unknown base character points per die`);
+            if (!squelch(`${item.id}cppd`)) {
+                console.error(
+                    `${item.detailedName()} for ${item.actor.name} has unknown base character points per die`,
+                );
+            }
 
             // make a guess since we don't know
             baseCost = roundFavorPlayerTowardsZero(baseCpPerDie / 2);
