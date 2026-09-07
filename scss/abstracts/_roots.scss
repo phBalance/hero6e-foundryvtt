@@ -1,9 +1,0 @@
-// Chat cards are a separate root because core paints them light in every theme.
-$hero-roots: (".herosystem6e", ".hero.chat-card");
-
-// Zero-specificity guard for rules shared by several roots; component rules always win.
-@mixin hero-scoped {
-    :where(#{$hero-roots}) {
-        @content;
-    }
-}

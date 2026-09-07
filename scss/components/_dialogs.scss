@@ -1,9 +1,0 @@
-@use "../abstracts" as *;
-
-// Content rendered inside DialogV2 windows the system opens
-@include hero-scoped {
-    .hero-damage-types {
-        flex-wrap: wrap;
-        border-top: 1px dashed var(--hero-border);
-    }
-}

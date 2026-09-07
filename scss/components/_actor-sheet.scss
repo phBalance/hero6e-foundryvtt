@@ -105,7 +105,7 @@
 
 @each $level in (error, info, warning) {
     .herosystem6e.actor-sheet-v2 nav.sheet-tabs.tabs a.validation-#{$level} {
-        @include validation-outline($level);
+        outline: var(--hero-#{$level}) solid 1px;
     }
 
     .herosystem6e.actor-sheet-v2 .item-row.item-row.validation-#{$level} > div.item-column {
@@ -183,7 +183,6 @@
 
     button {
         margin: 2px 0;
-        height: auto;
     }
 
     fieldset.defenses {
@@ -202,7 +201,7 @@
     grid-area: header;
 
     input[type="text"] {
-        font-family: Signika, sans-serif;
+        font-family: var(--font-primary);
         font-size: 30px;
         font-weight: 500;
         font-variant-caps: small-caps;
@@ -219,8 +218,6 @@
         height: 24px;
         padding: 2px 4px;
         font-size: 14px;
-
-        /* margin-top: 2px; */
         margin: 5px;
         text-align: center;
     }
@@ -237,10 +234,8 @@
     overflow: hidden;
     line-height: inherit;
     justify-content: left;
-
-    .sheet-tabs.tabs {
-        gap: 0;
-    }
+    gap: 2px;
+    padding: 2px 0;
 
     a {
         margin: 0;
@@ -261,12 +256,6 @@
         background-color: var(--hero-accent);
         color: var(--hero-text-on-accent);
     }
-}
-
-* Override nav.tabs
-.herosystem6e.actor-sheet-v2 .window-content nav.sheet-tabs.tabs {
-    gap: 2px;
-    padding: 2px 0;
 }
 
 .herosystem6e.actor-sheet-v2 .window-content section.tab {
@@ -410,7 +399,6 @@
         li.item.collapsed {
             a.item-chevron {
                 transform: rotate(-90deg);
-                transition: all 0.1s ease-out;
             }
         }
 
@@ -465,29 +453,12 @@
         width: 80px;
     }
 
-    .item-column.item-end {
-        width: 28px;
-    }
-
     .item-column.item-aoe {
         width: 73px;
     }
 }
 
-/************************************************************************
-* MARTIAL 
-************************************************************************/
-.herosystem6e.actor-sheet-v2 .window-content section.tab.martial {
-    .item-column.item-phase,
-    .item-column.item-ocv,
-    .item-column.item-dcv {
-        width: 40px;
-    }
-}
-
-/************************************************************************
-* MANEUVERS 
-************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.martial,
 .herosystem6e.actor-sheet-v2 .window-content section.tab.maneuvers {
     .item-column.item-phase,
     .item-column.item-ocv,
@@ -496,9 +467,7 @@
     }
 }
 
-/************************************************************************
-* POWERS 
-************************************************************************/
+.herosystem6e.actor-sheet-v2 .window-content section.tab.attacks,
 .herosystem6e.actor-sheet-v2 .window-content section.tab.powers {
     .item-column.item-end {
         width: 28px;
@@ -620,7 +589,7 @@
         border-radius: 3px;
         font-size: 14px;
         line-height: 28px;
-        font-family: Signika, sans-serif;
+        font-family: var(--font-primary);
         align-content: center;
         text-align: center;
         color: var(--button-text-color);

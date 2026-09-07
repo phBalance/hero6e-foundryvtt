@@ -138,37 +138,34 @@
             background-color: var(--color-dark-1);
             overflow: hidden;
 
-            span {
+            span,
+            .linked,
+            .value-wrapper {
                 position: absolute;
-                left: 0;
                 bottom: -1px;
-                width: 100%;
-                padding: 2px 1px;
                 color: var(--hero-text-on-accent);
                 background-color: var(--hero-overlay-bg);
+            }
+
+            span {
+                left: 0;
+                width: 100%;
+                padding: 2px 1px;
                 text-align: center;
                 font-size: 0.7em;
                 overflow: hidden;
             }
 
             .linked {
-                position: absolute;
                 display: inline-block;
-                bottom: -1px;
                 right: -1px;
                 padding: 0 2px;
-                color: var(--hero-text-on-accent);
-                background-color: var(--hero-overlay-bg);
             }
 
             .value-wrapper {
-                position: absolute;
-                bottom: -1px;
                 left: -1px;
                 max-width: calc(100% + 2px);
                 padding: 0 2px;
-                color: var(--hero-text-on-accent);
-                background-color: var(--hero-overlay-bg);
                 font-size: var(--font-size-13);
                 letter-spacing: -0.05em;
                 white-space: nowrap;

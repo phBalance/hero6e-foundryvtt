@@ -175,10 +175,6 @@
         line-height: 2em;
     }
 
-    .target-container .target-info-row:nth-child(odd) div {
-        background-color: transparent;
-    }
-
     .target-container .target-info-row:nth-child(even) div {
         background-color: var(--hero-surface-tint);
     }
@@ -440,11 +436,13 @@
     }
 }
 
-/* Consumed delayed-attack landing cards (Haymaker / Extra Time): the buttons
-   stay in place with greyed text instead of the heavy disabled treatment;
-   clicking still explains that the attack already resolved */
+.hero-used,
 button.hero-delayed-spent {
     color: var(--color-text-subtle);
+}
+
+// Keep spent attacks clickable so their handlers can explain why they cannot resolve again.
+button.hero-delayed-spent {
     opacity: 0.65;
     cursor: default;
 
@@ -459,11 +457,6 @@ button.hero-delayed-spent {
 }
 
 .chat-message {
-    // Buttons already pressed once
-    .hero-used {
-        color: var(--color-text-subtle);
-    }
-
     .hero-inobvious {
         color: var(--hero-info);
     }

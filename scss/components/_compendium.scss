@@ -23,85 +23,41 @@
     // 1. Folder Header & Subdirectory Styling
     // ==========================================
 
-    // List styling (Slate Blue/Grey)
-    .folder-header.hero-header-list {
-        background-color: color-mix(in srgb, var(--hero-folder-list) 25%, var(--hero-surface-raised));
-        border-left: 3px solid var(--hero-folder-list);
+    @each $kind in (list, compoundpower, multipower, vpp) {
+        $color: var(--hero-folder-#{$kind});
 
-        i.fa-folder,
-        i.fa-folder-open {
-            color: var(--hero-folder-list);
+        .folder-header.hero-header-#{$kind} {
+            background-color: color-mix(in srgb, $color 25%, var(--hero-surface-raised));
+            border-left: 3px solid $color;
+
+            i.fa-folder,
+            i.fa-folder-open {
+                color: $color;
+            }
         }
-    }
 
-    .hero-parent-folder.hero-folder-list > .subdirectory {
-        border-left: 3px solid var(--hero-folder-list);
-    }
-
-    // Compound Power styling (Amber / Dark Orange)
-    .folder-header.hero-header-compoundpower {
-        background-color: color-mix(in srgb, var(--hero-folder-compound) 25%, var(--hero-surface-raised));
-        border-left: 3px solid var(--hero-folder-compound);
-
-        i.fa-folder,
-        i.fa-folder-open {
-            color: var(--hero-folder-compound);
+        .hero-parent-folder.hero-folder-#{$kind} > .subdirectory {
+            border-left: 3px solid $color;
         }
-    }
-
-    .hero-parent-folder.hero-folder-compoundpower > .subdirectory {
-        border-left: 3px solid var(--hero-folder-compound);
-    }
-
-    // Multipower styling (Dark Blue)
-    .folder-header.hero-header-multipower {
-        background-color: color-mix(in srgb, var(--hero-folder-multipower) 25%, var(--hero-surface-raised));
-        border-left: 3px solid var(--hero-folder-multipower);
-
-        i.fa-folder,
-        i.fa-folder-open {
-            color: var(--hero-folder-multipower);
-        }
-    }
-
-    .hero-parent-folder.hero-folder-multipower > .subdirectory {
-        border-left: 3px solid var(--hero-folder-multipower);
-    }
-
-    // VPP styling (Dark Purple)
-    .folder-header.hero-header-vpp {
-        background-color: color-mix(in srgb, var(--hero-folder-vpp) 25%, var(--hero-surface-raised));
-        border-left: 3px solid var(--hero-folder-vpp);
-
-        i.fa-folder,
-        i.fa-folder-open {
-            color: var(--hero-folder-vpp);
-        }
-    }
-
-    .hero-parent-folder.hero-folder-vpp > .subdirectory {
-        border-left: 3px solid var(--hero-folder-vpp);
     }
 
     // ==========================================
-    // 3. Edition Badge SVG Background Styling
+    // 3. Edition Badge
     // ==========================================
-    .directory-item.hero-edition-5,
-    .directory-item.hero-edition-6,
-    .folder-header.hero-edition-5,
-    .folder-header.hero-edition-6 {
-        background-repeat: no-repeat;
-        background-position: right 2px bottom 2px;
-        background-size: 10px 14px;
-    }
+    @each $edition in (5, 6) {
+        .directory-item.hero-edition-#{$edition},
+        .folder-header.hero-edition-#{$edition} {
+            position: relative;
 
-    .directory-item.hero-edition-5,
-    .folder-header.hero-edition-5 {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext x='32' y='52' font-family='sans-serif' font-weight='bold' font-size='48' fill='%23ff9933' fill-opacity='0.8' text-anchor='middle'%3E5e%3C/text%3E%3C/svg%3E");
-    }
-
-    .directory-item.hero-edition-6,
-    .folder-header.hero-edition-6 {
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext x='32' y='52' font-family='sans-serif' font-weight='bold' font-size='48' fill='%2300ccff' fill-opacity='0.8' text-anchor='middle'%3E6e%3C/text%3E%3C/svg%3E");
+            &::after {
+                content: "#{$edition}e";
+                position: absolute;
+                right: 2px;
+                bottom: 2px;
+                font: bold 11px/1 sans-serif;
+                color: var(--hero-edition-#{$edition});
+                pointer-events: none;
+            }
+        }
     }
 }

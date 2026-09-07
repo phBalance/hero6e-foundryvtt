@@ -1,4 +1,10 @@
 // Keep shared selectors weaker than component rules.
+@mixin hero-scoped {
+    :where(.herosystem6e, .hero.chat-card) {
+        @content;
+    }
+}
+
 @mixin validation-tint($level, $strength: 10%, $edges: true) {
     background-color: color-mix(in srgb, var(--hero-#{$level}) $strength, transparent);
 
@@ -8,8 +14,14 @@
     }
 }
 
-@mixin validation-outline($level) {
-    outline: var(--hero-#{$level}) solid 1px;
+@mixin row-accent($token, $tint: 6%, $edge: 80%, $width: 3px) {
+    background: color-mix(in srgb, var(--hero-#{$token}) $tint, transparent);
+
+    @if $edge == 100% {
+        box-shadow: inset $width 0 0 var(--hero-#{$token});
+    } @else {
+        box-shadow: inset $width 0 0 color-mix(in srgb, var(--hero-#{$token}) $edge, transparent);
+    }
 }
 
 @mixin boxed-description {
@@ -22,7 +34,6 @@
     overflow-wrap: anywhere;
 }
 
-@mixin form-row($label-basis: 40%) {
 // Fixed label widths avoid padding-dependent column shifts.
 @mixin form-row {
     clear: both;
@@ -32,7 +43,7 @@
     align-items: center;
 
     > label {
-        flex: 0 0 $label-basis;
+        flex: 0 0 40%;
     }
 
     > * {
@@ -41,10 +52,10 @@
     }
 }
 
-@mixin truncate($lines: 1) {
+@mixin truncate($lines: null) {
     overflow: hidden;
 
-    @if $lines == 1 {
+    @if not $lines {
         text-overflow: ellipsis;
         white-space: nowrap;
     } @else {

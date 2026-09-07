@@ -1,9 +1,6 @@
 @use "../abstracts" as *;
 
 $dispositions: friendly, neutral, hostile, secret, player;
-$disposition-tint-default: 5%;
-$disposition-tint-hover: 20%;
-$disposition-tint-active: 60%;
 
 // Keep header overrides after row rules of equal specificity.
 
@@ -41,8 +38,7 @@ ol.combat-tracker.plain {
 
         // Disposition rules below override the fill but preserve the active edge.
         &.current-segment-member.active {
-            background: color-mix(in srgb, var(--hero-accent-hot) 14%, transparent);
-            box-shadow: inset 4px 0 0 var(--hero-accent-hot);
+            @include row-accent(accent-hot, $tint: 14%, $edge: 100%, $width: 4px);
 
             .name {
                 font-weight: bold;
@@ -53,14 +49,14 @@ ol.combat-tracker.plain {
             $color: var(--hero-disposition-#{$disposition});
 
             &.combat-tracker-hero-disposition-#{$disposition} {
-                background-color: color-mix(in srgb, $color $disposition-tint-default, transparent);
+                background-color: color-mix(in srgb, $color 5%, transparent);
 
                 &:hover {
-                    background-color: color-mix(in srgb, $color $disposition-tint-hover, transparent);
+                    background-color: color-mix(in srgb, $color 20%, transparent);
                 }
 
                 &.active {
-                    background-color: color-mix(in srgb, $color $disposition-tint-active, transparent);
+                    background-color: color-mix(in srgb, $color 60%, transparent);
                 }
             }
         }
@@ -157,8 +153,7 @@ ol.combat-tracker.plain {
     }
 
     .combatant.next-turn-preview {
-        box-shadow: inset 3px 0 0 color-mix(in srgb, var(--hero-accent-next) 80%, transparent);
-        background: color-mix(in srgb, var(--hero-accent-next) 6%, transparent);
+        @include row-accent(accent-next);
     }
 
     li.combatant {
@@ -231,15 +226,9 @@ ol.combat-tracker.plain {
         }
     }
 
-    .hero-held-scroll {
-        margin: 0;
-        padding: 0;
-    }
-
     li.combatant {
         &.hero-held-row {
-            box-shadow: inset 3px 0 0 color-mix(in srgb, var(--hero-accent-held) 80%, transparent);
-            background: color-mix(in srgb, var(--hero-accent-held) 6%, transparent);
+            @include row-accent(accent-held);
 
             .name {
                 font-style: italic;
@@ -287,8 +276,7 @@ ol.combat-tracker.plain {
         }
 
         &.hero-lr-row {
-            box-shadow: inset 3px 0 0 color-mix(in srgb, var(--hero-accent) 80%, transparent);
-            background: color-mix(in srgb, var(--hero-accent) 6%, transparent);
+            @include row-accent(accent);
         }
 
         .hero-lr-elevate {
@@ -389,8 +377,7 @@ ol.combat-tracker.plain {
         }
 
         &.defeated {
-            background: color-mix(in srgb, var(--hero-error) 10%, transparent);
-            box-shadow: inset 3px 0 0 var(--hero-error);
+            @include row-accent(error, $tint: 10%, $edge: 100%);
 
             .name {
                 color: var(--hero-error);

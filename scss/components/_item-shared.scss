@@ -2,13 +2,9 @@
 
 @include hero-scoped {
     .item-notes-editable-content {
+        @include truncate(1);
+
         white-space: pre-wrap;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        display: -webkit-box;
-        line-clamp: 1;
-        -webkit-line-clamp: 1;
-        -webkit-box-orient: vertical;
 
         &:active {
             display: block;

@@ -6,7 +6,6 @@ const legacyTokens = [
     "/--color-bg-/",
     "/--color-underline/",
     "/--form-field-height/",
-    "/--font-primary/",
 ];
 
 export default {

@@ -1,11 +1,10 @@
 @use "sass:map";
-@use "sass:meta";
 
 $static: (
     --hero-text-on-accent: var(--color-light-1),
     --hero-overlay-bg: rgb(0 0 0 / 75%),
     --hero-folder-list: #607d8b,
-    --hero-folder-compound: #ff9800,
+    --hero-folder-compoundpower: #ff9800,
     --hero-folder-multipower: #2196f3,
     --hero-folder-vpp: #9c27b0,
     --hero-disposition-friendly: rgb(67 223 223),
@@ -13,6 +12,8 @@ $static: (
     --hero-disposition-hostile: rgb(231 33 36),
     --hero-disposition-secret: rgb(166 18 212),
     --hero-disposition-player: rgb(0 212 0),
+    --hero-edition-5: rgb(255 153 51 / 80%),
+    --hero-edition-6: rgb(0 204 255 / 80%),
 );
 
 // Chat stays light in every theme. Use literals or theme-independent core primitives here.
@@ -33,8 +34,6 @@ $light: (
     --hero-success: #006400,
     --hero-tag: #5e0000,
     --hero-tag-aoe: #d06fa2,
-    --hero-edition-5: #b0c4de,
-    --hero-edition-6: #d8bfd8,
 );
 $dark: (
     --hero-surface-raised: var(--color-cool-5),
@@ -53,8 +52,6 @@ $dark: (
     --hero-success: #4ade80,
     --hero-tag: #8b2020,
     --hero-tag-aoe: #b0487f,
-    --hero-edition-5: #3b5b80,
-    --hero-edition-6: #5c3f5c,
 );
 $core-light-pin: (
     --color-text-emphatic: var(--color-dark-1),
@@ -67,8 +64,7 @@ $core-light-pin: (
     --content-link-border-color: var(--color-dark-4),
 );
 
-// Core has no high-contrast theme, so hc must also supply every core-owned variable. Keys that are
-// selectors nest: core declares --input-* and --button-* on the elements themselves.
+// Core has no HC theme; override its inherited colors explicitly.
 $hc: map.merge(
     $light,
     (
@@ -107,39 +103,6 @@ $hc: map.merge(
         --hr-border: 1px solid #000,
         --color-text-selection: #fff,
         --color-text-selection-bg: #000,
-        "input, select, textarea, formula-input, file-picker, label.icon": (
-            --input-background-color: #fff,
-            --input-border-color: #000,
-            --input-text-color: #000,
-            --input-placeholder-color: var(--color-dark-3),
-            --input-focus-outline-color: #000,
-            --input-box-shadow: none,
-            --checkbox-background-color: #fff,
-            --checkbox-checked-color: #000,
-            --checkbox-checkmark-color: #fff,
-            "&:disabled, &[readonly]": (
-                --input-background-color: var(--color-light-2),
-                --input-text-color: var(--color-dark-3),
-            ),
-        ),
-        "button, a.button": (
-            --button-background-color: #000,
-            --button-border-color: #000,
-            --button-text-color: #fff,
-            --button-hover-background-color: #fff,
-            --button-hover-border-color: #000,
-            --button-hover-text-color: #000,
-            --button-focus-outline-color: #000,
-        ),
-        "#context-menu, &#context-menu": (
-            --background-color: #fff,
-            --border-color: #000,
-            --text-color: #000,
-            --hover-text-color: #fff,
-            --group-separator: #000,
-            --hover-entry-border: #000,
-            --hover-entry-background: #000,
-        ),
     )
 );
 $themes: (
@@ -150,25 +113,21 @@ $themes: (
 
 @mixin emit($map) {
     @each $key, $value in $map {
-        @if meta.type-of($value) == map {
-            #{$key} {
-                @include emit($value);
-            }
-        } @else {
-            #{$key}: #{$value};
-        }
+        #{$key}: #{$value};
     }
 }
 
-// Tokens live on the theme roots core stamps, so elements inherit from the nearest one: an
-// interface-dark sidebar inside an applications-light body resolves without specificity games.
-// No theme class at all falls back to dark, like core.
+// Use theme roots so interface and application themes can differ.
 body {
     @include emit($static);
+}
+
+body,
+.themed.theme-dark {
     @include emit($dark);
 }
 
-@each $name, $map in $themes {
+@each $name, $map in map.remove($themes, dark) {
     body.theme-#{$name},
     .themed.theme-#{$name} {
         @include emit($map);
@@ -177,6 +136,48 @@ body {
 
 .themed.theme-hc {
     color-scheme: light;
+}
+
+// Override on the controls themselves; core declarations would shadow inherited values.
+body.theme-hc,
+.themed.theme-hc {
+    :is(input, select, textarea, formula-input, file-picker, label.icon) {
+        --input-background-color: #fff;
+        --input-border-color: #000;
+        --input-text-color: #000;
+        --input-placeholder-color: var(--color-dark-3);
+        --input-focus-outline-color: #000;
+        --input-box-shadow: none;
+        --checkbox-background-color: #fff;
+        --checkbox-checked-color: #000;
+        --checkbox-checkmark-color: #fff;
+
+        &:is(:disabled, [readonly]) {
+            --input-background-color: var(--color-light-2);
+            --input-text-color: var(--color-dark-3);
+        }
+    }
+
+    :is(button, a.button) {
+        --button-background-color: #000;
+        --button-border-color: #000;
+        --button-text-color: #fff;
+        --button-hover-background-color: #fff;
+        --button-hover-border-color: #000;
+        --button-hover-text-color: #000;
+        --button-focus-outline-color: #000;
+    }
+
+    #context-menu,
+    &#context-menu {
+        --background-color: #fff;
+        --border-color: #000;
+        --text-color: #000;
+        --hover-text-color: #fff;
+        --group-separator: #000;
+        --hover-entry-border: #000;
+        --hover-entry-background: #000;
+    }
 }
 
 .chat-message {
