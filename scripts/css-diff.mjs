@@ -5,11 +5,10 @@ import * as csstree from "css-tree";
 const args = process.argv.slice(2);
 const coreIndex = args.indexOf("--core");
 const corePath = coreIndex >= 0 ? args.splice(coreIndex, 2)[1] : null;
-const [before, after] = args
-    .join(" ")
-    .split(" -- ")
-    .map((s) => s.trim().split(/\s+/).filter(Boolean));
-if (!before?.length || !after?.length) {
+const sep = args.indexOf("--");
+const before = sep >= 0 ? args.slice(0, sep) : [];
+const after = sep >= 0 ? args.slice(sep + 1) : [];
+if (!before.length || !after.length) {
     console.error("usage: css-diff.mjs <before.css...> -- <after.css...> [--core foundry2.css]");
     process.exit(2);
 }
@@ -39,27 +38,41 @@ function index(css) {
                 decls.push(`${node.property}:${value}${node.important ? "!important" : ""}`);
             });
             for (const selector of selectors) {
-                rules.set(selector, new Set([...(rules.get(selector) ?? []), ...decls]));
+                let set = rules.get(selector);
+                if (!set) rules.set(selector, (set = new Set()));
+                for (const d of decls) set.add(d);
             }
         },
     });
     return { rules, used, defined, important };
 }
 
+// Only the custom property names matter for core, so skip selector and value generation
+function definedVars(css) {
+    const defined = new Set();
+    csstree.walk(csstree.parse(css), {
+        visit: "Declaration",
+        enter(node) {
+            if (node.property.startsWith("--")) defined.add(node.property);
+        },
+    });
+    return defined;
+}
+
 const a = index(load(before));
 const b = index(load(after));
-const coreDefined = corePath ? index(readFileSync(corePath, "utf8")).defined : new Set();
-const key = (set) => [...set].sort().join(";");
+const coreDefined = corePath ? definedVars(readFileSync(corePath, "utf8")) : new Set();
 
 const removed = [...a.rules.keys()].filter((s) => !b.rules.has(s));
 const added = [...b.rules.keys()].filter((s) => !a.rules.has(s));
 const changed = [...a.rules.keys()]
-    .filter((s) => b.rules.has(s) && key(a.rules.get(s)) !== key(b.rules.get(s)))
+    .filter((s) => b.rules.has(s))
     .map((s) => ({
         selector: s,
         dropped: [...a.rules.get(s)].filter((d) => !b.rules.get(s).has(d)),
         introduced: [...b.rules.get(s)].filter((d) => !a.rules.get(s).has(d)),
-    }));
+    }))
+    .filter(({ dropped, introduced }) => dropped.length || introduced.length);
 const undefinedVars = [...b.used].filter((v) => !b.defined.has(v) && !coreDefined.has(v) && !RUNTIME_DEFINED.test(v));
 
 const section = (title, items) => {
