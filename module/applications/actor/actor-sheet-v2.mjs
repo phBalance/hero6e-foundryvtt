@@ -1836,13 +1836,17 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
                 continue;
             }
             for (const parentElement of parentElements) {
-                parentElement.classList.toggle("collapsed", value);
-
                 const listElement = parentElement.closest("ol.item-list");
                 if (!listElement) {
                     console.error("unable to find itemList");
                     continue;
                 }
+
+                // Syncing another tab must not hide search matches here.
+                const part = listElement.closest("[data-application-part]")?.dataset.applicationPart;
+                if (this.searchValues[part]) continue;
+
+                parentElement.classList.toggle("collapsed", value);
 
                 for (const child of item.childItems) {
                     listElement
