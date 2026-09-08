@@ -406,6 +406,10 @@
             display: none;
         }
 
+        li.item.group-header .item-row {
+            background-color: var(--hero-surface-tint);
+        }
+
         img.item-image {
             width: 24px;
             height: 24px;
