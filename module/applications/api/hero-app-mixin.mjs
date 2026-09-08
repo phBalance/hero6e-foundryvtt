@@ -1,4 +1,4 @@
-export const HERO_ROOT_CLASS = "herosystem6e";
+const HERO_ROOT_CLASS = "herosystem6e";
 
 // Keys must match the theme maps in scss/theme/_tokens.scss
 export const HERO_SHEET_THEMES = Object.freeze({
@@ -14,7 +14,7 @@ export const HERO_SHEET_THEMES = Object.freeze({
  * @param {foundry.applications.api.ApplicationV2|HTMLElement|null} source
  * @returns {string[]}
  */
-export function heroThemeClasses(source) {
+function heroThemeClasses(source) {
     const element = source instanceof HTMLElement ? source : source?.element;
     const themed = element?.closest?.(".sheet.themed");
     const classes = [HERO_ROOT_CLASS];
