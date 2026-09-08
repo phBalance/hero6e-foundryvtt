@@ -227,16 +227,6 @@
         padding: 0;
     }
 
-    [data-visibility="gm"] {
-        background-color: color-mix(in srgb, var(--hero-info) 8%, var(--hero-surface-raised));
-        outline: 1px solid color-mix(in srgb, var(--hero-info) 40%, transparent);
-    }
-
-    [data-visibility="redacted"] {
-        background-color: var(--color-dark-1);
-        color: var(--hero-text-on-accent);
-    }
-
     .hex-facing {
         display: block;
         margin-left: auto;
@@ -459,6 +449,19 @@ button.hero-delayed-spent {
 .chat-message {
     .hero-inobvious {
         color: var(--hero-info);
+    }
+}
+
+// Generic rolls lack .hero.chat-card; dialog cards lack .chat-message.
+:where(.chat-message, .hero.chat-card) {
+    [data-visibility="gm"] {
+        background-color: color-mix(in srgb, var(--hero-info) 8%, var(--hero-surface-raised));
+        outline: 1px solid color-mix(in srgb, var(--hero-info) 40%, transparent);
+    }
+
+    [data-visibility="redacted"] {
+        background-color: var(--color-dark-1);
+        color: var(--hero-text-on-accent);
     }
 }
 
