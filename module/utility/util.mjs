@@ -621,6 +621,14 @@ export function toHHMMSS(secs) {
 }
 
 /**
+ * Mark a chat button as used.
+ * @param {HTMLElement} button
+ */
+export function markButtonUsed(button) {
+    button.classList.add("hero-used");
+}
+
+/**
  * TokenDocument uuid for a Token placeable, TokenDocument, or PrototypeToken.
  * Token placeables only expose a uuid via their document; PrototypeTokens have none.
  *

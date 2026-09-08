@@ -1,154 +1,17 @@
-// Import utilities.
-@use "sass:meta";
-@use "utils/typography";
-@use "utils/colors";
-@use "utils/variables";
-
-body {
-    --herosystem-color-announce-failure: var(--color-level-error);
-    --herosystem-color-announce-success: #006400;
-
-    .announce-failure {
-        color: var(--herosystem-color-announce-failure);
-        font-weight: bold;
-    }
-
-    .announce-success {
-        color: var(--herosystem-color-announce-success);
-        font-weight: bold;
-    }
-
-    .hero-warning {
-        color: colors.$c-warning;
-    }
-}
-
-/* Styles for dice which are direct overrides of FoundryVTT styling */
-@include meta.load-css("components/foundry-overrides/dice");
-
-/* FIXME: This should not be using the class as a guard. These rules should all use the hero guard and be more tightly scoped (e.g. remove body as they're not global overrides). */
-.herosystem6e,
-.herosystem6e.theme-hc {
-    --herosystem-blue: #286293;
-    --herosystem-table-header-bg-color: var(--table-header-bg-color);
-    --herosystem-shadow-45: rgb(0 0 0 / 45%);
-    --herosystem-border: var(--herosystem-blue);
-    --herosystem-search-background: var(--color-light-1);
-    --herosystem-search-text: var(--color-dark-1);
-    --herosystem-text-light-6: #666;
-    --herosystem-filter-control-color: #999;
-    --herosystem-header-background: var(--table-header-bg-color);
-    --herosystem-item-row-border: rgb(var(--herosystem-blue) / 20%);
-    --herosystem-header-text: var(--table-header-text-color);
-    --input-border-color: var(--color-dark-4, rgb(0 0 0 / 50%));
-    --input-text-color: var(--color-dark-2);
-    --input-background-color: var(--color-light-2);
-}
-
-body.theme-light .herosystem6e,
-.herosystem6e.theme-light {
-    // opacity+sticky is a problem
-    --herosystem-table-header-bg-color: #cac7bf;
-    --herosystem-header-background: #cac7bf;
-}
-
-body.theme-dark .herosystem6e:not(.themed),
-.herosystem6e.theme-dark {
-    --herosystem-table-header-bg-color: var(--color-cool-4); // #333
-    --background: black;
-    --herosystem-search-background: var(--color-dark-3); // 333
-    --herosystem-search-text: var(--color-light-1); // #f7f3e8
-    --input-border-color: var(--color-light-4, rgb(255 255 255 / 40%));
-    --input-text-color: var(--color-light-2);
-    --input-background-color: var(--color-dark-3);
-}
-
-// ref: https://venngage.com/tools/accessible-color-palette-generator
-form.herosystem6e.theme-hc {
-    --herosystem-table-header-bg-color: var(--color-dark-1);
-    --table-header-text-color: white;
-    --background: var(--color-light-1);
-    --color-text-primary: var(--color-dark-1);
-    --color-text-secondary: var(--color-dark-2);
-    --input-text-color: var(--color-dark-2);
-    --input-background-color: var(--color-light-2);
-
-    border: 1px solid white;
-
-    button:not(.unbutton),
-    header {
-        background-color: black;
-        color: white;
-
-        div {
-            background-color: var(--color-light-1);
-            color: black;
-        }
-    }
-
-    input {
-        color: black;
-        background-color: var(--color-light-2);
-        border: 1px solid black;
-    }
-
-    fieldset {
-        border-width: 1px;
-        margin-bottom: 2px;
-    }
-}
-
-/* END FIXME: This should not be using the class as a guard. These rules should all use the hero guard and be more tightly scoped (e.g. remove body as they're not global overrides). */
-
-/* Styles limited to hero sheets */
-.hero {
-    @include meta.load-css("global/grid"); /* V13 - Moved from global as these should be scoped */
-    @include meta.load-css("global/flex"); /* V13 - Moved from global as these should be scoped */
-    @include meta.load-css("components/forms");
-    @include meta.load-css("components/resource");
-    @include meta.load-css("components/tabs");
-    @include meta.load-css("components/items");
-    @include meta.load-css("components/rollable-skill");
-
-    &.auto-overflow {
-        overflow: auto;
-    }
-}
-
-@include meta.load-css("components/chat");
-
-/* Styles for uploading */
-@include meta.load-css("components/upload");
-
-/* Styles for power cards */
-@include meta.load-css("components/power-cards");
-
-/* Stuff that doesn't have a distinct home - should go away */
-@include meta.load-css("components/junk");
-
-/* Combat Tracker */
-@include meta.load-css("components/combat-tracker");
-
-/* Settings window group headers */
-@include meta.load-css("components/settings-config");
-
-/* Effects Panel */
-@include meta.load-css("components/effects-panel");
-
-/* HeroRoll Panel */
-@include meta.load-css("components/hero-generic-roller");
-
-/* Styles for TextEditor */
-@include meta.load-css("components/text-editor");
-
-/* Styles for Notes */
-@include meta.load-css("components/notes");
-
-/* Styles for Active Effects */
-@include meta.load-css("components/active-effects");
-
-/* Styles for Item Attack Application */
-@include meta.load-css("components/item-attack");
-
-/* Styles for Compendium Application */
-@include meta.load-css("components/compendium");
+@use "theme/tokens";
+@use "base/global";
+@use "base/foundry-overrides";
+@use "components/tags";
+@use "components/item-shared";
+@use "components/actor-sheet";
+@use "components/item-sheet";
+@use "components/item-attack-app";
+@use "components/item-modifier-app";
+@use "components/vpp-config";
+@use "components/active-effect-config";
+@use "components/chat";
+@use "components/generic-roller";
+@use "components/combat-tracker";
+@use "components/effects-panel";
+@use "components/compendium";
+@use "components/settings";

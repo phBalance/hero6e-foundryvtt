@@ -41,6 +41,7 @@ import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
 import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
+import { HeroDialogV2, heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
 
 const { Item } = foundry.documents;
 const { FilePicker } = foundry.applications.apps;
@@ -7770,7 +7771,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // If no childItems use the built in Foundry Delete Prompt
         if (this.childItems.length === 0) {
-            return super.deleteDialog(options, operation);
+            return super.deleteDialog(heroDialogOptions(null, options), operation);
         }
 
         // Recursively count all descendants for the warning text
@@ -7795,7 +7796,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             `Delete ${this.system.XMLID} only, or delete ${this.system.XMLID} and all ${totalChildrenCount} children? ` +
             game.i18n.format("SIDEBAR.DeleteWarning", { type });
 
-        return new foundry.applications.api.DialogV2(
+        return new HeroDialogV2(
             foundry.utils.mergeObject(
                 {
                     content,

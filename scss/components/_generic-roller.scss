@@ -9,12 +9,8 @@
     padding: var(--chat-message-spacing);
 
     button {
-        background: rgb(70 130 180);
-        border: 1px solid #000;
-        box-shadow: 0 0 6px inset rgb(141 158 167);
         align-items: center;
         justify-content: center;
-        color: rgb(255 255 255);
         margin: 1px;
     }
 }

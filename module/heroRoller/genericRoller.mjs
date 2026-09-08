@@ -2,6 +2,7 @@ import { createTemporaryItemAttackActionForApplyingDamage, generateChatMessage }
 import { HeroRoller } from "./dice.mjs";
 
 import { HEROSYS } from "../herosystem6e.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 // v13 compatibility
 const { renderTemplate } = foundry.applications.handlebars;
@@ -53,7 +54,7 @@ export class GenericRoller {
         const options = { ocv: canvas.tokens.controlled.at(0)?.actor?.system.characteristics.ocv?.value || 0 };
         const template = await renderTemplate(`systems/${HEROSYS.module}/templates/system/heroRoll-toHit.hbs`, options);
 
-        const userSelection = await foundry.applications.api.DialogV2.prompt({
+        const userSelection = await HeroDialogV2.prompt({
             window: { title: "Roll ToHit" },
             content: template,
             ok: {
@@ -138,7 +139,7 @@ export class GenericRoller {
             `systems/${HEROSYS.module}/templates/system/heroRoll-damage.hbs`,
             options,
         );
-        const userSelection = await foundry.applications.api.DialogV2.prompt({
+        const userSelection = await HeroDialogV2.prompt({
             window: { title: "Roll Damage" },
             content: template,
             ok: {

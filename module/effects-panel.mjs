@@ -1,6 +1,7 @@
+import { HeroAppMixin } from "./applications/api/hero-app-mixin.mjs";
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-export class EffectsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
+export class EffectsPanel extends HeroAppMixin(HandlebarsApplicationMixin(ApplicationV2)) {
     // 1. ApplicationV2 uses static DEFAULT_OPTIONS instead of a defaultOptions getter
     static DEFAULT_OPTIONS = {
         id: "hero-effects-panel",
@@ -9,8 +10,6 @@ export class EffectsPanel extends HandlebarsApplicationMixin(ApplicationV2) {
             frame: false, // Replaces popOut: false
             resizable: false,
         },
-        // HandlebarsApplicationMixin looks for a 'templates' array or a single template path
-        tagName: "div",
         classes: ["hero-effects-panel-container"],
     };
 

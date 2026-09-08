@@ -1,0 +1,36 @@
+@use "../abstracts" as *;
+
+html,
+.herosystem6e {
+    interpolate-size: allow-keywords;
+}
+
+.announce-failure {
+    color: var(--hero-error);
+    font-weight: bold;
+}
+
+.announce-success {
+    color: var(--hero-success);
+    font-weight: bold;
+}
+
+.hero-warning {
+    color: var(--hero-warning);
+}
+
+@include hero-scoped {
+    td {
+        text-align: center;
+    }
+
+    .form-group div span {
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+
+    .hero-damage-types {
+        flex-wrap: wrap;
+        border-top: 1px dashed var(--hero-border);
+    }
+}

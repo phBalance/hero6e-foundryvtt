@@ -1,3 +1,5 @@
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
+
 const { renderTemplate } = foundry.applications.handlebars;
 
 export const DICE_SO_NICE_CUSTOM_SETS = Object.freeze({
@@ -1289,7 +1291,7 @@ export class HeroRoller {
                     // Prompt the user for hit location unless we explicitly don't want to.
                     const hitLocation = this._doNotPromptUserForPlacedShotSelection
                         ? this._placedShotHitLocationOverride
-                        : await foundry.applications.api.DialogV2.wait({
+                        : await HeroDialogV2.wait({
                               window: { title: `Select Specific ${this._alreadyHitLocation} Location To Hit` },
                               content: `<fieldset><legend>Skills</legend>${radios}</fieldset>`,
                               buttons: [

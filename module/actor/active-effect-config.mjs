@@ -1,6 +1,7 @@
+import { HeroAppMixin } from "../applications/api/hero-app-mixin.mjs";
 const { ActiveEffectConfig } = foundry.applications.sheets;
 
-export class HeroSystemActiveEffectConfig extends ActiveEffectConfig {
+export class HeroSystemActiveEffectConfig extends HeroAppMixin(ActiveEffectConfig) {
     static DEFAULT_OPTIONS = {
         classes: ["herosystem-active-effect-config"],
         position: {

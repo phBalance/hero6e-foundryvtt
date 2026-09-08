@@ -45,10 +45,12 @@ import {
     getPowerInfo,
     getTokenUuid,
     hdcTimeOptionIdToSeconds,
+    markButtonUsed,
     tokenEducatedGuess,
     whisperUserTargetsForActor,
 } from "../utility/util.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 const { renderTemplate } = foundry.applications.handlebars;
 
@@ -340,7 +342,7 @@ export async function getTargetArray(formData) {
                 html += `<li style="text-align:left">${target.name}</li>`;
             }
             html += "</ol></td></tr></table>";
-            targetArray = await foundry.applications.api.DialogV2.wait({
+            targetArray = await HeroDialogV2.wait({
                 window: { title: `Pick target list` },
                 content: html,
                 buttons: [
@@ -2029,7 +2031,7 @@ export async function _onRollKnockback(event) {
         </p>
     `;
 
-    await foundry.applications.api.DialogV2.wait({
+    await HeroDialogV2.wait({
         window: { title: `Confirm Knockback details` },
         position: { width: 400 },
         content: html,
@@ -2123,7 +2125,7 @@ export async function _onRollPowerToRemove(event) {
     const template = `systems/${HEROSYS.module}/templates/attack/remove-power-from-automaton.hbs`;
     const content = await renderTemplate(template, { choices });
 
-    const powerToRemoveId = await foundry.applications.api.DialogV2.prompt({
+    const powerToRemoveId = await HeroDialogV2.prompt({
         window: { title: `Remove power from ${targetToken.name}` },
         content,
         ok: {
@@ -2140,7 +2142,7 @@ export async function _onRollPowerToRemove(event) {
     let chatContent = null;
     if (powerToRemoveId === "STR") {
         event.target.textContent = "Removed 10 STR";
-        event.target.style.color = "darkgray";
+        markButtonUsed(event.target);
         chatContent = "Removed 10 STR";
         await actor.update({
             "system.characteristics.str.value": actor.system.characteristics.str.value - 10,
@@ -2148,7 +2150,7 @@ export async function _onRollPowerToRemove(event) {
         });
     } else if (powerToRemoveId === "SPD") {
         event.target.textContent = "Removed 1 SPD";
-        event.target.style.color = "darkgray";
+        markButtonUsed(event.target);
         chatContent = "Removed 1 SPD";
         await actor.update({
             "system.characteristics.spd.value": actor.system.characteristics.spd.value - 1,
@@ -2165,7 +2167,7 @@ export async function _onRollPowerToRemove(event) {
                 const button = parsedMessageContent.querySelector(`button.roll-powerToRemove`);
                 if (button) {
                     button.textContent = `Removed ${item.name}`;
-                    button.style.color = "darkgray";
+                    markButtonUsed(button);
                     await message.update({ content: parsedMessageContent.innerHTML });
                 }
                 chatContent = `Removed power ${item.name}`;
@@ -2808,7 +2810,7 @@ export async function _onRollBreakfall(event) {
             parsedMessageContent.innerHTML = message.content;
             const button = parsedMessageContent.querySelector(`button.roll-breakfall`);
             if (button) {
-                button.style.color = "darkgray";
+                markButtonUsed(button);
                 console.log(`emit updateChatMessage`);
                 if (game.user.isGM) {
                     await message.update({ content: parsedMessageContent.innerHTML });
@@ -3270,8 +3272,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
         }
     }
 
-    // change font color to indicate this button has already been pressed
-    $(button).css("color", "#A9A9A9");
+    markButtonUsed(button);
 }
 
 export async function _onApplyDamageToSpecificToken(item, _damageData, action, targetData) {
@@ -3393,7 +3394,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         // If they clicked "Apply Damage" then prompt
         // WHAT? if (damageRoller.getType === HeroRoller.ROLL_TYPE.ENTANGLE) {
         if (damageRoller.getType() !== HeroRoller.ROLL_TYPE.ENTANGLE && targetEntangle === undefined) {
-            targetEntangle = await foundry.applications.api.DialogV2.wait({
+            targetEntangle = await HeroDialogV2.wait({
                 window: { title: `Confirm Target` },
                 content: `Target ${targetToken.name} or the ENTANGLE effecting ${targetToken.name}?`,
                 buttons: [
@@ -4271,7 +4272,7 @@ export async function _onApplyAdjustmentToSpecificToken(
             html += `</table>`;
 
             const checked =
-                (await foundry.applications.api.DialogV2.wait({
+                (await HeroDialogV2.wait({
                     window: { title: `Pick power to adjust` },
                     content: html,
                     buttons: [
@@ -5091,7 +5092,7 @@ export async function _onModalDamageCard(event) {
     content.find(".modal-damage-card").remove();
     content = content.html();
 
-    const dialog = new foundry.applications.api.DialogV2({
+    const dialog = new HeroDialogV2({
         window: { title: `Modal Damage` },
         content,
         buttons: [

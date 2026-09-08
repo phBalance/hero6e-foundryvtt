@@ -2,6 +2,7 @@ import { HeroRoller } from "../heroRoller/dice.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 const { renderTemplate } = foundry.applications.handlebars;
 const { FormDataExtended } = foundry.applications.ux;
@@ -130,7 +131,7 @@ export async function createSkillPopOutFromItem(item, actor) {
     const content = await _renderSkillForm(item, actor, {});
 
     // Attack Card as a Pop Out
-    const result = await foundry.applications.api.DialogV2.wait({
+    const result = await HeroDialogV2.wait({
         window: { title: "Roll Skill" },
         position: { width: 500 },
         content,

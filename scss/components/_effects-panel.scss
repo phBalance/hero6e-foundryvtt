@@ -1,3 +1,5 @@
+@use "../abstracts" as *;
+
 #effects-panel {
     pointer-events: none;
     top: 5px;
@@ -18,11 +20,11 @@
 
             &:hover::before {
                 content: "\f6cf";
-                background: rgb(0 0 0 / 50%);
+                background: var(--hero-overlay-bg);
                 font-family: "Font Awesome 5 Free";
                 font-weight: 900;
-                font-size: var(--font-size-26);
-                color: var(--text-light);
+                font-size: var(--font-size-24);
+                color: var(--hero-text-on-accent);
                 position: absolute;
                 width: 100%;
                 height: 100%;
@@ -42,21 +44,30 @@
         }
 
         .effect-info {
-            background-color: rgb(0 0 0 / 75%);
-            color: var(--color-text-light-2);
+            background-color: var(--hero-overlay-bg);
+            color: var(--hero-text-on-accent);
             display: none;
             gap: 3px;
             height: min-content;
             margin-right: 0.5em;
-            max-width: 350px;
+            max-width: min(50vw, 640px);
             padding: 0.25em 0.5rem;
 
             table {
                 margin: 0;
+
+                th,
+                td {
+                    text-align: left;
+                }
+
+                // Attribute keys have no natural wrap points.
+                td:first-child {
+                    overflow-wrap: anywhere;
+                }
             }
 
             h1 {
-                // @include p-reset;
                 border: none;
                 display: flex;
                 font-size: var(--font-size-14);
@@ -67,13 +78,6 @@
                     font-size: var(--font-size-13);
                     margin-left: 2px;
                 }
-            }
-
-            > a.inline-check {
-                font-size: var(--font-size-13);
-                font-weight: normal;
-                line-height: normal;
-                vertical-align: middle;
             }
 
             .tags {
@@ -103,28 +107,26 @@
             }
 
             .description {
-                background: rgb(black, 0.7);
+                background: var(--hero-overlay-bg);
                 max-height: 16em;
                 overflow-y: auto;
                 padding: 0 0.5em;
                 text-align: left;
 
-                a,
-                span[data-pf2-effect-area] {
-                    color: var(--color-text-dark-primary);
+                a {
+                    color: var(--hero-text-on-accent);
                 }
             }
         }
 
         > .icon {
-            // @include frame-silver;
             align-items: center;
             background-repeat: no-repeat;
             background-size: contain;
             box-shadow:
-                0 0 0 1px #c0c0c0,
-                0 0 0 2px #808080,
-                inset 0 0 4px rgb(0 0 0 / 50%);
+                0 0 0 1px var(--hero-surface-raised),
+                0 0 0 2px var(--hero-border),
+                inset 0 0 4px var(--hero-shadow);
             color: transparent;
             display: flex;
             justify-content: center;
@@ -133,69 +135,44 @@
             height: 48px;
             width: 48px;
             min-width: 48px;
-            background-color: black;
+            background-color: var(--color-dark-1);
             overflow: hidden;
 
-            &.aura {
-                border-radius: 50%;
-                box-shadow: 0 0 10px 5px white;
-            }
-
-            &.unidentified {
-                filter: drop-shadow(0 0 8px var(--visibility-gm-bg));
-            }
-
-            .expired {
+            span,
+            .linked,
+            .value-wrapper {
                 position: absolute;
-                left: 0;
                 bottom: -1px;
-                width: 100%;
-                padding: 2px 1px;
-
-                // @include micro;
-                color: var(--text-light);
-                background-color: var(--primary);
+                color: var(--hero-text-on-accent);
+                background-color: var(--hero-overlay-bg);
             }
 
             span {
-                position: absolute;
                 left: 0;
-                bottom: -1px;
                 width: 100%;
                 padding: 2px 1px;
-                color: white;
-                background-color: rgb(0 0 0 / 50%);
                 text-align: center;
                 font-size: 0.7em;
                 overflow: hidden;
             }
 
             .linked {
-                position: absolute;
                 display: inline-block;
-                bottom: -1px;
                 right: -1px;
                 padding: 0 2px;
-                color: var(--text-light);
-                background-color: rgb(0 0 0 / 75%);
             }
 
             .value-wrapper {
-                position: absolute;
-                bottom: -1px;
                 left: -1px;
                 max-width: calc(100% + 2px);
                 padding: 0 2px;
-                color: var(--text-light);
-                background-color: rgb(0 0 0 / 75%);
                 font-size: var(--font-size-13);
                 letter-spacing: -0.05em;
                 white-space: nowrap;
                 overflow: hidden;
 
                 .value {
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    @include truncate;
 
                     strong {
                         display: inline-block;

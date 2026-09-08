@@ -6,6 +6,7 @@ import {
     tokenEducatedGuess,
     whisperUserTargetsForActor,
 } from "../../utility/util.mjs";
+import { HeroAppMixin, HeroDialogV2 } from "../api/hero-app-mixin.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 const { ActorSheetV2 } = foundry.applications.sheets;
@@ -17,7 +18,7 @@ const { Actor } = foundry.documents;
 // REF: https://foundryvtt.wiki/en/development/guides/converting-to-appv2
 // REF: https://foundryvtt.wiki/en/development/guides/applicationV2-conversion-guide
 
-export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorSheetV2) {
+export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMixin(ActorSheetV2)) {
     // Dynamic PARTS based on system.id
     static {
         Hooks.once("init", async function () {
@@ -31,7 +32,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         //     //handler: TemplateApplication.#onSubmit,
         //     closeOnSubmit: false, // do not close when submitted
         // },
-        classes: ["herosystem6e", "actor-sheet-v2"],
+        classes: ["actor-sheet-v2"],
         position: {
             width: 800,
             height: 717,
@@ -203,43 +204,46 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
         const content = contentFullHealth + contentRestore + contentReset + contentRebuild;
 
-        const action = await foundry.applications.api.DialogV2.wait({
-            window: {
-                maxWidth: "200px",
-                title:
-                    game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") + ` [${this.actor.name}]`,
-            },
-            position: {
-                width: 600,
-            },
-            content,
-            buttons: [
-                {
-                    icon: "fas fa-heart-crack",
-                    label: "Full Health",
-                    action: "fullHealth",
-                    tooltip: "",
+        const action = await HeroDialogV2.wait(
+            this.dialogOptions({
+                window: {
+                    maxWidth: "200px",
+                    title:
+                        game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.fullHealthConfirm.Title") +
+                        ` [${this.actor.name}]`,
                 },
-                {
-                    icon: "fa-duotone fa-regular fa-cards-blank",
-                    label: "Restore",
-                    action: "restore",
-                    disabled: !this.actor.token,
+                position: {
+                    width: 600,
                 },
-                {
-                    icon: "fas fa-rotate-left",
-                    label: "Reset Actor",
-                    action: "reset",
-                    disabled: resetRebuildDisabled,
-                },
-                {
-                    icon: "fas fa-hammer",
-                    label: "Rebuild",
-                    action: "rebuild",
-                    disabled: resetRebuildDisabled,
-                },
-            ],
-        });
+                content,
+                buttons: [
+                    {
+                        icon: "fas fa-heart-crack",
+                        label: "Full Health",
+                        action: "fullHealth",
+                        tooltip: "",
+                    },
+                    {
+                        icon: "fa-duotone fa-regular fa-cards-blank",
+                        label: "Restore",
+                        action: "restore",
+                        disabled: !this.actor.token,
+                    },
+                    {
+                        icon: "fas fa-rotate-left",
+                        label: "Reset Actor",
+                        action: "reset",
+                        disabled: resetRebuildDisabled,
+                    },
+                    {
+                        icon: "fas fa-hammer",
+                        label: "Rebuild",
+                        action: "rebuild",
+                        disabled: resetRebuildDisabled,
+                    },
+                ],
+            }),
+        );
 
         switch (action) {
             case "fullHealth":
@@ -262,9 +266,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     static #onConfigureActorType() {
-        this.actor.changeTypeDialog({
-            classes: Array.from(this.classList).filter((c) => c.includes("herosystem") || c.includes("theme")),
-        });
+        this.actor.changeTypeDialog(this.dialogOptions());
     }
 
     static #onConfigureToken() {
@@ -280,12 +282,14 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     static async #onDeleteAllTemporaryEffects() {
-        const confirm = await foundry.applications.api.DialogV2.confirm({
-            window: { title: "Delete all Temporary Effects" },
-            content:
-                `<h4>Are you sure?</h4><p>This will permanently delete all ${this.actor.temporaryEffects.length} ` +
-                `temporary effects.</p>`,
-        });
+        const confirm = await HeroDialogV2.confirm(
+            this.dialogOptions({
+                window: { title: "Delete all Temporary Effects" },
+                content:
+                    `<h4>Are you sure?</h4><p>This will permanently delete all ${this.actor.temporaryEffects.length} ` +
+                    `temporary effects.</p>`,
+            }),
+        );
 
         if (confirm) {
             await this.actor.deleteEmbeddedDocuments(
@@ -296,12 +300,14 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
     }
 
     static async #onDeleteAllActiveEffects() {
-        const confirm = await foundry.applications.api.DialogV2.confirm({
-            window: { title: "Delete all activeEffects" },
-            content:
-                `<h4>Are you sure?</h4><p>This will attempt to permanently delete all ${Array.from(this.actor.allApplicableEffects()).length} ` +
-                `active effects.  Some effects will get re-applied.  This may break some powers and/or automation, requiring a re-upload of HDC or FullHealth+Rebuild to fix.</p>`,
-        });
+        const confirm = await HeroDialogV2.confirm(
+            this.dialogOptions({
+                window: { title: "Delete all activeEffects" },
+                content:
+                    `<h4>Are you sure?</h4><p>This will attempt to permanently delete all ${Array.from(this.actor.allApplicableEffects()).length} ` +
+                    `active effects.  Some effects will get re-applied.  This may break some powers and/or automation, requiring a re-upload of HDC or FullHealth+Rebuild to fix.</p>`,
+            }),
+        );
 
         if (confirm) {
             // Intentionally not bulk deleting as we may have errors and we want to delete
@@ -538,6 +544,10 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 case "attacks":
                 case "defenses":
                 case "movements":
+                    context.items = this.#groupedEntries(this._items[partId]);
+                    context.searchValue = this.searchValues[partId];
+                    break;
+
                 case "martial":
                 case "skills":
                 case "maneuvers":
@@ -663,6 +673,30 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
         }
 
         return context;
+    }
+
+    /**
+     * Include nonmatching ancestors as headers; sort siblings alphabetically.
+     * @param {HeroSystem6eItem[]} items
+     * @returns {{ item: HeroSystem6eItem, header: boolean }[]}
+     */
+    #groupedEntries(items) {
+        const matching = new Set(items);
+        const included = new Set();
+        for (const item of items) {
+            for (let ancestor = item; ancestor && !included.has(ancestor); ancestor = ancestor.parentItem) {
+                included.add(ancestor);
+            }
+        }
+
+        const byName = (a, b) => a.name.localeCompare(b.name);
+        const entries = [];
+        const walk = (item) => {
+            entries.push({ item, header: !matching.has(item) });
+            for (const child of item.childItems.filter((i) => included.has(i)).sort(byName)) walk(child);
+        };
+        for (const item of this.actor.items.filter((i) => included.has(i) && !i.parentItem).sort(byName)) walk(item);
+        return entries;
     }
 
     // Character & Active Points tooltip details
@@ -1580,6 +1614,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
         const filter = ev.target.value;
         const regex = new RegExp(RegExp.escape(filter), "i");
+        const itemMatches = (item) =>
+            item.name.match(regex) ||
+            item.system.XMLID.match(regex) ||
+            item.system.description.match(regex) ||
+            item.parentItem?.system.description.match(regex);
 
         // Effects tab, which has multiple item-list elements
         const itemLists = ev.target.closest(".tab")?.querySelectorAll(".item-list");
@@ -1595,6 +1634,11 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 console.error(`unable to find applicationPart`);
             }
 
+            const rendered = new Set(Array.from(itemList.children, (li) => li.dataset.documentUuid));
+            const itemOrDescendantMatches = (item) =>
+                itemMatches(item) ||
+                item.childItems.some((child) => rendered.has(child.uuid) && itemOrDescendantMatches(child));
+
             for (const li of itemList.children) {
                 const item = this._getEmbeddedDocument(li);
                 if (!item) {
@@ -1604,16 +1648,9 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
 
                 try {
                     if (item.documentName === "Item") {
-                        if (
-                            item.name.match(regex) ||
-                            item.system.XMLID.match(regex) ||
-                            item.system.description.match(regex) ||
-                            item.parentItem?.system.description.match(regex)
-                        ) {
-                            li.classList.remove("hidden");
-                        } else {
-                            li.classList.add("hidden");
-                        }
+                        li.classList.toggle("hidden", !itemOrDescendantMatches(item));
+                        // Expand matches without changing saved collapse state.
+                        if (filter) li.classList.remove("collapsed", "collapsed-child");
                     } else if (item.documentName === "ActiveEffect") {
                         const activeEffect = item; // makes code a bit easier to read.
                         if (activeEffect.nameExtended.match(regex) || activeEffect.XMLID?.match(regex)) {
@@ -1629,6 +1666,8 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 }
             }
         }
+
+        if (!filter) this.setChevronStatus(ev.target);
     }
 
     _getDocumentListContextOptions() {
@@ -1672,11 +1711,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
                 },
                 callback: async (target) => {
                     const document = this._getEmbeddedDocument(target);
-                    await document.deleteDialog({
-                        classes: Array.from(this.classList).filter(
-                            (c) => c.includes("herosystem") || c.includes("theme"),
-                        ),
-                    });
+                    await document.deleteDialog(this.dialogOptions());
                 },
             },
 
@@ -1729,6 +1764,7 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             for (const li of itemList.children) {
                 li.classList.remove("hidden");
             }
+            this.setChevronStatus(target);
         }
     }
 
@@ -1794,33 +1830,28 @@ export class HeroSystemActorSheetV2 extends HandlebarsApplicationMixin(ActorShee
             }
 
             const formElement = target.closest("form");
-            const parentElement = formElement.querySelector(`li[data-document-uuid="${item.uuid}"]`);
-            if (!parentElement) {
+            const parentElements = formElement.querySelectorAll(`li[data-document-uuid="${item.uuid}"]`);
+            if (parentElements.length === 0) {
                 console.error("unable to find parentEl");
                 continue;
             }
-            if (value) {
-                parentElement.classList.add("collapsed");
-            } else {
-                parentElement.classList.remove("collapsed");
-            }
-
-            const listElement = parentElement.closest("ol.item-list");
-            if (!listElement) {
-                console.error("unable to find itemList");
-                continue;
-            }
-
-            for (const child of item.childItems) {
-                const childElement = listElement.querySelector(`li[data-document-uuid="${child.uuid}"]`);
-                if (!childElement) {
-                    console.error("unable to find item child element");
+            for (const parentElement of parentElements) {
+                const listElement = parentElement.closest("ol.item-list");
+                if (!listElement) {
+                    console.error("unable to find itemList");
                     continue;
                 }
-                if (value) {
-                    childElement.classList.add("collapsed-child");
-                } else {
-                    childElement.classList.remove("collapsed-child");
+
+                // Syncing another tab must not hide search matches here.
+                const part = listElement.closest("[data-application-part]")?.dataset.applicationPart;
+                if (this.searchValues[part]) continue;
+
+                parentElement.classList.toggle("collapsed", value);
+
+                for (const child of item.childItems) {
+                    listElement
+                        .querySelector(`li[data-document-uuid="${child.uuid}"]`)
+                        ?.classList.toggle("collapsed-child", value);
                 }
             }
         }

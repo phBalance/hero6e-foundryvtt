@@ -1,0 +1,67 @@
+// Keep shared selectors weaker than component rules.
+@mixin hero-scoped {
+    :where(.herosystem6e, .hero.chat-card) {
+        @content;
+    }
+}
+
+@mixin validation-tint($level, $strength: 10%, $edges: true) {
+    background-color: color-mix(in srgb, var(--hero-#{$level}) $strength, transparent);
+
+    @if $edges {
+        border-top: 1px solid color-mix(in srgb, var(--hero-#{$level}) 30%, transparent);
+        border-bottom: 1px solid color-mix(in srgb, var(--hero-#{$level}) 30%, transparent);
+    }
+}
+
+@mixin row-accent($token, $tint: 6%, $edge: 80%, $width: 3px) {
+    background: color-mix(in srgb, var(--hero-#{$token}) $tint, transparent);
+
+    @if $edge == 100% {
+        box-shadow: inset $width 0 0 var(--hero-#{$token});
+    } @else {
+        box-shadow: inset $width 0 0 color-mix(in srgb, var(--hero-#{$token}) $edge, transparent);
+    }
+}
+
+@mixin boxed-description {
+    background-color: var(--hero-surface-tint);
+    border: 1px dashed var(--hero-border);
+    margin: 15px 0;
+    padding: 5px;
+    max-width: 100%;
+    user-select: text;
+    overflow-wrap: anywhere;
+}
+
+// Fixed label widths avoid padding-dependent column shifts.
+@mixin form-row {
+    clear: both;
+    display: flex;
+    flex-flow: row wrap;
+    margin: 3px 0;
+    align-items: center;
+
+    > label {
+        flex: 0 0 40%;
+    }
+
+    > * {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+}
+
+@mixin truncate($lines: null) {
+    overflow: hidden;
+
+    @if not $lines {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    } @else {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: $lines;
+        line-clamp: $lines;
+    }
+}

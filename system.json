@@ -38,7 +38,7 @@
         }
     },
     "esmodules": ["module/herosystem6e.mjs"],
-    "styles": ["css/herosystem6e.css", "css/actor-sheet.css"],
+    "styles": ["css/herosystem6e.css"],
     "scripts": [],
     "packs": [],
     "languages": [

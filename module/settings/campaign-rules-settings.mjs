@@ -3,9 +3,7 @@ import { HEROSYS } from "../herosystem6e.mjs";
 
 //import { getCharacteristicInfoArrayForActor } from "../utility/util.mjs";
 
-const { HandlebarsApplicationMixin } = foundry.applications.api;
-
-export class CampaignRulesSettingsConfig extends HandlebarsApplicationMixin(HeroApplication) {
+export class CampaignRulesSettingsConfig extends HeroApplication {
     // Dynamic PARTS based on system.id
     static {
         Hooks.once("init", async function () {

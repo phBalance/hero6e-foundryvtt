@@ -30,6 +30,7 @@ import {
 } from "../utility/util.mjs";
 import { HeroSystem6eActorActiveEffects } from "./actor-active-effects.mjs";
 import { uploadActorFromXml } from "./actor-upload.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 const { renderTemplate } = foundry.applications.handlebars;
 const { Actor } = foundry.documents;
@@ -930,7 +931,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         };
         const content = await renderTemplate(template, cardData);
 
-        await foundry.applications.api.DialogV2.prompt(
+        await HeroDialogV2.prompt(
             foundry.utils.mergeObject(
                 {
                     window: { title: `Change ${this.name} Type` },
@@ -2769,7 +2770,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             const p = item.isPerceivable(false); // inobivous is not included
             if (p) {
                 perceivable.push(
-                    `<b${p === "maybe" ? ` style="color:blue" title="Inobvious requires PERCEPTION roll"` : ""}>${item.parentItem ? `${item.parentItem.name}: ` : ""}${item.name}</b> ${item.system.description}`,
+                    `<b${p === "maybe" ? ` class="hero-inobvious" title="Inobvious requires PERCEPTION roll"` : ""}>${item.parentItem ? `${item.parentItem.name}: ` : ""}${item.name}</b> ${item.system.description}`,
                 );
             }
         }

@@ -1,6 +1,7 @@
+import { HeroAppMixin } from "../api/hero-app-mixin.mjs";
 const { HandlebarsApplicationMixin, ApplicationV2 } = foundry.applications.api;
 
-export class ItemModifierApplicationV2 extends HandlebarsApplicationMixin(ApplicationV2) {
+export class ItemModifierApplicationV2 extends HeroAppMixin(HandlebarsApplicationMixin(ApplicationV2)) {
     // Dynamic PARTS based on system.id
     static {
         Hooks.once("init", function () {
@@ -18,7 +19,7 @@ export class ItemModifierApplicationV2 extends HandlebarsApplicationMixin(Applic
     }
 
     static DEFAULT_OPTIONS = {
-        classes: ["herosystem6e", "item-modifier-application"],
+        classes: ["item-modifier-application"],
         tag: "form",
         form: {
             handler: ItemModifierApplicationV2.#onSubmit,

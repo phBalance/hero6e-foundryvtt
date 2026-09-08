@@ -3,22 +3,22 @@
     .dice-total {
         &.success {
             color: inherit;
-            background: #c7d0c0;
-            border: 1px solid #006c00;
+            background: color-mix(in srgb, var(--hero-success) 20%, transparent);
+            border: 1px solid var(--hero-success);
         }
 
         &.failure {
             color: inherit;
-            background: #fdd;
-            border: 1px solid #6e0000;
+            background: color-mix(in srgb, var(--hero-error) 15%, transparent);
+            border: 1px solid var(--hero-error);
         }
 
         &.critical {
-            color: green;
+            color: var(--hero-success);
         }
 
         &.fumble {
-            color: red;
+            color: var(--hero-error);
         }
     }
 

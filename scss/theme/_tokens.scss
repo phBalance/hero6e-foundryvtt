@@ -1,0 +1,186 @@
+@use "sass:map";
+
+$static: (
+    --hero-text-on-accent: var(--color-light-1),
+    --hero-overlay-bg: rgb(0 0 0 / 75%),
+    --hero-folder-list: #607d8b,
+    --hero-folder-compoundpower: #ff9800,
+    --hero-folder-multipower: #2196f3,
+    --hero-folder-vpp: #9c27b0,
+    --hero-disposition-friendly: rgb(67 223 223),
+    --hero-disposition-neutral: rgb(241 216 5),
+    --hero-disposition-hostile: rgb(231 33 36),
+    --hero-disposition-secret: rgb(166 18 212),
+    --hero-disposition-player: rgb(0 212 0),
+    --hero-edition-5: rgb(255 153 51 / 80%),
+    --hero-edition-6: rgb(0 204 255 / 80%),
+);
+
+// Chat stays light in every theme. Use literals or theme-independent core primitives here.
+$light: (
+    --hero-surface-raised: var(--color-light-1),
+    --hero-surface-header: #cac7bf,
+    --hero-surface-tint: rgb(0 0 0 / 10%),
+    --hero-border: rgb(0 0 0 / 30%),
+    --hero-shadow: rgb(0 0 0 / 15%),
+    --hero-text-header: var(--color-dark-1),
+    --hero-accent: #286293,
+    --hero-accent-hot: #c94f00,
+    --hero-accent-next: #b45309,
+    --hero-accent-held: #8a6d0e,
+    --hero-error: #c00000,
+    --hero-warning: #b7791f,
+    --hero-info: #1d4ed8,
+    --hero-success: #006400,
+    --hero-tag: #5e0000,
+    --hero-tag-aoe: #d06fa2,
+);
+$dark: (
+    --hero-surface-raised: var(--color-cool-5),
+    --hero-surface-header: var(--color-cool-4),
+    --hero-surface-tint: rgb(255 255 255 / 10%),
+    --hero-border: rgb(255 255 255 / 25%),
+    --hero-shadow: rgb(0 0 0 / 40%),
+    --hero-text-header: var(--color-light-1),
+    --hero-accent: #4fc3f7,
+    --hero-accent-hot: #ff6400,
+    --hero-accent-next: #ff9f43,
+    --hero-accent-held: #d9a520,
+    --hero-error: #ff6b6b,
+    --hero-warning: #f2c94c,
+    --hero-info: #60a5fa,
+    --hero-success: #4ade80,
+    --hero-tag: #8b2020,
+    --hero-tag-aoe: #b0487f,
+);
+$core-light-pin: (
+    --color-text-emphatic: var(--color-dark-1),
+    --color-text-primary: var(--color-dark-2),
+    --color-text-secondary: var(--color-dark-3),
+    --color-text-subtle: var(--color-dark-5),
+    --color-border: var(--color-cool-4),
+    --content-link-text-color: var(--color-dark-2),
+    --content-link-background: #ddd,
+    --content-link-border-color: var(--color-dark-4),
+);
+
+// Core has no HC theme; override its inherited colors explicitly.
+$hc: map.merge(
+    $light,
+    (
+        --hero-surface-header: var(--color-dark-1),
+        --hero-surface-tint: rgb(0 0 0 / 15%),
+        --hero-border: var(--color-dark-1),
+        --hero-shadow: transparent,
+        --hero-text-header: #fff,
+        --hero-accent: #003a6b,
+        --hero-accent-hot: #a33d00,
+        --hero-accent-next: #7a3a00,
+        --hero-accent-held: #5c4700,
+        --hero-error: #8b0000,
+        --hero-warning: #6b4f00,
+        --hero-info: #00248f,
+        --hero-success: #004d00,
+        --hero-tag: #000,
+        --hero-tag-aoe: #5a1a3f,
+        --background: var(--color-light-1),
+        --color-text-emphatic: #000,
+        --color-text-primary: var(--color-dark-1),
+        --color-text-secondary: var(--color-dark-2),
+        --color-text-subtle: var(--color-dark-3),
+        --color-header-background: #000,
+        --color-border: #000,
+        --color-tabs-border: #000,
+        --color-fieldset-border: #000,
+        --color-form-label: #000,
+        --color-form-label-hover: #000,
+        --color-form-hint: var(--color-dark-2),
+        --table-header-bg-color: #000,
+        --table-header-text-color: #fff,
+        --table-header-border-color: #000,
+        --table-row-color-even: rgb(0 0 0 / 12%),
+        --table-row-color-odd: transparent,
+        --hr-border: 1px solid #000,
+        --color-text-selection: #fff,
+        --color-text-selection-bg: #000,
+    )
+);
+$themes: (
+    light: $light,
+    dark: $dark,
+    hc: $hc,
+);
+
+@mixin emit($map) {
+    @each $key, $value in $map {
+        #{$key}: #{$value};
+    }
+}
+
+// Use theme roots so interface and application themes can differ.
+body {
+    @include emit($static);
+}
+
+body,
+.themed.theme-dark {
+    @include emit($dark);
+}
+
+@each $name, $map in map.remove($themes, dark) {
+    body.theme-#{$name},
+    .themed.theme-#{$name} {
+        @include emit($map);
+    }
+}
+
+.themed.theme-hc {
+    color-scheme: light;
+}
+
+// Override on the controls themselves; core declarations would shadow inherited values.
+body.theme-hc,
+.themed.theme-hc {
+    :is(input, select, textarea, formula-input, file-picker, label.icon) {
+        --input-background-color: #fff;
+        --input-border-color: #000;
+        --input-text-color: #000;
+        --input-placeholder-color: var(--color-dark-3);
+        --input-focus-outline-color: #000;
+        --input-box-shadow: none;
+        --checkbox-background-color: var(--color-dark-3);
+        --checkbox-checked-color: #000;
+        --checkbox-checkmark-color: #fff;
+
+        &:is(:disabled, [readonly]) {
+            --input-background-color: var(--color-light-2);
+            --input-text-color: var(--color-dark-3);
+        }
+    }
+
+    :is(button, a.button) {
+        --button-background-color: #000;
+        --button-border-color: #000;
+        --button-text-color: #fff;
+        --button-hover-background-color: #fff;
+        --button-hover-border-color: #000;
+        --button-hover-text-color: #000;
+        --button-focus-outline-color: #000;
+    }
+
+    #context-menu,
+    &#context-menu {
+        --background-color: #fff;
+        --border-color: #000;
+        --text-color: #000;
+        --hover-text-color: #fff;
+        --group-separator: #000;
+        --hover-entry-border: #000;
+        --hover-entry-background: #000;
+    }
+}
+
+.chat-message {
+    @include emit($light);
+    @include emit($core-light-pin);
+}

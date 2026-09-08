@@ -43,14 +43,14 @@
 
                 {{#if this.changes}}
                     <table>
-                        <head>
+                        <thead>
                             <tr>
                                 <th>Attribute Key</th>
                                 <th>Change Mode</th>
                                 <th>Effect Value</th>
                             </tr>
-                        </head>
-                        <body>
+                        </thead>
+                        <tbody>
                             {{#each this.changes}}
                                 <tr>
                                     <td>{{this.key}}</td>
@@ -60,7 +60,7 @@
                                     <td>{{this.value}}</td>
                                 </tr>
                             {{/each}}
-                        </body>
+                        </tbody>
                     </table>
                 {{/if}}
 

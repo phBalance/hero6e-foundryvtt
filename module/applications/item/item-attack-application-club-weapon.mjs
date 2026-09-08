@@ -1,4 +1,5 @@
 import { HeroSystem6eActorActiveEffects } from "../../actor/actor-active-effects.mjs";
+import { HeroAppMixin } from "../api/hero-app-mixin.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -8,7 +9,7 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
  * The dialog simply lets the user pick which hand-to-hand killing attack
  * should be treated as the "club" for the current attack.
  */
-export class ItemAttackClubWeaponApplicationV2 extends HandlebarsApplicationMixin(ApplicationV2) {
+export class ItemAttackClubWeaponApplicationV2 extends HeroAppMixin(HandlebarsApplicationMixin(ApplicationV2)) {
     static {
         Hooks.once("init", () => {
             ItemAttackClubWeaponApplicationV2.initializeTemplate();
@@ -33,7 +34,7 @@ export class ItemAttackClubWeaponApplicationV2 extends HandlebarsApplicationMixi
      * Option defaults for this V2 form.
      */
     static DEFAULT_OPTIONS = {
-        classes: ["herosystem6e", "club-weapon-application"],
+        classes: ["club-weapon-application"],
         id: "item-attack-club-weapon-v2",
         position: {
             width: 400,

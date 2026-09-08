@@ -9,13 +9,14 @@ import {
 import { adjustmentSourcesPermissive, adjustmentSourcesStrict } from "../../utility/adjustment.mjs";
 import { HeroAdderModel, HeroModifierModel } from "../../item/HeroSystem6eTypeDataModels.mjs";
 import { ItemModifierApplicationV2 } from "./item-modifier-application.mjs";
+import { HeroAppMixin, HeroDialogV2 } from "../api/hero-app-mixin.mjs";
 
 // REF: https://foundryvtt.wiki/en/development/guides/converting-to-appv2
 // REF: https://foundryvtt.wiki/en/development/guides/applicationV2-conversion-guide
 
 const ADJUSTMENT_XMLIDS = ["ABSORPTION", "AID", "DISPEL", "DRAIN", "HEALING", "SUCCOR", "SUPPRESS", "TRANSFER"];
 
-export class HeroSystemItemSheetV2 extends HandlebarsApplicationMixin(ItemSheetV2) {
+export class HeroSystemItemSheetV2 extends HeroAppMixin(HandlebarsApplicationMixin(ItemSheetV2)) {
     // Dynamic PARTS based on system.id
     static {
         Hooks.once("init", function () {
@@ -24,7 +25,7 @@ export class HeroSystemItemSheetV2 extends HandlebarsApplicationMixin(ItemSheetV
     }
 
     static DEFAULT_OPTIONS = {
-        classes: ["herosystem6e", "item-sheet-v2"],
+        classes: ["item-sheet-v2"],
         position: {
             width: 520,
             height: 660,
@@ -449,12 +450,14 @@ export class HeroSystemItemSheetV2 extends HandlebarsApplicationMixin(ItemSheetV
                 </select>
             </p>`;
 
-        const inputData = await foundry.applications.api.DialogV2.input({
-            window: {
-                title: `Create ${adderOrModifier.toUpperCase()} for ${item.system.XMLID}`,
-            },
-            content,
-        });
+        const inputData = await HeroDialogV2.input(
+            this.dialogOptions({
+                window: {
+                    title: `Create ${adderOrModifier.toUpperCase()} for ${item.system.XMLID}`,
+                },
+                content,
+            }),
+        );
         if (!inputData?.xmlid) {
             return;
         }
@@ -537,14 +540,16 @@ export class HeroSystemItemSheetV2 extends HandlebarsApplicationMixin(ItemSheetV
             return ui.notifications.error(`Unable to delete adder/modifier.`);
         }
 
-        const confirmed = await foundry.applications.api.DialogV2.confirm({
-            window: {
-                title:
-                    game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title") +
-                    ` ${adderOrModifier.ALIAS ?? adderOrModifier.XMLID}`,
-            },
-            content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content"),
-        });
+        const confirmed = await HeroDialogV2.confirm(
+            this.dialogOptions({
+                window: {
+                    title:
+                        game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Title") +
+                        ` ${adderOrModifier.ALIAS ?? adderOrModifier.XMLID}`,
+                },
+                content: game.i18n.localize("HERO6EFOUNDRYVTTV2.confirms.deleteConfirm.Content"),
+            }),
+        );
 
         if (confirmed) {
             await this.item.update({
@@ -561,11 +566,13 @@ export class HeroSystemItemSheetV2 extends HandlebarsApplicationMixin(ItemSheetV
         const item = this.item;
         if (!item.system._hdcXml) return;
 
-        const confirmed = await foundry.applications.api.DialogV2.confirm({
-            window: { title: `Restore ${item.name}` },
-            content: `<p>Restore <b>${item.name}</b> from its original Hero Designer data?
+        const confirmed = await HeroDialogV2.confirm(
+            this.dialogOptions({
+                window: { title: `Restore ${item.name}` },
+                content: `<p>Restore <b>${item.name}</b> from its original Hero Designer data?
                 Current values (LEVELS, adders, modifiers, charges, notes) will be replaced.</p>`,
-        });
+            }),
+        );
         if (!confirmed) return;
 
         if (await item.restoreFromHdc()) {
@@ -597,10 +604,12 @@ export class HeroSystemItemSheetV2 extends HandlebarsApplicationMixin(ItemSheetV
             return ui.notifications.error(conversionFailures[0].message);
         }
 
-        const confirmed = await foundry.applications.api.DialogV2.confirm({
-            window: { title: `Confirm ${item.name} type change` },
-            content: `Convert ${item.name} from a ${item.type} to ${targetType.toUpperCase()}`,
-        });
+        const confirmed = await HeroDialogV2.confirm(
+            this.dialogOptions({
+                window: { title: `Confirm ${item.name} type change` },
+                content: `Convert ${item.name} from a ${item.type} to ${targetType.toUpperCase()}`,
+            }),
+        );
 
         if (!confirmed) {
             return;

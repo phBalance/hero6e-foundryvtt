@@ -1,0 +1,7 @@
+@use "../abstracts" as *;
+
+.herosystem-active-effect-config {
+    div.description {
+        @include boxed-description;
+    }
+}

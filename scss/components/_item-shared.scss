@@ -1,0 +1,22 @@
+@use "../abstracts" as *;
+
+@include hero-scoped {
+    .item-notes-editable-content {
+        @include truncate(1);
+
+        white-space: pre-wrap;
+
+        &:active {
+            display: block;
+        }
+    }
+
+    .item-oihid {
+        color: var(--hero-error);
+    }
+
+    div.item-chat {
+        color: var(--hero-success);
+        font-weight: 100;
+    }
+}

@@ -6,6 +6,7 @@ import { FrozenSet } from "../utility/frozen-set.mjs";
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { doSuccessRoll, emphasizeSuccessFailureFlavour, generateSuccessChatCard } from "../utility/success-card.mjs";
 import { tokenEducatedGuess } from "../utility/util.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 // Probability, in %, of that number on 3d6
 const HIT_LOCATION_PROBABILITY = Object.freeze({
@@ -232,7 +233,7 @@ async function userSelectsASkill(skillArray) {
         )
         .join("");
 
-    const arrayIndex = await foundry.applications.api.DialogV2.wait({
+    const arrayIndex = await HeroDialogV2.wait({
         window: { title: "Choose Your Variable Skill" },
         content: `<fieldset><legend>Skills</legend>${radios}</fieldset>`,
         buttons: [

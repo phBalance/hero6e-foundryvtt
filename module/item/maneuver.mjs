@@ -4,6 +4,7 @@ import { activeSingleTrackerCombatFor, isQuenchTestRunning } from "../utility/ut
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { calculateVelocityInSystemUnits } from "../utility/units.mjs";
 import { dehydrateAttackItem, rehydrateAttackItem } from "./item-attack.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 /**
  * Maneuvers have some rules of their own that should be considered.
@@ -170,7 +171,7 @@ export async function promptOutOfTurnAbortForManeuver(item) {
         if (combat.combatant?.actor === actor) return;
         if (!combatant?.isOwner || combatant.abortEffect) return;
 
-        const proceed = await foundry.applications.api.DialogV2.confirm({
+        const proceed = await HeroDialogV2.confirm({
             window: { title: `Abort — ${actor.name}` },
             content: `<p>${actor.name} is activating <b>${item.name}</b> outside their Phase. Abort to it?</p>
                 <p class="hint">Aborting consumes their next Phase — or their Held Action, if holding. Cancel keeps ${item.name} active without declaring an Abort (e.g. pre-staging).</p>`,

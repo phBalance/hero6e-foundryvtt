@@ -61,6 +61,7 @@ import "./heroRoller/chat-dice.mjs";
 import { HeroRoll } from "./heroRoller/dice.mjs";
 import "./utility/adjustment.mjs";
 import { expireEffects } from "./utility/util.mjs";
+import { HERO_SHEET_THEMES } from "./applications/api/hero-app-mixin.mjs";
 
 const { Macro } = foundry.documents;
 const { Actors, Items } = foundry.documents.collections;
@@ -223,24 +224,14 @@ Hooks.once("init", async function () {
 
     Actors.registerSheet("herosystem6e", HeroSystemActorSheetV2, {
         makeDefault: true,
-        themes: {
-            "": "Default",
-            light: "Light",
-            dark: "Dark",
-            hc: "High Contrast",
-        },
+        themes: HERO_SHEET_THEMES,
         label: "HeroSystem v2",
     });
 
     Items.unregisterSheet("core", foundry.appv1.sheets.ItemSheet);
     Items.registerSheet("herosystem6e", HeroSystemItemSheetV2, {
         makeDefault: true,
-        themes: {
-            "": "Default",
-            light: "Light",
-            dark: "Dark",
-            hc: "High Contrast",
-        },
+        themes: HERO_SHEET_THEMES,
         label: "HeroSystem V2",
     });
 
@@ -252,6 +243,7 @@ Hooks.once("init", async function () {
         {
             makeDefault: true,
             label: "HeroSystemActiveEffectConfig",
+            themes: HERO_SHEET_THEMES,
         },
     );
 
@@ -285,6 +277,7 @@ Hooks.once("init", async function () {
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-disadvantages-partial-item-v2.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-item-actions-partial-v2.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-item-cost-v2.hbs`,
+        `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-group-header-partial-v2.hbs`,
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-item-description-v2.hbs`,
 
         `systems/${HEROSYS.module}/templates/actor/actor-sheet-v2-parts/actor-sheet-effects-partial-item-v2.hbs`,

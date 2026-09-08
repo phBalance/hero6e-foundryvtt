@@ -2,8 +2,8 @@ import { xmlToJsonNode } from "../utility/xml-to-json.mjs";
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { getPowerInfo } from "../utility/util.mjs";
 import { HeroSystem6eCompendium } from "./compendium.mjs";
+import { HeroAppMixin, HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
-const { DialogV2 } = foundry.applications.api;
 const { CompendiumDirectory } = foundry.applications.sidebar.tabs;
 const { CompendiumCollection } = foundry.documents.collections;
 const { renderTemplate } = foundry.applications.handlebars;
@@ -13,7 +13,7 @@ const { FormDataExtended } = foundry.applications.ux;
  * Custom Compendium Directory sidebar tab for Hero System 6e.
  * Extends core CompendiumDirectory to support direct Hero Designer Prefab (.hdp) batch uploads.
  */
-export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
+export class HeroSystem6eCompendiumDirectory extends HeroAppMixin(CompendiumDirectory) {
     constructor(...args) {
         super(...args);
     }
@@ -129,7 +129,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
                 });
             };
 
-            const metadata = await DialogV2.prompt({
+            const metadata = await HeroDialogV2.prompt({
                 content,
                 id: "create-compendium",
                 window: { title: "COMPENDIUM.Create" },
@@ -249,7 +249,7 @@ export class HeroSystem6eCompendiumDirectory extends CompendiumDirectory {
         const existingPack = game.packs.get(packName);
 
         if (existingPack) {
-            const confirmed = await DialogV2.confirm({
+            const confirmed = await HeroDialogV2.confirm({
                 window: { title: "Overwrite Compendium Entry" },
                 content: `<p><strong>"${metadata.label}"</strong> already exists. Overwrite it?</p>`,
                 rejectClose: false,

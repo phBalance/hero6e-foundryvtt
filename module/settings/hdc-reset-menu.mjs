@@ -1,6 +1,7 @@
 import { buildUploadErrorContext } from "../actor/actor-upload.mjs";
 import { getActorsFromUnlinkedTokensInGame, getSideBarActorsInGame } from "../migration.mjs";
 import { HeroProgressBar } from "../utility/progress-bar.mjs";
+import { HeroAppMixin } from "../applications/api/hero-app-mixin.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const { Actor } = foundry.documents;
@@ -9,7 +10,7 @@ const { Actor } = foundry.documents;
  * GM tool: re-import every world actor and unlinked token from its stored HDC.
  * Failures and legacy actors without stored HDC data are flagged in the dialog.
  */
-export class HdcResetMenu extends HandlebarsApplicationMixin(ApplicationV2) {
+export class HdcResetMenu extends HeroAppMixin(HandlebarsApplicationMixin(ApplicationV2)) {
     static {
         Hooks.once("init", () => {
             HdcResetMenu.PARTS = {
@@ -22,7 +23,6 @@ export class HdcResetMenu extends HandlebarsApplicationMixin(ApplicationV2) {
 
     static DEFAULT_OPTIONS = {
         id: "hdc-reset-application",
-        classes: ["herosystem6e"],
         position: {
             width: 520,
             height: "auto",

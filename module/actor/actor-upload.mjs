@@ -4,6 +4,7 @@ import { HeroProgressBar } from "../utility/progress-bar.mjs";
 import { UploadPerformance } from "../utility/upload-performance.mjs";
 import { formatDuration, getPowerInfo, utf8ToBase64, whisperUserTargetsForActor } from "../utility/util.mjs";
 import { xmlToJsonNode } from "../utility/xml-to-json.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 const { FilePicker } = foundry.applications.apps;
 const { Item } = foundry.documents;
@@ -734,7 +735,7 @@ async function uploadImage(ctx) {
         // Prompt before overwriting token image #2831
 
         if (actor.img !== CONST.DEFAULT_TOKEN && !options.keepExistingImage) {
-            new foundry.applications.api.DialogV2({
+            new HeroDialogV2({
                 window: { title: "Choose token image" },
                 content: `
                 <p>This HDC file does not include an image.</p>
@@ -925,7 +926,7 @@ async function confirmDeleteExtraItems(ctx) {
             .join("") +
         `</ul></div>`;
     const content = `The following items were not included in the HDC file. Do you want to delete them? ${unorderedList}`;
-    const confirmDeleteExtra = await foundry.applications.api.DialogV2.confirm({
+    const confirmDeleteExtra = await HeroDialogV2.confirm({
         window: { title: `${actor.name}: Delete extra items?` },
         content: content,
     });
