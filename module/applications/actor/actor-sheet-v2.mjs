@@ -1614,6 +1614,11 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
 
         const filter = ev.target.value;
         const regex = new RegExp(RegExp.escape(filter), "i");
+        const itemMatches = (item) =>
+            item.name.match(regex) ||
+            item.system.XMLID.match(regex) ||
+            item.system.description.match(regex) ||
+            item.parentItem?.system.description.match(regex);
 
         // Effects tab, which has multiple item-list elements
         const itemLists = ev.target.closest(".tab")?.querySelectorAll(".item-list");
@@ -1629,6 +1634,11 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
                 console.error(`unable to find applicationPart`);
             }
 
+            const rendered = new Set(Array.from(itemList.children, (li) => li.dataset.documentUuid));
+            const itemOrDescendantMatches = (item) =>
+                itemMatches(item) ||
+                item.childItems.some((child) => rendered.has(child.uuid) && itemOrDescendantMatches(child));
+
             for (const li of itemList.children) {
                 const item = this._getEmbeddedDocument(li);
                 if (!item) {
@@ -1638,16 +1648,9 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
 
                 try {
                     if (item.documentName === "Item") {
-                        if (
-                            item.name.match(regex) ||
-                            item.system.XMLID.match(regex) ||
-                            item.system.description.match(regex) ||
-                            item.parentItem?.system.description.match(regex)
-                        ) {
-                            li.classList.remove("hidden");
-                        } else {
-                            li.classList.add("hidden");
-                        }
+                        li.classList.toggle("hidden", !itemOrDescendantMatches(item));
+                        // Expand matches without changing saved collapse state.
+                        if (filter) li.classList.remove("collapsed", "collapsed-child");
                     } else if (item.documentName === "ActiveEffect") {
                         const activeEffect = item; // makes code a bit easier to read.
                         if (activeEffect.nameExtended.match(regex) || activeEffect.XMLID?.match(regex)) {
@@ -1663,6 +1666,8 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
                 }
             }
         }
+
+        if (!filter) this.setChevronStatus(ev.target);
     }
 
     _getDocumentListContextOptions() {
@@ -1759,6 +1764,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
             for (const li of itemList.children) {
                 li.classList.remove("hidden");
             }
+            this.setChevronStatus(target);
         }
     }
 
