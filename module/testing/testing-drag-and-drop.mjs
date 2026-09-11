@@ -303,6 +303,63 @@ export function registerDragAndDropTests(quench) {
                 expect(equipmentVppItems[0].system.QUANTITY).to.equal(2);
             });
 
+            it("Drop a framework-nested compound power onto a VPP moves it into the VPP", async () => {
+                const documents = await testCompendium.getDocuments();
+                const listDoc = documents.find((d) => d.name === "List1");
+                const compoundDoc = documents.find((d) => d.name === "CompoundPower3");
+                const vppDoc = documents.find((d) => d.name === "VPP1");
+                expect(listDoc).to.exist;
+                expect(compoundDoc).to.exist;
+                expect(vppDoc).to.exist;
+
+                const compendiumDrop = (uuid) => ({
+                    preventDefault: () => {},
+                    dataTransfer: {
+                        getData: (format) => (format === "text/plain" ? JSON.stringify({ type: "Item", uuid }) : ""),
+                    },
+                    target:
+                        actorSheet6e.element?.querySelector(".tab[data-tab='powers'], [data-tab='powers']") ||
+                        actorSheet6e.element,
+                });
+                await actorSheet6e._onDrop(compendiumDrop(listDoc.uuid));
+                await actorSheet6e._onDrop(compendiumDrop(compoundDoc.uuid));
+                await actorSheet6e._onDrop(compendiumDrop(vppDoc.uuid));
+
+                const list = quenchActor6e.items.find((item) => item.system.XMLID === "LIST");
+                const vpp = quenchActor6e.items.find((item) => item.system.XMLID === "VPP");
+                const compound = quenchActor6e.items.find((item) => item.name === "CompoundPower3");
+                const clinging = quenchActor6e.items.find((item) => item.system.XMLID === "CLINGING");
+                expect(clinging.parentItem?.id).to.equal(compound.id);
+
+                // Nest the compound in the list first so the drop has to re-parent rather than adopt
+                await compound.update({ "system.PARENTID": list.system.ID });
+                expect(compound.parentItem?.id).to.equal(list.id);
+
+                // Same-actor drop onto an item row (or onto the tab background when targetItem is null)
+                const rowDrop = (targetItem) => ({
+                    preventDefault: () => {},
+                    stopImmediatePropagation: () => {},
+                    target: {
+                        closest: (selector) => {
+                            if (selector === "[data-document-uuid]") {
+                                return targetItem ? { dataset: { documentUuid: targetItem.uuid } } : null;
+                            }
+                            return selector === "[data-tab]" ? { dataset: { tab: "powers" } } : null;
+                        },
+                    },
+                });
+
+                await actorSheet6e._onDropItem(rowDrop(vpp), { type: "Item", uuid: compound.uuid });
+                expect(compound.system.PARENTID).to.equal(vpp.system.ID);
+                expect(clinging.parentItem?.id).to.equal(compound.id);
+                expect(compound.isActive).to.equal(false);
+                expect(clinging.isActive).to.equal(false);
+
+                await actorSheet6e._onDropItem(rowDrop(null), { type: "Item", uuid: compound.uuid });
+                expect(compound.system.PARENTID).to.equal(undefined);
+                expect(compound.isActive).to.equal(true);
+            });
+
             it("Add 'Multipower' twice to powers and equipment (stacking check)", async () => {
                 const documents = await testCompendium.getDocuments();
                 const mpDoc = documents.find((d) => d.system.XMLID === "MULTIPOWER");
