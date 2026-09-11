@@ -120,9 +120,9 @@ export class ItemVppConfig extends HeroApplication {
         const changeContent = [];
         for (const vppItem of this.item.childItems) {
             const vppSlotted = this.#vppSlottedIds.includes(vppItem.id);
-            if (vppItem.system.vppSlotted !== vppSlotted) {
+            if (!!vppItem.system.CARRIED !== vppSlotted) {
                 changes.push({ _id: vppItem.id, ["system.CARRIED"]: vppSlotted });
-                changeContent.push(`<li>${vppItem.name}: ${!vppItem.system.CARRIED ? "Slotted" : "Unslottted"}</li>`);
+                changeContent.push(`<li>${vppItem.name}: ${vppSlotted ? "Slotted" : "Unslotted"}</li>`);
             }
         }
         if (changes.length > 0) {
