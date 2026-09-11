@@ -401,6 +401,70 @@ export function registerStatusEffectTests(quench) {
                     }
                 });
 
+                it("Full health clears the stunned token tint", async function () {
+                    const tokenHook = waitForHook("createToken");
+                    const tokenDocument = await TokenDocument.create(
+                        { actorId: quenchActor.id, name: quenchActor.name, x: 0, y: 0 },
+                        { parent: canvas.scene },
+                    );
+                    await tokenHook;
+
+                    try {
+                        const colors = CONFIG.HERO.statusColors;
+
+                        let hookPromise = waitForHook("createActiveEffect");
+                        await quenchActor.toggleStatusEffect(effectsObj.stunEffect.id, { active: true });
+                        await hookPromise;
+                        assert.ok(
+                            tintMatchesExpected(tokenDocument._source.texture.tint, colors.STUNNED_TINT),
+                            "Stunned tints the token.",
+                        );
+
+                        hookPromise = waitForHook("deleteActiveEffect");
+                        await quenchActor.fullHealth();
+                        await hookPromise;
+
+                        assert.ok(!quenchActor.statuses.has(effectsObj.stunEffect.id), "Stunned cleared.");
+                        assert.ok(
+                            !tintMatchesExpected(tokenDocument._source.texture.tint, colors.STUNNED_TINT),
+                            "Full health clears the stunned tint.",
+                        );
+                    } finally {
+                        await tokenDocument.delete();
+                    }
+                });
+
+                it("Full health clears knocked out applied at full STUN", async function () {
+                    const tokenHook = waitForHook("createToken");
+                    const tokenDocument = await TokenDocument.create(
+                        { actorId: quenchActor.id, name: quenchActor.name, x: 0, y: 0 },
+                        { parent: canvas.scene },
+                    );
+                    await tokenHook;
+
+                    try {
+                        const colors = CONFIG.HERO.statusColors;
+
+                        const hookPromise = waitForHook("createActiveEffect");
+                        await quenchActor.toggleStatusEffect(effectsObj.knockedOutEffect.id, { active: true });
+                        await hookPromise;
+                        assert.ok(
+                            tintMatchesExpected(tokenDocument._source.texture.tint, colors.KO_DEFAULT_TINT),
+                            "Knocked out tints the token.",
+                        );
+
+                        await quenchActor.fullHealth();
+
+                        assert.ok(!quenchActor.statuses.has(effectsObj.knockedOutEffect.id), "Knocked out cleared.");
+                        assert.ok(
+                            !tintMatchesExpected(tokenDocument._source.texture.tint, colors.KO_DEFAULT_TINT),
+                            "Full health clears the knocked out tint.",
+                        );
+                    } finally {
+                        await tokenDocument.delete();
+                    }
+                });
+
                 it("Prone halves DCV value as well as max on 6e", async function () {
                     const actor6e = await Actor.create({
                         name: "_Quench_6e_Prone_Tester",

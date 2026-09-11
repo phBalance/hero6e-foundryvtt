@@ -2,7 +2,7 @@ import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench
 
 import { HeroSystem6eActor } from "../actor/actor.mjs";
 import { calculateRequiredResourcesToUse } from "../item/item-resources.mjs";
-import { HeroSystem6eItem } from "../item/item.mjs";
+import { HeroSystem6eItem, cloneToEffectiveAttackItem } from "../item/item.mjs";
 import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
 import { addDiceParts, calculateDicePartsFromDcForItem, characteristicValueToDiceParts } from "../utility/damage.mjs";
 
@@ -1943,6 +1943,54 @@ export function registerDamageFunctionTests(quench) {
                                 assert.equal(calculateRequiredResourcesToUse([pushedItem], {}).totalEnd, 13);
                             });
                         });
+                    });
+                });
+
+                describe("rehydrate", function () {
+                    const hkaContents = `
+                        <POWER XMLID="HKA" ID="1787900000040" BASECOST="0.0" LEVELS="1" ALIAS="Killing Attack - Hand-To-Hand" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="PD" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
+                            <NOTES />
+                        </POWER>
+                    `;
+                    let actor;
+                    let hkaItem;
+
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents: hkaContents, is5e: false });
+                        hkaItem = actor.items.find((item) => item.system.XMLID === "HKA");
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("rebuilds nested _active item references as items", async function () {
+                        const { dehydrateAttackItem, rehydrateAttackItem } = await import("../item/item-attack.mjs");
+                        const { effectiveItem } = cloneToEffectiveAttackItem({
+                            originalItem: hkaItem,
+                            effectiveRealCost: hkaItem.realCost,
+                            pushedRealPoints: 0,
+                            effectiveStr: 10,
+                            effectiveStrPushedRealPoints: 0,
+                        });
+                        assert.instanceOf(effectiveItem.system._active.effectiveStrItem, HeroSystem6eItem);
+                        const expectedDescription = effectiveItem.system.description;
+
+                        // A snapshot where the STR item rode along inside the item source and a nested
+                        // weapon carries its own STR item, rather than being lifted out alongside it.
+                        const stale = JSON.parse(dehydrateAttackItem(effectiveItem));
+                        stale.item.system._active.effectiveStrItem = stale.effectiveStrItem;
+                        const weapon = JSON.parse(JSON.stringify(stale.item));
+                        weapon.system._active = { effectiveStrItem: stale.effectiveStrItem };
+                        stale.maWeaponItem = weapon;
+                        delete stale.effectiveStrItem;
+
+                        const { item } = rehydrateAttackItem(JSON.stringify(stale), actor);
+                        const active = item.system._active;
+                        assert.instanceOf(active.effectiveStrItem, HeroSystem6eItem);
+                        assert.instanceOf(active.maWeaponItem, HeroSystem6eItem);
+                        assert.instanceOf(active.maWeaponItem.system._active.effectiveStrItem, HeroSystem6eItem);
+                        assert.equal(item.system.description, expectedDescription);
                     });
                 });
             });

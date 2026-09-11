@@ -5896,7 +5896,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             // if the character buys the full category, this “free” CP does not
             // reduce the cost).
             // TODO: This list is incomplete, need config.mjs entries for all TF's along with valid discounts
-            const COMBAT_DRIVING = this.actor.items.find((item) => item.system.XMLID === "COMBAT_DRIVING");
+            const COMBAT_DRIVING = this.actor?.items.find((item) => item.system.XMLID === "COMBAT_DRIVING");
             if (COMBAT_DRIVING) {
                 const qualfyingCategoryForDiscount = this.adders.find(
                     (a) =>

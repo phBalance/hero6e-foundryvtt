@@ -9521,6 +9521,99 @@ export function registerUploadTests(quench) {
                     });
                 });
 
+                describe("Unowned items", function () {
+                    const pdContents = `<PD XMLID="PD" ID="1787900000001" BASECOST="0.0" LEVELS="5" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes"><NOTES /></PD>`;
+                    const forceFieldContents = `<POWER XMLID="FORCEFIELD" ID="1787900000002" BASECOST="0.0" LEVELS="10" ALIAS="Resistant Protection" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="5" EDLEVELS="5" MDLEVELS="0" POWDLEVELS="0"><NOTES /></POWER>`;
+
+                    it("PD costs 1 per level without an actor", function () {
+                        const item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContents, null));
+                        assert.isNull(item.actor);
+                        assert.equal(item.realCost, 5);
+                        assert.equal(item.end, 0);
+                        assert.deepEqual(HeroSystem6eItem._prepareOriginalResetData(item), {});
+                    });
+
+                    it("Resistant Protection costs without an actor", function () {
+                        const item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(forceFieldContents, null));
+                        assert.isNull(item.actor);
+                        // Edition follows the DefaultEdition setting when there is no actor
+                        assert.equal(item.realCost, item.is5e ? 10 : 15);
+                        assert.equal(HeroSystem6eItem._prepareOriginalResetData(item)["system.active"], false);
+                    });
+                });
+
+                describe("VPP with compound power", function () {
+                    const contents = `<?xml version="1.0" encoding="UTF-16"?>
+                        <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
+                        <BASIC_CONFIGURATION BASE_POINTS="400" DISAD_POINTS="75" EXPERIENCE="0" RULES="Default" />
+                        <CHARACTER_INFO CHARACTER_NAME="VPP compound" ALTERNATE_IDENTITIES="" PLAYER_NAME="" HEIGHT="78" WEIGHT="220" HAIR_COLOR="Brown" EYE_COLOR="Brown" CAMPAIGN_NAME="" GENRE="" GM=""><BACKGROUND /><PERSONALITY /><QUOTE /><TACTICS /><CAMPAIGN_USE /><APPEARANCE /><NOTES1 /><NOTES2 /><NOTES3 /><NOTES4 /><NOTES5 /></CHARACTER_INFO>
+                        <CHARACTERISTICS>
+                        <STR XMLID="STR" ID="1787900000010" BASECOST="0.0" LEVELS="0" ALIAS="STR" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes"><NOTES /></STR>
+                        </CHARACTERISTICS>
+                        <SKILLS /><PERKS /><TALENTS /><MARTIALARTS />
+                        <POWERS>
+                        <LIST XMLID="GENERIC_OBJECT" ID="1787900000020" BASECOST="0.0" LEVELS="0" ALIAS="List1" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME=""><NOTES /></LIST>
+                        <POWER XMLID="COMPOUNDPOWER" ID="1787900000021" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1787900000020" NAME="Listed Compound" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES />
+                        <POWER XMLID="CLINGING" ID="1787900000022" BASECOST="10.0" LEVELS="0" ALIAS="Clinging" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES /></POWER>
+                        <POWER XMLID="ENERGYBLAST" ID="1787900000023" BASECOST="0.0" LEVELS="4" ALIAS="Blast" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes"><NOTES /></POWER>
+                        </POWER>
+                        <VPP XMLID="GENERIC_OBJECT" ID="1787900000030" BASECOST="0.0" LEVELS="40" ALIAS="Variable Power Pool" POSITION="2" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Pool" QUANTITY="1"><NOTES />
+                        <ADDER XMLID="CONTROLCOST" ID="1787900000031" BASECOST="0.0" LEVELS="40" ALIAS="Control Cost" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="No" INCLUDE_NOTES_IN_PRINTOUT="No" NAME="" SHOWALIAS="Yes" PRIVATE="No" REQUIRED="Yes" INCLUDEINBASE="Yes" DISPLAYINSTRING="No" GROUP="No" LVLCOST="1.0" LVLVAL="2.0" SELECTED="YES"><NOTES /></ADDER>
+                        </VPP>
+                        <POWER XMLID="COMPOUNDPOWER" ID="1787900000032" BASECOST="0.0" LEVELS="0" ALIAS="Compound Power" POSITION="3" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1787900000030" NAME="Pooled Compound" QUANTITY="1" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes"><NOTES />
+                        <SWIMMING XMLID="SWIMMING" ID="1787900000033" BASECOST="0.0" LEVELS="4" ALIAS="Swimming" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes" ADD_MODIFIERS_TO_BASE="No"><NOTES /></SWIMMING>
+                        <POWER XMLID="FORCEFIELD" ID="1787900000034" BASECOST="0.0" LEVELS="10" ALIAS="Resistant Protection" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="5" EDLEVELS="5" MDLEVELS="0" POWDLEVELS="0"><NOTES /></POWER>
+                        </POWER>
+                        </POWERS>
+                        <DISADVANTAGES /><EQUIPMENT />
+                        </CHARACTER>`;
+                    let actor;
+                    let vpp;
+                    let listedCompound;
+                    let pooledCompound;
+
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false });
+                        vpp = actor.items.find((item) => item.system.XMLID === "VPP");
+                        listedCompound = actor.items.find((item) => item.name === "Listed Compound");
+                        pooledCompound = actor.items.find((item) => item.name === "Pooled Compound");
+                    });
+
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
+
+                    it("uploaded compound power in the pool costs no character points", function () {
+                        assert.equal(pooledCompound.parentItem.id, vpp.id);
+                        assert.equal(pooledCompound.realCost, 17);
+                        assert.equal(pooledCompound.characterPointCost, 0);
+                        assert.isTrue(pooledCompound.isActive);
+                        assert.isTrue(pooledCompound.childItems.every((child) => child.isActive));
+                    });
+
+                    it("compound power moved into the pool becomes an unslotted pool power", async function () {
+                        assert.equal(listedCompound.realCost, 30);
+                        assert.equal(listedCompound.characterPointCost, 30);
+
+                        await listedCompound.update({ "system.PARENTID": vpp.system.ID });
+
+                        assert.equal(listedCompound.parentItem.id, vpp.id);
+                        assert.equal(listedCompound.realCost, 30);
+                        assert.equal(listedCompound.characterPointCost, 0);
+                        assert.isFalse(listedCompound.isActive);
+                        assert.equal(listedCompound.childItems.length, 2);
+                        assert.isTrue(listedCompound.childItems.every((child) => !child.isActive));
+                        assert.isTrue(vpp.childItems.some((child) => child.id === listedCompound.id));
+                    });
+
+                    it("slotting the compound power activates its children", async function () {
+                        await listedCompound.update({ "system.CARRIED": true });
+
+                        assert.isTrue(listedCompound.isActive);
+                        assert.isTrue(listedCompound.childItems.every((child) => child.isActive));
+                    });
+                });
+
                 describe("VPP 6e", function () {
                     const contents = `
                         <VPP XMLID="GENERIC_OBJECT" ID="1747456137874" BASECOST="0.0" LEVELS="10" ALIAS="Variable Power Pool" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Gadget Pool" QUANTITY="1">

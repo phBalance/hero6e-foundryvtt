@@ -1165,7 +1165,17 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
             const dropTarget = event.target.closest("[data-document-uuid]");
             if (!item.isContainer || item.system.XMLID === "COMPOUNDPOWER") {
                 const dropTargetItem = await fromUuid(dropTarget?.dataset.documentUuid);
-                if (!item.system.PARENTID && dropTargetItem?.isContainer) {
+                const isOwnLineage = (candidate) => {
+                    for (let ancestor = candidate; ancestor; ancestor = ancestor.parentItem) {
+                        if (ancestor.id === item.id) return true;
+                    }
+                    return false;
+                };
+                if (
+                    dropTargetItem?.isContainer &&
+                    dropTargetItem.system.ID !== item.system.PARENTID &&
+                    !isOwnLineage(dropTargetItem)
+                ) {
                     ui.notifications.success(`<b>${item.name}</b> was moved into parent <b>${dropTargetItem.name}</b>`);
                     await item.update({ "system.PARENTID": dropTargetItem.system.ID });
                 } else if (item.system.PARENTID && !dropTargetItem?.system.PARENTID) {
@@ -1173,9 +1183,6 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
                         `<b>${item.name}</b> was removed from parent <b>${item.parentItem?.name}</b>.`,
                     );
                     await item.update({ "system.PARENTID": new foundry.data.operators.ForcedDeletion() });
-                } else if (!item.isContainer && dropTargetItem?.isContainer) {
-                    ui.notifications.success(`<b>${item.name}</b> was moved into parent <b>${dropTargetItem.name}</b>`);
-                    await item.update({ "system.PARENTID": dropTargetItem.system.ID });
                 } else if (
                     dropTargetItem?.parentItem &&
                     !item.parentItem &&
