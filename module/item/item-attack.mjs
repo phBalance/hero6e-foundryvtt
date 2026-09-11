@@ -109,7 +109,7 @@ export async function onMessageRendered(html) {
  * @returns {Object} plain item source
  */
 function dehydrateItemSource(item) {
-    const obj = item.toObject(false);
+    const obj = item.toObject ? item.toObject(false) : foundry.utils.deepClone(item);
 
     for (const effect of obj.effects ?? []) {
         const systemFlags = effect.flags?.[game.system.id];
@@ -203,67 +203,51 @@ export function rehydrateActorAndAttackItem(rollInfo) {
 export function rehydrateAttackItem(itemJsonStr, actor) {
     const obj = JSON.parse(itemJsonStr);
 
-    const item = HeroSystem6eItem.fromSource(obj.item, {
-        parent: actor,
-    });
+    const item = hydrateActiveItemReferences(HeroSystem6eItem.fromSource(obj.item, { parent: actor }), obj, actor);
 
+    return { actor, item };
+}
+
+const ACTIVE_ITEM_KEYS = ["__baseAttackItem", "effectiveStrItem", "maWeaponItem"];
+const ACTIVE_LINK_KEYS = ["linkedEnd", "linkedAssociated", "linked"];
+
+/**
+ * Rebuild the item references held in `system._active`. Dehydration lifts the top-level
+ * references out of the item, but nested items (a weapon's own STR item, linked items) ride
+ * through JSON as plain objects and would otherwise stay that way.
+ * @param {HeroSystem6eItem} item
+ * @param {Object} obj - dehydrated container whose top-level references take precedence
+ * @param {HeroSystem6eActor} actor
+ * @returns {HeroSystem6eItem}
+ */
+function hydrateActiveItemReferences(item, obj, actor) {
     // fromSource can come up without the transient _active state; restore the
     // dehydrated copy (it carries __originalUuid/effectiveStr) so the effective-
     // item getters and resource math see the declared state
-    item.system._active ??= obj.item.system?._active ?? {};
+    const active = (item.system._active ??= obj.item?.system?._active ?? {});
 
-    // If there is a base attack item, then we need to rehydrate it.
-    if (obj.__baseAttackItem) {
-        item.system._active.__baseAttackItem = HeroSystem6eItem.fromSource(obj.__baseAttackItem, {
-            parent: actor,
-        });
+    for (const key of ACTIVE_ITEM_KEYS) {
+        const source = obj[key] ?? active[key];
+        if (source) {
+            active[key] = toHydratedItem(source, actor);
+        }
     }
 
-    // If there is a strength item, then we need to rehydrate it.
-    if (obj.effectiveStrItem) {
-        item.system._active.effectiveStrItem = HeroSystem6eItem.fromSource(obj.effectiveStrItem, {
-            parent: actor,
-        });
+    for (const key of ACTIVE_LINK_KEYS) {
+        const links = obj[key] ?? active[key];
+        if (!links) continue;
+        for (const link of links) {
+            link.item = toHydratedItem(link.item, actor);
+        }
+        active[key] = links;
     }
 
-    // If there is a maneuver item, then we need to rehydrate it.
-    if (obj.maWeaponItem) {
-        item.system._active.maWeaponItem = HeroSystem6eItem.fromSource(obj.maWeaponItem, {
-            parent: actor,
-        });
-    }
+    return item;
+}
 
-    // If there are linked endurance items, then we need to rehydrate them as well.
-    if (obj.linkedEnd) {
-        obj.linkedEnd.forEach((linkedEndItemData) => {
-            linkedEndItemData.item = HeroSystem6eItem.fromSource(linkedEndItemData.item, {
-                parent: actor,
-            });
-        });
-        item.system._active.linkedEnd = obj.linkedEnd;
-    }
-
-    // If there are linked associated items, then we need to rehydrate them as well.
-    if (obj.linkedAssociated) {
-        obj.linkedAssociated.forEach((linkedEndItemData) => {
-            linkedEndItemData.item = HeroSystem6eItem.fromSource(linkedEndItemData.item, {
-                parent: actor,
-            });
-        });
-        item.system._active.linkedAssociated = obj.linkedAssociated;
-    }
-
-    // If there are linked items, then we need to rehydrate them as well.
-    if (obj.linked) {
-        obj.linked.forEach((linkedItemData) => {
-            linkedItemData.item = HeroSystem6eItem.fromSource(linkedItemData.item, {
-                parent: actor,
-            });
-        });
-        item.system._active.linked = obj.linked;
-    }
-
-    return { actor, item };
+function toHydratedItem(source, actor) {
+    if (!source || source instanceof HeroSystem6eItem) return source;
+    return hydrateActiveItemReferences(HeroSystem6eItem.fromSource(source, { parent: actor }), {}, actor);
 }
 
 /**

@@ -1041,7 +1041,7 @@ function addStrengthToBundle(item, options, dicePartsBundle, strengthAddsToDamag
     let str = baseEffectiveStrength;
 
     let actorStrengthItem = item.system._active.effectiveStrItem;
-    if (!actorStrengthItem) {
+    if (!(actorStrengthItem instanceof HeroSystem6eItem)) {
         actorStrengthItem = buildStrengthItem(baseEffectiveStrength, item.actor, `STR used with ${item.name}`);
     }
 
