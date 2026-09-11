@@ -808,31 +808,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             const tokenDocuments = this.getActiveTokens(false, true);
 
             if (tokenDocuments.length > 0) {
-                const colors = CONFIG.HERO.statusColors;
-                let updatePayload = { alpha: colors.DEFAULT_ALPHA, "texture.tint": colors.CLEAR_TINT };
-
-                if (finalDead) {
-                    updatePayload = { alpha: colors.DEAD_ALPHA, "texture.tint": colors.DEAD_TINT };
-                } else if (finalKO) {
-                    // The KO effect may not exist yet mid-toggle; force the pending state explicitly.
-                    const isOutOfCombat = this.getKnockedOutOfCombat({
-                        ...changed,
-                        _forceKOActive: finalKO,
-                    });
-
-                    updatePayload = {
-                        alpha: colors.DEFAULT_ALPHA,
-                        "texture.tint": isOutOfCombat ? colors.KO_COMBAT_TINT : colors.KO_DEFAULT_TINT,
-                    };
-                } else if (finalStun) {
-                    updatePayload = { alpha: colors.DEFAULT_ALPHA, "texture.tint": colors.STUNNED_TINT };
-                }
-
-                const tokenUpdates = tokenDocuments.map((tokenDocument) => ({
-                    _id: tokenDocument.id,
-                    ...updatePayload,
-                }));
-                await canvas.scene.updateEmbeddedDocuments("Token", tokenUpdates);
+                // The KO effect may not exist yet mid-toggle; force the pending state explicitly.
+                const updatePayload = HeroSystem6eActor._statusTokenTintPayload({
+                    dead: finalDead,
+                    knockedOut: finalKO,
+                    stunned: finalStun,
+                    knockedOutOfCombat: finalKO && this.getKnockedOutOfCombat({ ...changed, _forceKOActive: true }),
+                });
+                await this._updateStatusTokenTint(tokenDocuments, updatePayload);
 
                 if (finalDead) {
                     for (const tokenDocument of tokenDocuments) {
@@ -851,6 +834,47 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             console.error(`HERO: Status effect toggle failed for ${statusId}`, e);
             return false;
         }
+    }
+
+    static _statusTokenTintPayload({ dead, knockedOut, stunned, knockedOutOfCombat }) {
+        const colors = CONFIG.HERO.statusColors;
+        if (dead) {
+            return { alpha: colors.DEAD_ALPHA, "texture.tint": colors.DEAD_TINT };
+        }
+        if (knockedOut) {
+            return {
+                alpha: colors.DEFAULT_ALPHA,
+                "texture.tint": knockedOutOfCombat ? colors.KO_COMBAT_TINT : colors.KO_DEFAULT_TINT,
+            };
+        }
+        if (stunned) {
+            return { alpha: colors.DEFAULT_ALPHA, "texture.tint": colors.STUNNED_TINT };
+        }
+        return { alpha: colors.DEFAULT_ALPHA, "texture.tint": colors.CLEAR_TINT };
+    }
+
+    async _updateStatusTokenTint(tokenDocuments, updatePayload) {
+        const tokenUpdates = tokenDocuments.map((tokenDocument) => ({ _id: tokenDocument.id, ...updatePayload }));
+        await canvas.scene.updateEmbeddedDocuments("Token", tokenUpdates);
+    }
+
+    /**
+     * Re-derive token tint/alpha from the actor's current statuses. Needed after status effects
+     * are removed without going through toggleStatusEffect.
+     */
+    async syncStatusTokenTint() {
+        const tokenDocuments = this.getActiveTokens(false, true);
+        if (tokenDocuments.length === 0) return;
+
+        const effectsObj = HeroSystem6eActorActiveEffects.statusEffectsObj;
+        const knockedOut = this.statuses.has(effectsObj.knockedOutEffect.id);
+        const updatePayload = HeroSystem6eActor._statusTokenTintPayload({
+            dead: this.statuses.has(effectsObj.deadEffect.id),
+            knockedOut,
+            stunned: this.statuses.has(effectsObj.stunEffect.id),
+            knockedOutOfCombat: knockedOut && this.getKnockedOutOfCombat(),
+        });
+        await this._updateStatusTokenTint(tokenDocuments, updatePayload);
     }
 
     async removeActiveEffect(activeEffect) {
@@ -2415,6 +2439,18 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         end = Date.now();
         if (end - start > tDelta) {
             console.warn("fullHealth performance concern: Set Characteristics VALUE to MAX", end - start);
+        }
+
+        // KO/dead normally clear through the STUN/BODY updates above; a status applied while the
+        // characteristic was already at max never sees that update.
+        if (this.id && !options.keepTemporaryEffects) {
+            const effectsObj = HeroSystem6eActorActiveEffects.statusEffectsObj;
+            for (const statusId of [effectsObj.knockedOutEffect.id, effectsObj.deadEffect.id]) {
+                if (this.statuses.has(statusId)) {
+                    await this.toggleStatusEffect(statusId, { active: false });
+                }
+            }
+            await this.syncStatusTokenTint();
         }
     }
 
