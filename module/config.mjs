@@ -868,6 +868,10 @@ function staticIgnoreForActorFunction(alwaysIgnore) {
 
 function pdEdCostPerLevel(itemOrActor) {
     const actor = itemOrActor instanceof HeroSystem6eActor ? itemOrActor : itemOrActor.actor;
+    if (!actor) {
+        return 1;
+    }
+
     const specialAutomatonPowers = actor.getAutomatonSpecialPowers();
     const isAutomatonWithNoStun =
         specialAutomatonPowers.takesNoStunButLosesFunctionOnBody || specialAutomatonPowers.takesNoStun;

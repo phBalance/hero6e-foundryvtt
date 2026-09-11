@@ -9521,6 +9521,27 @@ export function registerUploadTests(quench) {
                     });
                 });
 
+                describe("Unowned items", function () {
+                    const pdContents = `<PD XMLID="PD" ID="1787900000001" BASECOST="0.0" LEVELS="5" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes"><NOTES /></PD>`;
+                    const forceFieldContents = `<POWER XMLID="FORCEFIELD" ID="1787900000002" BASECOST="0.0" LEVELS="10" ALIAS="Resistant Protection" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="5" EDLEVELS="5" MDLEVELS="0" POWDLEVELS="0"><NOTES /></POWER>`;
+
+                    it("PD costs 1 per level without an actor", function () {
+                        const item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContents, null));
+                        assert.isNull(item.actor);
+                        assert.equal(item.realCost, 5);
+                        assert.equal(item.end, 0);
+                        assert.deepEqual(HeroSystem6eItem._prepareOriginalResetData(item), {});
+                    });
+
+                    it("Resistant Protection costs without an actor", function () {
+                        const item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(forceFieldContents, null));
+                        assert.isNull(item.actor);
+                        // Edition follows the DefaultEdition setting when there is no actor
+                        assert.equal(item.realCost, item.is5e ? 10 : 15);
+                        assert.equal(HeroSystem6eItem._prepareOriginalResetData(item)["system.active"], false);
+                    });
+                });
+
                 describe("VPP 6e", function () {
                     const contents = `
                         <VPP XMLID="GENERIC_OBJECT" ID="1747456137874" BASECOST="0.0" LEVELS="10" ALIAS="Variable Power Pool" POSITION="0" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" INPUT="Gadget Pool" QUANTITY="1">
