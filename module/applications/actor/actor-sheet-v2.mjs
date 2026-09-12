@@ -1832,7 +1832,9 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
         for (const [key, value] of Object.entries(this.chevronCollapsedStatus)) {
             const item = fromUuidSync(key);
             if (!item) {
-                console.error("unable to find item");
+                // The sheet instance outlives its items (re-upload, framework removal);
+                // a stale entry would otherwise be reported on every render
+                delete this.chevronCollapsedStatus[key];
                 continue;
             }
 
@@ -1868,6 +1870,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
         const item = this._getEmbeddedDocument(target);
         if (!item) {
             console.error("onToggleChevron: Unable to locate item");
+            return;
         }
         this.chevronCollapsedStatus[item.uuid] = !this.chevronCollapsedStatus[item.uuid];
         await this.setChevronStatus(target);
