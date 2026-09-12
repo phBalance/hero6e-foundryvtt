@@ -3366,6 +3366,23 @@ export function registerDiceTests(quench) {
                         expect(roller.getEntangleTerms()).to.deep.equal([-2, -2, -2, 1, 3]);
                         expect(roller.getEntangleTotal()).to.equal(-2);
                     });
+
+                    it("should render when hit locations were requested", async function () {
+                        const TestRollMock = Roll1Mock;
+
+                        // Grab maneuvers roll as entangle with hit locations enabled; the
+                        // tooltip has no location sub-roller to show and must not try
+                        const roller = new HeroRoller({}, TestRollMock)
+                            .makeEntangleRoll()
+                            .addToHitLocation(true, "none")
+                            .addDice(3);
+
+                        await roller.roll();
+
+                        const html = await roller.render("Grab");
+                        expect(html).to.be.a("string");
+                        expect(html).to.not.include("Hit Location");
+                    });
                 });
 
                 describe("Effect roll", async function () {
