@@ -1210,6 +1210,46 @@ export function registerCombatTests(quench) {
                     expect(expired, "re-declared dodge expired at the actor's next Phase").to.be.true;
                 });
 
+                it("Should leave the reused maneuver effect document intact when re-activated out of combat", async function () {
+                    const { activateManeuver } = await import("../item/maneuver.mjs");
+
+                    const alpha = await makeActor("_Quench Linger Alpha", { dex: 30, spd: 2 });
+                    const weaver = await makeActor("_Quench Linger Weaver", { dex: 20, spd: 2 });
+                    const dodgeItem = await dodgeItemFor(weaver);
+
+                    const combat = await makeCombat([alpha, weaver]);
+                    await combat.startCombat();
+                    ui.combat.viewed = combat;
+
+                    await combat.nextTurn();
+                    expect(combat.combatant.actorId).to.equal(weaver.id);
+                    await dodgeItem.toggle();
+                    const dodgeEffect = () => dodgeItem.effects.contents[0];
+                    expect(dodgeEffect(), "activation created the effect").to.exist;
+
+                    // Leave combat with the effect still on the item, then re-declare:
+                    // activation bails before persisting, so the reused document must
+                    // come through untouched — the tracker reads every applied effect's
+                    // statuses Set on each render
+                    await combat.deleteEmbeddedDocuments("Combatant", [combatantFor(combat, weaver).id]);
+                    expect(weaver.inCombat, "weaver left combat").to.be.false;
+                    expect(dodgeEffect(), "effect lingers on the item").to.exist;
+                    await activateManeuver(dodgeItem);
+                    expect(dodgeEffect().statuses, "reused effect keeps a Set of statuses").to.be.instanceOf(Set);
+                    expect(
+                        dodgeEffect().system.changes.every((c) => c.phase === "initial"),
+                        "changes keep their application phase",
+                    ).to.be.true;
+
+                    // Back in combat, the tracker row for the actor must build without throwing
+                    await combat.createEmbeddedDocuments("Combatant", [{ actorId: weaver.id }]);
+                    const turn = await ui.combat._prepareTurnContext(combat, combatantFor(combat, weaver), 0);
+                    expect(
+                        turn.effects.icons.some((i) => i.name === dodgeEffect().name),
+                        "dodge icon on the row",
+                    ).to.be.true;
+                });
+
                 it("Haymaker activation carries its DCV penalty through system.changes", async function () {
                     // Brace/Haymaker route their effect changes through statusChanges (a deepClone
                     // of the haymakerEffect template), unlike Dodge/Block's traitChanges — exercise
