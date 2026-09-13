@@ -1241,11 +1241,20 @@ export class HeroRoller {
     /**
      * @returns {HitLocationInfo}
      */
-    async #calculateHitLocationIfAppropriate() {
-        if (
+    /**
+     * Hit locations only apply to rolls that deal STUN/BODY. Callers still request them for
+     * other types (grab maneuvers roll as entangle), so every reader of the location sub-roller
+     * must gate on this rather than on _useHitLocation alone.
+     */
+    #rollsHitLocation() {
+        return (
             this._useHitLocation &&
             (this._type === HeroRoller.ROLL_TYPE.NORMAL || this._type === HeroRoller.ROLL_TYPE.KILLING)
-        ) {
+        );
+    }
+
+    async #calculateHitLocationIfAppropriate() {
+        if (this.#rollsHitLocation()) {
             let locationName;
             let locationRollTotal;
 
@@ -1722,7 +1731,7 @@ export class HeroRoller {
 
         // Show hit location dice?
         if (
-            this._useHitLocation &&
+            this.#rollsHitLocation() &&
             (this._alreadyHitLocation === "none" || CONFIG.HERO.isSpecialHitLocation(this._alreadyHitLocation))
         ) {
             const isSpecialHitLocation = CONFIG.HERO.isSpecialHitLocation(this._alreadyHitLocation);

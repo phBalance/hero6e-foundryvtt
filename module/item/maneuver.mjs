@@ -458,9 +458,11 @@ export async function activateManeuver(item) {
     // Make sure we have original Item
     const originalItem = item.id ? item : fromUuidSync(item.system._active.__originalUuid);
 
-    let activeEffect = originalItem.effects.contents[0] || {
-        flags: [],
-    };
+    // Build on a plain copy and write back only through update(): fields set
+    // straight onto the live document stay there (array statuses, changes
+    // without a phase) through every early return below and any no-op update
+    const existingEffect = originalItem.effects.contents[0];
+    let activeEffect = existingEffect?.toObject() ?? { flags: [] };
 
     // Turn on any status effects that we have implemented
     const spec = MANEUVER_EFFECT_SPECS.find((s) => s.match(item));
@@ -470,7 +472,6 @@ export async function activateManeuver(item) {
         activeEffect = buildManeuverActiveEffect(activeEffect, item, spec, { dcvTrait, ocvTrait });
     }
 
-    // The effect may be a reused document or a plain template object
     const _changes = activeEffectChanges(activeEffect);
 
     if (activeEffect.name && _changes.length > 0) {
@@ -496,14 +497,12 @@ export async function activateManeuver(item) {
         if (activeEffect.duration?.value === Infinity) {
             activeEffect.duration.value = null;
         }
-        if (activeEffect.update) {
-            await activeEffect.update({ ...activeEffect, _id: undefined });
+        if (existingEffect) {
+            await existingEffect.update({ ...activeEffect, _id: undefined });
+        } else if (originalItem.id) {
+            await originalItem.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
         } else {
-            if (originalItem.id) {
-                await originalItem.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
-            } else {
-                console.error(`originalItem has no id, something is very wrong here`, originalItem);
-            }
+            console.error(`originalItem has no id, something is very wrong here`, originalItem);
         }
     }
 }

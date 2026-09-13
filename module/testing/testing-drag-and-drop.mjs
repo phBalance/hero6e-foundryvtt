@@ -514,5 +514,45 @@ export function registerDragAndDropTests(quench) {
                 });
             }
         });
+
+        describe("Actor sheet chevron state", function () {
+            setQuenchTimeout(this);
+            let actor;
+            let sheet;
+
+            before(async () => {
+                actor = await createQuenchActor({ quench: this, is5e: false, actorType: "pc" });
+                sheet = actor.sheet;
+                await sheet.render(true);
+            });
+
+            after(async () => {
+                if (sheet?.rendered) await sheet.close();
+                if (actor) await deleteQuenchActor({ quench: this, actor });
+            });
+
+            it("should drop collapsed-state entries for items deleted while the sheet stays open", async function () {
+                await actor.addHeroSystemManeuvers();
+                const item = actor.items.find((i) => i.system?.XMLID === "DODGE");
+                const uuid = item.uuid;
+                sheet.chevronCollapsedStatus[uuid] = true;
+                await item.delete();
+
+                const errors = [];
+                const originalError = console.error;
+                console.error = (...args) => errors.push(args.join(" "));
+                try {
+                    await sheet.setChevronStatus(sheet.element);
+                } finally {
+                    console.error = originalError;
+                }
+
+                expect(sheet.chevronCollapsedStatus, "stale entry pruned").to.not.have.property(uuid);
+                expect(
+                    errors.filter((e) => e.includes("unable to find item")),
+                    "no stale-item errors",
+                ).to.be.empty;
+            });
+        });
     });
 }
