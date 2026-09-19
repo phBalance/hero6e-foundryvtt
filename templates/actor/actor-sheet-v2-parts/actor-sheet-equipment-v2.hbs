@@ -6,15 +6,14 @@
     {{> (getModulePath 'actor/actor-sheet-v2-parts/actor-sheet-search-partial-v2.hbs') this }}
 
     <div class="flexrow equipment-price-weight-summary">
-        <div class="flexcol">Net Worth: ${{this.actor.netWorth}}</div>
-        <div class="flexcol">Net Weight: {{this.actor.encumbrance}} kg</div>
+        <div class="flexcol">{{localize "ActorSheet.NetWorth"}}: ${{this.actor.netWorth}}</div>
+        <div class="flexcol">{{#if (equal (getHeftUnits) "kg")}}{{localize "ActorSheet.NetMass"}}{{else}}{{localize "ActorSheet.NetWeight"}}{{/if}}: {{this.actor.encumbranceDisplay}} {{getHeftUnits}}</div>
     </div>
     <section class="item-list-container">
         <div class="item-header">
             <div class="item-column item-description">{{localize "ActorSheet.Description"}}</div>
             <div class="item-column item-end">{{localize "ActorSheet.End"}}</div>
-            <div class="item-column item-price">{{localize "ActorSheet.Price"}}</div>
-            <div class="item-column item-weight">{{localize "ActorSheet.Weight"}}</div>
+            <div class="item-column item-price-and-weight">{{localize "ActorSheet.Price"}} &amp; {{#if (equal (getHeftUnits) "kg")}}{{localize "ActorSheet.Mass"}}{{else}}{{localize "ActorSheet.Weight"}}{{/if}}</div>
             <div class="item-column item-carried">{{localize "ActorSheet.Carried"}}</div>
             <div class="item-column item-controls"></div>
         </div>

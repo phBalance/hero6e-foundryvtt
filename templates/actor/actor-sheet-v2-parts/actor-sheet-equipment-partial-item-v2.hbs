@@ -32,17 +32,21 @@
         </div>
 
         <div class="item-column item-end">
-            {{#if (ne this.system.XMLID "LIST")}}
+            {{#if (ne this.isContainer)}}
                 {{this.system.endEstimate}}
             {{/if}}
         </div>
 
-        <div class="item-column item-price">
-            {{this.priceText}}
-        </div>
-
-        <div class="item-column item-weight">
-            {{this.weightKg}}
+        <div class="item-column item-price-and-weight">
+            {{this.quantity}} x {{this.unitPriceDisplay}}
+            {{#if (gt this.quantity 1)}}
+                / {{this.totalPriceDisplay}}
+            {{/if}}
+            </br>
+            {{this.quantity}} x {{this.unitHeftDisplay}}
+            {{#if (gt this.quantity 1)}}
+                / {{this.heftInUnitsDisplay.total}}
+            {{/if}}
         </div>
         
         <div class="item-column item-carried">

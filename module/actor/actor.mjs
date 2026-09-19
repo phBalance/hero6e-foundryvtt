@@ -3705,22 +3705,43 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return "";
     }
 
+    /**
+     * Get the encumbrance for the actor. Only equipment has weight/mass (aka heft).
+     */
     get encumbrance() {
-        // encumbrancePercentage
-        const equipmentWeightPercentage =
-            parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
+        const equipmentWeightPercentagePenaltyFactor =
+            parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100;
 
-        // Hero Designer appears to store WEIGHT as LBS instead of KG.
-        const equipment = this.items.filter((item) => item.type === "equipment" && !item.parentItem && item.isCarried);
-        const weightLbs = equipment.reduce((a, b) => a + parseFloat(b.system?.WEIGHT || 0), 0);
-        const weightKg = (weightLbs / 2.2046226218) * equipmentWeightPercentage;
+        const equipment = this.items.filter((item) => item.type === "equipment" && item.isCarried);
+        const equipmentHeft = equipment.reduce(
+            (accum, item) => {
+                const combinedHeft = item.combinedHeft;
+                accum.mass += combinedHeft.mass;
+                accum.weight += combinedHeft.weight;
+                return accum;
+            },
+            { mass: 0, weight: 0 },
+        );
 
-        return weightKg.toFixed(1);
+        return {
+            mass: equipmentHeft.mass * equipmentWeightPercentagePenaltyFactor,
+            weight: equipmentHeft.weight * equipmentWeightPercentagePenaltyFactor,
+        };
+    }
+
+    /**
+     * Get the encumbrance for display purposes (limited to 1 significant digit after the decimal point)
+     */
+    get encumbranceDisplay() {
+        const metricUnits = game.settings.get(game.system.id, "metricUnits");
+        const encumberance = this.encumbrance;
+
+        return (metricUnits ? encumberance.mass : encumberance.weight).toFixed(1);
     }
 
     get netWorth() {
         const equipment = this.items.filter((item) => item.type === "equipment" && !item.parentItem && item.isCarried);
-        const price = equipment.reduce((a, b) => a + parseFloat(b.system.PRICE), 0);
+        const price = equipment.reduce((a, b) => a + b.system.PRICE, 0);
         return price.toFixed(2);
     }
 
