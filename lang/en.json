@@ -79,9 +79,13 @@
         "HitMod": "Hit Mod",
         "Imp": "Imp.",
         "Levels": "Levels",
+        "Mass": "Mass",
         "Max": "Max",
         "MaxTitle": "Maximum value including all powers and effects.",
         "Name": "Name",
+        "NetMass": "Net Mass",
+        "NetWeight": "Net Weight",
+        "NetWorth": "Net Worth",
         "Notes": "Notes",
         "NotesTitle": "Additional crucial information relating to the characteristic.",
         "OCV": "OCV",
@@ -329,7 +333,7 @@
         },
         "MetricUnits": {
             "Name": "Use Metric Units",
-            "Hint": "Display actor sheet background height and weight in metric units (meters) instead of imperial units (feet)."
+            "Hint": "Display actor sheet background height and weight in metric units (meters, kilograms) instead of imperial units (feet, pounds)."
         },
         "NonStandardStunMultiplierForKillingAttack": {
             "Name": "Custom Killing Attack STUN Multiplier",

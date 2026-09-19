@@ -1,5 +1,7 @@
 import { HEROSYS } from "./herosystem6e.mjs";
 
+import { getHeftUnits, getMonetaryUnits } from "./utility/units.mjs";
+
 export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("abs", abs);
     Handlebars.registerHelper("actorItemHeroValidation", actorItemHeroValidation);
@@ -9,9 +11,13 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("appliesTo", appliesTo);
     Handlebars.registerHelper("calculated5eCharacteristic", calculated5eCharacteristic);
     Handlebars.registerHelper("concat", concat);
+    Handlebars.registerHelper("defenseAbbreviation", defenseAbbreviation);
+    Handlebars.registerHelper("endOrChargeDisplay", endOrChargeDisplay);
     Handlebars.registerHelper("equal", equal);
     Handlebars.registerHelper("figured5eCharacteristic", figured5eCharacteristic);
     Handlebars.registerHelper("gameConfigValue", gameConfigValue);
+    Handlebars.registerHelper("getHeftUnits", getHeftUnits);
+    Handlebars.registerHelper("getMonetaryUnits", getMonetaryUnits);
     Handlebars.registerHelper("getModulePath", getModulePath);
     Handlebars.registerHelper("getScopedFlagValue", getScopedFlagValue);
     Handlebars.registerHelper("getUploadLastModifiedDate", getUploadLastModifiedDate);
@@ -22,15 +28,13 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("isdefined", isDefined);
     Handlebars.registerHelper("hasProperty", hasProperty);
     Handlebars.registerHelper("notEqual", notEqual);
+    Handlebars.registerHelper("objectNumKeys", objectNumKeys);
     Handlebars.registerHelper("signedString", signedString);
     Handlebars.registerHelper("toArray", toArray);
     Handlebars.registerHelper("toJsonArray", toJsonArray);
     Handlebars.registerHelper("toJSON", toJSON);
     Handlebars.registerHelper("toLowerCase", toLowerCase);
     Handlebars.registerHelper("toUpperCase", toUpperCase);
-    Handlebars.registerHelper("objectNumKeys", objectNumKeys);
-    Handlebars.registerHelper("defenseAbbreviation", defenseAbbreviation);
-    Handlebars.registerHelper("endOrChargeDisplay", endOrChargeDisplay);
 }
 
 function indexOf(str, searchTerm) {

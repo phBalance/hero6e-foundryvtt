@@ -26,8 +26,13 @@ import {
 import { getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { doSuccessRoll, generateSuccessChatCard } from "../utility/success-card.mjs";
-import { getRoundedUpDistanceInSystemUnits, getSystemDisplayUnits } from "../utility/units.mjs";
-import { xmlToJsonNode } from "../utility/xml-to-json.mjs";
+import {
+    getHeftUnits,
+    getMonetaryUnits,
+    getRoundedUpDistanceInSystemUnits,
+    getSystemDisplayUnits,
+    kgsInOneLb,
+} from "../utility/units.mjs";
 import {
     activeSingleTrackerCombatFor,
     getPowerInfo,
@@ -37,6 +42,7 @@ import {
     tokenEducatedGuess,
     whisperUserTargetsForActor,
 } from "../utility/util.mjs";
+import { xmlToJsonNode } from "../utility/xml-to-json.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
@@ -816,12 +822,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     this.effects.find((ae) => !ae.system.XMLID) ??
                     {};
 
-                activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.system.QUANTITY}`;
+                activeEffect.name = (this.name ? `${this.name}: ` : "") + `LIGHT ${this.quantity}`;
                 activeEffect.img = "icons/svg/light.svg";
                 const changes = [
                     {
                         key: "ATL.light.bright",
-                        value: parseFloat(this.system.QUANTITY),
+                        value: parseFloat(this.quantity),
                         type: CONFIG.HERO.ACTIVE_EFFECT_MODES.OVERRIDE,
                         priority: CONFIG.HERO.ACTIVE_EFFECT_PRIORITY.OVERRIDE,
                     },
@@ -4206,8 +4212,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             .trim();
 
         // 5 point doubling rule note
-        if (system.QUANTITY != null && system.QUANTITY > 1) {
-            description += ` (x${system.QUANTITY} number of items)`;
+        if (this.quantity != null && this.quantity > 1) {
+            description += ` (x${this.quantity} number of items)`;
         }
 
         return description;
@@ -5486,20 +5492,89 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         return this.isBodyBasedEffect || this.isStunBasedEffect;
     }
 
-    get weightKg() {
-        const equipmentWeightPercentage =
-            parseInt(game.settings.get(game.system.id, "equipmentWeightPercentage")) / 100.0;
-        let weightLbs = parseFloat(this.system?.WEIGHT) || 0;
-        for (const child of this.childItems) {
-            weightLbs += parseFloat(child.system?.WEIGHT) || 0;
-        }
-        const weightKg = (weightLbs / 2.2046226218) * equipmentWeightPercentage;
-        return weightKg.toFixed(1);
+    /**
+     * Return one of this item's mass in kilograms and weight in pounds - hence the awkward term to describe two totally different but similar terms.
+     */
+    get unitHeft() {
+        const weightInLbs = this.system.WEIGHT;
+        const massInKg = weightInLbs * kgsInOneLb;
+        return {
+            weight: weightInLbs,
+            mass: massInKg,
+        };
     }
 
-    get priceText() {
-        const price = parseFloat(this.system.PRICE) || 0;
-        return `$${price.toFixed(2)}`;
+    get unitHeftDisplay() {
+        const metricUnits = game.settings.get(game.system.id, "metricUnits");
+        const unitHeft = this.unitHeft;
+
+        return `${(metricUnits ? unitHeft.mass : unitHeft.weight).toFixed(2)} ${getHeftUnits(this.actor)}`;
+    }
+
+    /**
+     * Return all this item's mass in kilograms and weight in pounds.
+     */
+    get combinedHeft() {
+        const unitHeft = this.unitHeft;
+        return {
+            weight: unitHeft.weight * this.quantity,
+            mass: unitHeft.mass * this.quantity,
+        };
+    }
+
+    /**
+     * Return this item and all its children's mass in kilograms and weight in pounds.
+     */
+    get totalHeft() {
+        let totalHeft = this.combinedHeft;
+
+        for (const child of this.childItems) {
+            const combinedHeft = child.combinedHeft;
+            totalHeft.weight += combinedHeft.weight;
+            totalHeft.mass += combinedHeft.mass;
+        }
+
+        return totalHeft;
+    }
+
+    /**
+     * Return both the sub total mass in kilograms and weight in pounds (this item alone) and total mass in kilograms and weight in pounds (this item and all children)
+     */
+    get heftInUnitsDisplay() {
+        const metricUnits = game.settings.get(game.system.id, "metricUnits");
+        const combinedHeft = this.combinedHeft;
+        const totalHeft = this.totalHeft;
+
+        return {
+            subTotal: `${(metricUnits ? combinedHeft.mass : combinedHeft.weight).toFixed(2)} ${getHeftUnits(this.actor)}`,
+            total: `${(metricUnits ? totalHeft.mass : totalHeft.weight).toFixed(2)} ${getHeftUnits(this.actor)}`,
+        };
+    }
+
+    get quantity() {
+        return this.system.QUANTITY;
+    }
+
+    get unitPrice() {
+        const unitPrice = this.system.PRICE;
+        return unitPrice;
+    }
+
+    get unitPriceDisplay() {
+        // PH: FIXME: Should be using the number of digits and so on from the campaign rules in the HDC
+        const unitPrice = this.unitPrice;
+        return `${getMonetaryUnits(this.actor)}${unitPrice.toFixed(2)}`;
+    }
+
+    get totalPrice() {
+        const totalPrice = this.unitPrice * this.quantity;
+        return totalPrice;
+    }
+
+    get totalPriceDisplay() {
+        // PH: FIXME: Should be using the number of digits and so on from the campaign rules in the HDC
+        const totalPrice = this.totalPrice;
+        return `${getMonetaryUnits(this.actor)}${totalPrice.toFixed(2)}`;
     }
 
     // Is this power disabled because we are not in our superheroic identity?
@@ -5689,7 +5764,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         const cpCost = this._characterPointCost;
 
         // Consider the 5 point doubling cost
-        const quantity = this.system.QUANTITY;
+        const quantity = this.quantity;
         let doublingsCost = 0;
         if (quantity != null && quantity > 1) {
             const doublings = Math.ceil(Math.log2(quantity));
