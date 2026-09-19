@@ -1,8 +1,6 @@
 import { gridUnitsToMeters, roundDistanceInMetersUpToNumberOfGridUnits } from "./utility/units.mjs";
 
-class HeroNullClass {}
-
-const FoundryTokenRuler = foundry.canvas.placeables?.tokens.TokenRuler || HeroNullClass;
+const FoundryTokenRuler = foundry.canvas.placeables.tokens.TokenRuler;
 
 export class HeroTokenRuler extends FoundryTokenRuler {
     static colors = Object.freeze([0x33bc4e, 0xf1d836, 0x334ebc, 0xe72124]); // green, yellow, red, blue
