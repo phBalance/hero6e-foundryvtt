@@ -700,8 +700,9 @@ export class ItemAttackFormApplicationV2 extends HeroAppMixin(HandlebarsApplicat
         for (const app of Object.values(ui.windows)) {
             app.close();
         }
+
         for (const app of foundry.applications.instances.values()) {
-            if (app !== this) {
+            if (app !== this && app.hasFrame) {
                 app.close();
             }
         }

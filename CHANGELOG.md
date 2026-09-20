@@ -1,6 +1,10 @@
 # Releases
 
-### Version 5.0.1 20260920 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+### Version 5.0.2 Hotfix 20260920 [Hero System 6e (Unofficial) v2](https://github.com/dmdorman/hero6e-foundryvtt)
+
+- Fix issue with window derender for region replacement destroying combat tracker application.
+
+### Version 5.0.1 20260920
 
 - HDC uploads now ask whether to keep an actor's name when it differs from the name in the HDC file. Reset/rebuild from stored HDC data and the global HDC reset always keep the current name.
 
