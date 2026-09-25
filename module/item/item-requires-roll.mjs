@@ -128,7 +128,7 @@ const SECTIONAL_DEFENSES_OPTIONID_TO_HIT_LOCATIONS_SET = Object.freeze({
     STANDARDVEST: STANDARDVEST_HIT_LOCATIONS,
     LONGVEST: LONGVEST_HIT_LOCATIONS,
     JACKET: new FrozenSet([...HELMET_HIT_LOCATIONS.values(), ...JACKET_HIT_LOCATIONS.values()]),
-    LONGJACKET: new FrozenSet([...FULLHELMET_HIT_LOCATIONS.values(), ...JACKET_HIT_LOCATIONS.values()]),
+    LONGJACKET: new FrozenSet([...FULLHELMET_HIT_LOCATIONS.values(), ...LONGJACKET_HIT_LOCATIONS.values()]),
     LONGJACKETSLEEVES: new FrozenSet([
         ...FULLHELMET_HIT_LOCATIONS.values(),
         ...LONGJACKETWITHSLEEVES_HIT_LOCATIONS.values(),
@@ -248,7 +248,7 @@ async function userSelectsASkill(skillArray) {
     });
 
     // null is returned if the user is closing the dialog.
-    return arrayIndex == null ? null : skillArray[arrayIndex];
+    return arrayIndex == null ? null : skillArray[parseInt(arrayIndex)];
 }
 
 /**
@@ -904,7 +904,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
     // One failure is an overall failure
     return results.reduce((accum, result) => {
         return accum && result;
-    });
+    }, true);
 }
 
 export function sectionalDefenseHeroValidation(modifier, item) {
