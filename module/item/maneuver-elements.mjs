@@ -53,6 +53,7 @@ const MANEUVER_ELEMENTS = Object.freeze({
     targetFalls: { includes: "TARGET FALLS" },
     velocity: { regex: /v\/(\d+)/i },
     weaponDc: { includes: "[WEAPONDC]" },
+    youFall: { includes: "YOU FALL" },
 });
 
 /**

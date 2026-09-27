@@ -1,3 +1,4 @@
+import { getManeuverEffectCapitalized } from "./maneuver-elements.mjs";
 import {
     activateManeuver,
     doManeuverEffects,
@@ -23,8 +24,8 @@ import {
     maneuverHasTakeFullDmgElement,
     maneuverHasTakeHalfDmgElement,
     maneuverHasTargetFallsElement,
+    maneuverHasYouFallElement,
 } from "./maneuver.mjs";
-import { getManeuverEffectCapitalized } from "./maneuver-elements.mjs";
 
 import { HEROSYS } from "../herosystem6e.mjs";
 
@@ -1943,18 +1944,26 @@ export function getAttackTags(item) {
             return match ? match[1].trim() : null;
         };
 
-        const attackerDamageModifier = extractAttackerDamageModifier(item.system.WEAPONEFFECT || item.system.EFFECT);
+        const attackerDamageModifier = extractAttackerDamageModifier(getManeuverEffect(item));
         attackTags.push({
             name: `Attacker Takes ${attackerDamageModifier} Damage`,
             title: `Attacker takes damage if collision takes place`,
         });
     }
 
-    // Maneuver casues the target to be prone
+    // Maneuver causes the target to be prone
     if (maneuverHasTargetFallsElement(item)) {
         attackTags.push({
             name: `TARGET FALLS`,
             title: `Target falls prone as if thrown`,
+        });
+    }
+
+    // Maneuver causes the attacker to fall
+    if (maneuverHasYouFallElement(item)) {
+        attackTags.push({
+            name: `YOU FALL`,
+            title: `You fall prone as if thrown`,
         });
     }
 

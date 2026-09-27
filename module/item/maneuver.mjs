@@ -469,6 +469,16 @@ export function maneuverHasVelocityElement(item) {
     return maneuverHasElement(item, "velocity");
 }
 
+/**
+ * Maneuver includes the "You Falls" element.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasYouFallElement(item) {
+    return maneuverHasElement(item, "youFall");
+}
+
 // Maneuvers we recognize but have not implemented status effects for yet
 const UNSUPPORTED_MANEUVER_EFFECT_XMLIDS = ["COVER", "HIPSHOT", "HURRY", "SET", "SETANDBRACE", "PULLINGAPUNCH"];
 
