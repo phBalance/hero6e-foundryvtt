@@ -14,10 +14,6 @@
  *   not      — case-insensitive substrings that disqualify an otherwise match
  *   regex    — used instead of `includes` when the element isn't a fixed phrase
  *
- * The `not:` guards exist only because of open bug #2: "Must Follow Block" and
- * "Grab Weapon" are different ELEMENTS from "Block" and "Grab", but while we
- * match against the whole string they read as false positives.
- *
  **/
 const MANEUVER_BASES_AND_ELEMENTS = Object.freeze({
     abort: { includes: "ABORT" },
@@ -29,10 +25,10 @@ const MANEUVER_BASES_AND_ELEMENTS = Object.freeze({
     disable: { includes: "DISABLE" },
     disarm: { includes: "DISARM" },
     dodge: { includes: "DODGE" },
-    escape: { includes: "ESCAPE" },
+    exert: { includes: "[STRDC]" },
     flashDc: { includes: "[FLASHDC]" },
     fmove: { includes: "FMOVE" },
-    grab: { includes: "GRAB", not: ["GRAB WEAPON", "MUST"] },
+    grab: { includes: "GRAB", not: ["GRAB WEAPON", "MUST", "VS. GRAB", "VERSUS GRAB"] },
     grabWeapon: { includes: "GRAB WEAPON" },
     halfMoveRequired: { includes: "HALF MOVE REQUIRED" },
     killingDc: { includes: ["[KILLINGDC]", "[WEAPONKILLINGDC]"] },
@@ -45,8 +41,6 @@ const MANEUVER_BASES_AND_ELEMENTS = Object.freeze({
     response: { includes: "CAN ONLY BE USED AFTER" },
     root: { includes: "TO RESIST SHOVE" },
     shove: { includes: "SHOVE", not: ["TO RESIST SHOVE"] },
-    strAny: { includes: "STR" },
-    strDc: { includes: "[STRDC]" },
     strike: { includes: "STRIKE" },
     takeFullDmg: { includes: "TAKE FULL DMG" },
     takeHalfDmg: { includes: "TAKE HALF DMG" },

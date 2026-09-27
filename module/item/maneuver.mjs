@@ -254,7 +254,7 @@ export function maneuverHasDodgeBasis(item) {
  * @returns {boolean}
  */
 export function maneuverHasExertBasis(item) {
-    return maneuverHasBasisOrElement(item, "strDc");
+    return maneuverHasBasisOrElement(item, "exert");
 }
 
 /**

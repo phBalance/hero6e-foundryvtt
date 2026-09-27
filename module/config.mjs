@@ -13,6 +13,7 @@ import {
     maneuverHasCrushElement,
     maneuverHasDisarmBasis,
     maneuverHasDodgeBasis,
+    maneuverHasExertBasis,
     maneuverHasFlashBasis,
     maneuverHasGrabBasis,
     maneuverHasGrabWeaponBasis,
@@ -8713,6 +8714,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 if (
                     maneuverHasCrushElement(item) ||
                     maneuverHasDisarmBasis(item) ||
+                    maneuverHasExertBasis(item) ||
                     maneuverHasFlashBasis(item) ||
                     maneuverHasGrabBasis(item) ||
                     maneuverHasGrabWeaponBasis(item) ||

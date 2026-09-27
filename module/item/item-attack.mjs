@@ -4,12 +4,14 @@ import {
     doManeuverEffects,
     endHaymakerManeuver,
     maneuverHasAbortElement,
+    maneuverHasAttackerFallsElement,
     maneuverHasBindBasis,
     maneuverHasBlockBasis,
     maneuverHasCrushElement,
     maneuverHasDisableElement,
     maneuverHasDisarmBasis,
     maneuverHasDodgeBasis,
+    maneuverHasExertBasis,
     maneuverHasFMoveElement,
     maneuverHasFlashBasis,
     maneuverHasGrabBasis,
@@ -1725,7 +1727,7 @@ export function getAttackTags(item) {
         }
     }
 
-    // Maneuver that aborts
+    // Maneuver be aborted to
     if (maneuverHasAbortElement(item)) {
         attackTags.push({
             name: `ABORT`,
@@ -1734,7 +1736,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver where attacker falls
-    if (maneuverHasAbortElement(item)) {
+    if (maneuverHasAttackerFallsElement(item)) {
         attackTags.push({
             name: `ATTACKER FALLS`,
             title: `Attacker automatically falls down`,
@@ -1798,6 +1800,33 @@ export function getAttackTags(item) {
         attackTags.push({
             name: `DODGE`,
             title: `Dodge instead of Strike. Abort is free`,
+        });
+    }
+
+    // Maneuver that boosts strength exertion
+    if (maneuverHasExertBasis(item)) {
+        // PH: FIXME: Refactor all these examples
+        const extractExertTitle = function (effectText) {
+            if (!effectText) return null;
+
+            // EFFECT/WEAPONEFFECT are lists of bases and elements separated by
+            // "," or ";" — only the Exert element belongs in this tag's title.
+            const exertElement = effectText
+                .split(/[,;]/)
+                .map((element) => element.trim())
+                .find((element) => element.toUpperCase().includes("[STRDC]"));
+
+            if (!exertElement) return null;
+
+            return exertElement
+                .replace(/\[STRDC\]/i, "Strength Bonus")
+                .replace(/\s+/g, " ")
+                .trim();
+        };
+
+        attackTags.push({
+            name: `EXERT`,
+            title: extractExertTitle(getManeuverEffect(item)) ?? `Strength Bonus`,
         });
     }
 
