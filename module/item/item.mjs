@@ -49,17 +49,17 @@ import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-
 import {
     activateManeuver,
     maneuverHasAbortElement,
-    maneuverHasBlockElement,
-    maneuverHasFlashElement,
-    maneuverHasGrabElement,
-    maneuverHasGrabWeaponElement,
+    maneuverHasBlockBasis,
+    maneuverHasFlashBasis,
+    maneuverHasGrabBasis,
+    maneuverHasGrabWeaponBasis,
     maneuverHasKillingDamageElement,
     maneuverHasNoElements,
     maneuverHasNoNormalDefenseDamageElement,
     maneuverHasNormalDamageElement,
-    maneuverHasStrengthElement,
-    maneuverHasStrikeElement,
-    maneuverHasTargetFallsElement,
+    maneuverHasExertBasis,
+    maneuverHasStrikeBasis,
+    maneuverHasThrowBasis,
     maneuverHasVelocityElement,
 } from "./maneuver.mjs";
 
@@ -2549,12 +2549,12 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // PH: FIXME: Can we combine with the config.mjs entries?
         // Does it perform a strike?
-        else if (maneuverHasStrikeElement(this)) {
+        else if (maneuverHasStrikeBasis(this)) {
             return false;
         }
 
         // Does it use Strength (but not Strength for Damage)?
-        else if (maneuverHasStrengthElement(this)) {
+        else if (maneuverHasExertBasis(this)) {
             return false;
         }
 
@@ -2564,7 +2564,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // Does it require an attack to hit roll like BLOCK?
-        else if (maneuverHasBlockElement(this)) {
+        else if (maneuverHasBlockBasis(this)) {
             return false;
         }
 
@@ -4553,7 +4553,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 }
 
                 if (
-                    maneuverHasStrengthElement(this) ||
+                    maneuverHasExertBasis(this) ||
                     maneuverHasNormalDamageElement(this) ||
                     maneuverHasKillingDamageElement(this) ||
                     // Custom maneuvers have no [DC] placeholder; HD exports MAXSTR="0" for
@@ -4563,11 +4563,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 ) {
                     results.usesStrength = true;
                 }
-            } else if (maneuverHasFlashElement(this) || maneuverHasNoNormalDefenseDamageElement(this)) {
+            } else if (maneuverHasFlashBasis(this) || maneuverHasNoNormalDefenseDamageElement(this)) {
                 results.usesStrength = false;
             }
 
-            if (maneuverHasFlashElement(this)) {
+            if (maneuverHasFlashBasis(this)) {
                 results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
             } else if (maneuverHasNoNormalDefenseDamageElement(this)) {
                 results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
@@ -5308,7 +5308,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // MARTIAL generic STR (not as damage e.g. grab)
-        if (maneuverHasStrengthElement(baseAttackItem)) {
+        if (maneuverHasExertBasis(baseAttackItem)) {
             console.warn(
                 `${baseAttackItem.detailedName}: Strength vs Strength contest shouldn't be calling attackDefenseVs`,
             );
@@ -5316,7 +5316,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // STRIKE
-        if (maneuverHasStrikeElement(baseAttackItem)) {
+        if (maneuverHasStrikeBasis(baseAttackItem)) {
             return "PD";
         }
 
@@ -5325,7 +5325,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // MARTIAL FLASH
-        if (maneuverHasFlashElement(baseAttackItem)) {
+        if (maneuverHasFlashBasis(baseAttackItem)) {
             return "FLASHDEFENSE";
         }
 
@@ -5341,7 +5341,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return "NND";
         }
 
-        if (maneuverHasStrikeElement(this, "strike")) {
+        if (maneuverHasStrikeBasis(this, "strike")) {
             return "PD";
         }
 
@@ -5349,11 +5349,11 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return "PD";
         }
 
-        if (maneuverHasBlockElement(this, "block")) {
+        if (maneuverHasBlockBasis(this, "block")) {
             return "-";
         }
 
-        if (maneuverHasTargetFallsElement(this, "targetFalls")) {
+        if (maneuverHasThrowBasis(this, "targetFalls")) {
             return "-";
         }
 
@@ -5467,7 +5467,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     get isGrab() {
-        return maneuverHasGrabElement(this) || maneuverHasGrabWeaponElement(this);
+        return maneuverHasGrabBasis(this) || maneuverHasGrabWeaponBasis(this);
     }
 
     get isTransform() {
@@ -5903,7 +5903,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
      * @returns {boolean}
      */
     get isSenseAffecting() {
-        return !!this.baseInfo?.type?.includes("sense-affecting") || maneuverHasFlashElement(this);
+        return !!this.baseInfo?.type?.includes("sense-affecting") || maneuverHasFlashBasis(this);
     }
 
     get _basePoints() {

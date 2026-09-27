@@ -8,20 +8,20 @@ import {
 } from "./item/item-requires-roll.mjs";
 import { HeroSystem6eItem } from "./item/item.mjs";
 import {
-    maneuverHasBindElement,
-    maneuverHasBlockElement,
+    maneuverHasBindBasis,
+    maneuverHasBlockBasis,
     maneuverHasCrushElement,
-    maneuverHasDisarmElement,
-    maneuverHasDodgeElement,
-    maneuverHasFlashElement,
-    maneuverHasGrabElement,
-    maneuverHasGrabWeaponElement,
+    maneuverHasDisarmBasis,
+    maneuverHasDodgeBasis,
+    maneuverHasFlashBasis,
+    maneuverHasGrabBasis,
+    maneuverHasGrabWeaponBasis,
     maneuverHasKillingDamageElement,
     maneuverHasNoNormalDefenseDamageElement,
     maneuverHasNormalDamageElement,
     maneuverHasShoveElement,
-    maneuverHasStrikeElement,
-    maneuverHasTargetFallsElement,
+    maneuverHasStrikeBasis,
+    maneuverHasThrowBasis,
     maneuverHasVelocityElement,
 } from "./item/maneuver.mjs";
 import {
@@ -8686,25 +8686,25 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const behaviors = [];
 
                 // Do you dodge with this maneuver?
-                if (maneuverHasDodgeElement(item)) {
+                if (maneuverHasDodgeBasis(item)) {
                     behaviors.push("activable");
                 }
 
                 // Do you roll to hit with this maneuver?
                 if (
-                    maneuverHasBindElement(item) ||
-                    maneuverHasBlockElement(item) ||
+                    maneuverHasBindBasis(item) ||
+                    maneuverHasBlockBasis(item) ||
                     maneuverHasCrushElement(item) ||
-                    maneuverHasDisarmElement(item) ||
-                    maneuverHasFlashElement(item) ||
-                    maneuverHasGrabElement(item) ||
-                    maneuverHasGrabWeaponElement(item) ||
+                    maneuverHasDisarmBasis(item) ||
+                    maneuverHasFlashBasis(item) ||
+                    maneuverHasGrabBasis(item) ||
+                    maneuverHasGrabWeaponBasis(item) ||
                     maneuverHasKillingDamageElement(item) ||
                     maneuverHasNormalDamageElement(item) ||
                     maneuverHasNoNormalDefenseDamageElement(item) ||
                     maneuverHasShoveElement(item) ||
-                    maneuverHasStrikeElement(item) ||
-                    maneuverHasTargetFallsElement(item)
+                    maneuverHasStrikeBasis(item) ||
+                    maneuverHasThrowBasis(item)
                 ) {
                     behaviors.push("to-hit");
                 }
@@ -8712,14 +8712,14 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 // Is there some kind of damage/effect roll with this maneuver?
                 if (
                     maneuverHasCrushElement(item) ||
-                    maneuverHasDisarmElement(item) ||
-                    maneuverHasFlashElement(item) ||
-                    maneuverHasGrabElement(item) ||
-                    maneuverHasGrabWeaponElement(item) ||
+                    maneuverHasDisarmBasis(item) ||
+                    maneuverHasFlashBasis(item) ||
+                    maneuverHasGrabBasis(item) ||
+                    maneuverHasGrabWeaponBasis(item) ||
                     maneuverHasKillingDamageElement(item) ||
                     maneuverHasNormalDamageElement(item) ||
                     maneuverHasNoNormalDefenseDamageElement(item) ||
-                    maneuverHasStrikeElement(item) ||
+                    maneuverHasStrikeBasis(item) ||
                     maneuverHasVelocityElement(item)
                 ) {
                     behaviors.push("dice");
@@ -8732,19 +8732,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             rangeForItem: function (item) {
                 // Attacks have a range other than self
                 if (
-                    maneuverHasBindElement(item) ||
-                    maneuverHasBlockElement(item) ||
+                    maneuverHasBindBasis(item) ||
+                    maneuverHasBlockBasis(item) ||
                     maneuverHasCrushElement(item) ||
-                    maneuverHasDisarmElement(item) ||
-                    maneuverHasFlashElement(item) ||
-                    maneuverHasGrabElement(item) ||
-                    maneuverHasGrabWeaponElement(item) ||
+                    maneuverHasDisarmBasis(item) ||
+                    maneuverHasFlashBasis(item) ||
+                    maneuverHasGrabBasis(item) ||
+                    maneuverHasGrabWeaponBasis(item) ||
                     maneuverHasKillingDamageElement(item) ||
                     maneuverHasNormalDamageElement(item) ||
                     maneuverHasNoNormalDefenseDamageElement(item) ||
                     maneuverHasShoveElement(item) ||
-                    maneuverHasStrikeElement(item) ||
-                    maneuverHasTargetFallsElement(item)
+                    maneuverHasStrikeBasis(item) ||
+                    maneuverHasThrowBasis(item)
                 ) {
                     // Is this a HTH or a Ranged martial maneuver?
                     return isRangedMartialManeuver(item) ? HERO.RANGE_TYPES.STANDARD : HERO.RANGE_TYPES.NO_RANGE;

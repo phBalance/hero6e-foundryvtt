@@ -4,7 +4,7 @@ import { getSystemDisplayUnits } from "./units.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 
 import { getCostPerHalfDie, getCostPerDiePip, HeroSystem6eItem } from "../item/item.mjs";
-import { getManeuverEffect } from "../item/maneuver-elements.mjs";
+import { getManeuverEffect } from "../item/maneuver-bases-and-elements.mjs";
 
 export function combatSkillLevelsForAttack(item) {
     if (!item.system._active) {

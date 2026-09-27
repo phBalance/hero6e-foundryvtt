@@ -1,7 +1,7 @@
 /**
- * Maneuver Elements.
+ * Maneuver Bases And Elements.
  *
- * Per Ultimate Martial Artist a maneuver's effect is a LIST OF ELEMENTS
+ * Per Ultimate Martial Artist a maneuver's effect is a LIST OF BASES AND ELEMENTS
  * ("Block", "Abort", "Target Falls", "Grab Two Limbs"), not free prose.
  *
  */
@@ -19,7 +19,7 @@
  * match against the whole string they read as false positives.
  *
  **/
-const MANEUVER_ELEMENTS = Object.freeze({
+const MANEUVER_BASES_AND_ELEMENTS = Object.freeze({
     abort: { includes: "ABORT" },
     attackerFalls: { includes: "YOU FALL" },
     attackerTakes: { includes: "ATTACKER TAKES" },
@@ -50,7 +50,7 @@ const MANEUVER_ELEMENTS = Object.freeze({
     strike: { includes: "STRIKE" },
     takeFullDmg: { includes: "TAKE FULL DMG" },
     takeHalfDmg: { includes: "TAKE HALF DMG" },
-    targetFalls: { includes: "TARGET FALLS" },
+    throw: { includes: ["TARGET FALLS", "HE FALLS", "OPPONENT FALLS"] },
     velocity: { regex: /v\/(\d+)/i },
     weaponDc: { includes: "[WEAPONDC]" },
     youFall: { includes: "YOU FALL" },
@@ -88,7 +88,7 @@ export function getManeuverEffectCapitalized(item) {
  *
  * @returns {string[]}
  */
-function splitElementsFromEffectField(item) {
+function splitBasesAndElementsFromEffectField(item) {
     const effectText = getManeuverEffectCapitalized(item);
     if (!effectText) {
         return [];
@@ -108,14 +108,14 @@ function splitElementsFromEffectField(item) {
  *
  * @returns {boolean}
  */
-export function maneuverHasElement(item, element) {
-    const elementDefinition = MANEUVER_ELEMENTS[element];
+export function maneuverHasBasisOrElement(item, element) {
+    const elementDefinition = MANEUVER_BASES_AND_ELEMENTS[element];
     if (!elementDefinition) {
         console.error(`Unknown maneuver element "${element}"`, item.detailedName());
         return false;
     }
 
-    const presentElements = splitElementsFromEffectField(item);
+    const presentElements = splitBasesAndElementsFromEffectField(item);
     if (presentElements.length === 0) {
         return false;
     }

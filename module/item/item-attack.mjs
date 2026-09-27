@@ -1,19 +1,19 @@
-import { getManeuverEffectCapitalized } from "./maneuver-elements.mjs";
+import { getManeuverEffect, getManeuverEffectCapitalized } from "./maneuver-bases-and-elements.mjs";
 import {
     activateManeuver,
     doManeuverEffects,
     endHaymakerManeuver,
     maneuverHasAbortElement,
-    maneuverHasBindElement,
-    maneuverHasBlockElement,
+    maneuverHasBindBasis,
+    maneuverHasBlockBasis,
     maneuverHasCrushElement,
     maneuverHasDisableElement,
-    maneuverHasDisarmElement,
-    maneuverHasDodgeElement,
+    maneuverHasDisarmBasis,
+    maneuverHasDodgeBasis,
     maneuverHasFMoveElement,
-    maneuverHasFlashElement,
-    maneuverHasGrabElement,
-    maneuverHasGrabWeaponElement,
+    maneuverHasFlashBasis,
+    maneuverHasGrabBasis,
+    maneuverHasGrabWeaponBasis,
     maneuverHasHalfMoveRequiredElement,
     maneuverHasLastingRestrictionElement,
     maneuverHasMustFollowElement,
@@ -23,7 +23,7 @@ import {
     maneuverHasResponseElement,
     maneuverHasTakeFullDmgElement,
     maneuverHasTakeHalfDmgElement,
-    maneuverHasTargetFallsElement,
+    maneuverHasThrowBasis,
     maneuverHasYouFallElement,
 } from "./maneuver.mjs";
 
@@ -1408,7 +1408,7 @@ async function doSingleTargetActionToHit(action, options) {
     }
 
     // Block (which is a repeatable abort) has a different to-hit behavior
-    const isBlockManeuver = maneuverHasBlockElement(item);
+    const isBlockManeuver = maneuverHasBlockBasis(item);
     if (isBlockManeuver) {
         if (targetData.length === 1) {
             const hitRollTotal = targetData[0].toHitRollTotal;
@@ -1422,7 +1422,7 @@ async function doSingleTargetActionToHit(action, options) {
     // The act of making the attack can cause effects for maneuvers related to OCV and DCV
     // PH: FIXME: They are figured into the to-hit modal's ocv and dcv already
     if (["maneuver", "martialart"].includes(item.type)) {
-        activateManeuver(item);
+        await activateManeuver(item);
     }
 
     // this doesn't work because we create data-item-id="{{item.uuid}}" for the button. However, item is now something that has no uuid.
@@ -1742,7 +1742,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver that binds
-    if (maneuverHasBindElement(item)) {
+    if (maneuverHasBindBasis(item)) {
         attackTags.push({
             name: `BIND`,
             title: `Bind enemy weapon`,
@@ -1750,7 +1750,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver that Blocks
-    if (maneuverHasBlockElement(item)) {
+    if (maneuverHasBlockBasis(item)) {
         attackTags.push({
             name: `BLOCK`,
             title: `Block instead of Strike. Abort is free`,
@@ -1774,7 +1774,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver that diarms
-    if (maneuverHasDisarmElement(item)) {
+    if (maneuverHasDisarmBasis(item)) {
         // Remove any previous DISARM as it is likely very generic
         const disarmIndex = attackTags.findIndex((tag) => tag.name === "DISARM");
         if (disarmIndex > -1) {
@@ -1794,7 +1794,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver that dodges
-    if (maneuverHasDodgeElement(item)) {
+    if (maneuverHasDodgeBasis(item)) {
         attackTags.push({
             name: `DODGE`,
             title: `Dodge instead of Strike. Abort is free`,
@@ -1806,7 +1806,7 @@ export function getAttackTags(item) {
     //       In Maneuver listings, this Basis is indicated by
     //       use of the phrase, "[Sense] Group Flash __d6"
     //       You can buy additional sense groups, but unclear how that is formatted.
-    if (maneuverHasFlashElement(item)) {
+    if (maneuverHasFlashBasis(item)) {
         const senseGroup = effectiveAttackItem.system.INPUT || item.system.INPUT;
         attackTags.push({
             name: `${senseGroup ? `${senseGroup} Group Flash` : "Flash"}`,
@@ -1823,7 +1823,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver grabs opponent
-    if (maneuverHasGrabElement(item)) {
+    if (maneuverHasGrabBasis(item)) {
         attackTags.push({
             name: `GRAB TARGET`,
             title: `Grab a target. If successful you may squeeze, slam or throw`,
@@ -1831,7 +1831,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver grabs opponent's weapon
-    if (maneuverHasGrabWeaponElement(item)) {
+    if (maneuverHasGrabWeaponBasis(item)) {
         attackTags.push({
             name: `GRAB WEAPON`,
             title: `Grab a target. If successful you may attempt to disarm them`,
@@ -1951,8 +1951,8 @@ export function getAttackTags(item) {
         });
     }
 
-    // Maneuver causes the target to be prone
-    if (maneuverHasTargetFallsElement(item)) {
+    // Maneuver throws the target prone
+    if (maneuverHasThrowBasis(item)) {
         attackTags.push({
             name: `TARGET FALLS`,
             title: `Target falls prone as if thrown`,
@@ -1966,8 +1966,6 @@ export function getAttackTags(item) {
             title: `You fall prone as if thrown`,
         });
     }
-
-    // THROW (implemented as Target Falls)
 
     // TIME+ (not sure how to implement)
 
@@ -2648,7 +2646,7 @@ export async function _onRollDamage(event) {
     const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting;
     const isKilling = item.effectiveAttackItem.doesKillingDamage;
     const isEntangle = item.effectiveAttackItem.isEntangle;
-    const isGrab = maneuverHasGrabElement(item);
+    const isGrab = maneuverHasGrabBasis(item);
     const isEffectBasedAttack = item.effectiveAttackItem.isEffectBased;
     const isNormalAttack =
         !isEntangle && !isSenseAffecting && !isAdjustment && !isEffectBasedAttack && !isKilling && !isGrab;
