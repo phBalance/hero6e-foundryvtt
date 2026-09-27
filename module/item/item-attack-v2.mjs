@@ -17,7 +17,7 @@ export class ItemAttackV2 {
     static async processActionToHitV2(attackAction) {
         //attackAction.targetTokens = Array.from(game.user.targets).map((t) => t.id);
 
-        // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
+        // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike maneuver is the 1 exception.
         // const haymakerManeuverActive = attackAction.actor?.items.find(
         //     (anItem) => anItem.isCombatManeuver && anItem.system.XMLID === "HAYMAKER" && anItem.isActive,
         // );

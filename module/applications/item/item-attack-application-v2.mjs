@@ -486,15 +486,15 @@ export class ItemAttackFormApplicationV2 extends HeroAppMixin(HandlebarsApplicat
                 { ...this.data.formData, token: this.data.token, effectiveSubItems: this.data.effectiveSubItems },
             );
 
-            const manueverItem = this.data.effectiveItem;
+            const maneuverItem = this.data.effectiveItem;
             this.data.multiAttackItems ??= this.data.action.maneuver.isMultipleAttackManeuver
                 ? this.data.originalItem.actor.items.filter(filterIgnoreCompoundAndFrameworkItems).filter((item) => {
                       return (
                           (item.baseInfo.type.includes("attack") ||
                               (item.baseInfo.type.includes("maneuver") && item.rollsToHit())) && // Is an attack, or an offensive (to-hit) maneuver?
-                          (manueverItem.system.XMLID === "MULTIPLEATTACK" || // 6e Multipleattack allows both HTH and Ranged
-                              (manueverItem.system.XMLID === "SWEEP" && item.isHth) || // 5e Sweep is HTH only
-                              (manueverItem.system.XMLID === "RAPIDFIRE" && item.isRanged)) && // 5e Rapid Fire is Ranged only
+                          (maneuverItem.system.XMLID === "MULTIPLEATTACK" || // 6e Multipleattack allows both HTH and Ranged
+                              (maneuverItem.system.XMLID === "SWEEP" && item.isHth) || // 5e Sweep is HTH only
+                              (maneuverItem.system.XMLID === "RAPIDFIRE" && item.isRanged)) && // 5e Rapid Fire is Ranged only
                           !item.system.XMLID.startsWith("__") // No internal placeholder powers/items
                       );
                   })

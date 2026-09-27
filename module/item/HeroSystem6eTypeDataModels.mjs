@@ -4,13 +4,13 @@ import { HeroObjectCacheMixin } from "../utility/cache.mjs";
 import {
     combatSkillLevelsForAttack,
     getFullyQualifiedEffectFormulaFromItem,
-    getManueverEffectWithPlaceholdersReplaced,
+    getManeuverEffectWithPlaceholdersReplaced,
 } from "../utility/damage.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import { calculateVelocityInSystemUnits, kgsInOneLb } from "../utility/units.mjs";
 import { getPowerInfo, hdcTextNumberToNumeric, squelch } from "../utility/util.mjs";
 import { HeroSystem6eItem } from "./item.mjs";
-import { maneuverHasBlockTrait, maneuverHasFlashEffectTrait } from "./maneuver.mjs";
+import { maneuverHasBlockElement, maneuverHasFlashElement } from "./maneuver.mjs";
 
 const { StringField, ObjectField, BooleanField, ArrayField, EmbeddedDataField, SchemaField } = foundry.data.fields;
 
@@ -783,12 +783,12 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
     get noHitLocations() {
         if (["maneuver", "martialart"].includes(this.item.type)) {
             // Flash doesn't have a hit location
-            if (maneuverHasFlashEffectTrait(this.item)) {
+            if (maneuverHasFlashElement(this.item)) {
                 return true;
             }
 
             // Block doesn't use a hit location
-            if (maneuverHasBlockTrait(this.item)) {
+            if (maneuverHasBlockElement(this.item)) {
                 return true;
             }
         }
@@ -890,12 +890,8 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
     }
 
     get effect() {
-        let _effect = this.USEWEAPON ? this.WEAPONEFFECT : this.EFFECT;
-        if (!_effect) return null;
-
-        const maneuverEffect = getManueverEffectWithPlaceholdersReplaced(this.item);
-
-        return maneuverEffect;
+        const maneuverEffect = getManeuverEffectWithPlaceholdersReplaced(this.item);
+        return maneuverEffect || null;
     }
 
     get uses() {

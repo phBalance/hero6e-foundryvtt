@@ -301,7 +301,7 @@ export function registerManeuverTests(quench) {
                         const maneuvers = actor.items.filter((item) => item.system.XMLID === "MANEUVER");
 
                         maneuvers.forEach((maneuver) => {
-                            const behaviors = maneuver.baseInfo?.behaviorsByItem(maneuver);
+                            const behaviors = maneuver.baseInfo.behaviorsByItem(maneuver);
                             expect(behaviors).to.be.an(
                                 "array",
                                 `Maneuver "${maneuver.name}" should have behaviorsByItem return an array`,
@@ -949,7 +949,7 @@ export function registerManeuverTests(quench) {
                         const maneuvers = actor.items.filter((item) => item.system.XMLID === "MANEUVER");
 
                         maneuvers.forEach((maneuver) => {
-                            const behaviors = maneuver.baseInfo?.behaviorsByItem(maneuver);
+                            const behaviors = maneuver.baseInfo.behaviorsByItem(maneuver);
                             expect(behaviors).to.be.an(
                                 "array",
                                 `Maneuver "${maneuver.name}" should have behaviorsByItem return an array`,
