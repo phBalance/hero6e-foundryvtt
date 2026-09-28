@@ -4,6 +4,7 @@ import { getSystemDisplayUnits } from "./units.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
 
 import { getCostPerHalfDie, getCostPerDiePip, HeroSystem6eItem } from "../item/item.mjs";
+import { getManeuverEffect } from "../item/maneuver-bases-and-elements.mjs";
 
 export function combatSkillLevelsForAttack(item) {
     if (!item.system._active) {
@@ -282,53 +283,6 @@ function isManeuverThatIsUsingAnEmptyHand(item, options) {
 // excluded — it substitutes a STR value, not a damage formula.
 const replaceableDamagePlaceholderRegex = /\[(?:WEAPON)?(?:NORMAL|KILLING|FLASH|NND)?DC\]/g;
 
-export function getManueverEffectWithPlaceholdersReplaced(item) {
-    const maneuverEffect = getManeuverEffect(item);
-    if (maneuverEffect) {
-        let effectString = maneuverEffect;
-        // let rangeString = "";
-        // let dcsString = "";
-
-        if (item.causesDamageEffect()) {
-            const { diceParts } = calculateDicePartsForItem(item, { ignoreDeadlyBlow: true });
-            const doesDiceOfDamage =
-                diceParts.d6Count + diceParts.d6Less1DieCount + diceParts.halfDieCount + diceParts.constant;
-            if (maneuverEffect.search(/\[STRDC\]/) > -1) {
-                // PH: FIXME: Offensive Ranged Disarm and Ranged Disarm are shown as [WEAPONDC] but are not offensive and should be caught in this.
-                //            How to determine these martial maneuvers behave like this generically?
-                // Cheat a bit. d6Count for strength is ~DC.
-                const effectiveStrength = diceParts.d6Count * 5;
-                effectString = maneuverEffect.replace("[STRDC]", `${effectiveStrength} STR`);
-            } else if (doesDiceOfDamage) {
-                // This does some damage.
-                const damageFormula = dicePartsToEffectFormula(diceParts);
-                if (damageFormula) {
-                    const nnd = maneuverEffect.indexOf("NNDDC") > -1 || maneuverEffect.indexOf("WEAPONNNDDC") > -1;
-                    const killing =
-                        maneuverEffect.indexOf("KILLINGDC") > -1 || maneuverEffect.indexOf("WEAPONKILLINGDC") > -1;
-
-                    const diceFormula = `${damageFormula}${nnd ? " NND" : ""}${killing ? (isManeuverHthCategory(item) ? " HKA" : " RKA") : ""}`;
-
-                    if (isManeuverThatDoesReplaceableDamageType(item)) {
-                        effectString = maneuverEffect.replace(replaceableDamagePlaceholderRegex, diceFormula);
-                    } else if (parseInt(item.system.DC || 0) > 0) {
-                        // Custom maneuvers have no [DC] placeholder in their effect text; lead with
-                        // the dice the way Hero Designer displays them (e.g. "5 1/2d6 Strike").
-                        // The DC gate keeps placeholderless non-damage maneuvers (Dodge, Escape) clean.
-                        effectString = `${diceFormula} ${maneuverEffect}`;
-                    }
-                }
-            }
-        }
-
-        return effectString;
-    }
-}
-
-export function getManeuverEffect(item) {
-    return item.system.USEWEAPON || item.system.USEWEAPON === "Yes" ? item.system.WEAPONEFFECT : item.system.EFFECT;
-}
-
 export function isManeuverThatDoesReplaceableDamageType(item) {
     const effect = getManeuverEffect(item);
 
@@ -350,6 +304,45 @@ export function isManeuverThatDoesNormalDamage(item) {
             effect.search(/STRDC/) > -1 ||
             item.system.XMLID === "STRIKE")
     );
+}
+
+export function getManeuverEffectWithPlaceholdersReplaced(item) {
+    const maneuverEffect = getManeuverEffect(item);
+    let effectString = maneuverEffect;
+
+    if (maneuverEffect && item.causesDamageEffect()) {
+        const { diceParts } = calculateDicePartsForItem(item, { ignoreDeadlyBlow: true });
+        const doesDiceOfDamage =
+            diceParts.d6Count + diceParts.d6Less1DieCount + diceParts.halfDieCount + diceParts.constant;
+        if (maneuverEffect.search(/\[STRDC\]/) > -1) {
+            // PH: FIXME: Offensive Ranged Disarm and Ranged Disarm are shown as [WEAPONDC] but are not offensive and should be caught in this.
+            //            How to determine these martial maneuvers behave like this generically?
+            // Cheat a bit. d6Count for strength is ~DC.
+            const effectiveStrength = diceParts.d6Count * 5;
+            effectString = maneuverEffect.replace("[STRDC]", `${effectiveStrength} STR`);
+        } else if (doesDiceOfDamage) {
+            // This does some damage.
+            const damageFormula = dicePartsToEffectFormula(diceParts);
+            if (damageFormula) {
+                const nnd = maneuverEffect.indexOf("NNDDC") > -1 || maneuverEffect.indexOf("WEAPONNNDDC") > -1;
+                const killing =
+                    maneuverEffect.indexOf("KILLINGDC") > -1 || maneuverEffect.indexOf("WEAPONKILLINGDC") > -1;
+
+                const diceFormula = `${damageFormula}${nnd ? " NND" : ""}${killing ? (isManeuverHthCategory(item) ? " HKA" : " RKA") : ""}`;
+
+                if (isManeuverThatDoesReplaceableDamageType(item)) {
+                    effectString = maneuverEffect.replace(replaceableDamagePlaceholderRegex, diceFormula);
+                } else if (parseInt(item.system.DC || 0) > 0) {
+                    // Custom maneuvers have no [DC] placeholder in their effect text; lead with
+                    // the dice the way Hero Designer displays them (e.g. "5 1/2d6 Strike").
+                    // The DC gate keeps placeholderless non-damage maneuvers (Dodge, Escape) clean.
+                    effectString = `${diceFormula} ${maneuverEffect}`;
+                }
+            }
+        }
+    }
+
+    return effectString;
 }
 
 function doubleDamageLimit() {

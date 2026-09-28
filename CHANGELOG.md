@@ -1616,7 +1616,7 @@ WARNING: Read the changelog for this version before deciding to update.
 
 - Reworked Active Effects such that the effects on items remain with items. They are no longer
   transferred from the item to the actor. This is following [FoundryVtt v11 ActiveEffect Transferral](https://foundryvtt.com/article/v11-active-effects/) recommendations.
-- Fixed Custom martial attacks, they now show on attack tab. Also fixed the Set & Brace martial manuevers.
+- Fixed Custom martial attacks, they now show on attack tab. Also fixed the Set & Brace martial maneuvers.
 - Fixed a bug where an attack using charges would set END=0.
 - Fixed a bug where some auto created attacks were missing half die.
 - Initial AID support. Adjustment powers do not automatically fade yet. One step closer to DRAIN/TRANSFER [#133](https://github.com/dmdorman/hero6e-foundryvtt/issues/133)

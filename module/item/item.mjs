@@ -1,3 +1,4 @@
+import { HeroDialogV2, heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
 import { ItemVppConfig } from "../applications/apps/item-vpp-config.mjs";
 import { HeroRoller } from "../heroRoller/dice.mjs";
 import { HEROSYS } from "../herosystem6e.mjs";
@@ -18,8 +19,7 @@ import {
     combatSkillLevelsForAttack,
     getEffectFormulaFromItem,
     getExtraMartialDcsOrZero,
-    getManeuverEffect,
-    getManueverEffectWithPlaceholdersReplaced,
+    getManeuverEffectWithPlaceholdersReplaced,
     isManeuverThatDoesReplaceableDamageType,
     isRangedMartialManeuver,
 } from "../utility/damage.mjs";
@@ -46,8 +46,22 @@ import { xmlToJsonNode } from "../utility/xml-to-json.mjs";
 import { HeroAdderModel } from "./HeroSystem6eTypeDataModels.mjs";
 import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
-import { activateManeuver, enforceManeuverLimits, maneuverCanBeAbortedTo, maneuverHasBlockTrait } from "./maneuver.mjs";
-import { HeroDialogV2, heroDialogOptions } from "../applications/api/hero-app-mixin.mjs";
+import {
+    activateManeuver,
+    maneuverHasAbortElement,
+    maneuverHasBlockBasis,
+    maneuverHasFlashBasis,
+    maneuverHasGrabBasis,
+    maneuverHasGrabWeaponBasis,
+    maneuverHasKillingDamageElement,
+    maneuverHasNoElements,
+    maneuverHasNoNormalDefenseDamageElement,
+    maneuverHasNormalDamageElement,
+    maneuverHasExertBasis,
+    maneuverHasStrikeBasis,
+    maneuverHasThrowBasis,
+    maneuverHasVelocityElement,
+} from "./maneuver.mjs";
 
 const { Item } = foundry.documents;
 const { FilePicker } = foundry.applications.apps;
@@ -1495,7 +1509,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     canBeAbortedTo() {
         // Maneuvers have their own rules for what can be used for an abort.
         if (["maneuver", "martialart"].includes(this.type)) {
-            return maneuverCanBeAbortedTo(this);
+            return maneuverHasAbortElement(this);
         }
 
         // Can abort to a defensive power
@@ -2073,13 +2087,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             await this.turnOff(options);
         }
 
-        switch (this.type) {
-            case "martialart":
-            case "maneuver":
-                await enforceManeuverLimits(this.actor, this);
-                break;
-        }
-
         // Generic set VALUE = MAX
         if (this.actor && game.actors.get(this.actor.id)) {
             for (const activeEffect of this.transferredEffects) {
@@ -2530,14 +2537,8 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // FIXME: This is not stand alone, it only handles specific cases. Should default to false like isActivatable()
         // and handle any item.
 
-        // Hero designer has a few ways of marking things as doing damage. For the prebuilt ones you can't look at DAMAGETYPE as it's always "0" even
-        // for things like a Flying Dodge. So, we make our decision based on the EFFECT/WEAPONEFFECT. This means that custom maneuvers need to have the
-        // correct EFFECT or WEAPONEFFECT specified for things to work.
-        // NOTE: Doesn't appear that there is a [WEAPONNNDDC] or [WEAPONFLASHDC] but we're going to add it just in case
-        const effect = getManeuverEffect(this);
-
-        // Weapon Elements and anything without item.system.EFFECT
-        if (!effect) {
+        // Maneuvers without effects (e.g. Weapon Elements)
+        if (maneuverHasNoElements(this)) {
             return false;
         }
 
@@ -2546,23 +2547,24 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return false;
         }
 
+        // PH: FIXME: Can we combine with the config.mjs entries?
         // Does it perform a strike?
-        else if (effect.search(/Strike/) > -1) {
+        else if (maneuverHasStrikeBasis(this)) {
             return false;
         }
 
-        // Does it use Strength?
-        else if (effect.search(/\[STRDC\]/) > -1) {
+        // Does it use Strength (but not Strength for Damage)?
+        else if (maneuverHasExertBasis(this)) {
             return false;
         }
 
-        // Does it use velocity?
-        else if (effect.search(/v\/\d/) > -1) {
+        // Does it add to damage with velocity?
+        else if (maneuverHasVelocityElement(this)) {
             return false;
         }
 
         // Does it require an attack to hit roll like BLOCK?
-        else if (maneuverHasBlockTrait(this)) {
+        else if (maneuverHasBlockBasis(this)) {
             return false;
         }
 
@@ -3499,7 +3501,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     if (system.PHASE) description += ` ${system.PHASE} Phase`;
                     description += `, ${system.OCV} OCV, ${system.DCV} DCV`;
 
-                    const effectString = getManueverEffectWithPlaceholdersReplaced(this);
+                    const effectString = getManeuverEffectWithPlaceholdersReplaced(this);
                     description += `, ${effectString}`;
 
                     const maneuverDcs = parseInt(system.DC || 0) + getExtraMartialDcsOrZero(this);
@@ -4539,20 +4541,21 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         };
 
         // Maneuvers and martial arts may allow strength to be added or have extra effects.
-        // PH: FIXME: Weapons?
         if (["maneuver", "martialart"].includes(this.type)) {
             if (this.system.ADDSTR != undefined) {
                 results.usesStrength = this.system.ADDSTR;
                 if (this.system.MAXSTR === 0) {
                     results.usesStrength = false;
                 }
+
                 if (this.system.DAMAGETYPE === 0) {
                     results.usesStrength = false;
                 }
+
                 if (
-                    this.system.EFFECT.match(/\[STRDC\]/) ||
-                    this.system.EFFECT.match(/\[NORMALDC\]/) ||
-                    this.system.EFFECT.match(/\[KILLINGDC\]/) ||
+                    maneuverHasExertBasis(this) ||
+                    maneuverHasNormalDamageElement(this) ||
+                    maneuverHasKillingDamageElement(this) ||
                     // Custom maneuvers have no [DC] placeholder; HD exports MAXSTR="0" for
                     // "no limit", so for damage-dealing customs ADDSTR is the authoritative
                     // signal. The activatable check keeps stock CUSTOM templates like Dodge out.
@@ -4560,16 +4563,13 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 ) {
                     results.usesStrength = true;
                 }
-            } else if (
-                this.system.EFFECT &&
-                (this.system.EFFECT.search(/\[FLASHDC\]/) > -1 || this.system.EFFECT.search(/\[NNDDC\]/) > -1)
-            ) {
+            } else if (maneuverHasFlashBasis(this) || maneuverHasNoNormalDefenseDamageElement(this)) {
                 results.usesStrength = false;
             }
 
-            if (this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1) {
+            if (maneuverHasFlashBasis(this)) {
                 results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
-            } else if (this.system.EFFECT && this.system.EFFECT.search(/\[NNDDC\]/) > -1) {
+            } else if (maneuverHasNoNormalDefenseDamageElement(this)) {
                 results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
             }
         }
@@ -4678,7 +4678,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             }
         }
 
-        if (xmlid === "HKA" || this.system.EFFECT?.indexOf("KILLING") > -1) {
+        if (xmlid === "HKA" || maneuverHasKillingDamageElement(this)) {
             results.killing = true;
         } else if (xmlid === "TELEKINESIS") {
             results.usesTk = true;
@@ -5298,22 +5298,25 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // MARTIAL KILLING
-        if (baseAttackItem.system.WEAPONEFFECT?.includes("KILLINGDC")) {
+        if (maneuverHasKillingDamageElement(baseAttackItem)) {
             return "PD";
         }
 
-        // MARTIAL STR
-        if (baseAttackItem.system.WEAPONEFFECT?.includes("STRDC")) {
+        // MARTIAL STR as damage
+        if (maneuverHasNormalDamageElement(baseAttackItem)) {
             return "PD";
         }
 
-        // MARTIAL generic STR
-        if (baseAttackItem.system.WEAPONEFFECT?.includes("STR")) {
-            return "PD";
+        // MARTIAL generic STR (not as damage e.g. grab)
+        if (maneuverHasExertBasis(baseAttackItem)) {
+            console.warn(
+                `${baseAttackItem.detailedName}: Strength vs Strength contest shouldn't be calling attackDefenseVs`,
+            );
+            return "STR";
         }
 
         // STRIKE
-        if (baseAttackItem.system.EFFECT?.includes("STR")) {
+        if (maneuverHasStrikeBasis(baseAttackItem)) {
             return "PD";
         }
 
@@ -5322,7 +5325,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // MARTIAL FLASH
-        if (baseAttackItem.system.WEAPONEFFECT?.includes("FLASHDC")) {
+        if (maneuverHasFlashBasis(baseAttackItem)) {
             return "FLASHDEFENSE";
         }
 
@@ -5334,23 +5337,23 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return "PD";
         }
 
-        if (this.system.EFFECT?.includes("[NNDDC]")) {
+        if (maneuverHasNoNormalDefenseDamageElement(this)) {
             return "NND";
         }
 
-        if (this.system.EFFECT?.includes("Strike")) {
+        if (maneuverHasStrikeBasis(this, "strike")) {
             return "PD";
         }
 
-        if (this.system.EFFECT?.includes("WEAPONDC")) {
+        if (maneuverHasNormalDamageElement(this, "weaponDc")) {
             return "PD";
         }
 
-        if (this.system.EFFECT?.includes("Block")) {
+        if (maneuverHasBlockBasis(this, "block")) {
             return "-";
         }
 
-        if (this.system.EFFECT?.includes("Target Falls")) {
+        if (maneuverHasThrowBasis(this, "targetFalls")) {
             return "-";
         }
 
@@ -5464,7 +5467,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     }
 
     get isGrab() {
-        return this.maneuverHasTrait("GRAB");
+        return maneuverHasGrabBasis(this) || maneuverHasGrabWeaponBasis(this);
     }
 
     get isTransform() {
@@ -5900,10 +5903,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
      * @returns {boolean}
      */
     get isSenseAffecting() {
-        return (
-            !!this.baseInfo?.type?.includes("sense-affecting") ||
-            (!!this.system.EFFECT && this.system.EFFECT.search(/\[FLASHDC\]/) > -1)
-        );
+        return !!this.baseInfo?.type?.includes("sense-affecting") || maneuverHasFlashBasis(this);
     }
 
     get _basePoints() {
@@ -6402,29 +6402,6 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         // attack snapshots); no active state means no maneuver/weapon override
         return this.system._active?.maWeaponItem || this.system._active?.__baseAttackItem || this;
     }
-
-    /**
-     * Checks if a maneuver item contains a specific mechanical trait string within its system effect text field.
-     * HSMartialArts PDF page 94 has most of the traits.
-     *
-     * @param {string} effectText - The effect string associated with a maneuver (maps to raw 'EFFECT').
-     * @param {string} trait - The trait key phrase to search for (e.g., "[FLASHDC]", "block", "grab").
-     * @returns {boolean} True if the trait is present in the text field.
-     */
-    maneuverHasTrait = function (trait) {
-        const effectText = this.system.WEAPONEFFECT || this.system.EFFECT;
-        if (!effectText || !trait) return false;
-
-        // GRAB vs GRAB WEAPON special handling
-        if (trait.toUpperCase() === "GRAB") {
-            if (effectText.toUpperCase().includes("MUST")) {
-                return false;
-            }
-            return effectText.toUpperCase().includes("GRAB") && !effectText.toUpperCase().includes("GRAB WEAPON");
-        }
-
-        return effectText.toUpperCase().includes(trait.toUpperCase());
-    };
 
     /**
      * Add advantages from itemFrom to this item

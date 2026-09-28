@@ -1,4 +1,33 @@
-import { activateManeuver, doManeuverEffects, endHaymakerManeuver, maneuverHasBlockTrait } from "./maneuver.mjs";
+import { getManeuverEffect, getManeuverEffectCapitalized } from "./maneuver-bases-and-elements.mjs";
+import {
+    activateManeuver,
+    doManeuverEffects,
+    endHaymakerManeuver,
+    maneuverHasAbortElement,
+    maneuverHasAttackerFallsElement,
+    maneuverHasBindBasis,
+    maneuverHasBlockBasis,
+    maneuverHasCrushElement,
+    maneuverHasDisableElement,
+    maneuverHasDisarmBasis,
+    maneuverHasDodgeBasis,
+    maneuverHasExertBasis,
+    maneuverHasFMoveElement,
+    maneuverHasFlashBasis,
+    maneuverHasGrabBasis,
+    maneuverHasGrabWeaponBasis,
+    maneuverHasHalfMoveRequiredElement,
+    maneuverHasLastingRestrictionElement,
+    maneuverHasMustFollowElement,
+    maneuverHasNoNormalDefenseDamageElement,
+    maneuverHasRequiresBothHandsElement,
+    maneuverHasRequiresProneTargetElement,
+    maneuverHasResponseElement,
+    maneuverHasTakeFullDmgElement,
+    maneuverHasTakeHalfDmgElement,
+    maneuverHasThrowBasis,
+    maneuverHasYouFallElement,
+} from "./maneuver.mjs";
 
 import { HEROSYS } from "../herosystem6e.mjs";
 
@@ -21,7 +50,9 @@ import { isActivatedForThisUse } from "./item-requires-roll.mjs";
 
 import { overrideCanAct } from "../settings/settings-helpers.mjs";
 
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 import { DICE_SO_NICE_CUSTOM_SETS, HeroRoller } from "../heroRoller/dice.mjs";
+import { activeEffectChanges } from "../utility/active-effects.mjs";
 import { isAdjustmentTargetItem, renderAdjustmentChatCards } from "../utility/adjustment.mjs";
 import { Attack, actionFromJSON, actionToJSON } from "../utility/attack.mjs";
 import {
@@ -29,7 +60,6 @@ import {
     calculateStrengthMinimumForItem,
     combatSkillLevelsForAttack,
 } from "../utility/damage.mjs";
-import { activeEffectChanges } from "../utility/active-effects.mjs";
 import { getActorDefensesVsAttack, getConditionalDefenses, getItemDefenseVsAttack } from "../utility/defense.mjs";
 import { calculateDistanceBetween, calculateRangePenaltyFromDistanceInMetres } from "../utility/range.mjs";
 import { roundFavorPlayerAwayFromZero, roundFavorPlayerTowardsZero } from "../utility/round.mjs";
@@ -50,7 +80,6 @@ import {
     whisperUserTargetsForActor,
 } from "../utility/util.mjs";
 import { userInteractiveVerifyOptionallyPromptThenSpendResources } from "./item-resources.mjs";
-import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 
 const { renderTemplate } = foundry.applications.handlebars;
 
@@ -507,7 +536,7 @@ export async function processActionToHit(item, formData, options = {}) {
         return ui.notifications.error(`Attack details are no longer available.`);
     }
 
-    // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike manuever is the 1 exception.
+    // Can haymaker anything except for maneuvers because it is a maneuver itself. The strike maneuver is the 1 exception.
     const haymakerManeuverActive = item.actor?.items.find(
         (anItem) => anItem.isCombatManeuver && anItem.system.XMLID === "HAYMAKER" && anItem.isActive,
     );
@@ -1381,7 +1410,7 @@ async function doSingleTargetActionToHit(action, options) {
     }
 
     // Block (which is a repeatable abort) has a different to-hit behavior
-    const isBlockManeuver = maneuverHasBlockTrait(item);
+    const isBlockManeuver = maneuverHasBlockBasis(item);
     if (isBlockManeuver) {
         if (targetData.length === 1) {
             const hitRollTotal = targetData[0].toHitRollTotal;
@@ -1395,7 +1424,7 @@ async function doSingleTargetActionToHit(action, options) {
     // The act of making the attack can cause effects for maneuvers related to OCV and DCV
     // PH: FIXME: They are figured into the to-hit modal's ocv and dcv already
     if (["maneuver", "martialart"].includes(item.type)) {
-        activateManeuver(item);
+        await activateManeuver(item);
     }
 
     // this doesn't work because we create data-item-id="{{item.uuid}}" for the button. However, item is now something that has no uuid.
@@ -1698,40 +1727,56 @@ export function getAttackTags(item) {
         }
     }
 
-    // ABORT
-    //if (maneuverCanBeAbortedTo(effectText)) {
-    if (item.maneuverHasTrait("ABORT")) {
+    // Maneuver be aborted to
+    if (maneuverHasAbortElement(item)) {
         attackTags.push({
             name: `ABORT`,
             title: `You can abort to maneuver`,
         });
     }
 
-    // BIND
-    if (item.maneuverHasTrait("BIND")) {
+    // Maneuver where attacker falls
+    if (maneuverHasAttackerFallsElement(item)) {
+        attackTags.push({
+            name: `ATTACKER FALLS`,
+            title: `Attacker automatically falls down`,
+        });
+    }
+
+    // Maneuver that binds
+    if (maneuverHasBindBasis(item)) {
         attackTags.push({
             name: `BIND`,
             title: `Bind enemy weapon`,
         });
     }
 
-    // BLOCK
-    if (item.maneuverHasTrait("BLOCK")) {
+    // Maneuver that Blocks
+    if (maneuverHasBlockBasis(item)) {
         attackTags.push({
             name: `BLOCK`,
-            title: `Block instead of Strike. Abort is free.`,
+            title: `Block instead of Strike. Abort is free`,
         });
     }
 
-    // DISABLE
-    if (item.maneuverHasTrait("DISABLE")) {
+    // Crush
+    if (maneuverHasCrushElement(item)) {
+        attackTags.push({
+            name: `CRUSH`,
+            title: `Crush following Grab`,
+        });
+    }
+
+    // Maneuver that disables
+    if (maneuverHasDisableElement(item, "disable")) {
         attackTags.push({
             name: `DISABLE`,
             title: `Disable a limb`,
         });
     }
-    // DISARM
-    if (item.maneuverHasTrait("DISARM")) {
+
+    // Maneuver that diarms
+    if (maneuverHasDisarmBasis(item)) {
         // Remove any previous DISARM as it is likely very generic
         const disarmIndex = attackTags.findIndex((tag) => tag.name === "DISARM");
         if (disarmIndex > -1) {
@@ -1740,7 +1785,7 @@ export function getAttackTags(item) {
 
         attackTags.push({
             name: `DISARM`,
-            title: `Knock an opponent's weapon out of his grasp.`,
+            title: `Knock an opponent's weapon out of his grasp`,
         });
 
         // This does no damage, remove PD attackTag
@@ -1750,36 +1795,47 @@ export function getAttackTags(item) {
         }
     }
 
-    // DODGE
-    if (item.maneuverHasTrait("DODGE")) {
+    // Maneuver that dodges
+    if (maneuverHasDodgeBasis(item)) {
         attackTags.push({
             name: `DODGE`,
-            title: `Dodge instead of Strike. Abort is free.`,
+            title: `Dodge instead of Strike. Abort is free`,
         });
     }
 
-    // FALL
-    //if (maneuverHasAttackerFallsTrait(effectiveAttackItem)) {
-    if (item.maneuverHasTrait("YOU FALL")) {
+    // Maneuver that boosts strength exertion
+    if (maneuverHasExertBasis(item)) {
+        // PH: FIXME: Refactor all these examples
+        const extractExertTitle = function (effectText) {
+            if (!effectText) return null;
+
+            // EFFECT/WEAPONEFFECT are lists of bases and elements separated by
+            // "," or ";" — only the Exert element belongs in this tag's title.
+            const exertElement = effectText
+                .split(/[,;]/)
+                .map((element) => element.trim())
+                .find((element) => element.toUpperCase().includes("[STRDC]"));
+
+            if (!exertElement) return null;
+
+            return exertElement
+                .replace(/\[STRDC\]/i, "Strength Bonus")
+                .replace(/\s+/g, " ")
+                .trim();
+        };
+
         attackTags.push({
-            name: `YOU FALL`,
-            title: `Attacker automatically falls down.`,
-        });
-    }
-    //if (maneuverHasTargetFallsTrait(effectiveAttackItem)) {
-    if (item.maneuverHasTrait("TARGET FALLS")) {
-        attackTags.push({
-            name: `TARGET FALLS`,
-            title: `Target falls prone as if thrown`,
+            name: `EXERT`,
+            title: extractExertTitle(getManeuverEffect(item)) ?? `Strength Bonus`,
         });
     }
 
-    // FLASH
+    // Maneuver behaves like flash - attacking senses
     // TODO: Find purchasable HDC files to see how they format special FLASH senses.
     //       In Maneuver listings, this Basis is indicated by
     //       use of the phrase, "[Sense] Group Flash __d6"
     //       You can buy additional sense groups, but unclear how that is formatted.
-    if (item.maneuverHasTrait("[FLASHDC]")) {
+    if (maneuverHasFlashBasis(item)) {
         const senseGroup = effectiveAttackItem.system.INPUT || item.system.INPUT;
         attackTags.push({
             name: `${senseGroup ? `${senseGroup} Group Flash` : "Flash"}`,
@@ -1787,60 +1843,32 @@ export function getAttackTags(item) {
         });
     }
 
-    // FMOVE
-    if (item.maneuverHasTrait("FMOVE")) {
+    // Maneuver that includes a full move (fmove)
+    if (maneuverHasFMoveElement(item, "fmove")) {
         attackTags.push({
             name: `FMOVE`,
             title: `Can attack after Full Move`,
         });
     }
 
-    // FOLLOW
-    if (item.maneuverHasTrait("MUST FOLLOW")) {
-        const extractMustFollowTarget = function (effectText) {
-            if (!effectText) return null;
-
-            const match = effectText.match(/Must\s+Follow\s+([^,]+)/i);
-            return match ? match[1].trim() : null;
-        };
-
-        const mustFollowTarget = extractMustFollowTarget(item.system.WEAPONEFFECT || item.system.EFFECT);
-
+    // Maneuver grabs opponent
+    if (maneuverHasGrabBasis(item)) {
         attackTags.push({
-            name: `Must Follow ${mustFollowTarget?.toUpperCase()}`,
-            title: `This maneuver must follow a successful ${mustFollowTarget}`,
+            name: `GRAB TARGET`,
+            title: `Grab a target. If successful you may squeeze, slam or throw`,
         });
     }
 
-    // GRAB OPPONENT
-    if (item.maneuverHasTrait("GRAB")) {
-        const extractGrabTarget = function (effectText) {
-            if (!effectText) return null;
-
-            // Match "Must Follow " case-insensitively, then capture all characters up to the next comma or string end
-            const regex = /Grab\s+([^,;]+)/i;
-            const match = effectText.match(regex);
-
-            // If a match is found, return the trimmed capturing group contents
-            return match ? match[1].trim() : null;
-        };
-        const grabTarget = extractGrabTarget(item.system.WEAPONEFFECT || item.system.EFFECT);
-        attackTags.push({
-            name: `GRAB ${grabTarget?.toUpperCase()}`,
-            title: `Grab a target. If successful you may squeeze, slam or throw.`,
-        });
-    }
-
-    // GRAB WEAPON
-    if (item.maneuverHasTrait("GRAB WEAPON")) {
+    // Maneuver grabs opponent's weapon
+    if (maneuverHasGrabWeaponBasis(item)) {
         attackTags.push({
             name: `GRAB WEAPON`,
-            title: `Grab a target. If successful you may attempt to disarm them.`,
+            title: `Grab a target. If successful you may attempt to disarm them`,
         });
     }
 
-    // HALF MOVE REQUIRED
-    if (item.maneuverHasTrait("HALF MOVE REQUIRED")) {
+    // Maneuver requires a half move before attack
+    if (maneuverHasHalfMoveRequiredElement(item)) {
         attackTags.push({
             name: `HALF MOVE REQUIRED`,
             title: `This maneuver must follow a half move`,
@@ -1849,12 +1877,35 @@ export function getAttackTags(item) {
 
     // K-DAMAGE (this is killing damage and shown elsewhere)
 
-    // LASTING RESTRICTION (these are OCV/DCV penalties and shown elsewhere)
+    // Maneuver penalties last longer (basic OCV/DCV penalties are shown elsewhere)
+    if (maneuverHasLastingRestrictionElement(item)) {
+        attackTags.push({
+            name: `LASTING RESTRICTION`,
+            title: `OCV and DCV penalties last one additional phase`,
+        });
+    }
+
+    // Maneuver must follow another maneuver
+    if (maneuverHasMustFollowElement(item)) {
+        const extractMustFollowTarget = function (effectText) {
+            if (!effectText) return null;
+
+            const match = effectText.match(/Must\s+Follow\s+([^,]+)/i);
+            return match ? match[1].trim() : null;
+        };
+
+        const mustFollowTarget = extractMustFollowTarget(getManeuverEffectCapitalized(item));
+
+        attackTags.push({
+            name: `Must Follow ${mustFollowTarget?.toUpperCase()}`,
+            title: `This maneuver must follow a successful ${mustFollowTarget}`,
+        });
+    }
 
     // N-DAMAGE (this is normal damage and shown elsewhere)
 
     // NND DMG
-    if (item.maneuverHasTrait("[NNDDC]")) {
+    if (maneuverHasNoNormalDefenseDamageElement(item)) {
         // Remove any previous NND as it is likely very generic
         const nndIndex = attackTags.findIndex((tag) => tag.name === "NND");
         if (nndIndex > -1) {
@@ -1870,10 +1921,11 @@ export function getAttackTags(item) {
     // ONE LIMB (should be included in GRAB)
 
     // PRONE (careful the TRIP maneuver has a poorly constructed generic effect, which we are changing)
-    // HeroSystem's Trip maneuver is generically described as "Knock a target to the ground, making him Prone"
+    // Hero System's Trip maneuver is generically described as "Knock a target to the ground, making him Prone"
     // This causes PRONE to mistakenly match, a migration fixes this using
-    // the proper trait of "Target Falls".
-    if (item.maneuverHasTrait("PRONE") && item.system.XMLID !== "TRIP") {
+    // the proper element of "Target Falls".
+    // PH: FIXME: Is the trip qualification here required?
+    if (maneuverHasRequiresProneTargetElement(item) && item.system.XMLID !== "TRIP") {
         attackTags.push({
             name: `PRONE`,
             title: `Target is required to be prone before maneuver can be used`,
@@ -1881,17 +1933,17 @@ export function getAttackTags(item) {
     }
 
     // REQUIRES BOTH HANDS
-    if (item.maneuverHasTrait("BOTH HANDS")) {
+    if (maneuverHasRequiresBothHandsElement(item)) {
         attackTags.push({
-            name: `PRONE`,
+            name: `BOTH HANDS`,
             title: `Must have both hands free before using this maneuver`,
         });
     }
 
-    // REQUIRES OBJECT/CONDITION (not sure how to implement)
+    // TODO: REQUIRES OBJECT/CONDITION (not sure how to implement)
 
-    // RESPONSE (Need example of this one, likely does not match, does nothing)
-    if (item.maneuverHasTrait("CAN ONLY BE USED AFTER")) {
+    // Maneuver is a response action
+    if (maneuverHasResponseElement(item)) {
         const extractResponseTarget = function (effectText) {
             if (!effectText) return null;
 
@@ -1910,10 +1962,10 @@ export function getAttackTags(item) {
         });
     }
 
-    // STRIKE (this is standard damage and shown elsewhere)
+    // STRIKE (this is standard damage and shown elsewhere - is it?)
 
-    // TAKE FULL DMG  (not sure how to implement)
-    if (item.maneuverHasTrait("ATTACKER TAKES")) {
+    // Maneuver causes the attacker to Full or Half damage
+    if (maneuverHasTakeFullDmgElement(item) || maneuverHasTakeHalfDmgElement(item)) {
         const extractAttackerDamageModifier = function (effectText) {
             if (!effectText) return null;
 
@@ -1921,16 +1973,28 @@ export function getAttackTags(item) {
             return match ? match[1].trim() : null;
         };
 
-        const attackerDamageModifier = extractAttackerDamageModifier(item.system.WEAPONEFFECT || item.system.EFFECT);
+        const attackerDamageModifier = extractAttackerDamageModifier(getManeuverEffect(item));
         attackTags.push({
             name: `Attacker Takes ${attackerDamageModifier} Damage`,
             title: `Attacker takes damage if collision takes place`,
         });
     }
 
-    // TAKE HALF DMG  (see TAKE FULL DMG)
+    // Maneuver throws the target prone
+    if (maneuverHasThrowBasis(item)) {
+        attackTags.push({
+            name: `TARGET FALLS`,
+            title: `Target falls prone as if thrown`,
+        });
+    }
 
-    // THROW (implemented as Target Falls)
+    // Maneuver causes the attacker to fall
+    if (maneuverHasYouFallElement(item)) {
+        attackTags.push({
+            name: `YOU FALL`,
+            title: `You fall prone as if thrown`,
+        });
+    }
 
     // TIME+ (not sure how to implement)
 
@@ -2611,7 +2675,7 @@ export async function _onRollDamage(event) {
     const isSenseAffecting = item.effectiveAttackItem.isSenseAffecting;
     const isKilling = item.effectiveAttackItem.doesKillingDamage;
     const isEntangle = item.effectiveAttackItem.isEntangle;
-    const isGrab = item.maneuverHasTrait("GRAB");
+    const isGrab = maneuverHasGrabBasis(item);
     const isEffectBasedAttack = item.effectiveAttackItem.isEffectBased;
     const isNormalAttack =
         !isEntangle && !isSenseAffecting && !isAdjustment && !isEffectBasedAttack && !isKilling && !isGrab;

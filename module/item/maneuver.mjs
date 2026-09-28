@@ -1,28 +1,14 @@
 import { HeroSystem6eActorActiveEffects } from "../actor/actor-active-effects.mjs";
+import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
 import { activeEffectChanges } from "../utility/active-effects.mjs";
-import { activeSingleTrackerCombatFor, isQuenchTestRunning } from "../utility/util.mjs";
 import { roundFavorPlayerTowardsZero } from "../utility/round.mjs";
 import { calculateVelocityInSystemUnits } from "../utility/units.mjs";
+import { activeSingleTrackerCombatFor, isQuenchTestRunning } from "../utility/util.mjs";
 import { dehydrateAttackItem, rehydrateAttackItem } from "./item-attack.mjs";
-import { HeroDialogV2 } from "../applications/api/hero-app-mixin.mjs";
-
-/**
- * Maneuvers have some rules of their own that should be considered.
- *
- * @param {*} actor
- * @param {*} item
- */
-export async function enforceManeuverLimits() {
-    //actor, item) {
-    // const maneuverItems = actor.items.filter((e) => ["maneuver", "martialart"].includes(e.type));
-    // AARON commented this out on 11/23/2025 as it messes with active.
-    // This isn't enforcing any maneuver limits!
-    // TODO: I don't believe you can set, brace, and haymaker, etc. so that is what we should be enforcing.
-    //await item.update({ "system.active": !item.system.active });
-}
+import { getManeuverEffectCapitalized, maneuverHasBasisOrElement } from "./maneuver-bases-and-elements.mjs";
 
 // FIXME: DCV should only be effective against HTH attacks unless it's a Dodge
-function addDcvTraitToChanges(maneuverDcvChange) {
+function addDcvChange(maneuverDcvChange) {
     if (maneuverDcvChange !== 0) {
         return {
             key: "system.characteristics.dcv.max",
@@ -33,7 +19,7 @@ function addDcvTraitToChanges(maneuverDcvChange) {
     }
 }
 
-function addOcvTraitToChanges(maneuverOcvChange) {
+function addOcvChange(maneuverOcvChange) {
     if (maneuverOcvChange !== 0) {
         return {
             key: "system.characteristics.ocv.max",
@@ -138,15 +124,6 @@ export async function endHaymakerManeuver(actor, { token } = {}) {
 }
 
 /**
- * Things which have the "abort" trait in their effect can be aborted to.
- * @returns {boolean}
- */
-export function maneuverCanBeAbortedTo(item) {
-    const maneuverHasAbortTrait = item.system.EFFECT?.toLowerCase().indexOf("abort") > -1;
-    return !!maneuverHasAbortTrait;
-}
-
-/**
  * Toggling an abortable maneuver (Dodge, Martial Dodge, …) outside the actor's
  * own Phase in a live combat IS Aborting — offer to declare it through the
  * combat engine so the Phase cost and lockout are recorded. Confirm
@@ -157,7 +134,7 @@ export function maneuverCanBeAbortedTo(item) {
 export async function promptOutOfTurnAbortForManeuver(item) {
     try {
         const actor = item.actor;
-        if (!actor || !maneuverCanBeAbortedTo(item)) return;
+        if (!actor || !maneuverHasAbortElement(item)) return;
         if (isQuenchTestRunning()) return;
 
         // Live single-tracker combats only, and outside this actor's own turn
@@ -188,151 +165,318 @@ export async function promptOutOfTurnAbortForManeuver(item) {
 }
 
 /**
- * Things which have the "Attacker Falls" trait in their effect.
+ * Maneuvers whose effect includes the "Abort" element can be aborted to.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasAttackerFallsTrait(item) {
-    const maneuverHasAttackerFallsTrait = item.system.EFFECT?.search(/you fall/i) > -1;
-    return !!maneuverHasAttackerFallsTrait;
+export function maneuverHasAbortElement(item) {
+    return maneuverHasBasisOrElement(item, "abort");
 }
 
 /**
- * Things which have the "Crush" trait in their effect.
+ * Maneuver includes the "Attacker Falls" element.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasBindTrait(item) {
-    const maneuverHasBindTrait = item.system.EFFECT?.search(/bind/i) > -1;
-    return maneuverHasBindTrait;
+export function maneuverHasAttackerFallsElement(item) {
+    return maneuverHasBasisOrElement(item, "attackerFalls");
 }
 
 /**
- * Things which have the "block" trait in their effect. Need to be careful that we're not triggering on
- * the "Must Follow Block" trait in their effect.
+ * Maneuver includes the "Bind" exclusive basis.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasBlockTrait(item) {
-    const maneuverHasBlockTrait =
-        item.system.EFFECT?.search(/block/i) > -1 && !(item.system.EFFECT?.search(/follow block/i) > -1);
-    return maneuverHasBlockTrait;
+export function maneuverHasBindBasis(item) {
+    return maneuverHasBasisOrElement(item, "bind");
 }
 
 /**
- * Things which have the "Crush" trait in their effect.
+ * Maneuver includes the "Block" exclusive basis. The "Must Follow Block" basis is a
+ * prerequisite on a different maneuver, not a Block in its own right, so it is
+ * excluded.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasCrushTrait(item) {
-    const maneuverHasCrushTrait = item.system.EFFECT?.search(/crush/i) > -1;
-    return maneuverHasCrushTrait;
+export function maneuverHasBlockBasis(item) {
+    return maneuverHasBasisOrElement(item, "block");
 }
 
 /**
- * Things which have the "disarm" trait in their effect.
+ * Maneuver includes the "Crush" element. It appears to just be a flavour of strike so
+ * I'm not sure why they decided to create a new element for it.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasDisarmTrait(item) {
-    const maneuverHasDisarmTrait = item.system.EFFECT?.search(/disarm/i) > -1;
-    return !!maneuverHasDisarmTrait;
+export function maneuverHasCrushElement(item) {
+    return maneuverHasBasisOrElement(item, "crush");
 }
 
 /**
- * Things which have the "dodge" trait in their effect.
+ * Maneuver includes the "Disable" element.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasDodgeTrait(item) {
-    const maneuverHasDodgeTrait = item.system.EFFECT?.search(/dodge/i) > -1;
-    return !!maneuverHasDodgeTrait;
+export function maneuverHasDisableElement(item) {
+    return maneuverHasBasisOrElement(item, "disable");
 }
 
 /**
- * Things which have the "flash dc" trait in their effect.
+ * Maneuver includes the "Disarm" exclusive basis.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasFlashEffectTrait(item) {
-    const maneuverHasFlashTrait = item.system.EFFECT?.search(/\[FLASHDC\]/i) > -1;
-    return !!maneuverHasFlashTrait;
+export function maneuverHasDisarmBasis(item) {
+    return maneuverHasBasisOrElement(item, "disarm");
 }
 
 /**
- * Things which have the "grab" trait in their effect.
+ * Maneuver includes the "Dodge" exclusive basis.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasGrabTrait(item) {
-    const maneuverHasGrabTrait = item.system.EFFECT?.search(/grab/i) > -1;
-    return !!maneuverHasGrabTrait;
+export function maneuverHasDodgeBasis(item) {
+    return maneuverHasBasisOrElement(item, "dodge");
 }
 
 /**
- * Things which have the "killing" damage trait in their effect.
+ * Maneuver includes the "[STRDC]", which is not a strength damage, non-exclusive basis.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasKillingDamageTrait(item) {
-    const maneuverHasKillingTrait = item.system.EFFECT?.search(/\[KILLINGDC\]/i) > -1;
-    return !!maneuverHasKillingTrait;
+export function maneuverHasExertBasis(item) {
+    return maneuverHasBasisOrElement(item, "exert");
 }
 
 /**
- * Things which have the "NND" damage trait in their effect.
+ * Maneuver includes the "[FLASHDC]" exclusive basis.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasNoNormalDefenseDamageTrait(item) {
-    const maneuverHasNNDTrait = item.system.EFFECT?.search(/\[NNDDC\]/i) > -1;
-    return !!maneuverHasNNDTrait;
+export function maneuverHasFlashBasis(item) {
+    return maneuverHasBasisOrElement(item, "flashDc");
 }
 
 /**
- * Things which have the "normal" damage trait in their effect.
+ * Maneuver includes the "FMove" element.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasNormalDamageTrait(item) {
-    const maneuverHasNormalTrait = item.system.EFFECT?.search(/\[NORMALDC\]/i) > -1;
-    return !!maneuverHasNormalTrait;
+export function maneuverHasFMoveElement(item) {
+    return maneuverHasBasisOrElement(item, "fmove");
 }
 
 /**
- * Things which have the "Target Falls" trait in their effect.
+ * Maneuver includes the "Grab" non-exclusive basis — it grabs the OPPONENT. "Grab Weapon"
+ * and "Must Follow Grab" are separate elements and do not count.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasTargetFallsTrait(item) {
-    const maneuverHasTargetFallsTrait = item.system.EFFECT?.search(/target falls/i) > -1;
-    return !!maneuverHasTargetFallsTrait;
+export function maneuverHasGrabBasis(item) {
+    return maneuverHasBasisOrElement(item, "grab");
 }
 
 /**
- * Things which have the "to resist Shove" trait in their effect.
+ * Maneuver includes the "Grab Weapon" exclusive basis.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasRootTrait(item) {
-    const maneuverHasRootTrait = item.system.EFFECT?.search(/to resist Shove/i) > -1;
-    return !!maneuverHasRootTrait;
+export function maneuverHasGrabWeaponBasis(item) {
+    return maneuverHasBasisOrElement(item, "grabWeapon");
 }
 
 /**
- * Things which have the "shove" trait in their effect. Need to be careful that we're not triggering on
- * the "to resist Shove" (i.e. maneuverHasRootTrait) trait in their effect.
+ * Maneuver includes the "Half Move Required" element.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasShoveTrait(item) {
-    const maneuverHasShoveTrait =
-        item.system.EFFECT?.search(/shove/i) > -1 && !(item.system.EFFECT?.search(/to resist Shove/i) > -1);
-    return maneuverHasShoveTrait;
+export function maneuverHasHalfMoveRequiredElement(item) {
+    return maneuverHasBasisOrElement(item, "halfMoveRequired");
 }
 
 /**
- * Things which have the "Strike" trait in their effect.
+ * Maneuver includes the "[KILLINGDC]" or "[WEAPONKILLINGDC]" element.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasStrikeTrait(item) {
-    const maneuverHasStrikeTrait = item.system.EFFECT?.search(/strike/i) > -1;
-    return !!maneuverHasStrikeTrait;
+export function maneuverHasKillingDamageElement(item) {
+    return maneuverHasBasisOrElement(item, "killingDc");
 }
 
 /**
- * Things which have the "velocity" trait in their effect.
+ * Maneuver includes the "Lasting Restriction" element.
+ *
+ * @param {HeroSystem6eItem} item
  * @returns {boolean}
  */
-export function maneuverHasVelocityTrait(item) {
-    const maneuverHasVelocityTrait = item.system.EFFECT?.search(/v\/(\d+)/i) > -1;
-    return !!maneuverHasVelocityTrait;
+export function maneuverHasLastingRestrictionElement(item) {
+    return maneuverHasBasisOrElement(item, "lastingRestriction");
+}
+
+/**
+ * Maneuver includes the "Must Follow" element.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasMustFollowElement(item) {
+    return maneuverHasBasisOrElement(item, "mustFollow");
+}
+
+/*
+ * Maneuver has no elements. Likely not an active maneuver (e.g. weapon element).
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasNoElements(item) {
+    return !getManeuverEffectCapitalized(item);
+}
+
+/**
+ * Maneuver includes the "[NORMALDC]" or "[WEAPONDC]" element.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasNormalDamageElement(item) {
+    return maneuverHasBasisOrElement(item, "normalDc");
+}
+
+/**
+ * Maneuver includes the "[NNDDC]" (No Normal Defense) element.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasNoNormalDefenseDamageElement(item) {
+    return maneuverHasBasisOrElement(item, "nndDc");
+}
+
+/**
+ * Maneuver includes the "Requires Both Hands" element.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasRequiresBothHandsElement(item) {
+    return maneuverHasBasisOrElement(item, "requiresBothHands");
+}
+
+/**
+ * Maneuver includes the "Prone" element.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasRequiresProneTargetElement(item) {
+    return maneuverHasBasisOrElement(item, "prone");
+}
+
+/**
+ * Maneuver includes the "Can Only Be Used After X" element.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasResponseElement(item) {
+    return maneuverHasBasisOrElement(item, "response");
+}
+
+/**
+ * Maneuver includes the "To Resist Shove" element.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasRootElement(item) {
+    return maneuverHasBasisOrElement(item, "root");
+}
+
+/**
+ * Maneuver includes the "Shove" element. "To Resist Shove" is the Root element,
+ * not a Shove of its own, so the registry excludes it here.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasShoveElement(item) {
+    return maneuverHasBasisOrElement(item, "shove");
+}
+
+/**
+ * Maneuver includes the "Strike" basis.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasStrikeBasis(item) {
+    return maneuverHasBasisOrElement(item, "strike");
+}
+
+/**
+ * Maneuver includes the "Take Full DMG" element.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasTakeFullDmgElement(item) {
+    return maneuverHasBasisOrElement(item, "takeFullDmg");
+}
+
+/**
+ * Maneuver includes the "Take Half DMG" element.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasTakeHalfDmgElement(item) {
+    return maneuverHasBasisOrElement(item, "takeHalfDmg");
+}
+
+/**
+ * Maneuver includes the "throw" (e.g. "Target Falls", "He Falls", "Opponent Falls") non-exclusive basis.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasThrowBasis(item) {
+    return maneuverHasBasisOrElement(item, "throw");
+}
+
+/**
+ * Maneuver includes a velocity-scaled effect ("+v/5" and friends).
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasVelocityElement(item) {
+    return maneuverHasBasisOrElement(item, "velocity");
+}
+
+/**
+ * Maneuver includes the "You Falls" element.
+ *
+ * @param {HeroSystem6eItem} item
+ * @returns {boolean}
+ */
+export function maneuverHasYouFallElement(item) {
+    return maneuverHasBasisOrElement(item, "youFall");
 }
 
 // Maneuvers we recognize but have not implemented status effects for yet
@@ -341,32 +485,32 @@ const UNSUPPORTED_MANEUVER_EFFECT_XMLIDS = ["COVER", "HIPSHOT", "HURRY", "SET", 
 // Shared field recipes for MANEUVER_EFFECT_SPECS
 const nameWithXmlid = (item) => (item.name ? `${item.name} (${item.system.XMLID})` : `${item.system.XMLID}`);
 const statusName = (_item, status) => status.name;
-const traitChanges = (_item, _status, { dcvTrait, ocvTrait }) =>
-    [addDcvTraitToChanges(dcvTrait), addOcvTraitToChanges(ocvTrait)].filter(Boolean);
+const cvChanges = (_item, _status, { dcvChange, ocvChange }) =>
+    [addDcvChange(dcvChange), addOcvChange(ocvChange)].filter(Boolean);
 const statusChanges = (_item, status) => foundry.utils.deepClone(activeEffectChanges(status));
 
 /**
  * Declarative specs for the status effect each maneuver activation turns on.
  * Evaluated top to bottom — order reproduces the precedence of the old
- * if/else-if chain (trait matches before XMLID matches). An entry without a
+ * if/else-if chain (element matches before XMLID matches). An entry without a
  * `changes` recipe leaves the effect's changes untouched; an `unsupported`
  * entry warns instead of building an effect.
  */
 const MANEUVER_EFFECT_SPECS = [
     {
-        // Trait match rather than XMLID so custom/martial dodges qualify too
-        match: (item) => maneuverHasDodgeTrait(item),
+        // Element match rather than XMLID so custom/martial dodges qualify too
+        match: (item) => maneuverHasDodgeBasis(item),
         statusKey: "dodgeEffect",
-        name: (item, _status, { dcvTrait }) =>
-            item.name ? `${item.name} (${item.system.XMLID} +${dcvTrait})` : `${item.system.XMLID} +${dcvTrait}`,
-        changes: traitChanges,
+        name: (item, _status, { dcvChange }) =>
+            item.name ? `${item.name} (${item.system.XMLID} +${dcvChange})` : `${item.system.XMLID} +${dcvChange}`,
+        changes: cvChanges,
     },
     {
-        // Trait match rather than XMLID so custom/martial blocks qualify too
-        match: (item) => maneuverHasBlockTrait(item),
+        // Element match rather than XMLID so custom/martial blocks qualify too
+        match: (item) => maneuverHasBlockBasis(item),
         statusKey: "blockEffect",
         name: nameWithXmlid,
-        changes: traitChanges,
+        changes: cvChanges,
     },
     {
         // NOTE: This effect is special and doesn't come off as the start of the next phase
@@ -395,7 +539,7 @@ const MANEUVER_EFFECT_SPECS = [
         match: () => true,
         statusKey: "strikeEffect",
         name: nameWithXmlid,
-        changes: traitChanges,
+        changes: cvChanges,
     },
 ];
 
@@ -403,14 +547,14 @@ const MANEUVER_EFFECT_SPECS = [
  * Apply a spec's fields, plus the fields every maneuver effect shares, onto
  * the (possibly reused) active effect.
  */
-function buildManeuverActiveEffect(activeEffect, item, spec, traits) {
+function buildManeuverActiveEffect(activeEffect, item, spec, cvValues) {
     const status = HeroSystem6eActorActiveEffects.statusEffectsObj[spec.statusKey];
-    activeEffect.name = spec.name(item, status, traits);
+    activeEffect.name = spec.name(item, status, cvValues);
     activeEffect.img = status.img;
     activeEffect.flags = buildManeuverNextPhaseFlags(item);
     if (spec.changes) {
         activeEffect = foundry.utils.mergeObject(activeEffect, {
-            "system.changes": spec.changes(item, status, traits),
+            "system.changes": spec.changes(item, status, cvValues),
         });
     }
     activeEffect.duration ??= {};
@@ -437,22 +581,22 @@ export async function activateManeuver(item) {
     promptOutOfTurnAbortForManeuver(item);
 
     // FIXME: These are supposed to be for HTH or ranged combat only except for dodge.
-    const dcvTrait = parseInt(item.system.DCV === "--" ? 0 : item.system.DCV || 0);
-    let ocvTrait = parseInt(item.system.OCV === "--" ? 0 : item.system.OCV || 0);
+    const dcvChange = parseInt(item.system.DCV === "--" ? 0 : item.system.DCV || 0);
+    let ocvChange = parseInt(item.system.OCV === "--" ? 0 : item.system.OCV || 0);
 
     // Velocity calc?
-    if (isNaN(ocvTrait) && item.system.OCV.includes("v/")) {
+    if (isNaN(ocvChange) && item.system.OCV.includes("v/")) {
         const match = item.system.OCV.match(/([-+]*)v\/(\d+)/);
         const v = calculateVelocityInSystemUnits(item.actor);
         const sign = match[1];
         const divisor = parseInt(match[2]);
-        ocvTrait = roundFavorPlayerTowardsZero(v / divisor) * (sign === "-" ? -1 : 1);
+        ocvChange = roundFavorPlayerTowardsZero(v / divisor) * (sign === "-" ? -1 : 1);
     }
 
     // Catch All
-    if (isNaN(ocvTrait)) {
+    if (isNaN(ocvChange)) {
         console.error(`unhandled item.system.OCV`, item.system.OCV);
-        ocvTrait = 0;
+        ocvChange = 0;
     }
 
     // Make sure we have original Item
@@ -469,7 +613,7 @@ export async function activateManeuver(item) {
     if (spec.unsupported) {
         console.error(`Unsupported maneuver ${item.detailedName()}`);
     } else {
-        activeEffect = buildManeuverActiveEffect(activeEffect, item, spec, { dcvTrait, ocvTrait });
+        activeEffect = buildManeuverActiveEffect(activeEffect, item, spec, { dcvChange, ocvChange });
     }
 
     const _changes = activeEffectChanges(activeEffect);
@@ -526,9 +670,9 @@ export async function doManeuverEffects(item, action, targetToken) {
         return;
     }
 
-    const hasAttackerFallsTrait = maneuverHasAttackerFallsTrait(item);
-    const hasGrabTrait = maneuverHasGrabTrait(item);
-    const hasTargetFallsTrait = maneuverHasTargetFallsTrait(item);
+    const hasAttackerFallsElement = maneuverHasAttackerFallsElement(item);
+    const hasGrabBasis = maneuverHasGrabBasis(item);
+    const hasThrowBasis = maneuverHasThrowBasis(item);
 
     const currentTargets = action.system.currentTargets || [];
     if (currentTargets.length === 0 && targetToken) {
@@ -537,11 +681,11 @@ export async function doManeuverEffects(item, action, targetToken) {
     const validTargets = currentTargets.filter((t) => !!t.actor);
 
     // --- 1. PROCESS ALL TARGETED DEFENDERS SEQUENTIALLY ---
-    if (hasTargetFallsTrait || hasGrabTrait) {
+    if (hasThrowBasis || hasGrabBasis) {
         for (const targetedToken of validTargets) {
             const defenderActor = targetedToken.actor;
 
-            if (hasGrabTrait) {
+            if (hasGrabBasis) {
                 await defenderActor.createEmbeddedDocuments("ActiveEffect", [
                     {
                         // deepClone: freeze on statusEffectsObj is shallow and document construction takes ownership of system/changes
@@ -557,7 +701,7 @@ export async function doManeuverEffects(item, action, targetToken) {
                 ]);
             }
 
-            if (hasTargetFallsTrait) {
+            if (hasThrowBasis) {
                 await defenderActor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
                     active: true,
                 });
@@ -570,7 +714,7 @@ export async function doManeuverEffects(item, action, targetToken) {
     }
 
     // --- 2. PROCESS THE ATTACKER ---
-    if (hasGrabTrait && validTargets.length > 0) {
+    if (hasGrabBasis && validTargets.length > 0) {
         await attackerActor.createEmbeddedDocuments("ActiveEffect", [
             {
                 ...foundry.utils.deepClone(HeroSystem6eActorActiveEffects.statusEffectsObj.grabEffect),
@@ -585,7 +729,7 @@ export async function doManeuverEffects(item, action, targetToken) {
         ]);
     }
 
-    if (hasAttackerFallsTrait) {
+    if (hasAttackerFallsElement) {
         await attackerActor.toggleStatusEffect(HeroSystem6eActorActiveEffects.statusEffectsObj.proneEffect.id, {
             active: true,
         });
