@@ -1,8 +1,8 @@
 /**
  * Maneuver Bases And Elements.
  *
- * Per Ultimate Martial Artist a maneuver's effect is a LIST OF BASES AND ELEMENTS
- * ("Block", "Abort", "Target Falls", "Grab Two Limbs"), not free prose.
+ * Per Ultimate Martial Artist a maneuver's effect is a list of BASES (the core action) and
+ * ELEMENTS (flavour for the action) (e.g. "Block", "Abort", "Target Falls", "Grab Two Limbs"), not free prose.
  *
  */
 
@@ -11,7 +11,7 @@
  *
  *   includes — case-insensitive substring(s) marking the element present. An
  *              array means "any of".
- *   not      — case-insensitive substrings that disqualify an otherwise match
+ *   excludes — case-insensitive substrings that disqualify an otherwise match
  *   regex    — used instead of `includes` when the element isn't a fixed phrase
  *
  **/
@@ -20,7 +20,7 @@ const MANEUVER_BASES_AND_ELEMENTS = Object.freeze({
     attackerFalls: { includes: "YOU FALL" },
     attackerTakes: { includes: "ATTACKER TAKES" },
     bind: { includes: "BIND" },
-    block: { includes: "BLOCK", not: ["FOLLOW BLOCK"] },
+    block: { includes: "BLOCK", excludes: ["FOLLOW BLOCK"] },
     crush: { includes: "CRUSH" },
     disable: { includes: "DISABLE" },
     disarm: { includes: "DISARM" },
@@ -28,7 +28,7 @@ const MANEUVER_BASES_AND_ELEMENTS = Object.freeze({
     exert: { includes: "[STRDC]" },
     flashDc: { includes: "[FLASHDC]" },
     fmove: { includes: "FMOVE" },
-    grab: { includes: "GRAB", not: ["GRAB WEAPON", "MUST", "VS. GRAB", "VERSUS GRAB"] },
+    grab: { includes: "GRAB", excludes: ["GRAB WEAPON", "MUST", "VS. GRAB", "VERSUS GRAB"] },
     grabWeapon: { includes: "GRAB WEAPON" },
     halfMoveRequired: { includes: "HALF MOVE REQUIRED" },
     killingDc: { includes: ["[KILLINGDC]", "[WEAPONKILLINGDC]"] },
@@ -40,7 +40,7 @@ const MANEUVER_BASES_AND_ELEMENTS = Object.freeze({
     requiresBothHands: { includes: "BOTH HANDS" },
     response: { includes: "CAN ONLY BE USED AFTER" },
     root: { includes: "TO RESIST SHOVE" },
-    shove: { includes: "SHOVE", not: ["TO RESIST SHOVE"] },
+    shove: { includes: "SHOVE", excludes: ["TO RESIST SHOVE"] },
     strike: { includes: "STRIKE" },
     takeFullDmg: { includes: "TAKE FULL DMG" },
     takeHalfDmg: { includes: "TAKE HALF DMG" },
@@ -98,7 +98,7 @@ function splitBasesAndElementsFromEffectField(item) {
  * Does this item's effect include the given element?
  *
  * @param {HeroSystem6eItem} item
- * @param {string} element - Element to search for. String must be a key of MANEUVER_ELEMENTS
+ * @param {string} element - Element to search for. String must be a key of MANEUVER_BASES_AND_ELEMENTS
  *
  * @returns {boolean}
  */
@@ -126,6 +126,8 @@ export function maneuverHasBasisOrElement(item, element) {
             return false;
         }
 
-        return !(elementDefinition.not ?? []).some((exclusion) => presentElement.includes(exclusion.toUpperCase()));
+        return !(elementDefinition.excludes ?? []).some((exclusion) =>
+            presentElement.includes(exclusion.toUpperCase()),
+        );
     });
 }
