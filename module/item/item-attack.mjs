@@ -26,7 +26,6 @@ import {
     maneuverHasTakeFullDmgElement,
     maneuverHasTakeHalfDmgElement,
     maneuverHasThrowBasis,
-    maneuverHasYouFallElement,
 } from "./maneuver.mjs";
 
 import { HEROSYS } from "../herosystem6e.mjs";
@@ -1805,7 +1804,7 @@ export function getAttackTags(item) {
 
     // Maneuver that boosts strength exertion
     if (maneuverHasExertBasis(item)) {
-        // PH: FIXME: Refactor all these examples
+        // PH: FIXME: Refactor all these examples with splitBasesAndElementsFromEffectField or new API
         const extractExertTitle = function (effectText) {
             if (!effectText) return null;
 
@@ -1985,14 +1984,6 @@ export function getAttackTags(item) {
         attackTags.push({
             name: `TARGET FALLS`,
             title: `Target falls prone as if thrown`,
-        });
-    }
-
-    // Maneuver causes the attacker to fall
-    if (maneuverHasYouFallElement(item)) {
-        attackTags.push({
-            name: `YOU FALL`,
-            title: `You fall prone as if thrown`,
         });
     }
 

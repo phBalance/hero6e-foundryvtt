@@ -175,7 +175,8 @@ export function maneuverHasAbortElement(item) {
 }
 
 /**
- * Maneuver includes the "Attacker Falls" element.
+ * Maneuver includes the "You Fall" element. This called "Fall" in the Ultimate Martial Artist
+ * should be written as "You Fall" but that's a less descriptive name than it's the attacker falls.
  *
  * @param {HeroSystem6eItem} item
  * @returns {boolean}
@@ -467,16 +468,6 @@ export function maneuverHasThrowBasis(item) {
  */
 export function maneuverHasVelocityElement(item) {
     return maneuverHasBasisOrElement(item, "velocity");
-}
-
-/**
- * Maneuver includes the "You Falls" element.
- *
- * @param {HeroSystem6eItem} item
- * @returns {boolean}
- */
-export function maneuverHasYouFallElement(item) {
-    return maneuverHasBasisOrElement(item, "youFall");
 }
 
 // Maneuvers we recognize but have not implemented status effects for yet

@@ -17,6 +17,7 @@
  **/
 const MANEUVER_BASES_AND_ELEMENTS = Object.freeze({
     abort: { includes: "ABORT" },
+    // MMA element "You Fall" — the attacker goes prone
     attackerFalls: { includes: "YOU FALL" },
     attackerTakes: { includes: "ATTACKER TAKES" },
     bind: { includes: "BIND" },
@@ -47,7 +48,6 @@ const MANEUVER_BASES_AND_ELEMENTS = Object.freeze({
     throw: { includes: ["TARGET FALLS", "HE FALLS", "OPPONENT FALLS"] },
     velocity: { regex: /v\/(\d+)/i },
     weaponDc: { includes: "[WEAPONDC]" },
-    youFall: { includes: "YOU FALL" },
 });
 
 /**
@@ -76,14 +76,14 @@ export function getManeuverEffectCapitalized(item) {
 
 /**
  * Split effect text into its constituent elements. HD files EFFECT/WEAPONEFFECT
- * are elements written with either "," or ";" as separators.
+ * are bases and/or elements written with either "," or ";" as separators.
  *
  * @param {string} text
  *
  * @returns {string[]}
  */
 function splitBasesAndElementsFromEffectField(item) {
-    const effectText = getManeuverEffectCapitalized(item);
+    const effectText = getManeuverEffect(item);
     if (!effectText) {
         return [];
     }
@@ -108,17 +108,17 @@ export function maneuverHasBasisOrElement(item, element) {
         console.error(`Unknown maneuver element "${element}"`, item.detailedName());
         return false;
     }
-
-    const presentElements = splitBasesAndElementsFromEffectField(item);
-    if (presentElements.length === 0) {
-        return false;
-    }
-
     const markers = elementDefinition.includes
         ? [elementDefinition.includes].flat().map((marker) => marker.toUpperCase())
         : [];
 
-    return presentElements.some((presentElement) => {
+    // Get a capitalize array of bases and elements
+    const basesAndElementsArray = splitBasesAndElementsFromEffectField(item).map((element) => element.toUpperCase());
+    if (basesAndElementsArray.length === 0) {
+        return false;
+    }
+
+    return basesAndElementsArray.some((presentElement) => {
         const matched = elementDefinition.regex
             ? elementDefinition.regex.test(presentElement)
             : markers.some((marker) => presentElement.includes(marker));

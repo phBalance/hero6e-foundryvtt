@@ -302,12 +302,7 @@ export function registerManeuverTests(quench) {
                         "throw",
                         "velocity",
                         "weaponDc",
-                        "youFall",
                     ];
-
-                    // PH: FIXME: Should normalDc and strike be valid together?
-                    //            How about normalDc, velocity, and strike?
-                    //            Are they just a strike or not?
 
                     // The exact set of bases/elements each 5e martial-arts maneuver's
                     // EFFECT attribute is expected to resolve to, keyed by ALIAS.
@@ -324,15 +319,7 @@ export function registerManeuverTests(quench) {
                         "Fast Strike": ["normalDc", "strike"],
                         "Flying Dodge": ["abort", "dodge", "fmove"],
                         "Flying Grab": ["exert", "fmove", "grab"],
-                        "Flying Tackle": [
-                            "attackerFalls",
-                            "fmove",
-                            "normalDc",
-                            "strike",
-                            "throw",
-                            "velocity",
-                            "youFall",
-                        ],
+                        "Flying Tackle": ["attackerFalls", "fmove", "normalDc", "strike", "throw", "velocity"],
                         "Grappling Block": ["block", "grab"],
                         "Grappling Throw": ["mustFollow", "normalDc", "strike", "throw"],
                         "Joint Break": ["disable", "grab", "killingDc"],
@@ -358,7 +345,7 @@ export function registerManeuverTests(quench) {
                         "Sacrifice Disarm": ["disarm", "exert"],
                         "Sacrifice Lunge": ["fmove", "normalDc", "velocity"],
                         "Sacrifice Strike": ["normalDc", "strike"],
-                        "Sacrifice Throw": ["attackerFalls", "normalDc", "strike", "throw", "youFall"],
+                        "Sacrifice Throw": ["attackerFalls", "normalDc", "strike", "throw"],
                         Shove: ["exert", "shove"],
                         Takeaway: ["exert", "grabWeapon"],
                         Takedown: ["normalDc", "strike", "throw"],
