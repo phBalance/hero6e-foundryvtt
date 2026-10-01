@@ -1,4 +1,4 @@
-import { getManeuverEffect, getManeuverEffectCapitalized } from "./maneuver-bases-and-elements.mjs";
+import { getManeuverEffect } from "./maneuver-bases-and-elements.mjs";
 import {
     activateManeuver,
     doManeuverEffects,
@@ -1776,6 +1776,7 @@ export function getAttackTags(item) {
 
     // Maneuver that diarms
     if (!!maneuverDisarmBasis(item)) {
+        // PH: FIXME: Is this required? What situation would we encounter this?
         // Remove any previous DISARM as it is likely very generic
         const disarmIndex = attackTags.findIndex((tag) => tag.name === "DISARM");
         if (disarmIndex > -1) {
@@ -1803,29 +1804,14 @@ export function getAttackTags(item) {
     }
 
     // Maneuver that boosts strength exertion
-    if (!!maneuverExertBasis(item)) {
-        // PH: FIXME: Refactor all these examples with splitBasesAndElementsFromEffectField or new API
-        const extractExertTitle = function (effectText) {
-            if (!effectText) return null;
-
-            // EFFECT/WEAPONEFFECT are lists of bases and elements separated by
-            // "," or ";" — only the Exert element belongs in this tag's title.
-            const exertElement = effectText
-                .split(/[,;]/)
-                .map((element) => element.trim())
-                .find((element) => element.toUpperCase().includes("[STRDC]"));
-
-            if (!exertElement) return null;
-
-            return exertElement
-                .replace(/\[STRDC\]/i, "Strength Bonus")
-                .replace(/\s+/g, " ")
-                .trim();
-        };
-
+    const exertBasis = maneuverExertBasis(item);
+    if (exertBasis) {
         attackTags.push({
             name: `EXERT`,
-            title: extractExertTitle(getManeuverEffect(item)) ?? `Strength Bonus`,
+            title: exertBasis
+                .replace(/\[STRDC\]/i, "Strength Bonus")
+                .replace(/\s+/g, " ")
+                .trim(),
         });
     }
 
@@ -1885,18 +1871,15 @@ export function getAttackTags(item) {
     }
 
     // Maneuver must follow another maneuver
-    if (!!maneuverMustFollowElement(item)) {
-        const extractMustFollowTarget = function (effectText) {
-            if (!effectText) return null;
-
-            const match = effectText.match(/Must\s+Follow\s+([^,]+)/i);
-            return match ? match[1].trim() : null;
-        };
-
-        const mustFollowTarget = extractMustFollowTarget(getManeuverEffectCapitalized(item));
+    const mustFollowElement = maneuverMustFollowElement(item);
+    if (mustFollowElement) {
+        const mustFollowTarget = mustFollowElement
+            .replace(/^must\s+follow\s+/i, "")
+            .trim()
+            .toUpperCase();
 
         attackTags.push({
-            name: `Must Follow ${mustFollowTarget?.toUpperCase()}`,
+            name: `Must Follow ${mustFollowTarget}`,
             title: `This maneuver must follow a successful ${mustFollowTarget}`,
         });
     }
@@ -1905,6 +1888,7 @@ export function getAttackTags(item) {
 
     // NND DMG
     if (!!maneuverNoNormalDefenseDamageElement(item)) {
+        // PH: FIXME: Where can we encounter this?
         // Remove any previous NND as it is likely very generic
         const nndIndex = attackTags.findIndex((tag) => tag.name === "NND");
         if (nndIndex > -1) {
