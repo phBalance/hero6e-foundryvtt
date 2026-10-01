@@ -95,39 +95,45 @@ function splitBasesAndElementsFromEffectField(item) {
 }
 
 /**
- * Does this item's effect include the given element?
+ * The basis or element of the given kind that the item effect contains.
+ *
+ * Matching is case-insensitive, but the returned string keeps the original
+ * casing (trimmed) so callers can display or further parse what was actually
+ * written. When several elements match, the first one wins.
  *
  * @param {HeroSystem6eItem} item
- * @param {string} element - Element to search for. String must be a key of MANEUVER_BASES_AND_ELEMENTS
+ * @param {string} basisOrElementKey - Element to search for. String must be a key of MANEUVER_BASES_AND_ELEMENTS
  *
- * @returns {boolean}
+ * @returns {string|undefined} The matching basis/element text as written, or
+ *   undefined when the effect does not include it. Truthy when present, so a bare
+ *   `if (maneuverBasisOrElement(...))` still reads as a presence check; cast with
+ *   `!!` wherever a true boolean is required.
  */
-export function maneuverHasBasisOrElement(item, element) {
-    const elementDefinition = MANEUVER_BASES_AND_ELEMENTS[element];
+export function maneuverBasisOrElement(item, basisOrElementKey) {
+    const elementDefinition = MANEUVER_BASES_AND_ELEMENTS[basisOrElementKey];
     if (!elementDefinition) {
-        console.error(`Unknown maneuver element "${element}"`, item.detailedName());
-        return false;
+        console.error(`${item.detailedName()}: Unknown maneuver basis or element "${basisOrElementKey}"`);
+        return undefined;
     }
     const markers = elementDefinition.includes
         ? [elementDefinition.includes].flat().map((marker) => marker.toUpperCase())
         : [];
 
-    // Get a capitalize array of bases and elements
-    const basesAndElementsArray = splitBasesAndElementsFromEffectField(item).map((element) => element.toUpperCase());
-    if (basesAndElementsArray.length === 0) {
-        return false;
-    }
+    // Keep the original casing for the return value; only the haystack we match
+    // against is upper-cased, so matching stays case-insensitive.
+    const basesAndElements = splitBasesAndElementsFromEffectField(item);
 
-    return basesAndElementsArray.some((presentElement) => {
+    return basesAndElements.find((presentBasisOrElement) => {
+        const uppercaseBasisOrElement = presentBasisOrElement.toUpperCase();
         const matched = elementDefinition.regex
-            ? elementDefinition.regex.test(presentElement)
-            : markers.some((marker) => presentElement.includes(marker));
+            ? elementDefinition.regex.test(uppercaseBasisOrElement)
+            : markers.some((marker) => uppercaseBasisOrElement.includes(marker));
         if (!matched) {
             return false;
         }
 
         return !(elementDefinition.excludes ?? []).some((exclusion) =>
-            presentElement.includes(exclusion.toUpperCase()),
+            uppercaseBasisOrElement.includes(exclusion.toUpperCase()),
         );
     });
 }

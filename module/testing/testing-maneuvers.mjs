@@ -1,4 +1,4 @@
-import { maneuverHasBasisOrElement } from "../item/maneuver-bases-and-elements.mjs";
+import { maneuverBasisOrElement } from "../item/maneuver-bases-and-elements.mjs";
 import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 
 export function registerManeuverTests(quench) {
@@ -378,8 +378,8 @@ export function registerManeuverTests(quench) {
                             const maneuver = maneuvers.find((item) => item.system.ALIAS === alias);
                             expect(maneuver, `Maneuver with ALIAS "${alias}" should exist`).to.exist;
 
-                            const actual = ALL_MANEUVER_BASES_AND_ELEMENTS.filter((element) =>
-                                maneuverHasBasisOrElement(maneuver, element),
+                            const actual = ALL_MANEUVER_BASES_AND_ELEMENTS.filter(
+                                (basisOrElementKey) => !!maneuverBasisOrElement(maneuver, basisOrElementKey),
                             ).sort();
 
                             expect(actual, `Maneuver "${alias}" EFFECT="${maneuver.system.EFFECT}"`).to.deep.equal(
