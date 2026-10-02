@@ -1727,7 +1727,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver be aborted to
-    if (!!maneuverAbortElement(item)) {
+    if (maneuverAbortElement(item)) {
         attackTags.push({
             name: `ABORT`,
             title: `You can abort to maneuver`,
@@ -1735,7 +1735,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver where attacker falls
-    if (!!maneuverAttackerFallsElement(item)) {
+    if (maneuverAttackerFallsElement(item)) {
         attackTags.push({
             name: `ATTACKER FALLS`,
             title: `Attacker automatically falls down`,
@@ -1743,7 +1743,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver that binds
-    if (!!maneuverBindBasis(item)) {
+    if (maneuverBindBasis(item)) {
         attackTags.push({
             name: `BIND`,
             title: `Bind enemy weapon`,
@@ -1751,7 +1751,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver that Blocks
-    if (!!maneuverBlockBasis(item)) {
+    if (maneuverBlockBasis(item)) {
         attackTags.push({
             name: `BLOCK`,
             title: `Block instead of Strike. Abort is free`,
@@ -1759,7 +1759,7 @@ export function getAttackTags(item) {
     }
 
     // Crush
-    if (!!maneuverCrushElement(item)) {
+    if (maneuverCrushElement(item)) {
         attackTags.push({
             name: `CRUSH`,
             title: `Crush following Grab`,
@@ -1767,7 +1767,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver that disables
-    if (!!maneuverDisableElement(item)) {
+    if (maneuverDisableElement(item)) {
         attackTags.push({
             name: `DISABLE`,
             title: `Disable a limb`,
@@ -1775,7 +1775,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver that diarms
-    if (!!maneuverDisarmBasis(item)) {
+    if (maneuverDisarmBasis(item)) {
         // PH: FIXME: Is this required? What situation would we encounter this?
         // Remove any previous DISARM as it is likely very generic
         const disarmIndex = attackTags.findIndex((tag) => tag.name === "DISARM");
@@ -1796,7 +1796,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver that dodges
-    if (!!maneuverDodgeBasis(item)) {
+    if (maneuverDodgeBasis(item)) {
         attackTags.push({
             name: `DODGE`,
             title: `Dodge instead of Strike. Abort is free`,
@@ -1820,7 +1820,7 @@ export function getAttackTags(item) {
     //       In Maneuver listings, this Basis is indicated by
     //       use of the phrase, "[Sense] Group Flash __d6"
     //       You can buy additional sense groups, but unclear how that is formatted.
-    if (!!maneuverFlashBasis(item)) {
+    if (maneuverFlashBasis(item)) {
         const senseGroup = effectiveAttackItem.system.INPUT || item.system.INPUT;
         attackTags.push({
             name: `${senseGroup ? `${senseGroup} Group Flash` : "Flash"}`,
@@ -1829,7 +1829,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver that includes a full move (fmove)
-    if (!!maneuverFMoveElement(item)) {
+    if (maneuverFMoveElement(item)) {
         attackTags.push({
             name: `FMOVE`,
             title: `Can attack after Full Move`,
@@ -1837,7 +1837,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver grabs opponent
-    if (!!maneuverGrabBasis(item)) {
+    if (maneuverGrabBasis(item)) {
         attackTags.push({
             name: `GRAB TARGET`,
             title: `Grab a target. If successful you may squeeze, slam or throw`,
@@ -1845,7 +1845,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver grabs opponent's weapon
-    if (!!maneuverGrabWeaponBasis(item)) {
+    if (maneuverGrabWeaponBasis(item)) {
         attackTags.push({
             name: `GRAB WEAPON`,
             title: `Grab a target. If successful you may attempt to disarm them`,
@@ -1853,7 +1853,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver requires a half move before attack
-    if (!!maneuverHalfMoveRequiredElement(item)) {
+    if (maneuverHalfMoveRequiredElement(item)) {
         attackTags.push({
             name: `HALF MOVE REQUIRED`,
             title: `This maneuver must follow a half move`,
@@ -1863,7 +1863,7 @@ export function getAttackTags(item) {
     // K-DAMAGE (this is killing damage and shown elsewhere)
 
     // Maneuver penalties last longer (basic OCV/DCV penalties are shown elsewhere)
-    if (!!maneuverLastingRestrictionElement(item)) {
+    if (maneuverLastingRestrictionElement(item)) {
         attackTags.push({
             name: `LASTING RESTRICTION`,
             title: `OCV and DCV penalties last one additional phase`,
@@ -1887,7 +1887,7 @@ export function getAttackTags(item) {
     // N-DAMAGE (this is normal damage and shown elsewhere)
 
     // NND DMG
-    if (!!maneuverNoNormalDefenseDamageElement(item)) {
+    if (maneuverNoNormalDefenseDamageElement(item)) {
         // PH: FIXME: Where can we encounter this?
         // Remove any previous NND as it is likely very generic
         const nndIndex = attackTags.findIndex((tag) => tag.name === "NND");
@@ -1916,7 +1916,7 @@ export function getAttackTags(item) {
     }
 
     // REQUIRES BOTH HANDS
-    if (!!maneuverRequiresBothHandsElement(item)) {
+    if (maneuverRequiresBothHandsElement(item)) {
         attackTags.push({
             name: `BOTH HANDS`,
             title: `Must have both hands free before using this maneuver`,
@@ -1926,7 +1926,7 @@ export function getAttackTags(item) {
     // TODO: REQUIRES OBJECT/CONDITION (not sure how to implement)
 
     // Maneuver is a response action
-    if (!!maneuverResponseElement(item)) {
+    if (maneuverResponseElement(item)) {
         const extractResponseTarget = function (effectText) {
             if (!effectText) return null;
 
@@ -1948,7 +1948,7 @@ export function getAttackTags(item) {
     // STRIKE (this is standard damage and shown elsewhere - is it?)
 
     // Maneuver causes the attacker to Full or Half damage
-    if (!!maneuverTakeFullDmgElement(item) || !!maneuverTakeHalfDmgElement(item)) {
+    if (maneuverTakeFullDmgElement(item) || maneuverTakeHalfDmgElement(item)) {
         const extractAttackerDamageModifier = function (effectText) {
             if (!effectText) return null;
 
@@ -1964,7 +1964,7 @@ export function getAttackTags(item) {
     }
 
     // Maneuver throws the target prone
-    if (!!maneuverThrowBasis(item)) {
+    if (maneuverThrowBasis(item)) {
         attackTags.push({
             name: `TARGET FALLS`,
             title: `Target falls prone as if thrown`,

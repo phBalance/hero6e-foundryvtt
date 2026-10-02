@@ -8687,7 +8687,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const behaviors = [];
 
                 // Do you dodge with this maneuver?
-                if (!!maneuverDodgeBasis(item)) {
+                if (maneuverDodgeBasis(item)) {
                     behaviors.push("activable");
                 }
 

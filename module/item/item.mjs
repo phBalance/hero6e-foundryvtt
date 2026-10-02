@@ -2549,22 +2549,22 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
 
         // PH: FIXME: Can we combine with the config.mjs entries?
         // Does it perform a strike?
-        else if (!!maneuverStrikeBasis(this)) {
+        else if (maneuverStrikeBasis(this)) {
             return false;
         }
 
         // Does it use Strength (but not Strength for Damage)?
-        else if (!!maneuverExertBasis(this)) {
+        else if (maneuverExertBasis(this)) {
             return false;
         }
 
         // Does it add to damage with velocity?
-        else if (!!maneuverVelocityElement(this)) {
+        else if (maneuverVelocityElement(this)) {
             return false;
         }
 
         // Does it require an attack to hit roll like BLOCK?
-        else if (!!maneuverBlockBasis(this)) {
+        else if (maneuverBlockBasis(this)) {
             return false;
         }
 
@@ -4567,9 +4567,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 results.usesStrength = false;
             }
 
-            if (!!maneuverFlashBasis(this)) {
+            if (maneuverFlashBasis(this)) {
                 results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.effectonly;
-            } else if (!!maneuverNoNormalDefenseDamageElement(this)) {
+            } else if (maneuverNoNormalDefenseDamageElement(this)) {
                 results.stunBodyDamage = CONFIG.HERO.stunBodyDamages.stunonly;
             }
         }
@@ -5298,17 +5298,17 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // MARTIAL KILLING
-        if (!!maneuverKillingDamageElement(baseAttackItem)) {
+        if (maneuverKillingDamageElement(baseAttackItem)) {
             return "PD";
         }
 
         // MARTIAL STR as damage
-        if (!!maneuverNormalDamageElement(baseAttackItem)) {
+        if (maneuverNormalDamageElement(baseAttackItem)) {
             return "PD";
         }
 
         // MARTIAL generic STR (not as damage e.g. grab)
-        if (!!maneuverExertBasis(baseAttackItem)) {
+        if (maneuverExertBasis(baseAttackItem)) {
             console.warn(
                 `${baseAttackItem.detailedName}: Strength vs something contest perhaps shouldn't be calling attackDefenseVs`,
             );
@@ -5316,7 +5316,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // STRIKE
-        if (!!maneuverStrikeBasis(baseAttackItem)) {
+        if (maneuverStrikeBasis(baseAttackItem)) {
             return "PD";
         }
 
@@ -5325,7 +5325,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
         }
 
         // MARTIAL FLASH
-        if (!!maneuverFlashBasis(baseAttackItem)) {
+        if (maneuverFlashBasis(baseAttackItem)) {
             return "FLASHDEFENSE";
         }
 
@@ -5337,23 +5337,23 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             return "PD";
         }
 
-        if (!!maneuverNoNormalDefenseDamageElement(this)) {
+        if (maneuverNoNormalDefenseDamageElement(this)) {
             return "NND";
         }
 
-        if (!!maneuverStrikeBasis(this)) {
+        if (maneuverStrikeBasis(this)) {
             return "PD";
         }
 
-        if (!!maneuverNormalDamageElement(this)) {
+        if (maneuverNormalDamageElement(this)) {
             return "PD";
         }
 
-        if (!!maneuverBlockBasis(this)) {
+        if (maneuverBlockBasis(this)) {
             return "-";
         }
 
-        if (!!maneuverThrowBasis(this)) {
+        if (maneuverThrowBasis(this)) {
             return "-";
         }
 

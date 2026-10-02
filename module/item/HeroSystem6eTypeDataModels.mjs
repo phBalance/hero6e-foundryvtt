@@ -783,12 +783,12 @@ export class HeroSystem6eItemTypeDataModelGetters extends HeroObjectCacheMixin(f
     get noHitLocations() {
         if (["maneuver", "martialart"].includes(this.item.type)) {
             // Flash doesn't have a hit location
-            if (!!maneuverFlashBasis(this.item)) {
+            if (maneuverFlashBasis(this.item)) {
                 return true;
             }
 
             // Block doesn't use a hit location
-            if (!!maneuverBlockBasis(this.item)) {
+            if (maneuverBlockBasis(this.item)) {
                 return true;
             }
         }
