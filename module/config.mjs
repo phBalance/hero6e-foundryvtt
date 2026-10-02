@@ -8693,36 +8693,36 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
 
                 // Do you roll to hit with this maneuver?
                 if (
-                    !!maneuverBindBasis(item) ||
-                    !!maneuverBlockBasis(item) ||
-                    !!maneuverCrushElement(item) ||
-                    !!maneuverDisarmBasis(item) ||
-                    !!maneuverFlashBasis(item) ||
-                    !!maneuverGrabBasis(item) ||
-                    !!maneuverGrabWeaponBasis(item) ||
-                    !!maneuverKillingDamageElement(item) ||
-                    !!maneuverNormalDamageElement(item) ||
-                    !!maneuverNoNormalDefenseDamageElement(item) ||
-                    !!maneuverShoveElement(item) ||
-                    !!maneuverStrikeBasis(item) ||
-                    !!maneuverThrowBasis(item)
+                    maneuverBindBasis(item) ||
+                    maneuverBlockBasis(item) ||
+                    maneuverCrushElement(item) ||
+                    maneuverDisarmBasis(item) ||
+                    maneuverFlashBasis(item) ||
+                    maneuverGrabBasis(item) ||
+                    maneuverGrabWeaponBasis(item) ||
+                    maneuverKillingDamageElement(item) ||
+                    maneuverNormalDamageElement(item) ||
+                    maneuverNoNormalDefenseDamageElement(item) ||
+                    maneuverShoveElement(item) ||
+                    maneuverStrikeBasis(item) ||
+                    maneuverThrowBasis(item)
                 ) {
                     behaviors.push("to-hit");
                 }
 
                 // Is there some kind of damage/effect roll with this maneuver?
                 if (
-                    !!maneuverCrushElement(item) ||
-                    !!maneuverDisarmBasis(item) ||
-                    !!maneuverExertBasis(item) ||
-                    !!maneuverFlashBasis(item) ||
-                    !!maneuverGrabBasis(item) ||
-                    !!maneuverGrabWeaponBasis(item) ||
-                    !!maneuverKillingDamageElement(item) ||
-                    !!maneuverNormalDamageElement(item) ||
-                    !!maneuverNoNormalDefenseDamageElement(item) ||
-                    !!maneuverStrikeBasis(item) ||
-                    !!maneuverVelocityElement(item)
+                    maneuverCrushElement(item) ||
+                    maneuverDisarmBasis(item) ||
+                    maneuverExertBasis(item) ||
+                    maneuverFlashBasis(item) ||
+                    maneuverGrabBasis(item) ||
+                    maneuverGrabWeaponBasis(item) ||
+                    maneuverKillingDamageElement(item) ||
+                    maneuverNormalDamageElement(item) ||
+                    maneuverNoNormalDefenseDamageElement(item) ||
+                    maneuverStrikeBasis(item) ||
+                    maneuverVelocityElement(item)
                 ) {
                     behaviors.push("dice");
                 }
@@ -8734,19 +8734,19 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
             rangeForItem: function (item) {
                 // Attacks have a range other than self
                 if (
-                    !!maneuverBindBasis(item) ||
-                    !!maneuverBlockBasis(item) ||
-                    !!maneuverCrushElement(item) ||
-                    !!maneuverDisarmBasis(item) ||
-                    !!maneuverFlashBasis(item) ||
-                    !!maneuverGrabBasis(item) ||
-                    !!maneuverGrabWeaponBasis(item) ||
-                    !!maneuverKillingDamageElement(item) ||
-                    !!maneuverNormalDamageElement(item) ||
-                    !!maneuverNoNormalDefenseDamageElement(item) ||
-                    !!maneuverShoveElement(item) ||
-                    !!maneuverStrikeBasis(item) ||
-                    !!maneuverThrowBasis(item)
+                    maneuverBindBasis(item) ||
+                    maneuverBlockBasis(item) ||
+                    maneuverCrushElement(item) ||
+                    maneuverDisarmBasis(item) ||
+                    maneuverFlashBasis(item) ||
+                    maneuverGrabBasis(item) ||
+                    maneuverGrabWeaponBasis(item) ||
+                    maneuverKillingDamageElement(item) ||
+                    maneuverNormalDamageElement(item) ||
+                    maneuverNoNormalDefenseDamageElement(item) ||
+                    maneuverShoveElement(item) ||
+                    maneuverStrikeBasis(item) ||
+                    maneuverThrowBasis(item)
                 ) {
                     // Is this a HTH or a Ranged martial maneuver?
                     return isRangedMartialManeuver(item) ? HERO.RANGE_TYPES.STANDARD : HERO.RANGE_TYPES.NO_RANGE;
