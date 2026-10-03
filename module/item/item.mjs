@@ -4553,9 +4553,9 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 }
 
                 if (
-                    !!maneuverExertBasis(this) ||
-                    !!maneuverNormalDamageElement(this) ||
-                    !!maneuverKillingDamageElement(this) ||
+                    maneuverExertBasis(this) ||
+                    maneuverNormalDamageElement(this) ||
+                    maneuverKillingDamageElement(this) ||
                     // Custom maneuvers have no [DC] placeholder; HD exports MAXSTR="0" for
                     // "no limit", so for damage-dealing customs ADDSTR is the authoritative
                     // signal. The activatable check keeps stock CUSTOM templates like Dodge out.
@@ -4563,7 +4563,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 ) {
                     results.usesStrength = true;
                 }
-            } else if (!!maneuverFlashBasis(this) || !!maneuverNoNormalDefenseDamageElement(this)) {
+            } else if (maneuverFlashBasis(this) || maneuverNoNormalDefenseDamageElement(this)) {
                 results.usesStrength = false;
             }
 
@@ -4678,7 +4678,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             }
         }
 
-        if (xmlid === "HKA" || !!maneuverKillingDamageElement(this)) {
+        if (xmlid === "HKA" || maneuverKillingDamageElement(this)) {
             results.killing = true;
         } else if (xmlid === "TELEKINESIS") {
             results.usesTk = true;

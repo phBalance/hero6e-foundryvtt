@@ -17350,7 +17350,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 const recoverable = modifierModel.RECOVERABLE;
 
                 // Don't cap if these are continuing, fuel, boostable, or recoverable charges.
-                if (!!continuing || !!fuel || !!boostable || !!recoverable) {
+                if (continuing || fuel || boostable || recoverable) {
                     return chargesBaseCost;
                 }
 
