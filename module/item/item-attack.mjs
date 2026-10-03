@@ -1,4 +1,3 @@
-import { getManeuverEffect } from "./maneuver-bases-and-elements.mjs";
 import {
     activateManeuver,
     doManeuverEffects,
@@ -1935,16 +1934,13 @@ export function getAttackTags(item) {
 
     // STRIKE (this is standard damage and shown elsewhere - is it?)
 
-    // Maneuver causes the attacker to Full or Half damage
-    if (maneuverTakeFullDmgElement(item) || maneuverTakeHalfDmgElement(item)) {
-        const extractAttackerDamageModifier = function (effectText) {
-            if (!effectText) return null;
+    // Maneuver causes the attacker to take Full or Half damage
+    const attackerDamageElement = maneuverTakeFullDmgElement(item) || maneuverTakeHalfDmgElement(item);
+    if (attackerDamageElement) {
+        const attackerDamageModifier = attackerDamageElement
+            .match(/takes?\s+(full|half)\s+(?:dmg|damage)/i)[1]
+            .toUpperCase();
 
-            const match = effectText.match(/attacker\s+takes\s+([^,]+?)(?=\s*damage|$)/i);
-            return match ? match[1].trim() : null;
-        };
-
-        const attackerDamageModifier = extractAttackerDamageModifier(getManeuverEffect(item));
         attackTags.push({
             name: `Attacker Takes ${attackerDamageModifier} Damage`,
             title: `Attacker takes damage if collision takes place`,

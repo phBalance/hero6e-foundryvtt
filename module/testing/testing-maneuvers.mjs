@@ -255,6 +255,12 @@ export function registerManeuverTests(quench) {
                             <MANEUVER XMLID="MANEUVER" ID="1791060822287" BASECOST="3.0" LEVELS="0" ALIAS="Flowing Redirection" POSITION="55" MULTIPLIER="1.0" GRAPHIC="block" COLOR="255 255 255" SFX="Martial Arts" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1791060966275" NAME="" CUSTOM="Yes" CATEGORY="Hand to Hand" DISPLAY="Custom Maneuver" OCV="+0" DCV="+2" DC="1" PHASE="1" EFFECT="Target Falls, [DAMAGE] Strike; Can Only Be Used After an opponent misses the character with a Strike" ADDSTR="Yes" ACTIVECOST="0" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Target Falls, [DAMAGE] Strike; Can Only Be Used After an opponent misses the character with a Strike">
                             <NOTES />
                             </MANEUVER>
+                            <MANEUVER XMLID="MANEUVER" ID="1791063133721" BASECOST="4.0" LEVELS="0" ALIAS="Passing Slash (like a move-by)" POSITION="56" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1791060966275" NAME="" CUSTOM="Yes" CATEGORY="Hand to Hand" DISPLAY="Custom Maneuver" OCV="+1" DCV="+0" DC="0" PHASE="1/2" EFFECT="+ v/5; Strike, FMove; Attacker Takes Half Damage" ADDSTR="Yes" ACTIVECOST="0" DAMAGETYPE="3" MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="+ v/5; Strike, FMove; Attacker Takes Half Damage">
+                            <NOTES />
+                            </MANEUVER>
+                            <MANEUVER XMLID="MANEUVER" ID="1791063526874" BASECOST="3.0" LEVELS="0" ALIAS="Meteor Drop" POSITION="57" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1791060966275" NAME="" CUSTOM="Yes" CATEGORY="Hand to Hand" DISPLAY="Custom Maneuver" OCV="-2" DCV="-2" DC="4" PHASE="1/2" EFFECT="[NORMALDC] + v/3; Strike, FMove; Take Full Damage" ADDSTR="Yes" ACTIVECOST="0" DAMAGETYPE="3" MAXSTR="0" STRMULT="1" USEWEAPON="Yes" WEAPONEFFECT="[NORMALDC] + v/3; Strike, FMove; Take Full Damage">
+                            <NOTES />
+                            </MANEUVER>
                         </MARTIALARTS>
                         <POWERS />
                         <DISADVANTAGES />
@@ -282,7 +288,6 @@ export function registerManeuverTests(quench) {
                     const ALL_MANEUVER_BASES_AND_ELEMENTS = [
                         "abort",
                         "attackerFalls",
-                        "attackerTakes",
                         "bind",
                         "block",
                         "crush",
@@ -374,6 +379,12 @@ export function registerManeuverTests(quench) {
                         // the response marker; the "Strike" inside it never wins because the earlier
                         // "[DAMAGE] Strike" element matches first.
                         "Flowing Redirection": ["response", "strike", "throw"],
+                        // Custom maneuver: "Attacker Takes Half Damage" -> takeHalfDmg;
+                        // "+ v/5" -> velocity.
+                        "Passing Slash (like a move-by)": ["fmove", "strike", "takeHalfDmg", "velocity"],
+                        // Custom maneuver: "Take Full Damage" -> takeFullDmg;
+                        // "[NORMALDC] + v/3" -> normalDc and velocity.
+                        "Meteor Drop": ["fmove", "normalDc", "strike", "takeFullDmg", "velocity"],
                     };
 
                     it("every martial art maneuver is covered by the expectations table", function () {

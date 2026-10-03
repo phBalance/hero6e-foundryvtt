@@ -18,7 +18,6 @@
 const MANEUVER_BASES_AND_ELEMENTS = Object.freeze({
     abort: { includes: "ABORT" },
     attackerFalls: { includes: "YOU FALL" },
-    attackerTakes: { includes: "ATTACKER TAKES" },
     bind: { includes: "BIND", excludes: ["MUST FOLLOW", "CAN ONLY BE USED AFTER"] },
     block: { includes: "BLOCK", excludes: ["MUST FOLLOW", "CAN ONLY BE USED AFTER"] },
     crush: { includes: "CRUSH", excludes: ["MUST FOLLOW", "CAN ONLY BE USED AFTER"] },
@@ -45,8 +44,8 @@ const MANEUVER_BASES_AND_ELEMENTS = Object.freeze({
     root: { includes: "TO RESIST SHOVE" },
     shove: { includes: "SHOVE", excludes: ["TO RESIST SHOVE"] },
     strike: { includes: "STRIKE" },
-    takeFullDmg: { includes: "TAKE FULL DMG" },
-    takeHalfDmg: { includes: "TAKE HALF DMG" },
+    takeFullDmg: { regex: /TAKES?\s+FULL\s+(DMG|DAMAGE)/i },
+    takeHalfDmg: { regex: /TAKES?\s+HALF\s+(DMG|DAMAGE)/i },
     throw: { includes: ["TARGET FALLS", "HE FALLS", "OPPONENT FALLS"] },
     velocity: { regex: /v\/(\d+)/i },
     weaponDc: { includes: "[WEAPONDC]" },
