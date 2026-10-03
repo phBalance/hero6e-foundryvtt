@@ -1870,17 +1870,14 @@ export function getAttackTags(item) {
         });
     }
 
-    // Maneuver must follow another maneuver
+    // Maneuver must follow another maneuver by the attacker (and not on the same phase)
     const mustFollowElement = maneuverMustFollowElement(item);
     if (mustFollowElement) {
-        const mustFollowTarget = mustFollowElement
-            .replace(/^must\s+follow\s+/i, "")
-            .trim()
-            .toUpperCase();
+        const mustFollowTarget = mustFollowElement.replace(/^must\s+follow\s+/i, "").toUpperCase();
 
         attackTags.push({
             name: `Must Follow ${mustFollowTarget}`,
-            title: `This maneuver must follow a successful ${mustFollowTarget}`,
+            title: `This maneuver must follow a successful ${mustFollowTarget} by you`,
         });
     }
 
@@ -1908,7 +1905,7 @@ export function getAttackTags(item) {
     // This causes PRONE to mistakenly match, a migration fixes this using
     // the proper element of "Target Falls".
     // PH: FIXME: Is the trip qualification here required?
-    if (!!maneuverRequiresProneTargetElement(item) && item.system.XMLID !== "TRIP") {
+    if (maneuverRequiresProneTargetElement(item) && item.system.XMLID !== "TRIP") {
         attackTags.push({
             name: `PRONE`,
             title: `Target is required to be prone before maneuver can be used`,
@@ -1925,23 +1922,14 @@ export function getAttackTags(item) {
 
     // TODO: REQUIRES OBJECT/CONDITION (not sure how to implement)
 
-    // Maneuver is a response action
-    if (maneuverResponseElement(item)) {
-        const extractResponseTarget = function (effectText) {
-            if (!effectText) return null;
+    // Maneuver is a response action to an opponent's action
+    const responseElement = maneuverResponseElement(item);
+    if (responseElement) {
+        const responseTarget = responseElement.replace(/^can\s+only\s+be\s+used\s+after\s+/i, "").toUpperCase();
 
-            // Match "Must Follow " case-insensitively, then capture all characters up to the next comma or string end
-            const regex = /Can\sOnly\sBe\sUsed\sAfter\sSuccessful\s+([^,]+)/i;
-            const match = effectText.match(regex);
-
-            // If a match is found, return the trimmed capturing group contents
-            return match ? match[1].trim() : null;
-        };
-
-        const responseTarget = extractResponseTarget(item.system.WEAPONEFFECT || item.system.EFFECT);
         attackTags.push({
-            name: `Can Only Be Used After ${responseTarget?.toUpperCase()}`,
-            title: `Can only be used following a successful ${responseTarget?.toUpperCase()} maneuver`,
+            name: `Can Only Be Used After ${responseTarget}`,
+            title: `Can only be used following a ${responseTarget} maneuver by that opponent`,
         });
     }
 

@@ -246,6 +246,15 @@ export function registerManeuverTests(quench) {
                             <MANEUVER XMLID="MANEUVER" ID="1790379823100" BASECOST="4.0" LEVELS="0" ALIAS="Trip" POSITION="52" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" CATEGORY="Ranged" DISPLAY="Trip" OCV="-1" DCV="-1" DC="0" PHASE="1/2" EFFECT="v/5, Target Falls" ADDSTR="No" ACTIVECOST="31" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" RANGE="2">
                             <NOTES />
                             </MANEUVER>
+                            <LIST XMLID="GENERIC_OBJECT" ID="1791060965055" BASECOST="0.0" LEVELS="0" ALIAS=" " POSITION="53" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                            </LIST>
+                            <LIST XMLID="GENERIC_OBJECT" ID="1791060966275" BASECOST="0.0" LEVELS="0" ALIAS="Custom Martial Arts" POSITION="54" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="">
+                            <NOTES />
+                            </LIST>
+                            <MANEUVER XMLID="MANEUVER" ID="1791060822287" BASECOST="3.0" LEVELS="0" ALIAS="Flowing Redirection" POSITION="55" MULTIPLIER="1.0" GRAPHIC="block" COLOR="255 255 255" SFX="Martial Arts" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" PARENTID="1791060966275" NAME="" CUSTOM="Yes" CATEGORY="Hand to Hand" DISPLAY="Custom Maneuver" OCV="+0" DCV="+2" DC="1" PHASE="1" EFFECT="Target Falls, [DAMAGE] Strike; Can Only Be Used After an opponent misses the character with a Strike" ADDSTR="Yes" ACTIVECOST="0" DAMAGETYPE="0" MAXSTR="0" STRMULT="1" USEWEAPON="No" WEAPONEFFECT="Target Falls, [DAMAGE] Strike; Can Only Be Used After an opponent misses the character with a Strike">
+                            <NOTES />
+                            </MANEUVER>
                         </MARTIALARTS>
                         <POWERS />
                         <DISADVANTAGES />
@@ -360,6 +369,11 @@ export function registerManeuverTests(quench) {
                         "Quick Shot": ["normalDc", "strike", "weaponDc"],
                         "Ranged Disarm": ["disarm", "normalDc", "weaponDc"],
                         Trip: ["throw", "velocity"],
+                        // Custom maneuver: "Target Falls" -> throw, "[DAMAGE] Strike" -> strike,
+                        // "Can Only Be Used After ..." -> response. The trailing prose only carries
+                        // the response marker; the "Strike" inside it never wins because the earlier
+                        // "[DAMAGE] Strike" element matches first.
+                        "Flowing Redirection": ["response", "strike", "throw"],
                     };
 
                     it("every martial art maneuver is covered by the expectations table", function () {
