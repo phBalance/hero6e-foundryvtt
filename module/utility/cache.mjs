@@ -25,11 +25,19 @@ export class HeroSystemGenericSharedCache {
     #sets = 0;
     #invalidated = 0;
 
-    // eslint-disable-next-line no-unused-private-class-members
     #purpose;
 
     constructor(purpose) {
         this.#purpose = purpose;
+    }
+
+    /**
+     * Purpose this cache was created for. Read it when debugging cache contents.
+     *
+     * @returns {string}
+     */
+    get purpose() {
+        return this.#purpose;
     }
 
     setCachedValue(id, newValue) {
