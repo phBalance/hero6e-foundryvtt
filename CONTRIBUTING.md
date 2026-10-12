@@ -87,7 +87,7 @@ You should be able to find the appropriate labeled tests in the `module/testing`
 
 ### Code Formatting
 
-We have standardized the look of the code and making it harder to write incorrect code. We are doing this using [eslint](https://eslint.org/) and [stylelint](https://stylelint.io/) for linting/static analysis and [prettier](https://prettier.io/) for formatting. To validate the code, using `eslint`, `stylelint`, and `prettier`, you can run the following command:
+We have standardized the look of the code and making it harder to write incorrect code. We are doing this using [oxlint](https://oxc.rs/docs/guide/usage/linter) and [stylelint](https://stylelint.io/) for linting/static analysis and [prettier](https://prettier.io/) for formatting. To validate the code, using `oxlint`, `stylelint`, and `prettier`, you can run the following command:
 
 ```bash
 npm run validate
@@ -95,7 +95,7 @@ npm run validate
 
 #### Lint
 
-Linting does a static analysis on the code to find code mistakes like using a variable name that is not defined. To check the lint status you can run and check the number of errors provided at the very end.
+Linting does a static analysis on the code to find code mistakes like using a variable name that is not defined. The rules live in [`.oxlintrc.json`](./.oxlintrc.json) at the root of the repository. To check the lint status you can run and check the number of errors provided at the very end.
 
 ```bash
 npm run lint
@@ -115,7 +115,7 @@ Additionally, most likely your code editor will support the prettier, via an ext
 
 #### Auto Fixing
 
-If you don't want to setup your editor to auto format on save, `eslint`, `stylelint`, and `prettier` can fix the formatting of your files on an as needed basis. To let them do their thing:
+If you don't want to setup your editor to auto format on save, `oxlint`, `stylelint`, and `prettier` can fix the formatting of your files on an as needed basis. To let them do their thing:
 
 ```bash
 npm run autoFix

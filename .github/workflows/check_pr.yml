@@ -15,5 +15,5 @@ jobs:
         - name: Is it pretty?
           run: npm run prettier
 
-        - name: Any eslint issues?
+        - name: Any lint issues?
           run: npm run lint

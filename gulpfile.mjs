@@ -1,11 +1,15 @@
 import gulp from "gulp";
 import gulpAutoPrefix from "gulp-autoprefixer";
-import gulpEslintNew from "gulp-eslint-new";
 import gulpPrettier from "gulp-prettier";
 import gulpSass from "gulp-sass";
 import * as dartSass from "sass";
 import gulpStylelint from "gulp-stylelint-esm";
 import gulpPlumber from "gulp-plumber";
+import { spawn } from "node:child_process";
+import { createRequire } from "node:module";
+import path from "node:path";
+
+const require = createRequire(import.meta.url);
 
 const sass = gulpSass(dartSass);
 
@@ -18,15 +22,28 @@ const MARKDOWN_FILES = ["**/*.md", "!node_modules/**"];
 /*  Source Code Standard Validation
 /* ----------------------------------------- */
 
-const eslintDefaultConfig = { overrideConfigFile: "eslint.config.mjs" };
-const eslintFixConfig = { fix: true };
+// oxlint is a native CLI rather than a gulp plugin, so it is spawned as a child
+// process instead of being piped into. It is invoked through Node (rather than the
+// node_modules/.bin shim) so that it works regardless of whether the working tree
+// sits on a UNC/mapped path, which cmd.exe refuses to use as a working directory.
+const oxlintBin = path.join(path.dirname(require.resolve("oxlint/package.json")), "bin", "oxlint");
+
+function runOxlint(args) {
+    return new Promise((resolve, reject) => {
+        const child = spawn(process.execPath, [oxlintBin, ...args], { stdio: "inherit" });
+        child.on("error", reject);
+        child.on("close", (code) => {
+            if (code === 0) {
+                resolve();
+            } else {
+                reject(new Error(`oxlint exited with code ${code}`));
+            }
+        });
+    });
+}
 
 function validateJavaScriptFilesByLint() {
-    return gulp
-        .src(JAVASCRIPT_FILES)
-        .pipe(gulpEslintNew(eslintDefaultConfig))
-        .pipe(gulpEslintNew.formatEach("compact", process.stderr))
-        .pipe(gulpEslintNew.failAfterError());
+    return runOxlint(["."]);
 }
 
 function validateScssFilesByLint() {
@@ -41,12 +58,9 @@ function validateScssFilesByLint() {
 const lint = gulp.parallel(validateJavaScriptFilesByLint, validateScssFilesByLint);
 
 function autoFixJavaScriptFilesByLint() {
-    return gulp
-        .src(JAVASCRIPT_FILES)
-        .pipe(gulpEslintNew({ ...eslintDefaultConfig, ...eslintFixConfig }))
-        .pipe(gulpEslintNew.fix())
-        .pipe(gulpEslintNew.formatEach("compact", process.stderr))
-        .pipe(gulpEslintNew.failAfterError());
+    // `--fix-suggestions` is required because some oxlint corrections (for example
+    // no-extra-boolean-cast) are published as suggestions rather than fixes.
+    return runOxlint([".", "--fix", "--fix-suggestions"]);
 }
 
 function autoFixScssFilesByLint() {
