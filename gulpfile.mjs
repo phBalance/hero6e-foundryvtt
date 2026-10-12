@@ -29,17 +29,57 @@ const MARKDOWN_FILES = ["**/*.md", "!node_modules/**"];
 // sits on a UNC/mapped path, which cmd.exe refuses to use as a working directory.
 const oxlintBin = path.join(path.dirname(require.resolve("oxlint/package.json")), "bin", "oxlint");
 
-function runOxlint(args) {
+// Run oxlint, label its timing line, and resolve with the exit code.
+// oxlint prints "Finished in ..." with no owner named. The native binding owns that
+// string, so rewrite it here. Print a labelled line when oxlint prints none.
+function spawnOxlint(args) {
+    const startedAt = Date.now();
     return new Promise((resolve, reject) => {
-        const child = spawn(process.execPath, [oxlintBin, ...args], { stdio: "inherit" });
+        const child = spawn(process.execPath, [oxlintBin, ...args], { stdio: ["ignore", "pipe", "pipe"] });
+        let labelled = false;
+        const labelLine = (line) => {
+            if (!line.startsWith("Finished in ")) {
+                return line;
+            }
+            labelled = true;
+            return line.replace(/^Finished in /, "oxlint finished in ");
+        };
+        const forward = (source, sink) => {
+            let rest = "";
+            source.setEncoding("utf8");
+            source.on("data", (chunk) => {
+                rest += chunk;
+                const lines = rest.split("\n");
+                rest = lines.pop() ?? "";
+                for (const line of lines) {
+                    sink.write(`${labelLine(line)}\n`);
+                }
+            });
+            source.on("end", () => {
+                if (rest !== "") {
+                    sink.write(`${labelLine(rest)}\n`);
+                    rest = "";
+                }
+            });
+        };
+        forward(child.stdout, process.stdout);
+        forward(child.stderr, process.stderr);
         child.on("error", reject);
         child.on("close", (code) => {
-            if (code === 0) {
-                resolve();
-            } else {
-                reject(new Error(`oxlint exited with code ${code}`));
+            if (!labelled) {
+                console.log(`oxlint finished in ${Date.now() - startedAt}ms.`);
             }
+            resolve(code ?? 1);
         });
+    });
+}
+
+function runOxlint(args) {
+    return spawnOxlint(args).then((code) => {
+        if (code === 0) {
+            return;
+        }
+        throw new Error(`oxlint exited with code ${code}`);
     });
 }
 
@@ -100,11 +140,7 @@ const autoFix = gulp.series(autoFixJavaScriptFilesByLint, autoFixScssFilesByLint
 
 // Report oxlint findings and return the exit code instead of rejecting.
 function reportJavaScriptByLint() {
-    return new Promise((resolve, reject) => {
-        const child = spawn(process.execPath, [oxlintBin, "."], { stdio: "inherit" });
-        child.on("error", reject);
-        child.on("close", (code) => resolve(code ?? 1));
-    });
+    return spawnOxlint(["."]);
 }
 
 // Report stylelint findings. The gulp plugin re-throws after it calls done(error).
