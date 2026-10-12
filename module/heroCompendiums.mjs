@@ -126,7 +126,7 @@ async function CreateHeroItems(edition) {
     }
 
     async function createFolderGetId(name, color, parentFolderId) {
-        const folder = await Folder.create(
+        const folder = await foundry.documents.Folder.create(
             { name, type: "Item", color, folder: parentFolderId },
             {
                 pack: pack.metadata.id,

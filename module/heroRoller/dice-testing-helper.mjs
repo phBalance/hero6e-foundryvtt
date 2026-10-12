@@ -174,7 +174,7 @@ export class RollMock extends HeroRoll {
             return term;
         });
 
-        const formula = Roll.getFormula(newTerms);
+        const formula = foundry.dice.Roll.getFormula(newTerms);
 
         const mock = new this(formula, {}, options);
         mock.terms = newTerms;

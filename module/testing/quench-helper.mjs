@@ -272,7 +272,7 @@ export async function createQuenchScene(options = {}) {
     const quenchTestSceneName = `_Quench_${testSuffix}`;
     console.log(`createQuenchScene ${quenchTestSceneName}`);
 
-    const quenchScene = await Scene.create(
+    const quenchScene = await foundry.documents.Scene.create(
         foundry.utils.mergeObject(
             {
                 name: quenchTestSceneName,
@@ -349,7 +349,7 @@ export async function deleteQuenchScenes() {
 
     if (quenchIds.length > 0) {
         console.log(`Deleting scenes: ${quenchScenes.map((s) => `${s.name} (${s.id})`).join(", ")}`);
-        await Scene.deleteDocuments(quenchIds);
+        await foundry.documents.Scene.deleteDocuments(quenchIds);
     }
 }
 

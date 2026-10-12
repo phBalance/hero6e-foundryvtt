@@ -202,9 +202,9 @@ export class HeroSystem6eCompendium extends HeroAppMixin(foundry.applications.si
         let actor = null;
         if (data.actorId) {
             actor = game.actors.get(data.actorId);
-            item = actor?.items.get(data.uuid?.split(".").pop()) ?? (await fromUuid(data.uuid));
+            item = actor?.items.get(data.uuid?.split(".").pop()) ?? (await foundry.utils.fromUuid(data.uuid));
         } else {
-            item = await fromUuid(data.uuid);
+            item = await foundry.utils.fromUuid(data.uuid);
         }
 
         if (!item) {
@@ -225,7 +225,7 @@ export class HeroSystem6eCompendium extends HeroAppMixin(foundry.applications.si
         const closestFolder = target ? target.closest(".folder") : null;
         if (closestFolder) closestFolder.classList.remove("droptarget");
 
-        let folderTarget = closestFolder ? await fromUuid(closestFolder.dataset.uuid) : null;
+        let folderTarget = closestFolder ? await foundry.utils.fromUuid(closestFolder.dataset.uuid) : null;
 
         const childItems =
             item.childItems?.length > 0
@@ -307,7 +307,7 @@ export class HeroSystem6eCompendium extends HeroAppMixin(foundry.applications.si
             );
 
             if (!folderTarget) {
-                folderTarget = await Folder.create(
+                folderTarget = await foundry.documents.Folder.create(
                     {
                         type: "Item",
                         name: categoryName,
@@ -359,7 +359,7 @@ export class HeroSystem6eCompendium extends HeroAppMixin(foundry.applications.si
         const packId = this.collection.collection;
         const compendiumName = this.collection.metadata.label || this.collection.title;
 
-        const newFolder = await Folder.create(
+        const newFolder = await foundry.documents.Folder.create(
             { type: "Item", name: item.name, folder: folderTarget?.id ?? null },
             { pack: packId },
         );

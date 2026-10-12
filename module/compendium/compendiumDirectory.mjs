@@ -39,7 +39,7 @@ export class HeroSystem6eCompendiumDirectory extends HeroAppMixin(CompendiumDire
             // Prepare Document Type selections
             const types = CONST.COMPENDIUM_DOCUMENT_TYPES.map((documentName) => ({
                 value: documentName,
-                label: game.i18n.localize(getDocumentClass(documentName).metadata.label),
+                label: game.i18n.localize(foundry.utils.getDocumentClass(documentName).metadata.label),
             }));
             game.i18n.sortObjects(types, "label");
 
@@ -293,7 +293,7 @@ export class HeroSystem6eCompendiumDirectory extends HeroAppMixin(CompendiumDire
                 if (!folders[folderTypeKey]) {
                     const formattedName = `${folderTypeKey}S`.replace("EQUIPMENTS", "EQUIPMENT").titleCase();
 
-                    folders[folderTypeKey] = await Folder.create(
+                    folders[folderTypeKey] = await foundry.documents.Folder.create(
                         {
                             type: "Item",
                             name: formattedName,
@@ -310,7 +310,7 @@ export class HeroSystem6eCompendiumDirectory extends HeroAppMixin(CompendiumDire
                         pack.contents.find((o) => o.system.ID === itemData.system.PARENTID)?.folder ||
                         folders[folderTypeKey];
 
-                    const subFolder = await Folder.create(
+                    const subFolder = await foundry.documents.Folder.create(
                         {
                             type: "Item",
                             name: itemData.name,

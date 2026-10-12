@@ -944,12 +944,11 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     async changeTypeDialog(options = {}) {
         const template = `systems/${HEROSYS.module}/templates/chat/actor-change-type-dialog.hbs`;
         const actor = this;
-        let cardData = {
+        const cardData = {
             actor,
             groupName: "typeChoice",
-            choices: Actor.TYPES.filter((o) => o != "character" && o != "base").reduce(
-                (a, v) => ({ ...a, [v]: v.replace("2", "") }),
-                {},
+            choices: Object.fromEntries(
+                Actor.TYPES.filter((o) => o != "character" && o != "base").map((v) => [v, v.replace("2", "")]),
             ), // base is internal type and/or keyword. BASE2 is for bases.
             chosen: actor.type,
         };
@@ -3399,8 +3398,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                 o.type !== "movement" &&
                 !o.system.XMLID?.startsWith("__"), // Exclude placeholder powers
         )) {
-            let _characterPointCost =
-                parseFloat(item.system?.characterPointCost || item.system?.characterPointCost) || 0;
+            const _characterPointCost = parseFloat(item.system?.characterPointCost) || 0;
             const _activePoints = parseFloat(item.system?.activePoints) || 0;
 
             if (_characterPointCost !== 0) {

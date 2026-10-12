@@ -22,7 +22,7 @@ export function tagObjectForPersistence(source) {
  */
 export function getActorsFromUnlinkedTokensInGame() {
     return game.scenes.contents
-        .map((scene) => [...scene.tokens.filter((token) => token.actor && !token.actorLink).map((t) => t.actor)])
+        .map((scene) => scene.tokens.filter((token) => token.actor && !token.actorLink).map((t) => t.actor))
         .flat()
         .filter(Boolean);
 }
@@ -130,11 +130,9 @@ export async function migrateWorld() {
 
     // Delete invalidItems from unlinked tokens without actors.
     // Mostly to avoid future errors, not sure why we keep any "delta" from unlinked tokens without actors.
-    const tokensWithInvalidItems = [
-        ...game.scenes.contents
-            .map((scene) => [...scene.tokens.filter((t) => !t.actor && t.delta?.items?.invalidDocumentIds.size > 0)])
-            .flat(),
-    ];
+    const tokensWithInvalidItems = game.scenes.contents
+        .map((scene) => scene.tokens.filter((t) => !t.actor && t.delta?.items?.invalidDocumentIds.size > 0))
+        .flat();
     if (tokensWithInvalidItems.length > 0) {
         const migrationProgressBar = new HeroProgressBar(
             `Deleting invalid items from unlinked tokens`,
@@ -895,10 +893,7 @@ async function refreshWeaponMaster(actor) {
         for (const item of weaponMasterItems) {
             try {
                 const numEntries = 6 * item.system.LEVELS;
-                const csl = new Array(numEntries);
-                for (let idx = 0; idx < csl.length; idx++) {
-                    csl[idx] = "dc";
-                }
+                const csl = Array.from({ length: numEntries }, () => "dc");
                 await item.update({ [`system.csl`]: csl });
             } catch (e) {
                 console.error(e, item);
@@ -1034,10 +1029,8 @@ async function refreshSkillLevelsOverall(actor) {
             try {
                 const LEVELS = item.system.LEVELS;
                 if (item.system.csl.length !== LEVELS) {
-                    const csl = new Array(LEVELS);
-                    for (let idx = 0; idx < csl.length; idx++) {
-                        csl[idx] = item.system.csl?.[idx] || Object.keys(item.cslChoices)[0];
-                    }
+                    const defaultChoice = Object.keys(item.cslChoices)[0];
+                    const csl = Array.from({ length: LEVELS }, (_, idx) => item.system.csl?.[idx] || defaultChoice);
                     await item.update({ [`system.csl`]: csl });
                 }
             } catch (e) {

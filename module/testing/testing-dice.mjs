@@ -3871,16 +3871,13 @@ export function registerDiceTests(quench) {
                 });
 
                 describe("Flavors", async function () {
-                    function turnRollToTrueFalsePromise(roller) {
-                        // eslint-disable-next-line no-async-promise-executor
-                        return new Promise(async (resolve, reject) => {
-                            try {
-                                await roller.roll();
-                                resolve(true);
-                            } catch {
-                                reject(false);
-                            }
-                        });
+                    async function turnRollToTrueFalsePromise(roller) {
+                        try {
+                            await roller.roll();
+                            return true;
+                        } catch {
+                            return false;
+                        }
                     }
 
                     it("should support providing a valid flavor string", async function () {

@@ -16,7 +16,7 @@ export class HeroSocketHandler {
         // });
 
         game.socket.on(`system.${game.system.id}`, async (data) => {
-            const user = User.get(data.userId);
+            const user = foundry.documents.User.get(data.userId);
             console.log(`HeroSocketHandler operation=${data.operation}, user=${user?.name || data.userId}`, data);
 
             //TODO: Move all the game.user !== game.users.activeGM) checks in the functions, and have every client call the function.

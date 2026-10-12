@@ -12,8 +12,8 @@ jobs:
         - name: Install
           run: npm ci
   
-        - name: Is it pretty?
-          run: npm run prettier
+        - name: Is it formatted?
+          run: npm run format
 
-        - name: Any eslint issues?
+        - name: Any lint issues?
           run: npm run lint

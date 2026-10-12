@@ -9,8 +9,18 @@ const legacyTokens = [
 ];
 
 export default {
-    extends: ["stylelint-config-standard-scss"],
+    // stylelint owns SCSS. It checks both style rules and formatting.
+    // @stylistic carries the formatting rules that stylelint-config-standard dropped.
+    // oxfmt and oxlint skip .scss files; see .oxfmtrc.json and .oxlintrc.json.
+    extends: ["stylelint-config-standard-scss", "@stylistic/stylelint-config"],
     rules: {
+        // Match the project layout: 4 space indents, 120 column lines.
+        "@stylistic/indentation": 4,
+        "@stylistic/max-line-length": 120,
+
+        // `} @else {` is the house style for SCSS conditionals.
+        "@stylistic/block-closing-brace-newline-after": ["always", { ignoreAtRules: ["if", "else"] }],
+
         // System CSS loads in @layer system, above every core layer
         "declaration-no-important": true,
 

@@ -138,13 +138,12 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
             actor: actor,
             token: options.token,
         });
-        //speaker.alias = item.actor.name;
         const overrideKeyText = game.keybindings.get(HEROSYS.module, "OverrideCanAct")?.[0].key;
         const chatData = {
             author: game.user._id,
             style: CONST.CHAT_MESSAGE_STYLES.OTHER,
             content: `${game.user.name} is using ${overrideKeyText} to override using ${resourcesUsedDescription} for <b>${item.name}</b>${resourcesUsedDescriptionRenderedRoll}`,
-            whisper: whisperUserTargetsForActor(this),
+            whisper: whisperUserTargetsForActor(actor),
             speaker,
         };
         await ChatMessage.create(chatData);

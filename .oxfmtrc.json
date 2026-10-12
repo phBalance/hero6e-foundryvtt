@@ -1,0 +1,34 @@
+{
+  // oxfmt configuration
+  //
+  // Mirrors the former Prettier setup: 120 column lines, 4 space indents, LF endings.
+  // Markdown keeps 2 space indents. Data files keep their own formatting.
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 120,
+  "tabWidth": 4,
+  "endOfLine": "lf",
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    // stylelint owns SCSS formatting and linting. oxfmt must not touch it.
+    "**/*.scss",
+    "**/*.sass",
+    // Manifests and data files keep hand written layout.
+    "**/*.json",
+    "**/*.yml",
+    "**/*.yaml",
+    // Handlebars templates are owned by the Foundry renderer.
+    "**/*.hbs",
+    "**/*.handlebars",
+    // Generated output.
+    "css/**"
+  ],
+  "overrides": [
+    {
+      // Markdown uses 2 space indents for lists and nested content.
+      "files": ["*.md", "**/*.md"],
+      "options": {
+        "tabWidth": 2
+      }
+    }
+  ]
+}

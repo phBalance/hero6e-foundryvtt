@@ -8,7 +8,7 @@ import { getManeuverEffect } from "../item/maneuver-bases-and-elements.mjs";
 
 export function combatSkillLevelsForAttack(item) {
     if (!item.system._active) {
-        console.error(`Missing _active`, item, this);
+        console.error(`Missing _active`, item);
     }
 
     const results = {

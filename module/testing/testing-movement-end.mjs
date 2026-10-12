@@ -55,10 +55,8 @@ export function registerMovementEndTests(quench) {
                     });
 
                     it("Many short moves do not pick up an extra END from float noise", function () {
-                        assert.equal(
-                            movementEndCost(waypoints("RUNNING", new Array(20).fill(1)), 1, sourcesFor([[12, 0.1]])),
-                            2,
-                        );
+                        const shortMoves = Array.from({ length: 20 }, () => 1);
+                        assert.equal(movementEndCost(waypoints("RUNNING", shortMoves), 1, sourcesFor([[12, 0.1]])), 2);
                     });
 
                     it("Grid units convert to metres before costing", function () {

@@ -426,9 +426,6 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
     // chat/delayed-attack-cards.mjs (its own renderChatMessageHTML hook).
 });
 
-// Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
-// Hooks.on("renderChatPopout", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
-
 // Core only seeds token names at creation; carry an actor rename through to the
 // prototype token and placed tokens whose name still matched. The old name is
 // stashed on options because updateActor only sees the new one.
@@ -521,7 +518,7 @@ Hooks.on("changeSidebarTab", async (app) => {
 function createHeroSystem6eMacro(bar, data, slot) {
     // Check if we want to override the default macro (open sheet)
     if (data.type === "Item" && typeof data.uuid === "string") {
-        const item = fromUuidSync(data.uuid);
+        const item = foundry.utils.fromUuidSync(data.uuid);
         if (item.isRollable()) {
             handleMacroCreation(bar, data, slot, item);
             return false;

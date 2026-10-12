@@ -1,0 +1,55 @@
+{
+  // Whole-file formatting. Diff-only mode breaks oxfmt output.
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+
+  // Match the repo standard. VS Code defaults to 2 spaces, which fights `.oxfmtrc.json`.
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+
+  // oxfmt formats JavaScript and Markdown.
+  "[javascript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[javascriptreact]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[markdown]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode",
+    // `.oxfmtrc.json` overrides Markdown to 2 space indents.
+    "editor.tabSize": 2
+  },
+
+  // The stylelint extension ships no formatter. It fixes SCSS through a code action.
+  // Naming it as `editor.defaultFormatter` makes VS Code fall back to its built-in
+  // SCSS formatter, which indents with 2 spaces.
+  "[scss]": {
+    "editor.formatOnSave": false,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.stylelint": "explicit"
+    }
+  },
+  "stylelint.validate": ["scss"],
+
+  // Manifests and templates keep their hand-written layout.
+  "[json]": { "editor.formatOnSave": false },
+  "[jsonc]": { "editor.formatOnSave": false },
+  "[handlebars]": { "editor.formatOnSave": false },
+
+  // Let oxfmt and oxlint discover their configs from the file being formatted.
+  // Never set a relative path here. VS Code records this file as a workspace folder
+  // setting, so the extension skips path resolution and sends the raw string unchanged.
+  // oxfmt then falls back to its 2 space, 80 column defaults. The extension substitutes
+  // only `${userHome}` and `${env:NAME}`. It has no `${workspaceFolder}`.
+  "oxc.fmt.configPath": null,
+  "oxc.fmt.disableNestedConfig": true,
+  "oxc.configPath": null,
+  "oxc.disableNestedConfig": true,
+
+  // oxlint stays off in the editor. Run `npm run lint` or `npm run lint:fix` instead.
+  // The `gulp` watch loop also prints every oxlint finding without stopping the build.
+  // Use the `Oxc: Toggle whether oxlint is enabled` command to flip it on for one session.
+  "oxc.enable.oxlint": false,
+  "oxc.enable.oxfmt": true,
+
+  // Set to "verbose" to trace all JSON-RPC traffic in Output > Oxc (Formatter).
+  // Use it to check the config path and the binary the extension resolved.
+  "oxc.trace.server": "off"
+}

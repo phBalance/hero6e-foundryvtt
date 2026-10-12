@@ -77,6 +77,10 @@ npm run build
 
 This will automatically leave `gulp` in watch mode which means that any of your changes will automatically rebuilt.
 
+The build compiles the CSS files, then stays in watch mode. The watch loop checks only the files you changed. It prints every finding and keeps running. A finding never stops the build.
+
+CI still enforces the standards. Run `npm run validate` before you open a pull request, and fix every finding.
+
 One this step successful executes, you should be able to run worlds using this system.
 
 ### Testing
@@ -87,7 +91,7 @@ You should be able to find the appropriate labeled tests in the `module/testing`
 
 ### Code Formatting
 
-We have standardized the look of the code and making it harder to write incorrect code. We are doing this using [eslint](https://eslint.org/) and [stylelint](https://stylelint.io/) for linting/static analysis and [prettier](https://prettier.io/) for formatting. To validate the code, using `eslint`, `stylelint`, and `prettier`, you can run the following command:
+We have standardized the look of the code and making it harder to write incorrect code. Each file type has one owner. oxlint and oxfmt handle JavaScript and Markdown. stylelint handles SCSS for both formatting and linting. oxfmt and oxlint skip `.scss` files. To validate the code, using `oxlint`, `stylelint`, and `oxfmt`, you can run the following command:
 
 ```bash
 npm run validate
@@ -95,27 +99,74 @@ npm run validate
 
 #### Lint
 
-Linting does a static analysis on the code to find code mistakes like using a variable name that is not defined. To check the lint status you can run and check the number of errors provided at the very end.
+Linting does a static analysis on the code to find code mistakes like using a variable name that is not defined. The oxlint rules live in [`.oxlintrc.json`](./.oxlintrc.json) at the root of the repository. The stylelint rules live in [`stylelint.config.mjs`](./stylelint.config.mjs). To check the lint status you can run and check the number of errors provided at the very end.
 
 ```bash
 npm run lint
 ```
 
-#### Prettier
+#### Formatting
 
-Prettier enforces a coding standard. To check the number of code formatting errors:
+oxfmt enforces the formatting standard for JavaScript and Markdown. The rules live in [`.oxfmtrc.json`](./.oxfmtrc.json) at the root of the repository. stylelint enforces SCSS formatting through [`@stylistic/stylelint-config`](https://github.com/stylelint-stylistic/stylelint-stylistic). To check the number of code formatting errors:
 
 ```bash
-npm run prettier
+npm run format
 ```
 
-#### Prettier in your code editor
+#### oxfmt in your code editor
 
-Additionally, most likely your code editor will support the prettier, via an extension, enabling you to automatically pretty your code as you develop. For instance, with VSCode you can use [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode). The only thing you will have to do is to setup your editor to auto format when commanded. I would suggest setting your editor to format on every save using the configuration in the workspace/directory so you never have code that is against the standard.
+Most code editors support oxfmt through an extension, so the editor formats your code as you develop. With VS Code, install the [Oxc extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode). That extension runs `oxfmt --lsp` from this project and also reports oxlint findings. Set the extension as the default formatter and enable format on save so your code always matches the standard.
+
+This repository ships [`.vscode/settings.json`](./.vscode/settings.json) and [`.vscode/extensions.json`](./.vscode/extensions.json). VS Code reads them when you open the folder and prompts you to install both extensions. Install the recommendations, or the editor falls back to its built-in formatters and writes 2 space indents.
+
+SCSS needs the [VS Code stylelint extension](https://marketplace.visualstudio.com/items?itemName=stylelint.vscode-stylelint). That extension provides no formatter. It fixes SCSS through a code action, so the shipped settings disable `formatOnSave` for SCSS and run `source.fixAll.stylelint` on save instead. oxfmt ignores `.scss` files, so the Oxc extension leaves them alone.
+
+#### Working in WSL
+
+Run VS Code, the extensions, and the tools inside WSL. Do not open the repo from Windows through
+the `\\wsl$\` UNC path.
+
+Windows reaches WSL files over `\\wsl$\`. VS Code then reports URIs like `file://wsl%24/Ubuntu/home/...`.
+The Oxc extension runs on the Windows host and uses a Windows binary. That binary cannot read the
+Linux config, so oxfmt silently formats with its 2 space, 80 column defaults.
+
+Open the folder in the remote first. Run `Ctrl+Shift+P` then `Remote-WSL: Reopen Folder in WSL`.
+The status bar must read `WSL: Ubuntu`. Opening `\\wsl$\Ubuntu\...` as a Windows folder is not the
+same thing.
+
+Then install the extensions into the remote. In the Extensions view, use `Install in WSL: <name>`.
+Uninstall the local copies so they cannot shadow the remote ones. Or from a WSL terminal:
+
+```bash
+code --install-extension oxc.oxc-vscode
+code --install-extension stylelint.vscode-stylelint
+```
+
+Install the dependencies from inside WSL too. A `node_modules` tree installed from Windows holds only
+Windows native bindings, so `npm run format` cannot run in WSL.
+
+```bash
+cd ~/repos/hero6efoundryvttv2_slaughterhouse
+rm -rf node_modules
+npm ci
+ls node_modules/@oxfmt/ node_modules/@oxlint/
+```
+
+Each listing must include a `binding-linux-x64-gnu` entry.
+
+Verify the setup. Set `oxc.trace.server` to `verbose`, format a file, then read
+`Output > Oxc (Formatter)`. URIs must read `file:///home/...`, not `file://wsl%24/...`.
+Indentation must stay at 4 spaces.
+
+Do not set `oxc.fmt.configPath` to a relative path on any platform. VS Code records this file as a
+workspace folder setting, so the extension skips path resolution and sends the raw string. oxfmt then
+falls back to its defaults. The extension substitutes only `${userHome}` and `${env:NAME}`. It has no
+`${workspaceFolder}`. Leave the setting `null` and let oxfmt discover `.oxfmtrc.json` from the file it
+formats.
 
 #### Auto Fixing
 
-If you don't want to setup your editor to auto format on save, `eslint`, `stylelint`, and `prettier` can fix the formatting of your files on an as needed basis. To let them do their thing:
+If you don't want to setup your editor to auto format on save, `oxlint`, `stylelint`, and `oxfmt` can fix the formatting of your files on an as needed basis. To let them do their thing:
 
 ```bash
 npm run autoFix
@@ -125,5 +176,5 @@ Alternatively you can run one type of fixing or the other explicitly:
 
 ```bash
 npm run lint:fix
-npm run prettier:fix
+npm run format:fix
 ```

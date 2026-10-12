@@ -1,0 +1,8 @@
+{
+  // VS Code prompts to install these on open. Without them the editor silently falls
+  // back to its built-in formatters, which indent with 2 spaces.
+  "recommendations": [
+    "oxc.oxc-vscode",
+    "stylelint.vscode-stylelint"
+  ]
+}

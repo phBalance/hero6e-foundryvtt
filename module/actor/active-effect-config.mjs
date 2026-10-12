@@ -12,8 +12,8 @@ export class HeroSystemActiveEffectConfig extends HeroAppMixin(ActiveEffectConfi
     addHeroListeners(html, context) {
         const detailsSection = html.find("section[data-tab='details']")?.[0];
         if (detailsSection) {
-            const originItem = fromUuidSync(context.source.origin);
-            const token = fromUuidSync(context.source.origin?.match(/(.*).Actor/)?.[1]);
+            const originItem = foundry.utils.fromUuidSync(context.source.origin);
+            const token = foundry.utils.fromUuidSync(context.source.origin?.match(/(.*).Actor/)?.[1]);
             const originText =
                 (originItem ? `${token?.name || originItem.actor?.name}: ${originItem.name}` : context.source.origin) ||
                 "";

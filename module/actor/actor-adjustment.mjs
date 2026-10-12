@@ -128,7 +128,7 @@ function _createNewAdjustmentEffect(options) {
                 XMLID: attackItem.system.XMLID,
                 source: itemTokenName ?? targetActor.name,
                 target: targetPower?.uuid || potentialCharacteristic,
-                targetDisplay: fromUuidSync(targetPower?.uuid)?.XMLID || potentialCharacteristic,
+                targetDisplay: foundry.utils.fromUuidSync(targetPower?.uuid)?.XMLID || potentialCharacteristic,
                 key: targetPower?.system?.XMLID || potentialCharacteristic,
                 itemTokenName,
                 attackerTokenUuid: getTokenUuid(_attackerToken),
@@ -145,7 +145,9 @@ function _createNewAdjustmentEffect(options) {
             },
         },
         // We likely created an effective Item, so store the originalUuid
-        origin: fromUuidSync(attackItem.uuid)?.uuid || fromUuidSync(attackItem.system._active?.__originalUuid)?.uuid,
+        origin:
+            foundry.utils.fromUuidSync(attackItem.uuid)?.uuid ||
+            foundry.utils.fromUuidSync(attackItem.system._active?.__originalUuid)?.uuid,
         // We likely created an effective Item, so store the JSON
         originJson: JSON.stringify(attackItem),
         description: attackItem.system.description, // Issues with core FoundryVTT where description doesn't show, nor is editable.
@@ -181,7 +183,8 @@ export async function performAdjustment(
 
     // for backward compatibility
     const targetActor = targetToken.actor || targetToken;
-    const attackerToken = fromUuidSync(action?.current?.attackerTokenUuid) || attackItem.actor?.getActiveTokens()?.[0];
+    const attackerToken =
+        foundry.utils.fromUuidSync(action?.current?.attackerTokenUuid) || attackItem.actor?.getActiveTokens()?.[0];
 
     const isHealing = attackItem.system.XMLID === "HEALING";
     let targetUpperCaseName = nameOfCharOrPower.toUpperCase();
@@ -236,7 +239,7 @@ export async function performAdjustment(
         targetPower = targetActor.items
             .filter((item) => item.system.XMLID === targetUpperCaseName || item.id === nameOfCharOrPower)
             .sort((a, b) => b.adjustedLevels - a.adjustedLevels)?.[0];
-        targetPower = targetPower || fromUuidSync(nameOfCharOrPower);
+        targetPower = targetPower || foundry.utils.fromUuidSync(nameOfCharOrPower);
     }
 
     // Do we have a target?
@@ -901,7 +904,7 @@ function updateEffectName(activeEffect) {
     let xmlidSlug = `${_array.map((o) => `${o.value} ${o.name}`).join(",")}`;
     if (activeEffect.flags[systemId]?.XMLID === "HEALING") {
         // The originating item (or its whole actor) may have been deleted (#4526)
-        const attackItem = fromUuidSync(activeEffect.origin);
+        const attackItem = foundry.utils.fromUuidSync(activeEffect.origin);
         const simplifiedHealing = attackItem?.system?.INPUT?.match(/simplified/i); //&&
         //["BODY", "STUN"].includes(potentialCharacteristic.toUpperCase());
 
@@ -956,7 +959,7 @@ function _generateAdjustmentChatCard(
             adjustmentDamageRaw: Math.abs(thisAttackActivePointsEffectRaw),
             thisAttackActivePointsEffect: Math.abs(thisAttackActivePointsEffect),
             adjustmentDamageThisApplication,
-            adjustmentTarget: fromUuidSync(nameOfCharOrPower)?.system.XMLID || targetUpperCaseName,
+            adjustmentTarget: foundry.utils.fromUuidSync(nameOfCharOrPower)?.system.XMLID || targetUpperCaseName,
             adjustmentTotalActivePointEffect: totalEffectActivePointsForXmlid,
             thisAttackActivePointAdjustmentNotAppliedDueToMax,
             thisAttackActivePointEffectNotAppliedDueToNotExceedingHealing,

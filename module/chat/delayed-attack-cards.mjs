@@ -19,7 +19,7 @@ async function resolveDelayedAttackItem(payload) {
     // resolves later, and the raw DB item would drop all of that state
     let item = null;
     if (payload.itemJson) {
-        const owner = payload.actorUuid ? fromUuidSync(payload.actorUuid) : null;
+        const owner = payload.actorUuid ? foundry.utils.fromUuidSync(payload.actorUuid) : null;
         try {
             // TODO(post-alpha): remove — cards from builds before a898f687 double-stringified the snapshot
             let itemJsonStr = payload.itemJson;
@@ -31,8 +31,8 @@ async function resolveDelayedAttackItem(payload) {
             console.error(`Unable to rehydrate the delayed attack item`, e);
         }
     }
-    item ??= payload.itemUuid ? fromUuidSync(payload.itemUuid) : null;
-    item ??= payload.originalItemUuid ? fromUuidSync(payload.originalItemUuid) : null;
+    item ??= payload.itemUuid ? foundry.utils.fromUuidSync(payload.itemUuid) : null;
+    item ??= payload.originalItemUuid ? foundry.utils.fromUuidSync(payload.originalItemUuid) : null;
     return item;
 }
 
@@ -43,7 +43,7 @@ async function resolveDelayedAttackItem(payload) {
  * @returns {boolean}
  */
 function canActOnDelayedAttack(item, payload) {
-    const owningActor = item.actor ?? (payload.actorUuid ? fromUuidSync(payload.actorUuid) : null);
+    const owningActor = item.actor ?? (payload.actorUuid ? foundry.utils.fromUuidSync(payload.actorUuid) : null);
     return !!(item.isOwner || owningActor?.isOwner || game.user.isGM);
 }
 
@@ -117,7 +117,8 @@ Hooks.on("renderChatMessageHTML", (app, html) => {
                     // Consume the card only once the spend has gone through — marking
                     // first left a cancelled prompt with a dead card and no resolution
                     await markDelayedCardResolved(app);
-                    const actor = item.actor ?? (payload.actorUuid ? fromUuidSync(payload.actorUuid) : null);
+                    const actor =
+                        item.actor ?? (payload.actorUuid ? foundry.utils.fromUuidSync(payload.actorUuid) : null);
                     // The Haymaker is over: the roll path's tail would end the maneuver
                     // after the attack rolls, but nothing rolls here — tear it down now
                     // or the -5 DCV persists and the next attack gets re-intercepted

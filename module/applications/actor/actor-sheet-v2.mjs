@@ -454,7 +454,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
         if (nativeToken) return nativeToken;
 
         // If it's a linked PC, super.token is null, so it falls back to your saved UUID or guess
-        return fromUuidSync(this.#tokenUuid) ?? tokenEducatedGuess({ actor: this.actor });
+        return foundry.utils.fromUuidSync(this.#tokenUuid) ?? tokenEducatedGuess({ actor: this.actor });
     }
 
     static TABS = {
@@ -1096,7 +1096,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
         await super._onDragStart(event);
         const element = event.currentTarget.closest("[data-document-uuid]");
         if (element) {
-            const item = fromUuidSync(element.dataset.documentUuid);
+            const item = foundry.utils.fromUuidSync(element.dataset.documentUuid);
             if (!item) {
                 return;
             }
@@ -1124,7 +1124,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
         event.preventDefault?.();
         event.stopImmediatePropagation?.();
 
-        const item = await fromUuid(data.uuid);
+        const item = await foundry.utils.fromUuid(data.uuid);
         if (!item) {
             console.error("Missing item");
             return;
@@ -1164,7 +1164,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
 
             const dropTarget = event.target.closest("[data-document-uuid]");
             if (!item.isContainer || item.system.XMLID === "COMPOUNDPOWER") {
-                const dropTargetItem = await fromUuid(dropTarget?.dataset.documentUuid);
+                const dropTargetItem = await foundry.utils.fromUuid(dropTarget?.dataset.documentUuid);
                 const isOwnLineage = (candidate) => {
                     for (let ancestor = candidate; ancestor; ancestor = ancestor.parentItem) {
                         if (ancestor.id === item.id) return true;
@@ -1251,7 +1251,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
     async _prepareNormalizedDropItems(data, targetType) {
         let normalizedItems = [];
         async function recurseAddItemFromUuid(uuid) {
-            let item = await fromUuid(uuid);
+            let item = await foundry.utils.fromUuid(uuid);
             if (!item) {
                 console.error(`${uuid} was not found`);
                 return;
@@ -1830,7 +1830,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
     async setChevronStatus(target) {
         // Loop thru all the item chevrons and expand/collapse their children
         for (const [key, value] of Object.entries(this.chevronCollapsedStatus)) {
-            const item = fromUuidSync(key);
+            const item = foundry.utils.fromUuidSync(key);
             if (!item) {
                 // The sheet instance outlives its items (re-upload, framework removal);
                 // a stale entry would otherwise be reported on every render
@@ -2016,13 +2016,13 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
                 return Object.keys(object).find((key) => object[key] === value);
             }
 
-            let itemsWithChildren = items;
+            const itemsWithChildren = [...items];
             for (const item of items) {
-                itemsWithChildren = [...itemsWithChildren, ...item.childItems];
+                itemsWithChildren.push(...item.childItems);
                 for (const item2 of item.childItems) {
-                    itemsWithChildren = [...itemsWithChildren, ...item2.childItems];
+                    itemsWithChildren.push(...item2.childItems);
                     for (const item3 of item2.childItems) {
-                        itemsWithChildren = [...itemsWithChildren, ...item3.childItems];
+                        itemsWithChildren.push(...item3.childItems);
                     }
                 }
             }
@@ -2062,7 +2062,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
             };
 
             if (status.rule) {
-                const page = await fromUuid(status.rule);
+                const page = await foundry.utils.fromUuid(status.rule);
                 statusInfo[status.id].tooltip = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
                     page.text.content,
                     { relativeTo: this.actor },

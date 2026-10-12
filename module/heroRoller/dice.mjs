@@ -77,11 +77,9 @@ Hooks.once("diceSoNiceReady", (diceSoNice) => {
 
         diceSoNice.addColorset(
             {
-                ...{
-                    name: customSet.colorset,
-                    description: `${customSet.colorset} Dice`,
-                    category: game.system.title,
-                },
+                name: customSet.colorset,
+                description: `${customSet.colorset} Dice`,
+                category: game.system.title,
                 ...customSet,
             },
             "default",
@@ -92,7 +90,7 @@ Hooks.once("diceSoNiceReady", (diceSoNice) => {
 /**
  * We override aspects of the FoundryVTT Roll class.
  */
-export class HeroRoll extends Roll {
+export class HeroRoll extends foundry.dice.Roll {
     static DieClass = Die;
 
     static initialize() {
