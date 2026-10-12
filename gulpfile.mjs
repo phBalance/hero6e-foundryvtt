@@ -40,6 +40,15 @@ function resolveBin(pkg, name) {
 const oxlintBin = resolveBin("oxlint", "oxlint");
 const oxfmtBin = resolveBin("oxfmt", "oxfmt");
 
+// Pass every config path on the command line. Each tool otherwise searches from the
+// working directory. When that search misses, oxfmt silently reformats the whole tree
+// to its 2 space default instead of the 4 spaces this repo uses. A missing file now
+// fails the task with exit 1 instead.
+const OXLINT_CONFIG = path.join(ROOT, ".oxlintrc.json");
+const OXFMT_CONFIG = path.join(ROOT, ".oxfmtrc.json");
+// Anchor the ignore list too. oxfmt otherwise reads .gitignore from the working directory.
+const GITIGNORE = path.join(ROOT, ".gitignore");
+
 // Run a native CLI, label its timing line, and resolve with the exit code.
 // The CLI prints "Finished in ..." with no owner named. The native binding owns that
 // string, so rewrite it here. Print a labelled line when the CLI prints none.
@@ -86,11 +95,11 @@ function spawnTool(name, binPath, args) {
 }
 
 function spawnOxlint(args) {
-    return spawnTool("oxlint", oxlintBin, args);
+    return spawnTool("oxlint", oxlintBin, ["--config", OXLINT_CONFIG, ...args]);
 }
 
 function spawnOxfmt(args) {
-    return spawnTool("oxfmt", oxfmtBin, args);
+    return spawnTool("oxfmt", oxfmtBin, ["--config", OXFMT_CONFIG, "--ignore-path", GITIGNORE, ...args]);
 }
 
 // Reject with a clean message when a CLI reports a failure.
@@ -166,8 +175,9 @@ function autoFixScssFilesByLint() {
 }
 const lintAutoFix = gulp.parallel(autoFixJavaScriptFilesByLint, autoFixScssFilesByLint);
 
-// oxfmt picks its files itself. It honours .gitignore and the ignorePatterns in
-// .oxfmtrc.json, so this task passes no globs. Those patterns exclude SCSS.
+// oxfmt picks its files itself. It honours the `.gitignore` passed with `--ignore-path`
+// and the ignorePatterns in .oxfmtrc.json, so this task passes no globs. Those
+// patterns exclude SCSS.
 // `format` only reports. `formatAutoFix` rewrites the files. This mirrors `lint` and `lintAutoFix`.
 // SCSS formatting comes from stylelint, because oxfmt skips .scss files.
 function validateFilesByFormat() {
