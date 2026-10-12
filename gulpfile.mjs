@@ -1,10 +1,8 @@
 import gulp from "gulp";
 import gulpAutoPrefix from "gulp-autoprefixer";
-import gulpPrettier from "gulp-prettier";
 import gulpSass from "gulp-sass";
 import * as dartSass from "sass";
 import gulpStylelint from "gulp-stylelint-esm";
-import gulpPlumber from "gulp-plumber";
 import stylelint from "stylelint";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
@@ -23,26 +21,32 @@ const MARKDOWN_FILES = ["**/*.md", "!node_modules/**"];
 /*  Source Code Standard Validation
 /* ----------------------------------------- */
 
-// oxlint is a native CLI rather than a gulp plugin, so it is spawned as a child
-// process instead of being piped into. It is invoked through Node (rather than the
-// node_modules/.bin shim) so that it works regardless of whether the working tree
-// sits on a UNC/mapped path, which cmd.exe refuses to use as a working directory.
-const oxlintBin = path.join(path.dirname(require.resolve("oxlint/package.json")), "bin", "oxlint");
+// oxlint and oxfmt are native CLIs rather than gulp plugins, so they are spawned as
+// child processes instead of being piped into. They are invoked through Node
+// (rather than the node_modules/.bin shim) so that the task works regardless of
+// whether the working tree sits on a UNC/mapped path, which cmd.exe refuses to use
+// as a working directory.
+function resolveBin(pkg, name) {
+    return path.join(path.dirname(require.resolve(`${pkg}/package.json`)), "bin", name);
+}
 
-// Run oxlint, label its timing line, and resolve with the exit code.
-// oxlint prints "Finished in ..." with no owner named. The native binding owns that
-// string, so rewrite it here. Print a labelled line when oxlint prints none.
-function spawnOxlint(args) {
+const oxlintBin = resolveBin("oxlint", "oxlint");
+const oxfmtBin = resolveBin("oxfmt", "oxfmt");
+
+// Run a native CLI, label its timing line, and resolve with the exit code.
+// The CLI prints "Finished in ..." with no owner named. The native binding owns that
+// string, so rewrite it here. Print a labelled line when the CLI prints none.
+function spawnTool(name, binPath, args) {
     const startedAt = Date.now();
     return new Promise((resolve, reject) => {
-        const child = spawn(process.execPath, [oxlintBin, ...args], { stdio: ["ignore", "pipe", "pipe"] });
+        const child = spawn(process.execPath, [binPath, ...args], { stdio: ["ignore", "pipe", "pipe"] });
         let labelled = false;
         const labelLine = (line) => {
             if (!line.startsWith("Finished in ")) {
                 return line;
             }
             labelled = true;
-            return line.replace(/^Finished in /, "oxlint finished in ");
+            return line.replace(/^Finished in /, `${name} finished in `);
         };
         const forward = (source, sink) => {
             let rest = "";
@@ -67,20 +71,43 @@ function spawnOxlint(args) {
         child.on("error", reject);
         child.on("close", (code) => {
             if (!labelled) {
-                console.log(`oxlint finished in ${Date.now() - startedAt}ms.`);
+                console.log(`${name} finished in ${Date.now() - startedAt}ms.`);
             }
             resolve(code ?? 1);
         });
     });
 }
 
-function runOxlint(args) {
-    return spawnOxlint(args).then((code) => {
+function spawnOxlint(args) {
+    return spawnTool("oxlint", oxlintBin, args);
+}
+
+function spawnOxfmt(args) {
+    return spawnTool("oxfmt", oxfmtBin, args);
+}
+
+// Reject with a clean message when a CLI reports a failure.
+// `showStack = false` stops gulp-cli from printing a stack trace. The CLI already
+// printed every finding, so the trace adds noise. The task still fails with exit 1.
+function runTool(name, fixScript, run) {
+    return run.then((code) => {
         if (code === 0) {
             return;
         }
-        throw new Error(`oxlint exited with code ${code}`);
+        const err = new Error(
+            `${name} reported problems (exit code ${code}). Run \`npm run ${fixScript}\` to correct them.`,
+        );
+        err.showStack = false;
+        throw err;
     });
+}
+
+function runOxlint(args) {
+    return runTool("oxlint", "lint:fix", spawnOxlint(args));
+}
+
+function runOxfmt(args) {
+    return runTool("oxfmt", "format:fix", spawnOxfmt(args));
 }
 
 function validateJavaScriptFilesByLint() {
@@ -115,24 +142,21 @@ function autoFixScssFilesByLint() {
 }
 const lintAutoFix = gulp.parallel(autoFixJavaScriptFilesByLint, autoFixScssFilesByLint);
 
-function validateFilesByPrettier() {
-    return gulp
-        .src([...JAVASCRIPT_FILES, ...SASS_FILES, ...MARKDOWN_FILES])
-        .pipe(gulpPlumber()) // stop plugin throwing from ending things in watch mode
-        .pipe(gulpPrettier.check());
+// oxfmt picks the files itself. It honours .gitignore and the ignorePatterns in
+// .oxfmtrc.json, so this task passes no globs.
+// `format` only reports. `formatAutoFix` rewrites the files. This mirrors `lint` and `lintAutoFix`.
+function validateFilesByFormat() {
+    return runOxfmt([".", "--check"]);
 }
-const prettier = gulp.series(validateFilesByPrettier);
+const format = gulp.series(validateFilesByFormat);
 
-function autoFixFilesByPrettier() {
-    return gulp
-        .src([...JAVASCRIPT_FILES, ...SASS_FILES, ...MARKDOWN_FILES])
-        .pipe(gulpPrettier())
-        .pipe(gulp.dest((file) => file.base));
+function autoFixFilesByFormat() {
+    return runOxfmt(["."]);
 }
-const prettierAutoFix = gulp.series(autoFixFilesByPrettier);
+const formatAutoFix = gulp.series(autoFixFilesByFormat);
 
-const validate = gulp.parallel(validateJavaScriptFilesByLint, validateScssFilesByLint, validateFilesByPrettier);
-const autoFix = gulp.series(autoFixJavaScriptFilesByLint, autoFixScssFilesByLint, autoFixFilesByPrettier);
+const validate = gulp.parallel(validateJavaScriptFilesByLint, validateScssFilesByLint, validateFilesByFormat);
+const autoFix = gulp.series(autoFixJavaScriptFilesByLint, autoFixScssFilesByLint, autoFixFilesByFormat);
 
 /* ----------------------------------------- */
 /*  Advisory (non-fatal) checks for build and watch
@@ -153,39 +177,9 @@ async function reportScssFilesByLint() {
     return result.errored;
 }
 
-// Report prettier findings and return whether any file needs formatting.
-// A failed check emits "error" then "close" on the last stream, and never "end".
-// The data listener matters too: "end" alone does not resume the stream, and Node
-// then exits with the promise unsettled.
-function reportFilesByPrettier() {
-    return new Promise((resolve) => {
-        let settled = false;
-        let reported = false;
-        let needsFormatting = false;
-        const finish = () => {
-            if (settled) {
-                return;
-            }
-            settled = true;
-            resolve(needsFormatting);
-        };
-        const record = (err) => {
-            needsFormatting = true;
-            if (!reported) {
-                reported = true;
-                console.error(err.toString());
-            }
-            finish();
-        };
-        const stream = gulp
-            .src([...JAVASCRIPT_FILES, ...SASS_FILES, ...MARKDOWN_FILES])
-            .pipe(gulpPlumber({ errorHandler: record }))
-            .pipe(gulpPrettier.check());
-        stream.on("data", () => {});
-        stream.on("error", record);
-        stream.on("end", finish);
-        stream.on("close", finish);
-    });
+// Report formatting findings and return whether any file needs formatting.
+function reportFilesByFormat() {
+    return spawnOxfmt([".", "--check"]).then((code) => code !== 0);
 }
 
 // Print every lint finding, then continue regardless of the result.
@@ -208,17 +202,17 @@ async function reportLintChecks() {
 async function reportValidationChecks() {
     let jsExitCode = 1;
     let scssErrored = true;
-    let prettierNeedsWork = true;
+    let formatNeedsWork = true;
     try {
-        [jsExitCode, scssErrored, prettierNeedsWork] = await Promise.all([
+        [jsExitCode, scssErrored, formatNeedsWork] = await Promise.all([
             reportJavaScriptByLint(),
             reportScssFilesByLint(),
-            reportFilesByPrettier(),
+            reportFilesByFormat(),
         ]);
     } catch (err) {
         console.error(`Validation could not run: ${err?.message ?? err}`);
     }
-    if (jsExitCode === 0 && !scssErrored && !prettierNeedsWork) {
+    if (jsExitCode === 0 && !scssErrored && !formatNeedsWork) {
         console.warn("Validation found no problems.");
         return;
     }
@@ -284,11 +278,11 @@ export {
     defaultGulpTask as default,
     css,
     lint,
-    prettier,
+    format,
     validate,
     autoFix,
     lintAutoFix,
-    prettierAutoFix,
+    formatAutoFix,
     lintWithoutFailing,
     validateWithoutFailing,
 };

@@ -16,7 +16,6 @@ Support can be found by creating a [new issue](https://github.com/dmdorman/hero6
 
 We have a [YouTube channel](https://www.youtube.com/channel/UCcmq0WFFNZNhRSGwuEHOgRg) with some how to videos.
 ​
-
 ## Functionality
 
 This system is a work in progress. The following features are supported

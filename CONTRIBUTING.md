@@ -77,6 +77,10 @@ npm run build
 
 This will automatically leave `gulp` in watch mode which means that any of your changes will automatically rebuilt.
 
+The build compiles the CSS files, then stays in watch mode. The watch loop runs the SCSS lint, oxlint, and oxfmt checks at startup and after every change. It prints every finding and keeps running. A finding never stops the build.
+
+CI still enforces the standards. Run `npm run validate` before you open a pull request, and fix every finding.
+
 One this step successful executes, you should be able to run worlds using this system.
 
 ### Testing
@@ -87,7 +91,7 @@ You should be able to find the appropriate labeled tests in the `module/testing`
 
 ### Code Formatting
 
-We have standardized the look of the code and making it harder to write incorrect code. We are doing this using [oxlint](https://oxc.rs/docs/guide/usage/linter) and [stylelint](https://stylelint.io/) for linting/static analysis and [prettier](https://prettier.io/) for formatting. To validate the code, using `oxlint`, `stylelint`, and `prettier`, you can run the following command:
+We have standardized the look of the code and making it harder to write incorrect code. We are doing this using [oxlint](https://oxc.rs/docs/guide/usage/linter) and [stylelint](https://stylelint.io/) for linting/static analysis and [oxfmt](https://oxc.rs/docs/guide/usage/formatter) for formatting. To validate the code, using `oxlint`, `stylelint`, and `oxfmt`, you can run the following command:
 
 ```bash
 npm run validate
@@ -101,21 +105,21 @@ Linting does a static analysis on the code to find code mistakes like using a va
 npm run lint
 ```
 
-#### Prettier
+#### Formatting
 
-Prettier enforces a coding standard. To check the number of code formatting errors:
+oxfmt enforces the formatting standard. The rules live in [`.oxfmtrc.json`](./.oxfmtrc.json) at the root of the repository. To check the number of code formatting errors:
 
 ```bash
-npm run prettier
+npm run format
 ```
 
-#### Prettier in your code editor
+#### oxfmt in your code editor
 
-Additionally, most likely your code editor will support the prettier, via an extension, enabling you to automatically pretty your code as you develop. For instance, with VSCode you can use [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode). The only thing you will have to do is to setup your editor to auto format when commanded. I would suggest setting your editor to format on every save using the configuration in the workspace/directory so you never have code that is against the standard.
+Most code editors support oxfmt through an extension, so the editor formats your code as you develop. With VS Code, install the [Oxc extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode). That extension runs `oxfmt --lsp` from this project and also reports oxlint findings. Set the extension as the default formatter and enable format on save so your code always matches the standard.
 
 #### Auto Fixing
 
-If you don't want to setup your editor to auto format on save, `oxlint`, `stylelint`, and `prettier` can fix the formatting of your files on an as needed basis. To let them do their thing:
+If you don't want to setup your editor to auto format on save, `oxlint`, `stylelint`, and `oxfmt` can fix the formatting of your files on an as needed basis. To let them do their thing:
 
 ```bash
 npm run autoFix
@@ -125,5 +129,5 @@ Alternatively you can run one type of fixing or the other explicitly:
 
 ```bash
 npm run lint:fix
-npm run prettier:fix
+npm run format:fix
 ```
