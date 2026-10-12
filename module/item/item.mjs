@@ -1216,7 +1216,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             // This is either an effective item or just an item that's not in the database.
             // If it's an effective item, redirect to the original item for persistance otherwise ignore.
             if (this.system._active?.__originalUuid) {
-                const originalItem = fromUuidSync(this.system._active.__originalUuid);
+                const originalItem = foundry.utils.fromUuidSync(this.system._active.__originalUuid);
                 return originalItem.update(...args);
             }
 
@@ -2820,7 +2820,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
     get actor() {
         // Additional support to get the actor of an effectiveItem with V2 code.
         // Trailing null keeps core's contract: unowned items report null, never undefined.
-        return super.actor ?? fromUuidSync(this.system.originalItemUuid)?.actor ?? null;
+        return super.actor ?? foundry.utils.fromUuidSync(this.system.originalItemUuid)?.actor ?? null;
     }
 
     /**
@@ -5887,7 +5887,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 //console.log(ae);
                 for (const change of ae.changes) {
                     if (change.key.match(new RegExp(this.system.XMLID, "i"))) {
-                        const item = fromUuidSync(ae.flags?.target); // This should not be an array ?.[0]
+                        const item = foundry.utils.fromUuidSync(ae.flags?.target); // This should not be an array ?.[0]
                         if (!item) {
                             console.warn(`${ae.name} has no associated item`, this, ae);
                             return Math.max(0, _adjustedLevels);
@@ -8907,7 +8907,7 @@ export function buildEffectiveObject(effectiveObjectParameters) {
 
             return true;
         })
-        .map(([key, value]) => fromUuidSync(value.uuid ?? key)) // ItemAttackApplication uses value.uuid
+        .map(([key, value]) => foundry.utils.fromUuidSync(value.uuid ?? key)) // ItemAttackApplication uses value.uuid
         .forEach((hthAttack) => {
             // 5e only: Can use the HA with STR if HA's unmodified active points don't exceed the STR used. Get the advantages for free on STR if can use the HA.
             // 6e only: The HA becomes the base attack item.
@@ -8946,7 +8946,7 @@ export function buildEffectiveObject(effectiveObjectParameters) {
     let nakedAdvantagesDisabledDueToActivePoints = false;
     Object.entries(effectiveObjectParameters.nakedAdvantagesItems)
         .map(([key, value], index, array) => {
-            const naItem = fromUuidSync(value.uuid ?? key);
+            const naItem = foundry.utils.fromUuidSync(value.uuid ?? key);
 
             // Item the NA is being applied to must not exceed the AP of the NA was designed against.
             // TODO: This implies that one cannot push with a NA. Is this correct?

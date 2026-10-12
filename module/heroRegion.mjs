@@ -1,6 +1,6 @@
 export class HeroSystem6eRegionDocument extends foundry.documents.RegionDocument {
     static async applyBehaviorTokenAutomaticTargeting(regionUuid) {
-        const region = await fromUuid(regionUuid);
+        const region = await foundry.utils.fromUuid(regionUuid);
         if (!region) {
             console.error(`Region not found: ${regionUuid}`);
             return;

@@ -133,7 +133,10 @@ export class ItemVppConfig extends HeroApplication {
                 style: CONFIG.HERO.CHAT_MESSAGE_DEFAULT_STYLE,
                 content: `${this.item.name} slots were changed. Variable power pool points: ${this.vppSlottedCost} of ${this.item.vppPoolPoints}. <ul>${changeContent.join("")}</ul>`,
                 whisper: whisperUserTargetsForActor(this.item.actor),
-                speaker: ChatMessage.getSpeaker({ actor: this.item.actor, token: fromUuidSync(this.#tokenUuid) }),
+                speaker: ChatMessage.getSpeaker({
+                    actor: this.item.actor,
+                    token: foundry.utils.fromUuidSync(this.#tokenUuid),
+                }),
             };
             await ChatMessage.create(chatData);
         }

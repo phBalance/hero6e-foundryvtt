@@ -93,9 +93,11 @@ export async function expireManeuverNextPhaseEffects(actor) {
             let maneuver = null;
             try {
                 maneuver =
-                    fromUuidSync(flags.itemUuid) ||
-                    rehydrateAttackItem(flags.dehydratedManeuverItem, fromUuidSync(flags.dehydratedManeuverActorUuid))
-                        .item;
+                    foundry.utils.fromUuidSync(flags.itemUuid) ||
+                    rehydrateAttackItem(
+                        flags.dehydratedManeuverItem,
+                        foundry.utils.fromUuidSync(flags.dehydratedManeuverActorUuid),
+                    ).item;
             } catch (e) {
                 console.warn(`Unable to resolve maneuver item for expiring effect ${ae.name}`, e);
             }
@@ -591,7 +593,7 @@ export async function activateManeuver(item) {
     }
 
     // Make sure we have original Item
-    const originalItem = item.id ? item : fromUuidSync(item.system._active.__originalUuid);
+    const originalItem = item.id ? item : foundry.utils.fromUuidSync(item.system._active.__originalUuid);
 
     // Build on a plain copy and write back only through update(): fields set
     // straight onto the live document stay there (array statuses, changes

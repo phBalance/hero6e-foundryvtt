@@ -547,7 +547,7 @@ export function registerCombatTests(quench) {
                     try {
                         let scene = game.scenes.active ?? game.scenes.contents?.[0];
                         if (!scene) {
-                            scene = await Scene.create({ name: "_Quench Recovery Arena" });
+                            scene = await foundry.documents.Scene.create({ name: "_Quench Recovery Arena" });
                         }
 
                         const npcActor = await Actor.create(
@@ -3016,7 +3016,10 @@ export function registerCombatTests(quench) {
                 });
 
                 it("Should whisper SPD-change cards to the actor's owners (#4686)", async function () {
-                    const player = await User.create({ name: "_Quench Player", role: CONST.USER_ROLES.PLAYER });
+                    const player = await foundry.documents.User.create({
+                        name: "_Quench Player",
+                        role: CONST.USER_ROLES.PLAYER,
+                    });
                     try {
                         const changer = await makeActor("_Quench SPD Whisper", { dex: 12, spd: 2 });
                         await changer.update({
@@ -3129,7 +3132,7 @@ export function registerCombatTests(quench) {
                     const hero = await makeActor("_Quench Renamed Hero", { dex: 10, spd: 2 });
                     expect(hero.prototypeToken.name).to.equal("_Quench Renamed Hero");
 
-                    const scene = await Scene.create({ name: "_Quench Rename Scene" });
+                    const scene = await foundry.documents.Scene.create({ name: "_Quench Rename Scene" });
                     try {
                         await scene.createEmbeddedDocuments("Token", [
                             { actorId: hero.id, actorLink: true, name: "_Quench Renamed Hero", x: 100, y: 100 },

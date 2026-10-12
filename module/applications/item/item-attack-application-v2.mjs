@@ -209,7 +209,7 @@ export class ItemAttackFormApplicationV2 extends HeroAppMixin(HandlebarsApplicat
                     }
 
                     // TAKESNODAMAGE
-                    if (fromUuidSync(entangle.origin)?.findModsByXmlid("TAKESNODAMAGE")) {
+                    if (foundry.utils.fromUuidSync(entangle.origin)?.findModsByXmlid("TAKESNODAMAGE")) {
                         this.data.targetEntangle = false;
                     }
                 }

@@ -2442,7 +2442,7 @@ async function onTimingContest(button) {
     const rollSide = async (combatant, key) => {
         const characteristic = combatant.actor.system?.characteristics?.[key];
         const target = characteristic?.roll ?? Math.round(9 + (characteristic?.value ?? 10) / 5);
-        const roll = await new Roll("3d6").evaluate();
+        const roll = await new foundry.dice.Roll("3d6").evaluate();
         return { combatant, key, target, roll, margin: target - roll.total };
     };
     const holderSide = await rollSide(holder, choice.holderChar);

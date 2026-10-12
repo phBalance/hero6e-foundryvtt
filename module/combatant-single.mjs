@@ -1,4 +1,4 @@
-export class HeroSystem6eCombatantSingle extends Combatant {
+export class HeroSystem6eCombatantSingle extends foundry.documents.Combatant {
     /**
      * GM-hidden and invisible tokens enter combat hidden from the player-facing
      * tracker (#4466). An explicit hidden value in the creation data wins — the

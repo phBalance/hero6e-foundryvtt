@@ -560,7 +560,7 @@ function tokenFromTokenObj(tokenObj) {
 
     // Does this need to become a TokenDocument?
     if (tokenObj.uuid) {
-        return fromUuidSync(tokenObj.uuid);
+        return foundry.utils.fromUuidSync(tokenObj.uuid);
     }
 
     // This needs to become a PrototypeToken by deserializing and adding the actor/parent link
@@ -591,7 +591,7 @@ function actorToActorObj(actor) {
 function actorObjToActor(actorObj) {
     // DB based actor?
     if (actorObj.uuid) {
-        return fromUuidSync(actorObj.uuid);
+        return foundry.utils.fromUuidSync(actorObj.uuid);
     }
 
     // Create a HeroSystem6eActor from our serialized json.

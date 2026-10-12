@@ -117,7 +117,7 @@ export class AttackAction {
     }
 
     get attackerToken() {
-        return fromUuidSync(this.attackerTokenUuid);
+        return foundry.utils.fromUuidSync(this.attackerTokenUuid);
     }
 
     get actor() {

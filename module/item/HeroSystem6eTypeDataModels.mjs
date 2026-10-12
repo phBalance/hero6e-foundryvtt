@@ -1881,9 +1881,9 @@ export class HeroActorCharacteristic extends foundry.abstract.DataModel {
             const detail = [viaKey && escapeHtmlForTooltip(viaKey.toUpperCase()), deltaText].filter(Boolean).join(" ");
             const parts = [`${escapeHtmlForTooltip(ae.name)}${detail ? ` (${detail})` : ""}`];
 
-            const originItem = ae.origin ? fromUuidSync(ae.origin) : null;
+            const originItem = ae.origin ? foundry.utils.fromUuidSync(ae.origin) : null;
             if (originItem) {
-                const originToken = fromUuidSync(ae.origin.match(/(.*).Actor/)?.[1]);
+                const originToken = foundry.utils.fromUuidSync(ae.origin.match(/(.*).Actor/)?.[1]);
                 const ownerName = originToken?.name || originItem.actor?.name;
                 parts.push(
                     `${ownerName ? `${escapeHtmlForTooltip(ownerName)}: ` : ""}${escapeHtmlForTooltip(originItem.name)}`,

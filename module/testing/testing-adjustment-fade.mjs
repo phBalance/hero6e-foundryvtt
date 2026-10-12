@@ -78,7 +78,8 @@ export function registerAdjustmentFadeTests(quench) {
 
                     // 2. Automate canvas Token placement so every 'it' block starts with a fresh proxy instance
                     const activeScene =
-                        game.scenes.active || (await Scene.create({ name: "Quench Test Sandbox", active: true }));
+                        game.scenes.active ||
+                        (await foundry.documents.Scene.create({ name: "Quench Test Sandbox", active: true }));
 
                     // V14 Mapping Standard: Clear out existing duplicates safely from the Map contents array
                     const existingToken = activeScene.tokens.contents.find((t) => t.name === "Quench Test Target");

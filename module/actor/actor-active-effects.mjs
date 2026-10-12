@@ -752,7 +752,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
 
     get nameExtended() {
         try {
-            const sourceItem = this.origin?.includes("Item") ? fromUuidSync(this.origin) : null;
+            const sourceItem = this.origin?.includes("Item") ? foundry.utils.fromUuidSync(this.origin) : null;
             const actorName =
                 sourceItem?.actor?.token?.name ??
                 this.flags[game.system.id]?.itemTokenName ??
@@ -817,7 +817,7 @@ export class HeroSystem6eActorActiveEffects extends ActiveEffect {
             // }
 
             // If an origin was specified, check if it still exists.
-            const sourceItem = this.origin?.includes("Item") ? fromUuidSync(this.origin) : null;
+            const sourceItem = this.origin?.includes("Item") ? foundry.utils.fromUuidSync(this.origin) : null;
             if (this.origin && !sourceItem) {
                 heroValidations.push({
                     message: `The actor/item that created this effect no longer exists.`,

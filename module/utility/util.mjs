@@ -210,7 +210,7 @@ export async function getTemporaryEffectsOwnedByActorInCombat(actor) {
     let effects = [];
     for (const c of game.combat.combatants) {
         for (const ae of c.actor.temporaryEffects) {
-            const origin = await fromUuid(ae.origin);
+            const origin = await foundry.utils.fromUuid(ae.origin);
             const item = origin instanceof HeroSystem6eItem ? origin : null;
             if (item) {
                 const aeActor = item?.actor?.id === actor?.id;
@@ -307,7 +307,7 @@ export async function expireEffects(actor, expiresOn) {
         // The null check is for AE that have no duration.
         // TODO: Aaron dislikes WHILE loops, can this be reworked such that it there is not a possibility of infinite loop?
         while (ae._prepareDuration().remaining <= zero && ae._prepareDuration().remaining !== null) {
-            const origin = fromUuidSync(ae.origin);
+            const origin = foundry.utils.fromUuidSync(ae.origin);
             const item =
                 origin instanceof HeroSystem6eItem ? origin : ae.parent instanceof HeroSystem6eItem ? ae.parent : null;
             const source = ae.flags[game.system.id]?.source ?? "an unknown source";
@@ -695,7 +695,7 @@ export function tokenEducatedGuess(options = {}) {
 
     // Token id/uuid
     options.tokenId ??= options.action?.current.attackerTokenUuid;
-    options.token ??= fromUuidSync(options.tokenId);
+    options.token ??= foundry.utils.fromUuidSync(options.tokenId);
     options.token ??= canvas.tokens.get(options.tokenId);
     if (options.token) {
         return options.token;
@@ -716,7 +716,7 @@ export function tokenEducatedGuess(options = {}) {
 
     // Actor
     options.actor ??= options.action?.current.actor;
-    options.actor ??= fromUuidSync(options.actorId);
+    options.actor ??= foundry.utils.fromUuidSync(options.actorId);
     options.actor ??= game.actors.get(options.actorId);
 
     // Controlled token of provided actor

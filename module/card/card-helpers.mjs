@@ -16,7 +16,7 @@ export class HeroSystem6eCardHelpers {
     }
 
     static async _onChatMessageTokenHoverIn(event) {
-        const tokenDocument = await fromUuid(event.currentTarget.dataset.highlightToken);
+        const tokenDocument = await foundry.utils.fromUuid(event.currentTarget.dataset.highlightToken);
         const tokenObject = tokenDocument?.object;
         if (tokenObject && tokenObject._canHover(game.user, event) && tokenObject.visible) {
             tokenObject._onHoverIn(event, { hoverOutOthers: true });
@@ -24,7 +24,7 @@ export class HeroSystem6eCardHelpers {
     }
 
     static async _onChatMessageTokenHoverOut(event) {
-        const tokenDocument = await fromUuid(event.currentTarget.dataset.highlightToken);
+        const tokenDocument = await foundry.utils.fromUuid(event.currentTarget.dataset.highlightToken);
         const tokenObject = tokenDocument?.object;
         if (tokenObject && tokenObject._canHover(game.user, event)) {
             tokenObject._onHoverOut(event);

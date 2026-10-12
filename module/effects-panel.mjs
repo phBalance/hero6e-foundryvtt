@@ -79,7 +79,7 @@ export class EffectsPanel extends HeroAppMixin(HandlebarsApplicationMixin(Applic
             if (!effectData.description) {
                 effectData.description = undefined;
             }
-            effectData.description ??= fromUuidSync(ae.origin)?.system.description;
+            effectData.description ??= foundry.utils.fromUuidSync(ae.origin)?.system.description;
             effectData.description ??= ae.parent?.system.description;
 
             context.effects.push(effectData);

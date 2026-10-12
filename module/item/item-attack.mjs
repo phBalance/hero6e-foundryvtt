@@ -229,7 +229,7 @@ export function dehydrateAttackItem(item) {
  * @param {Object} rollInfo
  */
 export function rehydrateActorAndAttackItem(rollInfo) {
-    const actor = fromUuidSync(rollInfo.actorUuid);
+    const actor = foundry.utils.fromUuidSync(rollInfo.actorUuid);
 
     return rehydrateAttackItem(rollInfo.itemJsonStr, actor);
 }
@@ -2006,7 +2006,10 @@ export async function _onRollKnockback(event) {
         // We can likely proceed using kbOptions.actorUuid to find the token,
         // but it is better to use a specific tokenId.
     }
-    const token = tokenEducatedGuess({ tokenId: kbOptions.targetTokenId, actor: fromUuidSync(kbOptions.actorUuid) });
+    const token = tokenEducatedGuess({
+        tokenId: kbOptions.targetTokenId,
+        actor: foundry.utils.fromUuidSync(kbOptions.actorUuid),
+    });
     const knockbackResultTotal = kbOptions.knockbackResultTotal;
     if (!item || !token || !knockbackResultTotal) {
         return ui.notifications.error(`Knockback details are not available.`);
@@ -2094,7 +2097,7 @@ export async function _onRollPowerToRemove(event) {
     const button = event.currentTarget;
     button.blur(); // The button remains highlighted for some reason; kludge to fix.
 
-    const targetToken = await fromUuid(button.dataset.targetTokenUuid);
+    const targetToken = await foundry.utils.fromUuid(button.dataset.targetTokenUuid);
     if (!targetToken) {
         return ui.notifications.error(`Target token not found.`);
     }
@@ -2224,7 +2227,7 @@ export async function _onSpendHaps(event) {
     const targetContainer = button.closest(`[data-target-token-uuid]`);
     const targetTokenUuid = targetContainer?.dataset.targetTokenUuid;
     // Older cards rendered this button for targetless rolls, which have no uuid
-    const targetToken = targetTokenUuid ? await fromUuid(targetTokenUuid) : null;
+    const targetToken = targetTokenUuid ? await foundry.utils.fromUuid(targetTokenUuid) : null;
     const targetActor = targetToken?.actor;
     if (!targetActor) {
         return ui.notifications.warn("HAP cannot be spent on an attack roll without a target.");
@@ -2236,14 +2239,14 @@ export async function _onSpendHaps(event) {
     if (!message) throw new Error("Chat message context not found.");
 
     const attackerTokenUuid = message.getFlag(game.system.id, "attackerTokenUuid");
-    const attackerToken = attackerTokenUuid ? await fromUuid(attackerTokenUuid) : null;
+    const attackerToken = attackerTokenUuid ? await foundry.utils.fromUuid(attackerTokenUuid) : null;
     let attackerActor = attackerToken?.actor;
 
     // Older cards (and tokenless attackers) may lack the token uuid; fall back to the actor uuid.
     if (!attackerActor) {
         const attackerActorUuid =
             message.getFlag(game.system.id, "attackerActorUuid") ?? message.getFlag(game.system.id, "actorUuid");
-        attackerActor = attackerActorUuid ? await fromUuid(attackerActorUuid) : null;
+        attackerActor = attackerActorUuid ? await foundry.utils.fromUuid(attackerActorUuid) : null;
     }
 
     if (!attackerActor) throw new Error("Attacker actor not found.");
@@ -2609,7 +2612,7 @@ export async function _onRollDamage(event) {
     // PH: FIXME: This is now included in the action data and this can be cleaned up
     let { actor, item } = rehydrateActorAndAttackItem(toHitData);
     item ??= rehydrateAttackItem(message.getFlag(game.system.id, "itemJsonStr"), actor).item;
-    actor ??= await fromUuid(message.getFlag(game.system.id, "attackerActorUuid"));
+    actor ??= await foundry.utils.fromUuid(message.getFlag(game.system.id, "attackerActorUuid"));
 
     if (!item || !actor) {
         return ui.notifications.error(`Attack details are no longer available.`);
@@ -2628,7 +2631,7 @@ export async function _onRollDamage(event) {
         console.warn("expecting action.current.attackerTokenUuid");
     }
     const token = action.system.attackerToken ?? tokenEducatedGuess({ action, actor });
-    const hthAttackItems = (action.hthAttackItems || []).map((hthAttack) => fromUuidSync(hthAttack.uuid));
+    const hthAttackItems = (action.hthAttackItems || []).map((hthAttack) => foundry.utils.fromUuidSync(hthAttack.uuid));
     toHitData.hthAttackItems = hthAttackItems;
 
     const haymakerManeuverActiveItem = actor.items.find(
@@ -3161,7 +3164,7 @@ export async function _onGenericRollerApplyDamage(event) {
 
     // Since this is coming through the generic damage roll user flow there may or may not be a real actor attached.
     const actor = damageData.actorUuid
-        ? fromUuidSync(damageData.actorUuid)
+        ? foundry.utils.fromUuidSync(damageData.actorUuid)
         : new HeroSystem6eActor({
               name: `Generic Actor`,
               type: "npc",
@@ -3243,7 +3246,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
     const targetTokens = JSON.parse(damageData.targetTokens);
     const action = actionFromJSON(damageData.actionData);
 
-    const actor = actorParam || fromUuidSync(damageData.actorUuid);
+    const actor = actorParam || foundry.utils.fromUuidSync(damageData.actorUuid);
 
     const item = itemParam || rehydrateAttackItem(damageData.itemJsonStr, actorParam || actor).item;
 
@@ -3274,7 +3277,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
                 if (ae) {
                     const { item: entangle } = rehydrateAttackItem(
                         ae.flags[game.system.id].dehydratedEntangleItem,
-                        fromUuidSync(ae.flags[game.system.id].dehydratedEntangleActorUuid),
+                        foundry.utils.fromUuidSync(ae.flags[game.system.id].dehydratedEntangleActorUuid),
                     );
                     if (!entangle) {
                         console.error(ae);
@@ -3297,7 +3300,7 @@ export async function _onApplyDamage(event, actorParam, itemParam) {
 export async function _onApplyDamageToSpecificToken(item, _damageData, action, targetData) {
     const damageData = foundry.utils.deepClone(_damageData);
     const targetToken =
-        fromUuidSync(targetData.targetTokenUuid) ?? tokenEducatedGuess({ tokenId: targetData?.tokenId }); // canvas.scene.tokens.get(targetToken.tokenId);
+        foundry.utils.fromUuidSync(targetData.targetTokenUuid) ?? tokenEducatedGuess({ tokenId: targetData?.tokenId }); // canvas.scene.tokens.get(targetToken.tokenId);
     if (!targetToken) {
         return ui.notifications.warn(`You must select at least one token before applying damage.`);
     }
@@ -4053,7 +4056,7 @@ export async function _onApplyDamageToEntangle(attackItem, token, originalRoll, 
     // TODO: Add drian body support for entangles
     if (attackItem.isAdjustment) {
         ui.notifications.error(
-            `An entangle (${fromUuidSync(entangleAE.origin)?.name || entangleAE.name}) is not a supported target for an adjustment power (${attackItem.name}).`,
+            `An entangle (${foundry.utils.fromUuidSync(entangleAE.origin)?.name || entangleAE.name}) is not a supported target for an adjustment power (${attackItem.name}).`,
         );
         return;
     }

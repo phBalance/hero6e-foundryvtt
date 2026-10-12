@@ -9,7 +9,7 @@ export class HeroSystem6eItemDirectory extends ItemDirectory {
     async _handleDroppedEntry(target, data) {
         console.log("_handleDroppedEntry", target, data);
 
-        const item = await fromUuid(data.uuid);
+        const item = await foundry.utils.fromUuid(data.uuid);
         if (!item) {
             console.error("missing item", data.uuid);
             return;
@@ -30,7 +30,7 @@ export class HeroSystem6eItemDirectory extends ItemDirectory {
         // Find folder we ard dropping to
         const closestFolder = target ? target.closest(".folder") : null;
         if (closestFolder) closestFolder.classList.remove("droptarget");
-        const folderTarget = closestFolder ? await fromUuid(closestFolder.dataset.uuid) : null;
+        const folderTarget = closestFolder ? await foundry.utils.fromUuid(closestFolder.dataset.uuid) : null;
 
         // Create new folder
         await this.dropFrameworkItem(folderTarget, item);
@@ -38,7 +38,11 @@ export class HeroSystem6eItemDirectory extends ItemDirectory {
 
     async dropFrameworkItem(folderTarget, item) {
         if (item.childItems.length > 0) {
-            const newFolder = await Folder.create({ type: "Item", name: item.name, folder: folderTarget?.id });
+            const newFolder = await foundry.documents.Folder.create({
+                type: "Item",
+                name: item.name,
+                folder: folderTarget?.id,
+            });
             await HeroSystem6eItem.create({
                 ...item.toObject(),
                 folder: newFolder?.id,

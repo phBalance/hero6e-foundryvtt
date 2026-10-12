@@ -1004,7 +1004,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         // V14 refreshes combat-duration effect tracking at combat start; the
         // registry does not exist on V13
-        await getDocumentClass("ActiveEffect").registry?.refresh?.("combatStart", { combat: this });
+        await foundry.utils.getDocumentClass("ActiveEffect").registry?.refresh?.("combatStart", { combat: this });
 
         // Combat opens on Segment 12: offer/apply Lightning Reflexes right away.
         // The boundary maintenance also fires this for the start update; auto
@@ -3425,7 +3425,7 @@ export class HeroSystem6eCombatSingle extends Combat {
         if (cancelled) {
             outcome = `${actor?.name}'s ${label} is interrupted and lost${reason ? ` — ${reason}` : ""}${record.kind === "activation" ? " (resources already spent stay spent)" : ""}.`;
         } else if (record.kind === "activation") {
-            const item = record.itemUuid ? fromUuidSync(record.itemUuid) : null;
+            const item = record.itemUuid ? foundry.utils.fromUuidSync(record.itemUuid) : null;
             if (item && !item.isActive) {
                 // Resources and rolls were paid when the activation began (RAW:
                 // END up front); delayedResolution skips re-charging them

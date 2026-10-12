@@ -90,7 +90,7 @@ Hooks.once("diceSoNiceReady", (diceSoNice) => {
 /**
  * We override aspects of the FoundryVTT Roll class.
  */
-export class HeroRoll extends Roll {
+export class HeroRoll extends foundry.dice.Roll {
     static DieClass = Die;
 
     static initialize() {

@@ -518,7 +518,7 @@ Hooks.on("changeSidebarTab", async (app) => {
 function createHeroSystem6eMacro(bar, data, slot) {
     // Check if we want to override the default macro (open sheet)
     if (data.type === "Item" && typeof data.uuid === "string") {
-        const item = fromUuidSync(data.uuid);
+        const item = foundry.utils.fromUuidSync(data.uuid);
         if (item.isRollable()) {
             handleMacroCreation(bar, data, slot, item);
             return false;
