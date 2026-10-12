@@ -160,7 +160,7 @@ function isNonIgnoredCharacteristicsAndMovementBaseInfoForActor(actor) {
 
 export function getCharacteristicInfoArrayForActor(actor) {
     if (!actor) {
-        console.error("getCharacteristicInfoArrayForActor missing actor", this);
+        console.error("getCharacteristicInfoArrayForActor missing actor");
     }
     if (!actor._lazy) {
         console.warn("missing actor._lazy");

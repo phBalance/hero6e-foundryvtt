@@ -426,9 +426,6 @@ Hooks.on("renderChatMessageHTML", (app, html, data) => {
     // chat/delayed-attack-cards.mjs (its own renderChatMessageHTML hook).
 });
 
-// Hooks.on("renderChatLog", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
-// Hooks.on("renderChatPopout", (app, html) => HeroSystem6eCardHelpers.chatListeners(html));
-
 // Core only seeds token names at creation; carry an actor rename through to the
 // prototype token and placed tokens whose name still matched. The old name is
 // stashed on options because updateActor only sees the new one.

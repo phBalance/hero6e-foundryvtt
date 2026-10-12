@@ -83,18 +83,18 @@ const { renderTemplate } = foundry.applications.handlebars;
 
 export async function chatListeners(_html) {
     const html = $(_html); // v13 compatibility
-    html.on("click", "button.roll-damage", this._onRollDamage.bind(this));
-    html.on("click", "button.apply-damage", this._onApplyDamage.bind(this));
-    html.on("click", "button.generic-roller-apply-damage", this._onGenericRollerApplyDamage.bind(this));
-    html.on("click", "button.rollAoe-damage", this._onRollAoeDamage.bind(this));
-    html.on("click", "button.roll-knockback", this._onRollKnockback.bind(this));
-    html.on("click", "button.roll-breakfall", this._onRollBreakfall.bind(this));
-    html.on("click", "button.roll-mindscan", this._onRollMindScan.bind(this));
-    html.on("click", "button.roll-mindscan-ego", this._onRollMindScanEffectRoll.bind(this));
-    html.on("click", "div.adjustment-summary", this._onAdjustmentToolipExpandCollapse.bind(this));
-    html.on("click", "i.modal-damage-card, span.modal-damage-card", this._onModalDamageCard.bind(this));
-    html.on("click", "button.roll-powerToRemove", this._onRollPowerToRemove.bind(this));
-    html.on("click", `button[data-action="spendHaps"]`, this._onSpendHaps.bind(this));
+    html.on("click", "button.roll-damage", _onRollDamage);
+    html.on("click", "button.apply-damage", _onApplyDamage);
+    html.on("click", "button.generic-roller-apply-damage", _onGenericRollerApplyDamage);
+    html.on("click", "button.rollAoe-damage", _onRollAoeDamage);
+    html.on("click", "button.roll-knockback", _onRollKnockback);
+    html.on("click", "button.roll-breakfall", _onRollBreakfall);
+    html.on("click", "button.roll-mindscan", _onRollMindScan);
+    html.on("click", "button.roll-mindscan-ego", _onRollMindScanEffectRoll);
+    html.on("click", "div.adjustment-summary", _onAdjustmentToolipExpandCollapse);
+    html.on("click", "i.modal-damage-card, span.modal-damage-card", _onModalDamageCard);
+    html.on("click", "button.roll-powerToRemove", _onRollPowerToRemove);
+    html.on("click", `button[data-action="spendHaps"]`, _onSpendHaps);
 }
 
 export async function onMessageRendered(html) {
@@ -5125,7 +5125,7 @@ export async function _onModalDamageCard(event) {
         for (const button of dialog.element.querySelectorAll(".dialog-content button")) {
             button.setAttribute("type", "button");
         }
-        this.chatListeners(dialog.element);
+        chatListeners(dialog.element);
     });
 
     await dialog.render({ force: true });
