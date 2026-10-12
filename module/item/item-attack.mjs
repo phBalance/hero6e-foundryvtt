@@ -1101,7 +1101,7 @@ async function doSingleTargetActionToHit(action, options) {
         ...options,
         // A delayed Extra Time resolution paid its resources at declaration
         // (prepaid); a delayed Haymaker pays HERE — in the segment it launches
-        ...{ noResourceUse: overrideCanAct || !!options.prepaid },
+        noResourceUse: overrideCanAct || !!options.prepaid,
     });
     if (resourceError) {
         return ui.notifications.error(`${item.name} ${resourceError}`);
@@ -2664,7 +2664,7 @@ export async function _onRollDamage(event) {
     const { diceParts, tags } = calculateDicePartsForItem(item, {
         isAction: true,
         ...toHitData,
-        ...{ haymakerManeuverActiveItem },
+        haymakerManeuverActiveItem,
     });
 
     const includeHitLocation =

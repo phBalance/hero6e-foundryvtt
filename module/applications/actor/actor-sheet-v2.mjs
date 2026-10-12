@@ -2016,13 +2016,13 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
                 return Object.keys(object).find((key) => object[key] === value);
             }
 
-            let itemsWithChildren = items;
+            const itemsWithChildren = [...items];
             for (const item of items) {
-                itemsWithChildren = [...itemsWithChildren, ...item.childItems];
+                itemsWithChildren.push(...item.childItems);
                 for (const item2 of item.childItems) {
-                    itemsWithChildren = [...itemsWithChildren, ...item2.childItems];
+                    itemsWithChildren.push(...item2.childItems);
                     for (const item3 of item2.childItems) {
-                        itemsWithChildren = [...itemsWithChildren, ...item3.childItems];
+                        itemsWithChildren.push(...item3.childItems);
                     }
                 }
             }

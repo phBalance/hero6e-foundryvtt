@@ -77,11 +77,9 @@ Hooks.once("diceSoNiceReady", (diceSoNice) => {
 
         diceSoNice.addColorset(
             {
-                ...{
-                    name: customSet.colorset,
-                    description: `${customSet.colorset} Dice`,
-                    category: game.system.title,
-                },
+                name: customSet.colorset,
+                description: `${customSet.colorset} Dice`,
+                category: game.system.title,
                 ...customSet,
             },
             "default",

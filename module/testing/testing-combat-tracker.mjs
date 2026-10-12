@@ -2971,7 +2971,7 @@ export function registerCombatTests(quench) {
                         if (combat.segment === 12) acted.push(combat.combatant.id);
                     }
                     expect(guard, "the segment ends without cycling").to.be.lessThan(6);
-                    expect([...new Set(acted)].length, "no combatant acted twice").to.equal(acted.length);
+                    expect(new Set(acted).size, "no combatant acted twice").to.equal(acted.length);
                     expect(acted.length, "all three combatants acted").to.equal(3);
                 });
 

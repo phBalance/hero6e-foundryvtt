@@ -1,9 +1,5 @@
 {
-  // oxlint configuration for the Hero System 6e Foundry VTT system.
-  //
-  // This replaced ESLint. The `eslint/*` rules below reproduce, rule for rule, what
-  // `js.configs.recommended` plus the project's two custom rules used to enforce.
-  // oxlint does not read `eslint.config.mjs`, so this file is the source of truth.
+  // oxlint configuration
   //
   // Categories are switched off individually rather than using oxlint's defaults:
   // oxlint's default `correctness` category is broader than ESLint's `recommended`

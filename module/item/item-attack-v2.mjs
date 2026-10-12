@@ -37,7 +37,7 @@ export class ItemAttackV2 {
 
     static async allInOneV2(attackAction) {
         if (!attackAction) {
-            new Error("attackAction not defined");
+            throw new Error("attackAction not defined");
         }
 
         const aoe = attackAction.effectiveItem.aoeAttackParameters;
