@@ -77,7 +77,7 @@ npm run build
 
 This will automatically leave `gulp` in watch mode which means that any of your changes will automatically rebuilt.
 
-The build compiles the CSS files, then stays in watch mode. The watch loop runs the SCSS lint, oxlint, and oxfmt checks at startup and after every change. It prints every finding and keeps running. A finding never stops the build.
+The build compiles the CSS files, then stays in watch mode. The watch loop checks only the files you changed. It prints every finding and keeps running. A finding never stops the build.
 
 CI still enforces the standards. Run `npm run validate` before you open a pull request, and fix every finding.
 
@@ -91,7 +91,7 @@ You should be able to find the appropriate labeled tests in the `module/testing`
 
 ### Code Formatting
 
-We have standardized the look of the code and making it harder to write incorrect code. We are doing this using [oxlint](https://oxc.rs/docs/guide/usage/linter) and [stylelint](https://stylelint.io/) for linting/static analysis and [oxfmt](https://oxc.rs/docs/guide/usage/formatter) for formatting. To validate the code, using `oxlint`, `stylelint`, and `oxfmt`, you can run the following command:
+We have standardized the look of the code and making it harder to write incorrect code. Each file type has one owner. oxlint and oxfmt handle JavaScript and Markdown. stylelint handles SCSS for both formatting and linting. oxfmt and oxlint skip `.scss` files. To validate the code, using `oxlint`, `stylelint`, and `oxfmt`, you can run the following command:
 
 ```bash
 npm run validate
@@ -99,7 +99,7 @@ npm run validate
 
 #### Lint
 
-Linting does a static analysis on the code to find code mistakes like using a variable name that is not defined. The rules live in [`.oxlintrc.json`](./.oxlintrc.json) at the root of the repository. To check the lint status you can run and check the number of errors provided at the very end.
+Linting does a static analysis on the code to find code mistakes like using a variable name that is not defined. The oxlint rules live in [`.oxlintrc.json`](./.oxlintrc.json) at the root of the repository. The stylelint rules live in [`stylelint.config.mjs`](./stylelint.config.mjs). To check the lint status you can run and check the number of errors provided at the very end.
 
 ```bash
 npm run lint
@@ -107,7 +107,7 @@ npm run lint
 
 #### Formatting
 
-oxfmt enforces the formatting standard. The rules live in [`.oxfmtrc.json`](./.oxfmtrc.json) at the root of the repository. To check the number of code formatting errors:
+oxfmt enforces the formatting standard for JavaScript and Markdown. The rules live in [`.oxfmtrc.json`](./.oxfmtrc.json) at the root of the repository. stylelint enforces SCSS formatting through [`@stylistic/stylelint-config`](https://github.com/stylelint-stylistic/stylelint-stylistic). To check the number of code formatting errors:
 
 ```bash
 npm run format
@@ -116,6 +116,8 @@ npm run format
 #### oxfmt in your code editor
 
 Most code editors support oxfmt through an extension, so the editor formats your code as you develop. With VS Code, install the [Oxc extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode). That extension runs `oxfmt --lsp` from this project and also reports oxlint findings. Set the extension as the default formatter and enable format on save so your code always matches the standard.
+
+Format SCSS with the [VS Code stylelint extension](https://marketplace.visualstudio.com/items?itemName=stylelint.vscode-stylelint) instead. oxfmt ignores `.scss` files, so the Oxc extension leaves them alone.
 
 #### Auto Fixing
 

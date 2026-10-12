@@ -9,6 +9,9 @@
   "endOfLine": "lf",
   "sortPackageJson": false,
   "ignorePatterns": [
+    // stylelint owns SCSS formatting and linting. oxfmt must not touch it.
+    "**/*.scss",
+    "**/*.sass",
     // Manifests and data files keep hand written layout.
     "**/*.json",
     "**/*.yml",

@@ -26,10 +26,11 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
+    "@stylistic/stylelint-config": "^5.0.0",
+    "@stylistic/stylelint-plugin": "^5.3.1",
     "gulp": "^5.0.0",
     "gulp-autoprefixer": "^10.0.0",
     "gulp-sass": "^6.0.1",
-    "gulp-stylelint-esm": "^4.0.0",
     "mkdirp": "^3.0.1",
     "npm-run-all": "^4.1.5",
     "oxfmt": "^0.72.0",
