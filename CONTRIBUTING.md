@@ -117,7 +117,52 @@ npm run format
 
 Most code editors support oxfmt through an extension, so the editor formats your code as you develop. With VS Code, install the [Oxc extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode). That extension runs `oxfmt --lsp` from this project and also reports oxlint findings. Set the extension as the default formatter and enable format on save so your code always matches the standard.
 
-Format SCSS with the [VS Code stylelint extension](https://marketplace.visualstudio.com/items?itemName=stylelint.vscode-stylelint) instead. oxfmt ignores `.scss` files, so the Oxc extension leaves them alone.
+This repository ships [`.vscode/settings.json`](./.vscode/settings.json) and [`.vscode/extensions.json`](./.vscode/extensions.json). VS Code reads them when you open the folder and prompts you to install both extensions. Install the recommendations, or the editor falls back to its built-in formatters and writes 2 space indents.
+
+SCSS needs the [VS Code stylelint extension](https://marketplace.visualstudio.com/items?itemName=stylelint.vscode-stylelint). That extension provides no formatter. It fixes SCSS through a code action, so the shipped settings disable `formatOnSave` for SCSS and run `source.fixAll.stylelint` on save instead. oxfmt ignores `.scss` files, so the Oxc extension leaves them alone.
+
+#### Working in WSL
+
+Run VS Code, the extensions, and the tools inside WSL. Do not open the repo from Windows through
+the `\\wsl$\` UNC path.
+
+Windows reaches WSL files over `\\wsl$\`. VS Code then reports URIs like `file://wsl%24/Ubuntu/home/...`.
+The Oxc extension runs on the Windows host and uses a Windows binary. That binary cannot read the
+Linux config, so oxfmt silently formats with its 2 space, 80 column defaults.
+
+Open the folder in the remote first. Run `Ctrl+Shift+P` then `Remote-WSL: Reopen Folder in WSL`.
+The status bar must read `WSL: Ubuntu`. Opening `\\wsl$\Ubuntu\...` as a Windows folder is not the
+same thing.
+
+Then install the extensions into the remote. In the Extensions view, use `Install in WSL: <name>`.
+Uninstall the local copies so they cannot shadow the remote ones. Or from a WSL terminal:
+
+```bash
+code --install-extension oxc.oxc-vscode
+code --install-extension stylelint.vscode-stylelint
+```
+
+Install the dependencies from inside WSL too. A `node_modules` tree installed from Windows holds only
+Windows native bindings, so `npm run format` cannot run in WSL.
+
+```bash
+cd ~/repos/hero6efoundryvttv2_slaughterhouse
+rm -rf node_modules
+npm ci
+ls node_modules/@oxfmt/ node_modules/@oxlint/
+```
+
+Each listing must include a `binding-linux-x64-gnu` entry.
+
+Verify the setup. Set `oxc.trace.server` to `verbose`, format a file, then read
+`Output > Oxc (Formatter)`. URIs must read `file:///home/...`, not `file://wsl%24/...`.
+Indentation must stay at 4 spaces.
+
+Do not set `oxc.fmt.configPath` to a relative path on any platform. VS Code records this file as a
+workspace folder setting, so the extension skips path resolution and sends the raw string. oxfmt then
+falls back to its defaults. The extension substitutes only `${userHome}` and `${env:NAME}`. It has no
+`${workspaceFolder}`. Leave the setting `null` and let oxfmt discover `.oxfmtrc.json` from the file it
+formats.
 
 #### Auto Fixing
 

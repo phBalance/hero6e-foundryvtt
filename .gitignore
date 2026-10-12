@@ -1,7 +1,11 @@
 # IDE
 .idea/
 .vs/
-.vscode/
+
+# Share the editor setup. Keep personal VS Code state out of git.
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 
 # Node Modules
 node_modules/
