@@ -89,6 +89,90 @@ This package can be tested using the [Quench](https://foundryvtt.com/packages/qu
 
 You should be able to find the appropriate labeled tests in the `module/testing` directory. As you add new functionality or make bug fixes, you should add corresponding tests.
 
+#### Running the Tests from the Console
+
+The Quench sidebar is not the only way to drive the suite. With a world loaded you can run it from the browser developer console:
+
+```js
+// Run every suite once.
+const reports = await window.herosystem6eRunTests();
+
+// Run two suites only.
+const reports = await window.herosystem6eRunTests({ suites: ["main", "utils.dice"] });
+
+// Run a glob of suites, five times, 60 second timeout per run, and also write the
+// report to Data/quench-report.json.
+const reports = await window.herosystem6eRunTests({
+  suites: ["utils.*"],
+  numLoops: 5,
+  timeoutInMs: 60 * 1000,
+  jsonReport: true,
+});
+
+// Run one test case in one suite.
+const reports = await window.herosystem6eRunTests({
+  tests: { main: ["HERO 5e powers should have no validation errors"] },
+});
+
+// Run test cases from two suites in one call, and one run.
+const reports = await window.herosystem6eRunTests({
+  tests: {
+    main: ["HERO 6e powers *"],
+    "hero.rounding": ["Hero Math Tests numberToOneDecimalPlace integer numbers should not change ?"],
+  },
+});
+
+// Run a whole suite plus one test case from another suite.
+const reports = await window.herosystem6eRunTests({
+  suites: ["main"],
+  tests: { "hero.rounding": ["Hero Math Tests numberToOneDecimalPlace integer numbers should not change 2"] },
+});
+```
+
+Options, all optional: `numLoops` (default `1`), `timeoutInMs` (default `300000`), `jsonReport`
+(default `false`), `suites` (default `"**"`), `tests` (default `null`). Firefox slows these runs
+down as it runs more of them, so leave headroom in `timeoutInMs`.
+
+Pass suite names in `suites`, not full Quench keys. This system prepends `game.system.id`, so
+`"utils.dice"` selects `hero6efoundryvttv2.utils.dice`. You cannot select another package's suites.
+Globs pass through: `*` and `?` stop at a `.` separator, `**` crosses it. The global setup and
+teardown suites always run, and never run twice. An unknown name returns an `Error` and starts nothing.
+
+`tests` maps a suite name to the test cases to run in that suite. Name a test case with its `it`
+title plus its `describe` titles in front, joined by single spaces. That is how the Quench UI shows
+it. Inside a test case, `*` matches any run of characters and `?` matches one character, so
+`"HERO 6e powers *"` selects every test under that `describe`. Combine `suites` and `tests` to run
+whole suites plus single test cases. A selection that matches no test returns an `Error` and names
+the selections that matched nothing.
+
+`window.herosystem6eTestSuites()` lists every suite name this system registered.
+
+`window.herosystem6eTestNames(suites)` lists the test-case titles in the given suites. Quench builds
+the test tree only when a run starts, so this call runs a Mocha dry run. It registers every test and
+skips every test body and hook. Keys and titles drop the system prefix, so they match what `suites`
+and `tests` take.
+
+Only one run can be in flight at a time. A second call while a run is active returns an `Error`.
+
+The return value is an array with one `{ loop, report }` entry per run. `report` holds the parsed
+Mocha JSON report: `report.stats` carries the counts, `report.failures` carries each failed test.
+Treat `report.stats.failures === 0` as the pass condition. A validation failure or a failed run
+returns an `Error` instead of the array.
+
+The tests exercise live Foundry documents, so they need a real client and a world in which the `quench` module is active. If the batches defined under `module/testing` do not show up in the Quench UI, nothing ran - check that the module is enabled before trusting a quiet console.
+
+#### Reading Test Results Without a Browser
+
+When `jsonReport` is `true`, Quench uploads the Mocha report to `<dataPath>/Data/quench-report.json`. That file can be summarized from an ordinary shell, which makes it possible to review results from a script, a CI job, or an automated tool:
+
+```bash
+npm run test:report
+npm run test:report -- --filter combat
+node scripts/quench-report.mjs --report /path/to/quench-report.json
+```
+
+The summary lists pass/fail/pending counts and, for each failure, the assertion message and stack frames. It exits `0` when everything passed, `1` when there are failures, and `2` when no usable report was found. Point it somewhere non-default with `--report <path>`, `$HERO_QUENCH_REPORT`, or `$FOUNDRY_DATA_PATH`. Run `node scripts/quench-report.mjs --help` for the full option list.
+
 ### Code Formatting
 
 We have standardized the look of the code and making it harder to write incorrect code. Each file type has one owner. oxlint and oxfmt handle JavaScript and Markdown. stylelint handles SCSS for both formatting and linting. oxfmt and oxlint skip `.scss` files. To validate the code, using `oxlint`, `stylelint`, and `oxfmt`, you can run the following command:
