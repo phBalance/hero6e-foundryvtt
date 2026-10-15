@@ -2,6 +2,12 @@ import { HeroSystem6eItem } from "../item/item.mjs";
 
 const { Actor } = foundry.documents;
 
+// Quench runs batches in key order, so the `a.` and `z.` prefixes keep global setup
+// first and global teardown last. These names exclude the `${game.system.id}.` prefix.
+// Callers that select these suites must import them here rather than repeat the strings.
+export const GLOBAL_SETUP_SUITE = "a.global-setup";
+export const GLOBAL_TEARDOWN_SUITE = "z.global-teardown";
+
 export async function createQuenchActor({ quench, contents, is5e, actorType: type = "pc", name, img }) {
     const CHARACTER_NAME = contents?.match(/CHARACTER_NAME=".*?"/)?.[0];
     name ??= CHARACTER_NAME?.match(/CHARACTER_NAME="(.*?)"/)?.[1] || "";
@@ -89,7 +95,7 @@ export async function deleteQuenchActor({ quench, actor }) {
 
 export function registerGlobalSetup(quench) {
     quench.registerBatch(
-        `${game.system.id}.a.global-setup`,
+        `${game.system.id}.${GLOBAL_SETUP_SUITE}`,
         (context) => {
             const { describe, it } = context;
 
@@ -128,7 +134,7 @@ export function registerGlobalSetup(quench) {
 
 export function registerGlobalTeardown(quench) {
     quench.registerBatch(
-        `${game.system.id}.z.global-teardown`, // Use a unique key for your module.
+        `${game.system.id}.${GLOBAL_TEARDOWN_SUITE}`,
         (context) => {
             const { describe, it } = context;
 
