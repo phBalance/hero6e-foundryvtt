@@ -32,3 +32,7 @@ packs/**/CURRENT
 packs/**/LOG
 packs/**/MANIFEST-*
 .qodo
+
+
+# Coding agents
+.pi/
