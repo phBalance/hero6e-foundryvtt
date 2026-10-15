@@ -22,7 +22,7 @@ export function registerDiceTests(quench) {
                 setQuenchTimeout(this);
 
                 describe("chaining", function () {
-                    it("should be conditional for make functions with negative and default", function () {
+                    it("should skip the roll type change when apply is falsy and use the default when omitted", function () {
                         const roller = new HeroRoller().makeSuccessRoll();
 
                         roller.makeNormalRoll(0);
@@ -100,7 +100,7 @@ export function registerDiceTests(quench) {
                         expect(roller._type).to.equal(HeroRoller.ROLL_TYPE.LUCK);
                     });
 
-                    it("should be conditional for make functions with negative and default", function () {
+                    it("should set the roll type when apply is truthy", function () {
                         const roller = new HeroRoller();
 
                         roller.makeNormalRoll(true);
