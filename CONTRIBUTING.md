@@ -108,18 +108,51 @@ const reports = await window.herosystem6eRunTests({
   timeoutInMs: 60 * 1000,
   jsonReport: true,
 });
+
+// Run one test case in one suite.
+const reports = await window.herosystem6eRunTests({
+  tests: { main: ["HERO 5e powers should have no validation errors"] },
+});
+
+// Run test cases from two suites in one call, and one run.
+const reports = await window.herosystem6eRunTests({
+  tests: {
+    main: ["HERO 6e powers *"],
+    "hero.rounding": ["Hero Math Tests numberToOneDecimalPlace integer numbers should not change ?"],
+  },
+});
+
+// Run a whole suite plus one test case from another suite.
+const reports = await window.herosystem6eRunTests({
+  suites: ["main"],
+  tests: { "hero.rounding": ["Hero Math Tests numberToOneDecimalPlace integer numbers should not change 2"] },
+});
 ```
 
 Options, all optional: `numLoops` (default `1`), `timeoutInMs` (default `300000`), `jsonReport`
-(default `false`), `suites` (default `"**"`). Firefox slows these runs down as it runs more of them,
-so leave headroom in `timeoutInMs`.
+(default `false`), `suites` (default `"**"`), `tests` (default `null`). Firefox slows these runs
+down as it runs more of them, so leave headroom in `timeoutInMs`.
 
 Pass suite names in `suites`, not full Quench keys. This system prepends `game.system.id`, so
 `"utils.dice"` selects `hero6efoundryvttv2.utils.dice`. You cannot select another package's suites.
 Globs pass through: `*` and `?` stop at a `.` separator, `**` crosses it. The global setup and
 teardown suites always run, and never run twice. An unknown name returns an `Error` and starts nothing.
 
+`tests` maps a suite name to the test cases to run in that suite. Name a test case with its `it`
+title plus its `describe` titles in front, joined by single spaces. That is how the Quench UI shows
+it. Inside a test case, `*` matches any run of characters and `?` matches one character, so
+`"HERO 6e powers *"` selects every test under that `describe`. Combine `suites` and `tests` to run
+whole suites plus single test cases. A selection that matches no test returns an `Error` and names
+the selections that matched nothing.
+
 `window.herosystem6eTestSuites()` lists every suite name this system registered.
+
+`window.herosystem6eTestNames(suites)` lists the test-case titles in the given suites. Quench builds
+the test tree only when a run starts, so this call runs a Mocha dry run. It registers every test and
+skips every test body and hook. Keys and titles drop the system prefix, so they match what `suites`
+and `tests` take.
+
+Only one run can be in flight at a time. A second call while a run is active returns an `Error`.
 
 The return value is an array with one `{ loop, report }` entry per run. `report` holds the parsed
 Mocha JSON report: `report.stats` carries the counts, `report.failures` carries each failed test.

@@ -9,10 +9,16 @@ Hooks.on("quenchReady", async (quench) => {
     // Seconds to wait for an aborted run to wind down before forcing its release.
     const ABORT_GRACE_MS = 15 * 1000;
 
-    const tests = await importTestSuites();
+    // True while this console API drives a run. Set before the first await, so two calls in the
+    // same tick cannot both start a run.
+    let runInProgress = false;
 
-    registerTestSuites(quench, tests);
-    exposeConsoleApi(tests);
+    const RUN_BUSY_MESSAGE = "A Quench test run is already in progress. Wait for it or abort it first.";
+
+    const testModules = await importTestSuites();
+
+    registerTestSuites(quench, testModules);
+    exposeConsoleApi(testModules);
 
     // Import the test modules only after quench is ready.
     async function importTestSuites() {
@@ -142,10 +148,26 @@ Hooks.on("quenchReady", async (quench) => {
         t.registerGlobalTeardown(quench);
     }
 
-    // Publish the console API. Both functions close over `quench` and the global suite names.
+    // Publish the console API. These functions close over `quench` and the global suite names.
+    // The public defaults live here, at the boundary. Every internal function requires its
+    // arguments, so a caller cannot rely on a default it cannot see.
     function exposeConsoleApi({ setupSuite, teardownSuite }) {
-        window.herosystem6eRunTests = (options) => runTests(options, { setupSuite, teardownSuite });
+        const hooks = { setupSuite, teardownSuite };
+
+        window.herosystem6eRunTests = (options = {}) =>
+            runTests(
+                {
+                    numLoops: options.numLoops ?? 1,
+                    timeoutInMs: options.timeoutInMs ?? 5 * 60 * 1000,
+                    jsonReport: options.jsonReport ?? false,
+                    suites: options.suites ?? null,
+                    tests: options.tests ?? null,
+                },
+                hooks,
+            );
+
         window.herosystem6eTestSuites = listSuiteNames;
+        window.herosystem6eTestNames = (suites = "**") => listTestNames(suites, hooks);
     }
 
     // Run test suites from the browser console and return the Mocha JSON report of every run.
@@ -161,9 +183,24 @@ Hooks.on("quenchReady", async (quench) => {
     //       jsonReport: true,
     //   });
     //
+    //   // Run two single test cases, from two different suites, in one call.
+    //   const reports = await window.herosystem6eRunTests({
+    //       tests: {
+    //           main: ["HERO 5e powers should have no validation errors"],
+    //           "utils.dice": ["*critical*"],
+    //       },
+    //   });
+    //
     // `suites` takes names, not keys. Glob patterns pass through to Quench: `*` and `?` stop at
     // a `.` separator, `**` crosses it. So `"utils.*"` selects `utils.dice` and `utils.defense`.
     // The global setup and teardown suites always run, and never run twice.
+    //
+    // `tests` maps a suite name to the test cases to run inside it. Each test case is the test
+    // title with its `describe` titles in front, joined by single spaces, as Quench shows them.
+    // In a test case, `*` matches any run of characters and `?` matches one character, so
+    // `"HERO 5e powers *"` selects every test under that `describe`. Pass `suites` and `tests`
+    // together to run whole suites plus single test cases. When a selection matches no test,
+    // `runTests` returns an Error and names the selections that matched nothing.
     //
     // The default `timeoutInMs` is 5 minutes. Firefox slows these runs down as it runs more of
     // them, so leave headroom in the timeout.
@@ -172,26 +209,50 @@ Hooks.on("quenchReady", async (quench) => {
     // `report.stats` carries the counts, `report.failures` carries each failed test. Returns an
     // Error instead of the array when validation fails or a run fails. Pass `jsonReport: true`
     // only when the report must also reach the server as `Data/quench-report.json`.
-    async function runTests(
-        { numLoops = 1, timeoutInMs = 5 * 60 * 1000, jsonReport = false, suites = "**" } = {},
-        hooks,
-    ) {
+    async function runTests(options, hooks) {
+        if (runInProgress || quench._currentRunner) {
+            return fail(RUN_BUSY_MESSAGE);
+        }
+
+        runInProgress = true;
+        try {
+            return await runSelectedTests(options, hooks);
+        } finally {
+            runInProgress = false;
+        }
+    }
+
+    async function runSelectedTests({ numLoops, timeoutInMs, jsonReport, suites, tests }, hooks) {
         if (!game.modules.get("quench")?.active) {
             ui.notifications.warn(game.i18n.localize("Warning.Quench.Active"));
             throw new Error("Quench not active. Cannot run tests.");
         }
 
-        const resolved = resolveSuiteKeys(suites, hooks);
+        const requested = suites === null && tests === null ? { suites: "**" } : { suites, tests };
+        const resolved = resolveRunTargets(requested, hooks);
         if (resolved.error) {
-            console.error(resolved.error.message);
-            return resolved.error;
+            return fail(resolved.error.message);
         }
 
         const reports = [];
         for (let i = 0; i < numLoops; ++i) {
             try {
                 console.log(`Start test run ${i + 1} of ${numLoops} (${resolved.keys.length} test suites)`);
-                const report = await runTestSuitesOnce({ keys: resolved.keys, timeoutInMs, jsonReport });
+                const report = await runTestSuitesOnce({
+                    keys: resolved.keys,
+                    grep: resolved.grep,
+                    timeoutInMs,
+                    jsonReport,
+                });
+
+                const unmatched = unmatchedSelections(resolved.matchers, report);
+                if (unmatched.length > 0) {
+                    return fail(
+                        `No test matched: ${unmatched.join(", ")}. ` +
+                            "Call window.herosystem6eTestNames() to list test case titles.",
+                    );
+                }
+
                 reports.push({ loop: i + 1, report });
             } catch (err) {
                 console.error(`Test run failed: ${err}`);
@@ -204,6 +265,11 @@ Hooks.on("quenchReady", async (quench) => {
         return reports;
     }
 
+    function fail(message) {
+        console.error(message);
+        return new Error(message);
+    }
+
     // List the test suites this system registered. Pass these names in the `suites` option.
     function listSuiteNames() {
         return registeredSuiteKeys()
@@ -214,6 +280,121 @@ Hooks.on("quenchReady", async (quench) => {
 
     function systemPrefix() {
         return `${game.system.id}.`;
+    }
+
+    // Turn the `suites` and `tests` options into the batch keys to run, plus the Mocha grep
+    // that narrows the run to the selected test cases. `grep` is null when whole suites run.
+    // A `null` `suites` means the caller left the option out, so those batch keys stay out.
+    function resolveRunTargets({ suites, tests }, hooks) {
+        const whole = suites === null ? { keys: [] } : resolveSuiteKeys(suites, hooks);
+        if (whole.error) return whole;
+        if (tests == null) return { keys: whole.keys, grep: null, matchers: [] };
+
+        const selection = normalizeTestSelection(tests);
+        if (selection.length === 0) {
+            return {
+                error: new Error(
+                    'The "tests" option needs at least one test case title. ' +
+                        "Call window.herosystem6eTestNames() to list them.",
+                ),
+            };
+        }
+
+        const keys = new Set(whole.keys);
+        const matchers = [];
+        const unknownSuites = [];
+        for (const { suite, title } of selection) {
+            const batchKeys = matchingSuiteKeys(`${systemPrefix()}${suite}`);
+            if (batchKeys.length === 0) {
+                unknownSuites.push(suite);
+                continue;
+            }
+            for (const key of batchKeys) {
+                keys.add(key);
+                matchers.push({ label: `${suite} :: ${title}`, re: testCaseRegExp(key, title) });
+            }
+        }
+
+        if (unknownSuites.length > 0) {
+            return {
+                error: new Error(
+                    `Unknown test suite(s): ${unknownSuites.join(", ")}. ` +
+                        "Names exclude the system prefix. Call window.herosystem6eTestSuites() to list them.",
+                ),
+            };
+        }
+
+        // Global setup and teardown must still wrap the run, so match every test in both.
+        const hookKeys = [];
+        for (const hook of [hooks.setupSuite, hooks.teardownSuite]) {
+            const key = `${systemPrefix()}${hook}`;
+            if (registeredSuiteKeys().includes(key)) {
+                keys.add(key);
+                hookKeys.push(key);
+            }
+        }
+
+        // Whole-suite selections and the global hooks match every test in their batch. The
+        // matchers add the single test cases on top.
+        const sources = [...new Set([...whole.keys, ...hookKeys])].map(
+            (key) => `^${escapeRegExp(batchRootTitle(key))}`,
+        );
+        sources.push(...matchers.map((matcher) => matcher.re.source));
+
+        return {
+            keys: registeredSuiteKeys().filter((key) => keys.has(key)),
+            grep: new RegExp(sources.join("|"), "i"),
+            matchers,
+        };
+    }
+
+    // Accept `{ "<suite name>": "<test case>" }` or `{ "<suite name>": ["<test case>", ...] }`.
+    function normalizeTestSelection(tests) {
+        if (!tests || typeof tests !== "object" || Array.isArray(tests)) return [];
+
+        const selection = [];
+        for (const [suite, value] of Object.entries(tests)) {
+            const titles = Array.isArray(value) ? value : [value];
+            for (const title of titles) {
+                const trimmed = String(title).trim();
+                if (trimmed.length > 0) selection.push({ suite: suite.trim(), title: trimmed });
+            }
+        }
+        return selection;
+    }
+
+    // Build the anchored full-title RegExp for one test case. Quench wraps each batch in a suite
+    // named `<batch key>_root`, and Mocha joins suite titles with a space, so the full title of
+    // a test reads `<batch key>_root <describe titles> <it title>`.
+    function testCaseRegExp(batchKey, title) {
+        let source = "";
+        for (const char of title) {
+            if (char === "*") source += ".*";
+            else if (char === "?") source += ".";
+            else source += escapeRegExp(char);
+        }
+        return new RegExp(`^${escapeRegExp(batchRootTitle(batchKey))} ${source}$`, "i");
+    }
+
+    function batchRootTitle(batchKey) {
+        return `${batchKey}_root`;
+    }
+
+    // Report the selections that no executed test matched, so a typo cannot pass silently.
+    function unmatchedSelections(matchers, report) {
+        if (matchers.length === 0) return [];
+
+        const executed = executedFullTitles(report);
+        return matchers.filter((matcher) => !executed.some((title) => matcher.re.test(title))).map((m) => m.label);
+    }
+
+    function executedFullTitles(report) {
+        if (!report) return [];
+        const lists = [report.passes ?? [], report.failures ?? [], report.pending ?? []];
+        return lists
+            .flat()
+            .map((test) => test?.fullTitle)
+            .filter(Boolean);
     }
 
     // Turn the `suites` option into the exact batch keys to run, in registration order.
@@ -293,18 +474,75 @@ Hooks.on("quenchReady", async (quench) => {
             } else if (char === "?") {
                 source += "[^.]";
             } else {
-                source += char.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+                source += escapeRegExp(char);
             }
         }
         return new RegExp(`^${source}$`, "i");
     }
 
-    async function runTestSuitesOnce({ keys, timeoutInMs, jsonReport }) {
-        const mochaRunner = await quench.runBatches(keys, {
-            updateSnapshots: false,
-            preSelectedOnly: false,
-            json: jsonReport,
-        });
+    function escapeRegExp(text) {
+        return String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    // List the test cases in the given suites. Quench builds the test tree only when a run
+    // starts, so this runs the suites in Mocha dry-run mode: it registers every test and skips
+    // every test body and hook. Keys and titles drop the system prefix, so they match what the
+    // `suites` and `tests` options take.
+    async function listTestNames(suites, { setupSuite, teardownSuite }) {
+        if (runInProgress || quench._currentRunner) {
+            throw new Error(RUN_BUSY_MESSAGE);
+        }
+
+        runInProgress = true;
+        try {
+            const resolved = resolveSuiteKeys(suites, { setupSuite, teardownSuite });
+            if (resolved.error) throw resolved.error;
+
+            quench.mocha.dryRun(true);
+            try {
+                const dryRunner = await quench.runBatches(resolved.keys, {
+                    updateSnapshots: false,
+                    preSelectedOnly: false,
+                });
+                const tree = dryRunner.suite;
+                await new Promise((resolve) => dryRunner.once("end", resolve));
+                return testCasesBySuite(tree);
+            } finally {
+                quench.mocha.dryRun(false);
+            }
+        } finally {
+            runInProgress = false;
+        }
+    }
+
+    function testCasesBySuite(rootSuite) {
+        const bySuite = {};
+        const prefix = systemPrefix();
+        for (const batchSuite of rootSuite?.suites ?? []) {
+            const key = batchSuite.title.replace(/_root$/, "");
+            if (!key.startsWith(prefix)) continue;
+            const titles = [];
+            batchSuite.eachTest((test) => titles.push(test.fullTitle().slice(batchSuite.title.length + 1)));
+            bySuite[key.slice(prefix.length)] = titles.sort();
+        }
+        return bySuite;
+    }
+
+    async function runTestSuitesOnce({ keys, grep, timeoutInMs, jsonReport }) {
+        // Mocha copies `options.grep` into its runner when the run starts inside `runBatches`.
+        // Set it just before, and clear it as soon as the runner holds its own copy, so a
+        // filtered run cannot leak into the next one.
+        quench.mocha.grep(grep ?? undefined);
+        let mochaRunner;
+        try {
+            mochaRunner = await quench.runBatches(keys, {
+                updateSnapshots: false,
+                preSelectedOnly: false,
+                json: jsonReport,
+            });
+        } finally {
+            quench.mocha.grep(undefined);
+        }
 
         let timedOut = false;
         return new Promise((resolve, reject) => {
