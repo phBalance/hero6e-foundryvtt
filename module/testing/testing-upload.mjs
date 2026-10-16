@@ -9526,20 +9526,44 @@ export function registerUploadTests(quench) {
                     const pdContents = `<PD XMLID="PD" ID="1787900000001" BASECOST="0.0" LEVELS="5" ALIAS="PD" POSITION="9" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes"><NOTES /></PD>`;
                     const forceFieldContents = `<POWER XMLID="FORCEFIELD" ID="1787900000002" BASECOST="0.0" LEVELS="10" ALIAS="Resistant Protection" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes" PDLEVELS="5" EDLEVELS="5" MDLEVELS="0" POWDLEVELS="0"><NOTES /></POWER>`;
 
+                    // An unowned item has no actor to carry its edition. Set system.is5e on the data
+                    // so the fixture never falls back to the world's DefaultEdition setting, which
+                    // differs between developer worlds.
+
                     it("PD costs 1 per level without an actor", function () {
-                        const item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(pdContents, null));
+                        const data = HeroSystem6eItem.itemDataFromXml(pdContents, null);
+                        data.system.is5e = false;
+                        const item = new HeroSystem6eItem(data);
                         assert.isNull(item.actor);
+                        assert.isFalse(item.is5e);
                         assert.equal(item.realCost, 5);
                         assert.equal(item.end, 0);
                         assert.deepEqual(HeroSystem6eItem._prepareOriginalResetData(item), {});
                     });
 
-                    it("Resistant Protection costs without an actor", function () {
-                        const item = new HeroSystem6eItem(HeroSystem6eItem.itemDataFromXml(forceFieldContents, null));
-                        assert.isNull(item.actor);
-                        // Edition follows the DefaultEdition setting when there is no actor
-                        assert.equal(item.realCost, item.is5e ? 10 : 15);
-                        assert.equal(HeroSystem6eItem._prepareOriginalResetData(item)["system.active"], false);
+                    it("Resistant Protection 6e costs without an actor", function () {
+                        const data = HeroSystem6eItem.itemDataFromXml(forceFieldContents, null);
+                        data.system.is5e = false;
+                        const sixthEdition = new HeroSystem6eItem(data);
+                        assert.isNull(sixthEdition.actor);
+                        assert.isFalse(sixthEdition.is5e);
+                        // 6e: Persistent, costs no END, 3/2 CP per level
+                        assert.equal(sixthEdition.realCost, 15);
+                        assert.equal(sixthEdition.end, 0);
+                        // Reset only deactivates items that drain a resource. A 0 END power stays alone.
+                        assert.notProperty(HeroSystem6eItem._prepareOriginalResetData(sixthEdition), "system.active");
+                    });
+
+                    it("Resistant Protection 5e costs without an actor", function () {
+                        const data = HeroSystem6eItem.itemDataFromXml(forceFieldContents, null);
+                        data.system.is5e = true;
+                        const fifthEdition = new HeroSystem6eItem(data);
+                        assert.isNull(fifthEdition.actor);
+                        assert.isTrue(fifthEdition.is5e);
+                        // 5e: Constant, costs END, 1 CP per level
+                        assert.equal(fifthEdition.realCost, 10);
+                        assert.equal(fifthEdition.end, 1);
+                        assert.equal(HeroSystem6eItem._prepareOriginalResetData(fifthEdition)["system.active"], false);
                     });
                 });
 
