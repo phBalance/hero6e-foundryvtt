@@ -101,12 +101,8 @@ class BaseHeroDetectionModeV14 extends foundry.canvas.perception.DetectionMode {
 
         // Resolve Base PER Score via Intelligence characteristic
         let basePerRoll = 9;
-        if (
-            sourceActor &&
-            typeof sourceActor.hasCharacteristic === "function" &&
-            sourceActor.hasCharacteristic("INT")
-        ) {
-            const intValue = sourceActor.system.characteristics?.INT?.value || 0;
+        if (sourceActor?.hasCharacteristic("int")) {
+            const intValue = sourceActor.getCharacteristic("int").value;
             basePerRoll = 9 + Math.round(intValue / 5);
         }
 

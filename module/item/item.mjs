@@ -97,13 +97,16 @@ function itemHeroValidationForModifier(item, modifierID) {
 function itemHasDefenseActiveEffect(item) {
     if (!item) return false;
     const defenseChange = item.effects.find((ae) =>
-        ae.changes.find((ch) =>
-            getPowerInfo({
-                xmlid: ch.key.match(/system\.characteristics\.([a-z]+)\.(max||value)/)?.[1].toUpperCase(),
+        ae.changes.find((ch) => {
+            // Only match a characteristic (e.g. PD), never an adder or other key.
+            const characteristicKey = ch.key.match(/system\.characteristics\.([a-z]+)\.(max|value)/)?.[1];
+            if (!characteristicKey) return false;
+            return getPowerInfo({
+                xmlid: characteristicKey.toUpperCase(),
                 actor: item.actor,
-                xmlTag: ch.key.match(/system\.characteristics\.([a-z]+)\.(max||value)/)?.[1].toUpperCase(), // only search for characteristic not adders and such
-            })?.behaviors.includes("defense"),
-        ),
+                xmlTag: characteristicKey.toUpperCase(),
+            })?.behaviors?.includes("defense");
+        }),
     );
     if (defenseChange) {
         return true;

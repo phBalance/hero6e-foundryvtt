@@ -58,7 +58,7 @@ export function registerActorCharacteristicTests(quench) {
 
                                 for (const c of [...primaries, ...cvs]) {
                                     assert.ok(
-                                        actor.hasCharacteristic(c.toUpperCase()),
+                                        actor.hasCharacteristic(c),
                                         `Type [${type}] expects [${c.toUpperCase()}] node`,
                                     );
                                 }

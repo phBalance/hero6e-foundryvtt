@@ -656,12 +656,16 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      *
      * Get the characteristic structure.
      *
-     * @param {string} characteristicName - Target property layout key
-     * @returns {object|null} The underlying characteristic node structure
+     * This method normalizes the name case. Callers pass the name as-is and add no
+     * toUpperCase/toLowerCase call of their own.
+     * Callers must handle a null result. This method guards nothing.
+     *
+     * @param {string} characteristicName - Target property layout key. Doesn't matter what case it is as it's always converted to lower case.
+     *
+     * @returns {object|undefined} The underlying characteristic node structure
      */
     getCharacteristic(characteristicName) {
-        if (!characteristicName) return null;
-        return this.system?.characteristics?.[characteristicName.toLowerCase()] ?? null;
+        return this.system?.characteristics?.[characteristicName.toLowerCase()];
     }
 
     /**
@@ -1338,7 +1342,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             .filter(
                 (k) =>
                     systemChanged[k]?.LEVELS != null &&
-                    this.hasCharacteristic(k.toUpperCase()) &&
+                    this.hasCharacteristic(k) &&
                     Number(systemChanged[k].LEVELS) !==
                         Number(foundry.utils.getProperty(this.system, `${k}.LEVELS`) ?? 0),
             )
@@ -2728,6 +2732,16 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return base;
     }
 
+    /**
+     * Does this actor have this characteristic.
+     *
+     * NOTE: Because all actors have all characteristic fields, even if they don't use it, we can't just check the existance of the field to understand if that actor type
+     * should have that characteristic (or use that characteristic). We must consider the actor type.
+     *
+     * @param {String} characteristic - doesn't matter what case it is as it's always converted to upper case.
+     *
+     * @returns {Boolean}
+     */
     hasCharacteristic(characteristic) {
         // If the actor has the baseInfo and it shouldn't be ignored for this actor type, we have the characteristic
         // otherwise we don't
