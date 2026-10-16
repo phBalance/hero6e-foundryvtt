@@ -6910,9 +6910,7 @@ function addPower(powerDescription6e, powerOverrideFor5e) {
                 switch (options.attackDefenseVs) {
                     case "PD":
                     case "ED": {
-                        const characteristic = actorItemDefense.actor?.getCharacteristic(
-                            options.attackDefenseVs.toLowerCase(),
-                        );
+                        const characteristic = actorItemDefense.actor?.getCharacteristic(options.attackDefenseVs);
                         purchasedLevels = parseInt(actorItemDefense.system[`${options.attackDefenseVs}LEVELS`]) || 0;
                         maxValue = parseInt(characteristic?.basePlusLevels) || 0;
                         // Damage Resistance converts existing normal defense (5ER p. 146); it can

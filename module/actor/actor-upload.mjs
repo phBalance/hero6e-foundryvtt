@@ -868,7 +868,7 @@ async function restoreRetainedDamage(ctx) {
     if (actor.id && !options.rebuild) {
         const retainedDamageChanges = {};
         for (const key of ["body", "stun", "end"]) {
-            if (!actor.hasCharacteristic(key.toUpperCase())) continue;
+            if (!actor.hasCharacteristic(key)) continue;
             if (retainValuesOnUpload[key] == undefined) continue;
             if (actor.system.characteristics[key] == undefined) continue;
 
