@@ -2728,6 +2728,16 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return base;
     }
 
+    /**
+     * Does this actor have this characteristic.
+     *
+     * NOTE: Because all actors have all characteristic fields, even if they don't use it, we can't just check the existance of the field to understand if that actor type
+     * should have that characteristic (or use that characteristic). We must consider the actor type.
+     *
+     * @param {String} characteristic - doesn't matter what case it is
+     *
+     * @returns {Boolean}
+     */
     hasCharacteristic(characteristic) {
         // If the actor has the baseInfo and it shouldn't be ignored for this actor type, we have the characteristic
         // otherwise we don't
