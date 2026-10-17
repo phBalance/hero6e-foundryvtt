@@ -34,7 +34,7 @@ export class Attack {
 
         // Estimate of how many seconds the DCV penalty lasts (until next phase).
         // combat-single.mjs removes this AE at Phase start for exact timing.
-        const seconds = Math.ceil(12 / parseInt(actor.system.characteristics.spd.value));
+        const seconds = Math.ceil(12 / parseInt(actor.getCharacteristic("spd").value));
 
         const item = action.system.item[cvModifier.id];
 

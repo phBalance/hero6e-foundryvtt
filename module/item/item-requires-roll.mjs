@@ -842,7 +842,7 @@ async function isActivatedForThisUseInternal(item, rollClass, options) {
             flavor = `${item.name} activation <span class="${succeeded ? "announce-success" : "announce-failure"}">${succeeded ? "succeeded" : "failed"} by ${Math.abs(luckTotal - requiredLuck)} levels of luck.</span>`;
         } else if (activationRoll.type === RSR_ROLL_TYPE.CHARACTERISTIC_ROLL) {
             const charKey = activationRoll.characteristicKey.toLowerCase();
-            const characteristic = actor.system.characteristics[charKey];
+            const characteristic = actor.getCharacteristic(charKey);
             const baseRequiredRoll = characteristic.roll;
             const apPenalty = calculateRollApPenalty(item, rar);
             const divisor = findRollDivisor(rar);

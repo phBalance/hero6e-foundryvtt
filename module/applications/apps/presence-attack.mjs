@@ -103,7 +103,7 @@ export class PresenceAttackApplication extends HeroApplication {
 
         const tags = [];
 
-        const presence = parseInt(this.actor.system.characteristics.pre.value);
+        const presence = parseInt(this.actor.getCharacteristic("pre").value);
         const presenceAttackBasicDice = clampFractionalPortionToZeroOrHalf(presence / 5);
         if (presenceAttackBasicDice !== 0) {
             tags.push({

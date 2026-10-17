@@ -655,7 +655,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
                                 baseInfo?.key,
                             ),
                     )
-                    .map((o) => this.actor.system.characteristics[o.key.toLowerCase()]),
+                    .map((o) => this.actor.getCharacteristic(o.key)),
                 perks: this.actor.items.filter((item) => item.type === "perk" && !item.parentItem),
                 talents: this.actor.items.filter((item) => item.type === "talent" && !item.parentItem),
                 disadvantages: this.actor.items.filter((item) => item.type === "disadvantage" && !item.parentItem),
@@ -2090,7 +2090,7 @@ export class HeroSystemActorSheetV2 extends HeroAppMixin(HandlebarsApplicationMi
         // Active Point Summary
         analysis.activePointSummary = [];
         for (const powerInfo of getCharacteristicInfoArrayForActor(this.actor)) {
-            const char = this.actor.system.characteristics[powerInfo.key.toLowerCase()];
+            const char = this.actor.getCharacteristic(powerInfo.key);
             if (!char) {
                 console.error(`${powerInfo.key} not found in actor.system.characteristics`);
                 continue;

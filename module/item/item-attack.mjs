@@ -311,7 +311,7 @@ export async function collectActionDataBeforeToHitOptions(item, options = {}) {
         actor: actor,
         token: token,
         state: null,
-        str: item.actor.system.characteristics.str?.value,
+        str: item.actor.getCharacteristic("str")?.value,
     };
 
     // Uses Tk
@@ -837,7 +837,7 @@ export async function doAoeActionToHit(action, options) {
         );
     }
 
-    const hitCharacteristic = actor.system.characteristics.ocv.value;
+    const hitCharacteristic = actor.getCharacteristic("ocv").value;
     const setManeuver = item.actor.items.find(
         (item) => item.type == "maneuver" && item.name === "Set" && item.isActive,
     );
@@ -957,7 +957,7 @@ function determineDefensiveCombatValueAgainstAttack(defendingTarget, attackingAc
     const defensiveCharacteristic = attackItem.system.defendsWith;
     const defendingActor = defendingTarget.actor;
     let targetDefenseValue = roundFavorPlayerAwayFromZero(
-        defendingActor?.system.characteristics[defensiveCharacteristic]?.value,
+        defendingActor?.getCharacteristic(defensiveCharacteristic)?.value,
     );
 
     // PH: FIXME: Defensive tags are probably now needed for CSLs and DCV 0 vs 3
@@ -1058,7 +1058,7 @@ async function doSingleTargetActionToHit(action, options) {
     // Gestures Limitation.
     // Not all token types (base) will have STR
     if (actor && actor.hasCharacteristic("STR") && (item.system.usesStrength || item.findModsByXmlid("GESTURES"))) {
-        if (parseInt(actor.system.characteristics.str.value) <= 0) {
+        if (parseInt(actor.getCharacteristic("str").value) <= 0) {
             if (
                 !(await doCharacteristicRollCheck(
                     actor,
@@ -1079,7 +1079,7 @@ async function doSingleTargetActionToHit(action, options) {
     // offensive action, or to remain in the face of anything even
     // remotely threatening.
     // Not all token types (base) will have PRE
-    if (actor && actor.hasCharacteristic("PRE") && parseInt(actor.system.characteristics.pre.value) <= 0) {
+    if (actor && actor.hasCharacteristic("PRE") && parseInt(actor.getCharacteristic("pre").value) <= 0) {
         if (
             !(await doCharacteristicRollCheck(
                 actor,
@@ -1137,12 +1137,13 @@ async function doSingleTargetActionToHit(action, options) {
 
     const itemData = item.effectiveAttackItem.system;
 
-    const hitCharacteristic = Math.max(0, actor.system.characteristics[itemData.attacksWith]?.value);
     if (!actor.hasCharacteristic(itemData.attacksWith)) {
         ui.notifications.warn(
             `<b>${item.actor.name}</b> does not have <b>${itemData.attacksWith.toUpperCase()}</b>. ${item.actor.type === "base2" ? `Consider creating a COMPUTER` : ``}`,
         );
     }
+
+    const hitCharacteristic = Math.max(0, actor.getCharacteristic(itemData.attacksWith)?.value);
 
     const toHitChar = CONFIG.HERO.defendsWith[itemData.defendsWith];
 
@@ -1193,7 +1194,7 @@ async function doSingleTargetActionToHit(action, options) {
     const strMinimumModifier = item.effectiveAttackItem.findModsByXmlid("STRMINIMUM");
     if (strMinimumModifier) {
         const strMinimumValue = calculateStrengthMinimumForItem(item.effectiveAttackItem, strMinimumModifier);
-        const extraStr = Math.max(0, parseInt(actor.system.characteristics.str.value)) - strMinimumValue;
+        const extraStr = Math.max(0, parseInt(actor.getCharacteristic("str").value)) - strMinimumValue;
         if (extraStr < 0) {
             attackHeroRoller.addNumber(Math.floor(extraStr / 5), strMinimumModifier.ALIAS);
         }
@@ -1365,9 +1366,7 @@ async function doSingleTargetActionToHit(action, options) {
                     shot + 1
                 }/${autoFireShots}<br>${firstShotResult} a ${toHitChar} of ${autofireShotRollTotal}`;
 
-                const value = singleTarget.id
-                    ? singleTarget.actor.system.characteristics[toHitChar.toLowerCase()].value
-                    : 3;
+                const value = singleTarget.id ? singleTarget.actor.getCharacteristic(toHitChar).value : 3;
                 let hit = "Miss";
                 let by = Math.abs(autofireShotRollTotal - value);
 
@@ -2133,10 +2132,10 @@ export async function _onRollPowerToRemove(event) {
 
     // NOTE: For STR and SPD dropping to 0, it isn't excluded by the RAW, but is probably not what they want since it can effectively
     //       cripple the automaton.
-    if (actor.system.characteristics.str.value > 10) {
+    if (actor.getCharacteristic("str").value > 10) {
         choices.push({ key: "STR", label: "10 STR" });
     }
-    if (actor.system.characteristics.spd.value > 1) {
+    if (actor.getCharacteristic("spd").value > 1) {
         choices.push({ key: "SPD", label: "1 SPD" });
     }
 
@@ -2512,11 +2511,11 @@ async function _rollApplyKnockback(token, knockbackDice) {
 
         if (damageDetail.stun !== 0) {
             changes["system.characteristics.stun.value"] =
-                token.actor.system.characteristics.stun.value - damageDetail.stun;
+                token.actor.getCharacteristic("stun").value - damageDetail.stun;
         }
         if (damageDetail.body !== 0) {
             changes["system.characteristics.body.value"] =
-                token.actor.system.characteristics.body.value - damageDetail.body;
+                token.actor.getCharacteristic("body").value - damageDetail.body;
         }
 
         await token.actor.update(changes);
@@ -3039,7 +3038,7 @@ export async function _onRollMindScanEffectRoll(event) {
         return ui.notifications.error(`Token details are no longer available.`);
     }
 
-    const targetsEgo = parseInt(token.actor.system.characteristics.ego?.value);
+    const targetsEgo = parseInt(token.actor.getCharacteristic("ego")?.value);
     const egoAdder = parseInt(button.innerHTML.match(/\d+/)) || 0;
     const targetEgo = targetsEgo + egoAdder;
 
@@ -3654,7 +3653,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     if (damageDetail.stun > 0 && game.settings.get(HEROSYS.module, "stunned") && hasCon) {
         // determine if target was Stunned
         if (
-            damageDetail.stun > targetToken.actor.system.characteristics.con.value &&
+            damageDetail.stun > targetToken.actor.getCharacteristic("con").value &&
             !specialAutomatonPowers.cannotBeStunned
         ) {
             damageDetail.effects = damageDetail.effects + "inflicts Stunned; ";
@@ -3691,7 +3690,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
 
     // Mind Control
     if (item.effectiveAttackItem.system.XMLID === "MINDCONTROL") {
-        const targetActorEgo = targetToken.actor?.system.characteristics?.ego?.value;
+        const targetActorEgo = targetToken.actor?.getCharacteristic("ego")?.value;
         if (targetActorEgo !== undefined) {
             if (damageDetail.stunDamage >= targetActorEgo + 30) {
                 effectsFinal += `EGO+30: Target will perform actions they are violently opposed to doing. Target will believe statements that contradict strongly held personal beliefs or principles (such as Psychological Complications) or that contradict reality under direct observation.`;
@@ -3788,8 +3787,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
     // all: "PCs and NPCs (end, stun, body)"
     if (automation === "all" || (automation === "npcOnly" && targetToken.actor.type === "npc")) {
         const changes = {
-            "system.characteristics.body.value":
-                targetToken.actor.system.characteristics.body.value - damageDetail.body,
+            "system.characteristics.body.value": targetToken.actor.getCharacteristic("body").value - damageDetail.body,
         };
 
         // See if token has STUN.  Notice we check raw actor type from config, not current actor props as
@@ -3797,7 +3795,7 @@ export async function _onApplyDamageToSpecificToken(item, _damageData, action, t
         const hasSTUN = targetToken.actor.hasCharacteristic("STUN");
         if (hasSTUN) {
             changes["system.characteristics.stun.value"] =
-                targetToken.actor.system.characteristics.stun?.value - damageDetail.stun;
+                targetToken.actor.getCharacteristic("stun")?.value - damageDetail.stun;
         }
 
         await targetToken.actor.update(changes);

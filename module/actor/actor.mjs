@@ -373,7 +373,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
                             calculatedMax = roundFavorPlayerAwayFromZero(calculatedValue);
                         }
 
-                        const node = this.system.characteristics[keyLower];
+                        const node = this.getCharacteristic(keyLower);
                         node.max = this._applyDirectActiveEffectChangesToDerivedMax(keyLower, calculatedMax, {
                             maxChangesByKey,
                         });
@@ -405,7 +405,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
      *   value-targeting effect (e.g. the Brace maneuver's x1/2 DCV) that must not be erased.
      */
     _syncCharacteristicValueWithMax(keyLower) {
-        const node = this.system.characteristics?.[keyLower];
+        const node = this.getCharacteristic(keyLower);
         if (!node) return;
 
         const currentValue = Number(node.value);
@@ -471,8 +471,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             if (nonItemEntries.length === 0) continue;
 
             const characteristic = this.getCharacteristic(key);
-            const characteristicData = this.system.characteristics?.[key];
-            if (!characteristic || !characteristicData) continue;
+            if (!characteristic) continue;
 
             const basePlusLevels = Number(characteristic.basePlusLevels ?? 0);
             if (!Number.isFinite(basePlusLevels)) {
@@ -649,23 +648,58 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     /**
+     * Does this actor have this characteristic?
+     *
+     * NOTE: Because all actors have all characteristic fields, even if they don't use it, we can't just check the existance of the field to understand if that actor type
+     * should have that characteristic (or use that characteristic). We must consider the actor type.
+     *
+     * NOTE: We should remove movement types from characteristics in the future as, while they're on the character sheet, they're not characteristics and they're not in the schema as such either..
+     *
+     * NOTE: A missing uppercase node, a missing baseInfo, or a missing ignoreForActor all mean "does not have".
+     * FLIGHT, FTL, GLIDING, SWINGING, TELEPORTATION, TUNNELING, and CUSTOM1-CUSTOM10 have no uppercase node.
+     * COM and DEF have no 6e config entry. Callers must not use this method for those labels; use getCharacteristic.
+     *
+     * @param {String} characteristic - doesn't matter what case it is as it's always converted to upper case.
+     *
+     * @returns {Boolean}
+     */
+    hasCharacteristic(characteristic) {
+        // A missing uppercase node, a missing baseInfo, or a missing ignoreForActor all mean "does not have".
+        const doesNotHaveCharacteristic =
+            this.system[characteristic.toUpperCase()]?.baseInfo?.ignoreForActor?.(this) ?? true;
+        return !doesNotHaveCharacteristic;
+    }
+
+    /**
      * Retrieves a characteristic node by name from the system characteristics storage layer.
+     *
      * WARNING: This is a method reflecting the old way of doing things. It is being created to funnel all characteristics access away from
      * direct property access. This will be turned into a more expensive function. As well, the concepts of value, max, etc may well go away
      * when characteristics are items.
-     *
-     * Get the characteristic structure.
-     *
-     * This method normalizes the name case. Callers pass the name as-is and add no
-     * toUpperCase/toLowerCase call of their own.
-     * Callers must handle a null result. This method guards nothing.
      *
      * @param {string} characteristicName - Target property layout key. Doesn't matter what case it is as it's always converted to lower case.
      *
      * @returns {object|undefined} The underlying characteristic node structure
      */
     getCharacteristic(characteristicName) {
-        return this.system?.characteristics?.[characteristicName.toLowerCase()];
+        return this.system.characteristics[characteristicName.toLowerCase()];
+    }
+
+    /**
+     * NOTE: running etc are not characteristics and this will be migrated away from over time. Use this method to help identify places where movement is being accessed.
+     *
+     * Retrieves a movement characteristic node by name from the system characteristics storage layer.
+     *
+     * WARNING: This is a method reflecting the old way of doing things. It is being created to funnel all characteristics access away from
+     * direct property access. This will be turned into a more expensive function. As well, the concepts of value, max, etc may well go away
+     * when characteristics are items.
+     *
+     * @param {string} characteristicName - Target property layout key. Doesn't matter what case it is as it's always converted to lower case.
+     *
+     * @returns {object|undefined} The underlying characteristic node structure
+     */
+    getMovementCharacteristic(characteristicName) {
+        return this.getCharacteristic(characteristicName);
     }
 
     /**
@@ -1509,31 +1543,34 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         }
 
         // FIXME: CHARACTERISTICS TO ITEMS: Rework from here.
-        const chars = this.system.characteristics;
+        // Snapshot the nodes before the update below. Later chat text reads this pre-update snapshot.
+        const recNode = this.getCharacteristic("rec");
+        const stunNode = this.getCharacteristic("stun");
+        const endNode = this.getCharacteristic("end");
 
         // Need to account for negative RECovery
-        const rec = Math.max(0, chars.rec.value);
+        const rec = Math.max(0, recNode.value);
 
-        let newStun = chars.stun.value + rec;
-        let newEnd = Math.max(0, chars.end.value) + rec;
+        let newStun = stunNode.value + rec;
+        let newEnd = Math.max(0, endNode.value) + rec;
 
         // newEnd should not exceed newStun if current stun <=0
-        if (chars.stun.value <= 0) {
+        if (stunNode.value <= 0) {
             newEnd = Math.max(0, Math.min(newStun, newEnd));
         }
 
-        if (newStun > chars.stun.max) {
-            newStun = Math.max(chars.stun.max, chars.stun.value); // possible > MAX (which is OKish)
+        if (newStun > stunNode.max) {
+            newStun = Math.max(stunNode.max, stunNode.value); // possible > MAX (which is OKish)
         }
-        const deltaStun = newStun - chars.stun.value;
+        const deltaStun = newStun - stunNode.value;
 
-        if (newEnd > chars.end.max) {
-            newEnd = Math.max(chars.end.max, chars.end.value); // possible > MAX (which is OKish)
+        if (newEnd > endNode.max) {
+            newEnd = Math.max(endNode.max, endNode.value); // possible > MAX (which is OKish)
         }
 
         // Ignore negative deltaEnd values.
         // It seems like END should be set to 0 when you are KO'd, but haven't found such a rule.
-        const deltaEnd = Math.max(0, newEnd - chars.end.value);
+        const deltaEnd = Math.max(0, newEnd - endNode.value);
 
         await this.updateCharacteristics(
             [
@@ -1543,12 +1580,12 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
             { hideChatMessage: true, preventRecoverFromStun },
         );
 
-        let content = `${tokenName} ${this.system.characteristics.stun?.value <= 0 ? "is knockedOut, " : ""}${asAction ? `<i>Takes a Recovery</i>` : "gets a recovery"}`;
+        let content = `${tokenName} ${this.hasCharacteristic("STUN") && this.getCharacteristic("stun")?.value <= 0 ? "is knockedOut, " : ""}${asAction ? `<i>Takes a Recovery</i>` : "gets a recovery"}`;
         if (rec <= 0) {
-            content += ` [REC=${chars.rec.value}]`;
+            content += ` [REC=${recNode.value}]`;
         }
         if (deltaEnd || deltaStun) {
-            if (chars.stun.value <= 0 && newStun > 0) {
+            if (stunNode.value <= 0 && newStun > 0) {
                 content += `, recovers from knockedOut, gaining ${deltaStun} stun and endurance set to ${newStun}.`;
             } else {
                 content += `, gaining ${deltaEnd} endurance and ${deltaStun} stun.`;
@@ -1760,7 +1797,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // }
 
         // No speed?
-        if (parseInt(this.system.characteristics.spd?.value || 0) < 1) {
+        if (parseInt(this.getCharacteristic("spd")?.value || 0) < 1) {
             if (uiNotice) badStatus.push("SPD1");
             result = false;
         }
@@ -1830,7 +1867,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     strDetails(str) {
         let strLiftText = "0kg";
         let strRunningThrow = 0;
-        const value = Number.isFinite(Number(str)) ? Number(str) : this.system.characteristics.str?.value;
+        const value = Number.isFinite(Number(str)) ? Number(str) : this.getCharacteristic("str")?.value;
 
         if (value >= 105) {
             strLiftText = `${50 + Math.floor((value - 105) / 5) * 25} ktons`;
@@ -1986,7 +2023,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // During _preUpdate this.system still holds the pre-update value; prefer the pending one.
         const sizeKey = this.type === "base2" ? "basesize" : "size";
         const pendingSize = changed?.system?.characteristics?.[sizeKey]?.value;
-        const size = parseInt(pendingSize ?? this.system.characteristics[sizeKey]?.value ?? 0);
+        const size = parseInt(pendingSize ?? this.getCharacteristic(sizeKey)?.value ?? 0);
         const _sizeDetails = this.sizeDetails(size);
 
         let activeEffect =
@@ -2055,7 +2092,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         // During _preUpdate this.system still holds the pre-update value; prefer the pending one.
         const strValue = Number(
-            changed?.system?.characteristics?.str?.value ?? this.system.characteristics.str?.value ?? 0,
+            changed?.system?.characteristics?.str?.value ?? this.getCharacteristic("str")?.value ?? 0,
         );
         const { strLiftKg } = this.strDetails(strValue);
         const encumbrance = this.encumbrance;
@@ -2404,7 +2441,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const fullHealthMaxByCharacteristic = this._getFullHealthCharacteristicMaxes();
         const characteristicChangesMax = {};
         for (const [charKey, fullHealthMax] of Object.entries(fullHealthMaxByCharacteristic)) {
-            if (this.system.characteristics[charKey].max !== fullHealthMax) {
+            if (this.getCharacteristic(charKey).max !== fullHealthMax) {
                 characteristicChangesMax[`system.characteristics.${charKey}.max`] = fullHealthMax;
             }
         }
@@ -2426,7 +2463,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const fullHealthValues = this._getFullHealthCharacteristicValues(fullHealthMaxByCharacteristic);
         const characteristicChangesValue = {};
         for (const [charKey, value] of Object.entries(fullHealthValues)) {
-            const characteristic = this.system.characteristics[charKey];
+            const characteristic = this.getCharacteristic(charKey);
             if (characteristic.value !== value) {
                 characteristic.value = value;
                 characteristicChangesValue[`system.characteristics.${charKey}.value`] = value;
@@ -2484,7 +2521,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const maxChangesByKey = this._collectActiveEffectMaxChanges();
         const values = {};
         for (const charKey of Object.keys(this.system.characteristics)) {
-            const baseMax = fullHealthMaxByCharacteristic[charKey] ?? this.system.characteristics[charKey].max;
+            const baseMax = fullHealthMaxByCharacteristic[charKey] ?? this.getCharacteristic(charKey).max;
             values[charKey] = parseInt(
                 this._applyDirectActiveEffectChangesToDerivedMax(charKey, baseMax, {
                     includeStatusEffects: false,
@@ -2497,7 +2534,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
     _getFullHealthCharacteristicMax(info) {
         const charKey = info.key.toLowerCase();
-        const characteristic = this.system.characteristics?.[charKey];
+        const characteristic = this.getCharacteristic(charKey);
         if (!characteristic) return null;
 
         const nativeKey = info.key.toUpperCase();
@@ -2732,24 +2769,6 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         return base;
     }
 
-    /**
-     * Does this actor have this characteristic.
-     *
-     * NOTE: Because all actors have all characteristic fields, even if they don't use it, we can't just check the existance of the field to understand if that actor type
-     * should have that characteristic (or use that characteristic). We must consider the actor type.
-     *
-     * @param {String} characteristic - doesn't matter what case it is as it's always converted to upper case.
-     *
-     * @returns {Boolean}
-     */
-    hasCharacteristic(characteristic) {
-        // If the actor has the baseInfo and it shouldn't be ignored for this actor type, we have the characteristic
-        // otherwise we don't
-        const doesNotHaveCharacteristic =
-            this.system[characteristic.toUpperCase()]?.baseInfo?.ignoreForActor(this) ?? true;
-        return !doesNotHaveCharacteristic;
-    }
-
     getActiveConstantItems() {
         const results = [];
         for (const item of this.items.filter((item) => item.isActive)) {
@@ -2847,7 +2866,14 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     async onCharacteristicSuccessRoll({ label, token }) {
-        const charRoll = this.system.characteristics[label.toLowerCase()].roll;
+        const characteristic = this.getCharacteristic(label);
+        if (!characteristic) {
+            console.error(
+                `${this.detailedName()}: cannot roll ${label.toUpperCase()}, this actor has no such characteristic`,
+            );
+            return;
+        }
+        const charRoll = characteristic.roll;
 
         const heroRoller = new HeroRoller().makeSuccessRoll(true, charRoll, `Base ${label} roll`).addDice(3);
 
@@ -2863,13 +2889,13 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
     }
 
     async onCharacteristicFullRoll({ label, token }) {
-        const characteristicValue = this.system.characteristics[label.toLocaleLowerCase()].value;
+        const characteristicValue = this.getCharacteristic(label)?.value;
         const flavor = `Full ${label.toUpperCase()} Roll (${characteristicValue} ${label.toUpperCase()})`;
         await this.onCharacteristicRoll({ label, token, targetValue: characteristicValue, flavor });
     }
 
     async onCharacteristicCasualRoll({ label, token }) {
-        const characteristicValue = this.system.characteristics[label.toLocaleLowerCase()].value;
+        const characteristicValue = this.getCharacteristic(label)?.value;
         const halfCharacteristicValue = roundFavorPlayerAwayFromZero(
             +(Math.round(characteristicValue / 2 + "e+2") + "e-2"),
         ); //REF: https://stackoverflow.com/questions/11832914/how-to-round-to-at-most-2-decimal-places-if-necessary
@@ -3361,9 +3387,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         // TODO: Fix PERCEPTION.system.roll so we don't have to poke into INT
         //const PERCEPTION = this.actor?.items.find((i) => i.system.XMLID === "PERCEPTION");
         // TODO: This only handles the generic rules, should include telescopic vision, etc.
-        if (this && this.system.characteristics.int) {
+        if (this.hasCharacteristic("INT")) {
             //9 + (INT/5)
-            const perRoll = 9 + roundFavorPlayerAwayFromZero(parseInt(this.system.characteristics.int.value) / 5);
+            const perRoll = 9 + roundFavorPlayerAwayFromZero(parseInt(this.getCharacteristic("int").value) / 5);
             const pwr = perRoll / 2 + 2;
             visionMaximumDistanceInMeters = Math.floor(Math.max(visionMaximumDistanceInMeters, Math.pow(2, pwr)));
         }
@@ -3395,8 +3421,8 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         const powers = getCharacteristicInfoArrayForActor(this);
         for (const powerInfo of powers) {
-            characterPointCost += parseFloat(this.system.characteristics[powerInfo.key.toLowerCase()]?.realCost || 0);
-            activePoints += parseFloat(this.system.characteristics[powerInfo.key.toLowerCase()]?.activePoints || 0);
+            characterPointCost += parseFloat(this.getCharacteristic(powerInfo.key)?.realCost || 0);
+            activePoints += parseFloat(this.getCharacteristic(powerInfo.key)?.activePoints || 0);
         }
         pointsDetail.characteristics = characterPointCost;
         activePointsDetail.characteristics = characterPointCost;
@@ -3762,7 +3788,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         let movementItems = [];
         for (const key of Object.keys(this.system.characteristics).filter((o) => movementPowers[o])) {
-            const char = this.system.characteristics[key];
+            const char = this.getCharacteristic(key);
             if ((parseInt(char.value) || 0) > 0) {
                 char._id = key;
                 char.name = movementPowers[key];
@@ -3799,7 +3825,7 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         if (!isKO) return false;
 
         // 2. Fetch the incoming structural target value vs the database state value
-        const stunVal = changed.system?.characteristics?.stun?.value ?? this.system.characteristics.stun?.value ?? 0;
+        const stunVal = changed.system?.characteristics?.stun?.value ?? this.getCharacteristic("stun")?.value ?? 0;
 
         // 3. Return true if STUN falls below your system threshold
         return stunVal < this.stunThreshold;
@@ -3953,17 +3979,16 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
         const endForAttack = Math.max(
             1,
             Math.ceil(
-                this.system.characteristics.str.value /
-                    (game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10),
+                this.getCharacteristic("str").value / (game.settings.get(HEROSYS.module, "StrEnd") === "five" ? 5 : 10),
             ),
         );
 
         const perPhase = 1 + activatablePowerEndSum + endForAttack;
-        const perTurn = perPhase * this.system.characteristics.spd.value || 1;
-        const perTurnWithRecovery = Math.max(0, perTurn - this.system.characteristics.rec.value) || 0;
+        const perTurn = perPhase * this.getCharacteristic("spd").value || 1;
+        const perTurnWithRecovery = Math.max(0, perTurn - this.getCharacteristic("rec").value) || 0;
         const phasesUntil0End =
             perTurnWithRecovery > 0
-                ? Math.trunc(this.system.characteristics.end.value / perTurnWithRecovery, 1)
+                ? Math.trunc(this.getCharacteristic("end").value / perTurnWithRecovery, 1)
                 : "infinity";
         return { perPhase, perTurn, phasesUntil0End };
     }
@@ -3981,9 +4006,9 @@ export class HeroSystem6eActor extends HeroObjectCacheMixin(Actor) {
 
         // During _preUpdate this.system still holds the pre-update values; prefer the pending ones.
         const pendingCharacteristics = changed?.system?.characteristics ?? {};
-        const bodyValue = parseInt(pendingCharacteristics.body?.value ?? this.system.characteristics.body?.value);
-        const bodyMax = parseInt(pendingCharacteristics.body?.max ?? this.system.characteristics.body?.max);
-        const recValue = parseInt(pendingCharacteristics.rec?.value ?? this.system.characteristics.rec?.value);
+        const bodyValue = parseInt(pendingCharacteristics.body?.value ?? this.getCharacteristic("body")?.value);
+        const bodyMax = parseInt(pendingCharacteristics.body?.max ?? this.getCharacteristic("body")?.max);
+        const recValue = parseInt(pendingCharacteristics.rec?.value ?? this.getCharacteristic("rec")?.value);
 
         if (this.type === "pc" && bodyValue < bodyMax) {
             const bodyPerMonth = Math.max(1, recValue);

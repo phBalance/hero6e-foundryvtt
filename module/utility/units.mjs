@@ -262,12 +262,12 @@ export function calculateVelocityInSystemUnits(actor) {
 
     // Simplistic velocity calc using current movement
     // TODO: This is likely wrong for Teleport and other movements with quirky velocity rules.
-    velocity = parseInt(actor.system.characteristics[actor.activeMovement]?.value || 0);
+    velocity = parseInt(actor.getMovementCharacteristic(actor.activeMovement)?.value || 0);
 
     // Sanity check
     if (velocity <= 0) {
         console.warn(`Calculated velocity of ${velocity} is invalid, using simplistic calculation`);
-        velocity = Math.max(0, parseInt(actor.system.characteristics[actor.activeMovement]?.value || 0));
+        velocity = Math.max(0, parseInt(actor.getMovementCharacteristic(actor.activeMovement)?.value || 0));
     }
 
     return velocity;

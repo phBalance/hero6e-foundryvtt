@@ -13,13 +13,13 @@ const { TokenHUD } = foundry.applications.hud;
  * @param {String} characteristic
  */
 function combatMovementValueInSystemUnits(token, characteristic) {
-    return Math.max(0, token.actor?.system.characteristics[characteristic]?.value || 0);
+    return Math.max(0, token.actor?.getMovementCharacteristic(characteristic)?.value || 0);
 }
 
 function generateMovementCanSelectFunction(characteristic) {
     return (token) => {
         const actor = token.actor;
-        if ((actor?.system.characteristics[characteristic]?.value || 0) > 0) {
+        if ((actor?.getMovementCharacteristic(characteristic)?.value || 0) > 0) {
             return true;
         }
 
@@ -29,7 +29,7 @@ function generateMovementCanSelectFunction(characteristic) {
             (sum, entry) => sum + entry.value,
             0,
         );
-        const unadjustedMax = (actor?.system.characteristics[characteristic]?.max || 0) - actorLevelChange;
+        const unadjustedMax = (actor?.getMovementCharacteristic(characteristic)?.max || 0) - actorLevelChange;
         return unadjustedMax > 0;
     };
 }
@@ -88,12 +88,12 @@ function generateMovementMaxNonCombatDistanceMeters(characteristic) {
 
 // PH: FIXME: Base FTL is 0 LEVELS. Probably this is not expected elsewhere
 function ftlCanSelect(token) {
-    const ftlLevels = token.actor?.system.characteristics.ftl?.value || -1;
+    const ftlLevels = token.actor?.getMovementCharacteristic("ftl")?.value || -1;
     return ftlLevels > -1;
 }
 
 function ftlMaxNonCombatDistanceMeters(token) {
-    const ftlLevels = token.actor?.system.characteristics.ftl?.value || -1;
+    const ftlLevels = token.actor?.getMovementCharacteristic("ftl")?.value || -1;
     if (ftlLevels <= -1) {
         return 0;
     }
@@ -101,7 +101,7 @@ function ftlMaxNonCombatDistanceMeters(token) {
     // FTL is given movement per year - not per phase. Convert to per phase based on speed.
     const lightYearsPerYear = ftlLevelsToLightYearsPerYear(ftlLevels);
     const metresPerTurnPerLightYearPerYear = (lightYearInMetres * lightYearsPerYear) / turnsPerGregorianYear;
-    const speed = parseInt(token.actor?.system.characteristics.spd?.value || 0);
+    const speed = parseInt(token.actor?.getCharacteristic("spd")?.value || 0);
 
     return metresPerTurnPerLightYearPerYear / speed;
 }

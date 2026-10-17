@@ -369,7 +369,7 @@ export class HeroSystem6eCombatantSingle extends foundry.documents.Combatant {
         // Prepared system data carries active-effect adjustments (Aid/Drain);
         // the raw _source only covers documents read before preparation
         const rawSource = this.actor._source?.system || this.actor.system?._source || {};
-        const spdObj = this.actor.system?.characteristics?.spd || rawSource.characteristics?.spd;
+        const spdObj = this.actor.getCharacteristic("spd") || rawSource.characteristics?.spd;
 
         const rawSpd = spdObj?.value ?? 2;
 

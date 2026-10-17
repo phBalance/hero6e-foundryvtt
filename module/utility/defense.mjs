@@ -133,10 +133,10 @@ export function getActorDefensesVsAttack(targetActor, attackItem, options = {}) 
 
     // Basic characteristics (PD & ED)
     if (
-        (targetActor.system.characteristics[attackDefenseVs.toLowerCase()]?.value || 0) > 0 &&
+        (targetActor.getCharacteristic(attackDefenseVs)?.value || 0) > 0 &&
         !(options?.ignoreDefenseIds || []).includes(attackDefenseVs.toUpperCase())
     ) {
-        let value = targetActor.system.characteristics[attackDefenseVs.toLowerCase()].value;
+        let value = targetActor.getCharacteristic(attackDefenseVs).value;
         const characteristicCurrentValue = value;
         const newOptions = foundry.utils.deepClone(options);
         let temporaryChangesSum = 0;

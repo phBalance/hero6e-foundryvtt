@@ -813,7 +813,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         const actorDoc = combatant.actor;
         const characteristicKey = actorDoc.system?.initiativeCharacteristic ?? "dex";
-        const characteristicObj = actorDoc.system?.characteristics?.[characteristicKey];
+        const characteristicObj = actorDoc.getCharacteristic(characteristicKey);
 
         const baseScore = characteristicObj?.value ?? 10;
 
@@ -827,7 +827,7 @@ export class HeroSystem6eCombatSingle extends Combat {
             lightningReflexesLevels += lr.scoped.levels;
         }
 
-        const spdObj = actorDoc.system?.characteristics?.spd;
+        const spdObj = actorDoc.getCharacteristic("spd");
         const resolvedSpd = spdObj?.value ?? 2;
 
         const hasPhase = combatant.hasPhaseInSegment ? combatant.hasPhaseInSegment(activeSegment, scoredAbs) : false;
@@ -2855,7 +2855,7 @@ export class HeroSystem6eCombatSingle extends Combat {
                 spentResources.totalEnd += endCostPerTurn;
                 content += `<li>${encumbered.name} (${endCostPerTurn})</li>`;
 
-                const value = parseInt(actor.getCharacteristic("end").value);
+                const value = parseInt(actor.getCharacteristic("end")?.value);
                 await actor.updateCharacteristics([["end", { value: value - endCostPerTurn }]], {});
             }
         }
@@ -2975,7 +2975,7 @@ export class HeroSystem6eCombatSingle extends Combat {
 
         const currentAbs = this.currentAbs;
         const characteristicKey = actor.system?.initiativeCharacteristic ?? "dex";
-        const dex = actor.system?.characteristics?.[characteristicKey]?.value ?? 10;
+        const dex = actor.getCharacteristic(characteristicKey)?.value ?? 10;
         const optionId = extraTime.OPTIONID ?? "";
         const alias = extraTime.OPTION_ALIAS ?? extraTime.ALIAS ?? "";
         const matches = (needle) => optionId === needle.id || alias.toLowerCase().includes(needle.text);
