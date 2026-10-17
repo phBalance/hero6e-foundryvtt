@@ -20,6 +20,7 @@ export function initializeHandlebarsHelpers() {
     Handlebars.registerHelper("getMonetaryUnits", getMonetaryUnits);
     Handlebars.registerHelper("getModulePath", getModulePath);
     Handlebars.registerHelper("getScopedFlagValue", getScopedFlagValue);
+    Handlebars.registerHelper("getCharacteristic", getCharacteristic);
     Handlebars.registerHelper("getUploadLastModifiedDate", getUploadLastModifiedDate);
     Handlebars.registerHelper("hasCharacteristic", hasCharacteristic);
     Handlebars.registerHelper("includes", includes);
@@ -221,11 +222,21 @@ function actorHeroValidationCssByItemType(actor, itemType) {
 }
 
 function hasCharacteristic(actor, characteristic) {
-    if (actor) {
-        return actor.hasCharacteristic(characteristic);
+    if (!actor) {
+        console.error("No actor provided");
+        return false;
     }
-    console.error("No actor provided");
-    return false;
+
+    return actor.hasCharacteristic(characteristic);
+}
+
+function getCharacteristic(actor, characteristic) {
+    if (!actor) {
+        console.error("No actor provided");
+        return null;
+    }
+
+    return actor.getCharacteristic(characteristic) ?? null;
 }
 
 function notEqual(value1, value2) {
