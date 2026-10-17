@@ -359,7 +359,7 @@ export class HeroSystem6eCombatTrackerSingle extends HeroAppMixin(CombatTracker)
                 continue;
             }
             const characteristicKey = actor.system?.initiativeCharacteristic ?? "dex";
-            const dex = actor.system?.characteristics?.[characteristicKey]?.value ?? 10;
+            const dex = actor.getCharacteristic(characteristicKey)?.value ?? 10;
             const preview = dex + (combatant.lightningReflexes?.always ?? 0);
             turn.initiative = String(preview);
             turn.hasRolled = true;
@@ -558,8 +558,7 @@ export class HeroSystem6eCombatTrackerSingle extends HeroAppMixin(CombatTracker)
             })
             .sort(
                 (a, b) =>
-                    (b.actor.system?.characteristics?.dex?.value ?? 0) -
-                        (a.actor.system?.characteristics?.dex?.value ?? 0) ||
+                    (b.actor.getCharacteristic("dex")?.value ?? 0) - (a.actor.getCharacteristic("dex")?.value ?? 0) ||
                     HeroSystem6eCombatSingle.stableTiebreak(a, b),
             );
 
@@ -1495,7 +1494,7 @@ export class HeroSystem6eCombatTrackerSingle extends HeroAppMixin(CombatTracker)
         const actor = combatant.actor;
         const currentAbs = absoluteSegment(combat.round, combat.segment);
         const characteristicKey = actor.system?.initiativeCharacteristic ?? "dex";
-        const ownDex = actor.system?.characteristics?.[characteristicKey]?.value ?? 10;
+        const ownDex = actor.getCharacteristic(characteristicKey)?.value ?? 10;
         // Only unrestricted All Actions LR raises the holding position — holding is
         // not the scoped action a restricted purchase was bought for
         const actingDex = ownDex + (combatant.lightningReflexes?.always ?? 0);
@@ -2147,7 +2146,7 @@ function injectInitiativeTooltips(app, element) {
         const initiativeEl = li.querySelector(".token-initiative");
         if (!initiativeEl) continue;
         const charKey = actor.system?.initiativeCharacteristic || "dex";
-        const charValue = actor.system?.characteristics?.[charKey]?.value ?? 0;
+        const charValue = actor.getCharacteristic(charKey)?.value ?? 0;
         const lr = combatant.lightningReflexes;
         let lrLevels = lr?.always ?? 0;
         if (li.classList.contains("hero-lr-row")) lrLevels += lr?.scoped?.levels ?? 0;
@@ -2440,7 +2439,7 @@ async function onTimingContest(button) {
     if (!choice || choice === "cancel") return;
 
     const rollSide = async (combatant, key) => {
-        const characteristic = combatant.actor.system?.characteristics?.[key];
+        const characteristic = combatant.actor.getCharacteristic(key);
         const target = characteristic?.roll ?? Math.round(9 + (characteristic?.value ?? 10) / 5);
         const roll = await new foundry.dice.Roll("3d6").evaluate();
         return { combatant, key, target, roll, margin: target - roll.total };

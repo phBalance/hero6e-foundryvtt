@@ -51,7 +51,7 @@ export class GenericRoller {
     }
 
     static async toHit() {
-        const options = { ocv: canvas.tokens.controlled.at(0)?.actor?.system.characteristics.ocv?.value || 0 };
+        const options = { ocv: canvas.tokens.controlled.at(0)?.actor?.getCharacteristic("ocv")?.value || 0 };
         const template = await renderTemplate(`systems/${HEROSYS.module}/templates/system/heroRoll-toHit.hbs`, options);
 
         const userSelection = await HeroDialogV2.prompt({

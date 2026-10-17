@@ -222,10 +222,8 @@ export async function performAdjustment(
     // Find a matching characteristic. Because movement powers are unfortunately setup as
     // characteristics and always exist as properties, we need to check that they actually
     // have been bought or naturally exist (core > 0).
-    const targetCharacteristic =
-        targetActor.system.characteristics?.[potentialCharacteristic]?.base > 0
-            ? targetActor.system.characteristics?.[potentialCharacteristic]
-            : undefined;
+    const characteristicNode = targetActor.getCharacteristic(potentialCharacteristic);
+    const targetCharacteristic = characteristicNode?.base > 0 ? characteristicNode : undefined;
 
     // Search the target for this power.
     // TODO: will return first matching power. How can we distinguish without making users
@@ -377,8 +375,8 @@ export async function performAdjustment(
         const prevValue = parseInt(prevChange?.value) || 0;
         const targetHealValue = Math.floor(thisAttackActivePointsEffect / costPerActivePoint);
 
-        const actorValue = targetActor.system.characteristics[char].value;
-        const actorMax = targetActor.system.characteristics[char].max;
+        const actorValue = targetActor.getCharacteristic(char).value;
+        const actorMax = targetActor.getCharacteristic(char).max;
         //const value = Math.max(1, Math.floor(_adjustmentActivePoints / costPerActivePoint));
         const value = Math.max(targetHealValue - prevValue);
         const newActorValue = Math.min(actorMax, actorValue + value);

@@ -145,10 +145,15 @@ function parseHdcXml(ctx) {
 function captureRetainedValues(ctx) {
     const { actor } = ctx;
 
+    const numOffFromMax = (characteristicName) => {
+        const node = actor.getCharacteristic(characteristicName);
+        return parseInt(node?.max) - parseInt(node?.value);
+    };
+
     ctx.retainValuesOnUpload = {
-        body: parseInt(actor.system.characteristics?.body?.max) - parseInt(actor.system.characteristics?.body?.value),
-        stun: parseInt(actor.system.characteristics?.stun?.max) - parseInt(actor.system.characteristics?.stun?.value),
-        end: parseInt(actor.system.characteristics?.end?.max) - parseInt(actor.system.characteristics?.end?.value),
+        body: numOffFromMax("body"),
+        stun: numOffFromMax("stun"),
+        end: numOffFromMax("end"),
         hap: actor.system.hap?.value,
         heroicIdentity: actor.system.heroicIdentity ?? true,
         resources: actor.items
@@ -658,7 +663,7 @@ async function restoreFullHealth(ctx) {
         if (actor.id) {
             const changes = {};
             for (const [key, value] of Object.entries(actor._getFullHealthCharacteristicValues())) {
-                if (actor.system.characteristics[key].value !== value) {
+                if (actor.getCharacteristic(key).value !== value) {
                     changes[`system.characteristics.${key}.value`] = value;
                 }
             }
@@ -845,7 +850,8 @@ async function saveCoreChanges(ctx) {
     }
 
     // Ghosts fly (or anything with RUNNING=0 and FLIGHT)
-    if (actor.system.characteristics?.running?.value === 0 && actor.system.characteristics?.running?.base === 0) {
+    const runningNode = actor.getMovementCharacteristic("running");
+    if (runningNode?.value === 0 && runningNode?.base === 0) {
         for (const flight of actor.items.filter((i) => i.system.XMLID === "FLIGHT")) {
             await flight.toggle();
         }
@@ -870,10 +876,11 @@ async function restoreRetainedDamage(ctx) {
         for (const key of ["body", "stun", "end"]) {
             if (!actor.hasCharacteristic(key)) continue;
             if (retainValuesOnUpload[key] == undefined) continue;
-            if (actor.system.characteristics[key] == undefined) continue;
+            const characteristicNode = actor.getCharacteristic(key);
+            if (characteristicNode == undefined) continue;
 
-            actor.system.characteristics[key].value -= retainValuesOnUpload[key];
-            retainedDamageChanges[`system.characteristics.${key}.value`] = actor.system.characteristics[key].value;
+            characteristicNode.value -= retainValuesOnUpload[key];
+            retainedDamageChanges[`system.characteristics.${key}.value`] = characteristicNode.value;
         }
         if (Object.keys(retainedDamageChanges).length > 0) {
             await actor.update(retainedDamageChanges, { render: false });

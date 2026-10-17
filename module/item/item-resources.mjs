@@ -41,7 +41,7 @@ export async function userInteractiveVerifyOptionallyPromptThenSpendResources(it
     const resourcesRequired = calculateRequiredResourcesToUse(resourceUsingItems, options);
 
     const actor = item.actor;
-    const actorEndurance = actor.system.characteristics.end?.value || 0;
+    const actorEndurance = actor.getCharacteristic("end")?.value || 0;
 
     // PH: FIXME: This needs to be reworked. Have kludged it with totalEnd.
     // PH: FIXME: Need to check if we're supposed to apply STUN for each individual power
@@ -337,7 +337,7 @@ function calculateRequiredReserveEndurance(item) {
  * @returns
  */
 function calculateRequiredStunDiceForLackOfEnd(actor, enduranceToUse) {
-    const actorEnd = actor.system.characteristics.end.value;
+    const actorEnd = actor.getCharacteristic("end").value;
     let endSpentAboveZero = 0;
     let stunDice = 0;
 
@@ -465,8 +465,8 @@ async function spendResourcesToUse(
 
     // Deduct actor END
     if (endToSpend || stunToSpend) {
-        const actorStun = actor.system.characteristics.stun.value;
-        const actorEndurance = actor.system.characteristics.end.value;
+        const actorStun = actor.getCharacteristic("stun").value;
+        const actorEndurance = actor.getCharacteristic("end").value;
         const actorNewEndurance = actorEndurance - endToSpend;
         const actorChanges = {};
 

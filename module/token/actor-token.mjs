@@ -57,7 +57,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             const masterCombatant = this.combatant;
             const endStart = masterCombatant.getFlag(game.system.id, "endUsedForMovement") || 0;
             const endCost = this._movementHistoryEndCost;
-            const endValue = this.actor.system.characteristics.end?.value;
+            const endValue = this.actor.getCharacteristic("end")?.value;
             if (!Number.isFinite(endCost) || !Number.isFinite(endValue)) {
                 return;
             }
@@ -87,7 +87,7 @@ export class HeroSystem6eTokenDocument extends TokenDocument {
             });
         }
         // characteristicMax already includes the AE ADD contributions counted above
-        const characteristicMax = parseInt(this.actor.system.characteristics[action.toLowerCase()]?.max) || 0;
+        const characteristicMax = parseInt(this.actor.getCharacteristic(action)?.max) || 0;
         const inherentDistance = Math.max(0, characteristicMax - aeGrantedDistance);
         if (inherentDistance > 0) {
             possibleMovements.push({

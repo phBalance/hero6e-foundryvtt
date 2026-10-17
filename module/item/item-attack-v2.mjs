@@ -120,11 +120,8 @@ export class ItemAttackV2 {
 
         // Get attackAction
         const attackAction = this.getAttackActionFromDomObject(event.target);
-
         const distance = calculateDistanceBetween(attackAction.placedAoeTemplate, attackAction.attackerToken).distance;
-        //const dcvTargetNumber = distance > (attackAction.actor.is5e ? 1 : 2) ? 3 : 0;
-
-        const hitCharacteristic = attackAction.actor.system.characteristics.ocv.value;
+        const hitCharacteristic = attackAction.actor.getCharacteristic("ocv").value;
 
         const attackHeroRoller = new HeroRoller()
             .makeSuccessRoll()
@@ -147,7 +144,7 @@ export class ItemAttackV2 {
     }
 
     static newHeroRollerForAttackAction(attackAction) {
-        const hitCharacteristic = attackAction.actor.system.characteristics.ocv.value;
+        const hitCharacteristic = attackAction.actor.getCharacteristic("ocv").value;
 
         return new HeroRoller()
             .makeSuccessRoll()

@@ -20,9 +20,9 @@ export class HeroEncounter {
     static difficulty(friendlyActor, hostileActor) {
         return {
             chanceForHostileToMiss:
-                friendlyActor.system.characteristics.dcv.value / hostileActor.system.characteristics.ocv.value,
+                friendlyActor.getCharacteristic("dcv").value / hostileActor.getCharacteristic("ocv").value,
             chanceToHitHostile:
-                friendlyActor.system.characteristics.ocv.value / hostileActor.system.characteristics.dcv.value,
+                friendlyActor.getCharacteristic("ocv").value / hostileActor.getCharacteristic("dcv").value,
         };
     }
 

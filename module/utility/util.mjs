@@ -374,11 +374,13 @@ export async function expireEffects(actor, expiresOn) {
                 );
                 pendingFadeFlags = { [`flags.${game.system.id}.bodyDamage`]: remainingSegments };
             } else if (ae.flags[game.system.id]?.XMLID === "naturalBodyHealing") {
-                let bodyValue = parseInt((ae.target || actor).system.characteristics.body.value);
-                let bodyMax = parseInt((ae.target || actor).system.characteristics.body.max);
+                const healingActor = ae.target || actor;
+                const bodyNode = healingActor.getCharacteristic("body");
+                let bodyValue = parseInt(bodyNode.value);
+                let bodyMax = parseInt(bodyNode.max);
                 bodyValue = Math.min(bodyValue + 1, bodyMax);
 
-                await (ae.target || actor).update({
+                await healingActor.update({
                     "system.characteristics.body.value": bodyValue,
                 });
 

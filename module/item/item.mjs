@@ -717,15 +717,15 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                 });
 
                 if (activeEffect.update) {
-                    const oldMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max;
+                    const oldMax = this.actor.getCharacteristic(this.system.XMLID).max;
                     await activeEffect.update({
                         name: activeEffect.name,
                         "system.changes": activeEffect.system.changes,
                     });
-                    const deltaMax = this.actor.system.characteristics[this.system.XMLID.toLowerCase()].max - oldMax;
-                    const newValue =
-                        this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value + deltaMax;
-                    if (this.actor.system.characteristics[this.system.XMLID.toLowerCase()].value !== newValue) {
+                    const updatedCharacteristic = this.actor.getCharacteristic(this.system.XMLID);
+                    const deltaMax = updatedCharacteristic.max - oldMax;
+                    const newValue = updatedCharacteristic.value + deltaMax;
+                    if (updatedCharacteristic.value !== newValue) {
                         await this.actor.update({
                             [`system.characteristics.${this.system.XMLID.toLowerCase()}.value`]: newValue,
                         });
@@ -3160,7 +3160,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     let mdBonusFor5e = 0;
                     if (this.actor.is5e) {
                         mdBonusFor5e = roundFavorPlayerAwayFromZero(
-                            parseInt(this.actor.system.characteristics.ego?.value) / 5 || 0,
+                            parseInt(this.actor.getCharacteristic("ego")?.value) / 5 || 0,
                         );
                     }
                     description = `${system.ALIAS} ${system.LEVELS + mdBonusFor5e} points`;
@@ -3681,7 +3681,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
                     if (!this.actor) {
                         description = `${system.ALIAS}`;
                     } else {
-                        const baseStr = this.actor.system.characteristics.str.value;
+                        const baseStr = this.actor.getCharacteristic("str").value;
                         const additionalClingingStr = system.LEVELS;
                         const totalStr = baseStr + additionalClingingStr;
                         description = `${system.ALIAS} (${baseStr} + ${additionalClingingStr} = ${totalStr} STR)`;
@@ -4861,7 +4861,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             roll = `${rollValue}-`;
         } else if (skillData.XMLID === "PSYCHOLOGICALLIMITATION") {
             // Intensity is based on an EGO roll
-            const egoRoll = this.actor.system.characteristics.ego?.roll || 0;
+            const egoRoll = this.actor.getCharacteristic("ego")?.roll || 0;
             const intensity = skillData.ADDER.find((adder) => adder.XMLID === "INTENSITY")?.OPTIONID;
             let intensityValue;
 
@@ -5016,7 +5016,7 @@ export class HeroSystem6eItem extends HeroObjectCacheMixin(Item) {
             const baseRollValue = skillData.XMLID === "UNTRAINED" ? 6 : skillData.CHARACTERISTIC === "GENERAL" ? 11 : 9;
             const characteristicValue =
                 characteristic !== "general" && characteristic != ""
-                    ? this.actor?.system.characteristics?.[characteristic]?.value || 0
+                    ? this.actor?.getCharacteristic(characteristic)?.value || 0
                     : 0;
             const characteristicAdjustment = Math.round(characteristicValue / 5);
             const levelsAdjustment = parseInt(skillData.LEVELS?.value || skillData.LEVELS || skillData.levels) || 0;
@@ -8586,7 +8586,7 @@ export function getItem(id) {
 
 export async function doCharacteristicRollCheck(actor, characteristic, reasonText) {
     const charKey = characteristic.toLowerCase();
-    const successValue = parseInt(actor?.system.characteristics[charKey].roll) || 8;
+    const successValue = parseInt(actor?.getCharacteristic(charKey)?.roll) || 8;
     const activationRoller = new HeroRoller().makeSuccessRoll(true, successValue, `Base ${charKey} roll`).addDice(3);
 
     let { succeeded, flavor } = await doSuccessRoll(
