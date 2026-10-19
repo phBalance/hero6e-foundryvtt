@@ -26,13 +26,6 @@ export async function createQuenchActor({ quench, contents, is5e, actorType: typ
     // Need to be a bit careful as we can create invalid XML if name has special characters
     const quenchName = `_Quench ${Date.now().toString()} ${name.replace(/\W+/g, " ")} ${titlePath}`;
 
-    // An interrupted run never runs its `after` hook, and the Foundry world keeps that fixture.
-    // Match the sanitized title path, not the full name: the timestamp makes each run's name unique.
-    const oldQuenchActors = titlePath
-        ? game.actors.filter((a) => a.name.startsWith("_Quench ") && a.name.endsWith(titlePath))
-        : [];
-    await Actor.deleteDocuments(oldQuenchActors.map((m) => m.id));
-
     if (is5e === undefined) {
         throw new Error("missing is5e");
     }
