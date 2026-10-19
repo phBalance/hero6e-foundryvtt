@@ -1841,7 +1841,7 @@ export function registerCombatTests(quench) {
                 });
             });
         },
-        { displayName: "HERO SYSTEM 6E: Speed Chart Combat Validation" },
+        { displayName: "HERO: Speed Chart Combat Validation" },
     );
 
     quench.registerBatch(
@@ -3185,6 +3185,6 @@ export function registerCombatTests(quench) {
                 });
             });
         },
-        { displayName: "HERO SYSTEM 6E: Combat Tracker Fix Validation" },
+        { displayName: "HERO: Combat Tracker Fix Validation" },
     );
 }

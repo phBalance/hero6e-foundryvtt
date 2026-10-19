@@ -264,14 +264,14 @@ function registerFixtureCleanupBatch(quench, { suiteKey, displayName }) {
 export function registerGlobalSetup(quench) {
     registerFixtureCleanupBatch(quench, {
         suiteKey: GLOBAL_SETUP_SUITE,
-        displayName: "Global Setup",
+        displayName: "HERO: Global Setup",
     });
 }
 
 export function registerGlobalTeardown(quench) {
     registerFixtureCleanupBatch(quench, {
         suiteKey: GLOBAL_TEARDOWN_SUITE,
-        displayName: "Global Teardown",
+        displayName: "HERO: Global Teardown",
     });
 }
 
