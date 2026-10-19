@@ -20,14 +20,17 @@ export async function createQuenchActor({ quench, contents, is5e, actorType: typ
         return `${generateQuenchTitleRecursive(quench.parent)}/${quench.title.replace(/\W+/g, "")}`;
     }
 
-    // Need to be a bit careful as we can create invalid XML if name has special characters
-    const quenchName = `_Quench ${Date.now().toString()} ${name.replace(
-        /\W+/g,
-        " ",
-    )} ${generateQuenchTitleRecursive(quench.currentTest || quench.test || quench)}`;
+    // Sanitized ancestor path of the current suite. The name and the sweep below share this value.
+    const titlePath = generateQuenchTitleRecursive(quench.currentTest || quench.test || quench);
 
-    // Delete any previous leftover actors for this test
-    const oldQuenchActors = game.actors.filter((a) => a.name.includes(quench.title));
+    // Need to be a bit careful as we can create invalid XML if name has special characters
+    const quenchName = `_Quench ${Date.now().toString()} ${name.replace(/\W+/g, " ")} ${titlePath}`;
+
+    // An interrupted run never runs its `after` hook, and the Foundry world keeps that fixture.
+    // Match the sanitized title path, not the full name: the timestamp makes each run's name unique.
+    const oldQuenchActors = titlePath
+        ? game.actors.filter((a) => a.name.startsWith("_Quench ") && a.name.endsWith(titlePath))
+        : [];
     await Actor.deleteDocuments(oldQuenchActors.map((m) => m.id));
 
     if (is5e === undefined) {
@@ -93,84 +96,160 @@ export async function deleteQuenchActor({ quench, actor }) {
     await actor.delete();
 }
 
-export function registerGlobalSetup(quench) {
-    quench.registerBatch(
-        `${game.system.id}.${GLOBAL_SETUP_SUITE}`,
-        (context) => {
-            const { describe, it } = context;
+/**
+ * Delete the `_Quench` combats the suites left behind.
+ *
+ * Combats go first. Once the actor sweep runs, a leaked combat loses the `_Quench` actor names this
+ * filter needs.
+ *
+ * Test combats carry the `_Quench` name prefix. The fallback sweeps unnamed leaks, but only when every
+ * combatant provably belongs to a `_Quench` actor. A real saved encounter whose actors were deleted
+ * must survive this.
+ *
+ * @returns {Promise<string[]>} The combat ids deleted.
+ */
+export async function deleteQuenchCombats() {
+    const ids = game.combats
+        .filter(
+            (c) =>
+                c.name?.startsWith("_Quench") ||
+                (c.combatants.some((ct) => ct.actor?.name?.startsWith("_Quench")) &&
+                    c.combatants.every((ct) => !ct.actor || ct.actor.name.startsWith("_Quench"))),
+        )
+        .map((c) => c.id);
 
-            describe("Global Module Setup", function () {
-                // Combats FIRST: once the actor sweep runs, leaked combats lose the
-                // _Quench actor names this filter needs
-                it("Delete '_Quench' combats", async () => {
-                    // Test combats are created with the _Quench name prefix. The
-                    // fallback sweeps unnamed leaks, but only when at least one
-                    // combatant provably belongs to a _Quench actor — a real saved
-                    // encounter whose actors were deleted must survive this
-                    const ids = game.combats
-                        .filter(
-                            (c) =>
-                                c.name?.startsWith("_Quench") ||
-                                (c.combatants.some((ct) => ct.actor?.name?.startsWith("_Quench")) &&
-                                    c.combatants.every((ct) => !ct.actor || ct.actor.name.startsWith("_Quench"))),
-                        )
-                        .map((c) => c.id);
-                    if (ids.length > 0) await Combat.deleteDocuments(ids);
-                });
+    if (ids.length > 0) {
+        await Combat.deleteDocuments(ids);
+    }
 
-                it("Delete '_Quench' actors", async () => {
-                    await Actor.deleteDocuments(
-                        game.actors.filter((a) => a.name.startsWith("_Quench")).map((o) => o.id),
-                    );
-                });
-            });
-        },
-        {
-            // Display name for the batch in the Quench UI.
-            displayName: "Global Setup",
-        },
-    );
+    return ids;
 }
 
-export function registerGlobalTeardown(quench) {
+/**
+ * Delete the `_Quench` tokens and actors the suites left behind.
+ *
+ * Tokens go first, because a token whose actor is already gone is harder to identify. Both sweeps
+ * run even when the first one fails, so a token problem cannot strand actors.
+ *
+ * @returns {Promise<{tokenIds: string[], actorIds: string[]}>} The ids actually deleted.
+ * @throws {Error} When a sweep fails. Names each failure and reports what was deleted first.
+ */
+export async function deleteQuenchTokensAndActors() {
+    const activeScene = game.scenes.active ?? game.scenes.contents?.[0];
+    const failures = [];
+    const deleted = { tokenIds: [], actorIds: [] };
+
+    const tokenIds = activeScene ? activeScene.tokens.filter((t) => t.name.startsWith("_Quench")).map((t) => t.id) : [];
+
+    if (tokenIds.length > 0) {
+        try {
+            await activeScene.deleteEmbeddedDocuments("Token", tokenIds);
+            deleted.tokenIds = tokenIds;
+        } catch (err) {
+            failures.push(`tokens: ${err?.message ?? err}`);
+        }
+    }
+
+    const actorIds = game.actors.filter((a) => a.name.startsWith("_Quench")).map((a) => a.id);
+
+    if (actorIds.length > 0) {
+        try {
+            await Actor.deleteDocuments(actorIds);
+            deleted.actorIds = actorIds;
+        } catch (err) {
+            failures.push(`actors: ${err?.message ?? err}`);
+        }
+    }
+
+    if (failures.length > 0) {
+        throw new Error(
+            `Incomplete _Quench cleanup - ${failures.join("; ")}. Deleted ` +
+                `${deleted.tokenIds.length} tokens and ${deleted.actorIds.length} actors before the failure.`,
+        );
+    }
+
+    return deleted;
+}
+
+/**
+ * Delete every `_Quench` fixture from the world: combats, tokens, actors, then scenes.
+ *
+ * Both global batches call this through Mocha. `abortAndRunGlobalTeardown` also calls it directly
+ * when Mocha cannot run the batch, so the cleanup does not depend on the runner. Each sweep runs
+ * even when an earlier one fails, so no failure strands a later fixture type.
+ *
+ * @returns {Promise<{combats: number, tokens: number, actors: number, scenes: number}>} How many of
+ *                                    each fixture type were deleted.
+ * @throws {Error} When a sweep fails. Names each failure and reports the partial counts.
+ */
+export async function deleteQuenchFixtures() {
+    const failures = [];
+    const counts = { combats: 0, tokens: 0, actors: 0, scenes: 0 };
+
+    try {
+        counts.combats = (await deleteQuenchCombats()).length;
+    } catch (err) {
+        failures.push(`combats: ${err?.message ?? err}`);
+    }
+
+    try {
+        const deleted = await deleteQuenchTokensAndActors();
+        counts.tokens = deleted.tokenIds.length;
+        counts.actors = deleted.actorIds.length;
+    } catch (err) {
+        failures.push(String(err?.message ?? err));
+    }
+
+    try {
+        const before = game.scenes.filter((s) => s.name.startsWith("_Quench")).length;
+        await deleteQuenchScenes();
+        counts.scenes = before - game.scenes.filter((s) => s.name.startsWith("_Quench")).length;
+    } catch (err) {
+        failures.push(`scenes: ${err?.message ?? err}`);
+    }
+
+    if (failures.length > 0) {
+        throw new Error(
+            `Incomplete _Quench fixture cleanup - ${failures.join("; ")}. Deleted ` +
+                `${counts.combats} combats, ${counts.tokens} tokens, ${counts.actors} actors, ` +
+                `${counts.scenes} scenes.`,
+        );
+    }
+
+    return counts;
+}
+
+/**
+ * Register one batch that deletes every `_Quench` fixture.
+ *
+ * Global setup and global teardown share this body. Their purpose is the same: leave no `_Quench`
+ * residue in the world. They differ only in the batch key, which sets when Quench runs them.
+ * Quench runs batches in registration order, and the keys sort `a.global-setup` first and
+ * `z.global-teardown` last.
+ *
+ * Each fixture type gets its own `it` step. A failure then names the fixture type in the Quench UI
+ * instead of pointing at the wrong one.
+ *
+ * @param {object} quench The Quench instance.
+ * @param {object} identity The batch identity.
+ * @param {string} identity.suiteKey Suite name without the system prefix.
+ * @param {string} identity.displayName Batch name shown in the Quench UI.
+ */
+function registerFixtureCleanupBatch(quench, { suiteKey, displayName }) {
     quench.registerBatch(
-        `${game.system.id}.${GLOBAL_TEARDOWN_SUITE}`,
+        `${game.system.id}.${suiteKey}`,
         (context) => {
             const { describe, it } = context;
 
-            describe("Global Teardown", function () {
-                // Combats FIRST: once the actor sweep runs, leaked combats lose the
-                // _Quench actor names this filter needs
+            describe(displayName, function () {
+                // Combats first: the actor sweep removes the _Quench actor names this filter needs.
                 it("Delete '_Quench' combats", async () => {
-                    // Test combats are created with the _Quench name prefix. The
-                    // fallback sweeps unnamed leaks, but only when at least one
-                    // combatant provably belongs to a _Quench actor — a real saved
-                    // encounter whose actors were deleted must survive this
-                    const ids = game.combats
-                        .filter(
-                            (c) =>
-                                c.name?.startsWith("_Quench") ||
-                                (c.combatants.some((ct) => ct.actor?.name?.startsWith("_Quench")) &&
-                                    c.combatants.every((ct) => !ct.actor || ct.actor.name.startsWith("_Quench"))),
-                        )
-                        .map((c) => c.id);
-                    if (ids.length > 0) await Combat.deleteDocuments(ids);
+                    await deleteQuenchCombats();
                 });
 
-                it("Delete '_Quench' actors", async () => {
-                    // The end-to-end tests create tokens, make sure they get deleted
-                    const activeScene = game.scenes.active ?? game.scenes.contents?.[0];
-                    if (activeScene) {
-                        await activeScene.deleteEmbeddedDocuments(
-                            "Token",
-                            activeScene.tokens.filter((t) => t.name.startsWith("_Quench")).map((o) => o.id),
-                        );
-                    }
-
-                    // Various tests create actors, make sure they get deleted
-                    await Actor.deleteDocuments(
-                        game.actors.filter((a) => a.name.startsWith("_Quench")).map((o) => o.id),
-                    );
+                // Tokens before actors: a token whose actor is already gone is harder to identify.
+                it("Delete '_Quench' tokens and actors", async () => {
+                    await deleteQuenchTokensAndActors();
                 });
 
                 it("Delete '_Quench' scenes", async () => {
@@ -178,11 +257,22 @@ export function registerGlobalTeardown(quench) {
                 });
             });
         },
-        {
-            // Display name for the batch in the Quench UI.
-            displayName: "Global Teardown",
-        },
+        { displayName },
     );
+}
+
+export function registerGlobalSetup(quench) {
+    registerFixtureCleanupBatch(quench, {
+        suiteKey: GLOBAL_SETUP_SUITE,
+        displayName: "HERO: Global Setup",
+    });
+}
+
+export function registerGlobalTeardown(quench) {
+    registerFixtureCleanupBatch(quench, {
+        suiteKey: GLOBAL_TEARDOWN_SUITE,
+        displayName: "HERO: Global Teardown",
+    });
 }
 
 /**

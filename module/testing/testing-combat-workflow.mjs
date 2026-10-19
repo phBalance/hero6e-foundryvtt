@@ -701,6 +701,6 @@ export function registerCombatWorkflowTests(quench) {
                 });
             });
         },
-        { displayName: "End-to-End Combat Execution" },
+        { displayName: "HERO: End-to-End Combat Execution" },
     );
 }
