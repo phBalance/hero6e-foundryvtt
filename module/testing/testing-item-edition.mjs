@@ -1,4 +1,5 @@
 import { HeroSystem6eItem } from "../item/item.mjs";
+import { setQuenchTimeout } from "./quench-helper.mjs";
 
 const { Actor, Item } = foundry.documents;
 
@@ -9,6 +10,9 @@ export function registerItemEditionTests(quench) {
             const { describe, it, before, after, assert } = context;
 
             describe("Item Edition Preservation and Type Conversion Validation", function () {
+                // Mocha's 2000ms default is too short when several actors are created at the same time.
+                setQuenchTimeout(this, 20000);
+
                 let quenchActor6e = null;
                 let quenchAutomaton6e = null;
                 const worldItems = [];

@@ -1917,67 +1917,70 @@ export function registerEverythingLadLass(quench) {
         (context) => {
             const { assert, before, after, describe, it } = context;
 
-            // Runs last within a character's describe: the re-upload replaces item data,
-            // so earlier assertions must see the fresh-upload state.
-            function addUploadTimingTests(label, contents, getActor) {
-                let freshItemsCreated;
-
-                it("records stage timings for a fresh upload", function () {
-                    const perf = getActor().lastUploadPerformance;
-                    assert.isDefined(perf);
-                    assert.isAbove(perf.marks.length, 10);
-                    assert.isAbove(perf.counts.itemsCreated, 0);
-                    freshItemsCreated = perf.counts.itemsCreated;
-                    logUploadPerformance(getActor(), `${label} fresh`);
-                });
-
-                it("creates active effects for every item the upload sweep covers", function () {
-                    const itemsExpectingEffects = getActor().items.filter(
-                        (item) =>
-                            item.baseInfo?.activeEffect ||
-                            item.baseInfo?.type?.includes("movement") ||
-                            (item.type !== "characteristic" && item.baseInfo?.type?.includes("characteristic")),
-                    );
-                    assert.isAbove(itemsExpectingEffects.length, 0);
-                    for (const item of itemsExpectingEffects) {
-                        assert.isAbove(item.effects.size, 0, `${item.name} has no active effects after upload`);
-                    }
-                });
-
-                it("re-uploads by updating existing items and records stage timings", async function () {
-                    this.timeout(120000);
-                    const actor = getActor();
-
-                    const maneuverIdsBefore = actor.items
-                        .filter((item) => item.type === "maneuver")
-                        .map((item) => item.id)
-                        .sort();
-                    const dodge = actor.items.find((item) => item.system.XMLID === "DODGE");
-                    await dodge.update({ "system.active": true });
-
-                    const renamedContents = contents.replace(/CHARACTER_NAME=".*?"/, `CHARACTER_NAME="${actor.name}"`);
-                    await actor.uploadFromXml(renamedContents, { quenchUpload: true });
-
-                    const perf = actor.lastUploadPerformance;
-                    assert.equal(perf.counts.itemsUpdated, freshItemsCreated);
-                    assert.equal(perf.counts.itemsCreated, 0);
-
-                    // Unchanged definitions: maneuvers are kept (same ids), not recreated,
-                    // and an active maneuver survives the re-upload
-                    const maneuverIdsAfter = actor.items
-                        .filter((item) => item.type === "maneuver")
-                        .map((item) => item.id)
-                        .sort();
-                    assert.deepEqual(maneuverIdsAfter, maneuverIdsBefore);
-                    assert.isTrue(actor.items.get(dodge.id).system.active);
-
-                    logUploadPerformance(actor, `${label} re-upload`);
-                });
-            }
-
             describe("Everything Lad and Lass Tests", function () {
-                // The default timeout tends to be insufficient with multiple actors being created at the same time.
-                setQuenchTimeout(this);
+                // A full re-upload runs many item writes in one test, so the batch needs far more
+                // than 20000ms. Set the largest value once here.
+                setQuenchTimeout(this, 120000);
+
+                // Runs last within a character's describe: the re-upload replaces item data,
+                // so earlier assertions must see the fresh-upload state.
+                function addUploadTimingTests(label, contents, getActor) {
+                    let freshItemsCreated;
+
+                    it("records stage timings for a fresh upload", function () {
+                        const perf = getActor().lastUploadPerformance;
+                        assert.isDefined(perf);
+                        assert.isAbove(perf.marks.length, 10);
+                        assert.isAbove(perf.counts.itemsCreated, 0);
+                        freshItemsCreated = perf.counts.itemsCreated;
+                        logUploadPerformance(getActor(), `${label} fresh`);
+                    });
+
+                    it("creates active effects for every item the upload sweep covers", function () {
+                        const itemsExpectingEffects = getActor().items.filter(
+                            (item) =>
+                                item.baseInfo?.activeEffect ||
+                                item.baseInfo?.type?.includes("movement") ||
+                                (item.type !== "characteristic" && item.baseInfo?.type?.includes("characteristic")),
+                        );
+                        assert.isAbove(itemsExpectingEffects.length, 0);
+                        for (const item of itemsExpectingEffects) {
+                            assert.isAbove(item.effects.size, 0, `${item.name} has no active effects after upload`);
+                        }
+                    });
+
+                    it("re-uploads by updating existing items and records stage timings", async function () {
+                        const actor = getActor();
+
+                        const maneuverIdsBefore = actor.items
+                            .filter((item) => item.type === "maneuver")
+                            .map((item) => item.id)
+                            .sort();
+                        const dodge = actor.items.find((item) => item.system.XMLID === "DODGE");
+                        await dodge.update({ "system.active": true });
+
+                        const renamedContents = contents.replace(
+                            /CHARACTER_NAME=".*?"/,
+                            `CHARACTER_NAME="${actor.name}"`,
+                        );
+                        await actor.uploadFromXml(renamedContents, { quenchUpload: true });
+
+                        const perf = actor.lastUploadPerformance;
+                        assert.equal(perf.counts.itemsUpdated, freshItemsCreated);
+                        assert.equal(perf.counts.itemsCreated, 0);
+
+                        // Unchanged definitions: maneuvers are kept (same ids), not recreated,
+                        // and an active maneuver survives the re-upload
+                        const maneuverIdsAfter = actor.items
+                            .filter((item) => item.type === "maneuver")
+                            .map((item) => item.id)
+                            .sort();
+                        assert.deepEqual(maneuverIdsAfter, maneuverIdsBefore);
+                        assert.isTrue(actor.items.get(dodge.id).system.active);
+
+                        logUploadPerformance(actor, `${label} re-upload`);
+                    });
+                }
 
                 describe("Everything Lad (5e)", function () {
                     const contents = EVERYTHING_LAD_5E_HDC;

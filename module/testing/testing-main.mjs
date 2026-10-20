@@ -63,6 +63,7 @@ Hooks.on("quenchReady", async (quench) => {
                 GLOBAL_TEARDOWN_SUITE,
                 deleteQuenchFixtures,
             },
+            { registerConfigTests },
             { registerAutomatonTests },
             { registerBaseTests },
             { registerCslTests },
@@ -91,6 +92,7 @@ Hooks.on("quenchReady", async (quench) => {
             { registerMovementEndTests },
         ] = await Promise.all([
             import("./quench-helper.mjs"),
+            import("./testing-config.mjs"),
             import("./testing-automaton.mjs"),
             import("./testing-base.mjs"),
             import("./testing-csl.mjs"),
@@ -125,6 +127,7 @@ Hooks.on("quenchReady", async (quench) => {
             setupSuite: GLOBAL_SETUP_SUITE,
             teardownSuite: GLOBAL_TEARDOWN_SUITE,
             deleteQuenchFixtures,
+            registerConfigTests,
             registerAutomatonTests,
             registerBaseTests,
             registerCslTests,
@@ -159,38 +162,38 @@ Hooks.on("quenchReady", async (quench) => {
      * and global teardown goes last.
      *
      * @param {object} quench The Quench instance.
-     * @param {object} t The imported registration functions.
+     * @param {object} testModules The imported registration functions.
      */
-    function registerTestSuites(quench, t) {
-        t.registerGlobalSetup(quench);
-        t.registerAutomatonTests(quench);
-        t.registerBaseTests(quench);
-        t.registerCslTests(quench);
-        t.registerDamageFunctionTests(quench);
-        t.registerDefenseTests(quench);
-        t.registerDiceTests(quench);
-        t.registerEverythingLadLass(quench);
-        t.registerFullTests(quench);
-        t.registerHeroMathTests(quench);
-        registerMainTests(quench);
-        t.registerManeuverTests(quench);
-        t.registerRequiresRollCheckTests(quench);
-        t.registerUploadTests(quench);
-        t.registerVehicleTests(quench);
-        t.registerActorCharacteristicTests(quench);
-        t.registerStatusEffectTests(quench);
-        t.registerTypeForceReplaceTests(quench);
-        t.registerCombatWorkflowTests(quench);
-        t.register5eCalculatedActiveEffectAutomationTests(quench);
-        t.registerCombatTests(quench);
-        t.registerAdjustmentFadeTests(quench);
-        t.registerItemEditionTests(quench);
-        t.registerWorldTimeTests(quench);
-        t.registerVisionTests(quench);
-        t.registerActiveEffectTests(quench);
-        t.registerDragAndDropTests(quench);
-        t.registerMovementEndTests(quench);
-        t.registerGlobalTeardown(quench);
+    function registerTestSuites(quench, testModules) {
+        testModules.registerGlobalSetup(quench);
+        testModules.registerAutomatonTests(quench);
+        testModules.registerBaseTests(quench);
+        testModules.registerCslTests(quench);
+        testModules.registerDamageFunctionTests(quench);
+        testModules.registerDefenseTests(quench);
+        testModules.registerDiceTests(quench);
+        testModules.registerEverythingLadLass(quench);
+        testModules.registerFullTests(quench);
+        testModules.registerHeroMathTests(quench);
+        testModules.registerConfigTests(quench);
+        testModules.registerManeuverTests(quench);
+        testModules.registerRequiresRollCheckTests(quench);
+        testModules.registerUploadTests(quench);
+        testModules.registerVehicleTests(quench);
+        testModules.registerActorCharacteristicTests(quench);
+        testModules.registerStatusEffectTests(quench);
+        testModules.registerTypeForceReplaceTests(quench);
+        testModules.registerCombatWorkflowTests(quench);
+        testModules.register5eCalculatedActiveEffectAutomationTests(quench);
+        testModules.registerCombatTests(quench);
+        testModules.registerAdjustmentFadeTests(quench);
+        testModules.registerItemEditionTests(quench);
+        testModules.registerWorldTimeTests(quench);
+        testModules.registerVisionTests(quench);
+        testModules.registerActiveEffectTests(quench);
+        testModules.registerDragAndDropTests(quench);
+        testModules.registerMovementEndTests(quench);
+        testModules.registerGlobalTeardown(quench);
     }
 
     /**
@@ -1162,34 +1165,5 @@ Hooks.on("quenchReady", async (quench) => {
         const raw = quench?.reports?.json;
         if (!raw) return null;
         return JSON.parse(raw);
-    }
-
-    /**
-     * Register the smoke-test batch that checks the HERO power tables load without validation errors.
-     *
-     * @param {object} quench The Quench instance.
-     */
-    function registerMainTests(quench) {
-        quench.registerBatch(
-            `${game.system.id}.main`,
-            (context) => {
-                const { describe, expect, it } = context;
-
-                describe("HERO", async function () {
-                    describe("5e powers", async function () {
-                        it("should have no validation errors", function () {
-                            expect(CONFIG.HERO.powers5e.validate()).to.equal(0);
-                        });
-                    });
-
-                    describe("6e powers", async function () {
-                        it("should have no validation errors", function () {
-                            expect(CONFIG.HERO.powers6e.validate()).to.equal(0);
-                        });
-                    });
-                });
-            },
-            { displayName: "HERO: Main" },
-        );
     }
 });

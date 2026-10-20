@@ -235,6 +235,9 @@ function registerFixtureCleanupBatch(quench, { suiteKey, displayName }) {
             const { describe, it } = context;
 
             describe(displayName, function () {
+                // Mocha's 2000ms default is too short when several actors are created at the same time.
+                setQuenchTimeout(this, 20000);
+
                 // Combats first: the actor sweep removes the _Quench actor names this filter needs.
                 it("Delete '_Quench' combats", async () => {
                     await deleteQuenchCombats();
@@ -491,9 +494,18 @@ export async function waitForElementInChat(elementSelector, timeoutMs = 5000) {
 }
 
 /**
- * The default timeout tends to be insufficient with multiple actors being created at the same time.
- * @param {*} quench
+ * Set the Mocha timeout for one Quench suite. Call this in the batch's outer describe block, so every
+ * nested suite and test inherits the value. This function supplies no fallback: each batch states its
+ * own budget. Mocha's own 2000 ms default is too short when several actors are created at once, so a
+ * batch that forgets to call this fails for the wrong reason.
+ *
+ * @param {object} quench The Mocha suite context (`this`) of the outer describe block.
+ * @param {number} timeoutMs Milliseconds to allow. Must be a positive finite number.
+ * @throws {TypeError} If timeoutMs is missing or is not a positive finite number.
  */
-export function setQuenchTimeout(quench) {
-    quench.timeout(20000);
+export function setQuenchTimeout(quench, timeoutMs) {
+    if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+        throw new TypeError(`setQuenchTimeout requires a positive timeout in milliseconds, got ${timeoutMs}.`);
+    }
+    quench.timeout(timeoutMs);
 }

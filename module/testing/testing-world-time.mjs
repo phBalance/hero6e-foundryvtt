@@ -1,4 +1,5 @@
 import { HEROSYS } from "../herosystem6e.mjs";
+import { setQuenchTimeout } from "./quench-helper.mjs";
 
 const { Actor } = foundry.documents;
 
@@ -17,7 +18,7 @@ export function registerWorldTimeTests(quench) {
 
             describe("World Time Recovery & Effect Expiry", function () {
                 // Recovery calibration steps world time second-by-second with settle waits.
-                this.timeout(60000);
+                setQuenchTimeout(this, 60000);
 
                 let testActor = null;
                 let originalAutomation = null;

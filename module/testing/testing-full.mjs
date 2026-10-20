@@ -15,8 +15,8 @@ export function registerFullTests(quench) {
             const { after, afterEach, assert, before, beforeEach, describe, expect, it } = context;
 
             describe("Full Character Tests", function () {
-                // The default timeout tends to be insufficient with multiple actors being created at the same time.
-                setQuenchTimeout(this);
+                // Mocha's 2000ms default is too short when several actors are created at the same time.
+                setQuenchTimeout(this, 20000);
 
                 describe("Characteristics 5e simple", function () {
                     const contents = `

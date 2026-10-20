@@ -1,6 +1,7 @@
 import { HeroSystem6eItem } from "../item/item.mjs";
 import { roundFavorPlayerAwayFromZero } from "../utility/round.mjs";
 import { performAdjustment } from "../actor/actor-adjustment.mjs";
+import { setQuenchTimeout } from "./quench-helper.mjs";
 
 const { Actor } = foundry.documents;
 
@@ -14,80 +15,88 @@ export function register5eCalculatedActiveEffectAutomationTests(quench) {
         `${game.system.id}.testing.5eCalculatedActiveEffects`,
         (context) => {
             const { after, describe, it, assert } = context;
-            const waitForHook = (hookName) =>
-                new Promise((resolve) => Hooks.once(hookName, (...args) => resolve(args)));
 
-            const actorTypes = Actor.TYPES.filter((t) => t !== "base");
-            const createdActorIds = [];
-            const create5eActor = async (name) => {
-                const createHook = waitForHook("createActor");
-                const initialActor = await Actor.create({
-                    name,
-                    type: "pc",
-                    system: { is5e: true },
-                });
-                await createHook;
-                createdActorIds.push(initialActor.id);
+            describe("Hero System 5e Calculated and Figured Characteristics State Machine", function () {
+                // Mocha's 2000ms default is too short when several actors are created at the same time.
+                setQuenchTimeout(this, 20000);
 
-                const actor = game.actors.get(initialActor.id);
-                assert.ok(!!actor, `[${name}] Failed to fetch instantiated actor record.`);
-                return actor;
-            };
+                const waitForHook = (hookName) =>
+                    new Promise((resolve) => Hooks.once(hookName, (...args) => resolve(args)));
 
-            const createAdjustmentEffect = async (actor, { adjustmentActivePoints = 0, flags = {}, ...effectData }) => {
-                const [effect] = await actor.createEmbeddedDocuments("ActiveEffect", [
-                    {
-                        ...effectData,
-                        flags: {
-                            ...flags,
-                            [game.system.id]: {
-                                ...(flags[game.system.id] ?? {}),
-                                type: "adjustment",
-                                adjustmentActivePoints,
+                const actorTypes = Actor.TYPES.filter((t) => t !== "base");
+                const createdActorIds = [];
+                const create5eActor = async (name) => {
+                    const createHook = waitForHook("createActor");
+                    const initialActor = await Actor.create({
+                        name,
+                        type: "pc",
+                        system: { is5e: true },
+                    });
+                    await createHook;
+                    createdActorIds.push(initialActor.id);
+
+                    const actor = game.actors.get(initialActor.id);
+                    assert.ok(!!actor, `[${name}] Failed to fetch instantiated actor record.`);
+                    return actor;
+                };
+
+                const createAdjustmentEffect = async (
+                    actor,
+                    { adjustmentActivePoints = 0, flags = {}, ...effectData },
+                ) => {
+                    const [effect] = await actor.createEmbeddedDocuments("ActiveEffect", [
+                        {
+                            ...effectData,
+                            flags: {
+                                ...flags,
+                                [game.system.id]: {
+                                    ...(flags[game.system.id] ?? {}),
+                                    type: "adjustment",
+                                    adjustmentActivePoints,
+                                },
                             },
                         },
-                    },
-                ]);
-                return effect;
-            };
-            const addAdjustmentEffect = async (actor, effectData) => {
-                await createAdjustmentEffect(actor, effectData);
-                return actor.system.characteristics;
-            };
+                    ]);
+                    return effect;
+                };
+                const addAdjustmentEffect = async (actor, effectData) => {
+                    await createAdjustmentEffect(actor, effectData);
+                    return actor.system.characteristics;
+                };
 
-            // Real adjustment items driven through performAdjustment (the production attack/fade flow),
-            // as opposed to the bare ActiveEffects above which only exercise the derived-data layer.
-            const createAdjustmentItem = async (actor, { xmlid, input, levels }) => {
-                const xml = `
+                // Real adjustment items driven through performAdjustment (the production attack/fade flow),
+                // as opposed to the bare ActiveEffects above which only exercise the derived-data layer.
+                const createAdjustmentItem = async (actor, { xmlid, input, levels }) => {
+                    const xml = `
                     <POWER XMLID="${xmlid}" ID="17661${Math.floor(Math.random() * 100000000)}" BASECOST="0.0" LEVELS="${levels}" ALIAS="${xmlid}" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="${xmlid} ${input}" INPUT="${input}" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="No" AFFECTS_TOTAL="Yes">
                     <NOTES />
                     </POWER>
                 `;
-                return HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(xml, actor), { parent: actor });
-            };
-            const applyAdjustment = (attackItem, characteristic, activePoints, targetActor) =>
-                performAdjustment(attackItem, characteristic, activePoints, "", "", false, targetActor, null);
-            // Mirrors expireEffects: AID fades -5 AP per turn, DRAIN returns +5.
-            const fadeAdjustment = (attackItem, characteristic, effect) => {
-                const fade = effect.flags[game.system.id].adjustmentActivePoints >= 0 ? -5 : 5;
-                return performAdjustment(
-                    attackItem,
-                    characteristic,
-                    fade,
-                    "None - Effect Fade",
-                    "",
-                    true,
-                    effect.parent,
-                    null,
-                    effect,
-                );
-            };
-            const findAdjustmentEffect = (actor) =>
-                actor.effects.find((e) => e.flags[game.system.id]?.type === "adjustment");
+                    return HeroSystem6eItem.create(HeroSystem6eItem.itemDataFromXml(xml, actor), { parent: actor });
+                };
+                const applyAdjustment = (attackItem, characteristic, activePoints, targetActor) =>
+                    performAdjustment(attackItem, characteristic, activePoints, "", "", false, targetActor, null);
+                // Mirrors expireEffects: AID fades -5 AP per turn, DRAIN returns +5.
+                const fadeAdjustment = (attackItem, characteristic, effect) => {
+                    const fade = effect.flags[game.system.id].adjustmentActivePoints >= 0 ? -5 : 5;
+                    return performAdjustment(
+                        attackItem,
+                        characteristic,
+                        fade,
+                        "None - Effect Fade",
+                        "",
+                        true,
+                        effect.parent,
+                        null,
+                        effect,
+                    );
+                };
+                const findAdjustmentEffect = (actor) =>
+                    actor.effects.find((e) => e.flags[game.system.id]?.type === "adjustment");
 
-            // 5ER p. 9-10: CV = DEX/3; 5ER p. 37: CV is 0 at DEX 1 or less.
-            const expectedOcvFromDex = (dex) => roundFavorPlayerAwayFromZero(Math.max(0, dex) / 3);
-            describe("Hero System 5e Calculated and Figured Characteristics State Machine", function () {
+                // 5ER p. 9-10: CV = DEX/3; 5ER p. 37: CV is 0 at DEX 1 or less.
+                const expectedOcvFromDex = (dex) => roundFavorPlayerAwayFromZero(Math.max(0, dex) / 3);
+
                 // Multi-client database sweep block to guarantee multi-client parity
                 after(async function () {
                     for (const actorId of createdActorIds) {

@@ -101,10 +101,9 @@ export function registerCombatTests(quench) {
 
             // This has to be the top level so isSingleCombatTracker can be changed
             describe(`Hero System 6e Speed Chart Turn Progression Matrix (Foundry Gen: ${generationLabel})`, function () {
-                // Pointer moves now settle pending segment maintenance first, so the
-                // long multi-Turn marches legitimately exceed mocha's 2s default —
-                // and one march timing out mid-run corrupts the next test's clock
-                setQuenchTimeout(this);
+                // Mocha's 2000ms default is too short when several actors are created at the same time.
+                setQuenchTimeout(this, 20000);
+
                 const actorDocuments = [];
                 const combatDocuments = [];
                 const { makeActor, makeCombat, combatantFor, dodgeItemFor, hasManeuverAe } = makeHarness({
@@ -1850,7 +1849,9 @@ export function registerCombatTests(quench) {
             const { after, before, describe, expect, it } = context;
 
             describe(`Hero System 6e Combat Tracker Fix Validation`, function () {
-                setQuenchTimeout(this);
+                // Mocha's 2000ms default is too short when several actors are created at the same time.
+                setQuenchTimeout(this, 20000);
+
                 const actorDocuments = [];
                 const combatDocuments = [];
                 const { makeActor, makeCombat, combatantFor, makeHoldEffect } = makeHarness({
