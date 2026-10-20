@@ -12,7 +12,7 @@ const { Actor } = foundry.documents;
  *
  * @param {Object} quench - The external Quench module testing framework instance.
  */
-export function registerAdjustmentFadeTests(quench) {
+export function registerAdjustmentPowerFadeMatrixTests(quench) {
     quench.registerBatch(
         `${game.system.id}.adjustmentPowerFades`,
         (context) => {

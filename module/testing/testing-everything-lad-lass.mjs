@@ -1911,7 +1911,7 @@ function logUploadPerformance(actor, label) {
     );
 }
 
-export function registerEverythingLadLass(quench) {
+export function registerEverythingCharacterTests(quench) {
     quench.registerBatch(
         `${game.system.id}.utils.everything`,
         (context) => {

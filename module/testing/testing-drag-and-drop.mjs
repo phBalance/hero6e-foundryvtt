@@ -2,7 +2,7 @@ import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench
 import { HeroSystem6eCompendiumDirectory } from "../compendium/compendiumDirectory.mjs";
 import { HeroSystemActorSheetV2 } from "../applications/actor/actor-sheet-v2.mjs";
 
-export function registerDragAndDropTests(quench) {
+export function registerDropTests(quench) {
     quench.registerBatch(
         `${game.system.id}.testing.drop-tests`,
         (context) => {

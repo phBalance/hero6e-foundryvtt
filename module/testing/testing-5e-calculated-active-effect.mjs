@@ -10,7 +10,7 @@ const { Actor } = foundry.documents;
  * Validates baseline ratios and dynamic buffs while enforcing 5e non-cascading rules.
  * @param {object} quench - The Quench test runner instance injected by the system loader.
  */
-export function register5eCalculatedActiveEffectAutomationTests(quench) {
+export function register5eCalculatedCombatAndFiguredValuesTests(quench) {
     quench.registerBatch(
         `${game.system.id}.testing.5eCalculatedActiveEffects`,
         (context) => {

@@ -1,6 +1,6 @@
 import { createQuenchActor, deleteQuenchActor, setQuenchTimeout } from "./quench-helper.mjs";
 
-export function registerCslTests(quench) {
+export function registerCombatSkillLevelsTests(quench) {
     quench.registerBatch(
         `${game.system.id}.item.csl`,
         (context) => {

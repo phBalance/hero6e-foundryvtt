@@ -90,7 +90,7 @@ function makeHarness({ actorDocuments, combatDocuments }) {
     return { makeActor, makeCombat, combatantFor, makeHoldEffect, dodgeItemFor, hasManeuverAe };
 }
 
-export function registerCombatTests(quench) {
+export function registerSpeedChartCombatValidationTests(quench) {
     quench.registerBatch(
         `${game.system.id}.combat.speed-chart-progression`,
         (context) => {
@@ -1842,7 +1842,9 @@ export function registerCombatTests(quench) {
         },
         { displayName: "HERO: Speed Chart Combat Validation" },
     );
+}
 
+export function registerCombatTrackerFixValidationTests(quench) {
     quench.registerBatch(
         `${game.system.id}.combat.tracker-fixes`,
         (context) => {

@@ -6,7 +6,7 @@ import { HeroSystem6eItem, cloneToEffectiveAttackItem } from "../item/item.mjs";
 import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
 import { addDiceParts, calculateDicePartsFromDcForItem, characteristicValueToDiceParts } from "../utility/damage.mjs";
 
-export function registerDamageFunctionTests(quench) {
+export function registerDamageFunctionsTests(quench) {
     quench.registerBatch(
         `${game.system.id}.damageFunctions`,
         (context) => {

@@ -10,7 +10,7 @@ const { Actor } = foundry.documents;
  *
  * @param {Object} quench - The external Quench module testing framework instance.
  */
-export function registerWorldTimeTests(quench) {
+export function registerWorldTimeRecoveryAndExpiryTests(quench) {
     quench.registerBatch(
         `${game.system.id}.worldTime`,
         (context) => {

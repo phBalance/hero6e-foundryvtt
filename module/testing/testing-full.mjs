@@ -8,7 +8,7 @@ import {
     getFullyQualifiedEffectFormulaFromItem,
 } from "../utility/damage.mjs";
 
-export function registerFullTests(quench) {
+export function registerFullCharacterTests(quench) {
     quench.registerBatch(
         `${game.system.id}.utils.full`,
         (context) => {

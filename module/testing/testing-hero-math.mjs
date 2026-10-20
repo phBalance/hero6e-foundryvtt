@@ -6,7 +6,7 @@ import {
     roundFavorPlayerAwayFromZero,
 } from "../utility/round.mjs";
 
-export function registerHeroMathTests(quench) {
+export function registerMathFunctionalityTests(quench) {
     quench.registerBatch(
         `${game.system.id}.hero.rounding`,
         (context) => {

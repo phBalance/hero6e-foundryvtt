@@ -43,16 +43,17 @@ Hooks.on("quenchReady", async (quench) => {
     const MOCHA_STUCK_MESSAGE =
         "Mocha still holds a run that never wound down. Reload the browser window before you run tests.";
 
-    const testModules = await importTestSuites();
+    const { setupSuite, teardownSuite, deleteQuenchFixtures, testSuiteRegistrars } = await importTestSuites();
 
-    registerTestSuites(quench, testModules);
-    exposeConsoleApi(testModules);
+    registerTestSuites(quench, testSuiteRegistrars);
+    exposeConsoleApi({ setupSuite, teardownSuite, deleteQuenchFixtures });
 
     /**
      * Import the test modules. Quench readiness gates the import, so a world without Quench never
      * parses or evaluates the test suites.
      *
-     * @returns {Promise<object>} The registration functions and the global suite names.
+     * @returns {Promise<object>} The global suite names, the clean-up helper, and the suite
+     *                    registration functions in run order.
      */
     async function importTestSuites() {
         const [
@@ -63,137 +64,117 @@ Hooks.on("quenchReady", async (quench) => {
                 GLOBAL_TEARDOWN_SUITE,
                 deleteQuenchFixtures,
             },
-            { registerConfigTests },
+            { register5eCalculatedCombatAndFiguredValuesTests },
+            { registerItemActiveEffectSyncTests },
+            { registerAdjustmentPowerFadeMatrixTests },
             { registerAutomatonTests },
             { registerBaseTests },
-            { registerCslTests },
-            { registerDamageFunctionTests },
+            { registerSpeedChartCombatValidationTests, registerCombatTrackerFixValidationTests },
+            { registerEndToEndCombatExecutionTests },
+            { registerConfigTests },
+            { registerCombatSkillLevelsTests },
+            { registerDamageFunctionsTests },
+            { registerDefaultCharacteristicsForEachActorTypeTests },
             { registerDefenseTests },
             { registerDiceTests },
-            { registerEverythingLadLass },
-            { registerFullTests },
-            { registerHeroMathTests },
+            { registerDropTests },
+            { registerEverythingCharacterTests },
+            { registerFullCharacterTests },
+            { registerMathFunctionalityTests },
+            { registerItemEditionAndTypeConversionTests },
             { registerManeuverTests },
+            { registerMovementEndTests },
             { registerRequiresRollCheckTests },
+            { registerStatusEffectsLogicTests },
+            { registerUpdatesWithTypeForceReplaceTests },
             { registerUploadTests },
             { registerVehicleTests },
-            { registerCombatTests },
-            { registerCombatWorkflowTests },
-            { registerTypeForceReplaceTests },
-            { registerStatusEffectTests },
-            { register5eCalculatedActiveEffectAutomationTests },
-            { registerActorCharacteristicTests },
-            { registerAdjustmentFadeTests },
-            { registerItemEditionTests },
-            { registerWorldTimeTests },
             { registerVisionTests },
-            { registerActiveEffectTests },
-            { registerDragAndDropTests },
-            { registerMovementEndTests },
+            { registerWorldTimeRecoveryAndExpiryTests },
         ] = await Promise.all([
             import("./quench-helper.mjs"),
-            import("./testing-config.mjs"),
+            import("./testing-5e-calculated-active-effect.mjs"),
+            import("./testing-active-effects.mjs"),
+            import("./testing-adjustment-fade.mjs"),
             import("./testing-automaton.mjs"),
             import("./testing-base.mjs"),
+            import("./testing-combat-tracker.mjs"),
+            import("./testing-combat-workflow.mjs"),
+            import("./testing-config.mjs"),
             import("./testing-csl.mjs"),
             import("./testing-damage-functions.mjs"),
+            import("./testing-default-characteristics.mjs"),
             import("./testing-defense.mjs"),
             import("./testing-dice.mjs"),
+            import("./testing-drag-and-drop.mjs"),
             import("./testing-everything-lad-lass.mjs"),
             import("./testing-full.mjs"),
             import("./testing-hero-math.mjs"),
+            import("./testing-item-edition.mjs"),
             import("./testing-maneuvers.mjs"),
+            import("./testing-movement-end.mjs"),
             import("./testing-requires-roll-check.mjs"),
+            import("./testing-status-effects.mjs"),
+            import("./testing-type-force-replace.mjs"),
             import("./testing-upload.mjs"),
             import("./testing-vehicles.mjs"),
-            import("./testing-combat-tracker.mjs"),
-            import("./testing-combat-workflow.mjs"),
-            import("./testing-type-force-replace.mjs"),
-            import("./testing-status-effects.mjs"),
-            import("./testing-5e-calculated-active-effect.mjs"),
-            import("./testing-default-characteristics.mjs"),
-            import("./testing-adjustment-fade.mjs"),
-            import("./testing-item-edition.mjs"),
-            import("./testing-world-time.mjs"),
             import("./testing-vision.mjs"),
-            import("./testing-active-effects.mjs"),
-            import("./testing-drag-and-drop.mjs"),
-            import("./testing-movement-end.mjs"),
+            import("./testing-world-time.mjs"),
         ]);
 
         return {
-            registerGlobalSetup,
-            registerGlobalTeardown,
             setupSuite: GLOBAL_SETUP_SUITE,
             teardownSuite: GLOBAL_TEARDOWN_SUITE,
             deleteQuenchFixtures,
-            registerConfigTests,
-            registerAutomatonTests,
-            registerBaseTests,
-            registerCslTests,
-            registerDamageFunctionTests,
-            registerDefenseTests,
-            registerDiceTests,
-            registerEverythingLadLass,
-            registerFullTests,
-            registerHeroMathTests,
-            registerManeuverTests,
-            registerRequiresRollCheckTests,
-            registerUploadTests,
-            registerVehicleTests,
-            registerCombatTests,
-            registerCombatWorkflowTests,
-            registerTypeForceReplaceTests,
-            registerStatusEffectTests,
-            register5eCalculatedActiveEffectAutomationTests,
-            registerActorCharacteristicTests,
-            registerAdjustmentFadeTests,
-            registerItemEditionTests,
-            registerWorldTimeTests,
-            registerVisionTests,
-            registerActiveEffectTests,
-            registerDragAndDropTests,
-            registerMovementEndTests,
+            // Run order. Global setup goes first, global teardown goes last, and the suites between
+            // them are alphabetical by the Quench display name.
+            testSuiteRegistrars: [
+                registerGlobalSetup,
+                register5eCalculatedCombatAndFiguredValuesTests,
+                registerAdjustmentPowerFadeMatrixTests,
+                registerAutomatonTests,
+                registerBaseTests,
+                registerCombatSkillLevelsTests,
+                registerCombatTrackerFixValidationTests,
+                registerConfigTests,
+                registerDamageFunctionsTests,
+                registerDefaultCharacteristicsForEachActorTypeTests,
+                registerDefenseTests,
+                registerDiceTests,
+                registerDropTests,
+                registerEndToEndCombatExecutionTests,
+                registerEverythingCharacterTests,
+                registerFullCharacterTests,
+                registerItemActiveEffectSyncTests,
+                registerItemEditionAndTypeConversionTests,
+                registerManeuverTests,
+                registerMathFunctionalityTests,
+                registerMovementEndTests,
+                registerRequiresRollCheckTests,
+                registerSpeedChartCombatValidationTests,
+                registerStatusEffectsLogicTests,
+                registerUpdatesWithTypeForceReplaceTests,
+                registerUploadTests,
+                registerVehicleTests,
+                registerVisionTests,
+                registerWorldTimeRecoveryAndExpiryTests,
+                registerGlobalTeardown,
+            ],
         };
     }
 
     /**
-     * Register every suite. Quench runs batches in registration order, so global setup goes first
-     * and global teardown goes last.
+     * Register every suite in array order. Quench runs batches in registration order, so the array
+     * keeps global setup first and global teardown last. A non-function entry throws here, so a bad
+     * registration fails at start-up instead of going missing.
      *
      * @param {object} quench The Quench instance.
-     * @param {object} testModules The imported registration functions.
+     * @param {Function[]} testSuiteRegistrars One registration function per suite, in run order.
      */
-    function registerTestSuites(quench, testModules) {
-        testModules.registerGlobalSetup(quench);
-        testModules.registerAutomatonTests(quench);
-        testModules.registerBaseTests(quench);
-        testModules.registerCslTests(quench);
-        testModules.registerDamageFunctionTests(quench);
-        testModules.registerDefenseTests(quench);
-        testModules.registerDiceTests(quench);
-        testModules.registerEverythingLadLass(quench);
-        testModules.registerFullTests(quench);
-        testModules.registerHeroMathTests(quench);
-        testModules.registerConfigTests(quench);
-        testModules.registerManeuverTests(quench);
-        testModules.registerRequiresRollCheckTests(quench);
-        testModules.registerUploadTests(quench);
-        testModules.registerVehicleTests(quench);
-        testModules.registerActorCharacteristicTests(quench);
-        testModules.registerStatusEffectTests(quench);
-        testModules.registerTypeForceReplaceTests(quench);
-        testModules.registerCombatWorkflowTests(quench);
-        testModules.register5eCalculatedActiveEffectAutomationTests(quench);
-        testModules.registerCombatTests(quench);
-        testModules.registerAdjustmentFadeTests(quench);
-        testModules.registerItemEditionTests(quench);
-        testModules.registerWorldTimeTests(quench);
-        testModules.registerVisionTests(quench);
-        testModules.registerActiveEffectTests(quench);
-        testModules.registerDragAndDropTests(quench);
-        testModules.registerMovementEndTests(quench);
-        testModules.registerGlobalTeardown(quench);
+    function registerTestSuites(quench, testSuiteRegistrars) {
+        for (const registerTestSuite of testSuiteRegistrars) {
+            registerTestSuite(quench);
+        }
     }
 
     /**

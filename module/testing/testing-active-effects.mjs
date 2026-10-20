@@ -56,7 +56,7 @@ function duplicateEffectIdentities(actor) {
  *
  * @param {Object} quench - The external Quench module testing framework instance.
  */
-export function registerActiveEffectTests(quench) {
+export function registerItemActiveEffectSyncTests(quench) {
     quench.registerBatch(
         `${game.system.id}.activeEffects`,
         (context) => {

@@ -12,7 +12,7 @@ import { getAndSetGameSetting, getAndSetGameSettingCore } from "../settings/sett
 
 const { Actor } = foundry.documents;
 
-export function registerCombatWorkflowTests(quench) {
+export function registerEndToEndCombatExecutionTests(quench) {
     quench.registerBatch(
         `${game.system.id}.testing.e2e.combat-workflow`,
         (context) => {

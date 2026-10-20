@@ -3,7 +3,7 @@ import { setQuenchTimeout } from "./quench-helper.mjs";
 
 const { Actor, Item } = foundry.documents;
 
-export function registerItemEditionTests(quench) {
+export function registerItemEditionAndTypeConversionTests(quench) {
     quench.registerBatch(
         `${game.system.id}.testing.itemEdition`,
         (context) => {

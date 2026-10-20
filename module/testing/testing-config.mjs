@@ -28,6 +28,6 @@ export function registerConfigTests(quench) {
                 });
             });
         },
-        { displayName: "HERO: Main" },
+        { displayName: "HERO: Config" },
     );
 }

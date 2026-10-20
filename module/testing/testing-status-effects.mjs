@@ -10,7 +10,7 @@ import {
 
 const { Actor, TokenDocument } = foundry.documents;
 
-export function registerStatusEffectTests(quench) {
+export function registerStatusEffectsLogicTests(quench) {
     quench.registerBatch(
         `${game.system.id}.testing.statusEffects`,
         (context) => {

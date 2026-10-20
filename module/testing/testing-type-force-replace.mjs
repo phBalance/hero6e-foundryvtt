@@ -3,7 +3,7 @@ import { setQuenchTimeout } from "./quench-helper.mjs";
 
 const { Actor, Item } = foundry.documents;
 
-export function registerTypeForceReplaceTests(quench) {
+export function registerUpdatesWithTypeForceReplaceTests(quench) {
     quench.registerBatch(
         `${game.system.id}.testing.typeForceReplace`,
         (context) => {
