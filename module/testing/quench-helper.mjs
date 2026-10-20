@@ -1,4 +1,5 @@
 import { HeroSystem6eItem } from "../item/item.mjs";
+import { captureChatBaseline, deleteRunChatMessages } from "./quench-chat.mjs";
 
 const { Actor } = foundry.documents;
 
@@ -165,19 +166,26 @@ export async function deleteQuenchTokensAndActors() {
 }
 
 /**
- * Delete every `_Quench` fixture from the world: combats, tokens, actors, then scenes.
+ * Delete every `_Quench` fixture from the world: chat messages, combats, tokens, actors, then scenes.
  *
  * Both global batches call this through Mocha. `abortAndRunGlobalTeardown` also calls it directly
  * when Mocha cannot run the batch, so the cleanup does not depend on the runner. Each sweep runs
  * even when an earlier one fails, so no failure strands a later fixture type.
  *
- * @returns {Promise<{combats: number, tokens: number, actors: number, scenes: number}>} How many of
- *                                    each fixture type were deleted.
+ * @returns {Promise<{messages: number, combats: number, tokens: number, actors: number, scenes: number}>}
+ *                    How many of each fixture type were deleted.
  * @throws {Error} When a sweep fails. Names each failure and reports the partial counts.
  */
 export async function deleteQuenchFixtures() {
     const failures = [];
-    const counts = { combats: 0, tokens: 0, actors: 0, scenes: 0 };
+    const counts = { messages: 0, combats: 0, tokens: 0, actors: 0, scenes: 0 };
+
+    // Chat first. A short log makes everything after it cheaper to render.
+    try {
+        counts.messages = (await deleteRunChatMessages()).deleted;
+    } catch (err) {
+        failures.push(`chat messages: ${err?.message ?? err}`);
+    }
 
     try {
         counts.combats = (await deleteQuenchCombats()).length;
@@ -204,8 +212,8 @@ export async function deleteQuenchFixtures() {
     if (failures.length > 0) {
         throw new Error(
             `Incomplete _Quench fixture cleanup - ${failures.join("; ")}. Deleted ` +
-                `${counts.combats} combats, ${counts.tokens} tokens, ${counts.actors} actors, ` +
-                `${counts.scenes} scenes.`,
+                `${counts.messages} chat messages, ${counts.combats} combats, ${counts.tokens} tokens, ` +
+                `${counts.actors} actors, ${counts.scenes} scenes.`,
         );
     }
 
@@ -227,8 +235,9 @@ export async function deleteQuenchFixtures() {
  * @param {object} identity The batch identity.
  * @param {string} identity.suiteKey Suite name without the system prefix.
  * @param {string} identity.displayName Batch name shown in the Quench UI.
+ * @param {{title: string, run: Function}} identity.chatStep The chat sweep this batch runs first.
  */
-function registerFixtureCleanupBatch(quench, { suiteKey, displayName }) {
+function registerFixtureCleanupBatch(quench, { suiteKey, displayName, chatStep }) {
     quench.registerBatch(
         `${game.system.id}.${suiteKey}`,
         (context) => {
@@ -237,6 +246,12 @@ function registerFixtureCleanupBatch(quench, { suiteKey, displayName }) {
             describe(displayName, function () {
                 // Mocha's 2000ms default is too short when several actors are created at the same time.
                 setQuenchTimeout(this, 20000);
+
+                // The chat step runs first in both batches. Global setup records the log the run must
+                // not touch. Global teardown clears the log the run produced.
+                it(chatStep.title, async () => {
+                    await chatStep.run();
+                });
 
                 // Combats first: the actor sweep removes the _Quench actor names this filter needs.
                 it("Delete '_Quench' combats", async () => {
@@ -261,6 +276,7 @@ export function registerGlobalSetup(quench) {
     registerFixtureCleanupBatch(quench, {
         suiteKey: GLOBAL_SETUP_SUITE,
         displayName: "HERO: Global Setup",
+        chatStep: { title: "Record the chat baseline", run: captureChatBaseline },
     });
 }
 
@@ -268,6 +284,7 @@ export function registerGlobalTeardown(quench) {
     registerFixtureCleanupBatch(quench, {
         suiteKey: GLOBAL_TEARDOWN_SUITE,
         displayName: "HERO: Global Teardown",
+        chatStep: { title: "Delete chat messages the run created", run: deleteRunChatMessages },
     });
 }
 

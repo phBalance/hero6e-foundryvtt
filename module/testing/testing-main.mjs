@@ -43,10 +43,11 @@ Hooks.on("quenchReady", async (quench) => {
     const MOCHA_STUCK_MESSAGE =
         "Mocha still holds a run that never wound down. Reload the browser window before you run tests.";
 
-    const { setupSuite, teardownSuite, deleteQuenchFixtures, testSuiteRegistrars } = await importTestSuites();
+    const { setupSuite, teardownSuite, deleteQuenchFixtures, chatCleanup, testSuiteRegistrars } =
+        await importTestSuites();
 
     registerTestSuites(quench, testSuiteRegistrars);
-    exposeConsoleApi({ setupSuite, teardownSuite, deleteQuenchFixtures });
+    exposeConsoleApi({ setupSuite, teardownSuite, deleteQuenchFixtures, chatCleanup });
 
     /**
      * Import the test modules. Quench readiness gates the import, so a world without Quench never
@@ -64,6 +65,7 @@ Hooks.on("quenchReady", async (quench) => {
                 GLOBAL_TEARDOWN_SUITE,
                 deleteQuenchFixtures,
             },
+            chatCleanup,
             { register5eCalculatedCombatAndFiguredValuesTests },
             { registerItemActiveEffectSyncTests },
             { registerAdjustmentPowerFadeMatrixTests },
@@ -93,6 +95,7 @@ Hooks.on("quenchReady", async (quench) => {
             { registerWorldTimeRecoveryAndExpiryTests },
         ] = await Promise.all([
             import("./quench-helper.mjs"),
+            import("./quench-chat.mjs"),
             import("./testing-5e-calculated-active-effect.mjs"),
             import("./testing-active-effects.mjs"),
             import("./testing-adjustment-fade.mjs"),
@@ -126,6 +129,7 @@ Hooks.on("quenchReady", async (quench) => {
             setupSuite: GLOBAL_SETUP_SUITE,
             teardownSuite: GLOBAL_TEARDOWN_SUITE,
             deleteQuenchFixtures,
+            chatCleanup,
             // Run order. Global setup goes first, global teardown goes last, and the suites between
             // them are alphabetical by the Quench display name.
             testSuiteRegistrars: [
@@ -186,8 +190,12 @@ Hooks.on("quenchReady", async (quench) => {
      * @param {string} root.setupSuite Global setup suite name, without the system prefix.
      * @param {string} root.teardownSuite Global teardown suite name, without the system prefix.
      * @param {Function} root.deleteQuenchFixtures Deletes every `_Quench` fixture from the world.
+     * @param {object} root.chatCleanup The chat clean-up toggle module.
+     * @param {Function} root.chatCleanup.isChatCleanupEnabled Reports whether clean-up runs.
+     * @param {Function} root.chatCleanup.setChatCleanupEnabled Turns clean-up on or off.
+     * @param {string} root.chatCleanup.TOGGLE_STORAGE_KEY The localStorage key that holds the toggle.
      */
-    function exposeConsoleApi({ setupSuite, teardownSuite, deleteQuenchFixtures }) {
+    function exposeConsoleApi({ setupSuite, teardownSuite, deleteQuenchFixtures, chatCleanup }) {
         const hooks = { setupSuite, teardownSuite, deleteQuenchFixtures };
 
         /**
@@ -245,6 +253,30 @@ Hooks.on("quenchReady", async (quench) => {
                 deleteFixtures: deleteQuenchFixtures,
                 timeoutInMs: options.timeoutInMs ?? TEARDOWN_TIMEOUT_MS,
             });
+
+        /**
+         * Turn the end-of-run chat clean-up on or off.
+         *
+         * A run deletes the chat messages it created, so the chat log stays short and the next run
+         * does not pay for the last run's output. Turn this off to time a run with the log left in
+         * place. The choice is stored in `localStorage`, so it survives a page reload.
+         *
+         * @returns {object} The console handle.
+         */
+        window.herosystem6eChatCleanup = {
+            enable: () => chatCleanup.setChatCleanupEnabled(true),
+            disable: () => chatCleanup.setChatCleanupEnabled(false),
+
+            /**
+             * Report the effective clean-up state.
+             *
+             * @returns {{enabled: boolean, storageKey: string}} The state and where it is stored.
+             */
+            status: () => ({
+                enabled: chatCleanup.isChatCleanupEnabled(),
+                storageKey: chatCleanup.TOGGLE_STORAGE_KEY,
+            }),
+        };
     }
 
     /**
