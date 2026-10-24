@@ -2,7 +2,7 @@ import { setQuenchTimeout } from "./quench-helper.mjs";
 
 const { Actor } = foundry.documents;
 
-export function registerActorCharacteristicTests(quench) {
+export function registerDefaultCharacteristicsForEachActorTypeTests(quench) {
     const createdActors = [];
 
     const cleanup = async () => {
@@ -18,7 +18,7 @@ export function registerActorCharacteristicTests(quench) {
             const { describe, it, assert, after } = context;
 
             describe("Default characteristics for each actor type", function () {
-                setQuenchTimeout(this);
+                setQuenchTimeout(this, 20000);
 
                 describe("Verify Living Actor Exhaustive Baselines (6e vs 5e)", () => {
                     after(cleanup);

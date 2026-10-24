@@ -14,8 +14,8 @@ export function registerUploadTests(quench) {
             const { assert, before, after, describe, expect, it } = context;
 
             describe("Partial Character (Upload) Tests", function () {
-                // The default timeout tends to be insufficient with multiple actors being created at the same time.
-                setQuenchTimeout(this);
+                // Mocha's 2000ms default is too short when several actors are created at the same time.
+                setQuenchTimeout(this, 20000);
 
                 describe("NAKEDMODIFIER", function () {
                     describe("NAKEDMODIFIER Kaden", function () {

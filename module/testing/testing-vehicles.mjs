@@ -7,8 +7,8 @@ export function registerVehicleTests(quench) {
             const { after, before, describe, expect, it } = context;
 
             describe("Vehicle Characteristics", function () {
-                // The default timeout tends to be insufficient with multiple actors being created at the same time.
-                setQuenchTimeout(this);
+                // Mocha's 2000ms default is too short when several actors are created at the same time.
+                setQuenchTimeout(this, 20000);
 
                 describe("6e ARC-170 Starfighter", async function () {
                     const contents = `

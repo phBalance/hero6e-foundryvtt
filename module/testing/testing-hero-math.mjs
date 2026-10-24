@@ -6,15 +6,15 @@ import {
     roundFavorPlayerAwayFromZero,
 } from "../utility/round.mjs";
 
-export function registerHeroMathTests(quench) {
+export function registerMathFunctionalityTests(quench) {
     quench.registerBatch(
         `${game.system.id}.hero.rounding`,
         (context) => {
             const { describe, expect, it } = context;
 
             describe("Hero Math Tests", function () {
-                // The default timeout tends to be insufficient with multiple actors being created at the same time.
-                setQuenchTimeout(this);
+                // Nothing here should require much of a timeout. Shrink from Mocha's default.
+                setQuenchTimeout(this, 500);
 
                 describe("numberToOneDecimalPlace", function () {
                     describe("integer numbers", function () {

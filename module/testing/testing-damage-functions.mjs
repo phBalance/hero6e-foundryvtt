@@ -6,15 +6,15 @@ import { HeroSystem6eItem, cloneToEffectiveAttackItem } from "../item/item.mjs";
 import { getAndSetGameSetting } from "../settings/settings-helpers.mjs";
 import { addDiceParts, calculateDicePartsFromDcForItem, characteristicValueToDiceParts } from "../utility/damage.mjs";
 
-export function registerDamageFunctionTests(quench) {
+export function registerDamageFunctionsTests(quench) {
     quench.registerBatch(
         `${game.system.id}.damageFunctions`,
         (context) => {
             const { after, assert, before, describe, expect, it } = context;
 
             describe("Damage Function Tests", function () {
-                // The default timeout tends to be insufficient with multiple actors being created at the same time.
-                setQuenchTimeout(this);
+                // Mocha's 2000ms default is too short when several actors are created at the same time.
+                setQuenchTimeout(this, 20000);
 
                 describe("dice parts", function () {
                     const rkaContent = `

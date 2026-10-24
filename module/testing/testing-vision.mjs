@@ -20,7 +20,8 @@ export function registerVisionTests(quench) {
 
             // Targeted Iteration Isolation: Focus execution entirely on the Vision module
             describe("Vision", function () {
-                setQuenchTimeout(this);
+                // The default timeout tends to be insufficient with multiple actors being created at the same time.
+                setQuenchTimeout(this, 20000);
 
                 // --- UNIT TESTS LEVEL ---
                 describe("Unit tests", function () {

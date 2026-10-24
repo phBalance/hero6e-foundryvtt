@@ -56,77 +56,81 @@ function duplicateEffectIdentities(actor) {
  *
  * @param {Object} quench - The external Quench module testing framework instance.
  */
-export function registerActiveEffectTests(quench) {
+export function registerItemActiveEffectSyncTests(quench) {
     quench.registerBatch(
         `${game.system.id}.activeEffects`,
         (context) => {
             const { describe, it, assert, before, after } = context;
 
-            describe("Item ActiveEffect Sync", function () {
-                let testActor = null;
+            describe("Active Effects", function () {
+                // Mocha's 2000ms default is too short when several actors are created at the same time.
+                setQuenchTimeout(this, 20000);
 
-                before(async () => {
-                    testActor = await Actor.create({
-                        name: "_Quench AE Sync",
-                        type: "pc",
-                        system: { is5e: false },
+                describe("Item ActiveEffect Sync", function () {
+                    let testActor = null;
+
+                    before(async () => {
+                        testActor = await Actor.create({
+                            name: "_Quench AE Sync",
+                            type: "pc",
+                            system: { is5e: false },
+                        });
                     });
-                });
 
-                after(async () => {
-                    await testActor?.delete();
-                    testActor = null;
-                });
+                    after(async () => {
+                        await testActor?.delete();
+                        testActor = null;
+                    });
 
-                it("Should update a movement power's existing effect through system.changes when LEVELS change", async function () {
-                    const powerInfo = getPowerInfo({ xmlid: "FLIGHT", actor: testActor, xmlTag: "POWER" });
-                    const itemData = foundry.utils.mergeObject(
-                        HeroSystem6eItem.itemDataFromXml(powerInfo.xml, testActor),
-                        { system: { LEVELS: 10 } },
-                    );
-                    const [item] = await testActor.createEmbeddedDocuments("Item", [itemData]);
+                    it("Should update a movement power's existing effect through system.changes when LEVELS change", async function () {
+                        const powerInfo = getPowerInfo({ xmlid: "FLIGHT", actor: testActor, xmlTag: "POWER" });
+                        const itemData = foundry.utils.mergeObject(
+                            HeroSystem6eItem.itemDataFromXml(powerInfo.xml, testActor),
+                            { system: { LEVELS: 10 } },
+                        );
+                        const [item] = await testActor.createEmbeddedDocuments("Item", [itemData]);
 
-                    // Idempotent: guarantees the movement effect exists whether or not
-                    // the creation hooks already built it
-                    await item.setActiveEffects();
-                    const flightAe = () =>
-                        item.effects.find((ae) => ae.system.XMLID === "FLIGHT") ?? item.effects.contents[0];
-                    const flightChange = () =>
-                        flightAe()?.system.changes.find((c) => c.key === "system.characteristics.flight.max");
+                        // Idempotent: guarantees the movement effect exists whether or not
+                        // the creation hooks already built it
+                        await item.setActiveEffects();
+                        const flightAe = () =>
+                            item.effects.find((ae) => ae.system.XMLID === "FLIGHT") ?? item.effects.contents[0];
+                        const flightChange = () =>
+                            flightAe()?.system.changes.find((c) => c.key === "system.characteristics.flight.max");
 
-                    assert.ok(flightAe(), "Movement effect created for the FLIGHT power.");
-                    assert.strictEqual(
-                        parseInt(flightChange()?.value),
-                        10,
-                        "Effect change carries the initial LEVELS.",
-                    );
-                    assert.strictEqual(
-                        parseInt(testActor.system.characteristics.flight.max),
-                        10,
-                        "Actor flight max reflects the transferred effect.",
-                    );
+                        assert.ok(flightAe(), "Movement effect created for the FLIGHT power.");
+                        assert.strictEqual(
+                            parseInt(flightChange()?.value),
+                            10,
+                            "Effect change carries the initial LEVELS.",
+                        );
+                        assert.strictEqual(
+                            parseInt(testActor.system.characteristics.flight.max),
+                            10,
+                            "Actor flight max reflects the transferred effect.",
+                        );
 
-                    // Re-syncing after a LEVELS change hits the UPDATE branch of
-                    // setActiveEffects — the path that must write system.changes
-                    await item.update({ "system.LEVELS": 15 });
-                    await item.setActiveEffects();
+                        // Re-syncing after a LEVELS change hits the UPDATE branch of
+                        // setActiveEffects — the path that must write system.changes
+                        await item.update({ "system.LEVELS": 15 });
+                        await item.setActiveEffects();
 
-                    assert.strictEqual(
-                        parseInt(flightChange()?.value),
-                        15,
-                        "Existing effect's system.changes updated to the new LEVELS.",
-                    );
-                    assert.strictEqual(
-                        parseInt(testActor.system.characteristics.flight.max),
-                        15,
-                        "Actor flight max follows the updated effect.",
-                    );
-                });
+                        assert.strictEqual(
+                            parseInt(flightChange()?.value),
+                            15,
+                            "Existing effect's system.changes updated to the new LEVELS.",
+                        );
+                        assert.strictEqual(
+                            parseInt(testActor.system.characteristics.flight.max),
+                            15,
+                            "Actor flight max follows the updated effect.",
+                        );
+                    });
 
-                it("Should start a continuing charge by writing V14 duration and start fields", async function () {
-                    // 3 Continuing (1 Turn) Charges: CONTINUING is an ADDER inside the
-                    // CHARGES modifier, found via findModsByXmlid's recursion
-                    const chargeXml = `
+                    it("Should start a continuing charge by writing V14 duration and start fields", async function () {
+                        // 3 Continuing (1 Turn) Charges: CONTINUING is an ADDER inside the
+                        // CHARGES modifier, found via findModsByXmlid's recursion
+                        const chargeXml = `
                         <POWER XMLID="ENERGYBLAST" ID="1000000000001" BASECOST="0.0" LEVELS="1" ALIAS="Blast" POSITION="1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="Continuing Blast" INPUT="ED" USESTANDARDEFFECT="No" QUANTITY="1" AFFECTS_PRIMARY="Yes" AFFECTS_TOTAL="Yes">
                             <NOTES />
                             <MODIFIER XMLID="CHARGES" ID="1000000000002" BASECOST="-1.25" LEVELS="0" ALIAS="Charges" POSITION="-1" MULTIPLIER="1.0" GRAPHIC="Burst" COLOR="255 255 255" SFX="Default" SHOW_ACTIVE_COST="Yes" OPTION="THREE" OPTIONID="THREE" OPTION_ALIAS="3" INCLUDE_NOTES_IN_PRINTOUT="Yes" NAME="" COMMENTS="" PRIVATE="No" FORCEALLOW="No">
@@ -137,102 +141,111 @@ export function registerActiveEffectTests(quench) {
                             </MODIFIER>
                         </POWER>
                     `;
-                    const [item] = await testActor.createEmbeddedDocuments("Item", [
-                        HeroSystem6eItem.itemDataFromXml(chargeXml, testActor),
-                    ]);
-                    assert.ok(item.findModsByXmlid("CHARGES"), "Item carries the CHARGES modifier.");
-                    assert.strictEqual(
-                        item.findModsByXmlid("CONTINUING")?.OPTIONID,
-                        "TURN",
-                        "CONTINUING adder found through the modifier recursion.",
-                    );
+                        const [item] = await testActor.createEmbeddedDocuments("Item", [
+                            HeroSystem6eItem.itemDataFromXml(chargeXml, testActor),
+                        ]);
+                        assert.ok(item.findModsByXmlid("CHARGES"), "Item carries the CHARGES modifier.");
+                        assert.strictEqual(
+                            item.findModsByXmlid("CONTINUING")?.OPTIONID,
+                            "TURN",
+                            "CONTINUING adder found through the modifier recursion.",
+                        );
 
-                    // The charge tracker uses the item's first effect; give it one the
-                    // way activation does when none was built by the power itself
-                    const [ae] = await item.createEmbeddedDocuments("ActiveEffect", [
-                        { name: "_Quench Continuing Charge", img: "icons/svg/clockwork.svg" },
-                    ]);
+                        // The charge tracker uses the item's first effect; give it one the
+                        // way activation does when none was built by the power itself
+                        const [ae] = await item.createEmbeddedDocuments("ActiveEffect", [
+                            { name: "_Quench Continuing Charge", img: "icons/svg/clockwork.svg" },
+                        ]);
 
-                    await _startIfIsAContinuingCharge(item);
+                        await _startIfIsAContinuingCharge(item);
 
-                    const started = item.effects.get(ae.id);
-                    assert.strictEqual(started._source.duration.units, "seconds", "Duration units written.");
-                    assert.strictEqual(parseInt(started._source.duration.value), 12, "1 Turn charge lasts 12 seconds.");
-                    assert.strictEqual(
-                        started._source.start.time,
-                        game.time.worldTime,
-                        "Effect start anchored to the current world time.",
-                    );
-                    assert.strictEqual(
-                        started.updateDuration().remaining,
-                        12,
-                        "Charge effect now counts down instead of lasting forever.",
-                    );
+                        const started = item.effects.get(ae.id);
+                        assert.strictEqual(started._source.duration.units, "seconds", "Duration units written.");
+                        assert.strictEqual(
+                            parseInt(started._source.duration.value),
+                            12,
+                            "1 Turn charge lasts 12 seconds.",
+                        );
+                        assert.strictEqual(
+                            started._source.start.time,
+                            game.time.worldTime,
+                            "Effect start anchored to the current world time.",
+                        );
+                        assert.strictEqual(
+                            started.updateDuration().remaining,
+                            12,
+                            "Charge effect now counts down instead of lasting forever.",
+                        );
+                    });
+
+                    it("Should keep a single effect when an effect-bearing power's LEVELS change", async function () {
+                        const powerInfo = getPowerInfo({ xmlid: "DENSITYINCREASE", actor: testActor, xmlTag: "POWER" });
+                        const itemData = foundry.utils.mergeObject(
+                            HeroSystem6eItem.itemDataFromXml(powerInfo.xml, testActor),
+                            { system: { LEVELS: 2 } },
+                        );
+                        const [item] = await testActor.createEmbeddedDocuments("Item", [itemData]);
+
+                        await item.setActiveEffects();
+                        assert.strictEqual(item.effects.size, 1, "One effect for the newly created power.");
+
+                        // DENSITYINCREASE adds 5 STR per level
+                        const strAdd = () => parseInt(effectChangeValue(item.effects.contents[0], "str"));
+                        assert.strictEqual(strAdd(), 10, "Effect change carries the initial LEVELS.");
+
+                        // The update re-enters setActiveEffects from _preUpdate; that pass must
+                        // finish before the update commits or it races itself into a second effect
+                        await item.update({ "system.LEVELS": 4 });
+
+                        assert.strictEqual(item.effects.size, 1, "Changing LEVELS did not add a second effect.");
+                        assert.strictEqual(strAdd(), 20, "The one effect was updated in place.");
+                        assert.deepEqual(
+                            duplicateEffectIdentities(testActor),
+                            [],
+                            "No item on the actor carries the same effect twice.",
+                        );
+                    });
+
+                    it("Should not leave AE sync disabled on the actor after a failed XML upload", async function () {
+                        // Malformed XML returns early inside uploadFromXml's try, exercising the
+                        // finally that clears _uploadSweepActive without the upload throwing.
+                        await testActor.uploadFromXml("this is not valid xml <<<");
+                        assert.notOk(testActor._uploadSweepActive, "Upload marker cleared after a failed upload.");
+
+                        const powerInfo = getPowerInfo({ xmlid: "DENSITYINCREASE", actor: testActor, xmlTag: "POWER" });
+                        const itemData = foundry.utils.mergeObject(
+                            HeroSystem6eItem.itemDataFromXml(powerInfo.xml, testActor),
+                            { system: { LEVELS: 2 } },
+                        );
+                        const [item] = await testActor.createEmbeddedDocuments("Item", [itemData]);
+
+                        await item.setActiveEffects();
+                        assert.strictEqual(
+                            item.effects.size,
+                            1,
+                            "AE sync still creates an effect after a failed upload.",
+                        );
+
+                        // DENSITYINCREASE adds 5 STR per level
+                        const strAdd = () => parseInt(effectChangeValue(item.effects.contents[0], "str"));
+                        assert.strictEqual(strAdd(), 10, "New effect carries the initial LEVELS.");
+
+                        await item.update({ "system.LEVELS": 4 });
+
+                        assert.strictEqual(item.effects.size, 1, "LEVELS change updated in place, no duplicate.");
+                        assert.strictEqual(
+                            strAdd(),
+                            20,
+                            "AE sync still reflects LEVELS updates after a failed upload.",
+                        );
+                    });
                 });
 
-                it("Should keep a single effect when an effect-bearing power's LEVELS change", async function () {
-                    const powerInfo = getPowerInfo({ xmlid: "DENSITYINCREASE", actor: testActor, xmlTag: "POWER" });
-                    const itemData = foundry.utils.mergeObject(
-                        HeroSystem6eItem.itemDataFromXml(powerInfo.xml, testActor),
-                        { system: { LEVELS: 2 } },
-                    );
-                    const [item] = await testActor.createEmbeddedDocuments("Item", [itemData]);
-
-                    await item.setActiveEffects();
-                    assert.strictEqual(item.effects.size, 1, "One effect for the newly created power.");
-
-                    // DENSITYINCREASE adds 5 STR per level
-                    const strAdd = () => parseInt(effectChangeValue(item.effects.contents[0], "str"));
-                    assert.strictEqual(strAdd(), 10, "Effect change carries the initial LEVELS.");
-
-                    // The update re-enters setActiveEffects from _preUpdate; that pass must
-                    // finish before the update commits or it races itself into a second effect
-                    await item.update({ "system.LEVELS": 4 });
-
-                    assert.strictEqual(item.effects.size, 1, "Changing LEVELS did not add a second effect.");
-                    assert.strictEqual(strAdd(), 20, "The one effect was updated in place.");
-                    assert.deepEqual(
-                        duplicateEffectIdentities(testActor),
-                        [],
-                        "No item on the actor carries the same effect twice.",
-                    );
-                });
-
-                it("Should not leave AE sync disabled on the actor after a failed XML upload", async function () {
-                    // Malformed XML returns early inside uploadFromXml's try, exercising the
-                    // finally that clears _uploadSweepActive without the upload throwing.
-                    await testActor.uploadFromXml("this is not valid xml <<<");
-                    assert.notOk(testActor._uploadSweepActive, "Upload marker cleared after a failed upload.");
-
-                    const powerInfo = getPowerInfo({ xmlid: "DENSITYINCREASE", actor: testActor, xmlTag: "POWER" });
-                    const itemData = foundry.utils.mergeObject(
-                        HeroSystem6eItem.itemDataFromXml(powerInfo.xml, testActor),
-                        { system: { LEVELS: 2 } },
-                    );
-                    const [item] = await testActor.createEmbeddedDocuments("Item", [itemData]);
-
-                    await item.setActiveEffects();
-                    assert.strictEqual(item.effects.size, 1, "AE sync still creates an effect after a failed upload.");
-
-                    // DENSITYINCREASE adds 5 STR per level
-                    const strAdd = () => parseInt(effectChangeValue(item.effects.contents[0], "str"));
-                    assert.strictEqual(strAdd(), 10, "New effect carries the initial LEVELS.");
-
-                    await item.update({ "system.LEVELS": 4 });
-
-                    assert.strictEqual(item.effects.size, 1, "LEVELS change updated in place, no duplicate.");
-                    assert.strictEqual(strAdd(), 20, "AE sync still reflects LEVELS updates after a failed upload.");
-                });
-            });
-
-            describe("Upload ActiveEffect Duplication", function () {
-                // Uploads create and update many items in quick succession
-                setQuenchTimeout(this);
-
-                // Covers all three find-then-create branches of setActiveEffects: the
-                // generic CONFIG effect (DENSITYINCREASE), movement (FLIGHT) and senses
-                // (NIGHTVISION).
-                const contents = `
+                describe("Upload ActiveEffect Duplication", function () {
+                    // Covers all three find-then-create branches of setActiveEffects: the
+                    // generic CONFIG effect (DENSITYINCREASE), movement (FLIGHT) and senses
+                    // (NIGHTVISION).
+                    const contents = `
                     <?xml version="1.0" encoding="UTF-16"?>
                     <CHARACTER version="6.0" TEMPLATE="builtIn.Superheroic6E.hdt">
                         <BASIC_CONFIGURATION BASE_POINTS="200" DISAD_POINTS="150" EXPERIENCE="0" RULES="Default" />
@@ -319,104 +332,105 @@ export function registerActiveEffectTests(quench) {
                     </CHARACTER>
                 `;
 
-                let actor;
+                    let actor;
 
-                before(async function () {
-                    actor = await createQuenchActor({ quench: this, contents, is5e: false });
+                    before(async function () {
+                        actor = await createQuenchActor({ quench: this, contents, is5e: false });
 
-                    // Re-uploading the same file updates existing items instead of creating them —
-                    // the path where the per-item sync overlaps the upload's own sweep
-                    await actor.uploadFromXml(
-                        contents.replace(/CHARACTER_NAME=".*?"/, `CHARACTER_NAME="${actor.name}"`),
-                        { quenchUpload: true },
-                    );
-                });
+                        // Re-uploading the same file updates existing items instead of creating them —
+                        // the path where the per-item sync overlaps the upload's own sweep
+                        await actor.uploadFromXml(
+                            contents.replace(/CHARACTER_NAME=".*?"/, `CHARACTER_NAME="${actor.name}"`),
+                            { quenchUpload: true },
+                        );
+                    });
 
-                after(async function () {
-                    await deleteQuenchActor({ quench: this, actor });
-                });
+                    after(async function () {
+                        await deleteQuenchActor({ quench: this, actor });
+                    });
 
-                it("should give each effect-bearing power exactly one effect", function () {
-                    for (const xmlid of ["DENSITYINCREASE", "FLIGHT", "NIGHTVISION"]) {
-                        const item = actor.items.find((i) => i.system.XMLID === xmlid);
-                        assert.ok(item, `${xmlid} survived the re-upload.`);
-                        assert.strictEqual(item.effects.size, 1, `${xmlid} has a single effect.`);
-                    }
-                });
+                    it("should give each effect-bearing power exactly one effect", function () {
+                        for (const xmlid of ["DENSITYINCREASE", "FLIGHT", "NIGHTVISION"]) {
+                            const item = actor.items.find((i) => i.system.XMLID === xmlid);
+                            assert.ok(item, `${xmlid} survived the re-upload.`);
+                            assert.strictEqual(item.effects.size, 1, `${xmlid} has a single effect.`);
+                        }
+                    });
 
-                it("should not leave duplicate effects on any item", function () {
-                    assert.deepEqual(
-                        duplicateEffectIdentities(actor),
-                        [],
-                        "No item carries the same effect identity twice.",
-                    );
-                });
-            });
-
-            describe("Natural Healing on a disabled effect", function () {
-                let testActor = null;
-
-                before(async () => {
-                    testActor = await Actor.create({
-                        name: "_Quench Natural Healing",
-                        type: "pc",
-                        system: { is5e: false },
+                    it("should not leave duplicate effects on any item", function () {
+                        assert.deepEqual(
+                            duplicateEffectIdentities(actor),
+                            [],
+                            "No item carries the same effect identity twice.",
+                        );
                     });
                 });
 
-                after(async () => {
-                    await testActor?.delete();
-                    testActor = null;
-                });
+                describe("Natural Healing on a disabled effect", function () {
+                    let testActor = null;
 
-                const findNaturalBodyHealing = () =>
-                    testActor.effects.find((ae) => ae.flags[game.system.id]?.XMLID === "naturalBodyHealing");
+                    before(async () => {
+                        testActor = await Actor.create({
+                            name: "_Quench Natural Healing",
+                            type: "pc",
+                            system: { is5e: false },
+                        });
+                    });
 
-                // Mirrors setNaturalHealing's own rate formula (module/actor/actor.mjs) so the
-                // test can assert an exact refreshed value, not just "it changed".
-                const secondsPerBodyForRec = (recValue) => Math.floor(2.628e6 / Math.max(1, recValue));
+                    after(async () => {
+                        await testActor?.delete();
+                        testActor = null;
+                    });
 
-                it("refreshes a disabled effect's rate instead of duplicating it, then deletes it on full BODY", async function () {
-                    const bodyMax = testActor.system.characteristics.body.max;
-                    assert.ok(bodyMax > 0, "Actor starts with a positive BODY max.");
-                    const originalRec = testActor.system.characteristics.rec.value;
+                    const findNaturalBodyHealing = () =>
+                        testActor.effects.find((ae) => ae.flags[game.system.id]?.XMLID === "naturalBodyHealing");
 
-                    // Damage BODY: setNaturalHealing's create branch runs
-                    await testActor.update({ "system.characteristics.body.value": bodyMax - 1 });
+                    // Mirrors setNaturalHealing's own rate formula (module/actor/actor.mjs) so the
+                    // test can assert an exact refreshed value, not just "it changed".
+                    const secondsPerBodyForRec = (recValue) => Math.floor(2.628e6 / Math.max(1, recValue));
 
-                    let naturalBodyHealing = findNaturalBodyHealing();
-                    assert.ok(naturalBodyHealing, "Natural healing effect created while BODY is below max.");
+                    it("refreshes a disabled effect's rate instead of duplicating it, then deletes it on full BODY", async function () {
+                        const bodyMax = testActor.system.characteristics.body.max;
+                        assert.ok(bodyMax > 0, "Actor starts with a positive BODY max.");
+                        const originalRec = testActor.system.characteristics.rec.value;
 
-                    await naturalBodyHealing.update({ disabled: true });
-                    assert.ok(findNaturalBodyHealing().disabled, "Effect is now disabled.");
+                        // Damage BODY: setNaturalHealing's create branch runs
+                        await testActor.update({ "system.characteristics.body.value": bodyMax - 1 });
 
-                    // Retrigger setNaturalHealing with a different REC so a refreshed rate is
-                    // distinguishable from the original; the lookup (unlike core's
-                    // temporaryEffects) must still find the disabled effect.
-                    const newRec = originalRec + 20;
-                    await testActor.update({ "system.characteristics.rec.value": newRec });
+                        let naturalBodyHealing = findNaturalBodyHealing();
+                        assert.ok(naturalBodyHealing, "Natural healing effect created while BODY is below max.");
 
-                    const afterRetrigger = testActor.effects.filter(
-                        (ae) => ae.flags[game.system.id]?.XMLID === "naturalBodyHealing",
-                    );
-                    assert.strictEqual(afterRetrigger.length, 1, "No duplicate created for a disabled effect.");
-                    assert.ok(
-                        afterRetrigger[0].disabled,
-                        "Effect was updated in place, not recreated (still disabled).",
-                    );
-                    assert.strictEqual(
-                        afterRetrigger[0].duration.seconds,
-                        secondsPerBodyForRec(newRec),
-                        "Healing rate refreshed to reflect the new REC.",
-                    );
+                        await naturalBodyHealing.update({ disabled: true });
+                        assert.ok(findNaturalBodyHealing().disabled, "Effect is now disabled.");
 
-                    // Restore BODY to full: the delete branch must fire even though the effect is disabled
-                    await testActor.update({ "system.characteristics.body.value": bodyMax });
+                        // Retrigger setNaturalHealing with a different REC so a refreshed rate is
+                        // distinguishable from the original; the lookup (unlike core's
+                        // temporaryEffects) must still find the disabled effect.
+                        const newRec = originalRec + 20;
+                        await testActor.update({ "system.characteristics.rec.value": newRec });
 
-                    assert.notOk(
-                        findNaturalBodyHealing(),
-                        "Disabled natural healing effect deleted once BODY returns to full.",
-                    );
+                        const afterRetrigger = testActor.effects.filter(
+                            (ae) => ae.flags[game.system.id]?.XMLID === "naturalBodyHealing",
+                        );
+                        assert.strictEqual(afterRetrigger.length, 1, "No duplicate created for a disabled effect.");
+                        assert.ok(
+                            afterRetrigger[0].disabled,
+                            "Effect was updated in place, not recreated (still disabled).",
+                        );
+                        assert.strictEqual(
+                            afterRetrigger[0].duration.seconds,
+                            secondsPerBodyForRec(newRec),
+                            "Healing rate refreshed to reflect the new REC.",
+                        );
+
+                        // Restore BODY to full: the delete branch must fire even though the effect is disabled
+                        await testActor.update({ "system.characteristics.body.value": bodyMax });
+
+                        assert.notOk(
+                            findNaturalBodyHealing(),
+                            "Disabled natural healing effect deleted once BODY returns to full.",
+                        );
+                    });
                 });
             });
         },

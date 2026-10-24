@@ -36,7 +36,8 @@ export function registerMovementEndTests(quench) {
             const { describe, it, assert, before, after } = context;
 
             describe("Movement END", function () {
-                setQuenchTimeout(this);
+                // The default timeout tends to be insufficient with multiple actors being created at the same time.
+                setQuenchTimeout(this, 20000);
 
                 describe("movementEndCost", function () {
                     it("Running 12m moving 12m costs 2 END", function () {

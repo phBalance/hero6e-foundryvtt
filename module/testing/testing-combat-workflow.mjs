@@ -12,109 +12,109 @@ import { getAndSetGameSetting, getAndSetGameSettingCore } from "../settings/sett
 
 const { Actor } = foundry.documents;
 
-export function registerCombatWorkflowTests(quench) {
+export function registerEndToEndCombatExecutionTests(quench) {
     quench.registerBatch(
         `${game.system.id}.testing.e2e.combat-workflow`,
         (context) => {
             const { describe, it, before, beforeEach, after, assert } = context;
 
-            // ==========================================
-            // ENCAPSULATED UI AUTOMATION HELPERS
-            // ==========================================
-
-            /**
-             * Resolves token drawing and handles client targeting on the canvas.
-             */
-            async function targetToken(tokenDoc, fallbackActor) {
-                game.user.targets.clear();
-                const targetTokenObject = await waitForTokenDrawn(tokenDoc);
-                if (targetTokenObject) {
-                    game.user.targets.add(targetTokenObject);
-                } else {
-                    console.warn("Token object not found on active canvas, pushing fallback reference.");
-                    game.user.targets.add({ actor: fallbackActor, id: tokenDoc.id });
-                }
-            }
-
-            /**
-             * Renders actor sheet and intercepts the V14 ApplicationV2 lifecycle hooks.
-             */
-            async function launchAttackForm(actor, item) {
-                const sheet = actor.sheet;
-                await sheet.render(true);
-                const $sheetHtml = $(sheet.element);
-
-                const rowSelector = `[data-document-uuid="Actor.${actor.id}.Item.${item.id}"] .roll-icon, [data-document-uuid="Actor.${actor.id}.Item.${item.id}"] .item-control, [data-document-uuid="Actor.${actor.id}.Item.${item.id}"] .action-button, [data-document-uuid="Actor.${actor.id}.Item.${item.id}"] [data-action="roll"], [data-document-uuid="Actor.${actor.id}.Item.${item.id}"] button[type="submit"][name="roll"]`;
-                let $btn = $sheetHtml.find(rowSelector).first();
-
-                if (!$btn.length) {
-                    const fallbackSelector = `[data-item-id="${item.id}"] .roll-icon, [data-item-id="${item.id}"] .item-control, [data-item-id="${item.id}"] .action-button, [data-item-id="${item.id}"] [data-action="roll"], [data-item-id="${item.id}"] button[type="submit"][name="roll"]`;
-                    $btn = $sheetHtml.find(fallbackSelector).first();
-                }
-
-                assert.ok($btn.length, `Attack trigger element located for item: ${item.name}`);
-
-                const appPromise = new Promise((resolve) => {
-                    const hookId = Hooks.on("renderItemAttackFormApplicationV2", (app) => {
-                        Hooks.off("renderItemAttackFormApplicationV2", hookId);
-                        resolve(app);
-                    });
-                });
-
-                $btn.click();
-                const appInstance = await appPromise;
-                await appInstance.render(true);
-                return { appInstance, sheet };
-            }
-
-            /**
-             * Executes the full automated three-stage click pipeline inside the chat log window.
-             */
-            async function executeChatCardSequence(attackForm, targetTokenDoc, ocvBonus = 20, querySelector) {
-                const $appHtml = $(attackForm.element);
-                const $ocvMod = $appHtml.find(`input[name="ocvMod"]`);
-                if ($ocvMod.length) {
-                    $ocvMod.val(ocvBonus);
-                    $ocvMod.blur();
-                }
-
-                let rollToHitBtn = $appHtml.find(
-                    "button:contains('Roll to Hit'), button[data-action='roll-to-hit'], button.roll-to-hit",
-                );
-                if (!rollToHitBtn.length) {
-                    rollToHitBtn = $appHtml.find("button").filter(function () {
-                        return $(this).text().trim().toLowerCase() === "roll to hit";
-                    });
-                }
-
-                assert.ok(rollToHitBtn.length, "Found the 'Roll to Hit' actionable element inside config window.");
-                rollToHitBtn.click();
-
-                const { foundElement: rollDamageButton } = await waitForElementInChat(`button.roll-damage`);
-                assert.ok(rollDamageButton, "Roll Damage button found within chat card.");
-
-                const allInOneChatCard = rollDamageButton.closest("div.item-all-in-one-tohit-apply-card");
-                assert.ok(
-                    allInOneChatCard,
-                    `${attackForm.data?.originalItem?.system?.XMLID} is not using all in one chat card`,
-                );
-
-                rollDamageButton.click();
-
-                const { foundElement: applyDamageButton } = await waitForElementInChat(
-                    `button.apply-damage[data-highlight-token="${targetTokenDoc.uuid}"]`,
-                );
-                assert.ok(applyDamageButton, "Apply Damage button found within chat card.");
-                applyDamageButton.click();
-
-                const { foundElement: finalSummaryDiv } = await waitForElementInChat(querySelector);
-                assert.ok(finalSummaryDiv, "Execution summary element container located successfully.");
-
-                return { finalSummaryDiv, rollToHitBtn, allInOneChatCard };
-            }
-
             describe("End-to-End Combat Action Workflow", function () {
-                setQuenchTimeout(this);
+                setQuenchTimeout(this, 20000);
+
+                // ==========================================
+                // ENCAPSULATED UI AUTOMATION HELPERS
+                // ==========================================
+
+                /**
+                 * Resolves token drawing and handles client targeting on the canvas.
+                 */
+                async function targetToken(tokenDoc, fallbackActor) {
+                    game.user.targets.clear();
+                    const targetTokenObject = await waitForTokenDrawn(tokenDoc);
+                    if (targetTokenObject) {
+                        game.user.targets.add(targetTokenObject);
+                    } else {
+                        console.warn("Token object not found on active canvas, pushing fallback reference.");
+                        game.user.targets.add({ actor: fallbackActor, id: tokenDoc.id });
+                    }
+                }
+
+                /**
+                 * Renders actor sheet and intercepts the V14 ApplicationV2 lifecycle hooks.
+                 */
+                async function launchAttackForm(actor, item) {
+                    const sheet = actor.sheet;
+                    await sheet.render(true);
+                    const $sheetHtml = $(sheet.element);
+
+                    const rowSelector = `[data-document-uuid="Actor.${actor.id}.Item.${item.id}"] .roll-icon, [data-document-uuid="Actor.${actor.id}.Item.${item.id}"] .item-control, [data-document-uuid="Actor.${actor.id}.Item.${item.id}"] .action-button, [data-document-uuid="Actor.${actor.id}.Item.${item.id}"] [data-action="roll"], [data-document-uuid="Actor.${actor.id}.Item.${item.id}"] button[type="submit"][name="roll"]`;
+                    let $btn = $sheetHtml.find(rowSelector).first();
+
+                    if (!$btn.length) {
+                        const fallbackSelector = `[data-item-id="${item.id}"] .roll-icon, [data-item-id="${item.id}"] .item-control, [data-item-id="${item.id}"] .action-button, [data-item-id="${item.id}"] [data-action="roll"], [data-item-id="${item.id}"] button[type="submit"][name="roll"]`;
+                        $btn = $sheetHtml.find(fallbackSelector).first();
+                    }
+
+                    assert.ok($btn.length, `Attack trigger element located for item: ${item.name}`);
+
+                    const appPromise = new Promise((resolve) => {
+                        const hookId = Hooks.on("renderItemAttackFormApplicationV2", (app) => {
+                            Hooks.off("renderItemAttackFormApplicationV2", hookId);
+                            resolve(app);
+                        });
+                    });
+
+                    $btn.click();
+                    const appInstance = await appPromise;
+                    await appInstance.render(true);
+                    return { appInstance, sheet };
+                }
+
+                /**
+                 * Executes the full automated three-stage click pipeline inside the chat log window.
+                 */
+                async function executeChatCardSequence(attackForm, targetTokenDoc, ocvBonus = 20, querySelector) {
+                    const $appHtml = $(attackForm.element);
+                    const $ocvMod = $appHtml.find(`input[name="ocvMod"]`);
+                    if ($ocvMod.length) {
+                        $ocvMod.val(ocvBonus);
+                        $ocvMod.blur();
+                    }
+
+                    let rollToHitBtn = $appHtml.find(
+                        "button:contains('Roll to Hit'), button[data-action='roll-to-hit'], button.roll-to-hit",
+                    );
+                    if (!rollToHitBtn.length) {
+                        rollToHitBtn = $appHtml.find("button").filter(function () {
+                            return $(this).text().trim().toLowerCase() === "roll to hit";
+                        });
+                    }
+
+                    assert.ok(rollToHitBtn.length, "Found the 'Roll to Hit' actionable element inside config window.");
+                    rollToHitBtn.click();
+
+                    const { foundElement: rollDamageButton } = await waitForElementInChat(`button.roll-damage`);
+                    assert.ok(rollDamageButton, "Roll Damage button found within chat card.");
+
+                    const allInOneChatCard = rollDamageButton.closest("div.item-all-in-one-tohit-apply-card");
+                    assert.ok(
+                        allInOneChatCard,
+                        `${attackForm.data?.originalItem?.system?.XMLID} is not using all in one chat card`,
+                    );
+
+                    rollDamageButton.click();
+
+                    const { foundElement: applyDamageButton } = await waitForElementInChat(
+                        `button.apply-damage[data-highlight-token="${targetTokenDoc.uuid}"]`,
+                    );
+                    assert.ok(applyDamageButton, "Apply Damage button found within chat card.");
+                    applyDamageButton.click();
+
+                    const { foundElement: finalSummaryDiv } = await waitForElementInChat(querySelector);
+                    assert.ok(finalSummaryDiv, "Execution summary element container located successfully.");
+
+                    return { finalSummaryDiv, rollToHitBtn, allInOneChatCard };
+                }
 
                 // describe.skip("Unit tests", function () {
                 //     it.skip("skip", function () {});
